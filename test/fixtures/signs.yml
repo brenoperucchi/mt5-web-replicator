@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  currency: MyString
+  tp: 9.99
+  sp: 9.99
+  price: 9.99
+  kind: MyString
+
+two:
+  currency: MyString
+  tp: 9.99
+  sp: 9.99
+  price: 9.99
+  kind: MyString

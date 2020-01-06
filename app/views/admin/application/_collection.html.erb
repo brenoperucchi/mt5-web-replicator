@@ -1,0 +1,101 @@
+<%#
+# Collection
+
+This partial is used on the `index` and `show` pages
+to display a collection of resources in an HTML table.
+
+## Local variables:
+
+- `collection_presenter`:
+  An instance of [Administrate::Page::Collection][1].
+  The table presenter uses `ResourceDashboard::COLLECTION_ATTRIBUTES` to determine
+  the columns displayed in the table
+- `resources`:
+  An ActiveModel::Relation collection of resources to be displayed in the table.
+  By default, the number of resources is limited by pagination
+  or by a hard limit to prevent excessive page load times
+
+[1]: http://www.rubydoc.info/gems/administrate/Administrate/Page/Collection
+%>
+<div class="container-fluid page__container">
+  <div class="stories-cards mb-4">
+    
+    <div class="card stories-card">
+      <div class="stories-card__content d-flex align-items-center flex-wrap">
+        <div class="avatar avatar-lg mr-3">
+          <a href=""><img src="/assets/stack/stories/256_rsz_clem-onojeghuo-193397-unsplash-da5d9024e9950573fc04f77838970d190eddfe5147e645a9a12555cb663163fa.jpg" alt="avatar" class="avatar-img rounded"></a>
+        </div>
+        <div class="stories-card__title flex">
+          <h5 class="card-title m-0"><a href="" class="headings-color">Cheap Romantic Vacations</a></h5>
+          <small class="text-dark-gray"> views last week</small>
+        </div>
+        <div class="d-flex align-items-center flex-column flex-sm-row stories-card__meta">
+          <div class="mr-3 text-dark-gray text-uppercase stories-card__tag d-flex align-items-center">
+            <i class="material-icons text-muted-light mr-1">folder_open</i> future
+          </div>
+          <div class="mr-3 text-dark-gray stories-card__date">
+            <small>11 Nov, 2018 07:46 AM</small>
+          </div>
+          <div class="media mr-2 ml-sm-auto align-items-center">
+            <div class="media-left mr-2 avatar-group">
+              <div class="avatar avatar-xs" data-toggle="tooltip" data-placement="top" title="Janell D.">
+                <img src="/assets/stack/256_rsz_1andy-lee-642320-unsplash-773639ea00b4f9a36ef17ed465cce928c3dfaf14a25557f1c7d87e26e92cda2d.jpg" alt="Avatar" class="avatar-img rounded-circle">
+              </div>
+              <div class="avatar avatar-xs" data-toggle="tooltip" data-placement="top" title="Janell D.">
+                <img src="/assets/stack/256_michael-dam-258165-unsplash-ae86fc74529786ca144994a84096b7b1ee4dbafcfe66c763a121d7e52b9db3fc.jpg" alt="Avatar" class="avatar-img rounded-circle">
+              </div>
+              <div class="avatar avatar-xs" data-toggle="tooltip" data-placement="top" title="Janell D.">
+                <img src="/assets/stack/256_luke-porter-261779-unsplash-d691468f5260a90ed3776c15f64d659b0136e6aabbb2514f43a6845615ce14a4.jpg" alt="Avatar" class="avatar-img rounded-circle">
+              </div>
+            </div>
+            <div class="media-body">
+              <a href="" class="text-body">+2 more</a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown ml-auto">
+          <a href="#" data-toggle="dropdown" data-caret="false" class="text-muted" aria-expanded="false"><i class="material-icons">more_vert</i></a>
+          <div class="dropdown-menu dropdown-menu-right" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(24px, 20px, 0px);">
+            <a href="javascript:void(0)" class="dropdown-item">Action</a>
+            <a href="javascript:void(0)" class="dropdown-item">Other Action</a>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0)" class="dropdown-item">Some Other Action</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% resources.each do |resource| %>
+      <div class="card stories-card js-table-row" tabindex="0">
+        <% collection_presenter.attributes_for(resource).each do |attribute| %> 
+          <div class="stories-card__content d-flex align-items-center flex-wrap cell-data cell-data--<%= attribute.html_class %>">
+            <% if show_action? :show, resource -%>
+              <a href="<%= polymorphic_path([namespace, resource]) -%>"
+                 class="action-show"
+                 >
+                <%= render_field attribute %>
+              </a>
+            <% end -%>
+          </div>
+        <% end %>
+
+        <% if valid_action? :edit, collection_presenter.resource_name %>
+          <td><%= link_to(
+            t("administrate.actions.edit"),
+            [:edit, namespace, resource],
+            class: "action-edit",
+          ) if show_action? :edit, resource%></td>
+        <% end %>
+
+        <% if valid_action? :destroy, collection_presenter.resource_name %>
+          <td><%= link_to(
+            t("administrate.actions.destroy"),
+            [namespace, resource],
+            class: "text-color-red",
+            method: :delete,
+            data: { confirm: t("administrate.actions.confirm") }
+          ) if show_action? :destroy, resource %></td>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
