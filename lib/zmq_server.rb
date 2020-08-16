@@ -8,7 +8,7 @@ class EchoServer < EM::Connection
   def receive_data(data)
     # send_data(data)
 
-    link = "tcp://192.168.1.245:5555"
+    link = "tcp://192.168.1.245:32770"
 
     begin
       ctx = ZMQ::Context.new
@@ -31,7 +31,7 @@ class EchoServer < EM::Connection
 end
 
 EventMachine.run do
-  # hit Control + C to stop
+  # hit Control + C to stopz
   Signal.trap("INT")  { EventMachine.stop }
   Signal.trap("TERM") { EventMachine.stop }
 

@@ -5,7 +5,7 @@
 class Apisocial::Telegram
   def initialize
     TD.configure do |config|
-      config.lib_path = '/Users/brenoperucchi/tdlib/build/'
+      config.lib_path = '/usr/local/Cellar/tdlib/1.6.0/include/td/'
 
       config.client.api_id = 980209
       config.client.api_hash = '03062326232cb23c6770e7a735c2dae2'
@@ -28,7 +28,7 @@ class Apisocial::Telegram
        :use_message_database=>true,
        :system_language_code=>"en",
        :device_model=>"Ruby TD client",
-       :system_version=>"Unknown",
+       :system_version=>"test",
        :application_version=>"1.0",
        :enable_storage_optimizer=>true,
        :ignore_file_names=>false})

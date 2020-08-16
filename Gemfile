@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.6.4'
+ruby '2.7.1'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.0.0'
@@ -65,7 +65,7 @@ group :development do
 end
 
 # gem 'tdlib-ruby', path: "vendor/tdlib-ruby"
-gem 'tdlib-ruby'
+gem 'tdlib-ruby', "2.2.0"
 
 # gem 'zmq', git: 'https://github.com/cowboyrushforth/rbzmq.git'
 
@@ -76,6 +76,9 @@ gem "administrate"
 
 # gem 'telegramAPI'
 # gem 'telegram-rb', github: 'ssut/telegram-rb', require: 'telegram'
+gem 'pycall'
+gem 'telegram-bot-ruby'
+gem 'concurrent-ruby', "1.1.7", require: 'concurrent'
 
 
 

@@ -10,14 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_06_032434) do
+ActiveRecord::Schema.define(version: 2020_04_02_012525) do
 
   create_table "apisocials", force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "posts", force: :cascade do |t|
+    t.string "title"
+    t.text "body"
+    t.boolean "published"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "signs", force: :cascade do |t|
+    t.string "message_id"
     t.string "currency"
     t.decimal "take_profit2"
     t.decimal "take_profit1"
@@ -27,8 +36,11 @@ ActiveRecord::Schema.define(version: 2019_09_06_032434) do
     t.string "broker"
     t.string "social"
     t.datetime "order_at"
+    t.integer "service_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["service_id"], name: "index_signs_on_service_id"
   end
 
+  add_foreign_key "signs", "services"
 end
