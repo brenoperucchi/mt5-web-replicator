@@ -1,0 +1,2334 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"messa",
+				"telegram_message_id"
+			],
+			[
+				"tele",
+				"telegram"
+			],
+			[
+				"telegram",
+				"telegram_message_id"
+			],
+			[
+				"data",
+				"database"
+			],
+			[
+				"cha",
+				"chat_id"
+			],
+			[
+				"sing",
+				"signa_name"
+			],
+			[
+				"file",
+				"file_id"
+			],
+			[
+				"remote",
+				"remote_file"
+			],
+			[
+				"tex",
+				"texts"
+			],
+			[
+				"signal_",
+				"signal_name"
+			],
+			[
+				"sign",
+				"signal_name"
+			],
+			[
+				"tecn",
+				"TechnicalPips"
+			],
+			[
+				"id",
+				"id_telegram_message"
+			],
+			[
+				"si",
+				"signal_name"
+			],
+			[
+				"q",
+				"query_name"
+			],
+			[
+				"enter",
+				"enter_price"
+			],
+			[
+				"stop",
+				"stop_price"
+			],
+			[
+				"me",
+				"messages_ids"
+			],
+			[
+				"teel",
+				"telegram_user"
+			],
+			[
+				"resu",
+				"result_telegram"
+			],
+			[
+				"teleg",
+				"telegram_result"
+			],
+			[
+				"res",
+				"result"
+			],
+			[
+				"t",
+				"t.\tt.integer (tci)"
+			],
+			[
+				"param",
+				"param_method"
+			],
+			[
+				"mail",
+				"mailable"
+			],
+			[
+				"mailer",
+				"mailer_method"
+			],
+			[
+				"mailer_s",
+				"mailer_senders"
+			],
+			[
+				"hm",
+				"hm\thas_many"
+			],
+			[
+				"klass",
+				"klass_method"
+			],
+			[
+				"multi",
+				"multiSelect"
+			],
+			[
+				"mul",
+				"multiSelect"
+			],
+			[
+				"method",
+				"method_name"
+			],
+			[
+				"deliver",
+				"deliver_mail"
+			],
+			[
+				"ac",
+				"accepted"
+			],
+			[
+				"acc",
+				"accept"
+			],
+			[
+				"current",
+				"current_store"
+			],
+			[
+				"re",
+				"repp\tredirect_to (path plural)"
+			],
+			[
+				"Prpos",
+				"Propostas"
+			],
+			[
+				"obje",
+				"object_store"
+			],
+			[
+				"prpo",
+				"proposal"
+			],
+			[
+				"respon",
+				"respond_with"
+			],
+			[
+				"props",
+				"proposta"
+			],
+			[
+				"btn-",
+				"btn-danger"
+			],
+			[
+				"crea",
+				"created_at"
+			],
+			[
+				"validate",
+				"validate_off"
+			],
+			[
+				"item",
+				"items"
+			],
+			[
+				"header",
+				"header-icon"
+			],
+			[
+				"propostas",
+				"propostas"
+			],
+			[
+				"text",
+				"large-text"
+			],
+			[
+				"proposal_",
+				"proposal_accepted"
+			],
+			[
+				"redi",
+				"redirect_to"
+			],
+			[
+				"use",
+				"user"
+			],
+			[
+				"state",
+				"state_update"
+			],
+			[
+				"sa",
+				"update_states"
+			],
+			[
+				"la",
+				"layouts"
+			],
+			[
+				"respo",
+				"respond_to"
+			],
+			[
+				"redire",
+				"redirect_to"
+			],
+			[
+				"act",
+				"activity"
+			],
+			[
+				"Ter",
+				"tempor"
+			],
+			[
+				"fil",
+				"fill_in"
+			],
+			[
+				"vf",
+				"vuif\tvalidates_uniqueness_of if"
+			],
+			[
+				"page",
+				"save_and_open_page"
+			],
+			[
+				"v",
+				"vp\tvalidates_presence_of"
+			],
+			[
+				"rest",
+				"rest\trespond_to"
+			],
+			[
+				"margin",
+				"margin-bottom"
+			],
+			[
+				"form-",
+				"form-horizontal"
+			],
+			[
+				"from",
+				"form-group-default"
+			],
+			[
+				"control",
+				"control-label"
+			],
+			[
+				"radi",
+				"radio-primary"
+			],
+			[
+				"set",
+				"set_admin_build"
+			],
+			[
+				"error",
+				"error_class"
+			],
+			[
+				"form",
+				"form-group"
+			],
+			[
+				"store",
+				"store_params"
+			],
+			[
+				"user",
+				"user_id"
+			],
+			[
+				"cure",
+				"current_store"
+			],
+			[
+				"deli",
+				"deliver_mail"
+			],
+			[
+				"fini",
+				"finish"
+			],
+			[
+				"broker",
+				"brokerage"
+			],
+			[
+				"Mailer",
+				"MailerMethod"
+			],
+			[
+				"render",
+				"render_to_string"
+			],
+			[
+				"rende",
+				"rendered"
+			],
+			[
+				"proposal",
+				"proposals_expired_mailer"
+			],
+			[
+				"sc",
+				"sc\tscope"
+			],
+			[
+				"brok",
+				"broker"
+			],
+			[
+				"admin_",
+				"admin_builds_path"
+			],
+			[
+				"restr",
+				"restrict_booked"
+			],
+			[
+				"admin",
+				"admin_builds_path"
+			],
+			[
+				"upd",
+				"update_states"
+			],
+			[
+				"prop",
+				"proposal2"
+			],
+			[
+				"click",
+				"click_button"
+			],
+			[
+				"with",
+				"within"
+			],
+			[
+				"public",
+				"public_builds_path"
+			],
+			[
+				"pro",
+				"proposal"
+			],
+			[
+				"has",
+				"has_accepted"
+			],
+			[
+				"propsal",
+				"proposals"
+			],
+			[
+				"resp",
+				"respond_with"
+			],
+			[
+				"app",
+				"approved"
+			],
+			[
+				"appr",
+				"approved"
+			],
+			[
+				"document",
+				"document_id"
+			],
+			[
+				"proposa",
+				"proposal_documents"
+			],
+			[
+				"td",
+				"td\ttd"
+			],
+			[
+				"docu",
+				"document_field"
+			],
+			[
+				"link",
+				"link_create_field"
+			],
+			[
+				"docume",
+				"document_fields"
+			],
+			[
+				"class",
+				"class_name"
+			],
+			[
+				"img",
+				"imgDropzone"
+			],
+			[
+				"propo",
+				"proposal"
+			],
+			[
+				"vp",
+				"vpif\tvalidates_presence_of if"
+			],
+			[
+				"mai",
+				"mailable_id"
+			],
+			[
+				"sub",
+				"subject"
+			],
+			[
+				"po",
+				"proposal"
+			],
+			[
+				"pr",
+				"proposal"
+			],
+			[
+				"de",
+				"des\tdescribe 'description' do … end"
+			],
+			[
+				"have",
+				"have_text"
+			],
+			[
+				"params",
+				"broker_params"
+			],
+			[
+				"bt",
+				"bt\tbelongs_to"
+			],
+			[
+				"ho",
+				"ho\thas_one"
+			],
+			[
+				"h",
+				"ho\thas_one"
+			],
+			[
+				"model",
+				"model_class"
+			],
+			[
+				"admi",
+				"admin_builds"
+			],
+			[
+				"pars",
+				"parsley-required"
+			],
+			[
+				"cl",
+				"cla\tCreate controller class"
+			],
+			[
+				"materia",
+				"materialize2"
+			],
+			[
+				"curre",
+				"current_store"
+			],
+			[
+				"default",
+				"default_locale"
+			],
+			[
+				"Ass",
+				"Assignor"
+			],
+			[
+				"Assi",
+				"Assignors"
+			],
+			[
+				"desc",
+				"Description"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/client.py",
+			"settings":
+			{
+				"buffer_size": 4254,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
+			"settings":
+			{
+				"buffer_size": 25314,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "lib/dwyte/v2.0.1b/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
+			"settings":
+			{
+				"buffer_size": 40460,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "lib/signal_001.py",
+			"settings":
+			{
+				"buffer_size": 6040,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "lib/signal_test.py",
+			"settings":
+			{
+				"buffer_size": 6667,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "app/controllers/posts_controller.rb",
+			"settings":
+			{
+				"buffer_size": 1792,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "config/routes.rb",
+			"settings":
+			{
+				"buffer_size": 363,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "{\"telegram\": {\n\t\"-481414223\": [{\"message_id\": 123, \"signal_name\": \"stackabuse.com\", \"message_text\": \"sdsdsdss\"}, {\"message_id\": 124, \"signal_name\": \"stackabuse.com\", \"message_text\": \"sdsdsdss\"}, {\"message_id\": 80740352, \"signal_name\": \"technical\", \"message_text\": {\"@type\": \"messageText\", \"text\": {\"@type\": \"formattedText\", \"text\": \"GBPAUD SELL \\ud83d\\udcc9\\nPrice:1.81557\\nStop:1.84310\\nTP:1.77000\", \"entities\": [{\"@type\": \"textEntity\", \"offset\": 0, \"length\": 12, \"type\": {\"@type\": \"textEntityTypeBold\"}}]}}}], \n\t\"-481414224\": [\n\t\t\t{\"message_id\": 80740352, \"signal_name\": \"technical\", \"message_text\": {\"@type\": \"messageText\", \"text\": {\"@type\": \"formattedText\", \"text\": \"GBPAUD SELL \\ud83d\\udcc9\\nPrice:1.81557\\nStop:1.84310\\nTP:1.77000\", \"entities\": [{\"@type\": \"textEntity\", \"offset\": 0, \"length\": 12, \"type\": {\"@type\": \"textEntityTypeBold\"}}]}}}, \n\t\t\t{\"message_id\": 81788928, \"signal_name\": \"technical\", \"message_text\": {\"@type\": \"messageText\", \"text\": {\"@type\": \"formattedText\", \"text\": \"GBPAUD SELL \\ud83d\\udcc9\\nPrice:1.81557\\nStop:1.84310\\nTP:1.77000\", \"entities\": [{\"@type\": \"textEntity\", \"offset\": 0, \"length\": 12, \"type\": {\"@type\": \"textEntityTypeBold\"}}]}}}]}}",
+			"file": "lib/database.json",
+			"file_size": 1158,
+			"file_write_time": 132431322761250116,
+			"settings":
+			{
+				"buffer_size": 1170,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"dele",
+				"File: Delete"
+			],
+			[
+				"rename",
+				"File: Rename"
+			],
+			[
+				"RENAME",
+				"Rename File"
+			],
+			[
+				"json",
+				"Set Syntax: JSON"
+			],
+			[
+				"py",
+				"Set Syntax: Python"
+			],
+			[
+				"dupli",
+				"File: Duplicate"
+			],
+			[
+				"new",
+				"File: New File Relative to Current View"
+			],
+			[
+				"pho",
+				"Set Syntax: Python"
+			],
+			[
+				"newfi",
+				"File: New File Relative to Current View"
+			],
+			[
+				"logg",
+				"Snippet: RAILS_DEFAULT_LOGGER.debug"
+			],
+			[
+				"rails",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"rails l",
+				"Set Syntax: SQL (Rails)"
+			],
+			[
+				"delete",
+				"File: Delete"
+			],
+			[
+				"new file",
+				"File: New File Relative to Current View"
+			],
+			[
+				"move",
+				"File: Move"
+			],
+			[
+				"dupl",
+				"File: Duplicate"
+			],
+			[
+				"du",
+				"File: Duplicate"
+			],
+			[
+				"conver",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"d",
+				"File: Duplicate"
+			],
+			[
+				"dul",
+				"File: Duplicate"
+			],
+			[
+				"dup",
+				"File: Duplicate"
+			],
+			[
+				"duplica",
+				"File: Duplicate"
+			],
+			[
+				"slim",
+				"Set Syntax: Ruby Slim"
+			],
+			[
+				"dee",
+				"File: Delete"
+			],
+			[
+				"duplo",
+				"AngularJS: Toggle - Disable Built-in Element Completions"
+			],
+			[
+				"valida",
+				"Snippet: validates_numericality_of"
+			],
+			[
+				"conve",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"convert",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"new ",
+				"File: New File Relative to Current View"
+			],
+			[
+				"new fie",
+				"File: New File Relative to Current View"
+			],
+			[
+				"newfile",
+				"File: New File Relative to Current View"
+			],
+			[
+				"duplicate",
+				"File: Duplicate"
+			],
+			[
+				"mv",
+				"File: Move"
+			],
+			[
+				"convre",
+				"Convert Case: Lower Case"
+			],
+			[
+				"renam",
+				"File: Rename"
+			],
+			[
+				"new cu",
+				"File: New File Relative to Current View"
+			],
+			[
+				"yml",
+				"Set Syntax: YAML"
+			],
+			[
+				"set slim",
+				"Set Syntax: Ruby Slim"
+			],
+			[
+				"package",
+				"Package Control: List Packages"
+			],
+			[
+				"converst",
+				"HTML2Slim: Convert selection"
+			],
+			[
+				"html",
+				"Set Syntax: HTML (Rails)"
+			],
+			[
+				"con",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"ident",
+				"Indentation: Reindent Lines"
+			],
+			[
+				"set coff",
+				"Set Syntax: CoffeeScript"
+			],
+			[
+				"new c",
+				"File: New File Relative to Current View"
+			],
+			[
+				"DUPLICATE",
+				"File: Duplicate"
+			],
+			[
+				"validate ",
+				"Snippet: validates_acceptance_of if"
+			],
+			[
+				"lorem",
+				"LoremIpsum: (200) stick shake"
+			],
+			[
+				"new cur",
+				"File: New File Relative to Current View"
+			],
+			[
+				"vf",
+				"Snippet: validates_format_of"
+			],
+			[
+				"packageremov",
+				"Package Control: Remove Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Unmanaged Packages"
+			],
+			[
+				"packa",
+				"Package Control: List Packages"
+			],
+			[
+				"package list",
+				"Package Control: List Packages"
+			],
+			[
+				"deelte",
+				"File: Delete"
+			],
+			[
+				"lore",
+				"LoremIpsum: (15) some"
+			],
+			[
+				"new fiel",
+				"File: New File Relative to Current View"
+			],
+			[
+				"uni",
+				"Snippet: validates_uniqueness_of if"
+			],
+			[
+				"DUPL",
+				"File: Duplicate"
+			],
+			[
+				"package ",
+				"Package Control: List Packages"
+			],
+			[
+				"DUPLI",
+				"File: Duplicate"
+			],
+			[
+				"synt slim",
+				"Set Syntax: Ruby Slim"
+			],
+			[
+				"scope",
+				"Snippet: scope"
+			],
+			[
+				"SLIM",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"respond",
+				"Snippet: assert_respond_to(..)"
+			],
+			[
+				"pakage",
+				"Package Control: Install Package"
+			],
+			[
+				"sl",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"new curre",
+				"File: New File Relative to Current View"
+			],
+			[
+				"new folder",
+				"File: New Folder Relative to Current View"
+			],
+			[
+				"newf",
+				"File: New File Relative to Current View"
+			],
+			[
+				"nrema",
+				"Package Control: Remove Package"
+			],
+			[
+				"fren",
+				"File: Rename"
+			],
+			[
+				"new current",
+				"File: New File Relative to Current View"
+			],
+			[
+				"new cure",
+				"File: New File Relative to Current View"
+			],
+			[
+				"dif",
+				"Diffy Compare"
+			],
+			[
+				"rspec",
+				"Set Syntax: Better RSpec"
+			],
+			[
+				"new fi",
+				"File: New File Relative to Current View"
+			],
+			[
+				"scop",
+				"Snippet: scope with arguments"
+			],
+			[
+				"accept",
+				"Snippet: accepts_nested_attributes_for"
+			],
+			[
+				"around",
+				"Snippet: after_validation_on_update"
+			],
+			[
+				"di",
+				"Diffy Compare"
+			],
+			[
+				"diff",
+				"Diffy Compare"
+			],
+			[
+				"pakcage",
+				"Package Control: List Packages"
+			],
+			[
+				"hasn",
+				"Snippet: has_one"
+			],
+			[
+				"paka",
+				"Package Control: Install Package"
+			],
+			[
+				"acept",
+				"Snippet: accepts_nested_attributes_for"
+			],
+			[
+				"sscope",
+				"Snippet: scope with arguments"
+			],
+			[
+				"disal",
+				"Package Control: Disable Package"
+			],
+			[
+				"file name",
+				"File: Rename"
+			],
+			[
+				"edit",
+				"Project: Edit"
+			],
+			[
+				"migra",
+				"Migrations list"
+			],
+			[
+				"set rails",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"pack",
+				"Package Control: Enable Package"
+			],
+			[
+				"pak",
+				"Package Control: List Packages"
+			],
+			[
+				"pakcager",
+				"Package Control: Remove Package"
+			],
+			[
+				"duplic",
+				"File: Duplicate"
+			],
+			[
+				"set rspec",
+				"Set Syntax: Better RSpec"
+			],
+			[
+				"respn",
+				"Snippet: assert_respond_to(..)"
+			],
+			[
+				"key",
+				"Preferences: Key Bindings - Default"
+			],
+			[
+				"pakc",
+				"Package Control: List Packages"
+			],
+			[
+				"guard",
+				"Set Syntax: GuardOutput"
+			],
+			[
+				"pakca",
+				"Package Control: List Packages"
+			],
+			[
+				"package install",
+				"Package Control: Install Package"
+			],
+			[
+				"package isntal",
+				"Package Control: Install Package"
+			],
+			[
+				"ruby",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"package remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"html2",
+				"HTML2Slim: Convert clipboard content"
+			],
+			[
+				"packge",
+				"Package Control: List Packages"
+			],
+			[
+				"convert slim",
+				"Plugin Development: Convert Syntax to .sublime-syntax"
+			],
+			[
+				"vali",
+				"Snippet: validates_uniqueness_of"
+			],
+			[
+				"rais",
+				"Set Syntax: HTML (Rails)"
+			],
+			[
+				"attr",
+				"Snippet: attr_writer .."
+			],
+			[
+				"java",
+				"Set Syntax: JavaScript (Rails)"
+			],
+			[
+				"bash",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"set html",
+				"Set Syntax: HTML"
+			],
+			[
+				"text",
+				"Set Syntax: Plain Text"
+			],
+			[
+				"rails ",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"javasc",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"rals",
+				"Set Syntax: SQL (Rails)"
+			],
+			[
+				"wrap",
+				"HTML: Wrap Selection With Tag"
+			],
+			[
+				"att",
+				"Snippet: attr_accessor .."
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"css",
+				"Set Syntax: CSS"
+			],
+			[
+				"erb",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"packate",
+				"Package Control: Install Package"
+			],
+			[
+				"migr",
+				"Migrations list"
+			],
+			[
+				"akc",
+				"Package Control: Install Package"
+			],
+			[
+				"js",
+				"Set Syntax: JavaScript (Rails)"
+			]
+		],
+		"width": 484.0
+	},
+	"console":
+	{
+		"height": 512.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/brenoperucchi/Devs/telegram",
+		"/Users/brenoperucchi/Devs/telegram/app",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers",
+		"/Users/brenoperucchi/Devs/telegram/bin",
+		"/Users/brenoperucchi/Devs/telegram/lib",
+		"/Users/brenoperucchi/Devs/telegram/lib/venv"
+	],
+	"file_history":
+	[
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/telegram.sublime-project",
+		"/Users/brenoperucchi/Devs/telegram/Gemfile",
+		"/Users/brenoperucchi/Devs/telegram/node_modules/regenerate-unicode-properties/Binary_Property/Grapheme_Extend.js",
+		"/Users/brenoperucchi/Devs/telegram/lib/detect.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/database.json",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal_backup.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwx-zeromq-connector/v2.0.2/mql4/DWX_ZeroMQ_Server_v2.0.2_RC1.mq4",
+		"/Users/brenoperucchi/Devs/telegram/lib/connector.py",
+		"/Users/brenoperucchi/Devs/telegram/vendor/python-telegram/telegram_api/client.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwq.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwq.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/connection.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/telegram_api.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/apisocial/telegram.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/telegram_bot.rb",
+		"/Users/brenoperucchi/Devs/telegram/config/initializers/check_telegram.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/application_record.rb",
+		"/Users/brenoperucchi/Devs/telegram/config/environment.rb",
+		"/Users/brenoperucchi/Devs/telegram/.ruby-version",
+		"/Users/brenoperucchi/Devs/telegram/config/initializers/custom_init.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/apisocial.rb",
+		"/Users/brenoperucchi/Devs/telegram/config/initializers/telegram_loop_check.rb",
+		"/Users/brenoperucchi/Devs/telegram/config/schedule.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20190906031238_create_signs.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/schema.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwx/v2.0.1b/python/api/dwx/dwx/mq.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwx/v2.0.1b/python/api/dwx/dwx/client.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/DWX_ZeroMQ_Connector_v2_0_1_RC8.py",
+		"/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/iOSSupport/System/Library/Frameworks/StoreKit.framework/Versions/A/Headers/SKArcadeService.h",
+		"/Users/brenoperucchi/Devs/telegram/lib/zmq_server.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/rzmq_client.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/rbzmq.rb",
+		"/Users/brenoperucchi/Devs/dwx-zeromq-connector/v2.0.1/python/api/DWX_ZeroMQ_Connector_v2_0_1_RC8.py",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/unit.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/build.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20171213030516_add_state_to_brokers.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/routes.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/application_controller.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/seeds.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/broker.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/initializers/sidekiq.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/locales/pt-BR.yml",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/Gemfile",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/stores/edit.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/mailer_method/base.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/workers/proposal_expire_day3_worker.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/sidekiq.yml",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/sidekiq_scheduler.yml",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/store.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161227200148_create_buyers.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/initializers/backtrace_silencers.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/activity.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/initializers/sidekiq_scheduler.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/workers/proposal_expire_today_worker.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/builds/_scope_partial.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/initializers/inflections.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/layouts/elite/_navigation.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/initializers/better_errors.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/layouts/shards/_nav.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161221010724_create_persons.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/brokers/index.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161213221014_create_units.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/person.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/site/registers_controller.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/admin/stores_controller.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/user.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/admin/base_controller.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/schema.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161214013612_create_proposals.rb",
+		"/Users/brenoperucchi/Devs/forexsignal/Gemfile.lock",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161218182346_add_storeid_to_users.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20170304201530_create_stores.rb",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/brokers/_timeline.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/appweb.sublime-project",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_sender.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer/proposal_request.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/build.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer/price_list.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/assets/javascripts/pages/admin/mailers.js",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/new.js.erb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/_price_list.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/locales/pt-BR.yml",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/mailers_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_request.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/builds/index.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/price_list.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/assets/javascripts/pages/admin/builds.js",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/public/proposals_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/_form.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/locales/en.yml",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/routes.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/application_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/public/base_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_expired.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180716024521_add_send_at_to_mailer_senders.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/base.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/proposal_request.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/proposal.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_accepted.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/notify.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/price_list.rb",
+		"//Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/mailers/application_mailer.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180716003916_remove_fields_from_mailers.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20161221212307_create_mailers.rb",
+		"//Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/price_list.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_create.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/brokers/_form.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/proposals_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/user.rb",
+		"/Users/brenoperucchi/Downloads/06 - Trader/[PDF] Trading - Atitude Mental - Free Download PDF_files/BzrlAFdm-l9.js",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/abstract_model.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/broker.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/store.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/_notify.html.slim",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/application_record.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180609215700_add_method_to_mailers.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/initializers/sentient_store.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/public/units_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/base_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/seeds.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180609064753_remove_token_to_mailers.rb",
+		"/Users/brenoperucchi/Downloads/02 - Developer/pages-3.0.0/demo/html/condensed/form_elements.html",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20161213002121_create_builds.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180609045709_create_mailer_senders.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/builds_controller.rb",
+		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/create_mailer_sender.rb"
+	],
+	"find":
+	{
+		"height": 39.0
+	},
+	"find_in_files":
+	{
+		"height": 125.0,
+		"where_history":
+		[
+			"*.rb",
+			".rb",
+			"*.rb",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"s.",
+			"s.enter(3, 1",
+			"telegram_message_id",
+			"id_telegram_message",
+			"messages_ids",
+			"('",
+			"messages_ids",
+			", messages_ids",
+			"sc",
+			"messages_ids",
+			"telegram_message_id",
+			"telegram_message_id =",
+			"\ttelegram_message_id =",
+			"48141422",
+			"481414223",
+			"data",
+			"signal_name",
+			"append",
+			"data",
+			"telegram_result['messages'][0]['content']",
+			"telegram_message_id",
+			"\"id\": ",
+			"481414224",
+			"messages_ids[signal]",
+			"id_telegram_message",
+			"for p in data['telegram'][chat_id]:",
+			"# pdb.set_trace()",
+			"set_trace",
+			"get_message",
+			"_DWX_ZMQ_CLEANUP",
+			"_DWX_ZMQ_CLEANUP_'",
+			"_DWX_ZMQ_CLEANUP_",
+			"_price",
+			"set_tr",
+			"pdb.set_trace()",
+			"_price_str",
+			"_generate_default_order_dict",
+			"_DWX_MTX_NEW_TRADE_",
+			"11",
+			"10",
+			"pullSocket",
+			"ZmqMsg",
+			"request",
+			"REQUEST",
+			"Request",
+			"request",
+			"MessageHandler",
+			"ZmqMsg",
+			"_request",
+			"_data",
+			"_data[]",
+			"//+--------------------------------------------------------------+",
+			"_data",
+			"getData",
+			"ArrayResize",
+			"StringSplit",
+			"ParseZmqMessage",
+			"components",
+			"InterpretZmqMessage",
+			"compArray",
+			"[10]",
+			"compArray[]",
+			"_generate_default_order_dict",
+			"generate_",
+			"generate",
+			"generate_",
+			"_generate_default_order_dict",
+			":\n",
+			"_generate_default_order_dict",
+			"()\n",
+			"_generate_default_order_dict",
+			"DWX_OpenOrder",
+			"_DWX_MTX_SEND_COMMAND_",
+			"_order",
+			"_DWX_MTX_SEND_COMMAND_",
+			"remote_send",
+			"&compArray[]",
+			" &compArray[]",
+			"ParseZmqMessage",
+			"set_trace",
+			"swing_trading",
+			"_DWX_ZMQ_HEARTBEAT_",
+			"heartbeat",
+			"HEARTBEAT",
+			"HEART",
+			"_DWX_MTX_SEND_COMMAND_",
+			"_generate_default_order_dict",
+			"_DWX_MTX_NEW_TRADE_",
+			"DWX_OpenOrder",
+			"compArray[4]",
+			"DWX_OpenOrder",
+			"_generate_default_order_dict",
+			"DWX_OpenOrder",
+			"DMA_MODE",
+			"DWX_OpenOrder",
+			"calculete_loss_gain",
+			"self",
+			"_DWX_MTX_SEND_COMMAND_",
+			"GET OPEN",
+			"lot",
+			"get_candle_history",
+			"ZMQ_CONTEXT",
+			"_ZMQ_CONTEXT",
+			"def _ZMQ_CONTEXT",
+			"_ZMQ_CONTEXT",
+			"DWX_MTX_SEND_COMMAND_(",
+			"_zmq.remote_send(",
+			"_DWX_ZMQ_EVENT_MONITOR_",
+			"SEND_",
+			"set_trace",
+			"remote_send",
+			"DWX_MTX_SEND_MARKETDATA_REQUEST",
+			"pdb.set_trace()",
+			"# pdb.set_trace()",
+			"pdb.set_trace()",
+			"messages_ids",
+			"messages_ids['signal_technical']",
+			"text",
+			"Text",
+			"text",
+			"Text",
+			"text",
+			"telegram_user.update['title']",
+			"text",
+			"Text",
+			"text",
+			"telegram_username",
+			"telegram_user"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 6,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/client.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4254,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								340,
+								340
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 25314,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								24151,
+								24134
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "lib/dwyte/v2.0.1b/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 40460,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7450,
+								7450
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/MetaQuotes (MQL4) Language Package/Syntaxes/MQL4.tmLanguage",
+							"tab_size": 3,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 320.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "lib/signal_001.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6040,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1259,
+								1275
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"open_with_edit": true,
+							"spell_check": true,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 407.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "lib/signal_test.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6667,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6656,
+								6656
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"open_with_edit": true,
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1968.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "app/controllers/posts_controller.rb",
+					"semi_transient": true,
+					"settings":
+					{
+						"buffer_size": 1792,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/Ruby/Ruby.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "config/routes.rb",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 363,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								130,
+								130
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/Ruby/Ruby.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "lib/database.json",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1170,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
+						},
+						"translation.x": 5.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 26.0
+	},
+	"input":
+	{
+		"height": 48.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.SublimeLinter":
+	{
+		"height": 0.0
+	},
+	"output.exec":
+	{
+		"height": 392.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.guard":
+	{
+		"height": 172.0
+	},
+	"output.mdpopups":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "telegram.sublime-project",
+	"replace":
+	{
+		"height": 48.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"GEM",
+				"Gemfile"
+			],
+			[
+				"GE",
+				"node_modules/regenerate-unicode-properties/Binary_Property/Grapheme_Extend.js"
+			],
+			[
+				"ROUTE",
+				"config/routes.rb"
+			],
+			[
+				"gem",
+				"Gemfile"
+			],
+			[
+				"create signs",
+				"db/migrate/20190906031238_create_signs.rb"
+			],
+			[
+				"schema",
+				"db/schema.rb"
+			],
+			[
+				"unit",
+				"app/models/unit.rb"
+			],
+			[
+				"balance",
+				"config/initializers/backtrace_silencers.rb"
+			],
+			[
+				"create ",
+				"db/migrate/20161227200148_create_buyers.rb"
+			],
+			[
+				"models/",
+				"app/models/activity.rb"
+			],
+			[
+				"store view",
+				"app/views/admin/stores/edit.html.slim"
+			],
+			[
+				"store.rb",
+				"app/models/store.rb"
+			],
+			[
+				"sideki",
+				"config/sidekiq.yml"
+			],
+			[
+				"side",
+				"config/initializers/sidekiq.rb"
+			],
+			[
+				"seeds",
+				"db/seeds.rb"
+			],
+			[
+				"route",
+				"config/routes.rb"
+			],
+			[
+				"pt-b",
+				"config/locales/pt-BR.yml"
+			],
+			[
+				"ProposalExpireTodayWorker",
+				"app/workers/proposal_expire_today_worker.rb"
+			],
+			[
+				"scheduler",
+				"config/sidekiq_scheduler.yml"
+			],
+			[
+				"sidek",
+				"config/sidekiq.yml"
+			],
+			[
+				"db migrate broker",
+				"db/migrate/20171213030516_add_state_to_brokers.rb"
+			],
+			[
+				"nav",
+				"app/views/layouts/elite/_navigation.html.slim"
+			],
+			[
+				"beeter",
+				"config/initializers/better_errors.rb"
+			],
+			[
+				"create person",
+				"db/migrate/20161221010724_create_persons.rb"
+			],
+			[
+				"in",
+				"config/initializers/inflections.rb"
+			],
+			[
+				"user.rb",
+				"app/models/user.rb"
+			],
+			[
+				"register",
+				"app/controllers/site/registers_controller.rb"
+			],
+			[
+				"store contro",
+				"app/controllers/admin/stores_controller.rb"
+			],
+			[
+				"person",
+				"app/models/person.rb"
+			],
+			[
+				"gemf",
+				"Gemfile"
+			],
+			[
+				"db/mig / user",
+				"db/migrate/20161218182346_add_storeid_to_users.rb"
+			],
+			[
+				"create store",
+				"db/migrate/20170304201530_create_stores.rb"
+			],
+			[
+				"sotre.rb",
+				"app/models/store.rb"
+			],
+			[
+				"db/create",
+				"db/migrate/20161213221014_create_units.rb"
+			],
+			[
+				"mailer.js",
+				"app/assets/javascripts/pages/admin/mailers.js"
+			],
+			[
+				"en",
+				"config/locales/en.yml"
+			],
+			[
+				"appli",
+				"app/controllers/application_controller.rb"
+			],
+			[
+				"proosal contro",
+				"app/controllers/public/proposals_controller.rb"
+			],
+			[
+				"pt",
+				"config/locales/pt-BR.yml"
+			],
+			[
+				"create mailer",
+				"db/migrate/20161221212307_create_mailers.rb"
+			],
+			[
+				"route.rb",
+				"config/routes.rb"
+			],
+			[
+				"build index",
+				"app/views/admin/builds/index.html.slim"
+			],
+			[
+				"notify",
+				"app/views/admin/mailers/_notify.html.slim"
+			],
+			[
+				"seed",
+				"db/seeds.rb"
+			],
+			[
+				"proposal contro",
+				"app/controllers/admin/proposals_controller.rb"
+			],
+			[
+				"create",
+				"db/migrate/20161213002121_create_builds.rb"
+			],
+			[
+				"Mailer",
+				"app/models/mailer_sender.rb"
+			],
+			[
+				"information",
+				"db/migrate/20180411013341_add_information_to_builds.rb"
+			],
+			[
+				"create build",
+				"db/migrate/20161213002121_create_builds.rb"
+			],
+			[
+				"build contro",
+				"app/controllers/admin/builds_controller.rb"
+			],
+			[
+				"build",
+				"app/models/build.rb"
+			],
+			[
+				"taginput",
+				"vendor/assets/javascripts/pages/bootstrap-tagsinput.min.js"
+			],
+			[
+				"broker",
+				"app/models/broker.rb"
+			],
+			[
+				"deve",
+				"config/environments/development.rb"
+			],
+			[
+				"builds.js",
+				"app/assets/javascripts/elite/admin/builds.js"
+			],
+			[
+				"builds css",
+				"app/assets/stylesheets/pages/admin/builds.scss"
+			],
+			[
+				"mailer css",
+				"app/assets/stylesheets/elite/mailer.scss"
+			],
+			[
+				"builds js",
+				"app/assets/javascripts/pages/admin/builds.js"
+			],
+			[
+				"broker.rb",
+				"app/models/broker.rb"
+			],
+			[
+				"mailers.js",
+				"app/assets/javascripts/pages/admin/mailers.js"
+			],
+			[
+				"mailer.rb",
+				"app/models/mailer.rb"
+			],
+			[
+				"select",
+				"vendor/assets/stylesheets/pages/select2.min.css"
+			],
+			[
+				"pages modal",
+				"app/views/layouts/pages/_modal.html.slim"
+			],
+			[
+				"pages",
+				"app/views/layouts/pages.html.slim"
+			],
+			[
+				"pages defau",
+				"app/assets/stylesheets/pages/default.scss"
+			],
+			[
+				"buildscss",
+				"app/assets/stylesheets/pages/admin/builds.scss"
+			],
+			[
+				"mailers scss",
+				"app/assets/stylesheets/pages/admin/mailers.scss"
+			],
+			[
+				"mailer.scss",
+				"app/assets/stylesheets/pages/admin/mailers.scss"
+			],
+			[
+				"mailer scss",
+				"app/assets/stylesheets/elite/mailer.scss"
+			],
+			[
+				"builds scss",
+				"app/assets/stylesheets/pages/admin/builds.scss"
+			],
+			[
+				"broker contro",
+				"app/controllers/admin/brokers_controller.rb"
+			],
+			[
+				"mailer.",
+				"app/assets/stylesheets/elite/mailer.scss"
+			],
+			[
+				"pages footer",
+				"app/views/layouts/pages/_footer.html.slim"
+			],
+			[
+				"layout pages",
+				"app/views/layouts/pages.html.slim"
+			],
+			[
+				"html head",
+				"app/views/layouts/pages/_html_head.html.slim"
+			],
+			[
+				"rename",
+				"db/migrate/20171223001938_rename_proposal_documents_to_documents.rb"
+			],
+			[
+				"select2",
+				"vendor/assets/javascripts/pages/select2.full.min.js"
+			],
+			[
+				"admin pages scss",
+				"app/assets/javascripts/pages/admin/stores.js"
+			],
+			[
+				"pages admin scss",
+				"app/assets/stylesheets/pages/admin/dashboards.scss"
+			],
+			[
+				"build css",
+				"app/assets/stylesheets/pages/admin/builds.scss"
+			],
+			[
+				"build js",
+				"app/assets/javascripts/pages/admin/builds.js"
+			],
+			[
+				"admin builds",
+				"app/views/admin/builds/_admin_build.json.jbuilder"
+			],
+			[
+				"builder",
+				"app/views/admin/units/index.json.jbuilder"
+			],
+			[
+				"broker contor",
+				"app/controllers/public/brokers_controller.rb"
+			],
+			[
+				"brokerc ontr",
+				"app/controllers/admin/brokers_controller.rb"
+			],
+			[
+				"mailer contro",
+				"app/controllers/admin/mailers_controller.rb"
+			],
+			[
+				"mailer",
+				"app/models/mailer_method/proposal_accepted.rb"
+			],
+			[
+				" base",
+				"app/models/mailer_method/base.rb"
+			],
+			[
+				"proposal contr",
+				"app/controllers/public/proposals_controller.rb"
+			],
+			[
+				"price list",
+				"app/views/mailers/_price_list.html.slim"
+			],
+			[
+				"propsal index",
+				"app/views/admin/proposals/index.html.slim"
+			],
+			[
+				"scope exp",
+				"app/views/admin/builds/_scope_expired.html.slim"
+			],
+			[
+				"expired",
+				"app/views/public/proposals/expired.html.slim"
+			],
+			[
+				"base.rb",
+				"app/models/mailer_method/base.rb"
+			],
+			[
+				"expier",
+				"app/views/mailers/_proposal_expired.html.slim"
+			],
+			[
+				"expie",
+				"app/views/public/proposals/expired.html.slim"
+			],
+			[
+				"develo",
+				"config/environments/development.rb"
+			],
+			[
+				"proposa",
+				"app/models/proposal.rb"
+			],
+			[
+				"unit store",
+				"spec/factories/unit.rb"
+			],
+			[
+				"public unit index",
+				"app/views/public/units/index.html.slim"
+			],
+			[
+				"dashboard index",
+				"app/views/public/dashboards/index.html.slim"
+			],
+			[
+				"session contro",
+				"app/controllers/public/sessions_controller.rb"
+			],
+			[
+				"base contr",
+				"app/controllers/admin/base_controller.rb"
+			],
+			[
+				"user",
+				"app/models/user.rb"
+			],
+			[
+				"base contero",
+				"app/controllers/admin/base_controller.rb"
+			],
+			[
+				"base contro",
+				"app/controllers/public/base_controller.rb"
+			],
+			[
+				"build new",
+				"app/views/admin/builds/_new.html.slim"
+			],
+			[
+				"unti form",
+				"app/views/admin/units/_form.html.slim"
+			],
+			[
+				"unit contor",
+				"app/controllers/admin/units_controller.rb"
+			],
+			[
+				"unit contro",
+				"app/controllers/public/units_controller.rb"
+			],
+			[
+				"unti.",
+				"app/models/unit.rb"
+			],
+			[
+				"unit form",
+				"app/views/admin/units/_form.html.slim"
+			],
+			[
+				"proposal form",
+				"app/views/admin/proposals/_form.html.slim"
+			],
+			[
+				"dashboard contor",
+				"app/controllers/public/dashboards_controller.rb"
+			],
+			[
+				"proposal edit",
+				"app/views/admin/proposals/edit.html.slim"
+			],
+			[
+				"scope",
+				"app/views/admin/builds/_scope_proposals.html.slim"
+			],
+			[
+				"admin proposal index",
+				"app/views/admin/proposals/_index.html.slim"
+			],
+			[
+				"admin proposal",
+				"app/models/admin/proposal.rb"
+			],
+			[
+				"activi",
+				"app/models/activity.rb"
+			],
+			[
+				"proposal",
+				"app/models/proposal.rb"
+			],
+			[
+				"appl",
+				"app/controllers/application_controller.rb"
+			],
+			[
+				"unti.rb",
+				"app/models/unit.rb"
+			],
+			[
+				"proposa rb",
+				"app/models/proposal.rb"
+			],
+			[
+				"buyer",
+				"app/models/buyer.rb"
+			],
+			[
+				"proosal",
+				"app/models/proposal.rb"
+			],
+			[
+				"unit.rb",
+				"app/models/unit.rb"
+			],
+			[
+				"prposaol form",
+				"app/views/admin/proposals/_form.html.slim"
+			],
+			[
+				"proposal rb",
+				"app/models/proposal.rb"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"/Users/breno/app/go2b/Imentore.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 392.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"au",
+				"authenticate_user!"
+			],
+			[
+				"current_store",
+				"current_store"
+			],
+			[
+				"checkstore",
+				"check_store"
+			],
+			[
+				"check_Store",
+				"check_store"
+			],
+			[
+				"check store",
+				"check_store"
+			],
+			[
+				"",
+				"ApplicationController"
+			]
+		],
+		"width": 704.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 257.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

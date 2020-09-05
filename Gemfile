@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.7.1'
+ruby '2.6.6'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.0'
+gem 'rails', '~> 6.0.2.2'
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3', '~> 1.4'
 # Use Puma as the app server
@@ -39,7 +39,7 @@ group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  gem 'spring-watcher-listen', '~> 2.0.1'
 end
 
 group :test do
@@ -69,16 +69,21 @@ gem 'tdlib-ruby', "2.2.0"
 
 # gem 'zmq', git: 'https://github.com/cowboyrushforth/rbzmq.git'
 
-gem 'ffi-rzmq'
+# gem 'ffi-rzmq'
 gem 'eventmachine'
 gem 'slim'
 gem "administrate"
 
 # gem 'telegramAPI'
 # gem 'telegram-rb', github: 'ssut/telegram-rb', require: 'telegram'
-gem 'pycall'
-gem 'telegram-bot-ruby'
-gem 'concurrent-ruby', "1.1.7", require: 'concurrent'
 
+#API
+gem 'grape'  
+gem 'rack-cors' 
+gem 'grape-active_model_serializers'
+
+# gem 'telegram-bot-ruby'
+# gem 'concurrent-ruby', "1.1.7", require: 'concurrent'
+# gem 'whenever', require: false
 
 

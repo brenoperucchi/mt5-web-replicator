@@ -1,9 +1,10 @@
 Rails.application.routes.draw do
+  mount API::Base, at: "/"
   namespace :admin do
 	  	resources :signs
 		  resources :posts
 	    
-	    root to: "posts#index"
+	    root "posts#index"
     end
   resources :apisocials
   resources :posts

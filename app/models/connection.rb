@@ -1,6 +1,6 @@
 # require 'tdlib-ruby'
-# require 'telegram'
-class Apisocial# < ApplicationRecord
+# require 'apisocial/telegram'
+class Connection# < ApplicationRecord
   # include Telegram
 
   def initialize
@@ -12,14 +12,14 @@ class Apisocial# < ApplicationRecord
   end
 
   def get_ticket(chat_id=487330707)
-    @telegram.get_chat_history(chat_id,0).result[1]  
+    @telegram.get_chat_history(chat_id,0,0,10,true).result[1]  
   end
 
   def get_message
     ticket = get_ticket
 		message = ticket.messages.first
     if message.sender_user_id == @sender_user_id
-      message.content.text.text
+      message.content.text.text.strip_emoji
     else
       return false
     end
@@ -32,7 +32,7 @@ class Apisocial# < ApplicationRecord
     currency = message[0..5]
     
     #todo Now and Price should be a price to bid
-    price = message.match(/now(.*?$)/m)[1].gsub("@","")
+    price = message.gsub("@","")
 
     kind = if message.include?("sell") then "sell" else "buy" end
     stop_loss = message.match(/Sl(.*?$)/m)[1].gsub("@","")

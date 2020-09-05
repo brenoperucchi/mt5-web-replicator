@@ -9,15 +9,25 @@ class SignDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    currency: Field::String,
-    take_profit2: Field::String.with_options(searchable: false),
-    take_profit1: Field::String.with_options(searchable: false),
-    stop_loss: Field::String.with_options(searchable: false),
-    price: Field::String.with_options(searchable: false),
+    provider: Field::String,
+    provider_name: Field::String,
+    symbol: Field::String,
+    action: Field::String,
     kind: Field::String,
-    broker: Field::String,
-    social: Field::String,
-    order_at: Field::DateTime,
+    price_request: Field::String.with_options(searchable: false),
+    price_open: Field::String.with_options(searchable: false),
+    stop_loss: Field::String.with_options(searchable: false),
+    take_profit_2: Field::String.with_options(searchable: false),
+    take_profit_1: Field::String.with_options(searchable: false),
+    comment: Field::String,
+    lots: Field::String,
+    magic: Field::String,
+    open_at: Field::DateTime,
+    ticket: Field::String,
+    context: Field::String,
+    response: Field::String,
+    response_value: Field::String,
+    service_id: Field::Number,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -29,24 +39,31 @@ class SignDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  currency
-  take_profit2
-  take_profit1
+  symbol
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  currency
-  take_profit2
-  take_profit1
-  stop_loss
-  price
+  provider
+  provider_name
+  symbol
+  action
   kind
-  broker
-  social
-  order_at
+  price_request
+  price_open
+  stop_loss
+  take_profit_1
+  take_profit_2
+  comment
+  lots
+  magic
+  open_at
+  ticket
+  context
+  response
+  response_value
   created_at
   updated_at
   ].freeze
@@ -55,15 +72,7 @@ class SignDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  currency
-  take_profit2
-  take_profit1
-  stop_loss
-  price
-  kind
-  broker
-  social
-  order_at
+  symbol
   ].freeze
 
   # COLLECTION_FILTERS
@@ -74,7 +83,7 @@ class SignDashboard < Administrate::BaseDashboard
   # in the search field:
   #
   #   COLLECTION_FILTERS = {
-  #     open: ->(resources) { where(open: true) }
+  #     open: ->(resources) { resources.where(open: true) }
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
