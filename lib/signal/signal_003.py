@@ -2,9 +2,9 @@ import pdb
 import sched, time
 import json
 
+from signal_functions import SignalFunction
 from telegram_api.client import Telegram
 from lib.DWX_v2_0_1_RC8_003 import DWX_ZeroMQ_Connector
-from lib.signal_functions import SignalFunction
 
 with open("database.json", "r") as json_file:
 	database = json.load(json_file)

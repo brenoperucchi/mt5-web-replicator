@@ -8,7 +8,7 @@ import pdb
 import re
 # construct the argument parse and parse the arguments
 
-def text_image_detect(path):
+def detect_text_local(path):
 	# load the example image and convert it to grayscale
 	image = cv2.imread(path)
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

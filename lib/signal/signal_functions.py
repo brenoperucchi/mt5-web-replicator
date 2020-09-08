@@ -12,8 +12,8 @@ except ImportError:
 import pytesseract
 
 from decimal import *
-from lib.detect import *
-from lib.ocr import text_image_detect
+from lib.ocr_google import detect_text_google
+from lib.ocr_local import detect_text_local
 
 class SignalFunction():
 
@@ -174,20 +174,21 @@ class SignalFunction():
 			file = self._tg.call_method('downloadFile', params={'file_id': file_id, 'priority': 1, 'offset':0, 'limit':10, 'synchronous':True})
 			time.sleep(timer)
 			path = file.update['local']['path']
-			error = None
-			message = text_image_detect(path)
-			# message = detect_text(path)
+			if timer > 2:
+				message = detect_text_local(path)
+				print("Detect Text Local :", message)
+			else:
+				message = detect_text_google(path)
+				print("Detect Text Google :", message)
 			message = re.sub(" / ", "",  message).strip()
-			print("Detect Text in Message :", message)
 			return message
 		except Exception as e:
 			print(f"Detect Text Error / Remote File Id :{remote_file_id} / Exception :{e}")
 			timer = timer + 0.5
-			if timer < 2:
-				self._detect_text_image(remote_file_id, timer)
+			if timer < 3:
+				return self._detect_text_image(remote_file_id, timer)
 			else:
 				return 
-
 
 	def _save_database_api(self, _my_trade, chat_id, message, telegram_username):
 		response = None

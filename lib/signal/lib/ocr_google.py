@@ -25,7 +25,7 @@ def detect_text_uri(uri):
             'https://cloud.google.com/apis/design/errors'.format(
                 response.error.message))
 
-def detect_text(path):
+def detect_text_google(path):
     """Detects text in the file."""
     from google.cloud import vision
     import io
