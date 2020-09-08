@@ -6,6 +6,9 @@
 
 # Custom
 /vendor
+lib/signal/__pycache__/
+lib/signal/lib/__pycache__/
+*.pyc
 
 # Ignore bundler config.
 /.bundle

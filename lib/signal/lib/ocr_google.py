@@ -1,4 +1,6 @@
-import pdb
+import re
+# import pdb
+
 def detect_text_uri(uri):
     """Detects text in the file located in Google Cloud Storage or on the Web.
     """
@@ -35,21 +37,12 @@ def detect_text_google(path):
         content = image_file.read()
 
     image = vision.types.Image(content=content)
-
     response = client.text_detection(image=image)
     texts = response.text_annotations
     # pdb.set_trace()
-    # print('text:', texts[0].description)
-    return texts[0].description
-
-    # for text in texts:
-    #     print('\n"{}"'.format(text.description))
-
-    #     vertices = (['({},{})'.format(vertex.x, vertex.y)
-    #                 for vertex in text.bounding_poly.vertices])
-
-    #     print('bounds: {}'.format(','.join(vertices)))
-
+    texts = texts[0].description
+    texts = re.sub(" / ", "",  texts).strip()
+    return texts
     if response.error.message:
         raise Exception(
             '{}\nFor more info on error messages, check: '

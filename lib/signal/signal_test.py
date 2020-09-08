@@ -4,7 +4,7 @@ import json
 
 from telegram_api.client import Telegram
 from lib.DWX_v2_0_1_RC8_Test import DWX_ZeroMQ_Connector
-from signal_functions import SignalFunction
+from signal_functions_test import SignalFunction
 
 
 
@@ -18,6 +18,7 @@ tg = Telegram(
 	api_hash='04c2afe8f6dd37450e69a9ece6dce187',
 	phone='+5548991268808',
 	database_encryption_key='changeme1234',
+	# library_path='/home/bperucchi/.local/lib/python3.7/site-packages/telegram_api/lib/linux/libtdjson_64.so'
 )
 
 tg.login()

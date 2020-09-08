@@ -16,12 +16,13 @@ tg = Telegram(
 	api_hash='03062326232cb23c6770e7a735c2dae2',
 	phone='+5548984222627',
 	database_encryption_key='changeme1234',
+	library_path='/home/bperucchi/.local/lib/python3.7/site-packages/telegram_api/lib/linux/libtdjson_64.so'
 )
 
 tg.login()
 
 def signals(sc):
-	SignalFunction(sc, tg, _zmq, database, 'technical').prepare_signal()
+	# SignalFunction(sc, tg, _zmq, database, 'technical').prepare_signal()
 	SignalFunction(sc, tg, _zmq, database, 'swing_trading').prepare_signal()
 	SignalFunction(sc, tg, _zmq, database, 'M15_Signals').prepare_signal()
 	# SignalFunction(sc, tg, _zmq, database, 'test').prepare_signal()
