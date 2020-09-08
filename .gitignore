@@ -102,3 +102,4 @@ yarn-debug.log*
 /storage/*
 !/storage/.keep
 *.pyc
+lib/signal/database.json
