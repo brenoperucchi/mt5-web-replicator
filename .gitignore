@@ -103,3 +103,5 @@ yarn-debug.log*
 !/storage/.keep
 *.pyc
 lib/signal/database.json
+lib/signal/__pycache__/signal_functions.cpython-38.pyc
+*.pyc
