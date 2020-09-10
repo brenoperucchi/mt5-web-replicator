@@ -8,6 +8,7 @@
 /vendor
 lib/signal/__pycache__/
 lib/signal/lib/__pycache__/
+database.json
 *.pyc
 
 # Ignore bundler config.
@@ -101,7 +102,3 @@ yarn-debug.log*
 # Ignore uploaded files in development
 /storage/*
 !/storage/.keep
-*.pyc
-lib/signal/database.json
-lib/signal/__pycache__/signal_functions.cpython-38.pyc
-*.pyc
