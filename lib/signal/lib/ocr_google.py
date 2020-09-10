@@ -42,6 +42,7 @@ def detect_text_google(path):
     # pdb.set_trace()
     texts = texts[0].description
     texts = re.sub(" / ", "",  texts).strip()
+    texts = re.sub("/ ", "",  texts).strip()
     return texts
     if response.error.message:
         raise Exception(

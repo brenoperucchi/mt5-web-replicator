@@ -32,9 +32,9 @@ class DWX_ZeroMQ_Connector:
                  client_id='dwx-zeromq',  # Unique ID for this client
                  host='192.168.1.245',  # Host to connect to
                  protocol='tcp',  # Connection protocol
-                 push_port=33001,  # Port for Sending commands
-                 pull_port=33002,  # Port for Receiving responses
-                 sub_port=33003,  # Port for Subscribing for prices
+                 push_port=32768,  # Port for Sending commands
+                 pull_port=32769,  # Port for Receiving responses
+                 sub_port=32770,  # Port for Subscribing for prices
                  delimiter=';',
                  pulldata_handlers=None,  # Handlers to process data received through PULL port.
                  subdata_handlers=None,  # Handlers to process data received through SUB port.
