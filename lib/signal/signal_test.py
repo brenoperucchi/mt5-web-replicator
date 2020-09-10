@@ -3,8 +3,8 @@ import sched, time
 import json
 
 from telegram_api.client import Telegram
-from lib.DWX_v2_0_1_RC8_Test import DWX_ZeroMQ_Connector
 from signal_functions_test import SignalFunction
+from lib.DWX_v2_0_1_RC8_Test import DWX_ZeroMQ_Connector
 
 
 

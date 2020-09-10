@@ -4,12 +4,84 @@
 		"selected_items":
 		[
 			[
+				"_price",
+				"_price_request"
+			],
+			[
+				"reque",
+				"_request_price"
+			],
+			[
+				"decim",
+				"decimal_market_price"
+			],
+			[
+				"decima",
+				"decimal_market_price"
+			],
+			[
+				"Cal",
+				"Calculete_loss_gain"
+			],
+			[
+				"def",
+				"def\tFunction"
+			],
+			[
+				"tr",
+				"try\tTry/Except"
+			],
+			[
+				"dec",
+				"decimal_market_price"
+			],
+			[
+				"request",
+				"request_price"
+			],
+			[
+				"M1",
+				"M15_Signals"
+			],
+			[
+				"message",
+				"messages"
+			],
+			[
+				"remote",
+				"remote_file_id"
+			],
+			[
+				"remot",
+				"remote_file_id"
+			],
+			[
+				"tx",
+				"texts"
+			],
+			[
 				"messa",
-				"telegram_message_id"
+				"message"
+			],
+			[
+				"try",
+				"try\tTry/Except/Else"
+			],
+			[
+				"res",
+				"response_value"
+			],
+			[
+				"ea",
+				"eab\teach_byte { |byte| .. }"
+			],
+			[
+				"t",
+				"t.\tt.string (tcs)"
 			],
 			[
 				"tele",
-				"telegram"
+				"telegram_username"
 			],
 			[
 				"telegram",
@@ -30,10 +102,6 @@
 			[
 				"file",
 				"file_id"
-			],
-			[
-				"remote",
-				"remote_file"
 			],
 			[
 				"tex",
@@ -86,14 +154,6 @@
 			[
 				"teleg",
 				"telegram_result"
-			],
-			[
-				"res",
-				"result"
-			],
-			[
-				"t",
-				"t.\tt.integer (tci)"
 			],
 			[
 				"param",
@@ -454,142 +514,11 @@
 			[
 				"de",
 				"des\tdescribe 'description' do … end"
-			],
-			[
-				"have",
-				"have_text"
-			],
-			[
-				"params",
-				"broker_params"
-			],
-			[
-				"bt",
-				"bt\tbelongs_to"
-			],
-			[
-				"ho",
-				"ho\thas_one"
-			],
-			[
-				"h",
-				"ho\thas_one"
-			],
-			[
-				"model",
-				"model_class"
-			],
-			[
-				"admi",
-				"admin_builds"
-			],
-			[
-				"pars",
-				"parsley-required"
-			],
-			[
-				"cl",
-				"cla\tCreate controller class"
-			],
-			[
-				"materia",
-				"materialize2"
-			],
-			[
-				"curre",
-				"current_store"
-			],
-			[
-				"default",
-				"default_locale"
-			],
-			[
-				"Ass",
-				"Assignor"
-			],
-			[
-				"Assi",
-				"Assignors"
-			],
-			[
-				"desc",
-				"Description"
 			]
 		]
 	},
 	"buffers":
 	[
-		{
-			"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/client.py",
-			"settings":
-			{
-				"buffer_size": 4254,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
-			"settings":
-			{
-				"buffer_size": 25314,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "lib/dwyte/v2.0.1b/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
-			"settings":
-			{
-				"buffer_size": 40460,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "lib/signal_001.py",
-			"settings":
-			{
-				"buffer_size": 6040,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "lib/signal_test.py",
-			"settings":
-			{
-				"buffer_size": 6667,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "app/controllers/posts_controller.rb",
-			"settings":
-			{
-				"buffer_size": 1792,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "config/routes.rb",
-			"settings":
-			{
-				"buffer_size": 363,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "{\"telegram\": {\n\t\"-481414223\": [{\"message_id\": 123, \"signal_name\": \"stackabuse.com\", \"message_text\": \"sdsdsdss\"}, {\"message_id\": 124, \"signal_name\": \"stackabuse.com\", \"message_text\": \"sdsdsdss\"}, {\"message_id\": 80740352, \"signal_name\": \"technical\", \"message_text\": {\"@type\": \"messageText\", \"text\": {\"@type\": \"formattedText\", \"text\": \"GBPAUD SELL \\ud83d\\udcc9\\nPrice:1.81557\\nStop:1.84310\\nTP:1.77000\", \"entities\": [{\"@type\": \"textEntity\", \"offset\": 0, \"length\": 12, \"type\": {\"@type\": \"textEntityTypeBold\"}}]}}}], \n\t\"-481414224\": [\n\t\t\t{\"message_id\": 80740352, \"signal_name\": \"technical\", \"message_text\": {\"@type\": \"messageText\", \"text\": {\"@type\": \"formattedText\", \"text\": \"GBPAUD SELL \\ud83d\\udcc9\\nPrice:1.81557\\nStop:1.84310\\nTP:1.77000\", \"entities\": [{\"@type\": \"textEntity\", \"offset\": 0, \"length\": 12, \"type\": {\"@type\": \"textEntityTypeBold\"}}]}}}, \n\t\t\t{\"message_id\": 81788928, \"signal_name\": \"technical\", \"message_text\": {\"@type\": \"messageText\", \"text\": {\"@type\": \"formattedText\", \"text\": \"GBPAUD SELL \\ud83d\\udcc9\\nPrice:1.81557\\nStop:1.84310\\nTP:1.77000\", \"entities\": [{\"@type\": \"textEntity\", \"offset\": 0, \"length\": 12, \"type\": {\"@type\": \"textEntityTypeBold\"}}]}}}]}}",
-			"file": "lib/database.json",
-			"file_size": 1158,
-			"file_write_time": 132431322761250116,
-			"settings":
-			{
-				"buffer_size": 1170,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -603,12 +532,64 @@
 		"selected_items":
 		[
 			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"du",
+				"File: Duplicate"
+			],
+			[
+				"rena",
+				"File: Rename"
+			],
+			[
+				"dupli",
+				"File: Duplicate"
+			],
+			[
+				"dup",
+				"File: Duplicate"
+			],
+			[
 				"dele",
+				"File: Delete"
+			],
+			[
+				"dupl",
+				"File: Duplicate"
+			],
+			[
+				"delete",
 				"File: Delete"
 			],
 			[
 				"rename",
 				"File: Rename"
+			],
+			[
+				"rails",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"mql",
+				"Set Syntax: MQL4"
+			],
+			[
+				"rail",
+				"Set Syntax: Ruby on Rails"
+			],
+			[
+				"ename",
+				"Rename File"
+			],
+			[
+				"new",
+				"File: New File Relative to Current View"
+			],
+			[
+				"newf",
+				"File: New File Relative to Current View"
 			],
 			[
 				"RENAME",
@@ -623,14 +604,6 @@
 				"Set Syntax: Python"
 			],
 			[
-				"dupli",
-				"File: Duplicate"
-			],
-			[
-				"new",
-				"File: New File Relative to Current View"
-			],
-			[
 				"pho",
 				"Set Syntax: Python"
 			],
@@ -643,16 +616,8 @@
 				"Snippet: RAILS_DEFAULT_LOGGER.debug"
 			],
 			[
-				"rails",
-				"Set Syntax: Ruby on Rails"
-			],
-			[
 				"rails l",
 				"Set Syntax: SQL (Rails)"
-			],
-			[
-				"delete",
-				"File: Delete"
 			],
 			[
 				"new file",
@@ -661,14 +626,6 @@
 			[
 				"move",
 				"File: Move"
-			],
-			[
-				"dupl",
-				"File: Duplicate"
-			],
-			[
-				"du",
-				"File: Duplicate"
 			],
 			[
 				"conver",
@@ -680,10 +637,6 @@
 			],
 			[
 				"dul",
-				"File: Duplicate"
-			],
-			[
-				"dup",
 				"File: Duplicate"
 			],
 			[
@@ -877,10 +830,6 @@
 			[
 				"new folder",
 				"File: New Folder Relative to Current View"
-			],
-			[
-				"newf",
-				"File: New File Relative to Current View"
 			],
 			[
 				"nrema",
@@ -1087,32 +1036,12 @@
 				"Snippet: attr_accessor .."
 			],
 			[
-				"install",
-				"Package Control: Install Package"
-			],
-			[
 				"css",
 				"Set Syntax: CSS"
 			],
 			[
 				"erb",
 				"Set Syntax: Ruby on Rails"
-			],
-			[
-				"packate",
-				"Package Control: Install Package"
-			],
-			[
-				"migr",
-				"Migrations list"
-			],
-			[
-				"akc",
-				"Package Control: Install Package"
-			],
-			[
-				"js",
-				"Set Syntax: JavaScript (Rails)"
 			]
 		],
 		"width": 484.0
@@ -1137,18 +1066,94 @@
 	[
 		"/Users/brenoperucchi/Devs/telegram",
 		"/Users/brenoperucchi/Devs/telegram/app",
-		"/Users/brenoperucchi/Devs/telegram/app/controllers",
-		"/Users/brenoperucchi/Devs/telegram/bin",
+		"/Users/brenoperucchi/Devs/telegram/app/models",
+		"/Users/brenoperucchi/Devs/telegram/app/models/apisocial",
+		"/Users/brenoperucchi/Devs/telegram/app/serializers",
+		"/Users/brenoperucchi/Devs/telegram/config",
 		"/Users/brenoperucchi/Devs/telegram/lib",
-		"/Users/brenoperucchi/Devs/telegram/lib/venv"
+		"/Users/brenoperucchi/Devs/telegram/lib/signal",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/__pycache__",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib",
+		"/Users/brenoperucchi/Devs/telegram/vendor",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/python"
 	],
 	"file_history":
 	[
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/telegram.sublime-project",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_production.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions_004.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/database.json",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/Signal-004.mq4",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/Signal-test.mq4",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions_test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/DWX_v2_0_1_RC8_004.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/DWX_v2_0_1_RC8_Test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_003.py",
+		"/Users/brenoperucchi/Devs/telegram/config/application.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions.py",
+		"/Users/brenoperucchi/Devs/telegram/config/environments/development.rb",
 		"/Users/brenoperucchi/Devs/telegram/Gemfile",
+		"/Users/brenoperucchi/Devs/telegram/config/secrets.yml",
+		"/Users/brenoperucchi/Devs/telegram/app/dashboards/foo_dashboard.rb",
+		"/Users/brenoperucchi/Devs/telegram/.gitignore",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/ocr_local.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/ocr_google.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/requirements.txt.",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/ocr.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/DWX_v2_0_1_RC8_003.py",
+		"/Users/brenoperucchi/Devs/telegram/config/database.yml",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/DWX_v2_0_1_RC8_Test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/telegram_api.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/apisocial/telegram.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/detect.py",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector/v2.0.1/python/api/DWX_ZeroMQ_Connector_v2_0_1_RC8.py",
+		"/Users/brenoperucchi/Devs/telegram/app/dashboards/sign_dashboard.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/v1/signs.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20190906031238_create_signs.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_001.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/venv/lib/python3.8/site-packages/pandas/tests/frame/methods/test_rename.py",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/signs_controller.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/serializers/sign_serializer.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal_001.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/database.json",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal_test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal_002.py",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/python/api/DWX_ZeroMQ_Connector_v2_0_1_RC8.py",
+		"/Users/brenoperucchi/Devs/telegram/config/routes.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20200901013709_create_clients.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/sign.rb",
+		"/Users/brenoperucchi/Downloads/mql4\\Include\\json.mqh",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/admin/signs_controller.rb",
+		"/Users/brenoperucchi/Devs/telegram/config/initializers/inflections.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/v1/base.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/v1/signals.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/helpers/signals_helper.rb",
+		"/Users/brenoperucchi/Devs/telegram/telegram.sublime-project",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20200402012525_create_posts.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20200830222803_create_transactions.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20190906031238_create_signals.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/serializers/signal_serializer.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/transaction.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20200830222659_transaction.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/application_controller.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/models/post.rb",
+		"/Users/brenoperucchi/Devs/telegram/config/hosts",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/v1/defaults.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/base.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwyte/v2.0.1b/python/api/dwx/dwx/client.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/dwyte/v2.0.1b/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
+		"/Users/brenoperucchi/Devs/telegram/app/views/admin/application/_collection.html.erb",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/admin/posts_controller.rb",
+		"/Users/brenoperucchi/Devs/telegram/app/views/admin/application/_navigation.html.erb",
+		"/Users/brenoperucchi/Devs/telegram/app/views/admin/application/_navigation.html.slim",
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/telegram.sublime-project",
 		"/Users/brenoperucchi/Devs/telegram/node_modules/regenerate-unicode-properties/Binary_Property/Grapheme_Extend.js",
 		"/Users/brenoperucchi/Devs/telegram/lib/detect.py",
-		"/Users/brenoperucchi/Devs/telegram/lib/database.json",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal_backup.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/dwx-zeromq-connector/v2.0.2/mql4/DWX_ZeroMQ_Server_v2.0.2_RC1.mq4",
 		"/Users/brenoperucchi/Devs/telegram/lib/connector.py",
@@ -1156,9 +1161,6 @@
 		"/Users/brenoperucchi/Devs/telegram/lib/dwq.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/dwq.rb",
 		"/Users/brenoperucchi/Devs/telegram/app/models/connection.rb",
-		"/Users/brenoperucchi/Devs/telegram/lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
-		"/Users/brenoperucchi/Devs/telegram/lib/telegram_api.rb",
-		"/Users/brenoperucchi/Devs/telegram/app/models/apisocial/telegram.rb",
 		"/Users/brenoperucchi/Devs/telegram/lib/telegram_bot.rb",
 		"/Users/brenoperucchi/Devs/telegram/config/initializers/check_telegram.rb",
 		"/Users/brenoperucchi/Devs/telegram/app/models/application_record.rb",
@@ -1168,7 +1170,6 @@
 		"/Users/brenoperucchi/Devs/telegram/app/models/apisocial.rb",
 		"/Users/brenoperucchi/Devs/telegram/config/initializers/telegram_loop_check.rb",
 		"/Users/brenoperucchi/Devs/telegram/config/schedule.rb",
-		"/Users/brenoperucchi/Devs/telegram/db/migrate/20190906031238_create_signs.rb",
 		"/Users/brenoperucchi/Devs/telegram/db/schema.rb",
 		"/Users/brenoperucchi/Devs/telegram/lib/dwx/v2.0.1b/python/api/dwx/dwx/mq.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/dwx/v2.0.1b/python/api/dwx/dwx/client.py",
@@ -1208,70 +1209,7 @@
 		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/brokers/index.html.slim",
 		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161213221014_create_units.rb",
 		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/person.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/site/registers_controller.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/admin/stores_controller.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/user.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/admin/base_controller.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/schema.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161214013612_create_proposals.rb",
-		"/Users/brenoperucchi/Devs/forexsignal/Gemfile.lock",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161218182346_add_storeid_to_users.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20170304201530_create_stores.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/brokers/_timeline.html.slim",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/appweb.sublime-project",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_sender.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer/proposal_request.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/build.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer/price_list.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/assets/javascripts/pages/admin/mailers.js",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/new.js.erb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/_price_list.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/locales/pt-BR.yml",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/mailers_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_request.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/builds/index.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/price_list.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/assets/javascripts/pages/admin/builds.js",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/public/proposals_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/_form.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/locales/en.yml",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/routes.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/application_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/public/base_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_expired.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180716024521_add_send_at_to_mailer_senders.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/base.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/proposal_request.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/proposal.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_accepted.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/notify.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/price_list.rb",
-		"//Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/mailers/application_mailer.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180716003916_remove_fields_from_mailers.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20161221212307_create_mailers.rb",
-		"//Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/price_list.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/mailer_method/proposal_create.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/brokers/_form.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/proposals_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/user.rb",
-		"/Users/brenoperucchi/Downloads/06 - Trader/[PDF] Trading - Atitude Mental - Free Download PDF_files/BzrlAFdm-l9.js",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/abstract_model.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/broker.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/store.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/views/admin/mailers/_notify.html.slim",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/application_record.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180609215700_add_method_to_mailers.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/config/initializers/sentient_store.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/public/units_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/base_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/seeds.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180609064753_remove_token_to_mailers.rb",
-		"/Users/brenoperucchi/Downloads/02 - Developer/pages-3.0.0/demo/html/condensed/form_elements.html",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20161213002121_create_builds.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/db/migrate/20180609045709_create_mailer_senders.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/controllers/admin/builds_controller.rb",
-		"/Users/brenoperucchi/Google-Drive/03-Apps/appweb/app/models/create_mailer_sender.rb"
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/site/registers_controller.rb"
 	],
 	"find":
 	{
@@ -1283,6 +1221,8 @@
 		"where_history":
 		[
 			"*.rb",
+			"*",
+			"*.rb",
 			".rb",
 			"*.rb",
 			""
@@ -1290,137 +1230,137 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": false,
+		"case_sensitive": true,
 		"find_history":
 		[
-			"s.",
-			"s.enter(3, 1",
-			"telegram_message_id",
-			"id_telegram_message",
-			"messages_ids",
-			"('",
-			"messages_ids",
-			", messages_ids",
-			"sc",
-			"messages_ids",
-			"telegram_message_id",
-			"telegram_message_id =",
-			"\ttelegram_message_id =",
-			"48141422",
-			"481414223",
-			"data",
-			"signal_name",
-			"append",
-			"data",
-			"telegram_result['messages'][0]['content']",
-			"telegram_message_id",
-			"\"id\": ",
-			"481414224",
-			"messages_ids[signal]",
-			"id_telegram_message",
-			"for p in data['telegram'][chat_id]:",
-			"# pdb.set_trace()",
-			"set_trace",
-			"get_message",
-			"_DWX_ZMQ_CLEANUP",
-			"_DWX_ZMQ_CLEANUP_'",
-			"_DWX_ZMQ_CLEANUP_",
-			"_price",
-			"set_tr",
-			"pdb.set_trace()",
-			"_price_str",
-			"_generate_default_order_dict",
-			"_DWX_MTX_NEW_TRADE_",
-			"11",
-			"10",
-			"pullSocket",
-			"ZmqMsg",
-			"request",
-			"REQUEST",
-			"Request",
-			"request",
-			"MessageHandler",
-			"ZmqMsg",
-			"_request",
-			"_data",
-			"_data[]",
-			"//+--------------------------------------------------------------+",
-			"_data",
-			"getData",
-			"ArrayResize",
-			"StringSplit",
-			"ParseZmqMessage",
-			"components",
+			"signal_functions",
+			"# market_price = self._get_track_price_metatrader(_my_trade['_symbol'])",
+			"_calculete_loss_gain",
+			"self._calculete_loss_gain(price_request, ",
+			"self._calculete_loss_gain(price_request, re.search(r\"[\\d]+[.,\\d]+\", ",
+			", market_price",
+			"_get_track_price_metatrader",
+			"price_request",
+			"_price_request",
+			"pdb.",
+			"double",
+			"DWX_OpenOrder",
+			"_market_price",
+			"StrToDouble",
+			"IsStopped",
+			"stop",
+			"CheckServerStatus",
+			"_request.size",
+			"MarketInfo(_symbol, MODE_DIGITS);",
+			"DWX_OpenOrder",
+			"string",
+			"DWX_OpenOrder",
+			"_create_metatrader_order",
 			"InterpretZmqMessage",
-			"compArray",
-			"[10]",
-			"compArray[]",
-			"_generate_default_order_dict",
-			"generate_",
-			"generate",
-			"generate_",
-			"_generate_default_order_dict",
-			":\n",
-			"_generate_default_order_dict",
-			"()\n",
-			"_generate_default_order_dict",
-			"DWX_OpenOrder",
-			"_DWX_MTX_SEND_COMMAND_",
-			"_order",
-			"_DWX_MTX_SEND_COMMAND_",
-			"remote_send",
-			"&compArray[]",
-			" &compArray[]",
 			"ParseZmqMessage",
 			"set_trace",
-			"swing_trading",
-			"_DWX_ZMQ_HEARTBEAT_",
-			"heartbeat",
-			"HEARTBEAT",
-			"HEART",
-			"_DWX_MTX_SEND_COMMAND_",
-			"_generate_default_order_dict",
-			"_DWX_MTX_NEW_TRADE_",
-			"DWX_OpenOrder",
-			"compArray[4]",
-			"DWX_OpenOrder",
-			"_generate_default_order_dict",
-			"DWX_OpenOrder",
-			"DMA_MODE",
-			"DWX_OpenOrder",
-			"calculete_loss_gain",
-			"self",
-			"_DWX_MTX_SEND_COMMAND_",
-			"GET OPEN",
-			"lot",
-			"get_candle_history",
-			"ZMQ_CONTEXT",
-			"_ZMQ_CONTEXT",
-			"def _ZMQ_CONTEXT",
-			"_ZMQ_CONTEXT",
-			"DWX_MTX_SEND_COMMAND_(",
-			"_zmq.remote_send(",
-			"_DWX_ZMQ_EVENT_MONITOR_",
-			"SEND_",
+			"_create_metatrader_order",
+			"(float(stop_price) - float(enter_price)) * 10 **",
+			"(float(stop_price) - float(enter_price)) * 10 ** decimal_market_price",
+			"(int((float(stop_price) - float(enter_price)) * 10 ** decimal_market_price)",
+			"abs(int((float(stop_price) - float(enter_price)) * 10 ** decimal_market_price)",
 			"set_trace",
-			"remote_send",
-			"DWX_MTX_SEND_MARKETDATA_REQUEST",
+			"OrderStopLoss",
+			"OrderStopLoss(",
+			"+ ",
+			"OrderStopLoss",
+			"DWX_OpenOrder",
+			"DWX_GetOpenOrders",
+			"_price",
+			"MarketInfo",
+			"DWX_GetHist",
+			"_get_track_price_metatrader",
+			"_calculete_loss_gain",
+			"price_request",
+			"_get_track_price_metatrader",
+			"\"",
+			"_signal_image",
+			"pdb.set",
+			"sleep",
+			"_detect_text_image",
+			"telegram_result",
+			"_parse_message_get",
+			"message['messages'][0]['content']['caption']['text']",
+			"_detect_text_image",
+			"message['messages'][0]['content']['text']['text']",
+			"pdb.set",
+			"error",
+			"_detect_text_image",
+			"text_image_detect",
+			"detect_text(",
+			"detect_text",
+			"timer",
+			"_detect_text_image",
+			"Detect Text Error",
+			"text_image_detect",
+			"_detect_text_image",
+			"Detect Text in Message",
+			"77.34",
+			"text_image_detect",
+			"0.6108",
 			"pdb.set_trace()",
-			"# pdb.set_trace()",
+			"\t\t",
 			"pdb.set_trace()",
-			"messages_ids",
-			"messages_ids['signal_technical']",
-			"text",
-			"Text",
-			"text",
-			"Text",
-			"text",
-			"telegram_user.update['title']",
-			"text",
-			"Text",
-			"text",
-			"telegram_username",
-			"telegram_user"
+			"_detect_text_image",
+			"_parse_message",
+			"_get_track_price_metatrader",
+			"message:",
+			"_rules_of_signal_swing_trading",
+			"_get_track_price_metatrader",
+			"_check_and_create_database",
+			"_save_database",
+			"pdb.set",
+			"account_type",
+			"pdb",
+			"num",
+			"pdb.set_trace()",
+			"HIST",
+			"send_trackprices_request",
+			"_my_trade['_type']",
+			"TID",
+			"_create_metatrader_order",
+			"pdb.set",
+			"_my_trade['_symbol'])",
+			"_my_trade['_symbol']",
+			"symbol)",
+			"_symbol)",
+			"request_price",
+			"request_decimal",
+			"time.",
+			"_get_track_price_metatrader",
+			"self._zmq.",
+			"self._zmq._generate_default_order_dict()",
+			"_calculete_loss_gain",
+			"while",
+			"decimal",
+			"rates",
+			"hist",
+			"track",
+			"send_trackrates_request",
+			"f'",
+			"DeltaValuePerLot",
+			"MONEY_AT_RISK",
+			"_open_metatrader_order",
+			"print(",
+			"Telegram:",
+			"Telegram",
+			"print",
+			"telegram_message_id",
+			"Text:",
+			"116.75",
+			"self._save_database",
+			"save_database",
+			"telegram_result[",
+			"telegram_result",
+			"_rules_of_signal_m15_signals",
+			"telegram_result",
+			"_save_database",
+			"pdb.set_trace()"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1438,258 +1378,8 @@
 	"groups":
 	[
 		{
-			"selected": 6,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/client.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4254,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								340,
-								340
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "lib/dwyte/v2.0.1b/python/api/dwx/dwx/mq.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 25314,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								24151,
-								24134
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "lib/dwyte/v2.0.1b/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 40460,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7450,
-								7450
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"syntax": "Packages/MetaQuotes (MQL4) Language Package/Syntaxes/MQL4.tmLanguage",
-							"tab_size": 3,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 320.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "lib/signal_001.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6040,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1259,
-								1275
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"open_with_edit": true,
-							"spell_check": true,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 407.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "lib/signal_test.py",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6667,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6656,
-								6656
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"open_with_edit": true,
-							"syntax": "Packages/Python/Python.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1968.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "app/controllers/posts_controller.rb",
-					"semi_transient": true,
-					"settings":
-					{
-						"buffer_size": 1792,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"syntax": "Packages/Ruby/Ruby.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "config/routes.rb",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 363,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								130,
-								130
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"syntax": "Packages/Ruby/Ruby.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "lib/database.json",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1170,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"git_gutter_is_enabled": true,
-							"syntax": "Packages/JavaScript/JSON.sublime-syntax"
-						},
-						"translation.x": 5.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				}
 			]
 		}
 	],
@@ -1758,6 +1448,122 @@
 		"selected_items":
 		[
 			[
+				"foo",
+				"app/dashboards/foo_dashboard.rb"
+			],
+			[
+				"gem",
+				"Gemfile"
+			],
+			[
+				"deve",
+				"config/environments/development.rb"
+			],
+			[
+				"da",
+				"lib/signal/database.json"
+			],
+			[
+				"data",
+				"lib/signal/database.json"
+			],
+			[
+				"telegram",
+				"app/models/apisocial/telegram.rb"
+			],
+			[
+				"telegram api",
+				"lib/telegram_api.rb"
+			],
+			[
+				"sign dhas",
+				"app/dashboards/sign_dashboard.rb"
+			],
+			[
+				"db sign",
+				"db/migrate/20190906031238_create_signs.rb"
+			],
+			[
+				"signs.rb",
+				"app/controllers/api/v1/signs.rb"
+			],
+			[
+				"rename",
+				"lib/venv/lib/python3.8/site-packages/pandas/tests/frame/methods/test_rename.py"
+			],
+			[
+				"seria",
+				"app/serializers/sign_serializer.rb"
+			],
+			[
+				"devo",
+				"config/environments/development.rb"
+			],
+			[
+				"appli",
+				"config/application.rb"
+			],
+			[
+				"db client",
+				"db/migrate/20200901013709_create_clients.rb"
+			],
+			[
+				"route",
+				"config/routes.rb"
+			],
+			[
+				"inf",
+				"config/initializers/inflections.rb"
+			],
+			[
+				"infel",
+				"config/initializers/inflections.rb"
+			],
+			[
+				"transc",
+				"db/migrate/20200830222803_create_transactions.rb"
+			],
+			[
+				"trans",
+				"app/models/transaction.rb"
+			],
+			[
+				"transac",
+				"db/migrate/20200830222659_transaction.rb"
+			],
+			[
+				"inflec",
+				"config/initializers/inflections.rb"
+			],
+			[
+				"sign db",
+				"db/migrate/20190906031238_create_signs.rb"
+			],
+			[
+				"devel",
+				"config/environments/development.rb"
+			],
+			[
+				"appl",
+				"config/application.rb"
+			],
+			[
+				"appli contro",
+				"app/controllers/application_controller.rb"
+			],
+			[
+				"app",
+				"config/application.rb"
+			],
+			[
+				"gemf",
+				"Gemfile"
+			],
+			[
+				"navi",
+				"app/views/admin/application/_navigation.html.erb"
+			],
+			[
 				"GEM",
 				"Gemfile"
 			],
@@ -1768,10 +1574,6 @@
 			[
 				"ROUTE",
 				"config/routes.rb"
-			],
-			[
-				"gem",
-				"Gemfile"
 			],
 			[
 				"create signs",
@@ -1816,10 +1618,6 @@
 			[
 				"seeds",
 				"db/seeds.rb"
-			],
-			[
-				"route",
-				"config/routes.rb"
 			],
 			[
 				"pt-b",
@@ -1874,10 +1672,6 @@
 				"app/models/person.rb"
 			],
 			[
-				"gemf",
-				"Gemfile"
-			],
-			[
 				"db/mig / user",
 				"db/migrate/20161218182346_add_storeid_to_users.rb"
 			],
@@ -1900,10 +1694,6 @@
 			[
 				"en",
 				"config/locales/en.yml"
-			],
-			[
-				"appli",
-				"app/controllers/application_controller.rb"
 			],
 			[
 				"proosal contro",
@@ -1968,10 +1758,6 @@
 			[
 				"broker",
 				"app/models/broker.rb"
-			],
-			[
-				"deve",
-				"config/environments/development.rb"
 			],
 			[
 				"builds.js",
@@ -2056,10 +1842,6 @@
 			[
 				"html head",
 				"app/views/layouts/pages/_html_head.html.slim"
-			],
-			[
-				"rename",
-				"db/migrate/20171223001938_rename_proposal_documents_to_documents.rb"
 			],
 			[
 				"select2",
@@ -2176,98 +1958,6 @@
 			[
 				"base contero",
 				"app/controllers/admin/base_controller.rb"
-			],
-			[
-				"base contro",
-				"app/controllers/public/base_controller.rb"
-			],
-			[
-				"build new",
-				"app/views/admin/builds/_new.html.slim"
-			],
-			[
-				"unti form",
-				"app/views/admin/units/_form.html.slim"
-			],
-			[
-				"unit contor",
-				"app/controllers/admin/units_controller.rb"
-			],
-			[
-				"unit contro",
-				"app/controllers/public/units_controller.rb"
-			],
-			[
-				"unti.",
-				"app/models/unit.rb"
-			],
-			[
-				"unit form",
-				"app/views/admin/units/_form.html.slim"
-			],
-			[
-				"proposal form",
-				"app/views/admin/proposals/_form.html.slim"
-			],
-			[
-				"dashboard contor",
-				"app/controllers/public/dashboards_controller.rb"
-			],
-			[
-				"proposal edit",
-				"app/views/admin/proposals/edit.html.slim"
-			],
-			[
-				"scope",
-				"app/views/admin/builds/_scope_proposals.html.slim"
-			],
-			[
-				"admin proposal index",
-				"app/views/admin/proposals/_index.html.slim"
-			],
-			[
-				"admin proposal",
-				"app/models/admin/proposal.rb"
-			],
-			[
-				"activi",
-				"app/models/activity.rb"
-			],
-			[
-				"proposal",
-				"app/models/proposal.rb"
-			],
-			[
-				"appl",
-				"app/controllers/application_controller.rb"
-			],
-			[
-				"unti.rb",
-				"app/models/unit.rb"
-			],
-			[
-				"proposa rb",
-				"app/models/proposal.rb"
-			],
-			[
-				"buyer",
-				"app/models/buyer.rb"
-			],
-			[
-				"proosal",
-				"app/models/proposal.rb"
-			],
-			[
-				"unit.rb",
-				"app/models/unit.rb"
-			],
-			[
-				"prposaol form",
-				"app/views/admin/proposals/_form.html.slim"
-			],
-			[
-				"proposal rb",
-				"app/models/proposal.rb"
 			]
 		],
 		"width": 0.0
@@ -2316,7 +2006,7 @@
 				"ApplicationController"
 			]
 		],
-		"width": 704.0
+		"width": 592.0
 	},
 	"selected_group": 0,
 	"settings":
@@ -2326,7 +2016,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 257.0,
+	"side_bar_width": 440.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

@@ -2,9 +2,9 @@ import pdb
 import sched, time
 import json
 
-from signal_functions import SignalFunction
 from telegram_api.client import Telegram
-from lib.DWX_v2_0_1_RC8_003 import DWX_ZeroMQ_Connector
+from signal_functions_004 import SignalFunction
+from lib.DWX_v2_0_1_RC8_004 import DWX_ZeroMQ_Connector
 
 with open("database.json", "r") as json_file:
 	database = json.load(json_file)
@@ -16,7 +16,7 @@ tg = Telegram(
 	api_hash='03062326232cb23c6770e7a735c2dae2',
 	phone='+5548984222627',
 	database_encryption_key='changeme1234',
-	library_path='/home/bperucchi/.local/lib/python3.7/site-packages/telegram_api/lib/linux/libtdjson_64.so'
+	# library_path='/home/bperucchi/.local/lib/python3.7/site-packages/telegram_api/lib/linux/libtdjson_64.so'
 )
 
 tg.login()
