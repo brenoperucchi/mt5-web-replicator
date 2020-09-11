@@ -75,6 +75,7 @@ class SignalFunction():
 			chat_id = check_chat_id.update['chat_ids'][0]
 		elif 'M15_Signals' in signal_name:
 			# check_chat_id = self._tg.get_chat('-1001490464609')
+			check_chat_id = self._tg.call_method('searchChatsOnServer',   params={'query': 'M15', 'limit':10})
 			check_chat_id = self._tg.get_chat('-1001222448337')
 			check_chat_id.wait()
 			chat_id = check_chat_id.update['id']
