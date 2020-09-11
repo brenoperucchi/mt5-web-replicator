@@ -6,7 +6,7 @@ from telegram_api.client import Telegram
 from signal_functions_004 import SignalFunction
 from lib.DWX_v2_0_1_RC8_004 import DWX_ZeroMQ_Connector
 
-with open("~/app/telegram/lib/signal/database.json", "r") as json_file:
+with open("/home/bperucchi/app/telegram/lib/signal/database.json", "r") as json_file:
 	database = json.load(json_file)
 
 _zmq = DWX_ZeroMQ_Connector(verbose=False)
