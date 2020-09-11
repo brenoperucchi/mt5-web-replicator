@@ -18,7 +18,7 @@ tg = Telegram(
 	api_hash='03062326232cb23c6770e7a735c2dae2',
 	phone='+5548984222627',
 	database_encryption_key='changeme1234',
-	library_path='lib/libtdjson_64.so'
+	library_path='/home/bperucchi/app/telegram/lib/signal/lib/libtdjson_64.so'
 )
 
 tg.login()
