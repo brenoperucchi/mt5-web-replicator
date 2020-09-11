@@ -47,7 +47,8 @@ module API
             open_at: params[:open_at],
             context: params[:context],
             response: params[:response],
-            response_value: params[:response_value]
+            response_value: params[:response_value],
+            environment: params[:environment]
           })
         end
 

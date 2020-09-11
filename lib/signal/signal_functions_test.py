@@ -17,12 +17,14 @@ from lib.ocr_local import detect_text_local
 
 class SignalFunction():
 
-	def __init__(self, sc, tg, _zmq, database, signal):
+	def __init__(self, sc, tg, _zmq, database, signal, metatrader_url, environment):
 		self._sc = sc
 		self._tg = tg
 		self._zmq = _zmq
 		self._database = database
 		self._signal = signal
+		self._metatrader_url = metatrader_url
+		self._environment = environment
 		self._signal_image = False
 
 
@@ -199,9 +201,10 @@ class SignalFunction():
 			'open_at':response.get('_open_time'),
 			'context': " ".join(message),
 			'response':response.get('_response'),
-			'response_value':response.get('response_value')
+			'response_value':response.get('response_value'),
+			'environment': self._environment
 		 }
-		r = requests.post('http://localhost/api/v1/signs',data = pload)
+		r = requests.post(self._metatrader_url ,data = pload)
 		print('Response API :', r.text)
 
 	def _rules_of_signal_technical(self, telegram_message_id, message, chat_id):

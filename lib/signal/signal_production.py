@@ -10,22 +10,25 @@ with open("database.json", "r") as json_file:
 	database = json.load(json_file)
 
 _zmq = DWX_ZeroMQ_Connector(verbose=False)
+METATRADER_URL = "http://benincasouza.tplinkdns.com:8080/api/v1/signs"
+ENVIRONMENT = 'production'
 
 tg = Telegram(
 	api_id='980209',
 	api_hash='03062326232cb23c6770e7a735c2dae2',
 	phone='+5548984222627',
 	database_encryption_key='changeme1234',
+	# library_path='/home/bperucchi/anaconda3/lib/python3.8/site-packages/telegram_api/lib/linux/libtdjson_64.so'
 	# library_path='/home/bperucchi/.local/lib/python3.7/site-packages/telegram_api/lib/linux/libtdjson_64.so'
 )
 
 tg.login()
 
 def signals(sc):
-	# SignalFunction(sc, tg, _zmq, database, 'technical').prepare_signal()
-	SignalFunction(sc, tg, _zmq, database, 'swing_trading').prepare_signal()
-	SignalFunction(sc, tg, _zmq, database, 'M15_Signals').prepare_signal()
-	# SignalFunction(sc, tg, _zmq, database, 'test').prepare_signal()
+	# SignalFunction(sc, tg, _zmq, database, 'technical', METATRADER_URL, ENVIRONMENT).prepare_signal()
+	SignalFunction(sc, tg, _zmq, database, 'swing_trading', METATRADER_URL, ENVIRONMENT).prepare_signal()
+	SignalFunction(sc, tg, _zmq, database, 'M15_Signals', METATRADER_URL, ENVIRONMENT).prepare_signal()
+	# SignalFunction(sc, tg, _zmq, database, 'test', METATRADER_URL, ENVIRONMENT).prepare_signal()
 	s.enter(3, 1, signals, (sc,))
 
 s = sched.scheduler(time.time, time.sleep)
