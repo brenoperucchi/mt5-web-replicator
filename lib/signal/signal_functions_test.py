@@ -146,14 +146,14 @@ class SignalFunction():
 			return False
 
 	def _create_metatrader_order(self, _my_trade, chat_id, message):
-		try:
+		# try:
 			self._zmq.new_trade(_order=_my_trade)
 			self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
 			print('Create Meta Trader Order: ', self._telegram_username, 'My_Trade: ', _my_trade)
-		except: 
-			e = sys.exc_info()[0]
-			print(f"Error Create MetaTrader Order: {_my_trade} / Excpetion: {e}")
-			return
+		# except: 
+		# 	e = sys.exc_info()[0]
+		# 	print(f"Error Create MetaTrader Order: {_my_trade} / Excpetion: {e}")
+		# 	return
 
 	def _detect_text_image(self, remote_file_id, timer = 0.5):
 		timer = timer + 0.5
