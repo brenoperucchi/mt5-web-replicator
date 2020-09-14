@@ -3,7 +3,7 @@ import sched, time
 import json
 
 from telegram_api.client import Telegram
-from signal_functions_test import SignalFunction
+from functions.signal_functions_test import SignalFunction
 from lib.DWX_v2_0_1_RC8_Test import DWX_ZeroMQ_Connector
 
 with open("database.json", "r") as json_file:

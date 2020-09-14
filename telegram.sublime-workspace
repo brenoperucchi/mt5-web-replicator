@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"lib",
+				"library_path"
+			],
+			[
 				"_price",
 				"_price_request"
 			],
@@ -510,10 +514,6 @@
 			[
 				"pr",
 				"proposal"
-			],
-			[
-				"de",
-				"des\tdescribe 'description' do … end"
 			]
 		]
 	},
@@ -531,6 +531,14 @@
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"dupl",
+				"File: Duplicate"
+			],
+			[
+				"rename",
+				"File: Rename"
+			],
 			[
 				"install",
 				"Package Control: Install Package"
@@ -556,16 +564,8 @@
 				"File: Delete"
 			],
 			[
-				"dupl",
-				"File: Duplicate"
-			],
-			[
 				"delete",
 				"File: Delete"
-			],
-			[
-				"rename",
-				"File: Rename"
 			],
 			[
 				"rails",
@@ -1073,25 +1073,26 @@
 		"/Users/brenoperucchi/Devs/telegram/lib",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/__pycache__",
-		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib",
-		"/Users/brenoperucchi/Devs/telegram/vendor",
-		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master",
-		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1",
-		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4",
-		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/python"
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib"
 	],
 	"file_history":
 	[
-		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_production.py",
-		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions_004.py",
-		"/Users/brenoperucchi/Devs/telegram/lib/signal/database.json",
-		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/Signal-004.mq4",
 		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/Signal-test.mq4",
-		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/Signal-005.mq4",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_production.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions_test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions_004.py",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/Signal-004.mq4",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/DWX_v2_0_1_RC8_004.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/DWX_v2_0_1_RC8_Test.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/ocr_google.py",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/requirements.txt",
+		"/Users/brenoperucchi/Devs/telegram/.gitignore",
+		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/v1/signs.rb",
+		"/Users/brenoperucchi/Devs/telegram/db/migrate/20200911035003_add_environment_to_sign.rb",
+		"/Users/brenoperucchi/Devs/telegram/lib/signal/database.json",
+		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector-master/v2.0.1/mql4/DWX_ZeroMQ_Server_v2.0.1_RC8.mq4",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_003.py",
 		"/Users/brenoperucchi/Devs/telegram/config/application.rb",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_functions.py",
@@ -1099,9 +1100,7 @@
 		"/Users/brenoperucchi/Devs/telegram/Gemfile",
 		"/Users/brenoperucchi/Devs/telegram/config/secrets.yml",
 		"/Users/brenoperucchi/Devs/telegram/app/dashboards/foo_dashboard.rb",
-		"/Users/brenoperucchi/Devs/telegram/.gitignore",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/ocr_local.py",
-		"/Users/brenoperucchi/Devs/telegram/lib/signal/lib/ocr_google.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/requirements.txt.",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/ocr.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/DWX_v2_0_1_RC8_003.py",
@@ -1112,7 +1111,6 @@
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/detect.py",
 		"/Users/brenoperucchi/Devs/telegram/vendor/dwx-zeromq-connector/v2.0.1/python/api/DWX_ZeroMQ_Connector_v2_0_1_RC8.py",
 		"/Users/brenoperucchi/Devs/telegram/app/dashboards/sign_dashboard.rb",
-		"/Users/brenoperucchi/Devs/telegram/app/controllers/api/v1/signs.rb",
 		"/Users/brenoperucchi/Devs/telegram/db/migrate/20190906031238_create_signs.rb",
 		"/Users/brenoperucchi/Devs/telegram/lib/signal/signal_001.py",
 		"/Users/brenoperucchi/Devs/telegram/lib/venv/lib/python3.8/site-packages/pandas/tests/frame/methods/test_rename.py",
@@ -1206,10 +1204,7 @@
 		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/config/initializers/better_errors.rb",
 		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/layouts/shards/_nav.html.slim",
 		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161221010724_create_persons.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/brokers/index.html.slim",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/db/migrate/20161213221014_create_units.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/models/person.rb",
-		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/controllers/site/registers_controller.rb"
+		"/Users/brenoperucchi/Google Drive/03-Apps/gestorobra/appweb/app/views/admin/brokers/index.html.slim"
 	],
 	"find":
 	{
@@ -1233,6 +1228,20 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"pdb.set",
+			"_save_database_api",
+			"Calculete_loss_gain",
+			"DWX_OpenOrder",
+			"and",
+			"DWX_OpenOrder",
+			"environment",
+			"ENVIRONMENT",
+			").",
+			"1.7771",
+			"EURNZD",
+			"_create_metatrader_order",
+			"_rules_of_signal_m15_signals",
+			"_check_and_create_database",
 			"signal_functions",
 			"# market_price = self._get_track_price_metatrader(_my_trade['_symbol'])",
 			"_calculete_loss_gain",
@@ -1346,21 +1355,7 @@
 			"DeltaValuePerLot",
 			"MONEY_AT_RISK",
 			"_open_metatrader_order",
-			"print(",
-			"Telegram:",
-			"Telegram",
-			"print",
-			"telegram_message_id",
-			"Text:",
-			"116.75",
-			"self._save_database",
-			"save_database",
-			"telegram_result[",
-			"telegram_result",
-			"_rules_of_signal_m15_signals",
-			"telegram_result",
-			"_save_database",
-			"pdb.set_trace()"
+			"print("
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1448,6 +1443,18 @@
 		"selected_items":
 		[
 			[
+				"addt",
+				"db/migrate/20200911035003_add_environment_to_sign.rb"
+			],
+			[
+				"api/v1",
+				"app/controllers/api/v1/signs.rb"
+			],
+			[
+				"data",
+				"lib/signal/database.json"
+			],
+			[
 				"foo",
 				"app/dashboards/foo_dashboard.rb"
 			],
@@ -1461,10 +1468,6 @@
 			],
 			[
 				"da",
-				"lib/signal/database.json"
-			],
-			[
-				"data",
 				"lib/signal/database.json"
 			],
 			[
@@ -1949,14 +1952,6 @@
 			],
 			[
 				"base contr",
-				"app/controllers/admin/base_controller.rb"
-			],
-			[
-				"user",
-				"app/models/user.rb"
-			],
-			[
-				"base contero",
 				"app/controllers/admin/base_controller.rb"
 			]
 		],

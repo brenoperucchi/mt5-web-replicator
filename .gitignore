@@ -10,6 +10,7 @@ lib/signal/__pycache__/
 lib/signal/lib/__pycache__/
 database.json
 *.pyc
+*.DS_Store
 
 # Ignore bundler config.
 /.bundle
