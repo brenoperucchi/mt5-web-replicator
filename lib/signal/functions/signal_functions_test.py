@@ -248,6 +248,7 @@ class SignalFunction():
 			_my_trade['_tid'] = 1
 		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1)
 
+		_my_trade['_lots'] = 0.02
 		_my_trade['_price'] = price_request
 		_my_trade['_SL'] = re.sub("SL ", "", message[5])
 		_my_trade['_TP'] = re.sub("TP ", "", message[2])
