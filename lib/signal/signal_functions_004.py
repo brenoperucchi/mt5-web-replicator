@@ -85,9 +85,9 @@ class SignalFunction():
 			# chat_id = 487330707 #- Breno Perucchi
 			# chat_id = -481414224 # RoboSignalGroup
 			# signal_name = 'technical'
-			# signal_name = 'swing_trading'
-			signal_name = 'M15_Signals'
-			self._signal_image = True
+			signal_name = 'swing_trading'
+			# signal_name = 'M15_Signals'
+			# self._signal_image = True
 			check_chat_id = self._tg.call_method('searchChatsOnServer',   params={'query': 'RoboSignal', 'limit':10})
 			check_chat_id.wait()
 			chat_id = check_chat_id.update['chat_ids'][0]
@@ -223,8 +223,8 @@ class SignalFunction():
 		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1)
 		
 		_my_trade['_price'] = price_request
-		_my_trade['_SL'] = re.search(r"[\d]+[.,\d]+", message[2])
-		_my_trade['_TP'] = re.search(r"[\d]+[.,\d]+", message[3])
+		_my_trade['_SL'] = re.search(r"[\d]+[.,\d]+", message[2]).group(1).strip()
+		_my_trade['_TP'] = re.search(r"[\d]+[.,\d]+", message[3]).group(1).strip()
 		_my_trade['_comment'] = self._telegram_username
 		return _my_trade
 
@@ -238,8 +238,8 @@ class SignalFunction():
 		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1).upper()
 
 		_my_trade['_price'] = price_request
-		_my_trade['_SL'] = regex.search(r'\Sl @(.*?$)',  message[1])
-		_my_trade['_TP'] = regex.search(r'\Tp1 @(.*?$)', message[2])
+		_my_trade['_SL'] = regex.search(r'\Sl @(.*?$)',  message[1]).group(1).strip()
+		_my_trade['_TP'] = regex.search(r'\Tp1 @(.*?$)', message[2]).group(1).strip()
 		print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 		_my_trade['_comment'] = self._telegram_username
 		return _my_trade	
@@ -251,7 +251,7 @@ class SignalFunction():
 			_my_trade['_tid'] = 0
 		elif 'SELL' in message[0]:
 			_my_trade['_tid'] = 1
-		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1)
+		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1).strip()
 
 		_my_trade['_lots'] = 0.02
 		_my_trade['_price'] = price_request
