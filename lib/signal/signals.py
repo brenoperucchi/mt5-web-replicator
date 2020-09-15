@@ -50,7 +50,7 @@ elif args['environment'].lower() == 'production':
 	PHONE_NUMBER = '+5548984222627'
 	DATABASE_ENCRYPT = 'changeme1234'
 	LIBRARY_PATH = '/home/bperucchi/app/telegram/lib/signal/lib/libtdjson_64.so'
-	DATABASE_PATH = "/home/brenoperucchi/app/telegram/lib/signal/database.json"
+	DATABASE_PATH = '/home/bperucchi/app/telegram/lib/signal/database.json'
 
 
 with open(DATABASE_PATH, "r") as json_file:
