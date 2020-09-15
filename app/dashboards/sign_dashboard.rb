@@ -27,6 +27,7 @@ class SignDashboard < Administrate::BaseDashboard
     context: Field::String,
     response: Field::String,
     response_value: Field::String,
+    environment: Field::String,
     service_id: Field::Number,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
@@ -64,6 +65,7 @@ class SignDashboard < Administrate::BaseDashboard
   context
   response
   response_value
+  environment
   created_at
   updated_at
   ].freeze

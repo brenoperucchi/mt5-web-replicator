@@ -17,13 +17,13 @@ from lib.ocr_local import detect_text_local
 
 class SignalFunction():
 
-	def __init__(self, sc, tg, _zmq, database, signal, metatrader_url, environment):
+	def __init__(self, sc, tg, _zmq, database, signal, api_url, environment):
 		self._sc = sc
 		self._tg = tg
 		self._zmq = _zmq
 		self._database = database
 		self._signal = signal
-		self._metatrader_url = metatrader_url
+		self._api_url = api_url
 		self._environment = environment
 		self._signal_image = False
 
@@ -146,14 +146,14 @@ class SignalFunction():
 			return False
 
 	def _create_metatrader_order(self, _my_trade, chat_id, message):
-		try:
-			self._zmq.new_trade(_order=_my_trade)
-			self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
-			print('Create Meta Trader Order: ', self._telegram_username, 'My_Trade: ', _my_trade)
-		except: 
-			e = sys.exc_info()[0]
-			print(f"Error Create MetaTrader Order: {_my_trade} / Excpetion: {e}")
-			return
+		# try:
+		self._zmq.new_trade(_order=_my_trade)
+		self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
+		print('Create Meta Trader Order: ', self._telegram_username, 'My_Trade: ', _my_trade)
+		# except: 
+		# 	e = sys.exc_info()[0]
+		# 	print(f"Error Create MetaTrader Order: {_my_trade} / Excpetion: {e}")
+		# 	return
 
 	def _detect_text_image(self, remote_file_id, timer = 0.5):
 		timer = timer + 0.5
@@ -184,29 +184,34 @@ class SignalFunction():
 
 	def _save_database_api(self, _my_trade, chat_id, message, telegram_username):
 		response = None
+		timer = 0
 		while(response == None):
-			 response = self._zmq._get_response_()
-		pload = {
-			'provider': chat_id,
-			'provider_name': telegram_username,
-			'symbol':_my_trade['_symbol'],
-			'action':response['_action'],
-			'kind': _my_trade['_tid'],
-			'price_request': _my_trade['_price'],
-			'price_open': response.get('_open_price'),
-			'stop_loss': response.get('_sl'),
-			'take_profit_1': response.get('_tp'),
-			'comment': _my_trade['_comment'],
-			'magic':response.get('_magic'),
-			'ticket':response.get('_ticket'),
-			'open_at':response.get('_open_time'),
-			'context': " ".join(message),
-			'response':response.get('_response'),
-			'response_value':response.get('response_value'),
-			'environment': self._environment
-		 }
-		r = requests.post(self._metatrader_url ,data = pload)
-		print('Response API :', r.text)
+			timer = timer + 0.5
+			time.sleep(timer)
+			response = self._zmq._get_response_()
+			if(timer == 2): break
+		if response:
+			pload = {
+				'provider': chat_id,
+				'provider_name': telegram_username,
+				'symbol':_my_trade['_symbol'],
+				'action':response['_action'],
+				'kind': _my_trade['_tid'],
+				'price_request': _my_trade['_price'],
+				'price_open': response.get('_open_price'),
+				'stop_loss': response.get('_sl'),
+				'take_profit_1': response.get('_tp'),
+				'comment': _my_trade['_comment'],
+				'magic':response.get('_magic'),
+				'ticket':response.get('_ticket'),
+				'open_at':response.get('_open_time'),
+				'context': " ".join(message),
+				'response':response.get('_response'),
+				'response_value':response.get('response_value'),
+				'environment': self._environment
+			 }
+			r = requests.post(self._api_url ,data = pload)
+			print('Response API :', r.text)
 
 	def _rules_of_signal_technical(self, telegram_message_id, message, chat_id):
 		_my_trade = self._zmq.generate_default_order_dict()
