@@ -14,7 +14,7 @@ args = vars(ap.parse_args())
 
 if args['environment'].lower() == 'development':
 	API_URL = "http://benincasouza.tplinkdns.com:8080/api/v1/signs"
-	METATRADER_HOST = 'benincasouza.tplinkdns.com'
+	METATRADER_HOST = 'metaserver.imentore.com.br'
 	ENVIRONMENT = 'development'
 	SIGNALS = ['test']
 	PORTS = [33001, 33002, 33003]
@@ -23,7 +23,7 @@ if args['environment'].lower() == 'development':
 	PHONE_NUMBER = '+5548991268808'
 	DATABASE_ENCRYPT = 'changeme1234'
 	LIBRARY_PATH = '/home/bperucchi/app/telegram/lib/signal/lib/libtdjson_64.so'
-	DATABASE_PATH = "/home/brenoperucchi/app/telegram/lib/signal/database.json"
+	DATABASE_PATH = '/home/bperucchi/app/telegram/lib/signal/database.json'
 
 elif args['environment'].lower() == 'local':
 	API_URL = "http://localhost/api/v1/signs"
