@@ -40,7 +40,7 @@ elif args['environment'].lower() == 'local':
 
 elif args['environment'].lower() == 'production':
 	API_URL = "http://benincasouza.tplinkdns.com:8080/api/v1/signs"
-	METATRADER_HOST = 'benincasouza.tplinkdns.com'
+	METATRADER_HOST = 'metaserver.imentore.com.br'
 	ENVIRONMENT = 'production'
 	# signals = ['technical', 'swing_trading', 'M15_Signals']
 	SIGNALS = ['swing_trading', 'M15_Signals']
