@@ -17,7 +17,7 @@ if args['environment'].lower() == 'development':
 	METATRADER_HOST = 'metaserver.imentore.com.br'
 	ENVIRONMENT = 'development'
 	SIGNALS = ['test']
-	PORTS = [33001, 33002, 33003]
+	PORTS = [32768, 32769, 32770]
 	API_ID = '1478090'
 	API_HASH = '04c2afe8f6dd37450e69a9ece6dce187'
 	PHONE_NUMBER = '+5548991268808'
@@ -27,9 +27,9 @@ if args['environment'].lower() == 'development':
 
 elif args['environment'].lower() == 'local':
 	API_URL = "http://localhost/api/v1/signs"
-	METATRADER_HOST = '192.168.1.245'
-	ENVIRONMENT = 'development'
-	PORTS = [33001, 33002, 33003]
+	METATRADER_HOST = 'metaserver.imentore.com.br'
+	ENVIRONMENT = 'local'
+	PORTS = [32768, 32769, 32770]
 	SIGNALS = ['test']
 	API_ID = '1478090'
 	API_HASH = '04c2afe8f6dd37450e69a9ece6dce187'
