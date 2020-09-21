@@ -14,18 +14,20 @@ import pytesseract
 from decimal import *
 from lib.ocr_google import detect_text_google
 from lib.ocr_local import detect_text_local
+from lib.DWX_v2_0_1_RC8_004 import DWX_ZeroMQ_Connector
 
 class SignalFunction():
 
-	def __init__(self, sc, tg, _zmq, database, signal, api_url, environment):
+	def __init__(self, sc, tg, database, signal, api_url, environment, meta_host, meta_ports):
 		self._sc = sc
 		self._tg = tg
-		self._zmq = _zmq
 		self._database = database
 		self._signal = signal
 		self._api_url = api_url
 		self._environment = environment
 		self._signal_image = False
+		self._meta_host = meta_host
+		self._meta_ports = meta_ports
 
 
 	def _deEmojify(self, message):
@@ -54,6 +56,7 @@ class SignalFunction():
 			})
 		with open("database.json", "w") as outfile:
 			json.dump(database, outfile)
+			outfile.close()
 
 	def _check_and_create_database(self, chat_id, database):
 		if not (str(chat_id) in database['telegram'].keys()):
@@ -109,11 +112,13 @@ class SignalFunction():
 				#Call Polymorphic Function
 				# _my_trade = getattr(sys.modules[__name__], ('rules_of_signal_'+ signal_name.lower()))(telegram_message_id, message, telegram_username, chat_id)
 				try:
+					self._zmq = DWX_ZeroMQ_Connector(host=self._meta_host, push_port=self._meta_ports[0], pull_port=self._meta_ports[1], sub_port=self._meta_ports[2])
 					_my_trade = getattr(self, '_' + ('rules_of_signal_'+ signal_name.lower()))(telegram_message_id, message, chat_id)
 				except Exception as e:
 					print(f"Error Prepare Signal / Function {('rules_of_signal_'+ signal_name.lower())} / Exception: {e}")
 					return
 				self._create_metatrader_order(_my_trade, chat_id, message)
+				self._zmq.zmq_shutdown()
 	
 	def _parse_message_get_check(self, message):
 		if self._signal_image and 'photo' in message['messages'][0]['content'].keys():

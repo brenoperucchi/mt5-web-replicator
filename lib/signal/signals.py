@@ -5,7 +5,6 @@ import json
 
 from telegram_api.client import Telegram
 from signal_functions_004 import SignalFunction
-from lib.DWX_v2_0_1_RC8_004 import DWX_ZeroMQ_Connector
 
 
 ap = argparse.ArgumentParser()
@@ -14,10 +13,10 @@ args = vars(ap.parse_args())
 
 if args['environment'].lower() == 'development':
 	API_URL = "http://benincasouza.tplinkdns.com:8080/api/v1/signs"
-	METATRADER_HOST = 'metaserver.imentore.com.br'
+	META_HOST = 'metaserver.imentore.com.br'
 	ENVIRONMENT = 'development'
 	SIGNALS = ['test']
-	PORTS = [32768, 32769, 32770]
+	META_PORTS = [32768, 32769, 32770]
 	API_ID = '1478090'
 	API_HASH = '04c2afe8f6dd37450e69a9ece6dce187'
 	PHONE_NUMBER = '+5548991268808'
@@ -27,9 +26,9 @@ if args['environment'].lower() == 'development':
 
 elif args['environment'].lower() == 'local':
 	API_URL = "http://localhost/api/v1/signs"
-	METATRADER_HOST = 'metaserver.imentore.com.br'
+	META_HOST = 'metaserver.imentore.com.br'
 	ENVIRONMENT = 'local'
-	PORTS = [32768, 32769, 32770]
+	META_PORTS = [32768, 32769, 32770]
 	SIGNALS = ['test']
 	API_ID = '1478090'
 	API_HASH = '04c2afe8f6dd37450e69a9ece6dce187'
@@ -40,11 +39,11 @@ elif args['environment'].lower() == 'local':
 
 elif args['environment'].lower() == 'production':
 	API_URL = "http://benincasouza.tplinkdns.com:8080/api/v1/signs"
-	METATRADER_HOST = 'metaserver.imentore.com.br'
+	META_HOST = 'metaserver.imentore.com.br'
 	ENVIRONMENT = 'production'
 	# signals = ['technical', 'swing_trading', 'M15_Signals']
 	SIGNALS = ['swing_trading', 'M15_Signals']
-	PORTS = [32768, 32769, 32770]
+	META_PORTS = [32768, 32769, 32770]
 	API_ID = '980209'
 	API_HASH = '03062326232cb23c6770e7a735c2dae2'
 	PHONE_NUMBER = '+5548984222627'
@@ -57,13 +56,11 @@ with open(DATABASE_PATH, "r") as json_file:
 	database = json.load(json_file)
 
 tg = Telegram(api_id=API_ID, api_hash=API_HASH, phone=PHONE_NUMBER, database_encryption_key=DATABASE_ENCRYPT, library_path= LIBRARY_PATH)
-_zmq = DWX_ZeroMQ_Connector(host=METATRADER_HOST, push_port=PORTS[0], pull_port=PORTS[1], sub_port=PORTS[2])
-
 tg.login()
 
 def signals(sc):
 	for i in range(len(SIGNALS)):
-		SignalFunction(sc, tg, _zmq, database, SIGNALS[i], API_URL, ENVIRONMENT).prepare_signal()
+		SignalFunction(sc, tg, database, SIGNALS[i], API_URL, ENVIRONMENT, META_HOST, META_PORTS).prepare_signal()
 	s.enter(3, 1, signals, (sc,))
 
 s = sched.scheduler(time.time, time.sleep)
