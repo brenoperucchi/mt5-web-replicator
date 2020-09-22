@@ -4,7 +4,7 @@ import requests
 import re
 import sys
 import regex
-import time
+import time, datetime
 try:
     from PIL import Image
 except ImportError:
@@ -106,6 +106,8 @@ class SignalFunction():
 		telegram_message_id = telegram_message['messages'][0]['id']
 
 		if not any(d.get('message_id') == telegram_message_id for d in self._database['telegram'].get(str(chat_id), [] )):
+			print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
 			self._save_database(self._database, telegram_message_id, signal_name, telegram_message, chat_id)
 			message = self._parse_message(telegram_message)
 			if(message):
@@ -116,6 +118,7 @@ class SignalFunction():
 					_my_trade = getattr(self, '_' + ('rules_of_signal_'+ signal_name.lower()))(telegram_message_id, message, chat_id)
 				except Exception as e:
 					print(f"Error Prepare Signal / Function {('rules_of_signal_'+ signal_name.lower())} / Exception: {e}")
+					self._zmq.zmq_shutdown()
 					return
 				self._create_metatrader_order(_my_trade, chat_id, message)
 				self._zmq.zmq_shutdown()
@@ -135,57 +138,68 @@ class SignalFunction():
 
 	def _parse_message(self, message):
 		remote_file_id, message = self._parse_message_get_check(message)
-		try:
-			if(('BUY' in message.upper() or "SELL" in message.upper()) and 'NONE' not in message.upper()):
-				if remote_file_id:
-					symbol = self._detect_text_image(remote_file_id)
-					message = F'{symbol} {message}'
-				message = self._deEmojify(message)
-				message = re.split(r'\n', message)
-				print('Telegram Message:', self._telegram_username, ' Text: ', message)
-				return message
-			else:
-				False
-		except Exception as e:
-			print(f'Error Parse Message: {message} exception: {e}')
-			return False
+		# try:
+		if(('BUY' in message.upper() or "SELL" in message.upper()) and 'NONE' not in message.upper()):
+			if remote_file_id:
+				symbol = self._detect_text_image(remote_file_id)
+				message = F'{symbol} {message}'
+			message = self._deEmojify(message)
+			message = re.split(r'\n', message)
+			print('Telegram Message:', self._telegram_username, ' Text: ', message)
+			return message
+		# 	else:
+		# 		False
+		# except Exception as e:
+		# 	print(f'Error Parse Message: {message} exception: {e}')
+		# 	return False
 
 	def _create_metatrader_order(self, _my_trade, chat_id, message):
 		# try:
+		timer = 0.5
+		response = {}
 		self._zmq.new_trade(_order=_my_trade)
-		self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
-		print('Create Meta Trader Order: ', self._telegram_username, 'My_Trade: ', _my_trade)
+
+		while(len(response) == 0):
+			timer = timer + 0.5
+			time.sleep(timer)
+			response = self._zmq._get_response_()
+			if(timer == 2): break
+		if not response.get('_response'): 
+			self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
+			print('Create meta trader order: ', self._telegram_username)
+			print('my_Trade: ', _my_trade)
+			print("ENDED TIME:", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+		else:
+			print('Error Create Order: ', response.get('_response_value'), '_response: ', response.get('_response'))
+			print('my_Trade: ', _my_trade)
+			print("ENDED TIME:", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 		# except: 
 		# 	e = sys.exc_info()[0]
 		# 	print(f"Error Create MetaTrader Order: {_my_trade} / Excpetion: {e}")
 		# 	return
 
-	def _detect_text_image(self, remote_file_id, timer = 0.5):
-		timer = timer + 0.5
-		try:
-			remote_file = self._tg.call_method('getRemoteFile', params={'remote_file_id': remote_file_id})
-			time.sleep(timer)
-			remote_file.update
-			file_id = remote_file.update['id']
-			file = self._tg.call_method('downloadFile', params={'file_id': file_id, 'priority': 1, 'offset':0, 'limit':10, 'synchronous':True})
-			time.sleep(timer)
-			path = file.update['local']['path']
-			if timer < 1.5:
+	def _detect_text_image(self, remote_file_id, timer = 1):
+		while True:
+			try:
+				remote_file = self._tg.call_method('getRemoteFile', params={'remote_file_id': remote_file_id})
+				time.sleep(timer)
+				remote_file.update
+				time.sleep(timer)
+				file_id = remote_file.update['id']
+				file = self._tg.call_method('downloadFile', params={'file_id': file_id, 'priority': 1, 'offset':0, 'limit':10, 'synchronous':True})
+				time.sleep(timer)
+				path = file.update['local']['path']
+				time.sleep(timer)
+			except Exception as e:
+					print(f"Detect Text Error / Remote File Id: {remote_file_id} / Exception: {e}")
+			else:
 				message = detect_text_local(path)
 				print("Detect Text Local :", message)
-			else:
-				message = detect_text_google(path)
-				print("Detect Text Google :", message)
-			if not len(message) == 0:
-				return message
-			else:
-				return self._detect_text_image(remote_file_id, timer)
-		except Exception as e:
-			print(f"Detect Text Error / Remote File Id :{remote_file_id} / Exception :{e}")
-			if timer < 3:
-				return self._detect_text_image(remote_file_id, timer)
-			else:
-				return 
+				if(len(message) == 0):
+					message = detect_text_google(path)
+					print("Detect Text Google :", message)
+				break
+		return message
 
 	def _save_database_api(self, _my_trade, chat_id, message, telegram_username):
 		response = None

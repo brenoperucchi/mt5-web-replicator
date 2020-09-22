@@ -10,7 +10,7 @@ pandas==1.1.1
 Pillow==7.2.0
 pytesseract==0.3.6
 python-dateutil==2.8.1
-python-telegram @ git+git://github.com/thaije/python-telegram.git@fa61b1b400f91cc94c1916905976ec892f7d9dbb
+python-telegram==0.12.0
 pytz==2020.1
 pyzmq==19.0.2
 regex==2020.7.14

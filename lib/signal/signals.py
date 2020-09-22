@@ -1,9 +1,9 @@
 import argparse
 import pdb
-import sched, time
+import sched, time, datetime
 import json
 
-from telegram_api.client import Telegram
+from telegram.client import Telegram
 from signal_functions_004 import SignalFunction
 
 
@@ -26,7 +26,7 @@ if args['environment'].lower() == 'development':
 
 elif args['environment'].lower() == 'local':
 	API_URL = "http://localhost/api/v1/signs"
-	META_HOST = 'metaserver.imentore.com.br'
+	META_HOST = '192.168.1.245'
 	ENVIRONMENT = 'local'
 	META_PORTS = [32768, 32769, 32770]
 	SIGNALS = ['test']
@@ -56,10 +56,11 @@ with open(DATABASE_PATH, "r") as json_file:
 	database = json.load(json_file)
 
 tg = Telegram(api_id=API_ID, api_hash=API_HASH, phone=PHONE_NUMBER, database_encryption_key=DATABASE_ENCRYPT, library_path= LIBRARY_PATH)
-tg.login()
+
 
 def signals(sc):
 	for i in range(len(SIGNALS)):
+		tg.login()
 		SignalFunction(sc, tg, database, SIGNALS[i], API_URL, ENVIRONMENT, META_HOST, META_PORTS).prepare_signal()
 	s.enter(3, 1, signals, (sc,))
 
