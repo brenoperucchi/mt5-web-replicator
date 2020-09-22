@@ -160,8 +160,10 @@ class SignalFunction():
 		while(True):
 			timer = timer + 0.5
 			time.sleep(timer)
+			print("Timer :", timer)
 			response = self._zmq._get_response_()
-			if(timer == 2 or response != None): break
+			if(response != None): break
+			# if(timer == 2 or response != None): break
 		if not response.get('_response'): 
 			self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
 			print('Create meta trader order: ', self._telegram_username)
