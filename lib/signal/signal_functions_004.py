@@ -55,7 +55,7 @@ class SignalFunction():
 			database['telegram'][str(chat_id)].append({
 				"message_id": telegram_message_id, "signal_name": signal_name, "message_text": telegram_result['messages'][0]['content']
 			})
-		with open(self.database_path, "w") as outfile:
+		with open(self._database_path, "w") as outfile:
 			json.dump(database, outfile)
 			outfile.close()
 
