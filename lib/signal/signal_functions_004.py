@@ -98,8 +98,6 @@ class SignalFunction():
 		else:
 			print('Error Signal Name')
 			return 
-		print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-		print("Chat ID:", chat_id, "Database: ", self._database)
 
 		self._check_and_create_database(chat_id, self._database)
 		telegram_user = self._tg.get_chat(chat_id)
@@ -109,6 +107,9 @@ class SignalFunction():
 		telegram_message_id = telegram_message['messages'][0]['id']
 
 		if not any(d.get('message_id') == telegram_message_id for d in self._database['telegram'].get(str(chat_id), [] )):
+
+			print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+			print("Chat ID:", chat_id, "Message ID: ", telegram_message_id)
 
 			self._save_database(self._database, telegram_message_id, signal_name, telegram_message, chat_id)
 			message = self._parse_message(telegram_message)
