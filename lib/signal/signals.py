@@ -61,7 +61,7 @@ tg = Telegram(api_id=API_ID, api_hash=API_HASH, phone=PHONE_NUMBER, database_enc
 def signals(sc):
 	for i in range(len(SIGNALS)):
 		tg.login()
-		SignalFunction(sc, tg, database, SIGNALS[i], API_URL, ENVIRONMENT, META_HOST, META_PORTS).prepare_signal()
+		SignalFunction(sc, tg, database, DATABASE_PATH, SIGNALS[i], API_URL, ENVIRONMENT, META_HOST, META_PORTS).prepare_signal()
 	s.enter(3, 1, signals, (sc,))
 
 s = sched.scheduler(time.time, time.sleep)

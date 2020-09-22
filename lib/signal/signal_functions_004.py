@@ -18,10 +18,11 @@ from lib.DWX_v2_0_1_RC8_004 import DWX_ZeroMQ_Connector
 
 class SignalFunction():
 
-	def __init__(self, sc, tg, database, signal, api_url, environment, meta_host, meta_ports):
+	def __init__(self, sc, tg, database, database_path, signal, api_url, environment, meta_host, meta_ports):
 		self._sc = sc
 		self._tg = tg
 		self._database = database
+		self._database_path = database_path
 		self._signal = signal
 		self._api_url = api_url
 		self._environment = environment
@@ -54,7 +55,7 @@ class SignalFunction():
 			database['telegram'][str(chat_id)].append({
 				"message_id": telegram_message_id, "signal_name": signal_name, "message_text": telegram_result['messages'][0]['content']
 			})
-		with open("database.json", "w") as outfile:
+		with open(self.database_path, "w") as outfile:
 			json.dump(database, outfile)
 			outfile.close()
 
@@ -97,6 +98,8 @@ class SignalFunction():
 		else:
 			print('Error Signal Name')
 			return 
+		print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+		print("Chat ID:", chat_id, "Database: ", self._database)
 
 		self._check_and_create_database(chat_id, self._database)
 		telegram_user = self._tg.get_chat(chat_id)
@@ -106,7 +109,6 @@ class SignalFunction():
 		telegram_message_id = telegram_message['messages'][0]['id']
 
 		if not any(d.get('message_id') == telegram_message_id for d in self._database['telegram'].get(str(chat_id), [] )):
-			print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
 			self._save_database(self._database, telegram_message_id, signal_name, telegram_message, chat_id)
 			message = self._parse_message(telegram_message)
