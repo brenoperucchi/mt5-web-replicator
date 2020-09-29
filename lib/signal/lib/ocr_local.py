@@ -14,6 +14,8 @@ def detect_text_local(path):
 		image = Image.open(f"{dir_path}/images/data/output.tiff")
 		text = pytesseract.image_to_string(image)
 		text = re.sub("[^A-Za-z]+", "",  text)
-		return text
 	except Exception as e:
 		print("Error Detect text local: ", e)
+	else:
+		os.remove(f"{dir_path}/images/data/output.tiff")
+		return text

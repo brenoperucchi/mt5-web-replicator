@@ -196,12 +196,12 @@ class SignalFunction():
 			except Exception as e:
 					print(f"Detect Text Error / Remote File Id: {remote_file_id} / Exception: {e}")
 			else:
-				# message = detect_text_local(path)
-				# print("Detect Text Local :", message)
-				# if(len(message) == 0):
-				message = detect_text_google(path)
-				print("Detect Text Google :", message)
-				break
+				message = detect_text_local(path)
+				print("Detect Text Local :", message)
+				if(len(message) == 0):
+					message = detect_text_google(path)
+					print("Detect Text Google :", message)
+					break
 		if (len(message.strip()) < 6 and timer < 1):
 			message = self._detect_text_image(remote_file_id, (timer + 0.5))
 		return message
