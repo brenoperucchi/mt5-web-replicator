@@ -201,6 +201,7 @@ class SignalFunction():
 				# if(len(message) == 0):
 				message = detect_text_google(path)
 				print("Detect Text Google :", message)
+				break
 		if (len(message.strip()) < 6 and timer < 1):
 			message = self._detect_text_image(remote_file_id, (timer + 0.5))
 		return message
