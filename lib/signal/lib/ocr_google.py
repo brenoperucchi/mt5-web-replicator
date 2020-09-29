@@ -37,12 +37,11 @@ def detect_text_google(path):
 
     image = vision.types.Image(content=content)
     response = client.text_detection(image=image)
-    texts = response.text_annotations
+    text = response.text_annotations
     # pdb.set_trace()
-    texts = texts[0].description
-    texts = re.sub(" / ", "",  texts).strip()
-    texts = re.sub("/ ", "",  texts).strip()
-    return texts
+    text = text[0].description
+    text = re.sub("[^A-Za-z]+", "",  text)
+    return text
     if response.error.message:
         raise Exception(
             '{}\nFor more info on error messages, check: '

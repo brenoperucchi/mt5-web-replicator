@@ -3,20 +3,16 @@ import pytesseract
 import argparse
 import cv2
 import os
-import re
-# import pdb
+import re, pdb
+import subprocess
 
 def detect_text_local(path):
-	text = ""
 	try:
-		image = cv2.imread(path)
-		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		gray = cv2.threshold(gray, 0, 255,
-			cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-		text = pytesseract.image_to_string(gray)
-		text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]', '', text)
-		text = text.split("\n")
-		text = list(filter(None, text))
-		text = re.sub(" / ", "",  text[-1]).strip()
-	finally:
+		bashCommand = f"/Users/brenoperucchi/Devs/telegram/lib/signal/images/textcleaner -c '0,140,0,0' -g -t 30 -s 2 -u -p 5 -T {path} /Users/brenoperucchi/Devs/telegram/lib/signal/images/data/output.tiff"
+		output = subprocess.check_output(['bash','-c', bashCommand])
+		image = Image.open("/Users/brenoperucchi/Devs/telegram/lib/signal/images/data/output.tiff")
+		text = pytesseract.image_to_string(image)
+		text = re.sub("[^A-Za-z]+", "",  text)
 		return text
+	except Exception as e:
+		print("Error Detect text local: ", e)

@@ -110,6 +110,7 @@ class SignalFunction():
 
 			print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 			print("Chat ID:", chat_id, "Message ID: ", telegram_message_id)
+			print("Message: ", telegram_message)
 
 			self._save_database(self._database, telegram_message_id, signal_name, telegram_message, chat_id)
 			message = self._parse_message(telegram_message)
@@ -122,9 +123,10 @@ class SignalFunction():
 				except Exception as e:
 					print(f"Error Prepare Signal / Function {('rules_of_signal_'+ signal_name.lower())} / Exception: {e}")
 					self._zmq.zmq_shutdown()
-					return
-				self._create_metatrader_order(_my_trade, chat_id, message)
-				self._zmq.zmq_shutdown()
+				else:
+					if self._verify_information(_my_trade):
+						self._create_metatrader_order(_my_trade, chat_id, message)
+						self._zmq.zmq_shutdown()
 	
 	def _parse_message_get_check(self, message):
 		if self._signal_image and 'photo' in message['messages'][0]['content'].keys():
@@ -174,14 +176,14 @@ class SignalFunction():
 			print("ENDED TIME:", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 		else:
 			print('Error Create Order: ', response.get('_response_value'), '_response: ', response.get('_response'))
-			print('my_Trade: ', _my_trade)
+			print('MY_Trade: ', _my_trade)
 			print("ENDED TIME:", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 		# except: 
 		# 	e = sys.exc_info()[0]
 		# 	print(f"Error Create MetaTrader Order: {_my_trade} / Excpetion: {e}")
 		# 	return
 
-	def _detect_text_image(self, remote_file_id, timer = 1):
+	def _detect_text_image(self, remote_file_id, timer = 0.5):
 		while True:
 			try:
 				remote_file = self._tg.call_method('getRemoteFile', params={'remote_file_id': remote_file_id})
@@ -202,6 +204,8 @@ class SignalFunction():
 					message = detect_text_google(path)
 					print("Detect Text Google :", message)
 				break
+		if (len(message.strip()) < 6 and timer < 1):
+			message = self._detect_text_image(remote_file_id, (timer + 0.5))
 		return message
 
 	def _save_database_api(self, _my_trade, chat_id, message, telegram_username):
@@ -282,3 +286,19 @@ class SignalFunction():
 		print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 		_my_trade['_comment'] = self._telegram_username
 		return _my_trade
+
+
+	def _verify_information(self, _my_trade):
+		check_params = ['_price', '_SL', '_TP']
+		for i in range(len(check_params)):
+			if not self.isfloat(_my_trade[check_params[i]]):
+				return False
+		return True
+
+
+	def isfloat(self, value):
+	  try:
+	    float(value)
+	    return True
+	  except ValueError:
+	    return False

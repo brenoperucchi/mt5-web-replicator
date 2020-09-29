@@ -28,7 +28,7 @@ elif args['environment'].lower() == 'local':
 	API_URL = "http://localhost/api/v1/signs"
 	META_HOST = '192.168.1.245'
 	ENVIRONMENT = 'local'
-	META_PORTS = [32768, 32769, 32770]
+	META_PORTS = [33001, 33002, 33002]
 	SIGNALS = ['test']
 	API_ID = '1478090'
 	API_HASH = '04c2afe8f6dd37450e69a9ece6dce187'
