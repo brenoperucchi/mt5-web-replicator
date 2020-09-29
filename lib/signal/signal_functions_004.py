@@ -89,9 +89,9 @@ class SignalFunction():
 			# chat_id = 487330707 #- Breno Perucchi
 			# chat_id = -481414224 # RoboSignalGroup
 			# signal_name = 'technical'
-			signal_name = 'swing_trading'
-			# signal_name = 'M15_Signals'
-			# self._signal_image = True
+			# signal_name = 'swing_trading'
+			signal_name = 'M15_Signals'
+			self._signal_image = True
 			check_chat_id = self._tg.call_method('searchChatsOnServer',   params={'query': 'RoboSignal', 'limit':10})
 			check_chat_id.wait()
 			chat_id = check_chat_id.update['chat_ids'][0]
@@ -160,16 +160,17 @@ class SignalFunction():
 		self._zmq.new_trade(_order=_my_trade)
 
 		while(True):
-			timer = timer + 0.5
-			time.sleep(timer)
-			print("Timer :", timer)
 			response = self._zmq._get_response_()
-			if(response != None): break
-			# if(timer == 2 or response != None): break
+			if(response != None): 
+				break
+			else:
+				timer += 0.3
+				time.sleep(timer)
+				print("Timer :", timer)
+			if(timer > 2 or response != None): break
 		if not response.get('_response'): 
 			self._save_database_api(_my_trade, chat_id, message, self._telegram_username)
-			print('Create meta trader order: ', self._telegram_username)
-			print('my_Trade: ', _my_trade)
+			print('MY_Trade: ', _my_trade)
 			print("ENDED TIME:", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 		else:
 			print('Error Create Order: ', response.get('_response_value'), '_response: ', response.get('_response'))
