@@ -104,3 +104,4 @@ yarn-debug.log*
 /storage/*
 !/storage/.keep
 lib/signal/database.json
+lib/signal/images/data/output.tiff

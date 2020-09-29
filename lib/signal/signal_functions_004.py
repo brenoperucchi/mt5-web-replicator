@@ -89,9 +89,9 @@ class SignalFunction():
 			# chat_id = 487330707 #- Breno Perucchi
 			# chat_id = -481414224 # RoboSignalGroup
 			# signal_name = 'technical'
-			# signal_name = 'swing_trading'
-			signal_name = 'M15_Signals'
-			self._signal_image = True
+			signal_name = 'swing_trading'
+			# signal_name = 'M15_Signals'
+			# self._signal_image = True
 			check_chat_id = self._tg.call_method('searchChatsOnServer',   params={'query': 'RoboSignal', 'limit':10})
 			check_chat_id.wait()
 			chat_id = check_chat_id.update['chat_ids'][0]
@@ -110,23 +110,20 @@ class SignalFunction():
 
 			print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 			print("Chat ID:", chat_id, "Message ID: ", telegram_message_id)
-			print("Message: ", telegram_message)
 
 			self._save_database(self._database, telegram_message_id, signal_name, telegram_message, chat_id)
 			message = self._parse_message(telegram_message)
+			print("Message: ", message)
 			if(message):
 				#Call Polymorphic Function
 				# _my_trade = getattr(sys.modules[__name__], ('rules_of_signal_'+ signal_name.lower()))(telegram_message_id, message, telegram_username, chat_id)
 				try:
 					self._zmq = DWX_ZeroMQ_Connector(host=self._meta_host, push_port=self._meta_ports[0], pull_port=self._meta_ports[1], sub_port=self._meta_ports[2])
-					_my_trade = getattr(self, '_' + ('rules_of_signal_'+ signal_name.lower()))(telegram_message_id, message, chat_id)
+					getattr(self, '_' + ('rules_of_signal_'+ signal_name.lower()))(telegram_message_id, message, chat_id)
 				except Exception as e:
 					print(f"Error Prepare Signal / Function {('rules_of_signal_'+ signal_name.lower())} / Exception: {e}")
+				finally:
 					self._zmq.zmq_shutdown()
-				else:
-					if self._verify_information(_my_trade):
-						self._create_metatrader_order(_my_trade, chat_id, message)
-						self._zmq.zmq_shutdown()
 	
 	def _parse_message_get_check(self, message):
 		if self._signal_image and 'photo' in message['messages'][0]['content'].keys():
@@ -257,9 +254,9 @@ class SignalFunction():
 	def _rules_of_signal_swing_trading(self, telegram_message_id, message, chat_id):
 		_my_trade = self._zmq.generate_default_order_dict()
 		price_request = regex.search(r'\@(.*?$)', message[0]).group(1).strip()
-		if 'buy' in message[0]:
+		if 'buy' in message[0].lower():
 			_my_trade['_tid'] = 0
-		elif 'sell' in message[0]:
+		elif 'sell' in message[0].lower():
 			_my_trade['_tid'] = 1
 		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1).upper()
 
@@ -268,25 +265,32 @@ class SignalFunction():
 		_my_trade['_TP'] = regex.search(r'\Tp1 @(.*?$)', message[2]).group(1).strip()
 		print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 		_my_trade['_comment'] = self._telegram_username
-		return _my_trade	
+		if self._verify_information(_my_trade):
+			self._create_metatrader_order(_my_trade, chat_id, message)
 
 	def _rules_of_signal_m15_signals(self, telegram_message_id, message, chat_id):
+		take_profit = [re.sub("TP ", "", message[2]), re.sub("TP ", "", message[3])]
+		lots = ['0.02', '0.01']
+
 		_my_trade = self._zmq.generate_default_order_dict()
 		price_request = regex.search(r'\ (.*?$)', message[0]).group(1).split()[1]
-		if 'BUY' in message[0]:
+		if 'buy' in message[0].lower():
 			_my_trade['_tid'] = 0
-		elif 'SELL' in message[0]:
+		elif 'sell' in message[0].lower():
 			_my_trade['_tid'] = 1
 		_my_trade['_symbol'] = regex.search(r'([^\s]+)', message[0]).group(1).strip()
 
-		_my_trade['_lots'] = 0.02
+		# _my_trade['_lots'] = 0.02
 		_my_trade['_price'] = price_request
 		_my_trade['_SL'] = re.sub("SL ", "", message[5])
-		_my_trade['_TP'] = re.sub("TP ", "", message[2])
-		print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 		_my_trade['_comment'] = self._telegram_username
-		return _my_trade
-
+		# _my_trade['_TP'] = re.sub("TP ", "", message[2])
+		for i in range(len(take_profit)):
+			_my_trade['_TP'] = take_profit[i]
+			_my_trade['_lots'] = float(lots[i])
+			print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
+			if self._verify_information(_my_trade):
+				self._create_metatrader_order(_my_trade, chat_id, message)
 
 	def _verify_information(self, _my_trade):
 		check_params = ['_price', '_SL', '_TP']
