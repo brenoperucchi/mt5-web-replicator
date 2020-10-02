@@ -74,6 +74,7 @@ class SignalFunction():
 			check_chat_id.wait()
 			chat_id = check_chat_id.update['id']
 		elif 'swing_trading' in signal_name:
+			# chat_id = -1001159029077 # VIP
 			check_chat_id = self._tg.call_method('searchChatsOnServer',   params={'query': 'Swing Trading ViP', 'limit':10})
 			check_chat_id.wait()
 			chat_id = check_chat_id.update['chat_ids'][0]
@@ -109,7 +110,7 @@ class SignalFunction():
 		if not any(d.get('message_id') == telegram_message_id for d in self._database['telegram'].get(str(chat_id), [] )):
 
 			print("STARTED TIME: ", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-			print("Chat ID:", chat_id, "Message ID: ", telegram_message_id)
+			print("Name: ", self._telegram_username, "Chat ID: ", chat_id, "Message ID: ", telegram_message_id)
 
 			self._save_database(self._database, telegram_message_id, signal_name, telegram_message, chat_id)
 			message = self._parse_message(telegram_message)
@@ -264,9 +265,9 @@ class SignalFunction():
 		_my_trade['_price'] = price_request
 		_my_trade['_SL'] = regex.search(r'\Sl @(.*?$)',  message[1]).group(1).strip()
 		_my_trade['_TP'] = regex.search(r'\Tp1 @(.*?$)', message[2]).group(1).strip()
-		print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 		_my_trade['_comment'] = self._telegram_username
 		if self._verify_information(_my_trade):
+			print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 			self._create_metatrader_order(_my_trade, chat_id, message)
 
 	def _rules_of_signal_m15_signals(self, telegram_message_id, message, chat_id):
@@ -289,8 +290,8 @@ class SignalFunction():
 		for i in range(len(take_profit)):
 			_my_trade['_TP'] = take_profit[i]
 			_my_trade['_lots'] = float(lots[i])
-			print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 			if self._verify_information(_my_trade):
+				print(f"STOP LOSS: {_my_trade['_SL']} TAKE PROFIT: {_my_trade['_TP']}")
 				self._create_metatrader_order(_my_trade, chat_id, message)
 
 	def _verify_information(self, _my_trade):
