@@ -1,3 +1,0 @@
-/home/bperucchi/app/telegram/lib/signal/lib/images
-/home/bperucchi/app/telegram/lib/signal/lib/images
-/home/bperucchi/app/telegram/lib/signal/lib/images
