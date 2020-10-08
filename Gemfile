@@ -55,9 +55,12 @@ end
 
 
 group :development do
-  gem "better_errors"
-  gem "binding_of_caller"
-  gem 'pry'
+  # gem "better_errors"
+  # gem "binding_of_caller"
+gem 'pry'
+gem 'pry-remote'
+gem 'pry-nav'
+
   # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
   # gem 'pry-byebug'
   # gem 'pry-nav'
@@ -73,17 +76,33 @@ gem 'tdlib-ruby', "2.2.0"
 gem 'eventmachine'
 gem 'slim'
 gem "administrate"
+gem 'administrate-field-image'
+
+gem 'sidekiq'
+gem 'sidekiq-scheduler'
+gem 'foreman'
+gem 'ocr_space', path: "vendor/ocr_space"
+gem 'rtesseract'
+gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
+gem 'lucky_case'
 
 # gem 'telegramAPI'
 # gem 'telegram-rb', github: 'ssut/telegram-rb', require: 'telegram'
 
 #API
 gem 'grape'  
-gem 'rack-cors' 
 gem 'grape-active_model_serializers'
+gem 'grape_on_rails_routes'
+gem 'rack-cors' 
 
+gem 'capistrano-rails'
+gem 'capistrano-bundler'
+gem 'capistrano-rbenv'
+gem 'capistrano3-unicorn'
+gem 'capistrano-sidekiq', github: 'seuros/capistrano-sidekiq'
+gem 'capistrano-yarn'
 # gem 'telegram-bot-ruby'
 # gem 'concurrent-ruby', "1.1.7", require: 'concurrent'
 # gem 'whenever', require: false
 
-
+gem "rename"

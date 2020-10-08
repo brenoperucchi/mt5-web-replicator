@@ -1,0 +1,8 @@
+ImageWorker:
+  # cron: '30 * * * * *'   # Runs once per minute
+  every: ["2s"]
+  class: ImageWorker
+  queue: default
+  # args: contributors
+  description: 'This job resets the weekly leaderboard for contributions'
+  # include_metadata: true

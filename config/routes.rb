@@ -1,16 +1,19 @@
+require 'sidekiq/web'
 Rails.application.routes.draw do
+  mount Sidekiq::Web => '/sidekiq'
   mount API::Base, at: "/"
   namespace :admin do
-	  	resources :signs
-		  resources :posts
+	  	resources :sign_slaves
+      resources :sign_orders
+      resources :sign_traces
+      # resources :sign_traces
 	    
-	    root "posts#index"
+	    root "sign_orders#index"
     end
   resources :apisocials
-  resources :posts
   
   get ':page' => 'signs#show', as: 'signs'
-  root 'admin/posts#index'
+  root 'admin/sign_orders#index'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
 end

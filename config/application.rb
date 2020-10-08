@@ -6,7 +6,7 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module Telegram
+module SignalForex
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.0
@@ -24,6 +24,7 @@ module Telegram
    	    resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
    	  end
    	end
-
+    #SIDEKIQ
+    config.active_job.queue_adapter = :sidekiq
   end
 end

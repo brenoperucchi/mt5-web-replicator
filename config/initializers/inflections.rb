@@ -17,4 +17,6 @@
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym 'API'
   inflect.irregular 'sign', 'signs'
+  inflect.singular('slaves', 'slave')
+
 end
