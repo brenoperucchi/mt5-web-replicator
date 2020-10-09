@@ -5,11 +5,13 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 # Custom
+/vendor
 lib/signal/__pycache__/
 lib/signal/lib/__pycache__/
 database.json
 *.pyc
 *.DS_Store
+*.keep
 # Ignore bundler config.
 /.bundle
 
