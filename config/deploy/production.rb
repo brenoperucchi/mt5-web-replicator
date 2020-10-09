@@ -3,6 +3,8 @@ set :user, 'bperucchi'
 set :deploy_to, '/home/bperucchi/app'
 set :deploy_via, :remote_cache
 set :use_sudo, false
+set :stage, :production
+
 
 server 'signal.imentore.com.br',
   roles: [:web, :app, :db],

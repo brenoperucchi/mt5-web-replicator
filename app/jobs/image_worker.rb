@@ -1,6 +1,4 @@
 require 'sidekiq-scheduler'
-require 'pry'
-
 
 class ImageWorker
   include Sidekiq::Worker
