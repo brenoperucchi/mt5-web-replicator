@@ -21,8 +21,8 @@ development:
   # <<: *default
   # database: db/development.sqlite3
   <<: *postgres
-  database: forex_signal
-  username: forex_signal
+  database: signalforex
+  username: signalforex
   password: aszx12qw  
 
 # Warning: The database defined as "test" will be erased and
@@ -34,6 +34,6 @@ test:
 
 production:
   <<: *postgres
-  database: forex_signal
-  username: forex_signal
+  database: signalforex
+  username: signalforex
   password: aszx12qw
