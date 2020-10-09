@@ -6,7 +6,6 @@
       [
         "*.pyc",
         ".rbenv*",
-        "*.lock",
         "Rakefile",
         "config.ru",
         ".gitkeep"
