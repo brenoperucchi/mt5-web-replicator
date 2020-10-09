@@ -1,3 +1,5 @@
+SSHKit.config.command_map[:sidekiq] = "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq"
+
 # config valid only for current version of Capistrano
 lock "3.14.1"
 

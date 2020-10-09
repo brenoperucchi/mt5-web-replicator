@@ -59,10 +59,9 @@ end
 group :development do
   # gem "better_errors"
   # gem "binding_of_caller"
-gem 'pry'
-gem 'pry-remote'
-gem 'pry-nav'
-
+  gem 'pry'
+  gem 'pry-remote'
+  gem 'pry-nav'
   # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
   # gem 'pry-byebug'
   # gem 'pry-nav'
@@ -94,8 +93,8 @@ gem 'capistrano', '~> 3.6'
 gem 'capistrano-bundler'
 gem 'capistrano-rbenv'
 gem 'capistrano3-unicorn'
-# gem 'capistrano-sidekiq'#, github: 'seuros/capistrano-sidekiq'
-gem 'capistrano-sidekiq', group: :development
+gem 'capistrano-sidekiq', git: 'http://github.com/seuros/capistrano-sidekiq'
+# gem 'capistrano-sidekiq', '1.0.3'
 gem 'capistrano-yarn'
 gem 'ed25519', '~> 1.2'
 gem 'bcrypt_pbkdf', '~> 1'
