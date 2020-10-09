@@ -1,9 +1,42 @@
-# config valid for current version and patch releases of Capistrano
-lock "~> 3.14.1"
+# config valid only for current version of Capistrano
+lock "3.14.1"
 
-set :application, "my_app_name"
-set :repo_url, "git@example.com:me/my_repo.git"
+set :application, 'signal_forex'
+set :repo_url, 'git@github.com:brenoperucchi/signalforex.git'
 
+# ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
+set :branch, "master"
+set :log_level, :debug
+
+set :use_sudo, false
+set :bundle_binstubs, nil
+set :linked_files, fetch(:linked_files, []).push('config/database.yml')
+set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system', 'public/uploads')
+
+set :rbenv_type, :user # or :system, depends on your rbenv setup
+set :rbenv_ruby, '2.6.6'
+
+# in case you want to set ruby version from the file:
+# set :rbenv_ruby, File.read('.ruby-version').strip
+
+set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rbenv_ruby)} #{fetch(:rbenv_path)}/bin/rbenv exec"
+set :rbenv_map_bins, %w{rake gem bundle ruby rails}
+set :rbenv_roles, :all # default value
+
+after 'deploy:publishing', 'deploy:restart'
+namespace :deploy do
+  task :add_default_hooks do
+    after 'deploy:starting', 'sidekiq:quiet'
+    after 'deploy:updated', 'sidekiq:stop'
+    after 'deploy:reverted', 'sidekiq:stop'
+    after 'deploy:published', 'sidekiq:start'
+  end
+  
+  task :restart do
+    invoke 'unicorn:stop'
+    invoke 'unicorn:start'
+  end
+end
 # Default branch is :master
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
 
@@ -21,7 +54,7 @@ set :repo_url, "git@example.com:me/my_repo.git"
 # set :pty, true
 
 # Default value for :linked_files is []
-# append :linked_files, "config/database.yml"
+# append :linked_files, "config/database.yml", "config/secrets.yml"
 
 # Default value for linked_dirs is []
 # append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system"
@@ -34,6 +67,3 @@ set :repo_url, "git@example.com:me/my_repo.git"
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
-
-# Uncomment the following to require manually verifying the host key before first deploy.
-# set :ssh_options, verify_host_key: :secure

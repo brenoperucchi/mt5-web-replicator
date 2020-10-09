@@ -67,12 +67,8 @@ gem 'pry-nav'
   # gem 'pry-stack_explorer'
 end
 
-# gem 'tdlib-ruby', path: "vendor/tdlib-ruby"
 gem 'tdlib-ruby', "2.2.0"
 
-# gem 'zmq', git: 'https://github.com/cowboyrushforth/rbzmq.git'
-
-# gem 'ffi-rzmq'
 gem 'eventmachine'
 gem 'slim'
 gem "administrate"
@@ -86,23 +82,22 @@ gem 'rtesseract'
 gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
 gem 'lucky_case'
 
-# gem 'telegramAPI'
-# gem 'telegram-rb', github: 'ssut/telegram-rb', require: 'telegram'
-
 #API
 gem 'grape'  
 gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
 gem 'rack-cors' 
 
-gem 'capistrano-rails'
+gem 'capistrano', '~> 3.6'
 gem 'capistrano-bundler'
 gem 'capistrano-rbenv'
 gem 'capistrano3-unicorn'
-gem 'capistrano-sidekiq', github: 'seuros/capistrano-sidekiq'
+# gem 'capistrano-sidekiq'#, github: 'seuros/capistrano-sidekiq'
+gem 'capistrano-sidekiq', group: :development
 gem 'capistrano-yarn'
-# gem 'telegram-bot-ruby'
-# gem 'concurrent-ruby', "1.1.7", require: 'concurrent'
-# gem 'whenever', require: false
+gem 'ed25519', '~> 1.2'
+gem 'bcrypt_pbkdf', '~> 1'
 
+gem 'postgresql'
+gem 'unicorn'
 gem "rename"

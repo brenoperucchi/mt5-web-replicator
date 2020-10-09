@@ -6,7 +6,7 @@ class StoreSerializer < ActiveModel::Serializer
 
 
   def traces
-  	object.traces.map do |trace|
+  	object.traces.active.map do |trace|
   		SignTraceSerializer.new(trace)
   	end
   end

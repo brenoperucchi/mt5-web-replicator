@@ -11,6 +11,7 @@ class SignTraceDashboard < Administrate::BaseDashboard
     id: Field::Number,
     name: Field::String,
     name_id: Field::String,
+    active_at: Field::DateTime,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -24,6 +25,7 @@ class SignTraceDashboard < Administrate::BaseDashboard
   id
   name
   name_id
+  active_at
 
   ].freeze
 
@@ -33,6 +35,7 @@ class SignTraceDashboard < Administrate::BaseDashboard
   id
   name
   name_id
+  active_at
   created_at
   updated_at
   ].freeze
@@ -43,6 +46,7 @@ class SignTraceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   name_id
+  active_at
 
   ].freeze
 

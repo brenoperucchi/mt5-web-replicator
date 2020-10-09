@@ -1,3 +1,31 @@
+set :port, 22
+set :user, 'bperucchi'
+set :deploy_to, '/home/bperucchi/app'
+set :deploy_via, :remote_cache
+set :use_sudo, false
+
+server 'signal.imentore.com.br',
+  roles: [:web, :app, :db],
+  port: fetch(:port),
+  user: fetch(:user),
+  primary: true
+
+# set :deploy_to, "/home/#{fetch(:user)}/app/#{fetch(:application)}"
+# set :deploy_to, "/home/#{fetch(:user)}/app/#{fetch(:application)}"
+
+set :ssh_options, {
+  forward_agent: true,
+  auth_methods: %w(publickey),
+  keys: "#{ENV['HOME']}/.ssh/id_rsa",
+  user: 'bperucchi',
+}
+
+set :rails_env, :production
+set :conditionally_migrate, true   
+set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
+set :pty,  false
+
+
 # server-based syntax
 # ======================
 # Defines a single server with a list of roles and multiple properties.
@@ -42,7 +70,7 @@
 # Global options
 # --------------
 #  set :ssh_options, {
-#    keys: %w(/home/user_name/.ssh/id_rsa),
+#    keys: %w(/home/rlisowski/.ssh/id_rsa),
 #    forward_agent: false,
 #    auth_methods: %w(password)
 #  }
