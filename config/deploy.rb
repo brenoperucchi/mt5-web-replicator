@@ -1,7 +1,7 @@
 # config valid only for current version of Capistrano
 lock "3.14.1"
 
-set :application, 'signal_forex'
+set :application, 'signalforex'
 set :repo_url, 'git@github.com:brenoperucchi/signalforex.git'
 
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
