@@ -77,7 +77,7 @@ gem 'administrate-field-image'
 gem 'sidekiq'
 gem 'sidekiq-scheduler'
 gem 'foreman'
-gem 'ocr_space', path: "vendor/ocr_space"
+# gem 'ocr_space', path: "vendor/ocr_space"
 gem 'rtesseract'
 gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
 gem 'lucky_case'
