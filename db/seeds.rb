@@ -6,5 +6,5 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
-store = Store.create(name:'Store 1')
+store = Store.create(name:'Store 1', active_at: DateTime.now)
 store.traces.create(name: 'M15 Signals Premium', name_id:'-481414224', active_at: DateTime.now)

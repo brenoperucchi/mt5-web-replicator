@@ -75,7 +75,7 @@ gem 'slim'
 gem "administrate"
 gem 'administrate-field-image'
 
-gem 'sidekiq'
+gem 'sidekiq'#, '5.2.9'
 gem 'sidekiq-scheduler'
 gem 'foreman'
 # gem 'ocr_space', path: "vendor/ocr_space"
@@ -93,8 +93,9 @@ gem 'capistrano', '~> 3.6'
 gem 'capistrano-bundler'
 gem 'capistrano-rbenv'
 gem 'capistrano3-unicorn'
-gem 'capistrano-sidekiq', git: 'http://github.com/seuros/capistrano-sidekiq'
-# gem 'capistrano-sidekiq', '1.0.3'
+# gem 'capistrano-sidekiq'#, git: 'http://github.com/seuros/capistrano-sidekiq'
+gem 'capistrano-sidekiq', '1.0.3'
+
 gem 'capistrano-yarn'
 gem 'ed25519', '~> 1.2'
 gem 'bcrypt_pbkdf', '~> 1'

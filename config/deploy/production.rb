@@ -28,6 +28,9 @@ set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
 set :pty,  false
 
 
+set :sidekiq_env, -> { fetch(:rails_env) }
+set :sidekiq_concurrency, 5
+
 # server-based syntax
 # ======================
 # Defines a single server with a list of roles and multiple properties.

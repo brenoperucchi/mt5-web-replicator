@@ -1,5 +1,3 @@
-SSHKit.config.command_map[:sidekiq] = "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq"
-
 # config valid only for current version of Capistrano
 lock "3.14.1"
 
@@ -25,18 +23,24 @@ set :rbenv_prefix, "RBENV_ROOT=#{fetch(:rbenv_path)} RBENV_VERSION=#{fetch(:rben
 set :rbenv_map_bins, %w{rake gem bundle ruby rails}
 set :rbenv_roles, :all # default value
 
+set :unicorn_rack_env, 'production'
+
 after 'deploy:publishing', 'deploy:restart'
 namespace :deploy do
   task :add_default_hooks do
-    after 'deploy:starting', 'sidekiq:quiet'
-    after 'deploy:updated', 'sidekiq:stop'
-    after 'deploy:reverted', 'sidekiq:stop'
-    after 'deploy:published', 'sidekiq:start'
+    after 'deploy:starting'#, 'sidekiq:start'
+    after 'deploy:updated'#, 'sidekiq:stop'
+    after 'deploy:reverted'#, 'sidekiq:stop'
+    after 'deploy:published'#, 'sidekiq:start'
   end
   
   task :restart do
     invoke 'unicorn:stop'
     invoke 'unicorn:start'
+    on roles(:app) do
+      execute "systemctl --user restart sidekiq.service"
+    #   execute "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq --pidfile /home/bperucchi/app/shared/tmp/pids/sidekiq-0.pid --environment production --logfile /home/bperucchi/app/shared/log/sidekiq.log --config /home/bperucchi/app/shared/config/sidekiq.yml --daemon"
+    end
   end
 end
 # Default branch is :master
