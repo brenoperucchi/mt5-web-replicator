@@ -8,3 +8,4 @@
 
 store = Store.create(name:'Store 1', active_at: DateTime.now)
 store.traces.create(name: 'M15 Signals Premium', name_id:'-481414224', active_at: DateTime.now)
+store.traces.create(name: 'Swing Trading', name_id:'-481414224', active_at: nil)
