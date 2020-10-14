@@ -90,6 +90,7 @@ gem 'grape_on_rails_routes'
 gem 'rack-cors' 
 
 gem 'capistrano', '~> 3.6'
+gem 'capistrano-rails'
 gem 'capistrano-bundler'
 gem 'capistrano-rbenv'
 gem 'capistrano3-unicorn'

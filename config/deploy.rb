@@ -36,10 +36,14 @@ namespace :deploy do
   
   task :restart do
     invoke 'unicorn:stop'
+    on roles(:app) do
+       # execute "systemctl --user stop sidekiq.service"
+    end
     invoke 'unicorn:start'
     on roles(:app) do
-      execute "systemctl --user restart sidekiq.service"
-      execute "systemctl --user restart python-signal.service"
+      # execute "systemctl --user start sidekiq.service"
+      execute "systemctl --user restart python-signal-api.service"
+      execute "systemctl --user restart python-signal-order.service"
     #   execute "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq --pidfile /home/bperucchi/app/shared/tmp/pids/sidekiq-0.pid --environment production --logfile /home/bperucchi/app/shared/log/sidekiq.log --config /home/bperucchi/app/shared/config/sidekiq.yml --daemon"
     end
   end
