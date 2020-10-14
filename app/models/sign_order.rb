@@ -37,10 +37,13 @@ class SignOrder < ApplicationRecord
       end
 
       def verify_symbol(state)
-        if sign_trace.name.downcase == "m15 signals premium"
-          sym = self.message.split[0]
+        # binding.pry
+        # if sign_trace.name.downcase == "m15 signals premium"
+          sym = self.message.split[0].upcase
           self.update_columns(symbol: sym, message:message.gsub(sym, '')) if not self.symbol
-        end
+        # else
+        # end
+          
       end
     end
     state :ordered do

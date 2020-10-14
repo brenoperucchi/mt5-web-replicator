@@ -23,7 +23,7 @@ module API
         end
         route_param :message_id do 
           get do
-            SignOrder.where(message_id: params[:message_id]).first
+            SignOrder.find_by(message_id: params[:message_id])
           end
         end
 
@@ -35,7 +35,7 @@ module API
           # requires :magic, type: String, desc: 'Magic'
         end
         post do
-          signal = SignTrace.find_by(name_id: params[:name_id])
+          signal = SignTrace.active.find_by(name_id: params[:name_id])
           if signal
             message = signal.orders.find_by(message_id: params[:message_id]) 
             message ||= signal.orders.create(message_id: params[:message_id]) do |sign_order|

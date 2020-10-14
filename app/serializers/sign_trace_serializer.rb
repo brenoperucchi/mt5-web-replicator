@@ -5,7 +5,7 @@ class SignTraceSerializer < ActiveModel::Serializer
 
   def orders
   	object.orders.ready.map do |message|
-  		"Signals::#{@object.name}_Serializer".to_underscore.constantize .new(message)
+  		"Signals::#{@object.name}_Serializer".to_underscore.constantize.new(message)
   	end
 	end
 

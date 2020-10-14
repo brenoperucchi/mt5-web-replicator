@@ -6,4 +6,5 @@ class SignTrace < ApplicationRecord
 	scope :active, ->{ where.not(active_at:nil)}
 
 
+
 end

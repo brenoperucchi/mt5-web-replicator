@@ -5,7 +5,6 @@
       "file_exclude_patterns":
       [
         "*.pyc",
-        ".rbenv*",
         "Rakefile",
         "config.ru",
         ".gitkeep"

@@ -8,7 +8,7 @@ module Signals
 	  end
 
 		def symbol
-			object.symbol
+			object.symbol.upcase
 		end
 
 		def type

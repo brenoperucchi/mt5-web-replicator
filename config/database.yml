@@ -22,7 +22,7 @@ development:
   # database: db/development.sqlite3
   <<: *postgres
   database: signalforex
-  username: brenoperucchi
+  username: signalforex
   password: aszx12qw  
 
 # Warning: The database defined as "test" will be erased and

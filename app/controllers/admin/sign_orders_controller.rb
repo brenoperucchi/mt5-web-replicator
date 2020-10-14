@@ -29,6 +29,11 @@ module Admin
     #   end
     # end
 
+    def scoped_resource
+        resource_class.order('id')
+    end
+
+
     # Override `resource_params` if you want to transform the submitted
     # data before it's persisted. For example, the following would turn all
     # empty values into nil values. It uses other APIs such as `resource_class`
