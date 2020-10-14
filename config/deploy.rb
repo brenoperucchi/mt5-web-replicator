@@ -42,6 +42,7 @@ namespace :deploy do
     invoke 'unicorn:start'
     on roles(:app) do
       # execute "systemctl --user start sidekiq.service"
+      execute "systemctl restart nginx.service"
       execute "systemctl --user restart python-signal-api.service"
       execute "systemctl --user restart python-signal-order.service"
     #   execute "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq --pidfile /home/bperucchi/app/shared/tmp/pids/sidekiq-0.pid --environment production --logfile /home/bperucchi/app/shared/log/sidekiq.log --config /home/bperucchi/app/shared/config/sidekiq.yml --daemon"
