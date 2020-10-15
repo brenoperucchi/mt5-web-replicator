@@ -10,7 +10,7 @@ class SignTraceSerializer < ActiveModel::Serializer
 	end
 
   def name
-  	object.name.downcase
+  	object.name
   end
 
 

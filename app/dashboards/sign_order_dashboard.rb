@@ -21,6 +21,7 @@ class SignOrderDashboard < Administrate::BaseDashboard
     state: Field::String,
     symbol: Field::String,
     message_response: Field::String,
+    sign_trace: Field::BelongsTo
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -33,10 +34,7 @@ class SignOrderDashboard < Administrate::BaseDashboard
   state
   symbol
   message
-  message_id
-  active_at
-  ready_at
-  order_at
+  sign_trace
 
   ].freeze
 
@@ -48,13 +46,14 @@ class SignOrderDashboard < Administrate::BaseDashboard
   symbol
   message
   message_id
-  image
+  sign_trace
   message_response
   active_at
   ready_at
   order_at
   created_at
   updated_at
+  image
   ].freeze
 
   # FORM_ATTRIBUTES

@@ -29,6 +29,18 @@ module Admin
     #   end
     # end
 
+    def new_resource
+        Store.first.traces.new
+    end
+
+    def scoped_resource
+        Store.first.traces
+    end
+
+    # def scope_resource
+    #     Store.first.traces
+    # end
+
     # Override `resource_params` if you want to transform the submitted
     # data before it's persisted. For example, the following would turn all
     # empty values into nil values. It uses other APIs such as `resource_class`

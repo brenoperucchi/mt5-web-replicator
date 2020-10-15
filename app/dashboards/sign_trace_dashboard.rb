@@ -80,4 +80,8 @@ class SignTraceDashboard < Administrate::BaseDashboard
   # def display_resource(sign)
   #   "Sign ##{sign.id}"
   # end
+
+   def display_resource(resource)
+    resource.name
+  end
 end
