@@ -1,6 +1,7 @@
+# m15
 require 'lucky_case/string'
 module Signals
-  class M15SignalsPremiumSerializer < ActiveModel::Serializer
+  class RoboSignalSerializer < ActiveModel::Serializer
     attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
 
     def id
@@ -26,6 +27,5 @@ module Signals
     def TP
       [object.message.split[3], object.message.split[5]]
     end
-    
   end
 end

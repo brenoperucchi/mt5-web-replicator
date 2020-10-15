@@ -35,15 +35,17 @@ module API
           # requires :magic, type: String, desc: 'Magic'
         end
         post do
-          signal = SignTrace.active.find_by(name_id: params[:name_id])
-          if signal
-            message = signal.orders.find_by(message_id: params[:message_id]) 
-            message ||= signal.orders.create(message_id: params[:message_id]) do |sign_order|
-              sign_order.message = params[:message]
-              if params[:photo_path].present?
-                sign_order.image.attach(io: File.open(params[:photo_path]), filename: 'output.tiff')
-              else 
-                sign_order.process
+          if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
+            signal = SignTrace.active.find_by(name_id: params[:name_id])
+            if signal
+              message = signal.orders.find_by(message_id: params[:message_id]) 
+              message ||= signal.orders.create(message_id: params[:message_id]) do |sign_order|
+                sign_order.message = params[:message]
+                if params[:photo_path].present?
+                  sign_order.image.attach(io: File.open(params[:photo_path]), filename: 'output.tiff')
+                else 
+                  sign_order.process
+                end
               end
             end
           end

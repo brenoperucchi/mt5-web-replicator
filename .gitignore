@@ -106,3 +106,4 @@ yarn-debug.log*
 lib/signal/database.json
 lib/signal/images/data/output.tiff
 *.sublime-workspace
+.rbenv-gemsets

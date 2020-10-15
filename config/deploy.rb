@@ -37,11 +37,11 @@ namespace :deploy do
   task :restart do
     invoke 'unicorn:stop'
     on roles(:app) do
-       execute "systemctl --user stop sidekiq.service"
+       # execute "systemctl --user stop sidekiq.service"
     end
     invoke 'unicorn:start'
     on roles(:app) do
-      execute "systemctl --user start sidekiq.service"
+      # execute "systemctl --user start sidekiq.service"
       execute "systemctl restart nginx.service"
       execute "systemctl --user restart python-signal-api.service"
       execute "systemctl --user restart python-signal-order.service"

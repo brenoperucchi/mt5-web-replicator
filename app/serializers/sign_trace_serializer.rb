@@ -1,6 +1,6 @@
 require 'lucky_case/string'
 class SignTraceSerializer < ActiveModel::Serializer
-  attributes :id, :name, :name_id, :active_at
+  attributes :id, :name, :name_id, :active_at, :telegram_option, :telegram_image
   attributes :orders
 
   def orders
@@ -10,7 +10,7 @@ class SignTraceSerializer < ActiveModel::Serializer
 	end
 
   def name
-  	object.name.to_underscore
+  	object.name.downcase
   end
 
 

@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class SignTraceDashboard < Administrate::BaseDashboard
+class StoreDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -10,14 +10,8 @@ class SignTraceDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     name: Field::String,
-    name_id: Field::String,
-    telegram_option: Field::String,
-    lots: Field::String,
-    telegram_image: Field::Boolean,
-    active_at: Field::DateTime,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
-    store: Field::BelongsTo
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -27,38 +21,23 @@ class SignTraceDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  name
-  name_id
-  active_at
-  store
-
+  created_at
+  updated_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  id
+  i
   name
-  name_id
-  store
-  lots
-  telegram_option
-  telegram_image
-  active_at
-  created_at
-  updated_at
+
+
   ].freeze
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  name
-  name_id
-  lots
-  telegram_option
-  telegram_image
-  active_at
 
   ].freeze
 
@@ -70,14 +49,14 @@ class SignTraceDashboard < Administrate::BaseDashboard
   # in the search field:
   #
   #   COLLECTION_FILTERS = {
-  #     open: ->(resources) { resources.where(open: true) }
+  #     open: ->(resources) { where(open: true) }
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how signs are displayed
+  # Overwrite this method to customize how mains are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(sign)
-  #   "Sign ##{sign.id}"
+  # def display_resource(main)
+  #   "Main ##{main.id}"
   # end
 end
