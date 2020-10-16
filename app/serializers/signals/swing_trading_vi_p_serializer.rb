@@ -1,6 +1,6 @@
 require 'lucky_case/string'
 module Signals
-	class SwingTradingVipSerializer < ActiveModel::Serializer
+	class SwingTradingViPSerializer < ActiveModel::Serializer
 		 attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
 
 	  def id
