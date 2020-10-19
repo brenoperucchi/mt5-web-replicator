@@ -53,6 +53,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
   create_table "orders", force: :cascade do |t|
     t.string "state"
     t.string "message"
+    t.string "message_response"
     t.string "message_id"
     t.datetime "active_at"
     t.datetime "ready_at"
@@ -62,8 +63,6 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "image"
     t.string "symbol"
-    t.string "message_response"
-    t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["trace_id"], name: "index_orders_on_trace_id"
   end
 
@@ -94,9 +93,10 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
   end
 
   create_table "transactions", force: :cascade do |t|
+    t.string "state"
     t.string "ticket"
     t.decimal "profit"
-    t.bigint "order_id", null: false
+    t.bigint "order_id"
     t.string "action"
     t.string "kind"
     t.string "symbol"
@@ -116,5 +116,4 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "transactions", "orders"
 end
