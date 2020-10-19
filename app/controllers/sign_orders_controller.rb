@@ -1,2 +1,0 @@
-class SignOrdersController < ApplicationController
-end

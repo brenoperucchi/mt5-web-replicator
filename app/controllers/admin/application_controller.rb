@@ -8,6 +8,10 @@ module Admin
   class ApplicationController < Administrate::ApplicationController
     before_action :authenticate_admin
 
+    def scoped_resource
+        resource_class.order('id')
+    end
+
     def authenticate_admin
       # TODO Add authentication logic here.
     end

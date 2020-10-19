@@ -1,7 +1,7 @@
 require 'lucky_case/string'
 module Signals
   class M15SignalsPremiumSerializer < ActiveModel::Serializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
+    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP, :lots
 
     def id
       object.id
@@ -24,8 +24,25 @@ module Signals
     end
 
     def TP
-      [object.message.split[3], object.message.split[5]]
+      case object.trace.take_profit.downcase
+      when "normal"          
+        [object.message.split[3]]
+      when "agressive"
+        [object.message.split[3], object.message.split[5]]
+      when "superagressive"
+        [object.message.split[3], object.message.split[5], object.message.split[7]]
+      end
     end
     
+    def lots
+      case object.trace.take_profit.downcase
+      when "normal"
+        [ object.calcule_lot(1.00) ]
+      when "agressive"
+        [ object.calcule_lot(0.65), object.calcule_lot(0.35) ]
+      when "superagressive"
+        [ object.calcule_lot(0.65), object.calcule_lot(0.35), object.calcule_lot(0.35) ]
+      end
+    end
   end
 end

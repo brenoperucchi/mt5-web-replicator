@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class StoreDashboard < Administrate::BaseDashboard
+class TransactionDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -9,7 +9,22 @@ class StoreDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    name: Field::String,
+    ticket: Field::String,
+    order: Field::BelongsTo,
+    profit: Field::String.with_options(searchable: false),
+    action: Field::String,
+    kind: Field::String,
+    symbol: Field::String,
+    price_request: Field::String,
+    price_open: Field::String,
+    stop_loss: Field::String,
+    take_profit: Field::String,
+    comment: Field::String,
+    lot: Field::String,
+    magic: Field::String,
+    response: Field::String,
+    response_error: Field::String,
+    open_at: Field::DateTime,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -21,23 +36,55 @@ class StoreDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  name
-  created_at
-  updated_at
+  order
+  ticket
+  profit
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  name
+  order
+  ticket
+  profit
+  action
+  kind
+  symbol
+  price_request
+  price_open
+  stop_loss
+  take_profit
+  comment
+  lot
+  magic
+  response
+  response_error
+  open_at
+  created_at
+  updated_at
   ].freeze
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  name
+  order
+  ticket
+  profit
+  action
+  kind
+  symbol
+  price_request
+  price_open
+  stop_loss
+  take_profit
+  comment
+  lot
+  magic
+  response
+  response_error
+  open_at
   ].freeze
 
   # COLLECTION_FILTERS
@@ -48,14 +95,14 @@ class StoreDashboard < Administrate::BaseDashboard
   # in the search field:
   #
   #   COLLECTION_FILTERS = {
-  #     open: ->(resources) { where(open: true) }
+  #     open: ->(resources) { resources.where(open: true) }
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how mains are displayed
+  # Overwrite this method to customize how transactions are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(main)
-  #   "Main ##{main.id}"
+  # def display_resource(transaction)
+  #   "Transaction ##{transaction.id}"
   # end
 end

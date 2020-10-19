@@ -1,6 +1,7 @@
 require "administrate/base_dashboard"
+require 'traces_helper'
 
-class StoreDashboard < Administrate::BaseDashboard
+class TraceDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -10,8 +11,15 @@ class StoreDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     name: Field::String,
+    name_id: Field::String,
+    telegram_option: Field::String,
+    take_profit: Field::Select.with_options(collection: TracesHelper::i18n_take_profit),
+    lots: Field::String,
+    telegram_image: Field::Boolean,
+    active: Field::Boolean,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
+    store: Field::BelongsTo
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -22,8 +30,11 @@ class StoreDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   name
-  created_at
-  updated_at
+  name_id
+  take_profit
+  active
+  store
+
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -31,6 +42,15 @@ class StoreDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
+  name_id
+  store
+  lots
+  take_profit
+  telegram_option
+  telegram_image
+  active
+  created_at
+  updated_at
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -38,6 +58,13 @@ class StoreDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  name_id
+  lots
+  take_profit
+  telegram_option
+  telegram_image
+  active
+
   ].freeze
 
   # COLLECTION_FILTERS
@@ -48,14 +75,18 @@ class StoreDashboard < Administrate::BaseDashboard
   # in the search field:
   #
   #   COLLECTION_FILTERS = {
-  #     open: ->(resources) { where(open: true) }
+  #     open: ->(resources) { resources.where(open: true) }
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how mains are displayed
+  # Overwrite this method to customize how signs are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(main)
-  #   "Main ##{main.id}"
+  # def display_resource(sign)
+  #   "Sign ##{sign.id}"
   # end
+
+   def display_resource(resource)
+    resource.name
+  end
 end

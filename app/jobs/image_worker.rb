@@ -5,10 +5,10 @@ class ImageWorker
   include Rails.application.routes.url_helpers
 
   def perform()
-  	SignOrder.image_to_process.each do |order|
+  	Order.image_to_process.each do |order|
   		# path = ActiveStorage::Blob.service.path_for(message.image.key)
   		text = order.ocr_text(file:true)
-  		SignOrder.transaction do
+  		Order.transaction do
 	  		order.symbol = text
   			order.process
   			order.save
