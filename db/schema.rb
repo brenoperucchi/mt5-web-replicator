@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_15_043341) do
+ActiveRecord::Schema.define(version: 2020_10_19_061338) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -41,56 +41,38 @@ ActiveRecord::Schema.define(version: 2020_10_15_043341) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "sign_orders", force: :cascade do |t|
+  create_table "clients", force: :cascade do |t|
+    t.string "name"
+    t.bigint "user_id"
+    t.datetime "active_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_clients_on_user_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.string "state"
     t.string "message"
     t.string "message_id"
     t.datetime "active_at"
     t.datetime "ready_at"
     t.datetime "order_at"
-    t.bigint "sign_trace_id", null: false
+    t.bigint "trace_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "image"
-    t.string "state"
     t.string "symbol"
     t.string "message_response"
-    t.index ["message_id"], name: "index_sign_orders_on_message_id"
-    t.index ["sign_trace_id"], name: "index_sign_orders_on_sign_trace_id"
+    t.index ["message_id"], name: "index_orders_on_message_id"
+    t.index ["trace_id"], name: "index_orders_on_trace_id"
   end
 
-  create_table "sign_slaves", force: :cascade do |t|
-    t.string "provider"
-    t.string "provider_name"
-    t.string "action"
-    t.string "kind"
-    t.string "symbol"
-    t.string "price_request"
-    t.string "price_open"
-    t.string "stop_loss"
-    t.string "take_profit_1"
-    t.string "take_profit_2"
-    t.string "comment"
-    t.string "lots"
-    t.string "magic"
-    t.string "ticket"
-    t.text "context"
-    t.datetime "open_at"
-    t.string "response"
-    t.string "response_value"
+  create_table "slaves", force: :cascade do |t|
+    t.bigint "trace_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "environment"
-    t.integer "order_trace_id"
-  end
-
-  create_table "sign_traces", force: :cascade do |t|
-    t.string "name"
-    t.string "name_id"
-    t.datetime "active_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.integer "store_id"
-    t.text "settings"
+    t.index ["trace_id"], name: "index_slaves_on_trace_id"
   end
 
   create_table "stores", force: :cascade do |t|
@@ -101,5 +83,38 @@ ActiveRecord::Schema.define(version: 2020_10_15_043341) do
     t.text "settings"
   end
 
+  create_table "traces", force: :cascade do |t|
+    t.string "name"
+    t.string "name_id"
+    t.datetime "active_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "store_id"
+    t.text "settings"
+  end
+
+  create_table "transactions", force: :cascade do |t|
+    t.string "ticket"
+    t.decimal "profit"
+    t.bigint "order_id", null: false
+    t.string "action"
+    t.string "kind"
+    t.string "symbol"
+    t.string "price_request"
+    t.string "price_open"
+    t.string "stop_loss"
+    t.string "take_profit"
+    t.string "comment"
+    t.string "lot"
+    t.string "magic"
+    t.string "response"
+    t.string "response_error"
+    t.datetime "open_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["order_id"], name: "index_transactions_on_order_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "transactions", "orders"
 end
