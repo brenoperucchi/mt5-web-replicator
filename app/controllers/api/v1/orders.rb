@@ -5,10 +5,20 @@ module API
       include API::V1::Defaults
 
       resource :orders do
-        desc "Save"
+        desc "Return Order Message"
+        params do 
+          requires :message_id, type: Integer, desc: 'Message ID.'
+        end
+        route_param :message_id do 
+          get do
+            Order.find_by(message_id: params[:message_id])
+          end
+        end
+
+        desc "Save transaction from metatrader order"
         post "" do
           order = Order.find_by(message_id: params[:message_id])
-          order.transactions.create(ticket: params[:ticket],
+          transaction = order.transactions.create(ticket: params[:ticket],
                                        action: params[:action],
                                        kind: params[:kind],
                                        symbol: params[:symbol],
@@ -22,8 +32,8 @@ module API
                                        response: params[:response],
                                        response_error: params[:response_error],
                                        open_at: params[:open_at])
-            order.order
-          # else
+          params[:response].blank? ? transaction.execute : transaction.erro
+          transaction
           #   message.update_attribute(:message_response, params.to_json)
           #   message.error
           # end

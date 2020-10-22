@@ -35,10 +35,9 @@ class TransactionDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
-  order
   ticket
-  profit
+  symbol
+  order
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -47,7 +46,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   id
   order
   ticket
-  profit
   action
   kind
   symbol
@@ -71,7 +69,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   order
   ticket
-  profit
   action
   kind
   symbol

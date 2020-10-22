@@ -10,16 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_19_061338) do
-
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+ActiveRecord::Schema.define(version: 2020_10_20_024353) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
-    t.bigint "record_id", null: false
-    t.bigint "blob_id", null: false
+    t.integer "record_id", null: false
+    t.integer "blob_id", null: false
     t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
@@ -43,7 +40,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
 
   create_table "clients", force: :cascade do |t|
     t.string "name"
-    t.bigint "user_id"
+    t.integer "user_id"
     t.datetime "active_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -57,8 +54,8 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
     t.string "message_id"
     t.datetime "active_at"
     t.datetime "ready_at"
-    t.datetime "order_at"
-    t.bigint "trace_id", null: false
+    t.datetime "execute_at"
+    t.integer "trace_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "image"
@@ -67,7 +64,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
   end
 
   create_table "slaves", force: :cascade do |t|
-    t.bigint "trace_id", null: false
+    t.integer "trace_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "environment"
@@ -96,7 +93,7 @@ ActiveRecord::Schema.define(version: 2020_10_19_061338) do
     t.string "state"
     t.string "ticket"
     t.decimal "profit"
-    t.bigint "order_id"
+    t.integer "order_id"
     t.string "action"
     t.string "kind"
     t.string "symbol"

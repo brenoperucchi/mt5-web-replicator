@@ -15,9 +15,8 @@ class OrderDashboard < Administrate::BaseDashboard
     image: Administrate::Field::Image,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
-    active_at: Field::DateTime,
     ready_at: Field::DateTime,
-    order_at: Field::DateTime,
+    execute_at: Field::DateTime,
     state: Field::String,
     symbol: Field::String,
     message_response: Field::String,
@@ -51,9 +50,8 @@ class OrderDashboard < Administrate::BaseDashboard
   message_id
   trace
   message_response
-  active_at
   ready_at
-  order_at
+  execute_at
   created_at
   updated_at
   image
@@ -69,9 +67,8 @@ class OrderDashboard < Administrate::BaseDashboard
   message
   message_id
   trace
-  active_at
   ready_at
-  order_at
+  execute_at
 
   ].freeze
 

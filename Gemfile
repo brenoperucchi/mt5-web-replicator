@@ -46,10 +46,17 @@ end
 
 group :test do
   # Adds support for Capybara system testing and selenium driver
+
   gem 'capybara', '>= 2.15'
   gem 'selenium-webdriver'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
+  #custom
+  gem 'rspec-rails', '~> 4.0.1'
+  gem 'guard-rspec'
+  gem 'terminal-notifier' , git:"https://github.com/d-a-l-l/terminal-notifier.git"
+  gem "database_cleaner"
+
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

@@ -1,37 +1,37 @@
 class Order < ApplicationRecord
 
-  # enum state: %i[ pending processed ordered error ]
+  # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
   has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id"
 
-  scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(order_at: nil).where(ready_at:nil).where.not(state: 'error') }
+  scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
 
-  scope :ready, ->{ where(state: 'processed').where.not(state:'error') }
+  scope :ready, ->{ where(state: 'prepared').where.not(state:'error') }
 
   scope :error, ->{ where(state: 'error')}
 
   has_one_attached :image
 
   state_machine :initial => :pending do
-    after_transition :pending => :processed, :do => :update_state
-    after_transition :pending => :processed, :do => :verify_symbol
-    after_transition :processed => :ordered, :do => :update_state
-    after_transition [:processed, :ordered] => :pending, :do => :update_state
+    after_transition :pending => :prepared, :do => :update_state
+    after_transition :pending => :prepared, :do => :verify_symbol
+    after_transition :prepared => :executed, :do => :update_state
+    after_transition [:prepared, :executed] => :pending, :do => :update_state
 
-    event :process do
-      transition :pending => :processed
+    event :prepare do
+      transition :pending => :prepared
     end
-    event :order do
-      transition :processed => :ordered
+    event :execute do
+      transition :prepared => :executed
     end
     event :erro do
-      transition [:processed, :ordered] => :error
+      transition [:prepared, :executed] => :error
     end
     event :cancel do
-      transition [:processed, :ordered, :error] => :pending
+      transition [:prepared, :executed, :error] => :pending
     end
 
-    state :processed do
+    state :prepared do
       def update_state(state)
         self.update_column(:ready_at, DateTime.now)
         system("rm -rf #{Rails.root}/public/output.tiff")
@@ -47,14 +47,14 @@ class Order < ApplicationRecord
           
       end
     end
-    state :ordered do
+    state :executed do
       def update_state(state)
-        self.update_column(:order_at, DateTime.now)
+        self.update_column(:execute_at, DateTime.now)
       end
     end
     state :pending do
       def update_state(state)
-        self.update_column(:order_at, nil)
+        self.update_column(:execute_at, nil)
         self.update_column(:ready_at, nil)
       end
     end

@@ -32,6 +32,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   take_profit
+  lots
   active
   store
 

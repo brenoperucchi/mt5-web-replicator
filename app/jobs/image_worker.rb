@@ -10,7 +10,7 @@ class ImageWorker
   		text = order.ocr_text(file:true)
   		Order.transaction do
 	  		order.symbol = text
-  			order.process
+  			order.prepare
   			order.save
   		end
   	end
