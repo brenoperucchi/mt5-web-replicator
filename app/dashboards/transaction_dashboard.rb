@@ -24,6 +24,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     magic: Field::String,
     response: Field::String,
     response_error: Field::String,
+    meta_order_generate: DisableTextField,
     open_at: Field::DateTime,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
@@ -58,6 +59,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   magic
   response
   response_error
+  meta_order_generate
   open_at
   created_at
   updated_at
@@ -81,6 +83,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   magic
   response
   response_error
+  meta_order_generate
   open_at
   ].freeze
 

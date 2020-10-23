@@ -19,31 +19,6 @@ module API
 
 
 
-        desc 'Save message from telegram to rails api'
-        params do
-          # requires :provider, type: String, desc: 'Your Provider'
-          # requires :kind, type: String, desc: 'Your Type'
-          # requires :symbol, type: String, desc: 'Symbol'
-          # requires :magic, type: String, desc: 'Magic'
-        end
-        post do
-          logger.debug { "MESSAGE_ID: #{params[:message_id]}" }
-          logger.debug { "URL: #{request.env['REQUEST_PATH']}" }
-          if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
-            signal = Trace.active.find_by(name_id: params[:name_id])
-            if signal
-              message = signal.orders.find_by(message_id: params[:message_id]) 
-              message ||= signal.orders.create(message_id: params[:message_id]) do |order|
-                order.message = params[:message]
-                if params[:photo_path].present?
-                  order.image.attach(io: File.open(params[:photo_path]), filename: 'output.tiff')
-                else 
-                  order.prepare
-                end
-              end
-            end
-          end
-        end
       
       end
     end

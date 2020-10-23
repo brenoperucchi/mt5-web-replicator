@@ -30,7 +30,7 @@ RSpec.describe API::V1::Orders do
   }
 
   before(:context) do
-    post '/api/v1/traces', params: {
+    post '/api/v1/orders', params: {
       "message_id"=>"723517440",
       "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39",
       "photo_path"=>"/tmp/500028400464_282900.jpg",
@@ -50,14 +50,14 @@ RSpec.describe API::V1::Orders do
   let(:job_image_worker) { ImageWorker.new.perform.first }
 
   describe API::V1::Traces do
-    context 'POST /api/v1/traces' do
+    context 'POST /api/v1/orders' do
       it 'save a telegram trace message' do
         expect(job_image_worker.state).to be == "prepared"
         expect(job_image_worker.symbol).to be == "CADJPY"
         # expect(response).to be_success
         expect(response.status).to eq(201)
         # binding.pry
-        expect(JSON.parse(response.body)).to be == {"id"=>1, "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39", "message_id"=>"723517440", "symbol"=>nil}
+        expect(JSON.parse(response.body)).to be == {"id"=>1, "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39", "message_id"=>"723517440", "symbol"=>nil, "trace"=>"RoboSignal"}
       end
     end
 
@@ -89,10 +89,10 @@ RSpec.describe API::V1::Orders do
         expect(JSON.parse(response.body)['traces'][0]['orders'][0]['lots']).to eq([0.03, 0.02])
       end
     end
-    context 'POST /api/v1/orders' do
+    context 'POST /api/v1/orders/transaction' do
       it 'Save transaction from metatrader order' do
         job_image_worker
-        post '/api/v1/orders', params:{
+        post '/api/v1/orders/transaction', params:{
           "chat_id"=>"1",
           "message_id"=>"723517440",
           "provider"=>"1",
@@ -128,7 +128,7 @@ RSpec.describe API::V1::Orders do
     context 'POST /api/v1/orders' do
       it 'Error transaction from metatrader order' do
         job_image_worker
-        post '/api/v1/orders', params:{
+        post '/api/v1/orders/transaction', params:{
           'chat_id': 1, 'message_id': '723517440', 'provider': 1, 'provider_name': 'RoboSignal', 'symbol': 'CADJPY', 'action': 'EXECUTION', 'kind': 1, 'price_request': '80.39', 'price_open': 79.509, 'stop_loss': 'None', 'take_profit': 'None', 'comment': 'RoboSignal #1', 'magic': 123456, 'ticket': 363928013, 'open_at': '2020.10.22 06:36:53', 'response': 'ERROR_SETTING_SL_TP', 'response_value': 'None', 'environment': 'local'
         }
         expect(JSON.parse(response.body)['state']).to eq('error')

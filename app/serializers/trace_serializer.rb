@@ -4,8 +4,8 @@ class TraceSerializer < ActiveModel::Serializer
   attributes :orders
 
   def orders
-  	object.orders.ready.map do |message|
-  		"Signals::#{@object.name}_Serializer".to_underscore.constantize.new(message)
+  	object.orders.ready.map do |order|
+  		"Signals::#{@object.name}Serializer".to_underscore.constantize.new(order)
   	end
 	end
 

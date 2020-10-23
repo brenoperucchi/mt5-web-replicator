@@ -19,7 +19,6 @@ class OrderDashboard < Administrate::BaseDashboard
     execute_at: Field::DateTime,
     state: Field::String,
     symbol: Field::String,
-    message_response: Field::String,
     trace: Field::BelongsTo,
     transactions: Field::HasMany
   }.freeze
@@ -49,7 +48,6 @@ class OrderDashboard < Administrate::BaseDashboard
   message
   message_id
   trace
-  message_response
   ready_at
   execute_at
   created_at

@@ -1,14 +1,10 @@
 require 'lucky_case/string'
 module Signals
-  class M15SignalsPremiumSerializer < ActiveModel::Serializer
+  class M15SignalsPremiumSerializer < Signals::BaseSerializer
     attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP, :lots
 
-    def id
-      object.id
-    end
-
-    def symbol
-      object.symbol
+    def values
+      object.message.scan(/\@ (.*$)/).flatten
     end
 
     def type
@@ -44,5 +40,6 @@ module Signals
         [ object.calcule_lot(0.65), object.calcule_lot(0.35), object.calcule_lot(0.35) ]
       end
     end
+  
   end
 end

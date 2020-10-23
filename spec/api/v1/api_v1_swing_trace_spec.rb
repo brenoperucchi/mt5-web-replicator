@@ -30,7 +30,7 @@ RSpec.describe API::V1::Orders do
   }
 
   before(:context) do
-     post '/api/v1/traces', params: {"message_id"=>"720371712",
+     post '/api/v1/orders', params: {"message_id"=>"720371712",
      "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65",
      "name"=>"Perucchi Inc",
      "name_id"=>"-340961920"}
@@ -47,13 +47,13 @@ RSpec.describe API::V1::Orders do
   let(:valid_session) { {} }
 
   describe API::V1::Traces do
-    context 'POST /api/v1/traces' do
+    context 'POST /api/v1/orders' do
       it 'save a telegram trace message' do
         
         # expect(response).to be_success
         expect(response.status).to eq(201)
         # binding.pry
-        expect(JSON.parse(response.body)).to eq({"id"=>1, "message_id"=>"720371712", "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65", "symbol"=>"USDJPY"})
+        expect(JSON.parse(response.body)).to be == {"id"=>1, "message_id"=>"720371712", "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65", "symbol"=>"USDJPY", "trace"=>"Perucchi Inc"}
       end
     end
 
@@ -82,9 +82,9 @@ RSpec.describe API::V1::Orders do
       end
     end
 
-    context 'POST /api/v1/orders' do
+    context 'POST /api/v1/orders/transaction' do
       it 'save executed order metatrader information' do
-        post '/api/v1/orders', params:{
+        post '/api/v1/orders/transaction', params:{
           "chat_id"=>"2",
           "message_id"=>"720371712",
           "provider"=>"2",
@@ -117,6 +117,15 @@ RSpec.describe API::V1::Orders do
 
       end
     end
+    context 'POST /api/v1/orders/transaction' do
+      it 'Error transaction from metatrader order' do
+        post '/api/v1/orders/transaction', params:{
+          'chat_id': 1, 'message_id': '720371712', 'provider': 1, 'provider_name': 'Perucchi Inc', 'symbol': 'USDJPY', 'action': 'EXECUTION', 'kind': 1, 'price_request': '80.39', 'price_open': 79.509, 'stop_loss': 'None', 'take_profit': 'None', 'comment': 'RoboSignal #1', 'magic': 123456, 'ticket': 363928013, 'open_at': '2020.10.22 06:36:53', 'response': 'ERROR_SETTING_SL_TP', 'response_value': 'None', 'environment': 'local'
+        }
+        expect(JSON.parse(response.body)['state']).to eq('error')
+      end
+    end
+
   end
 
 
