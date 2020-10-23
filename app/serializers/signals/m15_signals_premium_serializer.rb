@@ -33,7 +33,7 @@ module Signals
     def lots
       case object.trace.take_profit.downcase
       when "normal"
-        [ object.calcule_lot(1.00) ]
+        [ object.trace.lots ]
       when "agressive"
         [ object.calcule_lot(0.65), object.calcule_lot(0.35) ]
       when "superagressive"
