@@ -11,20 +11,28 @@ module Signals
       object.message.split[1]
     end
 
+    def value(arg)
+      begin
+        values[arg].gsub(' ', '.')
+      rescue
+        nil
+      end
+    end
+
     def price_request
-      values[0].gsub(' ', '.')
+      value(0)
     end
 
     def SL
-      values[1].gsub(' ', '.')
+      value(1)
     end
 
     def take_profit_1
-      values[2].gsub(' ', '.')
+      value(2)
     end
 
     def take_profit_2
-      values[3].gsub(' ', '.')
+      value(3)
     end
 
     def TP

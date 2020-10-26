@@ -57,7 +57,7 @@ module API
           if signal
             message = signal.orders.find_by(message_id: params[:message_id]) 
             message ||= signal.orders.create(message_id: params[:message_id]) do |order|
-              order.message = params[:message]
+              order.message = params[:message].html_safe
               case order.trace.name
               when "M15 Signals Premium", "RoboSignal"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
