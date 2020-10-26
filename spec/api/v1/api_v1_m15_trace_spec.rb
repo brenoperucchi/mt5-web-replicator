@@ -25,15 +25,14 @@ require 'rails_helper'
 
 # RSpec.describe Finances::EntriesController, type: :controller do
 RSpec.describe API::V1::Orders do
-  let(:trace_attributes) {
-    
-  }
 
   before(:context) do
+    @store = create(:store)
+    @trace = create(:trace, :first, store: @store)
     post '/api/v1/orders', params: {
       "message_id"=>"723517440",
       "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39",
-      "photo_path"=>"/tmp/500028400464_282900.jpg",
+      "photo_path"=>"#{Rails.root}/tmp/500028400464_282900.jpg",
       "name"=>"RoboSignal",
       "name_id"=>"-481414224"
     }
@@ -47,25 +46,39 @@ RSpec.describe API::V1::Orders do
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in
   # Finances::EntriesController. Be sure to keep this updated too.
-  let(:job_image_worker) { ImageWorker.new.perform.first }
+  # let!(:store) { FactoryBot.create(:store)   }
+  # let!(:trace) { FactoryBot.create(:trace, :first, store: store)}
+  # let(:job_image_worker) { ImageWorker.new.perform.first }
 
   describe API::V1::Traces do
     context 'POST /api/v1/orders' do
       it 'save a telegram trace message' do
-        expect(job_image_worker.state).to be == "prepared"
-        expect(job_image_worker.symbol).to be == "CADJPY"
+        expect(Order.first.state).to be == "prepared"
+        expect(Order.first.symbol).to be == "CADJPY"
         # expect(response).to be_success
         expect(response.status).to eq(201)
         # binding.pry
-        expect(JSON.parse(response.body)).to be == {"id"=>1, "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39", "message_id"=>"723517440", "symbol"=>nil, "trace"=>"RoboSignal"}
+        expect(JSON.parse(response.body)).to be == {"id"=>1, "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39", "message_id"=>"723517440", "symbol"=>"CADJPY", "trace"=>"RoboSignal"}
+      end
+
+      it 'verify lot information' do
+        @trace.update_attribute(:take_profit, 'normal')
+        get '/api/v2/orders/723517440'
+        expect(JSON.parse(response.body)['lots']).to eq([0.05])
+
+        @trace.update_attribute(:take_profit, 'Agressive')
+        get '/api/v2/orders/723517440'
+        expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02])
+
+        @trace.update_attribute(:take_profit, 'Superagressive')
+        get '/api/v2/orders/723517440'
+        expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02, 0.02])
       end
     end
 
 
-
     context 'GET /api/v1/orders/723517440' do
       it 'get information of message id' do
-        job_image_worker
         get '/api/v1/orders/723517440'
         expect(JSON.parse(response.body)['id']).to eq(1)
         expect(JSON.parse(response.body)['message_id']).to eq('723517440')
@@ -76,7 +89,6 @@ RSpec.describe API::V1::Orders do
 
     context 'GET /api/v1/orders/' do
       it 'return all sign to execute' do
-        job_image_worker
         get '/api/v1/stores'
         # expect(response).to be_success
         expect(response.status).to eq(200)
@@ -91,7 +103,6 @@ RSpec.describe API::V1::Orders do
     end
     context 'POST /api/v1/orders/transaction' do
       it 'Save transaction from metatrader order' do
-        job_image_worker
         post '/api/v1/orders/transaction', params:{
           "chat_id"=>"1",
           "message_id"=>"723517440",
@@ -127,7 +138,6 @@ RSpec.describe API::V1::Orders do
     end
     context 'POST /api/v1/orders' do
       it 'Error transaction from metatrader order' do
-        job_image_worker
         post '/api/v1/orders/transaction', params:{
           'chat_id': 1, 'message_id': '723517440', 'provider': 1, 'provider_name': 'RoboSignal', 'symbol': 'CADJPY', 'action': 'EXECUTION', 'kind': 1, 'price_request': '80.39', 'price_open': 79.509, 'stop_loss': 'None', 'take_profit': 'None', 'comment': 'RoboSignal #1', 'magic': 123456, 'ticket': 363928013, 'open_at': '2020.10.22 06:36:53', 'response': 'ERROR_SETTING_SL_TP', 'response_value': 'None', 'environment': 'local'
         }

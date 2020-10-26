@@ -25,16 +25,15 @@ require 'rails_helper'
 
 # RSpec.describe Finances::EntriesController, type: :controller do
 RSpec.describe API::V1::Orders do
-  let(:trace_attributes) {
-    
-  }
 
   before(:context) do
-     post '/api/v1/orders', params: {"message_id"=>"720371712",
-     "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65",
-     "name"=>"Perucchi Inc",
-     "name_id"=>"-340961920"}
-     #, session: valid_session
+    @store = create(:store)
+    @trace = create(:trace, :second, store: @store)
+    post '/api/v1/orders', params: {"message_id"=>"720371712",
+    "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65",
+    "name"=>"Perucchi Inc",
+    "name_id"=>"-340961920"}
+    #, session: valid_session
   end
 
   # This should return the minimal set of attributes required to create a valid
@@ -44,10 +43,9 @@ RSpec.describe API::V1::Orders do
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in
   # Finances::EntriesController. Be sure to keep this updated too.
-  let(:valid_session) { {} }
 
   describe API::V1::Traces do
-    context 'POST /api/v1/orders' do
+    context 'POST /api/v*/orders' do
       it 'save a telegram trace message' do
         
         # expect(response).to be_success
@@ -55,20 +53,33 @@ RSpec.describe API::V1::Orders do
         # binding.pry
         expect(JSON.parse(response.body)).to be == {"id"=>1, "message_id"=>"720371712", "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65", "symbol"=>"USDJPY", "trace"=>"Perucchi Inc"}
       end
+      it 'verify lot information' do
+        @trace.update_attribute(:take_profit, 'normal')
+        get '/api/v2/orders/720371712'
+        expect(JSON.parse(response.body)['lots']).to eq([0.05])
+
+        @trace.update_attribute(:take_profit, 'Agressive')
+        get '/api/v2/orders/720371712'
+        expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02])
+
+        @trace.update_attribute(:take_profit, 'Superagressive')
+        get '/api/v2/orders/720371712'
+        expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02])
+      end
     end
 
-    context 'GET /api/v1/traces' do
+    context 'GET /api/v1/stores' do
       it 'return all sign to execute' do
         get '/api/v1/stores'
         # expect(response).to be_success
         expect(response.status).to eq(200)
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['message_id']).to eq('720371712')
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['type']).to eq('sell')
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['symbol']).to eq('USDJPY')
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['price_request']).to eq('105.25')
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['SL']).to eq('105.65')
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['TP']).to eq(['105.05', '104.65'])
-        expect(JSON.parse(response.body)['traces'][1]['orders'][0]['lots']).to eq([0.03, 0.02])
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['message_id']).to eq('720371712')
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['type']).to eq('sell')
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['symbol']).to eq('USDJPY')
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['price_request']).to eq('105.25')
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['SL']).to eq('105.65')
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['TP']).to eq(['105.05'])
+        expect(JSON.parse(response.body)['traces'][0]['orders'][0]['lots']).to eq([0.05])
       end
     end
 

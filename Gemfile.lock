@@ -177,6 +177,11 @@ GEM
       tzinfo
     eventmachine (1.2.7)
     execjs (2.7.0)
+    factory_bot (6.1.0)
+      activesupport (>= 5.0.0)
+    factory_bot_rails (6.1.0)
+      factory_bot (~> 6.1.0)
+      railties (>= 5.0.0)
     ffi (1.13.1)
     foreman (0.87.2)
     formatador (0.2.5)
@@ -433,6 +438,7 @@ GEM
     unicorn (5.7.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
+    wannabe_bool (0.7.1)
     web-console (4.0.4)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -474,6 +480,7 @@ DEPENDENCIES
   database_cleaner
   ed25519 (~> 1.2)
   eventmachine
+  factory_bot_rails
   foreman
   grape
   grape-active_model_serializers
@@ -505,6 +512,7 @@ DEPENDENCIES
   terminal-notifier!
   turbolinks (~> 5)
   unicorn
+  wannabe_bool
   web-console (>= 3.3.0)
   webdrivers
   webpacker (~> 4.0)

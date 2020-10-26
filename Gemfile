@@ -56,6 +56,8 @@ group :test do
   gem 'guard-rspec'
   gem 'terminal-notifier' , git:"https://github.com/d-a-l-l/terminal-notifier.git"
   gem "database_cleaner"
+  gem "factory_bot_rails"
+
 
 end
 
@@ -111,3 +113,4 @@ gem 'bcrypt_pbkdf', '~> 1'
 gem 'postgresql'
 gem 'unicorn'
 gem "rename"
+gem 'wannabe_bool'
