@@ -1,3 +1,4 @@
+require 'open-uri'
 require 'json'
 module API
   module V1
@@ -5,6 +6,8 @@ module API
       include API::V1::Defaults
 
       resource :orders do
+
+        ############################################
         desc "Return Order Message"
         params do 
           requires :message_id, type: Integer, desc: 'Message ID.'
@@ -14,7 +17,8 @@ module API
             order = Order.find_by(message_id: params[:message_id])
           end
         end
-
+        
+        ############################################
         desc "Save transaction from metatrader order"
         post "transaction/" do
           order = Order.find_by(message_id: params[:message_id])
@@ -44,20 +48,25 @@ module API
           # end
         end        
         
+        ############################################
         desc 'Save message from telegram to rails api'
         post '' do
           logger.debug { "MESSAGE_ID: #{params[:message_id]}" }
           logger.debug { "URL: #{request.env['REQUEST_PATH']}" }
-          if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
-            signal = Trace.active.find_by(name_id: params[:name_id])
-            if signal
-              message = signal.orders.find_by(message_id: params[:message_id]) 
-              message ||= signal.orders.create(message_id: params[:message_id]) do |order|
-                order.message = params[:message]
-                if params[:photo_path].present?
-                  order.image.attach(io: File.open(params[:photo_path]), filename: 'output.tiff')
-                else 
-                  order.prepare
+          signal = Trace.active.find_by(name_id: params[:name_id])
+          if signal
+            message = signal.orders.find_by(message_id: params[:message_id]) 
+            message ||= signal.orders.create(message_id: params[:message_id]) do |order|
+              order.message = params[:message]
+              case order.trace.name
+              when "M15 Signals Premium", "RoboSignal"
+                if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
+                  open("#{Rails.root}/public/output.jpg", 'wb') { |file| file << open(params[:photo_path]).read }
+                  order.save if order.prepare and order.order
+                end
+              when "Swing Trading ViP", "Perucchi Inc"
+                if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and params[:message].downcase.include?('now')
+                  order.save if order.prepare and order.order
                 end
               end
             end

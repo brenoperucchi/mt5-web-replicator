@@ -9,18 +9,19 @@ class OrderDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     trace_id: Field::BelongsTo,
     message: DisableTextField,
     message_id: Field::Number,
     image: Administrate::Field::Image,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
-    ready_at: Field::DateTime,
-    execute_at: Field::DateTime,
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    ready_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    execute_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     state: Field::String,
     symbol: Field::String,
     trace: Field::BelongsTo,
-    transactions: Field::HasMany
+    transactions: Field::HasMany,
+    kind: Field::String,
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -29,7 +30,7 @@ class OrderDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
+  created_at
   state
   symbol
   message

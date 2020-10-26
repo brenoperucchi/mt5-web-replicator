@@ -1,5 +1,7 @@
 class Order < ApplicationRecord
 
+  attr_accessor :image_url
+
   # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
   has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id"
@@ -12,7 +14,14 @@ class Order < ApplicationRecord
 
   has_one_attached :image
 
+  state_machine :kind, :initial => :message do
+    event :order do
+      transition :message => :orderd
+    end
+  end
+
   state_machine :initial => :pending do
+    before_transition :pending => :prepared, :do => :preparing
     after_transition :pending => :prepared, :do => :update_state
     after_transition :pending => :prepared, :do => :verify_symbol
     after_transition :prepared => :executed, :do => :update_state
@@ -32,19 +41,14 @@ class Order < ApplicationRecord
     end
 
     state :prepared do
+
       def update_state(state)
         self.update_column(:ready_at, DateTime.now)
-        system("rm -rf #{Rails.root}/public/output.tiff")
+        system("rm -rf #{Rails.root}/public/output.jpg") 
       end
 
       def verify_symbol(state)
-        # binding.pry
-        # if trace.name.downcase == "m15 signals premium"
-          sym = self.message.split[0].upcase
-          self.update_columns(symbol: sym, message:message.gsub(sym, '')) if not self.symbol
-        # else
-        # end
-          
+
       end
     end
     state :executed do
@@ -53,6 +57,17 @@ class Order < ApplicationRecord
       end
     end
     state :pending do
+      def preparing(state)
+        case self.trace.name
+        when "M15 Signals Premium", "RoboSignal" 
+          self.symbol = self.ocr_text(file:true) 
+          self.image.attach(io: File.open("#{Rails.root}/public/output.jpg"), filename: "#{self.symbol}.jpg") 
+        when "Swing Trading ViP", "Perucchi Inc"
+          self.symbol = self.message.split[0].upcase
+        end
+
+      end
+
       def update_state(state)
         self.update_column(:execute_at, nil)
         self.update_column(:ready_at, nil)
@@ -64,9 +79,10 @@ class Order < ApplicationRecord
   def ocr_text(url:nil, file:nil)
     if file
       path = Rails.root
-      image_path = ActiveStorage::Blob.service.path_for(self.image.key)
-      system("#{path}/lib/textcleaner -c '0,140,0,0' -g -t 30 -s 2 -u -p 5 -T #{image_path} #{path}/public/output.tiff")
-      image = RTesseract.new("#{path}/public/output.tiff")
+      image_path = "#{path}/public/output.jpg"
+      # image_path = ActiveStorage::Blob.service.path_for(self.image.key)
+      system("#{path}/lib/textcleaner -c '0,140,0,0' -g -t 30 -s 2 -u -p 5 -T #{image_path} #{image_path}")
+      image = RTesseract.new(image_path)
       return image.to_s.gsub(/[^A-Za-z]+/, "") #.to_s.scan(/([A-Z]{1,3} *\/ *[A-Z]{1,3})/)
 
     elsif url

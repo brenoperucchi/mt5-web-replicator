@@ -25,9 +25,9 @@ class TransactionDashboard < Administrate::BaseDashboard
     response: Field::String,
     response_error: Field::String,
     meta_order_generate: DisableTextField,
-    open_at: Field::DateTime,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    open_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
