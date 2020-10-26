@@ -16,6 +16,7 @@ class Transaction < ApplicationRecord
     event :cancel do
       transition [:executed, :error] => :pending
     end
+    
     state :error do
       def update_state(state)
         self.order.erro

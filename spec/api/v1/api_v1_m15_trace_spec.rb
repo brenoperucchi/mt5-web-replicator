@@ -26,6 +26,7 @@ require 'rails_helper'
 # RSpec.describe Finances::EntriesController, type: :controller do
 RSpec.describe API::V1::Orders do
 
+
   before(:context) do
     @store = create(:store)
     @trace = create(:trace, :first, store: @store)
@@ -36,7 +37,6 @@ RSpec.describe API::V1::Orders do
       "name"=>"RoboSignal",
       "name_id"=>"-481414224"
     }
-     #, session: valid_session
   end
 
   # This should return the minimal set of attributes required to create a valid
@@ -51,7 +51,18 @@ RSpec.describe API::V1::Orders do
   # let(:job_image_worker) { ImageWorker.new.perform.first }
 
   describe API::V1::Traces do
+    it 'verify kind order' do
+      @order = @trace.orders.find_by(message_id: 723517440)
+      expect(@order.kind).not_to be == nil
+    end
+
     context 'POST /api/v1/orders' do
+      
+      it 'verify kind order' do
+        @order = @trace.orders.find_by(message_id: 723517440)
+        expect(@order.kind).to be == "order"
+      end
+
       it 'save a telegram trace message' do
         expect(Order.first.state).to be == "prepared"
         expect(Order.first.symbol).to be == "CADJPY"
@@ -103,6 +114,9 @@ RSpec.describe API::V1::Orders do
     end
     context 'POST /api/v1/orders/transaction' do
       it 'Save transaction from metatrader order' do
+        
+
+
         post '/api/v1/orders/transaction', params:{
           "chat_id"=>"1",
           "message_id"=>"723517440",
@@ -120,6 +134,7 @@ RSpec.describe API::V1::Orders do
           "ticket"=>"363873673",
           "open_at"=>"2020.10.21 01:18:09"
         }
+
         expect(JSON.parse(response.body)['state']).to eq('executed')
         expect(JSON.parse(response.body)['ticket']).to eq('363873673')
         expect(JSON.parse(response.body)['action']).to eq('EXECUTION')
@@ -133,8 +148,13 @@ RSpec.describe API::V1::Orders do
         expect(JSON.parse(response.body)['magic']).to eq('123456')
         expect(JSON.parse(response.body)['ticket']).to eq('363873673')
         expect(JSON.parse(response.body)['open_at']).to eq('2020-10-21T01:18:09.000Z')
-
       end
+
+      it 'verify kind order' do
+        @order = @trace.orders.find_by(message_id: 723517440)
+        expect(@order.kind).to be == "order"
+      end
+      
     end
     context 'POST /api/v1/orders' do
       it 'Error transaction from metatrader order' do

@@ -40,7 +40,6 @@ module API
                                                   open_at: params[:open_at],
                                                   meta_order_generate: params[:meta_order_generate]
                                                 )
-
           params[:response].blank? ? transaction.execute : transaction.erro
           transaction
           #   message.update_attribute(:message_response, params.to_json)

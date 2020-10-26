@@ -16,7 +16,7 @@ class Order < ApplicationRecord
 
   state_machine :kind, :initial => :message do
     event :order do
-      transition :message => :orderd
+      transition :message => :order
     end
   end
 
@@ -87,7 +87,7 @@ class Order < ApplicationRecord
 
     elsif url
       # path = rails_blob_path(self.image, disposition: "attachment", only_path: true)
-    # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")relo
+    # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")
     # result = resource.convert url: "http://benincasouza.tplinkdns.com:8080/#{path}"
     end
   end
