@@ -6,7 +6,12 @@ Rails.application.routes.draw do
   namespace :admin do
 	  	resources :slaves
       resources :transactions
+
       resources :orders
+      resources :messages#, only: [:index]
+      # get '/messages', to: 'messages#index', as: 'messages', on: :collection
+      # end
+      
       resources :traces
       resources :stores
       # resources :sign_traces
