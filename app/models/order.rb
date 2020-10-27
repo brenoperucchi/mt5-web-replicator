@@ -4,7 +4,7 @@ class Order < ApplicationRecord
 
   # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
-  has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id"
+  has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
 
