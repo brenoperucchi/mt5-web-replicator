@@ -9,7 +9,7 @@ module Admin
     before_action :authenticate_admin
 
     def scoped_resource
-        resource_class.order('id')
+        resource_class.order('id desc')
     end
 
     def authenticate_admin

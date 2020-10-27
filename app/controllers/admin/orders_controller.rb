@@ -30,7 +30,7 @@ module Admin
     # end
 
     def scoped_resource
-        resource_class.order('id')
+        resource_class.where(kind: 'order').order('id desc')
     end
 
 

@@ -13,6 +13,6 @@ if Rails.env.development?
   store.traces.create(name: 'RoboSignal', name_id:'-481414224', active_at: DateTime.now, telegram_option:'query_name', telegram_image:true, lots: 0.05, take_profit:'Agressive')
   store.traces.create(name: 'Perucchi Inc', name_id:'-340961920', active_at: DateTime.now, telegram_option:'query_name_id', telegram_image:false, lots: 0.05, take_profit:'Agressive')
 elsif Rails.env.production?
-  store.traces.create(name: 'M15 Signals Premium', name_id:'-1001222448337', active_at: DateTime.now, telegram_option:'query_name_id', telegram_image:true, lots: 0.05, take_profit:'Agressive')
-  store.traces.create(name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: DateTime.now, telegram_option:'query_name', telegram_image:false, lots: 0.05, take_profit:'Agressive')
+  store.traces.create(name: 'M15 Signals Premium', name_id:'-1001222448337', active_at: DateTime.now, telegram_option:'query_name_id', telegram_image:true, lots: 0.04, take_profit:'Agressive')
+  store.traces.create(name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: DateTime.now, telegram_option:'query_name', telegram_image:false, lots: 0.03, take_profit:'Normal')
 end
