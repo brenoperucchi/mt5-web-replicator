@@ -39,6 +39,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   symbol
   order
+  profit
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -47,6 +48,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   id
   order
   ticket
+  profit
   action
   kind
   symbol

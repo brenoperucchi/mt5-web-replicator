@@ -10,8 +10,10 @@ class StoreDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     name: Field::String,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    master: Field::String,
+    slaves: Field::String,
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -22,8 +24,7 @@ class StoreDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   name
-  created_at
-  updated_at
+  master
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -31,6 +32,10 @@ class StoreDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
+  master
+  slaves
+  created_at
+  updated_at
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -38,6 +43,8 @@ class StoreDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  master
+  slaves
   ].freeze
 
   # COLLECTION_FILTERS
