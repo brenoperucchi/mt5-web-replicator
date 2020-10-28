@@ -40,7 +40,7 @@ module Signals
       when "normal"          
         [take_profit_1]
       when "agressive"
-        [take_profit_1, take_profit_2]
+        [take_profit_1, take_profit_1]
       when "superagressive"
         [take_profit_1, take_profit_2]
       end
