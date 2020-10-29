@@ -54,15 +54,15 @@ RSpec.describe API::V1::Orders do
         expect(JSON.parse(response.body)).to be == {"id"=>1, "message_id"=>"720371712", "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65", "symbol"=>"USDJPY", "trace"=>"Perucchi Inc"}
       end
       it 'verify lot information' do
-        @trace.update(:take_profit, 'normal')
+        @trace.update(take_profit: 'normal')
         get '/api/v2/orders/720371712'
         expect(JSON.parse(response.body)['lots']).to eq([0.05])
 
-        @trace.update(:take_profit, 'Agressive')
+        @trace.update(take_profit: 'Agressive')
         get '/api/v2/orders/720371712'
         expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02])
 
-        @trace.update(:take_profit, 'Superagressive')
+        @trace.update(take_profit: 'Superagressive')
         get '/api/v2/orders/720371712'
         expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02])
       end
