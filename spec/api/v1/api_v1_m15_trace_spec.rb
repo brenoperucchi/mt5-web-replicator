@@ -28,7 +28,7 @@ RSpec.describe API::V1::Orders do
 
 
   before(:context) do
-    @store = create(:store)
+    @store = create(:store, master: '5077669')
     @trace = create(:trace, :first, store: @store)
     post '/api/v1/orders', params: {
       "message_id"=>"723517440",
@@ -49,6 +49,8 @@ RSpec.describe API::V1::Orders do
   # let!(:store) { FactoryBot.create(:store)   }
   # let!(:trace) { FactoryBot.create(:trace, :first, store: store)}
   # let(:job_image_worker) { ImageWorker.new.perform.first }
+  # let(:order) { FactoryBot.create(:order, :m15_trace) }
+  # let(:transaction) { FactoryBot.create(:transaction) }
 
   describe API::V1::Traces do
     it 'verify kind order' do
@@ -73,15 +75,15 @@ RSpec.describe API::V1::Orders do
       end
 
       it 'verify lot information' do
-        @trace.update_attribute(:take_profit, 'normal')
+        @trace.update(take_profit: 'normal')
         get '/api/v2/orders/723517440'
         expect(JSON.parse(response.body)['lots']).to eq([0.05])
 
-        @trace.update_attribute(:take_profit, 'Agressive')
+        @trace.update(take_profit: 'Agressive')
         get '/api/v2/orders/723517440'
         expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02])
 
-        @trace.update_attribute(:take_profit, 'Superagressive')
+        @trace.update(take_profit: 'Superagressive')
         get '/api/v2/orders/723517440'
         expect(JSON.parse(response.body)['lots']).to eq([0.03, 0.02, 0.02])
       end
@@ -129,6 +131,7 @@ RSpec.describe API::V1::Orders do
           "price_open"=>"80.38",
           "stop_loss"=>"81.39",
           "take_profit"=>"80.19",
+          "lot"=> "0.03",
           "comment"=>"RoboSignal",
           "magic"=>"123456",
           "ticket"=>"363873673",
@@ -144,6 +147,7 @@ RSpec.describe API::V1::Orders do
         expect(JSON.parse(response.body)['price_open']).to eq('80.38')
         expect(JSON.parse(response.body)['stop_loss']).to eq('81.39')
         expect(JSON.parse(response.body)['take_profit']).to eq('80.19')
+        expect(JSON.parse(response.body)['lot']).to eq('0.03')
         expect(JSON.parse(response.body)['comment']).to eq('RoboSignal')
         expect(JSON.parse(response.body)['magic']).to eq('123456')
         expect(JSON.parse(response.body)['ticket']).to eq('363873673')
@@ -164,7 +168,20 @@ RSpec.describe API::V1::Orders do
         expect(JSON.parse(response.body)['state']).to eq('error')
       end
     end
+    context '/api/v1/traces' do
+      it 'post close transaction' do
+        transaction = create(:transaction, order: @store.traces.first.orders.first)
+        post '/api/v1/traces/master', params:{
+          'message': '5077669|CLOSED|EURNZD|363873673|1|1.182750|1.183030|0.020000|1.198500|1.178500|-0.610000'
+        }
+        expect(response.body).to eq('true')
+        expect(@store.traces.first.orders.first.transactions.first.profit.to_f).to be == -0.61
+        expect(@store.traces.first.orders.first.transactions.first.response).to be == "5077669|CLOSED|EURNZD|363873673|1|1.182750|1.183030|0.020000|1.198500|1.178500|-0.610000"
+      end
+    end
+
   end
+end
 
 
 
@@ -185,4 +202,3 @@ RSpec.describe API::V1::Orders do
   #   #   end
   #   # end
   # end
-end

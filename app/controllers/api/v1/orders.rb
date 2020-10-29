@@ -33,7 +33,6 @@ module API
                                                   take_profit: params[:take_profit],
                                                   lot: params[:lot],
                                                   comment: params[:comment],
-                                                  lot: params[:lot],
                                                   magic: params[:magic],
                                                   response: params[:response],
                                                   response_error: params[:response_value],
@@ -42,9 +41,6 @@ module API
                                                 )
           params[:response].blank? ? transaction.execute : transaction.erro
           transaction
-          #   message.update_attribute(:message_response, params.to_json)
-          #   message.error
-          # end
         end        
         
         ############################################

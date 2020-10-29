@@ -25,7 +25,7 @@ module API
           store = Store.all.detect{|x| x.master == response[0]}
           if store
             transaction = Transaction.find_by(ticket: response[3])
-            transaction.update_attributes(profit:response[10], response: params[:message])
+            transaction.update(profit:response[10], response: params[:message])
           end
         end
       
