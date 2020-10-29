@@ -74,6 +74,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   order
   ticket
   action
+  profit
   kind
   symbol
   price_request
