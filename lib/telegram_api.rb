@@ -50,7 +50,6 @@ class TelegramApi
     end
 
     def client
-      # binding.pryAp.c
       return @client.connect.result[1]
     end
 end
@@ -106,7 +105,6 @@ end
 #     end
 
 #     def client
-#       # binding.pryAp.c
 #       return @client.connect.result[1]
 #     end
 # end

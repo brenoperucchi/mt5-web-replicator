@@ -50,7 +50,6 @@ RSpec.describe API::V1::Orders do
         
         # expect(response).to be_success
         expect(response.status).to eq(201)
-        # binding.pry
         expect(JSON.parse(response.body)).to be == {"id"=>1, "message_id"=>"720371712", "message"=>"UsdJpy sell now @ 105.25\nSl @ 105.65\nTp1 @ 105.05\nTp2 @ 104.65", "symbol"=>"USDJPY", "trace"=>"Perucchi Inc"}
       end
       it 'verify lot information' do

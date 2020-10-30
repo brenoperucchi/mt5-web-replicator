@@ -50,7 +50,6 @@ class Apisocial::Telegram
     end
 
     def client
-      # binding.pryAp.c
       return @client.connect.result[1]
     end
 end
