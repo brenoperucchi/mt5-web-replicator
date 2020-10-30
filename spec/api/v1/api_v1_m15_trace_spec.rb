@@ -156,7 +156,9 @@ RSpec.describe API::V1::Orders do
 
       it 'verify kind order' do
         @order = @trace.orders.find_by(message_id: 723517440)
+        @order.execute
         expect(@order.kind).to be == "order"
+        expect(@order.state).to be == 'executed'
       end
       
     end
@@ -168,15 +170,18 @@ RSpec.describe API::V1::Orders do
         expect(JSON.parse(response.body)['state']).to eq('error')
       end
     end
-    context '/api/v1/traces' do
+    context '/api/v1/traces' do 
       it 'post close transaction' do
-        transaction = create(:transaction, order: @store.traces.first.orders.first)
+        transaction = create(:transaction, :first, order: @store.traces.first.orders.first)
+        transaction.execute
         post '/api/v1/traces/master', params:{
           'message': '5077669|CLOSED|EURNZD|363873673|1|1.182750|1.183030|0.020000|1.198500|1.178500|-0.610000'
         }
         expect(response.body).to eq('true')
         expect(@store.traces.first.orders.first.transactions.first.profit.to_f).to be == -0.61
         expect(@store.traces.first.orders.first.transactions.first.response).to be == "5077669|CLOSED|EURNZD|363873673|1|1.182750|1.183030|0.020000|1.198500|1.178500|-0.610000"
+        expect(@store.traces.first.orders.first.transactions.first.state).to be == 'closed'       
+        expect(@store.traces.first.orders.first.state).to be == 'closed'       
       end
     end
 

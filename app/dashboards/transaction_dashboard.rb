@@ -10,6 +10,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     ticket: Field::String,
+    state: Field::String,
     order: Field::BelongsTo,
     profit: Field::String.with_options(searchable: false),
     action: Field::String,
@@ -37,6 +38,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   ticket
+  state
   symbol
   order
   profit
@@ -48,6 +50,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   id
   order
   ticket
+  state
   profit
   action
   kind
@@ -73,6 +76,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   order
   ticket
+  state
   action
   profit
   kind

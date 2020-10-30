@@ -57,10 +57,13 @@ module API
               when "M15 Signals Premium", "RoboSignal"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
                   open("#{Rails.root}/public/output.jpg", 'wb') { |file| file << open(params[:photo_path]).read }
+                  order.symbol = order.ocr_text(file:true) 
+                  order.image.attach(io: File.open("#{Rails.root}/public/output.jpg"), filename: "#{order.symbol}.jpg") 
                   order.save if order.prepare and order.order
                 end
               when "Swing Trading ViP", "Perucchi Inc"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and params[:message].downcase.include?('now')
+                  order.symbol = params[:message].split[0].upcase
                   order.save if order.prepare and order.order
                 end
               end

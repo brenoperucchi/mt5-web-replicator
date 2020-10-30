@@ -25,7 +25,10 @@ module API
           store = Store.all.detect{|x| x.master == response[0]}
           if store
             transaction = Transaction.find_by(ticket: response[3])
-            transaction.update(profit:response[10], response: params[:message])
+            if transaction
+              transaction.update(profit:response[10], response: params[:message], action: response[1])
+              transaction.close
+            end
           end
         end
       

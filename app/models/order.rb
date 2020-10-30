@@ -21,10 +21,11 @@ class Order < ApplicationRecord
   end
 
   state_machine :initial => :pending do
-    before_transition :pending => :prepared, :do => :preparing
+    # before_transition :pending => :prepared, :do => :preparing
     after_transition :pending => :prepared, :do => :update_state
     after_transition :pending => :prepared, :do => :verify_symbol
     after_transition :prepared => :executed, :do => :update_state
+    before_transition :executed => :closed, :do => :close_state?
     after_transition [:prepared, :executed] => :pending, :do => :update_state
 
     event :prepare do
@@ -36,12 +37,14 @@ class Order < ApplicationRecord
     event :erro do
       transition [:prepared, :executed] => :error
     end
+    event :close do
+      transition [:executed] => :closed
+    end
     event :cancel do
       transition [:prepared, :executed, :error] => :pending
     end
 
     state :prepared do
-
       def update_state(state)
         self.update_column(:ready_at, DateTime.now)
         system("rm -rf #{Rails.root}/public/output.jpg") 
@@ -55,19 +58,13 @@ class Order < ApplicationRecord
       def update_state(state)
         self.update_column(:execute_at, DateTime.now)
       end
+      def close_state?(state)
+        trans_count = self.transactions.count
+        closed_count = self.transactions.closed.count
+        trans_count == closed_count ? self.update_column(:execute_at, DateTime.now) : false
+      end
     end
     state :pending do
-      def preparing(state)
-        case self.trace.name
-        when "M15 Signals Premium", "RoboSignal" 
-          self.symbol = self.ocr_text(file:true) 
-          self.image.attach(io: File.open("#{Rails.root}/public/output.jpg"), filename: "#{self.symbol}.jpg") 
-        when "Swing Trading ViP", "Perucchi Inc"
-          self.symbol = self.message.split[0].upcase
-        end
-
-      end
-
       def update_state(state)
         self.update_column(:execute_at, nil)
         self.update_column(:ready_at, nil)
