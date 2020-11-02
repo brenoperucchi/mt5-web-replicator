@@ -5,6 +5,14 @@ GIT
     terminal-notifier (2.0.0)
 
 GIT
+  remote: https://github.com/herregroen/administrate-field-tag.git
+  revision: 1573537e816b39db978ec09bb8965cb9dce8cc9c
+  specs:
+    administrate-field-tag (0.0.1)
+      administrate
+      rails
+
+GIT
   remote: https://github.com/shopperplus/state_machine.git
   revision: f770babf2152da074b399a0f68af3710b99f73f7
   specs:
@@ -73,6 +81,8 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
       zeitwerk (~> 2.2)
+    acts-as-taggable-on (6.5.0)
+      activerecord (>= 5.0, < 6.1)
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
     administrate (0.14.0)
@@ -463,8 +473,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  acts-as-taggable-on (~> 6.0)
   administrate
   administrate-field-image
+  administrate-field-tag!
   bcrypt_pbkdf (~> 1)
   better_errors
   binding_of_caller

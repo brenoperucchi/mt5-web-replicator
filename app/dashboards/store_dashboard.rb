@@ -12,6 +12,7 @@ class StoreDashboard < Administrate::BaseDashboard
     name: Field::String,
     master: Field::String,
     slaves: Field::String,
+    tag_list: Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -25,6 +26,7 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   master
+  tag_list
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -34,6 +36,7 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   master
   slaves
+  tag_list
   created_at
   updated_at
   ].freeze
@@ -43,6 +46,7 @@ class StoreDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  tag_list
   master
   slaves
   ].freeze

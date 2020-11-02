@@ -83,6 +83,8 @@ gem 'eventmachine'
 gem 'slim'
 gem "administrate"
 gem 'administrate-field-image'
+gem 'administrate-field-tag', git: 'https://github.com/herregroen/administrate-field-tag.git'
+
 
 gem 'sidekiq'#, '5.2.9'
 gem 'sidekiq-scheduler'
@@ -114,3 +116,4 @@ gem 'postgresql'
 gem 'unicorn'
 gem "rename"
 gem 'wannabe_bool'
+gem 'acts-as-taggable-on', '~> 6.0'

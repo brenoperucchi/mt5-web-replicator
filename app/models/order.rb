@@ -23,8 +23,8 @@ class Order < ApplicationRecord
   state_machine :initial => :pending do
     # before_transition :pending => :prepared, :do => :preparing
     after_transition :pending => :prepared, :do => :update_state
-    after_transition :pending => :prepared, :do => :verify_symbol
     after_transition :prepared => :executed, :do => :update_state
+    before_transition :prepared => :executed, :do => :restrict_symbol
     before_transition :executed => :closed, :do => :close_state?
     after_transition [:prepared, :executed] => :pending, :do => :update_state
 
@@ -49,9 +49,8 @@ class Order < ApplicationRecord
         self.update_column(:ready_at, DateTime.now)
         system("rm -rf #{Rails.root}/public/output.jpg") 
       end
-
-      def verify_symbol(state)
-
+      def restrict_symbol
+        
       end
     end
     state :executed do
