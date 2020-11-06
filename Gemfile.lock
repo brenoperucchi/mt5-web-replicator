@@ -5,18 +5,17 @@ GIT
     terminal-notifier (2.0.0)
 
 GIT
-  remote: https://github.com/herregroen/administrate-field-tag.git
-  revision: 1573537e816b39db978ec09bb8965cb9dce8cc9c
-  specs:
-    administrate-field-tag (0.0.1)
-      administrate
-      rails
-
-GIT
   remote: https://github.com/shopperplus/state_machine.git
   revision: f770babf2152da074b399a0f68af3710b99f73f7
   specs:
     state_machine (1.2.0)
+
+PATH
+  remote: vendor/administrate-field-tag
+  specs:
+    administrate-field-tag (0.0.1)
+      administrate
+      rails
 
 GEM
   remote: https://rubygems.org/

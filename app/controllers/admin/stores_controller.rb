@@ -48,7 +48,8 @@ module Admin
     #
 
     def resource_params
-    params.require(resource_class.model_name.param_key).permit(dashboard.permitted_attributes << :tag_list).transform_values{ |value| value == "" ? nil : value }
+        # params.require(:store).permit(:name, :master, :slaves, tag_list:[])
+        params.require(resource_class.model_name.param_key).permit(dashboard.permitted_attributes)
     end
 
     # See https://administrate-prototype.herokuapp.com/customizing_controller_actions

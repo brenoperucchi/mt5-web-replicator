@@ -83,8 +83,7 @@ gem 'eventmachine'
 gem 'slim'
 gem "administrate"
 gem 'administrate-field-image'
-gem 'administrate-field-tag', git: 'https://github.com/herregroen/administrate-field-tag.git'
-
+gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 
 gem 'sidekiq'#, '5.2.9'
 gem 'sidekiq-scheduler'

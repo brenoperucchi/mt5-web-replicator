@@ -22,9 +22,9 @@ class Order < ApplicationRecord
 
   state_machine :initial => :pending do
     # before_transition :pending => :prepared, :do => :preparing
+    before_transition :pending => :prepared, :do => :restrict_symbol
     after_transition :pending => :prepared, :do => :update_state
     after_transition :prepared => :executed, :do => :update_state
-    before_transition :prepared => :executed, :do => :restrict_symbol
     before_transition :executed => :closed, :do => :close_state?
     after_transition [:prepared, :executed] => :pending, :do => :update_state
 
@@ -44,13 +44,16 @@ class Order < ApplicationRecord
       transition [:prepared, :executed, :error] => :pending
     end
 
+    state :pending do
+      def restrict_symbol(state) Order.last.prepare Order.last.prepare
+        return self.trace.store.tag_list.all?{|symbol| not (symbol.downcase == self.symbol.downcase) }
+      end
+    end
+    
     state :prepared do
       def update_state(state)
         self.update_column(:ready_at, DateTime.now)
         system("rm -rf #{Rails.root}/public/output.jpg") 
-      end
-      def restrict_symbol
-        
       end
     end
     state :executed do

@@ -32,8 +32,9 @@ en:
   helpers:
     label:
       store:
-        id: id
-        name: name
+        id: Id
+        name: Name
+        tag_list: Restrict 
     select:
       prompt: Please select
     submit:
@@ -69,6 +70,7 @@ en:
       store:
         id: "Number"
         name: "Estate"
+        tag_list: 'Restrict'
   date:
     abbr_day_names:
     - Sun
