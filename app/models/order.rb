@@ -21,21 +21,19 @@ class Order < ApplicationRecord
   end
 
   state_machine :initial => :pending do
-    # before_transition :pending => :prepared, :do => :preparing
-    before_transition :pending => :prepared, :do => :restrict_symbol
     after_transition :pending => :prepared, :do => :update_state
     after_transition :prepared => :executed, :do => :update_state
     before_transition :executed => :closed, :do => :close_state?
     after_transition [:prepared, :executed] => :pending, :do => :update_state
 
     event :prepare do
-      transition :pending => :prepared
+      transition :pending => :prepared, :if => lambda { |order| order.restrict_symbol? }
     end
     event :execute do
       transition :prepared => :executed
     end
     event :erro do
-      transition [:prepared, :executed] => :error
+      transition [:pending, :prepared, :executed] => :error
     end
     event :close do
       transition [:executed] => :closed
@@ -44,12 +42,6 @@ class Order < ApplicationRecord
       transition [:prepared, :executed, :error] => :pending
     end
 
-    state :pending do
-      def restrict_symbol(state) Order.last.prepare Order.last.prepare
-        return self.trace.store.tag_list.all?{|symbol| not (symbol.downcase == self.symbol.downcase) }
-      end
-    end
-    
     state :prepared do
       def update_state(state)
         self.update_column(:ready_at, DateTime.now)
@@ -73,6 +65,16 @@ class Order < ApplicationRecord
       end
     end
 
+  end
+
+  def restrict_symbol?
+    if self.trace.store.tag_list.map(&:downcase).include?(symbol.downcase)
+      self.message_response = "Restrict Store Symbol"
+      self.erro
+      return false
+    else
+      return true
+    end
   end
 
   def ocr_text(url:nil, file:nil)

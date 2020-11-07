@@ -1,10 +1,10 @@
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.6.6'
+ruby '2.7.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.2.2'
+gem 'rails', '~> 6.0.3.3'
 # Use sqlite3 as the database for Active Record
 group :development, :test do
   gem 'sqlite3', '~> 1.4'
@@ -68,9 +68,8 @@ end
 group :development do
   gem "better_errors"
   gem "binding_of_caller"
-  gem 'pry'
-  gem 'pry-remote'
-  gem 'pry-nav'
+  gem 'pry', '~> 0.13.1'
+  gem 'pry-byebug'
   # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
   # gem 'pry-byebug'
   # gem 'pry-nav'
@@ -89,7 +88,7 @@ gem 'sidekiq'#, '5.2.9'
 gem 'sidekiq-scheduler'
 gem 'foreman'
 # gem 'ocr_space', path: "vendor/ocr_space"
-gem 'rtesseract'
+gem 'rtesseract'  
 gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
 gem 'lucky_case'
 

@@ -34,3 +34,18 @@ RSpec.describe Order do
     end
   end
 end
+
+RSpec.describe Order do
+  before(:context) do
+    @store = create(:store, master: '5077669', tag_list: "CADJPY")
+    @trace = create(:trace, :first, store: @store)
+  end
+
+  describe 'Order should be error ' do
+    it 'restrict symbol is defined' do
+      @order = create(:order, :m15_trace_first, trace:@trace)
+      @order.prepare
+      expect(@order.state).to be == "error"
+    end
+  end
+end
