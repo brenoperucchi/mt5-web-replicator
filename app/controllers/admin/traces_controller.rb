@@ -33,6 +33,22 @@ module Admin
         Store.first.try(:traces).try(:new)
     end
 
+    def create
+        resource = Store.first.try(:traces).try(:new, (resource_params))
+        authorize_resource(resource)
+
+        if resource.save
+          redirect_to(
+            [namespace, resource],
+            notice: translate_with_resource("create.success"),
+          )
+        else
+          render :new, locals: {
+            page: Administrate::Page::Form.new(dashboard, resource),
+          }
+        end
+    end
+
     # def scoped_resource
     #     Store.first.traces
     # end

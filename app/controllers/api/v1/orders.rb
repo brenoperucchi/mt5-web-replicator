@@ -61,9 +61,14 @@ module API
                   order.image.attach(io: File.open("#{Rails.root}/public/output.jpg"), filename: "#{order.symbol}.jpg") 
                   order.save if order.prepare and order.order
                 end
-              when "Swing Trading ViP", "Perucchi Inc"
+              when "Swing Trading ViP"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and params[:message].downcase.include?('now')
                   order.symbol = params[:message].split[0].upcase
+                  order.save if order.prepare and order.order
+                end
+              when "Mirfx", "Perucchi Inc"
+                if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and params[:message].downcase.include?('*novo trade*')
+                  order.symbol = params[:message].split[3].upcase
                   order.save if order.prepare and order.order
                 end
               end
