@@ -1,7 +1,7 @@
 require 'lucky_case/string'
 module Signals
   class SwingTradingViPSerializer < Signals::BaseSerializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP, :lots
+    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
 
     def values
       object.message.scan(/\@ (.*$)/).flatten
@@ -36,24 +36,11 @@ module Signals
     end
 
     def TP
-      case object.trace.take_profit.downcase
-      when "normal"          
+      case object.trace.volumes.count
+      when 1          
         [take_profit_1]
-      when "agressive"
-        [take_profit_1, take_profit_1]
-      when "superagressive"
+      when 2
         [take_profit_1, take_profit_2]
-      end
-    end
-    
-    def lots
-      case object.trace.take_profit.downcase
-      when "normal"
-        [ object.trace.lots ]
-      when "agressive"
-        [ object.calcule_lot(0.65), object.calcule_lot(0.35) ]
-      when "superagressive"
-        [ object.calcule_lot(0.55), object.calcule_lot(0.45) ]
       end
     end
 

@@ -39,7 +39,7 @@ module API
                                                   open_at: params[:open_at],
                                                   meta_order_generate: params[:meta_order_generate]
                                                 )
-          params[:response].blank? ? transaction.execute : transaction.erro
+          params[:response] == "OK" ? transaction.execute : transaction.erro
           transaction
         end        
         
@@ -54,21 +54,26 @@ module API
             message ||= signal.orders.create(message_id: params[:message_id]) do |order|
               order.message = params[:message].html_safe
               case order.trace.name
-              when "M15 Signals Premium", "RoboSignal"
+              when "M15 Signals Premium"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and not params[:message].downcase.include?('results')
                   open("#{Rails.root}/public/output.jpg", 'wb') { |file| file << open(params[:photo_path]).read }
                   order.symbol = order.ocr_text(file:true) 
                   order.image.attach(io: File.open("#{Rails.root}/public/output.jpg"), filename: "#{order.symbol}.jpg") 
                   order.save if order.prepare and order.order
                 end
-              when "Swing Trading ViP"
+              when "Swing Trading ViP", "Perucchi Inc"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and params[:message].downcase.include?('now')
                   order.symbol = params[:message].split[0].upcase
                   order.save if order.prepare and order.order
                 end
-              when "Mirfx", "Perucchi Inc"
+              when "Mirfx"
                 if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy')) and params[:message].downcase.include?('*novo trade*')
                   order.symbol = params[:message].split[3].upcase
+                  order.save if order.prepare and order.order
+                end
+              when "PipsNation", "RoboSignal"
+                if (params[:message].downcase.include?('sell') or params[:message].downcase.include?('buy'))
+                  order.symbol = params[:message].split[0].upcase
                   order.save if order.prepare and order.order
                 end
               end

@@ -2,7 +2,7 @@
 require 'lucky_case/string'
 module Signals
   class BaseSerializer < ActiveModel::Serializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP, :lots
+    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
 
     def id
       object.id

@@ -1,7 +1,7 @@
 require 'lucky_case/string'
 module Signals
   class MirfxSerializer < Signals::BaseSerializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP, :lots
+    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
 
     def values
       object.message.scan(/\@ (.*$)/).flatten
@@ -30,16 +30,5 @@ module Signals
       end
     end
     
-    def lots
-      case object.trace.take_profit.downcase
-      when "normal"
-        [ object.trace.lots ]
-      when "agressive"
-        [ object.calcule_lot(0.65), object.calcule_lot(0.35) ]
-      when "superagressive"
-        [ object.calcule_lot(0.65), object.calcule_lot(0.35), object.calcule_lot(0.35) ]
-      end
-    end
-  
   end
 end

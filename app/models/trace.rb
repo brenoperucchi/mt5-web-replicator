@@ -1,4 +1,5 @@
 class Trace < ApplicationRecord
+  acts_as_taggable_on :volumes
 
   TAKE_PROFIT = %w{normal agressive superagressive} 
 

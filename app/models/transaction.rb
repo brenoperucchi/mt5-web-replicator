@@ -2,6 +2,7 @@ class Transaction < ApplicationRecord
   belongs_to :order
 
   scope :closed, ->{where(state: 'closed')}
+  scope :executed, ->{where(state: 'executed')}
 
   state_machine :initial => :pending do
     # after_transition :pending => :executed, :do => :update_state

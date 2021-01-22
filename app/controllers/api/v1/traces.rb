@@ -22,11 +22,11 @@ module API
         desc "Return all signs"
         post "/master" do
           response = params[:message].split("|")
-          store = Store.all.detect{|x| x.master == response[0]}
+          store = Store.all.detect{|x| x.master.include?(response[0])}
           if store
             transaction = Transaction.find_by(ticket: response[3])
             if transaction
-              transaction.update(profit:response[10], response: params[:message], action: response[1])
+              transaction.update(profit:response[8], response: params[:message], action: response[1])
               transaction.close
             end
           end

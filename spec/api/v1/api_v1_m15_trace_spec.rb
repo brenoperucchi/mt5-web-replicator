@@ -106,7 +106,8 @@ RSpec.describe API::V1::Orders do
           "comment"=>"RoboSignal",
           "magic"=>"123456",
           "ticket"=>"363873673",
-          "open_at"=>"2020.10.21 01:18:09"
+          "open_at"=>"2020.10.21 01:18:09",
+          "response"=>"10009"
         }
 
         expect(JSON.parse(response.body)['state']).to eq('executed')

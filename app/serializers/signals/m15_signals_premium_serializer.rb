@@ -1,7 +1,7 @@
 require 'lucky_case/string'
 module Signals
   class M15SignalsPremiumSerializer < Signals::BaseSerializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP, :lots
+    attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
 
     def values
       object.message.scan(/\@ (.*$)/).flatten
@@ -20,24 +20,13 @@ module Signals
     end
 
     def TP
-      case object.trace.take_profit.downcase
-      when "normal"          
+      case object.trace.volumes.count
+      when 1          
         [object.message.split[3]]
-      when "agressive"
+      when 2
         [object.message.split[3], object.message.split[5]]
-      when "superagressive"
-        [object.message.split[3], object.message.split[5], object.message.split[7]]
-      end
-    end
-    
-    def lots
-      case object.trace.take_profit.downcase
-      when "normal"
-        [ object.trace.lots ]
-      when "agressive"
-        [ object.calcule_lot(0.65), object.calcule_lot(0.35) ]
-      when "superagressive"
-        [ object.calcule_lot(0.65), object.calcule_lot(0.35), object.calcule_lot(0.35) ]
+      when 3
+        [object.message.split[3], object.message.split[5]], object.message.split[7]]
       end
     end
   

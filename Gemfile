@@ -114,4 +114,6 @@ gem 'postgresql'
 gem 'unicorn'
 gem "rename"
 gem 'wannabe_bool'
-gem 'acts-as-taggable-on', '~> 6.0'
+gem 'acts-as-taggable-on', '~> 7.0'
+gem 'administrate-field-acts_as_taggable'
+gem 'ancestry'

@@ -13,13 +13,14 @@ class TraceDashboard < Administrate::BaseDashboard
     name: Field::String,
     name_id: Field::String,
     telegram_option: Field::String,
-    take_profit: Field::Select.with_options(collection: TracesHelper::i18n_take_profit),
-    lots: Field::String,
     telegram_image: Field::Boolean,
     active: Field::Boolean,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
-    store: Field::BelongsTo
+    store: Field::BelongsTo,
+    meta_host: Field::String,
+    meta_port: Field::String,
+    volumes: Field::ActsAsTaggable
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -31,8 +32,6 @@ class TraceDashboard < Administrate::BaseDashboard
   id
   name
   name_id
-  take_profit
-  lots
   active
   store
 
@@ -45,10 +44,11 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   store
-  lots
-  take_profit
+  volumes
   telegram_option
   telegram_image
+  meta_host
+  meta_port
   active
   created_at
   updated_at
@@ -60,11 +60,12 @@ class TraceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   name_id
-  lots
-  take_profit
+  volumes
   telegram_option
   telegram_image
   active
+  meta_host
+  meta_port
 
   ].freeze
 
