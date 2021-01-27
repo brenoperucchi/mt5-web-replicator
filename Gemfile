@@ -76,7 +76,7 @@ group :development do
   # gem 'pry-stack_explorer'
 end
 
-gem 'tdlib-ruby', "2.2.0"
+# gem 'tdlib-ruby', "2.2.0"
 
 gem 'eventmachine'
 gem 'slim'
@@ -117,3 +117,5 @@ gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'
 gem 'ancestry'
+gem 'pycall'
+gem "logidze", "~> 1.0.0"

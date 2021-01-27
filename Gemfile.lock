@@ -174,11 +174,6 @@ GEM
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.2)
       dry-equalizer (~> 0.2)
-    dry-struct (1.2.0)
-      dry-core (~> 0.4, >= 0.4.3)
-      dry-equalizer (~> 0.3)
-      dry-types (~> 1.0)
-      ice_nine (~> 0.11)
     dry-types (1.2.2)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.3)
@@ -234,7 +229,6 @@ GEM
       rspec (>= 2.99.0, < 4.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
-    ice_nine (0.11.2)
     jbuilder (2.10.1)
       activesupport (>= 5.0.0)
     jquery-rails (4.4.0)
@@ -259,6 +253,9 @@ GEM
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
       ruby_dep (~> 1.2)
+    logidze (1.0.0)
+      rails (>= 5.0)
+      ruby-next-core (~> 0.9)
     loofah (2.7.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -301,6 +298,7 @@ GEM
       pry (~> 0.13.0)
     public_suffix (4.0.6)
     puma (3.12.6)
+    pycall (1.3.1)
     raabro (1.4.0)
     rack (2.2.3)
     rack-accept (0.4.5)
@@ -372,6 +370,7 @@ GEM
       rspec-support (~> 3.9)
     rspec-support (3.10.0)
     rtesseract (3.1.2)
+    ruby-next-core (0.12.0)
     ruby2_keywords (0.0.2)
     ruby_dep (1.5.0)
     rubyzip (2.3.0)
@@ -431,12 +430,6 @@ GEM
     sshkit (1.21.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
-    tdlib-ruby (2.2.0)
-      concurrent-ruby (~> 1.1)
-      dry-configurable (~> 0.9)
-      dry-struct (~> 1.2.0)
-      dry-types (~> 1.2.0)
-      ffi (~> 1.0)
     temple (0.8.2)
     thor (1.0.1)
     thread_safe (0.3.6)
@@ -505,11 +498,13 @@ DEPENDENCIES
   guard-rspec
   jbuilder (~> 2.7)
   listen (>= 3.0.5, < 3.2)
+  logidze (~> 1.0.0)
   lucky_case
   postgresql
   pry (~> 0.13.1)
   pry-byebug
   puma (~> 3.11)
+  pycall
   rack-cors
   rails (~> 6.0.3.3)
   rename
@@ -524,7 +519,6 @@ DEPENDENCIES
   spring-watcher-listen (~> 2.0.1)
   sqlite3 (~> 1.4)
   state_machine!
-  tdlib-ruby (= 2.2.0)
   terminal-notifier!
   turbolinks (~> 5)
   unicorn

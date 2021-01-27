@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class MessageDashboard < OrderDashboard
+class MessageDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -9,19 +9,19 @@ class MessageDashboard < OrderDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    trace_id: Field::BelongsTo,
-    message: DisableTextField,
-    message_id: Field::Number,
-    image: Administrate::Field::Image,
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    ready_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    execute_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    content: Field::String.with_options(searchable: true),
+    content_id: Field::Number,
     state: Field::String,
-    symbol: Field::String,
+    response: Field::String,
+    order: Field::BelongsTo,
     trace: Field::BelongsTo,
-    transactions: Field::HasMany,
-    kind: Field::String,
+    # message: Field::HasOne,
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    content_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    prepare_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    descendants: Field::HasMany.with_options(class_name: 'Message'), 
+    ancestors: Field::HasMany.with_options(class_name: 'Message'), 
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -30,29 +30,40 @@ class MessageDashboard < OrderDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  created_at
-  message_id
-  message
+  id
+  state
+  content_id
+  content
+  response
   trace
+  created_at
+  content_at
+
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  message_id
-  created_at
-  message
+  state
   trace
+  content_id
+  content
+  order
+  response
+  descendants
+  ancestors
+  content_at
+  created_at
   ].freeze
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  message_id
-  created_at
-  message
-  trace
+  state
+  content_id
+  content
+  response
   ].freeze
 
   # COLLECTION_FILTERS

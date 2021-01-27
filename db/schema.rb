@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_20_014347) do
+ActiveRecord::Schema.define(version: 2021_01_25_043816) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,11 +50,28 @@ ActiveRecord::Schema.define(version: 2021_01_20_014347) do
     t.index ["user_id"], name: "index_clients_on_user_id"
   end
 
+  create_table "messages", force: :cascade do |t|
+    t.string "content"
+    t.string "content_id"
+    t.string "state"
+    t.bigint "store_id"
+    t.bigint "trace_id"
+    t.string "ancestry"
+    t.string "response"
+    t.datetime "prepare_at"
+    t.datetime "content_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["ancestry"], name: "index_messages_on_ancestry"
+    t.index ["store_id"], name: "index_messages_on_store_id"
+    t.index ["trace_id"], name: "index_messages_on_trace_id"
+  end
+
   create_table "orders", force: :cascade do |t|
     t.string "state"
-    t.string "message"
-    t.string "message_response"
-    t.string "message_id"
+    t.string "response"
+    t.string "content"
+    t.string "content_id"
     t.datetime "active_at"
     t.datetime "ready_at"
     t.datetime "execute_at"
@@ -63,7 +80,8 @@ ActiveRecord::Schema.define(version: 2021_01_20_014347) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "image"
     t.string "symbol"
-    t.string "kind"
+    t.bigint "message_id"
+    t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["trace_id"], name: "index_orders_on_trace_id"
   end
 
@@ -113,6 +131,7 @@ ActiveRecord::Schema.define(version: 2021_01_20_014347) do
   create_table "traces", force: :cascade do |t|
     t.string "name"
     t.string "name_id"
+    t.string "response"
     t.datetime "active_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -127,8 +146,7 @@ ActiveRecord::Schema.define(version: 2021_01_20_014347) do
     t.string "ticket"
     t.decimal "profit"
     t.bigint "order_id"
-    t.string "action"
-    t.string "kind"
+    t.string "ordertype"
     t.string "symbol"
     t.string "price_request"
     t.string "price_open"
@@ -136,7 +154,7 @@ ActiveRecord::Schema.define(version: 2021_01_20_014347) do
     t.string "take_profit"
     t.string "comment"
     t.string "lot"
-    t.string "magic"
+    t.string "magic_number"
     t.string "response"
     t.string "response_error"
     t.datetime "open_at"
@@ -144,6 +162,8 @@ ActiveRecord::Schema.define(version: 2021_01_20_014347) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "meta_order_generate"
     t.datetime "close_at"
+    t.bigint "message_id"
+    t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"
   end
 

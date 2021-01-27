@@ -13,8 +13,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     state: Field::String,
     order: Field::BelongsTo,
     profit: Field::String.with_options(searchable: false),
-    action: Field::String,
-    kind: Field::String,
+    ordertype: Field::String,
     symbol: Field::String,
     price_request: Field::String,
     price_open: Field::String,
@@ -22,13 +21,14 @@ class TransactionDashboard < Administrate::BaseDashboard
     take_profit: Field::String,
     comment: Field::String,
     lot: Field::String,
-    magic: Field::String,
+    magic_number: Field::String,
     response: Field::String,
     response_error: Field::String,
     meta_order_generate: DisableTextField,
     open_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    message: Field::BelongsTo,
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -52,8 +52,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   profit
-  action
-  kind
+  ordertype
   symbol
   price_request
   price_open
@@ -61,13 +60,14 @@ class TransactionDashboard < Administrate::BaseDashboard
   take_profit
   comment
   lot
-  magic
+  magic_number
   response
   response_error
   meta_order_generate
   open_at
   created_at
   updated_at
+  message
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -77,9 +77,8 @@ class TransactionDashboard < Administrate::BaseDashboard
   order
   ticket
   state
-  action
   profit
-  kind
+  ordertype
   symbol
   price_request
   price_open
@@ -87,7 +86,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   take_profit
   comment
   lot
-  magic
+  magic_number
   response
   response_error
   meta_order_generate

@@ -6,8 +6,7 @@ class CreateTransactions < ActiveRecord::Migration[6.0]
       t.decimal :profit
       t.belongs_to :order#, null: false, foreign_key: true
 
-      t.string :action
-      t.string :kind
+      t.string :ordertype
       t.string :symbol
       t.string :price_request
       t.string :price_open
@@ -15,7 +14,7 @@ class CreateTransactions < ActiveRecord::Migration[6.0]
       t.string :take_profit
       t.string :comment
       t.string :lot
-      t.string :magic
+      t.string :magic_number
       # t.text :context
       t.string :response
       t.string :response_error

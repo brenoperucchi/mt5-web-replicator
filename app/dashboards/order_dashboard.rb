@@ -10,9 +10,9 @@ class OrderDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    trace_id: Field::BelongsTo,
-    message: DisableTextField,
-    message_id: Field::Number,
+    message: Field::BelongsTo,
+    content: DisableTextField,
+    content_id: Field::Number,
     image: Administrate::Field::Image,
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     ready_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -21,7 +21,6 @@ class OrderDashboard < Administrate::BaseDashboard
     symbol: Field::String,
     trace: Field::BelongsTo,
     transactions: Field::HasMany,
-    kind: Field::String,
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -33,8 +32,8 @@ class OrderDashboard < Administrate::BaseDashboard
   created_at
   state
   symbol
-  message
-  message_id
+  content
+  content_id
   trace
   transactions
 
@@ -46,9 +45,10 @@ class OrderDashboard < Administrate::BaseDashboard
   id
   state
   symbol
-  message
-  message_id
+  content
+  content_id
   trace
+  message
   ready_at
   execute_at
   created_at
@@ -63,8 +63,8 @@ class OrderDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   state
   symbol
-  message
-  message_id
+  content
+  content_id
   trace
   ready_at
   execute_at

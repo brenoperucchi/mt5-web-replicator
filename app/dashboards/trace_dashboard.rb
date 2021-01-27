@@ -20,7 +20,8 @@ class TraceDashboard < Administrate::BaseDashboard
     store: Field::BelongsTo,
     meta_host: Field::String,
     meta_port: Field::String,
-    volumes: Field::ActsAsTaggable
+    volumes: Field::ActsAsTaggable,
+    response: Field::String
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -34,6 +35,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name_id
   active
   store
+  response
 
   ].freeze
 
@@ -50,6 +52,7 @@ class TraceDashboard < Administrate::BaseDashboard
   meta_host
   meta_port
   active
+  response
   created_at
   updated_at
   ].freeze
