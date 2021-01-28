@@ -118,4 +118,4 @@ gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'
 gem 'ancestry'
 gem 'pycall'
-gem "logidze", "~> 1.0.0"
+gem 'paper_trail'

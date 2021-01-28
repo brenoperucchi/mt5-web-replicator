@@ -54,12 +54,12 @@ class MetaTrader():
 
 		return meta
 
-	def order_send(self, _my_trade):
-		print('MY_Trade: ', _my_trade)
+	def order_send(self, meta_attributes):
+		print('MY_Trade: ', meta_attributes)
 		
 		MT = self.meta
 
-		ticket = self.meta.Open_order(**_my_trade)
+		ticket = self.meta.Open_order(**meta_attributes)
 
 		if(ticket == -1):
 			print(MT.order_error)
@@ -68,22 +68,22 @@ class MetaTrader():
 			print(ticket)	
 
 		trades = self.meta.Get_all_open_positions()
-		_my_trade['response_value'] = self.meta.order_error
-		_my_trade['response']	    = self.meta.order_return_message
+		meta_attributes['response_value'] = self.meta.order_error
+		meta_attributes['response']	    = self.meta.order_return_message
 		if (ticket == -1):  # opening order failed
-			_my_trade['open_price'] = None
-			_my_trade['open_time'] = None
-			_my_trade['ticket'] = None
-			_my_trade['account_login'] = None
+			meta_attributes['open_price'] = None
+			meta_attributes['open_time'] = None
+			meta_attributes['ticket'] = None
+			meta_attributes['account_login'] = None
 		else:
-			_my_trade['ticket'] = ticket
+			meta_attributes['ticket'] = ticket
 			for num in trades.index:
 				if trades['ticket'][num] == ticket:
-					_my_trade['open_price'] = trades['open_price'][num]
-					_my_trade['open_time'] = datetime.fromtimestamp(trades['open_time'][num]).strftime('%Y-%m-%d %H:%M:%S')
-		return _my_trade
+					meta_attributes['open_price'] = trades['open_price'][num]
+					meta_attributes['open_time'] = datetime.fromtimestamp(trades['open_time'][num]).strftime('%Y-%m-%d %H:%M:%S')
+		return meta_attributes
 
-	def order_closed(self):
+	def get_closed_positions(self):
 		timezone = pytz.timezone("Etc/UTC")
 		account_login = self.meta.Get_static_account_info()['login']
 		trades = self.meta.Get_all_closed_positions(date_from=datetime(2021, 1, 1, tzinfo=timezone), date_to=datetime.now() + timedelta(hours=5))		

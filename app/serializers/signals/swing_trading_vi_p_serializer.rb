@@ -3,8 +3,23 @@ module Signals
   class SwingTradingViPSerializer < Signals::BaseSerializer
     attributes :id, :message_id, :symbol, :type, :price_request, :stoploss, :takeprofit
 
-    def prepare?
-      (object.content.downcase.include?('sell') or object.content.downcase.include?('buy')) and object.content.downcase.include?('now')
+
+    def action?
+      content = self.object.content.downcase
+      if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
+        'open_order'
+      elsif content.include?("close") or content.include?("kill")
+        'close_order'
+      elsif content.include?("break") or content.include?("entrie")
+        "set_break_even"
+      elsif (content.include?("sl") or content.include?("stop loss")) and content.include?("set") 
+        object.new_value = values.first
+        return "set_stop_loss"
+      elsif (content.include?("tp") or content.include?("take profit")) and content.include?("set") 
+        "set_take_profit"
+      else
+        false
+      end
     end
 
     def symbol

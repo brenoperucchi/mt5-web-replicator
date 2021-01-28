@@ -1,6 +1,8 @@
+load "#{Rails.root}/lib/telegram/signal.rb"
 class Order < ApplicationRecord
-
-  attr_accessor :image_url
+  has_paper_trail
+  
+  attr_accessor :image_url, :new_value
 
   # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
@@ -58,6 +60,34 @@ class Order < ApplicationRecord
         self.update_column(:execute_at, nil)
         self.update_column(:ready_at, nil)
       end
+    end
+  end
+
+
+  def message_action(action)
+    case action
+    when "open_order"
+      create_order!
+    when "close_order"
+      transactions.map(&:close_order)
+    when "set_break_even"
+       # transactions.map(&:set_stop_loss_order)
+    when "set_stop_loss"
+      transactions.reverse.each{|t| t.set_stop_loss_order(new_value)}
+    when "set_take_profit"
+    
+    else
+      false
+    end
+  end
+
+  def create_order!
+    message.trace.volumes.each_with_index do |volume, index|
+      response = meta_order_send(trace, message.serializer.meta_attributes(index))
+      transaction = self.transactions.create(message.serializer.transaction_attributes(response))
+      # message.execute if transaction
+
+      response[:response] == "OK" ? transaction.execute : transaction.erro
     end
 
   end

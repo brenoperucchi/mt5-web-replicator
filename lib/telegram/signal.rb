@@ -29,7 +29,6 @@ def telegram_request_msg
 		telegram = Telegramf.new()
 		telegram.connect()
 		loop do
-			sleep(1)
 			traces.each do |trace|
 				t_response = telegram.query_message(trace)
 				if t_response['error']
@@ -44,7 +43,14 @@ def telegram_request_msg
 							if root_message.present?
 								reply_message = trace.messages.where(content_id: reply_id).first
 								unless reply_message.present?
-									root_message.children.create(response: content['content']['text']['text'], content_id:  content['id'], trace: trace, store: Store.first)
+									children = root_message.children.create(
+										content: content['content']['text']['text'], 
+										content_id: content['id'],
+										content_at: Time.at(content['date'].to_i),
+										trace: trace,
+										store: Store.first
+										)
+									children.prepare
 								end
 							end
 						else
@@ -53,7 +59,7 @@ def telegram_request_msg
 								root_message = trace.messages.where(content_id: content_id).first
 								root_message ||= trace.messages.create do |root_message|
 									root_message.content_id = content['id']
-									root_message.content_at = Time.at(content['date'])
+									root_message.content_at = Time.at(content['date'].to_i)
 									root_message.content = content['content'].include?('text') ? content['content']['text']['text'] : content['content']['caption']['text']
 									root_message.store = Store.first
 								end
@@ -62,42 +68,24 @@ def telegram_request_msg
 						end
 					end
 				end
+				meta_get_closed_positions(trace)
 			end
 		end
 		telegram.disconnect()
 	end
 end
 
-def meta_send_order
-	loop do
-		Store.first.traces.active.each do |trace|
-			meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
-			trace.messages.prepared.each do |message|
-				order = Store.first.orders.find_by(content_id: message.content_id) 
-				order ||= message.create_order(message.serializer.order_attributes) do |order|
-					order.trace = message.trace
-					order.message = message
-				end
-				order.prepare
-				
-				message.trace.volumes.each_with_index do |volume, index|
-					response = meta.order_send(_my_trade: message.serializer.meta_attributes(index))
-					transaction = order.transactions.create(message.serializer.transaction_attributes(response))
-					message.execute if transaction
-
-					response[:response] == "OK" ? transaction.execute : transaction.erro
-				end
-			end
-			meta_closed_order(trace, meta)
-			meta.meta.Disconnect()
-		end
-	end
+def meta_order_send(trace, meta_attributes)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	response = meta.order_send(meta_attributes: meta_attributes)
+	meta.meta.Disconnect()
+	return response
 end
 
-def meta_closed_order(trace, meta)
-	# meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
-	# meta.connect()
-	trades = meta.order_closed()
+def meta_get_closed_positions(trace)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta.connect()
+	trades = meta.get_closed_positions()
 	unless trades.empty
 		Store.first.transactions.executed.each do |transaction|
 			ticket = transaction.ticket.to_i
@@ -110,16 +98,14 @@ def meta_closed_order(trace, meta)
 						price_open: trades['open_price'][row_number], open_at: Time.at(trades['open_time'][row_number].to_i) )
 					transaction.close
 
-				# message = f"{account_login}|CLOSED|{trades['instrument'][num]}|{trades['position_ticket'][num]}|{trades['position_type'][num]}|{trades['open_price'][num]}|{trades['close_price'][num]}|{trades['volume'][num]}|{trades['profit'][num]}"
-				# pload = {'message':message}
-				# r = requests.post('http://192.168.1.240/api/v1/traces/master', data = pload)
 				end
 			end
 		end
 	end
+	meta.meta.Disconnect()
 end
 
-def meta_opened_order(transaction, trace)
+def meta_get_open_positions(transaction, trace)
 	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
 	meta.connect()
 	trades = meta.meta.Get_all_open_positions()
@@ -132,19 +118,25 @@ def meta_opened_order(transaction, trace)
 				transaction = Transaction.find_by(ticket: ticket)
 				transaction.update(response: row_hash,
 					price_open: trades['open_price'][row_number], open_at: Time.at(trades['open_time'][row_number].to_i) )
-
-			# message = f"{account_login}|CLOSED|{trades['instrument'][num]}|{trades['position_ticket'][num]}|{trades['position_type'][num]}|{trades['open_price'][num]}|{trades['close_price'][num]}|{trades['volume'][num]}|{trades['profit'][num]}"
-			# pload = {'message':message}
-			# r = requests.post('http://192.168.1.240/api/v1/traces/master', data = pload)
 			end
 		end
 	end
+	meta.meta.Disconnect()
 end
 
-def meta_set_break_env(ticket, price_open, trace)
+def meta_set_break_even(ticket, price_open, trace)
 	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
 	meta.connect()
 	response = meta.meta.Set_sl_and_tp_for_position(ticket=ticket, stoploss=price_open.to_f)
 	meta.meta.Disconnect()
+    return meta.meta.order_error, meta.meta.order_return_message
+end
+
+def meta_close_order(ticket, trace)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta.connect()
+	response = meta.meta.Close_position_by_ticket(ticket)
+	meta.meta.Disconnect()
+	return meta.meta.order_error, meta.meta.order_return_message
 end
 
