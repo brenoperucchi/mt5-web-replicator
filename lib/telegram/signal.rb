@@ -130,4 +130,3 @@ def meta_close_order(ticket, trace)
 	meta.meta.Disconnect()
 	return meta.meta.order_error, meta.meta.order_return_message
 end
-
