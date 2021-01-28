@@ -1,25 +1,16 @@
 #!/usr/bin/env ruby
 require File.expand_path('../../../config/environment', __FILE__)
-
-# require 'rufus-scheduler'
-# require "ancestry"
-# require "rubygems"
-# require "bundler/setup"
-
-# require 'pry'
-# require 'pry-byebug'
 require 'pycall/import'
-require "pathname"
+# require "pathname"
 
-ENV["RAILS_ENV"] ||= ENV["RACK_ENV"] || "development"
-ENV["NODE_ENV"]  ||= "development"
-ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../../Gemfile",
-  Pathname.new(__FILE__).realpath)
+# ENV["RAILS_ENV"] ||= ENV["RACK_ENV"] || "development"
+# ENV["NODE_ENV"]  ||= "development"
+# ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../../Gemfile",
+#   Pathname.new(__FILE__).realpath)
 
 include PyCall::Import
 PyCall.sys.path.append File.dirname(Rails.root.join('lib/telegram', 'telegramf'))
 PyCall.sys.path.append File.dirname(Rails.root.join('lib/telegram', 'meta_trader'))
-# PyCall.sys.path.append "#{__dir__}"
 pyfrom 'telegramf', import: :'Telegramf'
 pyfrom 'meta_trader', import: :'MetaTrader'
 
