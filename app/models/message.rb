@@ -2,7 +2,7 @@ require "ancestry"
 class Message < ApplicationRecord
 	has_ancestry
 
-	attr_accessor :new_value
+	# attr_accessor :new_value
 
  	has_one :order, :class_name => "Order", :foreign_key => "message_id"
  	has_many :transactions, :class_name => "Transaction", :foreign_key => "message_id"
@@ -19,6 +19,7 @@ class Message < ApplicationRecord
 
 	state_machine :initial => :pending do
 		after_transition :pending => :prepared, :do => :restrictions
+		before_transition :pending => :prepared, :do => :update_state
 		# after_transition :pending, :prepared] => :execute, :do => :restrictions
 		event :prepare do
 			transition :pending => :prepared
@@ -30,27 +31,49 @@ class Message < ApplicationRecord
 		  transition [:pending, :prepared, :executed] => :error
 		end
 		
+		state :pending do
+			def update_state(state)
+				self.prepare_at = DateTime.now
+			end
+		end
 		state :prepared do
 			def restrictions(state)
-				if restrict_symbol? and restrict_time? and message_action?
-					action = self.message_action?
-					if action != 'open_order'
-						orderr = root.order
-						orderr.new_value = self.new_value
-						self.execute if orderr.message_action(action)
-					elsif action == 'open_order'
+				action, new_value = self.message_action
+				if restrict_order?(action) 
+					if action == 'open_order'
 						self.create_order!
 						self.execute if order.message_action(action)
-					end
-					unless action
-						self.erro
 					else
-						self.update_column(:prepare_at, DateTime.now)
+						orderr = root.order
+						self.execute if orderr.message_action(action, new_value)						
 					end
 				else
 					self.erro
 				end
 			end
+		end
+	end
+
+	def restrict_order?(action)
+		if action == 'open_order' 
+			if restrict_symbol? or restrict_time?
+				# self.update_column(:response, "Order Restrict")	
+				return false
+			else
+				return true
+			end
+		elsif action != 'open_order'
+			if restrict_time? or (root.order.nil? and not root.order.try(:closed?))
+				# self.update_column(:response, "Order Restrict")		
+				return false
+			else
+				return true
+			end
+		elsif not action
+			self.update_column(:response, "No Action")		
+			return false
+		else
+			action
 		end
 	end
 
@@ -62,8 +85,7 @@ class Message < ApplicationRecord
 		order.prepare
 	end
 
-	def message_action?
-		# return if order.nil?
+	def message_action
 		action = self.serializer.action?
 	end
 
@@ -72,10 +94,10 @@ class Message < ApplicationRecord
 	end
 
 	def restrict_time?
-		if self.content_at + 15.minute > Time.now
-			true
-		else
+		if self.content_at + 15.minute < DateTime.now
 			self.update_column(:response, "Restrict Time")		
+			return true
+		else
 			return false
 		end
 		
@@ -83,11 +105,11 @@ class Message < ApplicationRecord
 
 	def restrict_symbol?
 		if self.store.tag_list.map(&:downcase).include?(serializer.symbol.downcase)
-	  	self.response = "Restrict Symbol"
-	  	return false
-	  else
-	  	return true
-	  end
+	  		self.response = "Restrict Symbol"
+	  		return true
+	  	else
+	  		return false
+	  	end
 	end
 
 end

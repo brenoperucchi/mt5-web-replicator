@@ -3,31 +3,30 @@ module Signals
   class SwingTradingViPSerializer < Signals::BaseSerializer
     attributes :id, :message_id, :symbol, :type, :price_request, :stoploss, :takeprofit
 
-
     def action?
       content = self.object.content.downcase
       if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
-        'open_order'
+        return 'open_order', nil
       elsif content.include?("close") or content.include?("kill")
-        'close_order'
+        return 'close_order', nil
       elsif content.include?("break") or content.include?("entrie")
-        "set_break_even"
+        return "set_break_even", values.first
       elsif (content.include?("sl") or content.include?("stop loss")) and content.include?("set") 
-        object.new_value = values.first
-        return "set_stop_loss"
+        return "set_stop_loss", values.first
       elsif (content.include?("tp") or content.include?("take profit")) and content.include?("set") 
-        "set_take_profit"
+        return "set_take_profit", values.first
       else
-        false
+        return false, nil
       end
     end
 
-    def symbol
-      object.content.split[0].upcase
+    def values
+      object.content.tr("@",'').scan(/ [(\d.*$\^@)]+/)
     end
 
-    def values
-      object.content.scan(/\@ (.*$)/).flatten
+
+    def symbol
+      object.content.split[0].upcase
     end
 
     def type
@@ -36,14 +35,14 @@ module Signals
 
     def value(arg)
       begin
-        values[arg].gsub(' ', '.')
+        values[arg].gsub(' ', '')
       rescue
         nil
       end
     end
 
     def takeprofits
-      object.content.scan('(/PT\d+ @ [\d.]+/)')
+      object.content.scan('(/Tp\d+ @ [\d.]+/)')
     end
 
     def price_request

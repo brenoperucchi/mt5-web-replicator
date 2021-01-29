@@ -78,17 +78,15 @@ def meta_get_closed_positions(trace)
 	meta.connect()
 	trades = meta.get_closed_positions()
 	unless trades.empty
-		Store.first.transactions.executed.each do |transaction|
+		Store.first.transactions.not_closed.each do |transaction|
 			ticket = transaction.ticket.to_i
 			row_number = trades.loc[trades['order_ticket'] == ticket].index.tolist().first
 			if row_number
 				if trades['order_ticket'][row_number] == ticket
 					row_hash = trades.loc[trades['order_ticket'] == ticket].to_dict
 					transaction = Transaction.find_by(ticket: ticket)
-					transaction.update(profit: trades['profit'][row_number], response: row_hash,
-						price_open: trades['open_price'][row_number], open_at: Time.at(trades['open_time'][row_number].to_i) )
+					transaction.update(profit: trades['profit'][row_number], response: row_hash, price_open: trades['open_price'][row_number], open_at: Time.at(trades['open_time'][row_number].to_i) )
 					transaction.close
-
 				end
 			end
 		end
@@ -115,10 +113,10 @@ def meta_get_open_positions(transaction, trace)
 	meta.meta.Disconnect()
 end
 
-def meta_set_break_even(ticket, price_open, trace)
+def meta_set_sl_and_tp_order(ticket=nil, take_profit=nil, stop_loss=nil, trace=nil)
 	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
 	meta.connect()
-	response = meta.meta.Set_sl_and_tp_for_position(ticket=ticket, stoploss=price_open.to_f)
+	response = meta.meta.Set_sl_and_tp_for_position(ticket=ticket.to_i, stoploss=stop_loss.to_f, takeprofit=take_profit.to_f)
 	meta.meta.Disconnect()
     return meta.meta.order_error, meta.meta.order_return_message
 end

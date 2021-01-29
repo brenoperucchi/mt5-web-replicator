@@ -13,15 +13,15 @@ if Rails.env.development?
 						telegram_image:true, lots: 0.05, take_profit:'Agressive',
 						meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.05, 0.10"
 					 )
-  	store.traces.create(name: 'Perucchi Inc', name_id:'-340961920', active_at: DateTime.now, telegram_option:'query_name_id',
+  	store.traces.create(name: 'Perucchi Inc', name_id:'-340961920', active_at: nil, telegram_option:'query_name_id',
 						telegram_image:false, lots: 0.05, take_profit:'Agressive',
 						meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.01, 0.02"
 					 )
-  	store.traces.create(name: 'PipsNation', name_id:'-1001330590845', active_at: DateTime.now, telegram_option:'query_name_id',
+  	store.traces.create(name: 'PipsNation', name_id:'-1001330590845', active_at: nil, telegram_option:'query_name_id',
 						telegram_image:false, lots: 0.05, take_profit:'Agressive',
 						meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.10, 0.05"
 					 )
-  	store.traces.create(name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: DateTime.now, telegram_option:'query_name',
+  	store.traces.create(name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: nil, telegram_option:'query_name',
 						telegram_image:false, lots: 0.03, take_profit:'Normal',
 						meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.01, 0.02"
 					 )

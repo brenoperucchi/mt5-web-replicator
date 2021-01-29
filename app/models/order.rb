@@ -1,8 +1,8 @@
-load "#{Rails.root}/lib/telegram/signal.rb"
+require "#{Rails.root}/lib/telegram/signal"
 class Order < ApplicationRecord
-  has_paper_trail
+  # has_paper_trail
   
-  attr_accessor :image_url, :new_value
+  attr_accessor :image_url
 
   # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
@@ -64,18 +64,18 @@ class Order < ApplicationRecord
   end
 
 
-  def message_action(action)
+  def message_action(action, value=0)
     case action
     when "open_order"
       create_order!
     when "close_order"
       transactions.map(&:close_order)
     when "set_break_even"
-       # transactions.map(&:set_stop_loss_order)
+       transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(0, value)}
     when "set_stop_loss"
-      transactions.reverse.each{|t| t.set_stop_loss_order(new_value)}
+      transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(0, value)}
     when "set_take_profit"
-    
+      transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(value, 0)}
     else
       false
     end
@@ -122,7 +122,5 @@ class Order < ApplicationRecord
     decimal = 10 ** (value.to_s.split('.').last.size)
     (self.trace.lots.to_f * value * decimal).round / decimal.to_f
   end
-
-
 
 end

@@ -3,12 +3,30 @@ module Signals
   class PipsNationSerializer < Signals::BaseSerializer
     attributes :id, :message_id, :symbol, :type, :price_request, :stoploss, :takeprofit
 
-    def prepare?
-      (object.content.downcase.include?('sell') or object.content.downcase.include?('buy'))
+    def values
+      object.content.scan(/(\d.*$)/).flatten
     end
 
-    def values
-      object.content.scan(/\@ (.*$)/).flatten
+
+    def action?
+      content = self.object.content.downcase
+      if (content.include?('sell') or content.include?('buy')) and object.root?
+        return 'open_order', values.first
+      elsif content.include?("break") or content.include?("even")
+        return 'set_break_even', values.first
+      elsif content.include?("close") or content.include?("kill")
+        return 'close_order', values.first
+      elsif (content.include?("sl") or content.include?("stop loss")) and content.include?("set") 
+        return 'set_stop_loss', values.first
+      elsif (content.include?("tp") or content.include?("take profit")) and content.include?("set") 
+        return 'set_take_profit', values.first
+      else
+        return false, nil
+      end
+    end
+
+    def prepare?
+      (object.content.downcase.include?('sell') or object.content.downcase.include?('buy'))
     end
 
     def symbol
@@ -24,7 +42,7 @@ module Signals
     end
 
     def stoploss
-      object.content.split[14]
+      object.content.split[14] || 0
     end
 
     def takeprofit

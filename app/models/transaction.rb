@@ -1,9 +1,10 @@
-load "#{Rails.root}/lib/telegram/signal.rb"
+require "#{Rails.root}/lib/telegram/signal"
 class Transaction < ApplicationRecord
   belongs_to :order
   belongs_to :message
 
   scope :closed, ->{where(state: 'closed')}
+  scope :not_closed, ->{where.not(state: 'closed')}
   scope :executed, ->{where(state: 'executed')}
 
   state_machine :initial => :pending do
@@ -44,11 +45,7 @@ class Transaction < ApplicationRecord
         first_id = transactions.first
         transactions.each do |transaction|
           unless transaction.first?
-            response, response_error = meta_set_break_even(transaction.ticket, self.price_request, self.order.trace)
-            if response > 0
-              self.update_column(:response_error, response_error)
-              self.erro
-            end
+            set_sl_and_tp_order(take_profit=self.price_request, stop_loss=self.price_request)
           end
         end
       end
@@ -67,15 +64,15 @@ class Transaction < ApplicationRecord
   def close_order
     response, response_error = meta_close_order(self.ticket, self.order.trace)
     if response > 0
-      self.update_column(:response_error, response_error)
+      self.update_columns(response_error: response_error, state: :closed)
       self.erro
     else
       true
     end
   end
 
-  def set_stop_loss_order(price)
-    response, response_error = meta_set_break_even(self.ticket, price, self.order.trace)
+  def set_sl_and_tp_order(take_profit=nil, stop_loss=nil)
+    response, response_error = meta_set_sl_and_tp_order(ticket=self.ticket, take_profit=take_profit, stop_loss=stop_loss, trace=self.order.trace)
     if response > 0
       self.update_column(:response_error, response_error)
       self.erro
