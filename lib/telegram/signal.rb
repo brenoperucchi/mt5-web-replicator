@@ -15,11 +15,11 @@ pyfrom 'telegramf', import: :'Telegramf'
 pyfrom 'meta_trader', import: :'MetaTrader'
 
 def telegram_request_msg
-	traces = Store.first.traces.active
-	if traces.present?
-		telegram = Telegramf.new()
-		telegram.connect()
-		loop do
+	telegram = Telegramf.new()
+	telegram.connect()
+	loop do
+		traces = Store.first.traces.active
+		if traces.present?
 			traces.each do |trace|
 				t_response = telegram.query_message(trace)
 				if t_response['error']
@@ -59,11 +59,10 @@ def telegram_request_msg
 						end
 					end
 				end
-				meta_get_closed_positions(trace)
 			end
 		end
-		telegram.disconnect()
 	end
+	telegram.disconnect()
 end
 
 def meta_order_send(trace, meta_attributes)

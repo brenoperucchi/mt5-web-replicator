@@ -56,7 +56,8 @@ class Message < ApplicationRecord
 
 	def restrict_order?(action)
 		if action == 'open_order' 
-			if restrict_symbol? or restrict_time?
+			# if restrict_symbol? or restrict_time?
+			if restrict_symbol? or restrict_time? or not root? ##TODO - NEED A TESTING
 				# self.update_column(:response, "Order Restrict")	
 				return false
 			else
@@ -94,7 +95,7 @@ class Message < ApplicationRecord
 	end
 
 	def restrict_time?
-		if self.content_at + 15.minute < DateTime.now
+		if self.content_at + 35.minute < DateTime.now
 			self.update_column(:response, "Restrict Time")		
 			return true
 		else

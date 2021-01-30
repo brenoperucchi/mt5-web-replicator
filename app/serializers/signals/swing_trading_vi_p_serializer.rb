@@ -5,7 +5,8 @@ module Signals
 
     def action?
       content = self.object.content.downcase
-      if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
+      # if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
+      if (object.content.include?('sell') or object.content.include?('buy')) and (object.content.include?('now') or object.content.include?('limit'))
         return 'open_order', nil
       elsif content.include?("close") or content.include?("kill")
         return 'close_order', nil
@@ -24,13 +25,18 @@ module Signals
       object.content.tr("@",'').scan(/ [(\d.*$\^@)]+/)
     end
 
-
     def symbol
       object.content.split[0].upcase
     end
 
     def type
-      object.content.split[1]
+      type_order = object.content.split[1].downcase
+      if object.content.downcase.include?('stop')
+        type_order += '_stop'
+      elsif object.content.downcase.include?('limit')
+        type_order += '_limit'
+      end
+      type_order
     end
 
     def value(arg)

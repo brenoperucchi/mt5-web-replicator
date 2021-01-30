@@ -7,7 +7,6 @@ module Signals
       object.content.scan(/(\d.*$)/).flatten
     end
 
-
     def action?
       content = self.object.content.downcase
       if (content.include?('sell') or content.include?('buy')) and object.root?
@@ -25,16 +24,18 @@ module Signals
       end
     end
 
-    def prepare?
-      (object.content.downcase.include?('sell') or object.content.downcase.include?('buy'))
-    end
-
     def symbol
       object.content.split[0].upcase
     end
 
     def type
-      object.content.split[3].downcase
+      type_order = object.content.split[3].downcase
+      if object.content.downcase.include?('stop')
+        type_order += '_stop'
+      elsif object.content.downcase.include?('limit')
+        type_order += '_limit'
+      end
+      type_order
     end
 
     def price_request
