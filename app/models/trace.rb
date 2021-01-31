@@ -24,4 +24,9 @@ class Trace < ApplicationRecord
 
   alias_method :active?, :active
 
+  def symbol_list_dict
+    string = self.symbol_list.gsub("\r\n", ",")
+    Hash[ string.scan(/(\w+):\s+([^,]+)/) ]
+  end
+
 end

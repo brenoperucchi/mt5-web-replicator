@@ -66,14 +66,14 @@ def telegram_request_msg
 end
 
 def meta_order_send(trace, meta_attributes)
-	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
 	response = meta.order_send(meta_attributes: meta_attributes)
 	meta.meta.Disconnect()
 	return response
 end
 
 def meta_get_closed_positions(trace)
-	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
 	meta.connect()
 	trades = meta.get_closed_positions()
 	unless trades.empty
@@ -94,7 +94,7 @@ def meta_get_closed_positions(trace)
 end
 
 def meta_get_open_positions(transaction, trace)
-	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
 	meta.connect()
 	trades = meta.meta.Get_all_open_positions()
 	unless trades.empty
@@ -113,7 +113,7 @@ def meta_get_open_positions(transaction, trace)
 end
 
 def meta_set_sl_and_tp_order(ticket=nil, take_profit=nil, stop_loss=nil, trace=nil)
-	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
 	meta.connect()
 	response = meta.meta.Set_sl_and_tp_for_position(ticket=ticket.to_i, stoploss=stop_loss.to_f, takeprofit=take_profit.to_f)
 	meta.meta.Disconnect()
@@ -121,7 +121,7 @@ def meta_set_sl_and_tp_order(ticket=nil, take_profit=nil, stop_loss=nil, trace=n
 end
 
 def meta_close_order(ticket, trace)
-	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
 	meta.connect()
 	response = meta.meta.Close_position_by_ticket(ticket)
 	meta.meta.Disconnect()

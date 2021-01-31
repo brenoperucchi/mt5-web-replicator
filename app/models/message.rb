@@ -95,7 +95,7 @@ class Message < ApplicationRecord
 	end
 
 	def restrict_time?
-		if self.content_at + 35.minute < DateTime.now
+		if self.content_at + 2.minute < DateTime.now
 			self.update_column(:response, "Restrict Time")		
 			return true
 		else

@@ -9,9 +9,10 @@ from datetime import datetime, timedelta
 from pytrader.Pytrader_API_V1_04 import Pytrader_API
 
 class MetaTrader():
-	def __init__(self, meta_host, meta_port):
+	def __init__(self, meta_host, meta_port, symbol_list):
 		self.meta_host = meta_host
 		self.meta_port = int(meta_port)
+		self.symbol_list = symbol_list
 		self.meta = self.connect()
 
 	def config_instruments(self, config, section):
@@ -31,16 +32,15 @@ class MetaTrader():
 	def connect(self):
 		meta = Pytrader_API()
 		# Read in config
-		CONFIG_FILE = "/Users/brenoperucchi/Devs/signalforex/lib/telegram/pytrader/instrument.conf"
-		config = configparser.ConfigParser()
-		config.read(CONFIG_FILE)
+		# CONFIG_FILE = "/Users/brenoperucchi/Devs/signalforex/lib/telegram/pytrader/instrument.conf"
+		# config = configparser.ConfigParser()
+		# config.read(CONFIG_FILE)
 
-		brokerInstrumentsLookup = self.config_instruments(config, "ICMarkets")
-
+		# brokerInstrumentsLookup = self.config_instruments(config, "ICMarkets")
 		Connected = meta.Connect(
 			server=self.meta_host,
 			port=self.meta_port,
-			instrument_lookup=brokerInstrumentsLookup)
+			instrument_lookup=self.symbol_list)
 		meta.debug = False
 
 		IsAlive = meta.connected
