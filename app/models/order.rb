@@ -82,7 +82,8 @@ class Order < ApplicationRecord
   end
 
   def create_order!
-    message.trace.volumes.each_with_index do |volume, index|
+    limit = self.trace.take_profit_limit
+    message.serializer.takeprofits.take(limit.to_i).each_with_index do |volume, index|
       response = meta_order_send(trace, message.serializer.meta_attributes(index))
       transaction = self.transactions.create(message.serializer.transaction_attributes(response))
       # message.execute if transaction

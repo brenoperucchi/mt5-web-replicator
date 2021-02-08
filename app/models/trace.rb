@@ -1,18 +1,22 @@
 class Trace < ApplicationRecord
-  acts_as_taggable_on :volumes
+  # acts_as_taggable_on :volumes
   
-  TAKE_PROFIT = %w{normal agressive superagressive} 
+  # TAKE_PROFIT = %w{normal agressive superagressive} 
 
-  store :settings, accessors: [ :lots, :telegram_option, :telegram_image, :take_profit ] 
+  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :volumes] 
+
   has_many :orders, :class_name => "Order", :foreign_key => "trace_id"
   has_many :messages, :class_name => "Message", :foreign_key => "trace_id"
   has_many :slaves, :class_name => "Slave", :foreign_key => "trace_id"
   belongs_to :store, optional: true
 
-  # scope :ready, ->{ joins(:messages).where.not(:sign_messages => {ready_at:nil}) }
   scope :active, ->{ where.not(active_at:nil)}
 
-  validates_presence_of :take_profit, :on => :create#, :message => "can't be blank"
+  # validates_presence_of :take_profit, :on => :create#, :message => "can't be blank"
+
+  def volumes
+    self.settings['volumes'] || ""
+  end
 
   def active
     active_at.present?
@@ -25,8 +29,10 @@ class Trace < ApplicationRecord
   alias_method :active?, :active
 
   def symbol_list_dict
-    string = self.symbol_list.gsub("\r\n", ",")
-    Hash[ string.scan(/(\w+):\s+([^,]+)/) ]
+    pairs = self.symbol_list.strip.gsub("\r", '')
+    pairs = pairs.gsub("\t", '')
+    pairs = pairs.split("\n").map{|pair| pair.split(':')}.map{|k,v| [k.strip, v.strip]}
+    result = Hash[pairs]
   end
 
 end

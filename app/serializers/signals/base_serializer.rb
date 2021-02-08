@@ -2,10 +2,10 @@
 require 'lucky_case/string'
 module Signals
   class BaseSerializer < ActiveModel::Serializer
-	attributes :id, :message_id, :symbol, :type, :price_request, :SL, :TP
+	attributes :id, :symbol, :type, :price_request, :stoploss, :takeprofit
 	
 	def id
-	  object.id
+	  	object.id
 	end
 
 	def transaction_attributes(response={})
@@ -26,23 +26,25 @@ module Signals
 	  }
 	end
 
-	def meta_attributes(value)
-	  @meta_attributes = { 
-		instrument: symbol,
-		ordertype: type,
-		volume:object.trace.volumes.map(&:name)[value],
-		openprice: price_request,
-		slippage:10,
-		magicnumber:2000,
-		stoploss: stoploss,
-		takeprofit:takeprofit[value],
-		comment:object.trace.name
-	  }
+	def meta_attributes(value=0)
+		price_request = 0 unless type.include?('limit') or type.include?('stop')
+
+	  	@meta_attributes = { 
+			instrument: symbol,
+			ordertype: type,
+			volume:object.trace.volumes.try(:split,', ')[value],
+			openprice: price_request,
+			slippage:10,
+			magicnumber:2000,
+			stoploss: stoploss,
+			takeprofit:takeprofit[value],
+			comment:object.trace.name
+	  	}
 	end
 
 
 	def order_attributes
-	  {symbol: symbol, content:object.content.html_safe, content_id: object.content_id}
+	 	{symbol: symbol, content:object.content.html_safe, content_id: object.content_id}
 	end
 
 	# def symbol

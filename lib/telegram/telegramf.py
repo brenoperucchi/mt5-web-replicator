@@ -42,7 +42,6 @@ class Telegramf():
 				telegram_query = self._tg.call_method('searchChatsOnServer',   params={'query': trace.name_id(), 'limit':10})
 				telegram_query.wait()
 				get_chat = self._tg.get_chat(trace.name_id())
-
 			get_chat.wait()
 			get_chat.update
 			get_chat.wait()
@@ -53,7 +52,7 @@ class Telegramf():
 				# self._signal_image = True #######################################################
 				chat_history, error, error_info = self._get_chat_history(get_chat)
 				chat_history, error, error_info = self._get_chat_history(get_chat)
-				# print(f'##### {trace.name_id()} #####')
+				# print(f'### {trace.name()} ## {trace.name_id()} #####')
 				return dict(chat_history= chat_history, error=error, error_info=error_info)
 
 	
@@ -92,7 +91,7 @@ class Telegramf():
 
 	def _get_chat_history(self, telegram_chat, from_message_id=0):
 		chat_id = telegram_chat.update['id']
-		result = self._tg.get_chat_history(chat_id=chat_id, offset=-50, from_message_id=from_message_id)
+		result = self._tg.get_chat_history(chat_id=chat_id, offset=-20, from_message_id=from_message_id)
 		result.wait()
 		result.update
 		result.wait()
@@ -112,3 +111,5 @@ class Telegramf():
 # chat_id = -481414224 # RoboSignalGroup
 # chat_id = -1001436795976 # MirFx
 # chat_id = -340961920 # Perucchi Inc	
+# chat_id = -1001330590845 # Pip Nation
+# chat_id = -1001340273590 # Pip Nation Vip

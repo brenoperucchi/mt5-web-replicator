@@ -20,9 +20,12 @@ class TraceDashboard < Administrate::BaseDashboard
     store: Field::BelongsTo,
     meta_host: Field::String,
     meta_port: Field::String,
-    volumes: Field::ActsAsTaggable,
+    # volumes: Field::ActsAsTaggable,
     response: Field::String,
-    symbol_list: Field::Text
+    symbol_list: Field::Text,
+    messages: Field::HasMany.with_options(direction: :desc),
+    take_profit_limit: Field::Number,
+    volumes: Field::String
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -32,11 +35,10 @@ class TraceDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  name
-  name_id
   active
-  store
-  response
+  name
+  meta_host
+  meta_port
 
   ].freeze
 
@@ -44,16 +46,18 @@ class TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  active
   name
   name_id
   store
+  take_profit_limit
   volumes
   telegram_option
   telegram_image
   meta_host
   meta_port
-  active
   response
+  messages
   symbol_list
   created_at
   updated_at
@@ -65,6 +69,7 @@ class TraceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   name_id
+  take_profit_limit
   volumes
   telegram_option
   telegram_image

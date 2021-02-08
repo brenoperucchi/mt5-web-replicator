@@ -65,8 +65,28 @@ def telegram_request_msg
 	telegram.disconnect()
 end
 
+def set_stop_or_limit_order(meta, instrument, open_price, ordertype)
+	open_price = open_price.to_f
+	tick = meta.meta.Get_last_tick_info(instrument=instrument)
+	if open_price > tick['bid'] and ordertype == 'sell'
+		return 'sell_limit'
+	elsif open_price < tick['bid'] and ordertype == 'sell'
+		return 'sell_stop'
+	elsif open_price > tick['bid'] and ordertype == 'buy'
+		return 'buy_stop'
+	elsif open_price < tick['bid'] and ordertype == 'buy'
+		return 'buy_limit'
+	end
+end
+
 def meta_order_send(trace, meta_attributes)
 	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
+	meta.connect()
+
+	if message.serializer.try(:check_limit_stop_order_type?)
+		meta_attributes[:ordertype] = set_stop_or_limit_order(meta, meta_attributes[:instrument], meta_attributes[:openprice], meta_attributes[:ordertype])
+	end
+
 	response = meta.order_send(meta_attributes: meta_attributes)
 	meta.meta.Disconnect()
 	return response

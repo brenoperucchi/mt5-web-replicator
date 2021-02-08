@@ -32,15 +32,16 @@ class MetaTrader():
 	def connect(self):
 		meta = Pytrader_API()
 		# Read in config
-		# CONFIG_FILE = "/Users/brenoperucchi/Devs/signalforex/lib/telegram/pytrader/instrument.conf"
-		# config = configparser.ConfigParser()
-		# config.read(CONFIG_FILE)
+		CONFIG_FILE = "/Users/brenoperucchi/Devs/signalforex/lib/telegram/pytrader/instrument.conf"
+		config = configparser.ConfigParser()
+		config.read(CONFIG_FILE)
 
-		# brokerInstrumentsLookup = self.config_instruments(config, "ICMarkets")
+		brokerInstrumentsLookup = self.config_instruments(config, "ICMarkets")
 		Connected = meta.Connect(
 			server=self.meta_host,
 			port=self.meta_port,
 			instrument_lookup=self.symbol_list)
+			# instrument_lookup=meta.symbol_list)
 		meta.debug = False
 
 		IsAlive = meta.connected
@@ -58,7 +59,6 @@ class MetaTrader():
 		print('MY_Trade: ', meta_attributes)
 		
 		MT = self.meta
-
 		ticket = self.meta.Open_order(**meta_attributes)
 
 		if(ticket == -1):

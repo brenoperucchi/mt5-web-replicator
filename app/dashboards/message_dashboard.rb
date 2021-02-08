@@ -9,7 +9,7 @@ class MessageDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    content: Field::String.with_options(searchable: true),
+    content: Field::Text.with_options(searchable: true),
     content_id: Field::Number,
     state: Field::String,
     response: Field::String,
@@ -30,7 +30,6 @@ class MessageDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
   state
   content_id
   content

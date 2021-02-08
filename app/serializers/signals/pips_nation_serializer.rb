@@ -1,10 +1,9 @@
 require 'lucky_case/string'
 module Signals
   class PipsNationSerializer < Signals::BaseSerializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :stoploss, :takeprofit
 
     def values
-      object.content.scan(/(\d.*$)/).flatten
+      object.content.scan(/ [(\d.*$\^@)]+/).flatten
     end
 
     def action?
@@ -24,40 +23,63 @@ module Signals
       end
     end
 
+    def value(arg)
+      begin
+        values[arg].try(:strip)
+      rescue
+        nil
+      end
+    end
+
+
+    def takeprofits
+      object.content.scan(/TP [\d.]+/)
+    end
+
+
     def symbol
       object.content.split[0].upcase
     end
 
     def type
-      type_order = object.content.split[3].downcase
-      if object.content.downcase.include?('stop')
-        type_order += '_stop'
-      elsif object.content.downcase.include?('limit')
-        type_order += '_limit'
-      end
-      type_order
+      object.content.split[3].downcase
     end
 
     def price_request
-      object.content.split[4]
+      value(0)
     end
 
     def stoploss
-      object.content.split[14] || 0
+      value(5)
+    end
+
+    def take_profit_1
+      value(1)
+    end
+    def take_profit_2
+      value(2)
+    end
+
+    def take_profit_3
+      value(3)
+    end
+
+    def take_profit_4
+      value(4)
     end
 
     def takeprofit
-      case object.trace.volumes.count
+      case object.trace.take_profit_limit.to_i
       when 1          
-        [object.content.split[6]]
+        [take_profit_1]
       when 2
-        [object.content.split[6], object.content.split[8]]
+        [take_profit_1, take_profit_2]
       when 3
-        [object.content.split[6], object.content.split[8], object.content.split[10]]
+        [take_profit_1, take_profit_2, take_profit_3]
       when 4
-        [object.content.split[6], object.content.split[8], object.content.split[10], object.content.split[12]]
+        [take_profit_1, take_profit_2, take_profit_3, take_profit_4]
       end
-    end
-     
+    end  
+  
   end
 end

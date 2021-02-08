@@ -4,8 +4,8 @@ class Message < ApplicationRecord
 
 	# attr_accessor :new_value
 
- 	has_one :order, :class_name => "Order", :foreign_key => "message_id"
- 	has_many :transactions, :class_name => "Transaction", :foreign_key => "message_id"
+ 	has_one :order, :class_name => "Order", :foreign_key => "message_id", dependent: :destroy
+ 	has_many :transactions, :class_name => "Transaction", :foreign_key => "message_id",  dependent: :destroy
 
 	belongs_to :store, optional: true
 	belongs_to :trace, optional: true
@@ -95,7 +95,7 @@ class Message < ApplicationRecord
 	end
 
 	def restrict_time?
-		if self.content_at + 2.minute < DateTime.now
+		if self.content_at + 5.minute < DateTime.now
 			self.update_column(:response, "Restrict Time")		
 			return true
 		else

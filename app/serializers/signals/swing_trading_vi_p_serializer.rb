@@ -1,12 +1,11 @@
 require 'lucky_case/string'
 module Signals
   class SwingTradingViPSerializer < Signals::BaseSerializer
-    attributes :id, :message_id, :symbol, :type, :price_request, :stoploss, :takeprofit
 
     def action?
       content = self.object.content.downcase
       # if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
-      if (object.content.include?('sell') or object.content.include?('buy')) and (object.content.include?('now') or object.content.include?('limit'))
+      if (content.include?('sell') or content.include?('buy')) and (content.include?('now') or content.include?('limit') or content.include?('stop'))
         return 'open_order', nil
       elsif content.include?("close") or content.include?("kill")
         return 'close_order', nil
@@ -41,14 +40,14 @@ module Signals
 
     def value(arg)
       begin
-        values[arg].gsub(' ', '')
+        values[arg].try(:strip)
       rescue
         nil
       end
     end
 
     def takeprofits
-      object.content.scan('(/Tp\d+ @ [\d.]+/)')
+      object.content.scan(/ [(\d.*$\)]+/)
     end
 
     def price_request
@@ -56,19 +55,19 @@ module Signals
     end
 
     def stoploss
-      value(1)
+      value(1).to_f
     end
 
     def take_profit_1
-      value(2)
+      value(2).to_f
     end
 
     def take_profit_2
-      value(3)
+      value(3).to_f
     end
 
     def takeprofit
-      case object.trace.volumes.count
+      case object.trace.take_profit_limit.to_i
       when 1          
         [take_profit_1]
       when 2
