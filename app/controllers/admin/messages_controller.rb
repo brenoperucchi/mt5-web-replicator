@@ -50,8 +50,8 @@ module Admin
 
 	def index
 		search_term = params[:search].to_s.strip
-		resource_messages = resource_class
-		resource_messages = resource_class.order('content_at desc').where(ancestry:nil)#.where.not(state:'action')
+		# resource_messages = resource_class
+		resource_messages = resource_class.where(ancestry:nil).order('content_at desc')#.where.not(state:'action')
 		resources = Administrate::Search.new(resource_messages, dashboard_class, search_term).run
 		resources = apply_collection_includes(resources)
 		resources = order.apply(resources).order('id desc')

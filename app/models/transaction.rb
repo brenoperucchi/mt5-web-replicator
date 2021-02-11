@@ -4,7 +4,8 @@ class Transaction < ApplicationRecord
   belongs_to :message
 
   scope :closed, ->{where(state: 'closed')}
-  scope :not_closed, ->{where.not(state: 'closed')}
+  scope :not_closed, ->{where.not(state: ['closed', 'error'])}
+  scope :finish, ->{where(state: ['closed', 'error'])}
   scope :executed, ->{where(state: 'executed')}
 
   state_machine :initial => :pending do
@@ -38,14 +39,14 @@ class Transaction < ApplicationRecord
         self.order.execute
       	meta_get_open_positions(self, self.order.trace)
       end
+
+
     end
     state :closed do
       def break_even(state)
-        transactions = order.transactions.executed
-        first_id = transactions.first
-        transactions.each do |transaction|
-          unless transaction.first?
-            set_sl_and_tp_order(take_profit=self.price_request, stop_loss=self.price_request)
+        if order.transactions.count > 1 and not first?
+          order.transactions.where.not(id: order.transactions.finish.map(&:id)).each do |transc|
+            transc.set_sl_and_tp_order(take_profit=0, stop_loss=self.price_request)
           end
         end
       end

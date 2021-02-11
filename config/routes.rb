@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   namespace :admin do
 	  	resources :slaves
       resources :transactions
+      resources :instruments
 
       resources :orders
       resources :messages#, only: [:index]

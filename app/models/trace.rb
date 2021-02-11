@@ -8,6 +8,7 @@ class Trace < ApplicationRecord
   has_many :orders, :class_name => "Order", :foreign_key => "trace_id"
   has_many :messages, :class_name => "Message", :foreign_key => "trace_id"
   has_many :slaves, :class_name => "Slave", :foreign_key => "trace_id"
+  has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id"
   belongs_to :store, optional: true
 
   scope :active, ->{ where.not(active_at:nil)}
@@ -29,9 +30,11 @@ class Trace < ApplicationRecord
   alias_method :active?, :active
 
   def symbol_list_dict
-    pairs = self.symbol_list.strip.gsub("\r", '')
-    pairs = pairs.gsub("\t", '')
-    pairs = pairs.split("\n").map{|pair| pair.split(':')}.map{|k,v| [k.strip, v.strip]}
+    # pairs = self.symbol_list.strip.gsub("\r", '')
+    # pairs = pairs.gsub("\t", '')
+    # pairs = pairs.split("\n").map{|pair| pair.split(':')}.map{|k,v| [k.strip, v.strip]}
+    # result = Hash[pairs]
+    pairs = instruments.map{|pair| [pair[:symbol], pair[:name]]}
     result = Hash[pairs]
   end
 

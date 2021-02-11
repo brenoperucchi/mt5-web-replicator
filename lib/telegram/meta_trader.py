@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import configparser
 import pytz
+import time
 
 from datetime import datetime, timedelta 
 from pytrader.Pytrader_API_V1_04 import Pytrader_API
@@ -56,19 +57,23 @@ class MetaTrader():
 		return meta
 
 	def order_send(self, meta_attributes):
-		print('MY_Trade: ', meta_attributes)
+		print("###### START ######")
+		print(time.strftime("%a, %d %b %Y %H:%M:%S"))
+		print(f"MY_Trade: {meta_attributes}")
 		
 		MT = self.meta
 		ticket = self.meta.Open_order(**meta_attributes)
 
 		if(ticket == -1):
-			print(MT.order_error)
-			print(MT.order_return_message)
+			print('Error:',MT.order_error)
+			print('Return Message:',MT.order_return_message)
 		else:
-			print(ticket)	
+			print('ticket:',ticket)	
+		
+		print("###### END ######")
 
 		trades = self.meta.Get_all_open_positions()
-		meta_attributes['response_value'] = self.meta.order_error
+		meta_attributes['response_error'] = self.meta.order_error
 		meta_attributes['response']	    = self.meta.order_return_message
 		if (ticket == -1):  # opening order failed
 			meta_attributes['open_price'] = None

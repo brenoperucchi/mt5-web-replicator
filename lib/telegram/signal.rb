@@ -26,6 +26,7 @@ def telegram_request_msg
 					trace.update_column(:response, t_response['chat_history']) if trace.response != t_response['chat_history']
 				else
 					t_response['chat_history']['messages'].each do |content|
+						next if content['content']['text'].nil?
 						trace.update_column(:response, nil) if trace.response != nil
 						if content['reply_to_message_id'].to_b 
 							root_id = content['reply_to_message_id']

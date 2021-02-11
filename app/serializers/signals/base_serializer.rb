@@ -28,11 +28,12 @@ module Signals
 
 	def meta_attributes(value=0)
 		price_request = 0 unless type.include?('limit') or type.include?('stop')
+		instrument = object.trace.instruments.find_by_symbol(symbol)
 
 	  	@meta_attributes = { 
 			instrument: symbol,
 			ordertype: type,
-			volume:object.trace.volumes.try(:split,', ')[value],
+			volume:instrument.volumes.try(:split,', ')[value],
 			openprice: price_request,
 			slippage:10,
 			magicnumber:2000,

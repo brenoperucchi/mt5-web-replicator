@@ -1,7 +1,6 @@
 require "administrate/base_dashboard"
-require 'traces_helper'
 
-class TraceDashboard < Administrate::BaseDashboard
+class InstrumentDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -9,24 +8,13 @@ class TraceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
+    trace: Field::BelongsTo,
     id: Field::Number,
+    symbol: Field::String,
     name: Field::String,
-    name_id: Field::String,
-    telegram_option: Field::String,
-    telegram_image: Field::Boolean,
-    active: Field::Boolean,
+    volumes: Field::String.with_options(searchable: false),
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
-    store: Field::BelongsTo,
-    meta_host: Field::String,
-    meta_port: Field::String,
-    # volumes: Field::ActsAsTaggable,
-    response: Field::String,
-    symbol_list: Field::Text,
-    messages: Field::HasMany.with_options(direction: :desc),
-    take_profit_limit: Field::Number,
-    volumes: Field::String,
-    instruments: Field::HasMany
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -35,32 +23,20 @@ class TraceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
+  trace
   id
-  active
+  symbol
   name
-  meta_host
-  meta_port
-
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
+  trace
   id
-  active
+  symbol
   name
-  name_id
-  store
-  take_profit_limit
   volumes
-  telegram_option
-  telegram_image
-  meta_host
-  meta_port
-  response
-  messages
-  symbol_list
-  instruments
   created_at
   updated_at
   ].freeze
@@ -69,18 +45,10 @@ class TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  trace
+  symbol
   name
-  name_id
-  take_profit_limit
   volumes
-  telegram_option
-  telegram_image
-  active
-  meta_host
-  meta_port
-  symbol_list
-  instruments
-
   ].freeze
 
   # COLLECTION_FILTERS
@@ -95,14 +63,10 @@ class TraceDashboard < Administrate::BaseDashboard
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how signs are displayed
+  # Overwrite this method to customize how instruments are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(sign)
-  #   "Sign ##{sign.id}"
+  # def display_resource(instrument)
+  #   "Instrument ##{instrument.id}"
   # end
-
-   def display_resource(resource)
-    resource.name
-  end
 end

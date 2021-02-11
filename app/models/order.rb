@@ -67,7 +67,7 @@ class Order < ApplicationRecord
   def message_action(action, value=0)
     case action
     when "open_order"
-      create_order!
+      create_transactions!
     when "close_order"
       transactions.map(&:close_order)
     when "set_break_even"
@@ -81,13 +81,14 @@ class Order < ApplicationRecord
     end
   end
 
-  def create_order!
-    limit = self.trace.take_profit_limit
-    message.serializer.takeprofits.take(limit.to_i).each_with_index do |volume, index|
-      response = meta_order_send(trace, message.serializer.meta_attributes(index))
+  def create_transactions!
+    limit = self.trace.take_profit_limit.to_i
+    takeprofits = message.serializer.takeprofits.count
+    for_limit = limit <= takeprofits ? limit : takeprofits
+    for i in (0..for_limit-1) do 
+      response = meta_order_send(trace, message.serializer.meta_attributes(i))
       transaction = self.transactions.create(message.serializer.transaction_attributes(response))
       # message.execute if transaction
-
       response[:response] == "OK" ? transaction.execute : transaction.erro
     end
 
