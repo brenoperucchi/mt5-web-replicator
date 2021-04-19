@@ -27,14 +27,14 @@ module Signals
 	end
 
 	def meta_attributes(value=0)
-		price_request = 0 unless type.include?('limit') or type.include?('stop')
+		openprice = (type.include?('limit') or type.include?('stop')) ? price_request : 0
 		instrument = object.trace.instruments.find_by_symbol(symbol)
 
 	  	@meta_attributes = { 
 			instrument: symbol,
 			ordertype: type,
 			volume:instrument.volumes.try(:split,', ')[value],
-			openprice: price_request,
+			openprice: openprice,
 			slippage:10,
 			magicnumber:2000,
 			stoploss: stoploss,
@@ -46,6 +46,11 @@ module Signals
 
 	def order_attributes
 	 	{symbol: symbol, content:object.content.html_safe, content_id: object.content_id}
+	end
+
+
+	def symbol
+		object.trace.instruments.detect{|x| object.content.gsub(/\W/, '').upcase.include?(x[:symbol].upcase) }.try(:name)
 	end
 
 	# def symbol

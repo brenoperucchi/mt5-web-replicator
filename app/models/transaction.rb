@@ -44,9 +44,9 @@ class Transaction < ApplicationRecord
     end
     state :closed do
       def break_even(state)
-        if order.transactions.count > 1 and not first?
+        if order.transactions.count > 1 and first_transaction?
           order.transactions.where.not(id: order.transactions.finish.map(&:id)).each do |transc|
-            transc.set_sl_and_tp_order(take_profit=0, stop_loss=self.price_request)
+            transc.set_sl_and_tp_order(take_profit=0, stop_loss=self.price_open) unless meta_get_closed_ticket_position(self.order.trace, transc.ticket)
           end
         end
       end
@@ -58,7 +58,7 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def first?
+  def first_transaction?
   	order.transactions.first == self
   end
 
@@ -76,7 +76,7 @@ class Transaction < ApplicationRecord
     response, response_error = meta_set_sl_and_tp_order(ticket=self.ticket, take_profit=take_profit, stop_loss=stop_loss, trace=self.order.trace)
     if response > 0
       self.update_column(:response_error, response_error)
-      self.erro
+      # self.erro
     else
       true
     end

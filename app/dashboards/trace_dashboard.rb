@@ -22,10 +22,8 @@ class TraceDashboard < Administrate::BaseDashboard
     meta_port: Field::String,
     # volumes: Field::ActsAsTaggable,
     response: Field::String,
-    symbol_list: Field::Text,
     messages: Field::HasMany.with_options(direction: :desc),
     take_profit_limit: Field::Number,
-    volumes: Field::String,
     instruments: Field::HasMany
   }.freeze
 
@@ -52,14 +50,12 @@ class TraceDashboard < Administrate::BaseDashboard
   name_id
   store
   take_profit_limit
-  volumes
   telegram_option
   telegram_image
   meta_host
   meta_port
   response
   messages
-  symbol_list
   instruments
   created_at
   updated_at
@@ -72,14 +68,11 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   take_profit_limit
-  volumes
   telegram_option
   telegram_image
   active
   meta_host
   meta_port
-  symbol_list
-  instruments
 
   ].freeze
 

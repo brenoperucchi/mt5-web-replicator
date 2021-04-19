@@ -8,21 +8,21 @@ module Signals
       # if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
       if (content.include?('venda') or content.include?('compra')) and not content.include?('start')
         return 'open_order', nil
-      elsif content.include?("fechar") or content.include?("close")
-        return 'close_order', nil
       elsif content.include?("break") or content.include?("entrie")
         return "set_break_even", values.first
       elsif (content.include?("sl") or content.include?("stop loss")) and content.include?("set") 
         return "set_stop_loss", values.first
       elsif (content.include?("tp") or content.include?("take profit")) and content.include?("set") 
         return "set_take_profit", values.first
+      elsif content.include?("fechar") or content.include?("close")
+        return 'close_order', nil
       else
         return false, nil
       end
     end
 
     def values
-      object.content.tr("@",'').scan(/[(\s\d.*$\^@)]+/)
+      object.content.scan(/(\d*\.\d+)/).flatten
     end
 
     def symbol
@@ -33,12 +33,14 @@ module Signals
       false
     end
 
+    def takeprofits
+      takeprofit
+    end
+
     def type
       if object.content.downcase.include?('venda')
-        @price_request = round_up(object.content.scan(/VENDA:[(\s\d.*$\^@)]+/).first.split(':').try(:last).try(:strip))
         'sell'
       elsif object.content.downcase.include?('compra')
-        @price_request = round_up(object.content.scan(/COMPRA:[(\s\d.*$\^@)]+/).first.split(':').try(:last).try(:strip))
         'buy'
       end
       # if object.content.downcase.include?('stop')
@@ -78,7 +80,7 @@ module Signals
     end
 
     def takeprofit
-      case object.trace.volumes.count
+      case object.trace.take_profit_limit.to_i
       when 1          
         [take_profit_1]
       when 2

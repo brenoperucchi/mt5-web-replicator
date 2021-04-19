@@ -7,7 +7,7 @@ import pytz
 import time
 
 from datetime import datetime, timedelta 
-from pytrader.Pytrader_API_V1_04 import Pytrader_API
+from pytrader.Pytrader_API_V1_05 import Pytrader_API
 
 class MetaTrader():
 	def __init__(self, meta_host, meta_port, symbol_list):
@@ -64,11 +64,9 @@ class MetaTrader():
 		MT = self.meta
 		ticket = self.meta.Open_order(**meta_attributes)
 
-		if(ticket == -1):
-			print('Error:',MT.order_error)
-			print('Return Message:',MT.order_return_message)
-		else:
-			print('ticket:',ticket)	
+		print('Error:',MT.order_error)
+		print('Return Message:',MT.order_return_message)
+		print('Ticket:',ticket)	
 		
 		print("###### END ######")
 
@@ -90,6 +88,4 @@ class MetaTrader():
 
 	def get_closed_positions(self):
 		timezone = pytz.timezone("Etc/UTC")
-		account_login = self.meta.Get_static_account_info()['login']
-		trades = self.meta.Get_all_closed_positions(date_from=datetime(2021, 1, 1, tzinfo=timezone), date_to=datetime.now() + timedelta(hours=5))		
-		return trades
+		return self.meta.Get_all_closed_positions(date_from=datetime(2021, 1, 1, tzinfo=timezone), date_to=datetime.now() + timedelta(hours=24))		

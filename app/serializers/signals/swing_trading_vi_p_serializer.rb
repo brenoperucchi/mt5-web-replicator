@@ -21,7 +21,7 @@ module Signals
     end
 
     def values
-      object.content.tr("@",'').scan(/ [(\d.*$\^@)]+/)
+      object.content.scan(/(\d*\.\d+)/).flatten
     end
 
     def symbol
@@ -47,7 +47,7 @@ module Signals
     end
 
     def takeprofits
-      object.content.scan(/ [(\d.*$\)]+/)
+      object.content.scan(/(?:TP\d?)(?::| @| ) ?(\d*\.\d+)/i).flatten
     end
 
     def price_request

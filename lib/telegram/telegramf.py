@@ -50,7 +50,7 @@ class Telegramf():
 			else:
 				chat_id = get_chat.update['id']
 				# self._signal_image = True #######################################################
-				chat_history, error, error_info = self._get_chat_history(get_chat)
+				# chat_history, error, error_info = self._get_chat_history(get_chat)
 				chat_history, error, error_info = self._get_chat_history(get_chat)
 				# print(f'### {trace.name()} ## {trace.name_id()} #####')
 				return dict(chat_history= chat_history, error=error, error_info=error_info)
@@ -91,7 +91,7 @@ class Telegramf():
 
 	def _get_chat_history(self, telegram_chat, from_message_id=0):
 		chat_id = telegram_chat.update['id']
-		result = self._tg.get_chat_history(chat_id=chat_id, offset=-20, from_message_id=from_message_id)
+		result = self._tg.get_chat_history(chat_id=chat_id, offset=0, from_message_id=from_message_id)
 		result.wait()
 		result.update
 		result.wait()

@@ -20,7 +20,7 @@ opts.each do |opt, arg|
       EOF
     when '--name', '-n'
     	if arg.downcase == "metatrader" or arg.downcase == "meta_trader"
-			meta_send_order
+			meta_get_closed_positions
 		end
     	if arg.downcase == "telegram"
 			telegram_request_msg 

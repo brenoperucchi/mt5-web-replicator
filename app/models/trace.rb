@@ -38,4 +38,19 @@ class Trace < ApplicationRecord
     result = Hash[pairs]
   end
 
+  def off 
+    self.update_column(:active_at, nil)
+  end
+
+  def self.disable
+    Trace.all.map(&:off)
+  end
+
+  def insert_instruments
+    Instrument::SYMBOLLIST.each do |symbol|
+      self.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes])
+    end
+
+  end
+
 end

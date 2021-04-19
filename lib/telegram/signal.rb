@@ -21,6 +21,9 @@ def telegram_request_msg
 		traces = Store.first.traces.active
 		if traces.present?
 			traces.each do |trace|
+				
+				meta_get_closed_positions(trace)
+
 				t_response = telegram.query_message(trace)
 				if t_response['error']
 					trace.update_column(:response, t_response['chat_history']) if trace.response != t_response['chat_history']
@@ -83,11 +86,9 @@ end
 def meta_order_send(trace, meta_attributes)
 	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
 	meta.connect()
-
 	if message.serializer.try(:check_limit_stop_order_type?)
 		meta_attributes[:ordertype] = set_stop_or_limit_order(meta, meta_attributes[:instrument], meta_attributes[:openprice], meta_attributes[:ordertype])
 	end
-
 	response = meta.order_send(meta_attributes: meta_attributes)
 	meta.meta.Disconnect()
 	return response
@@ -100,16 +101,28 @@ def meta_get_closed_positions(trace)
 	unless trades.empty
 		Store.first.transactions.not_closed.each do |transaction|
 			ticket = transaction.ticket.to_i
-			row_number = trades.loc[trades['order_ticket'] == ticket].index.tolist().first
+			row_number = trades.loc[trades['position_ticket'] == ticket].index.tolist().first
 			if row_number
-				if trades['order_ticket'][row_number] == ticket
-					row_hash = trades.loc[trades['order_ticket'] == ticket].to_dict
+				if trades['position_ticket'][row_number] == ticket
+					row_hash = trades.loc[trades['position_ticket'] == ticket].to_dict
 					transaction = Transaction.find_by(ticket: ticket)
 					transaction.update(profit: trades['profit'][row_number], response: row_hash, price_open: trades['open_price'][row_number], open_at: Time.at(trades['open_time'][row_number].to_i) )
 					transaction.close
 				end
 			end
 		end
+	end
+	meta.meta.Disconnect()
+end
+
+def meta_get_closed_ticket_position(trace, ticket)
+	meta = MetaTrader.new(meta_host: trace.meta_host, meta_port: trace.meta_port, symbol_list:trace.symbol_list_dict)
+	meta.connect()
+	trades = meta.get_closed_positions()
+	unless trades.empty
+		ticket = ticket.to_i
+		row_number = trades.loc[trades['position_ticket'] == ticket].index.tolist().first
+		return row_number ? trades['position_ticket'][row_number] == ticket : false
 	end
 	meta.meta.Disconnect()
 end

@@ -89,7 +89,7 @@ class Order < ApplicationRecord
       response = meta_order_send(trace, message.serializer.meta_attributes(i))
       transaction = self.transactions.create(message.serializer.transaction_attributes(response))
       # message.execute if transaction
-      response[:response] == "OK" ? transaction.execute : transaction.erro
+      response[:response_error] == 0 ? transaction.execute : transaction.erro
     end
 
   end
