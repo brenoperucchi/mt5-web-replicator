@@ -1,7 +1,5 @@
-require "#{Rails.root}/lib/telegram/signal"
 class Order < ApplicationRecord
   # has_paper_trail
-  
   attr_accessor :image_url
 
   # enum state: %i[ pending prepared ordered error ]
@@ -14,6 +12,7 @@ class Order < ApplicationRecord
   scope :ready, ->{ where(state: 'prepared').where.not(state:'error') }
 
   scope :error, ->{ where(state: 'error')}
+  scope :executed, ->{ where(state: 'executed')}
 
   has_one_attached :image
 
@@ -75,7 +74,7 @@ class Order < ApplicationRecord
     when "set_stop_loss"
       transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(0, value)}
     when "set_take_profit"
-      transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(value, 0)}
+      transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(value)}
     else
       false
     end
@@ -86,10 +85,7 @@ class Order < ApplicationRecord
     takeprofits = message.serializer.takeprofits.count
     for_limit = limit <= takeprofits ? limit : takeprofits
     for i in (0..for_limit-1) do 
-      response = meta_order_send(trace, message.serializer.meta_attributes(i))
-      transaction = self.transactions.create(message.serializer.transaction_attributes(response))
-      # message.execute if transaction
-      response[:response_error] == 0 ? transaction.execute : transaction.erro
+      transactions.create_transactions(message, i)
     end
 
   end
@@ -102,6 +98,10 @@ class Order < ApplicationRecord
     else
       return true
     end
+  end
+
+  def order_pending?
+    self.content.upcase.include?('STOP') or self.content.upcase.include?('LIMIT')
   end
 
   def ocr_text(url:nil, file:nil)

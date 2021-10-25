@@ -5,21 +5,22 @@
     "@rails/actioncable": "^6.0.0-alpha",
     "@rails/activestorage": "^6.0.0-alpha",
     "@rails/ujs": "^6.0.0-alpha",
-    "@rails/webpacker": "^4.0.7",
+    "@rails/webpacker": "*",
     "datatables": "^1.10.18",
+    "metaapi.cloud-sdk": "^12.4.0",
     "turbolinks": "^5.2.0"
   },
   "version": "0.1.0",
   "devDependencies": {
     "bootstrap": "^4.3.1",
     "dom-factory": "^1.0.3",
-    "jquery": "^3.4.1",
+    "jquery": "^3.6.0",
     "material-design-icons-iconfont": "^5.0.1",
     "material-design-kit": "^1.0.2",
-    "popper": "^1.0.1",
-    "popper.js": "^1.15.0",
+    "popper": "*",
+    "popper.js": "*",
     "sidebar-style-guide": "^2.0.0",
     "simplebar": "^4.3.0-alpha.0",
-    "webpack-dev-server": "^3.8.0"
+    "webpack-dev-server": "^3.11.2"
   }
 }

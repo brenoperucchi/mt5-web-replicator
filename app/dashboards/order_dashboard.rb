@@ -12,7 +12,7 @@ class OrderDashboard < Administrate::BaseDashboard
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     message: Field::BelongsTo,
     content: DisableTextField,
-    content_id: Field::Number,
+    content_id: Field::String,
     image: Administrate::Field::Image,
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     ready_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

@@ -11,6 +11,7 @@ class Message < ApplicationRecord
 	belongs_to :trace, optional: true
 	
 	scope :prepared, ->{ where(state: 'prepared')}
+	scope :executed, ->{ where(state: 'executed')}
 	# scope :action, ->{ where(state: 'action')}
 
 	def serializer
@@ -95,7 +96,7 @@ class Message < ApplicationRecord
 	end
 
 	def restrict_time?
-		if self.content_at + 15.minute < DateTime.now
+		if self.content_at + 45.minute < DateTime.now
 			self.update_column(:response, "Restrict Time")		
 			return true
 		else

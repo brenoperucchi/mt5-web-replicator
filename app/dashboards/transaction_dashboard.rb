@@ -24,11 +24,12 @@ class TransactionDashboard < Administrate::BaseDashboard
     magic_number: Field::String,
     response: Field::String,
     response_error: Field::String,
-    meta_order_generate: DisableTextField,
     open_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     message: Field::BelongsTo,
+    loggings: Field::HasMany,
+    slaves: Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -63,11 +64,12 @@ class TransactionDashboard < Administrate::BaseDashboard
   magic_number
   response
   response_error
-  meta_order_generate
   open_at
   created_at
   updated_at
   message
+  loggings
+  slaves
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -89,7 +91,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   magic_number
   response
   response_error
-  meta_order_generate
   open_at
   ].freeze
 

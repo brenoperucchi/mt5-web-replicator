@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_11_035215) do
+ActiveRecord::Schema.define(version: 2021_10_21_150544) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -60,6 +60,17 @@ ActiveRecord::Schema.define(version: 2021_02_11_035215) do
     t.index ["trace_id"], name: "index_instruments_on_trace_id"
   end
 
+  create_table "loggings", force: :cascade do |t|
+    t.string "content"
+    t.bigint "user_id"
+    t.string "loggerable_type"
+    t.bigint "loggerable_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["loggerable_type", "loggerable_id"], name: "index_loggings_on_loggerable_type_and_loggerable_id"
+    t.index ["user_id"], name: "index_loggings_on_user_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.string "content"
     t.string "content_id"
@@ -93,14 +104,6 @@ ActiveRecord::Schema.define(version: 2021_02_11_035215) do
     t.bigint "message_id"
     t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["trace_id"], name: "index_orders_on_trace_id"
-  end
-
-  create_table "slaves", force: :cascade do |t|
-    t.bigint "trace_id", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.string "environment"
-    t.index ["trace_id"], name: "index_slaves_on_trace_id"
   end
 
   create_table "stores", force: :cascade do |t|
@@ -148,8 +151,30 @@ ActiveRecord::Schema.define(version: 2021_02_11_035215) do
     t.integer "store_id"
     t.text "settings"
     t.string "meta_host"
-    t.string "meta_port"
+    t.string "kind"
     t.text "symbol_list"
+  end
+
+  create_table "transaction_slaves", force: :cascade do |t|
+    t.string "state"
+    t.string "ticket"
+    t.decimal "profit"
+    t.string "ordertype"
+    t.string "symbol"
+    t.string "price_request"
+    t.string "price_open"
+    t.string "stop_loss"
+    t.string "take_profit"
+    t.string "comment"
+    t.string "lot"
+    t.string "magic_number"
+    t.string "response"
+    t.string "response_error"
+    t.bigint "transaction_id"
+    t.datetime "open_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
 
   create_table "transactions", force: :cascade do |t|

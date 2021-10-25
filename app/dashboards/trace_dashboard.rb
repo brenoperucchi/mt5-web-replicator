@@ -19,7 +19,7 @@ class TraceDashboard < Administrate::BaseDashboard
     updated_at: Field::DateTime,
     store: Field::BelongsTo,
     meta_host: Field::String,
-    meta_port: Field::String,
+    kind: Field::String,
     # volumes: Field::ActsAsTaggable,
     response: Field::String,
     messages: Field::HasMany.with_options(direction: :desc),
@@ -36,9 +36,7 @@ class TraceDashboard < Administrate::BaseDashboard
   id
   active
   name
-  meta_host
-  meta_port
-
+  kind
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -48,13 +46,10 @@ class TraceDashboard < Administrate::BaseDashboard
   active
   name
   name_id
-  store
+  kind
   take_profit_limit
   telegram_option
   telegram_image
-  meta_host
-  meta_port
-  response
   messages
   instruments
   created_at
@@ -67,12 +62,12 @@ class TraceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   name_id
+  kind
   take_profit_limit
   telegram_option
   telegram_image
   active
-  meta_host
-  meta_port
+
 
   ].freeze
 

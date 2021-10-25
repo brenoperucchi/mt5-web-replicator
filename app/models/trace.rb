@@ -12,6 +12,7 @@ class Trace < ApplicationRecord
   belongs_to :store, optional: true
 
   scope :active, ->{ where.not(active_at:nil)}
+  scope :telegram, ->{ where(kind:'telegram')}
 
   # validates_presence_of :take_profit, :on => :create#, :message => "can't be blank"
 

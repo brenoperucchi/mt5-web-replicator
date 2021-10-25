@@ -4,8 +4,9 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
   mount API::Base, at: "/"
   namespace :admin do
-	  	resources :slaves
+	  	resources :transaction_slaves
       resources :transactions
+      resources :loggings
       resources :instruments
 
       resources :orders

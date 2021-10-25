@@ -1,0 +1,2 @@
+class TransactionSlave < ApplicationRecord
+end

@@ -10,7 +10,7 @@ class MessageDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     content: Field::Text.with_options(searchable: true),
-    content_id: Field::Number,
+    content_id: Field::String,
     state: Field::String,
     response: Field::String,
     order: Field::BelongsTo,

@@ -174,11 +174,6 @@ GEM
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.2)
       dry-equalizer (~> 0.2)
-    dry-struct (1.2.0)
-      dry-core (~> 0.4, >= 0.4.3)
-      dry-equalizer (~> 0.3)
-      dry-types (~> 1.0)
-      ice_nine (~> 0.11)
     dry-types (1.2.2)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.3)
@@ -199,6 +194,10 @@ GEM
       factory_bot (~> 6.1.0)
       railties (>= 5.0.0)
     ffi (1.13.1)
+    ffi-rzmq (2.0.7)
+      ffi-rzmq-core (>= 1.0.7)
+    ffi-rzmq-core (1.0.7)
+      ffi
     foreman (0.87.2)
     formatador (0.2.5)
     fugit (1.4.0)
@@ -234,7 +233,6 @@ GEM
       rspec (>= 2.99.0, < 4.0)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
-    ice_nine (0.11.2)
     jbuilder (2.10.1)
       activesupport (>= 5.0.0)
     jquery-rails (4.4.0)
@@ -437,12 +435,6 @@ GEM
     sshkit (1.21.0)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
-    tdlib-ruby (2.2.0)
-      concurrent-ruby (~> 1.1)
-      dry-configurable (~> 0.9)
-      dry-struct (~> 1.2.0)
-      dry-types (~> 1.2.0)
-      ffi (~> 1.0)
     temple (0.8.2)
     thor (1.0.1)
     thread_safe (0.3.6)
@@ -504,6 +496,7 @@ DEPENDENCIES
   ed25519 (~> 1.2)
   eventmachine
   factory_bot_rails
+  ffi-rzmq
   foreman
   grape
   grape-active_model_serializers
@@ -532,7 +525,6 @@ DEPENDENCIES
   spring-watcher-listen (~> 2.0.1)
   sqlite3 (~> 1.4)
   state_machine!
-  tdlib-ruby (= 2.2.0)
   terminal-notifier!
   turbolinks (~> 5)
   unicorn
