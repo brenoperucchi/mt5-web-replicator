@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # require File.expand_path('../../../config/environment', __FILE__)
-load "#{__dir__}/signal.rb"
+load "#{__dir__}/telegram.rb"
 require 'getoptlong'
 
 opts = GetoptLong.new(

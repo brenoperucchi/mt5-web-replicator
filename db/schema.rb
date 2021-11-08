@@ -10,10 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_10_21_150544) do
+ActiveRecord::Schema.define(version: 2021_11_03_033339) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "accounts", force: :cascade do |t|
+    t.string "name"
+    t.bigint "store_id"
+    t.text "settings"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["store_id"], name: "index_accounts_on_store_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -88,6 +97,15 @@ ActiveRecord::Schema.define(version: 2021_10_21_150544) do
     t.index ["trace_id"], name: "index_messages_on_trace_id"
   end
 
+  create_table "morphics", force: :cascade do |t|
+    t.bigint "account_id"
+    t.bigint "transaction_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["account_id"], name: "index_morphics_on_account_id"
+    t.index ["transaction_id"], name: "index_morphics_on_transaction_id"
+  end
+
   create_table "orders", force: :cascade do |t|
     t.string "state"
     t.string "response"
@@ -104,6 +122,15 @@ ActiveRecord::Schema.define(version: 2021_10_21_150544) do
     t.bigint "message_id"
     t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["trace_id"], name: "index_orders_on_trace_id"
+  end
+
+  create_table "permissions", force: :cascade do |t|
+    t.bigint "account_id"
+    t.bigint "trace_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["account_id"], name: "index_permissions_on_account_id"
+    t.index ["trace_id"], name: "index_permissions_on_trace_id"
   end
 
   create_table "stores", force: :cascade do |t|

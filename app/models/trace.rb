@@ -3,16 +3,20 @@ class Trace < ApplicationRecord
   
   # TAKE_PROFIT = %w{normal agressive superagressive} 
 
-  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :volumes] 
+  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :magics_accept, :accounts_accept]#, :volumes] 
 
   has_many :orders, :class_name => "Order", :foreign_key => "trace_id"
+  has_many :transactions, :through => :orders, :source => :transactions
   has_many :messages, :class_name => "Message", :foreign_key => "trace_id"
-  has_many :slaves, :class_name => "Slave", :foreign_key => "trace_id"
+
   has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id"
   belongs_to :store, optional: true
 
-  scope :active, ->{ where.not(active_at:nil)}
+  scope :active,   ->{ where.not(active_at:nil)}
   scope :telegram, ->{ where(kind:'telegram')}
+
+  has_many :permissions
+  has_many :accounts, :through => :permissions#, :source => :slave
 
   # validates_presence_of :take_profit, :on => :create#, :message => "can't be blank"
 

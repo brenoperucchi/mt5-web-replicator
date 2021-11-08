@@ -5,7 +5,12 @@ class Order < ApplicationRecord
   # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
   belongs_to :message
+
+  # has_many :morphics,     dependent: :destroy
+  # has_many :transactions, through: :morphics, source: :tmaster, class_name:'Transaction' 
+  # has_many :accounts,     through: :morphics, source: :account
   has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
+  has_many :slaves,       through: :transactions, source: :transaction_slaves, class_name:'TransactionSlave'
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
 
@@ -80,14 +85,35 @@ class Order < ApplicationRecord
     end
   end
 
+  # def create_transactions!
+  #   limit = self.trace.take_profit_limit.to_i
+  #   takeprofits = message.serializer.takeprofits.count
+  #   for_limit = limit <= takeprofits ? limit : takeprofits
+  #   for i in (0..for_limit-1) do 
+  #     self.trace.accounts.each do |account|
+  #       transaction = account.transactions.create_transactions(message, i)
+  #     end
+  #   end
+  # end
+
   def create_transactions!
     limit = self.trace.take_profit_limit.to_i
     takeprofits = message.serializer.takeprofits.count
     for_limit = limit <= takeprofits ? limit : takeprofits
     for i in (0..for_limit-1) do 
-      transactions.create_transactions(message, i)
+      self.trace.accounts.each do |account|
+        transaction = account.transactions.create(message.serializer.transaction_attributes(i))
+        if transaction
+          if trace.kind == "robometa"
+            api_attributes = APITransactionSerializer.new(transaction.message.content).api_attributes
+          else
+            api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id)
+          end
+          slave = transaction.transaction_slaves.create(api_attributes.merge(state:'pending', ticket:nil, price_request:transaction.price_request, profit:nil))
+          transaction.execute
+        end
+      end
     end
-
   end
 
   def restrict_symbol?

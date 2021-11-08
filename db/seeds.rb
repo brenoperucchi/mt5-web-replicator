@@ -11,23 +11,26 @@ if Rails.env.development?
   	store = Store.create(name:'Store 1', active_at: DateTime.now, master: '39426385 5100601')
 
   	store.traces.create(name: 'RoboSignal', name_id:'-481414224', active_at: DateTime.now, telegram_option:'query_name',
-						telegram_image:true, meta_host: '192.168.1.245', meta_port: 900, take_profit_limit: 2)
+						telegram_image:true, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
   	store.traces.create(name: 'Perucchi Inc', name_id:'-340961920', active_at: DateTime.now, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 900, take_profit_limit: 2)
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
   	store.traces.create(name: 'PipsNation', name_id:'-1001340273590', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 1120, take_profit_limit: 2)
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
   	store.traces.create(name: 'PipsMaster', name_id:'-1001136746513', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 1125, take_profit_limit: 2)
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
   	store.traces.create(name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: nil, telegram_option:'query_name',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 1125, take_profit_limit: 2)  	
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')  	
   	store.traces.create(name: 'Canal Easy Trader Robot Dolar', name_id:'-1001454553108', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 900, take_profit_limit: 2)
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
   	store.traces.create(name: 'Canal Easy Trader Robot Indice', name_id:'-1001366232829', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 900, take_profit_limit: 2)
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
   	store.traces.create(name: 'Tradexxfx', name_id:'-1001299578719', active_at: DateTime.now, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 1120, take_profit_limit: 2)
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'telegram')
+  	store.traces.create(name: 'SignalCopy', name_id:'2000', active_at: DateTime.now, telegram_option:'query_name_id',
+						telegram_image:false, meta_host: '192.168.1.245', take_profit_limit: 2, kind: 'robometa', accounts_accept:'6500361 5612933 39207589 39426385', magics_accept:'2000 0')
 
   	Store.first.traces.each do |trace|
+  		next if trace.kind != 'telegram'
   		Instrument::SYMBOLLIST.each do |symbol|
   			trace.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes])
   		end
@@ -36,13 +39,13 @@ elsif Rails.env.production?
   	store = Store.create(name:'Store 1', active_at: DateTime.now, master: '3007712').
 
   	store.traces.create(name: 'M15 Signals Premium', name_id:'-1001222448337', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:true, meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.10, 0.05",
+						telegram_image:true, meta_host: '192.168.1.245', volume_list:"0.10, 0.05",
 						symbol_list: symbol_list)
   	store.traces.create(name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: nil, telegram_option:'query_name',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.10, 0.05",
+						telegram_image:false, meta_host: '192.168.1.245', volume_list:"0.10, 0.05",
 						symbol_list: symbol_list)
   	store.traces.create(name: 'PipsNation', name_id:'-1001340273590', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:false, meta_host: '192.168.1.245', meta_port: 1120, volume_list:"0.10, 0.05",
+						telegram_image:false, meta_host: '192.168.1.245', volume_list:"0.10, 0.05",
 						symbol_list: symbol_list)
 end
 

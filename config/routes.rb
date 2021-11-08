@@ -16,6 +16,7 @@ Rails.application.routes.draw do
       
       resources :traces
       resources :stores
+      resources :accounts
       # resources :sign_traces
 	    
 	    root "orders#index"

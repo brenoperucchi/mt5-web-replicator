@@ -1,7 +1,6 @@
 require "administrate/base_dashboard"
-require 'traces_helper'
 
-class TraceDashboard < Administrate::BaseDashboard
+class AccountDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -9,25 +8,12 @@ class TraceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
     name: Field::String,
-    name_id: Field::String,
-    accounts_accept: Field::String,
-    magics_accept: Field::String,
-    telegram_option: Field::String,
-    telegram_image: Field::Boolean,
-    active: Field::Boolean,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    traces: Field::HasMany,
+    transactions: Field::HasMany,
     store: Field::BelongsTo,
-    meta_host: Field::String,
-    kind: Field::String,
-    # volumes: Field::ActsAsTaggable,
-    response: Field::String,
-    messages: Field::HasMany.with_options(direction: :desc),
-    take_profit_limit: Field::Number,
-    instruments: Field::HasMany,
-    accounts: Field::HasMany
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -36,28 +22,17 @@ class TraceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
-  active
   name
-  kind
+  traces
+  transactions
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  id
-  active
-  name
-  name_id
-  kind
-  accounts_accept
-  magics_accept
-  accounts
-  take_profit_limit
-  telegram_option
-  telegram_image
-  messages
-  instruments
+  traces
+  store
+  transactions
   created_at
   updated_at
   ].freeze
@@ -67,16 +42,8 @@ class TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
-  name_id
-  accounts_accept
-  magics_accept
-  kind
-  take_profit_limit
-  telegram_option
-  telegram_image
-  active
-
-
+  traces
+  store
   ].freeze
 
   # COLLECTION_FILTERS

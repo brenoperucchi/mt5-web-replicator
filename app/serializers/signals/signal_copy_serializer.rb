@@ -41,6 +41,10 @@ module Signals
       ordertype
     end
 
+    def volume(value=nil)
+      content['volume']
+    end
+
     def value(arg)
       begin
         values[arg].try(:strip)

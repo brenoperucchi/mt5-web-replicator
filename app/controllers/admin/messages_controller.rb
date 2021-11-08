@@ -55,7 +55,7 @@ module Admin
 		resources = Administrate::Search.new(resource_messages, dashboard_class, search_term).run
 		resources = apply_collection_includes(resources)
 		resources = order.apply(resources).order('id desc')
-		resources = resources.page(params[:_page]).per(records_per_page)
+		resources = resources.page(params[:page]).per(records_per_page)
 		page = Administrate::Page::Collection.new(dashboard, order: order)
 
 		render :index, locals: {

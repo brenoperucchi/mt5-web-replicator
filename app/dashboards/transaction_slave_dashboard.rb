@@ -8,25 +8,28 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    ticket: Field::String,
-    state: Field::String,
-    order: Field::BelongsTo,
-    profit: Field::String.with_options(searchable: false),
-    ordertype: Field::String,
-    symbol: Field::String,
-    price_request: Field::String,
-    price_open: Field::String,
-    stop_loss: Field::String,
-    take_profit: Field::String,
-    comment: Field::String,
-    lot: Field::String,
-    magic_number: Field::String,
-    response: Field::String,
-    response_error: Field::String,
-    open_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    id:                 Field::Number,
+    loggings:           Field::HasMany,
+    order:              Field::BelongsTo,
+    account:            Field::BelongsTo,
+    transaction_master: Field::BelongsTo.with_options(class_name:'Transaction'),
+    ticket:             Field::String,
+    state:              Field::String,
+    profit:             Field::String.with_options(searchable: false),
+    ordertype:          Field::String,
+    symbol:             Field::String,
+    price_request:      Field::String,
+    price_open:         Field::String,
+    stop_loss:          Field::String,
+    take_profit:        Field::String,
+    comment:            Field::String,
+    lot:                Field::String,
+    magic_number:       Field::String,
+    response:           Field::String,
+    response_error:     Field::String,
+    open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -35,9 +38,12 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  ticket
+  id
   state
+  ticket
   symbol
+  account
+  transaction_master
   profit
   ].freeze
 
@@ -46,6 +52,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   ticket
+  transaction_master
+  loggings
   state
   profit
   ordertype

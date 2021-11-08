@@ -29,7 +29,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     message: Field::BelongsTo,
     loggings: Field::HasMany,
-    slaves: Field::HasMany.with_options(class_name:'TransactionSlave'),
+    transaction_slaves: Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -69,7 +69,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   updated_at
   message
   loggings
-  slaves
+  transaction_slaves
   ].freeze
 
   # FORM_ATTRIBUTES

@@ -9,7 +9,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    content: Field::String,
+    content: Field::Text,
     # loggerable:Field::BelongsTo,
     # user:Field::BelongsTo,
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

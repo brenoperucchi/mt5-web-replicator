@@ -58,7 +58,7 @@ class Message < ApplicationRecord
 	def restrict_order?(action)
 		if action == 'open_order' 
 			# if restrict_symbol? or restrict_time?
-			if restrict_instrument? or restrict_symbol? or restrict_time? or not root? ##TODO - NEED A TESTING
+			if restrict_nil_instrument? or restrict_symbol? or restrict_time? or not root? ##TODO - NEED A TESTING
 				# self.update_column(:response, "Order Restrict")	
 				return false
 			else
@@ -113,7 +113,7 @@ class Message < ApplicationRecord
 	  	end
 	end
 
-	def restrict_instrument?
+	def restrict_nil_instrument?
 		if self.serializer.symbol.nil?
 	  		self.response = "Restrict Instrument"
 	  		return true

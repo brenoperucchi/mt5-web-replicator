@@ -42,7 +42,7 @@ def main
         trace_id = content['magic_number']
         comment = content['comment']
         time_at = Time.at(content['open_at'].split(".").first.to_i)
-        for i in 1..100 do
+        for i in 1..20 do
           sleep(0.2)
           trace = Trace.find_by(id: trace_id)
           break if trace
@@ -51,7 +51,7 @@ def main
         message.prepare
       when "COPY MODIFY"
         ticket_id = content['order_ticket']
-        for i in 1..100 do
+        for i in 1..20 do
           sleep(0.2)
           transaction = Transaction.find_by(ticket: ticket_id)
           break if transaction
@@ -62,7 +62,7 @@ def main
         end
       when "COPY CLOSE"
         ticket_id = content['order_ticket']
-        for i in 1..100 do
+        for i in 1..20 do
           sleep(0.2)
           transaction = Transaction.find_by(ticket: ticket_id)
           break if transaction
@@ -75,7 +75,7 @@ def main
           transaction = checkTransaction(content)
           if transaction
             transaction.loggings.create(content:message)
-            transaction.close
+            transaction.close_order
             # order = "#{transaction_id} SLAVE CLOSED|#{transaction.symbol}|#{content['order_ticket']}|#{transaction.ordertype}|#{transaction.price_request}|0.0|#{transaction.lot}|#{transaction.stop_loss}|#{transaction.take_profit}"
             # pub_socket.send_string(order)
           end
@@ -89,7 +89,7 @@ def main
           transaction = checkTransaction(content)
           if transaction
             transaction.loggings.create(content:message)
-            transaction.slaves.create(ticket:content['order_ticket'], price_open:content['open_price'],
+            transaction.transaction_slaves.create(ticket:content['order_ticket'], price_open:content['open_price'],
                                       open_at: Time.at(content['open_at'].split(".").first.to_i), 
                                       comment: content['comment'])
             # order = "#{transaction_id} SLAVE OPEN|#{transaction.symbol}|#{content['order_ticket']}|#{transaction.ordertype}|#{transaction.price_request}|0.0|#{transaction.lot}|#{transaction.stop_loss}|#{transaction.take_profit}"
