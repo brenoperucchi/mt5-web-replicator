@@ -1,12 +1,12 @@
 set :port, 22
-set :user, 'bperucchi'
-set :deploy_to, '/home/bperucchi/app'
+set :user, 'appweb'
+set :deploy_to, '/home/appweb/app'
 set :deploy_via, :remote_cache
 set :use_sudo, false
 set :stage, :production
 
 
-server 'signal.imentore.com.br',
+server 'app.imentore.com.br',
   roles: [:web, :app, :db],
   port: fetch(:port),
   user: fetch(:user),
@@ -19,7 +19,7 @@ set :ssh_options, {
   forward_agent: true,
   auth_methods: %w(publickey),
   keys: "#{ENV['HOME']}/.ssh/id_rsa",
-  user: 'bperucchi',
+  user: 'appweb',
 }
 
 set :rails_env, :production
