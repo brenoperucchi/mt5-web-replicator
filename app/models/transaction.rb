@@ -77,7 +77,7 @@ class Transaction < ApplicationRecord
 
   def close_order
     if self.close
-      self.order.slaves.each do |slave|
+      self.order.slaves.not_closed.each do |slave|
         slave.ticket.nil? ? slave.update(state: 'deleted') : slave.update(state: 'remove') 
       end
     end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_03_033339) do
+ActiveRecord::Schema.define(version: 2021_11_10_034015) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -139,6 +139,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_033339) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "settings"
+    t.integer "state", default: 0
   end
 
   create_table "taggings", id: :serial, force: :cascade do |t|
@@ -183,7 +184,6 @@ ActiveRecord::Schema.define(version: 2021_11_03_033339) do
   end
 
   create_table "transaction_slaves", force: :cascade do |t|
-    t.string "state"
     t.string "ticket"
     t.decimal "profit"
     t.string "ordertype"
@@ -201,6 +201,7 @@ ActiveRecord::Schema.define(version: 2021_11_03_033339) do
     t.datetime "open_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "state", default: 0
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
 

@@ -3,7 +3,8 @@ class Trace < ApplicationRecord
   
   # TAKE_PROFIT = %w{normal agressive superagressive} 
 
-  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :magics_accept, :accounts_accept]#, :volumes] 
+  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :magics_accept, :accounts_accept, 
+                               :telegram_api_id, :telegram_api_hash, :telegram_api_number]
 
   has_many :orders, :class_name => "Order", :foreign_key => "trace_id"
   has_many :transactions, :through => :orders, :source => :transactions

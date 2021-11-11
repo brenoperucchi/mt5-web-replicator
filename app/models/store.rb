@@ -1,4 +1,7 @@
 class Store < ApplicationRecord
+
+  enum state: {pending:0, active:1, deleted:2}
+  
   acts_as_taggable_on :tags
 
   has_many :accounts, :class_name => "Account", :foreign_key => "store_id"
@@ -8,5 +11,5 @@ class Store < ApplicationRecord
   has_many :transactions, :through => :messages, :source => :transactions
   store :settings, accessors: [:master]
 
-  scope :active, ->{ where.not(active_at:nil)}
+  # scope :active, ->{ where.not(active_at:nil)}
 end

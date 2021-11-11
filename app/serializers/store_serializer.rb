@@ -7,8 +7,10 @@ class StoreSerializer < ActiveModel::Serializer
 
   def traces
   	object.traces.active.map do |trace|
+      next unless trace.kind == "telegram"
+      next if trace.telegram_api_id.nil?
   		TraceSerializer.new(trace)
-  	end
+  	end.compact
   end
 
 end

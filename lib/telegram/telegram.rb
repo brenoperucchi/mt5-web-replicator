@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-require 'ffi-rzmq'
+# require 'ffi-rzmq'
 require File.expand_path('../../../config/environment', __FILE__)
 require 'pycall/import'
 

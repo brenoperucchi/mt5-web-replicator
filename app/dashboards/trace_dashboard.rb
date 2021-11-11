@@ -9,25 +9,28 @@ class TraceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    name: Field::String,
-    name_id: Field::String,
-    accounts_accept: Field::String,
-    magics_accept: Field::String,
-    telegram_option: Field::String,
-    telegram_image: Field::Boolean,
-    active: Field::Boolean,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
-    store: Field::BelongsTo,
-    meta_host: Field::String,
-    kind: Field::String,
-    # volumes: Field::ActsAsTaggable,
-    response: Field::String,
-    messages: Field::HasMany.with_options(direction: :desc),
-    take_profit_limit: Field::Number,
-    instruments: Field::HasMany,
-    accounts: Field::HasMany
+    id:                  Field::Number,
+    name:                Field::String,
+    name_id:             Field::String,
+    accounts_accept:     Field::String,
+    magics_accept:       Field::String,
+    telegram_option:     Field::String,
+    telegram_image:      Field::Boolean,
+    telegram_api_id:     Field::String,
+    telegram_api_hash:   Field::String,
+    telegram_api_number: Field::String,
+    active:              Field::Boolean,
+    created_at:          Field::DateTime,
+    updated_at:          Field::DateTime,
+    store:               Field::BelongsTo,
+    meta_host:           Field::String,
+    kind:                Field::String,
+    # volumes:           Field::ActsAsTaggable,
+    response:            Field::String,
+    messages:            Field::HasMany.with_options(direction: :desc),
+    take_profit_limit:   Field::Number,
+    instruments:         Field::HasMany,
+    accounts:            Field::HasMany
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -56,6 +59,9 @@ class TraceDashboard < Administrate::BaseDashboard
   take_profit_limit
   telegram_option
   telegram_image
+  telegram_api_id
+  telegram_api_hash
+  telegram_api_number
   messages
   instruments
   created_at
@@ -74,9 +80,10 @@ class TraceDashboard < Administrate::BaseDashboard
   take_profit_limit
   telegram_option
   telegram_image
+  telegram_api_id
+  telegram_api_hash
+  telegram_api_number
   active
-
-
   ].freeze
 
   # COLLECTION_FILTERS

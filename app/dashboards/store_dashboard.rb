@@ -10,6 +10,7 @@ class StoreDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     name: Field::String,
+    state: Field::String,
     master: Field::String,
     accounts: Field::HasMany,
     traces: Field::HasMany,
@@ -26,6 +27,7 @@ class StoreDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   name
+  state
   master
   tag_list
   ].freeze
@@ -35,6 +37,7 @@ class StoreDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
+  state
   master
   accounts
   traces
@@ -48,6 +51,7 @@ class StoreDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  state
   tag_list
   master
   accounts

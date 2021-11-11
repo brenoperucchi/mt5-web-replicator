@@ -1,6 +1,6 @@
 require 'lucky_case/string'
 class TraceSerializer < ActiveModel::Serializer
-  attributes :id, :name, :name_id, :active_at, :telegram_option, :telegram_image, :meta_host, :meta_port, :volumes
+  attributes :id, :name, :name_id, :active_at, :telegram_option, :telegram_image, :telegram_api_id, :telegram_api_hash, :telegram_api_number
   attributes :orders
 
   def volumes

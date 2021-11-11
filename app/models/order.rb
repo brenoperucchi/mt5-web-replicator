@@ -2,13 +2,9 @@ class Order < ApplicationRecord
   # has_paper_trail
   attr_accessor :image_url
 
-  # enum state: %i[ pending prepared ordered error ]
   belongs_to :trace
   belongs_to :message
 
-  # has_many :morphics,     dependent: :destroy
-  # has_many :transactions, through: :morphics, source: :tmaster, class_name:'Transaction' 
-  # has_many :accounts,     through: :morphics, source: :account
   has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
   has_many :slaves,       through: :transactions, source: :transaction_slaves, class_name:'TransactionSlave'
 

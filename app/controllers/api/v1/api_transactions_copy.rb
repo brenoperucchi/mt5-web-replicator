@@ -37,6 +37,7 @@ module API
 					    message.prepare
 					    if message.transactions
 					    	message.transactions.each do |t|
+					    		t.loggings.create(content:message)
 					    		t.update(ticket: content['order_ticket'], price_open:content['open_price'], open_at: Time.at(content['open_at'].split(".").first.to_i))
 					    		map = "#{t.order.trace.id}|#{t.id}|OK"
 					    	end

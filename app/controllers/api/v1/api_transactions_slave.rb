@@ -39,7 +39,7 @@ module API
             return unless slave
             slave.loggings.create(content:message)
             case content['action']
-            when "CLOSED", "DELETED"              
+            when "CLOSED", "DELETED"
               api_attributes = APITransactionSerializer.new(message).api_attributes
               slave.update(api_attributes.merge(state: content['action'].downcase))
               map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
