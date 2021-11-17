@@ -28,7 +28,7 @@ gem 'jbuilder', '~> 2.7'
 # gem 'image_processing', '~> 1.2'
 
 # Reduces boot times through caching; required in config/boot.rb
-gem 'bootsnap', '>= 1.6.0', require: false
+gem 'bootsnap', '>= 1.6.0'#, require: false
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -111,7 +111,7 @@ gem 'ed25519', '~> 1.2'
 gem 'bcrypt_pbkdf', '~> 1'
 
 gem 'postgresql'
-gem 'unicorn'
+# gem 'unicorn'
 gem "rename"
 gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
