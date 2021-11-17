@@ -23,7 +23,7 @@ development:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: aszx12qw  
+  password: ENV.fetch("DB_PASSWORD")  
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -36,4 +36,4 @@ production:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: aszx12qw
+  password: ENV.fetch("DB_PASSWORD")

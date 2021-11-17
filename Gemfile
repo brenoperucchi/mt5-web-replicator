@@ -57,8 +57,6 @@ group :test do
   gem 'terminal-notifier' , git:"https://github.com/d-a-l-l/terminal-notifier.git"
   gem "database_cleaner"
   gem "factory_bot_rails"
-
-
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
@@ -84,9 +82,6 @@ gem "administrate"
 gem 'administrate-field-image'
 gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 
-gem 'sidekiq'#, '5.2.9'
-gem 'sidekiq-scheduler'
-gem 'foreman'
 # gem 'ocr_space', path: "vendor/ocr_space"
 gem 'rtesseract'  
 gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
@@ -98,21 +93,29 @@ gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
 gem 'rack-cors' 
 
-gem 'capistrano', '~> 3.6'
-gem 'capistrano-rails'
-gem 'capistrano-bundler'
-gem 'capistrano-rbenv'
-gem 'capistrano3-unicorn'
-# gem 'capistrano-sidekiq'#, git: 'http://github.com/seuros/capistrano-sidekiq'
-gem 'capistrano-sidekiq', '1.0.3'
 
-gem 'capistrano-yarn'
-gem 'ed25519', '~> 1.2'
-gem 'bcrypt_pbkdf', '~> 1'
+group :development do
+  gem 'foreman'
+  gem 'sidekiq'#, '5.2.9'
+  gem 'sidekiq-scheduler'
+end
+
+group :development do
+  gem 'capistrano', '~> 3.6'
+  gem 'capistrano-rails'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rbenv'
+  gem 'capistrano3-unicorn'
+  # gem 'capistrano-sidekiq'#, git: 'http://github.com/seuros/capistrano-sidekiq'
+  gem 'capistrano-sidekiq', '1.0.3'
+  gem 'capistrano-yarn'
+  gem "rename"
+  gem 'bcrypt_pbkdf', '~> 1'
+  gem 'ed25519', '~> 1.2'
+  # gem 'unicorn'
+end
 
 gem 'postgresql'
-# gem 'unicorn'
-gem "rename"
 gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'
