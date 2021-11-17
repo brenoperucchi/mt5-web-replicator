@@ -477,7 +477,7 @@ DEPENDENCIES
   bcrypt_pbkdf (~> 1)
   better_errors
   binding_of_caller
-  bootsnap (>= 1.4.2)
+  bootsnap (>= 1.6.0)
   capistrano (~> 3.6)
   capistrano-bundler
   capistrano-rails
