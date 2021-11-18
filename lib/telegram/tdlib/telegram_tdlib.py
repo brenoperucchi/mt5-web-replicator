@@ -15,7 +15,7 @@ import pdb
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # load shared library
-tdjson_path = find_library('libtdjson.dylib') or 'tdjson.dll'
+tdjson_path = find_library('td/build/libtdjson.1.7.9')
 if tdjson_path is None:
     print('can\'t find tdjson library')
     quit()
@@ -101,7 +101,6 @@ while True:
             # and use them in the setTdlibParameters call
             if auth_state['@type'] == 'authorizationStateWaitTdlibParameters':
                 td_send({'@type': 'setTdlibParameters', 'parameters': {
-                                                       'lib_path': f'{dir_path}/tdlib/libtdjson.dylib',
                                                        'database_directory': 'tdlib',
                                                        'use_message_database': True,
                                                        'use_secret_chats': True,

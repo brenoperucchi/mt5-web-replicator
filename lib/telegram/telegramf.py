@@ -34,12 +34,11 @@ class Telegramf():
 			signal_name = trace['name']
 			self._signal_image = trace['telegram_image']
 			if trace['telegram_option'] == 'query_name':
-				telegram_query = self._tg.call_method('searchChatsOnServer',   params={'query': trace['name'], 'limit':10})
+				telegram_query = self._tg.call_method('searchChatsOnServer',   params={'query': trace['name'], 'limit':100})
 				telegram_query.wait()
 				get_chat = self._tg.get_chat(telegram_query.update['chat_ids'][0])
-
 			if trace['telegram_option'] == 'query_name_id':
-				telegram_query = self._tg.call_method('searchChatsOnServer',   params={'query': trace['name_id'], 'limit':10})
+				telegram_query = self._tg.call_method('searchChatsOnServer',   params={'query': trace['name'], 'limit':100})
 				telegram_query.wait()
 				get_chat = self._tg.get_chat(trace['name_id'])
 			get_chat.wait()
@@ -101,17 +100,6 @@ class Telegramf():
 			return result.update, None, None
 
 
-	def main(self):
-		stores = self.ApiConnection('get')
-		for store in stores:
-			# pdb.set_trace()
-			for trace in store['traces']:
-				self.connect(trace['telegram_api_id'], trace['telegram_api_hash'], trace['telegram_api_number'])
-				telegram_message = self.query_message(trace)
-				if(telegram_message):
-					telegram_message = json.dumps(telegram_message, indent = 2)
-					response = self.ApiConnection('post', telegram_message, trace['id'])
-					time.sleep(1)
 
 
 	def ApiConnection(self, action, response={}, trace_id = None):
@@ -122,11 +110,24 @@ class Telegramf():
 			request = requests.post(f'http://{hostname}/api/v1/traces/telegram/{trace_id}', data = response)
 		return request.json()
 
+def main():
+	telegram = Telegramf()
+	while True:
+		stores = telegram.ApiConnection('get')
+		for store in stores:
+			# pdb.set_trace()
+			for trace in store['traces']:
+				telegram.connect(trace['telegram_api_id'], trace['telegram_api_hash'], trace['telegram_api_number'])
+				telegram_message = telegram.query_message(trace)
+				if(telegram_message):
+					telegram_message = json.dumps(telegram_message, indent = 2)
+					response = telegram.ApiConnection('post', telegram_message, trace['id'])
+					time.sleep(1)
+				telegram.disconnect()
+
 if __name__ == "__main__":
-    telegram = Telegramf()
-    telegram.main()
-    telegram.disconnect()
-    # telegram.stop()
+	main()
+# telegram.disconnect()
 # check_chat_id = self._tg.get_chat('-1001490464609')
 # chat_id = -1001389557656 #- technicalPips VIP
 # chat_id = -1001287502434 #- technicalPips
