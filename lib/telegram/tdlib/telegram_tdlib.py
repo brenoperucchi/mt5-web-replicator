@@ -15,7 +15,7 @@ import pdb
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # load shared library
-tdjson_path = find_library('tdjson') or 'tdjson.dll'
+tdjson_path = find_library('libtdjson.dylib') or 'tdjson.dll'
 if tdjson_path is None:
     print('can\'t find tdjson library')
     quit()
