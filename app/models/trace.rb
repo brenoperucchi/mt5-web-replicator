@@ -1,7 +1,5 @@
 class Trace < ApplicationRecord
   # acts_as_taggable_on :volumes
-  
-  # TAKE_PROFIT = %w{normal agressive superagressive} 
 
   store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :magics_accept, :accounts_accept, 
                                :telegram_api_id, :telegram_api_hash, :telegram_api_number]
