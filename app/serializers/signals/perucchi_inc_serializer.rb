@@ -1,7 +1,7 @@
 #swing
 require 'lucky_case/string'
 module Signals
-  class PerucchiIncSerializer < SwingTradingViPSerializer
+  class PerucchiIncSerializer < CleverPipsSerializer
 
     
   end

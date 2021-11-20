@@ -48,6 +48,8 @@ class Telegramf():
 				return dict(chat_history= None, error=get_chat.error, error_info=get_chat.error_info, chat_name=trace['name'])
 			else:
 				chat_id = get_chat.update['id']
+				# if(trace['name_id'] == "-1001319789685"):
+				# 	pdb.set_trace()
 				# self._signal_image = True #######################################################
 				# chat_history, error, error_info = self._get_chat_history(get_chat)
 				chat_history, error, error_info = self._get_chat_history(get_chat)
