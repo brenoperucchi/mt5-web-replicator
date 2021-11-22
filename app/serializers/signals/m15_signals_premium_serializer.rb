@@ -26,7 +26,7 @@ module Signals
       when 2
         [object.content.split[3], object.content.split[5]]
       when 3
-        [object.content.split[3], object.content.split[5]], object.content.split[7]]
+        [object.content.split[3], object.content.split[5], object.content.split[7]]
       end
     end
   
