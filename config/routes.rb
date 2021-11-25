@@ -21,7 +21,6 @@ Rails.application.routes.draw do
 	    
 	    root "orders#index"
     end
-  resources :apisocials
   
   get ':page' => 'signs#show', as: 'signs'
   root 'admin/orders#index'

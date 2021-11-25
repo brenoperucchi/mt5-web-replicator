@@ -2,7 +2,7 @@ require 'open-uri'
 require 'json'
 module API
   module V1
-    class Orders < Grape::API
+    class ApiOrders < Grape::API
       include API::V1::Defaults
 
       resource :orders do

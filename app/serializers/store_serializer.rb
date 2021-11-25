@@ -1,9 +1,7 @@
 class StoreSerializer < ActiveModel::Serializer
-  attributes :id, :name
+  attributes :id, :name, :telegram_api_id, :telegram_api_number, :telegram_api_hash
   # has_many :traces
   attributes :traces
-
-
 
   def traces
   	object.traces.active.map do |trace|

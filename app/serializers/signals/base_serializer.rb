@@ -27,8 +27,12 @@ module Signals
 		end
 
 		def volume(value=0)
-			instrument = object.trace.instruments.find_by_symbol(symbol)
-			instrument.volumes.try(:split,', ')[value] 
+			instrument = object.trace.instruments.find_by(symbol: symbol)
+			begin
+				instrument.volumes.try(:split,', ')[value]
+			rescue
+				object.store.volume_default
+			end
 		end
 
 		def ordertype

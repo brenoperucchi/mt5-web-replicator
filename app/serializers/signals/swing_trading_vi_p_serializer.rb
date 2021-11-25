@@ -24,9 +24,9 @@ module Signals
       object.content.scan(/(\d*\.\d+)/).flatten
     end
 
-    def symbol
-      object.content.split[0].upcase
-    end
+    # def symbol
+    #   object.content.split[0].upcase
+    # end
 
     def type
       type_order = object.content.split[1].downcase

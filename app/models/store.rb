@@ -1,5 +1,6 @@
 class Store < ApplicationRecord
 
+  store :settings, accessors: [:master, :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default]
   enum state: {pending:0, active:1, deleted:2}
   
   acts_as_taggable_on :tags
@@ -9,7 +10,6 @@ class Store < ApplicationRecord
   has_many :orders, :through => :traces, :source => :orders
   has_many :messages, :class_name => "Message", :foreign_key => "store_id"
   has_many :transactions, :through => :messages, :source => :transactions
-  store :settings, accessors: [:master]
 
   # scope :active, ->{ where.not(active_at:nil)}
 end

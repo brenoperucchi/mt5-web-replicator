@@ -1,7 +1,7 @@
 # m15
 require 'lucky_case/string'
 module Signals
-  class RoboSignalSerializer < TradexxfxSerializer
+  class RoboSignalSerializer < CleverPipsSerializer
     
   end
 end

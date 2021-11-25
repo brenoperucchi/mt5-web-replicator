@@ -105,27 +105,31 @@ class Telegramf():
 
 
 	def ApiConnection(self, action, response={}, trace_id = None):
+		headers = {	'Accept':'*/*', 'Content-Type': 'application/json' }
 		hostname = self._HOSTNAME
+
 		if action == "get":
-			request = requests.get(f'http://{hostname}/api/v1/stores/telegram/python')
+			request = requests.get(f'http://{hostname}/api/v1/stores/telegram/python', headers=headers)
 		elif action == "post":
-			request = requests.post(f'http://{hostname}/api/v1/traces/telegram/{trace_id}', data = response)
+			request = requests.post(f'http://{hostname}/api/v1/traces/telegram/{trace_id}', data=response, headers=headers)
 		return request.json()
 
 def main():
 	telegram = Telegramf()
+	
 	while True:
 		stores = telegram.ApiConnection('get')
 		for store in stores:
+			telegram.connect(store['telegram_api_id'], store['telegram_api_hash'], store['telegram_api_number'])
 			# pdb.set_trace()
 			for trace in store['traces']:
-				telegram.connect(trace['telegram_api_id'], trace['telegram_api_hash'], trace['telegram_api_number'])
+				print(trace['name'])
 				telegram_message = telegram.query_message(trace)
 				if(telegram_message):
 					telegram_message = json.dumps(telegram_message, indent = 2)
 					response = telegram.ApiConnection('post', telegram_message, trace['id'])
-					time.sleep(1)
-				telegram.disconnect()
+					time.sleep(0.5)
+			telegram.disconnect()
 
 if __name__ == "__main__":
 	main()

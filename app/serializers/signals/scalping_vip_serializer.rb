@@ -1,6 +1,6 @@
 require 'lucky_case/string'
 module Signals
-  class CleverPipsSerializer < Signals::BaseSerializer
+  class ScalpingVipSerializer < Signals::BaseSerializer
 
     def action?
       content = self.object.content.downcase
@@ -69,7 +69,7 @@ module Signals
 
     def stoploss
       stoploss = object.content.scan(/(?:SL\d?)(?:[^\d]*)(\d*\.\d+)/i).flatten.first
-      stoploss ||= '30'
+      stoploss ||= 50.to_s
     end
 
     def take_profit_1
@@ -94,6 +94,7 @@ module Signals
         [take_profit_1, take_profit_2, take_profit_3]
       end
     end
+
 
   end
 end
