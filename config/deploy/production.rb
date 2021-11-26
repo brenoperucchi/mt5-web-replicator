@@ -1,12 +1,13 @@
 set :port, 22
-set :user, 'appweb'
-set :deploy_to, '/home/appweb/app'
+set :user, 'app'
+set :deploy_to, '/home/app/signalforex'
 set :deploy_via, :remote_cache
 set :use_sudo, false
 set :stage, :production
 
 
-server 'app.imentore.com.br',
+server '138.128.247.25',
+# server 'app.imentore.com.br',
   roles: [:web, :app, :db],
   port: fetch(:port),
   user: fetch(:user),
@@ -19,17 +20,17 @@ set :ssh_options, {
   forward_agent: true,
   auth_methods: %w(publickey),
   keys: "#{ENV['HOME']}/.ssh/id_rsa",
-  user: 'appweb',
+  user: 'app',
 }
 
 set :rails_env, :production
 set :conditionally_migrate, true   
-set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
+# set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
 set :pty,  false
 
 
-set :sidekiq_env, -> { fetch(:rails_env) }
-set :sidekiq_concurrency, 5
+# set :sidekiq_env, -> { fetch(:rails_env) }
+# set :sidekiq_concurrency, 5
 
 # server-based syntax
 # ======================

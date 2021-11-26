@@ -10,7 +10,7 @@ set :log_level, :debug
 
 set :use_sudo, false
 set :bundle_binstubs, nil
-set :linked_files, fetch(:linked_files, []).push('config/database.yml')
+# set :linked_files, fetch(:linked_files, []).push('config/database.yml')
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system', 'public/uploads')
 
 set :rbenv_type, :user # or :system, depends on your rbenv setup
@@ -38,8 +38,8 @@ namespace :deploy do
   task :stop do
     invoke 'unicorn:stop'
     on roles(:app) do
-      execute "systemctl --user stop python-signal-api.service"
-      execute "systemctl --user stop python-signal-order.service"
+      # execute "systemctl --user stop python-signal-api.service"
+      # execute "systemctl --user stop python-signal-order.service"
        # execute "systemctl --user stop sidekiq.service"
     end
   end
@@ -48,8 +48,8 @@ namespace :deploy do
     on roles(:app) do
       # execute "systemctl --user start sidekiq.service"
       # execute "systemctl restart nginx.service"
-      execute "systemctl --user start python-signal-api.service"
-      execute "systemctl --user start python-signal-order.service"
+      # execute "systemctl --user start python-signal-api.service"
+      # execute "systemctl --user start python-signal-order.service"
     #   execute "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq --pidfile /home/bperucchi/app/shared/tmp/pids/sidekiq-0.pid --environment production --logfile /home/bperucchi/app/shared/log/sidekiq.log --config /home/bperucchi/app/shared/config/sidekiq.yml --daemon"
     end
   end

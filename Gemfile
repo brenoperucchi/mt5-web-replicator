@@ -25,9 +25,10 @@ gem 'jbuilder', '~> 2.7'
 # gem 'image_processing', '~> 1.2'
 
 # Reduces boot times through caching; required in config/boot.rb
+gem 'rake' , '>= 13.0.6'
+gem 'bootsnap', '>= 1.6.0'#, require: false
 
 group :development, :test do
-  gem 'bootsnap', '>= 1.6.0'#, require: false
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   # gem 'byebug'#, platforms: [:mri, :mingw, :x64_mingw]
   gem 'sqlite3', '~> 1.4'
