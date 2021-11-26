@@ -10,7 +10,7 @@ set :log_level, :debug
 
 set :use_sudo, false
 set :bundle_binstubs, nil
-# set :linked_files, fetch(:linked_files, []).push('config/database.yml')
+set :linked_files, fetch(:linked_files, []).push('config/database.yml')
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system', 'public/uploads')
 
 set :rbenv_type, :user # or :system, depends on your rbenv setup
@@ -25,8 +25,13 @@ set :rbenv_roles, :all # default value
 
 set :unicorn_rack_env, 'production'
 
-before 'deploy:publishing', 'deploy:stop'
-after 'deploy:publishing', 'deploy:start'
+set :default_env, { 
+  'SECRET_KEY_BASE' => 'ddc2ccd700f0a70deedb201c1c838f376eba56e84842105618d20876adb239934cbe42b23235c2b33afac01f2272dc62adcaea2c6c85fc58c1b256e96f8219e6',
+  'DB_PASSWORD' => 'CjGcKx7h56CoBdlM'
+}
+
+# before 'deploy:publishing', 'deploy:stop'
+# after 'deploy:publishing', 'deploy:start'
 namespace :deploy do
   task :add_default_hooks do
     after 'deploy:starting'#, 'sidekiq:start'
@@ -35,22 +40,23 @@ namespace :deploy do
     after 'deploy:published'#, 'sidekiq:start'
   end
   
-  task :stop do
-    invoke 'unicorn:stop'
-    on roles(:app) do
-      # execute "systemctl --user stop python-signal-api.service"
-      # execute "systemctl --user stop python-signal-order.service"
-       # execute "systemctl --user stop sidekiq.service"
-    end
-  end
+  # task :stop do
+  #   invoke 'unicorn:stop'
+  #   on roles(:app) do
+  #     # execute "systemctl --user stop python-signal-api.service"
+  #     # execute "systemctl --user stop python-signal-order.service"
+  #      # execute "systemctl --user stop sidekiq.service"
+  #   end
+  # end
   task :start do
-    invoke 'unicorn:start'
+    # invoke 'unicorn:start'
     on roles(:app) do
       # execute "systemctl --user start sidekiq.service"
       # execute "systemctl restart nginx.service"
       # execute "systemctl --user start python-signal-api.service"
       # execute "systemctl --user start python-signal-order.service"
-    #   execute "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq --pidfile /home/bperucchi/app/shared/tmp/pids/sidekiq-0.pid --environment production --logfile /home/bperucchi/app/shared/log/sidekiq.log --config /home/bperucchi/app/shared/config/sidekiq.yml --daemon"
+      # execute "RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.6.6 $HOME/.rbenv/bin/rbenv exec bundle exec sidekiq --pidfile /home/bperucchi/app/shared/tmp/pids/sidekiq-0.pid --environment production --logfile /home/bperucchi/app/shared/log/sidekiq.log --config /home/bperucchi/app/shared/config/sidekiq.yml --daemon"
+      # execute "cd /home/app/signalforex/current | RBENV_ROOT=$HOME/.rbenv RBENV_VERSION=2.7.2 $HOME/.rbenv/bin/rbenv exec bundle exec rails server -b 0.0.0.0 -p 80 &"
     end
   end
 end

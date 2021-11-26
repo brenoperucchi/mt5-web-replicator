@@ -104,6 +104,7 @@ group :development do
   gem 'capistrano-bundler'
   gem 'capistrano-rbenv'
   gem 'capistrano3-unicorn'
+  gem 'capistrano3-puma'
   # gem 'capistrano-sidekiq'#, git: 'http://github.com/seuros/capistrano-sidekiq'
   gem 'capistrano-sidekiq', '1.0.3'
   gem 'capistrano-yarn'
