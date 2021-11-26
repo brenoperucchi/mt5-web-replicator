@@ -27,6 +27,7 @@ set :rails_env, :production
 set :conditionally_migrate, true   
 # set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
 set :pty,  false
+append :rbenv_map_bins, 'puma', 'pumactl'
 
 
 # set :sidekiq_env, -> { fetch(:rails_env) }
