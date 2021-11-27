@@ -16,6 +16,8 @@ class StoreDashboard < Administrate::BaseDashboard
     telegram_api_id:     Field::String,
     telegram_api_hash:   Field::String,
     telegram_api_number: Field::String,
+    server_url:          Field::String,
+    server_real:         Field::Boolean,
     accounts: Field::HasMany,
     traces: Field::HasMany,
     tag_list: Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
@@ -45,6 +47,8 @@ class StoreDashboard < Administrate::BaseDashboard
   master
   tag_list
   volume_default
+  server_url
+  server_real
   telegram_api_id
   telegram_api_hash
   telegram_api_number
@@ -63,6 +67,8 @@ class StoreDashboard < Administrate::BaseDashboard
   master
   tag_list
   volume_default
+  server_url
+  server_real
   telegram_api_id
   telegram_api_hash
   telegram_api_number

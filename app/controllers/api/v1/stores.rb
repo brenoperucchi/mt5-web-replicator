@@ -12,6 +12,12 @@ module API
         get "/telegram/python" do
           Store.active
         end      
+
+        desc "Return Store Config"
+        post "/config/:expert_name/:expert_version/:account_id" do
+          account = Account.find_by(name: params[:account_id])
+          store = account.store
+        end      
       end
     end
   end
