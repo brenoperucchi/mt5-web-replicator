@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_11_22_010917) do
+ActiveRecord::Schema.define(version: 2021_11_25_025819) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -204,6 +204,7 @@ ActiveRecord::Schema.define(version: 2021_11_22_010917) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "state", default: 0
+    t.integer "order_id"
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
 
@@ -226,8 +227,6 @@ ActiveRecord::Schema.define(version: 2021_11_22_010917) do
     t.datetime "open_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "meta_order_generate"
-    t.datetime "close_at"
     t.bigint "message_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"

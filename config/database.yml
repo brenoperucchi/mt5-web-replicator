@@ -36,4 +36,4 @@ production:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: ENV.fetch("DB_PASSWORD")
+  password: Rails.application.credentials.config[:database_password]
