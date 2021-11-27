@@ -107,8 +107,4 @@ lib/signal/database.json
 lib/signal/images/data/output.tiff
 *.sublime-workspace
 .rbenv-gemsets
-config/master.key
-
-/config/credentials/production.key
-
 /config/credentials/development.key

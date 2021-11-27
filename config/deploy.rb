@@ -7,10 +7,11 @@ set :repo_url, 'git@github.com:brenoperucchi/signalforex.git'
 # ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }.call
 set :branch, "master"
 set :log_level, :debug
-
+  
 set :use_sudo, false
 set :bundle_binstubs, nil
 # set :linked_files, fetch(:linked_files, []).push('config/database.yml')
+
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system', 'public/uploads')
 
 set :rbenv_type, :user # or :system, depends on your rbenv setup
@@ -24,6 +25,10 @@ set :rbenv_map_bins, %w{rake gem bundle ruby rails}
 set :rbenv_roles, :all # default value
 
 set :unicorn_rack_env, 'production'
+
+set :default_env, { 
+  'RAILS_PRODUCTION_KEY' => '6669ce3d197b0b9dd31847c29b473dee',
+}
 
 # before 'deploy:publishing', 'deploy:stop'
 # after 'deploy:publishing', 'deploy:start'
@@ -73,6 +78,7 @@ end
 
 # Default value for :linked_files is []
 # append :linked_files, "config/database.yml", "config/secrets.yml"
+append :linked_files, "config/credentials/production.key"
 
 # Default value for linked_dirs is []
 # append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system"
