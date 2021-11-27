@@ -10,7 +10,7 @@ set :log_level, :debug
 
 set :use_sudo, false
 set :bundle_binstubs, nil
-set :linked_files, fetch(:linked_files, []).push('config/database.yml')
+# set :linked_files, fetch(:linked_files, []).push('config/database.yml')
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system', 'public/uploads')
 
 set :rbenv_type, :user # or :system, depends on your rbenv setup
@@ -24,11 +24,6 @@ set :rbenv_map_bins, %w{rake gem bundle ruby rails}
 set :rbenv_roles, :all # default value
 
 set :unicorn_rack_env, 'production'
-
-set :default_env, { 
-  'SECRET_KEY_BASE' => 'ddc2ccd700f0a70deedb201c1c838f376eba56e84842105618d20876adb239934cbe42b23235c2b33afac01f2272dc62adcaea2c6c85fc58c1b256e96f8219e6',
-  'DB_PASSWORD' => 'CjGcKx7h56CoBdlM'
-}
 
 # before 'deploy:publishing', 'deploy:stop'
 # after 'deploy:publishing', 'deploy:start'
