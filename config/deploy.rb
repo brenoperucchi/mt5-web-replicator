@@ -26,10 +26,6 @@ set :rbenv_roles, :all # default value
 
 set :unicorn_rack_env, 'production'
 
-set :default_env, { 
-  'RAILS_PRODUCTION_KEY' => '6669ce3d197b0b9dd31847c29b473dee',
-}
-
 # before 'deploy:publishing', 'deploy:stop'
 # after 'deploy:publishing', 'deploy:start'
 namespace :deploy do
@@ -78,7 +74,6 @@ end
 
 # Default value for :linked_files is []
 # append :linked_files, "config/database.yml", "config/secrets.yml"
-append :linked_files, "config/credentials/production.key"
 
 # Default value for linked_dirs is []
 # append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/system"
