@@ -9,6 +9,7 @@ class AccountDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     name: Field::String,
+    state: Field::String,
     traces: Field::HasMany,
     transactions: Field::HasMany,
     store: Field::BelongsTo,
@@ -23,6 +24,7 @@ class AccountDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   name
+  state
   traces
   transactions
   ].freeze
@@ -30,6 +32,8 @@ class AccountDashboard < Administrate::BaseDashboard
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
+  name
+  state
   traces
   store
   transactions
@@ -42,6 +46,7 @@ class AccountDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  state
   traces
   store
   ].freeze

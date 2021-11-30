@@ -10,7 +10,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     content: Field::Text,
-    # loggerable:Field::BelongsTo,
+    loggerable:Field::Polymorphic,
     # user:Field::BelongsTo,
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
@@ -23,6 +23,8 @@ class LoggingDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
+  id
+  loggerable
   content
   ].freeze
 
@@ -30,6 +32,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  loggerable
   content
   created_at
   updated_at

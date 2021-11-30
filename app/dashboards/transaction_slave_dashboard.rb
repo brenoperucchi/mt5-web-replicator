@@ -27,6 +27,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     magic_number:       Field::String,
     response:           Field::String,
     response_error:     Field::String,
+    loggings:           Field::HasMany,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -45,6 +46,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   account
   transaction_master
   profit
+  loggings
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -67,6 +69,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   magic_number
   response
   response_error
+  loggings
   open_at
   created_at
   updated_at

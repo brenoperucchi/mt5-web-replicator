@@ -51,6 +51,10 @@ module API
               api_attributes = APITransactionSerializer.new(message).api_attributes
               slave.update(api_attributes.merge(state:'executed', profit:nil))
               map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
+            when "NOSLTP","ERRORDEAL"
+              api_attributes = APITransactionSerializer.new(message).api_attributes
+              slave.update(api_attributes.merge(state:'error', profit:nil))
+              map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
             end
             content_type 'text/plain'
             body map

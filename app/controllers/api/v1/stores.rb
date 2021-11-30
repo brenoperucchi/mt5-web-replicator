@@ -10,13 +10,13 @@ module API
       resource :stores do
         desc "Return all signs"
         get "/telegram/python" do
-          Store.active
+          Store.enable
         end      
 
         desc "Return Store Config"
         post "/config/:expert_name/:expert_version/:account_id" do
-          account = Account.find_by(name: params[:account_id])
-          store = account.store
+          account = Account.find_by(name: params[:account_id], state: 1)
+          account && account.store.enable? ? account.store : nil 
         end      
       end
     end
