@@ -1,24 +1,5 @@
 module Admin
   class TransactionSlavesController < Admin::ApplicationController
-
-    def index
-      search_term = params[:search].to_s.strip
-      resource_messages = resource_class
-      # resource_messages = resource_class.where(ancestry:nil).order('content_at desc')#.where.not(state:'action')
-      resources = Administrate::Search.new(resource_messages, dashboard_class, search_term).run
-      resources = apply_collection_includes(resources)
-      resources = order.apply(resources).order('id desc')
-      resources = resources.page(params[:page]).per(records_per_page)
-      page = Administrate::Page::Collection.new(dashboard, order: order)
-
-      render :index, locals: {
-        resources: resources,
-        search_term: search_term,
-        page: page,
-        show_search_bar: show_search_bar?,
-      }
-    end
-
     # Overwrite any of the RESTful controller actions to implement custom behavior
     # For example, you may want to send an email after a foo is updated.
     #

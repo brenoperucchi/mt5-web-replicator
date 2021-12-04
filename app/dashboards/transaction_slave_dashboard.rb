@@ -69,7 +69,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   magic_number
   response
   response_error
-  loggings
   open_at
   created_at
   updated_at

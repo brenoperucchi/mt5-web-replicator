@@ -121,11 +121,5 @@ gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'
 gem 'ancestry'
 gem 'paper_trail'
-# gem 'pycall'
-# gem 'execjs'
-# gem "therubyracer"
-# gem 'faraday'
-# gem 'websocket-client-simple', git:'https://github.com/fuyuton/websocket-client-simple'
-# gem 'socket.io-client-simple', git:'https://github.com/fuyuton/ruby-socket.io-client-simple'
-# gem 'socketclusterclient'
-# gem 'ffi-rzmq'
+gem 'devise'
+

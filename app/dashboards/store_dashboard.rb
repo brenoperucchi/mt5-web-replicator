@@ -8,19 +8,19 @@ class StoreDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    name: Field::String,
-    state: Field::String,
+    id:     Field::Number,
+    name:   Field::String,
+    state:  Field::String,
     master: Field::String,
-    volume_default: Field::String,
+    volume_default:      Field::String,
     telegram_api_id:     Field::String,
     telegram_api_hash:   Field::String,
     telegram_api_number: Field::String,
     server_url:          Field::String,
     server_real:         Field::Boolean,
-    accounts: Field::HasMany,
-    traces: Field::HasMany,
-    tag_list: Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
+    accounts:   Field::HasMany,
+    traces:     Field::HasMany,
+    tag_list:   Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze

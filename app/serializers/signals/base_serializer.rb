@@ -15,7 +15,7 @@ module Signals
 				price_request: price_request, 
 				take_profit: takeprofit[value], 
 				lot: volume(value),	
-				magic_number: object.trace.name_id, 
+				magic_number: object.trace.name_id.delete("-"), 
 				stop_loss: stoploss,
 				message_id: object.id,
 				order_id: object.try(:order).try(:id),

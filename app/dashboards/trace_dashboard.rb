@@ -42,6 +42,7 @@ class TraceDashboard < Administrate::BaseDashboard
   id
   active
   name
+  name_id
   kind
   ].freeze
 

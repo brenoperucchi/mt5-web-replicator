@@ -12,9 +12,10 @@ class LoggingDashboard < Administrate::BaseDashboard
     content: Field::Text,
     loggerable:Field::Polymorphic,
     # user:Field::BelongsTo,
+    account: Field::String,
+    state: Field::String,
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
-
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -24,8 +25,11 @@ class LoggingDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
+  state
   loggerable
   content
+  account
+  created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -34,6 +38,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   id
   loggerable
   content
+  account
   created_at
   updated_at
   ].freeze

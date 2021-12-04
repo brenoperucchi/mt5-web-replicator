@@ -11,7 +11,7 @@ class Transaction < ApplicationRecord
   has_one :morphic#, as: :morphicable     
   has_one :account, :through => :morphic, :source => :account
   
-  has_many :loggings, as: :loggerable
+  has_many :loggings, as: :loggerable, dependent: :destroy
 
   scope :closed, ->{where(state: 'closed')}
   scope :not_closed, ->{where.not(state: ['closed', 'error'])}

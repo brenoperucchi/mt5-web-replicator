@@ -2,7 +2,7 @@ class TransactionSlave < ApplicationRecord
 
 	enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5}
 
-	has_many :loggings, as: :loggerable
+	has_many :loggings, as: :loggerable, dependent: :destroy
 	
 	belongs_to :transaction_master, :class_name => "Transaction", :foreign_key => "transaction_id"
 	
