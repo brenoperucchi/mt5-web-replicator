@@ -34,14 +34,18 @@ module API
           message = params[:body]
           content = YAML.load(message)
           if not content.blank? and content.is_a?(Hash)
+            
+            action = content['action']
             transaction_id = content['comment'].split("|").last
             slave = TransactionSlave.find_by(id: transaction_id)
+            
             return unless slave
             slave.loggings.create(content:message)
-            case content['action']
+            
+            case action
             when "CLOSED", "DELETED"
               api_attributes = APITransactionSerializer.new(message).api_attributes
-              slave.update(api_attributes.merge(state: content['action'].downcase))
+              slave.update(api_attributes.merge(state: action.downcase))
               map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
             when "MODIFY"
               master = slave.transaction_master
@@ -52,7 +56,11 @@ module API
               slave.update(api_attributes.merge(state:'executed', profit:nil))
               map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
             when "NOSLTP","ERRORDEAL"
-              api_attributes = APITransactionSerializer.new(message).api_attributes
+              if action == "NOSLTP"
+                api_attributes = APITransactionSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
+              else
+                api_attributes = APITransactionSerializer.new(message).api_attributes
+              end
               slave.update(api_attributes.merge(state:'error', profit:nil))
               map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
             end
