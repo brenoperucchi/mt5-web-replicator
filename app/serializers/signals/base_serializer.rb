@@ -44,9 +44,9 @@ module Signals
 				1
 			when 'buy_limit'
 				2
-			when 'buy_stop'
-				3
 			when 'sell_limit'
+				3
+			when 'buy_stop'
 				4
 			when 'sell_stop'
 				5

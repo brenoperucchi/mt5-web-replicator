@@ -15,7 +15,11 @@ class Message < ApplicationRecord
 	# scope :action, ->{ where(state: 'action')}
 
 	def serializer
-		"Signals::#{"#{trace.name}Serializer".to_underscore.classify}".constantize.new(self)
+		if trace.telegram?
+			"Signals::#{"#{trace.name}Serializer".to_underscore.classify}".constantize.new(self)
+		else
+			Signals::SignalCopySerializer.new(self)
+		end
 	end
 
 	state_machine :initial => :pending do
@@ -34,7 +38,7 @@ class Message < ApplicationRecord
 		
 		state :pending do
 			def update_state(state)
-				self.prepare_at = DateTime.now
+				self.prepare_at = Time.current
 			end
 		end
 		state :prepared do
@@ -96,7 +100,7 @@ class Message < ApplicationRecord
 	end
 
 	def restrict_time?
-		if self.content_at + 20.minute < DateTime.now
+		if self.content_at + 20.minute < Time.current
 			self.update_column(:response, "Restrict Time")		
 			return true
 		else

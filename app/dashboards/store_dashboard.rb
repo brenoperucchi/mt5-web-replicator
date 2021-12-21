@@ -11,12 +11,10 @@ class StoreDashboard < Administrate::BaseDashboard
     id:     Field::Number,
     name:   Field::String,
     state:  Field::String,
-    master: Field::String,
     volume_default:      Field::String,
     telegram_api_id:     Field::String,
     telegram_api_hash:   Field::String,
     telegram_api_number: Field::String,
-    server_url:          Field::String,
     server_real:         Field::Boolean,
     accounts:   Field::HasMany,
     traces:     Field::HasMany,
@@ -34,7 +32,6 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
-  master
   tag_list
   ].freeze
 
@@ -44,10 +41,8 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
-  master
   tag_list
   volume_default
-  server_url
   server_real
   telegram_api_id
   telegram_api_hash
@@ -64,10 +59,8 @@ class StoreDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   state
-  master
   tag_list
   volume_default
-  server_url
   server_real
   telegram_api_id
   telegram_api_hash

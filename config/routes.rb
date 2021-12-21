@@ -1,5 +1,8 @@
 # require 'sidekiq/web'
 Rails.application.routes.draw do
+  devise_for :users, controllers: {
+    sessions: 'users/sessions'
+  }
   resources :clients
   # mount Sidekiq::Web => '/sidekiq'
   mount API::Base, at: "/"
@@ -22,8 +25,9 @@ Rails.application.routes.draw do
 	    root "orders#index"
     end
   
-  get ':page' => 'signs#show', as: 'signs'
-  root 'admin/orders#index'
+  # get ':page' => 'signs#show', as: 'signs'
+  root :to => "pages#index" 
+  # root 'admin/orders#index'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 
 end

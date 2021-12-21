@@ -1,19 +1,23 @@
 class Trace < ApplicationRecord
 
-  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, :magics_accept, :accounts_accept, 
+  after_create :insert_instruments
+
+  enum kind:  {telegram: 0, copy: 1}
+
+  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
                                :telegram_api_id, :telegram_api_hash, :telegram_api_number]
 
-  has_many :orders, :class_name => "Order", :foreign_key => "trace_id"
+  has_many :orders, :class_name => "Order", :foreign_key => "trace_id", dependent: :destroy
   has_many :transactions, :through => :orders, :source => :transactions
   has_many :messages, :class_name => "Message", :foreign_key => "trace_id"
 
-  has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id"
+  has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id", dependent: :destroy
   belongs_to :store, optional: true
 
   scope :active,   ->{ where.not(active_at:nil)}
-  scope :telegram, ->{ where(kind:'telegram')}
+  # scope :telegram, ->{ where(kind:'telegram')}
 
-  has_many :permissions
+  has_many :permissions, dependent: :destroy
   has_many :accounts, :through => :permissions#, :source => :slave
 
   # validates_presence_of :take_profit, :on => :create#, :message => "can't be blank"
@@ -31,15 +35,6 @@ class Trace < ApplicationRecord
   end
 
   alias_method :active?, :active
-
-  def symbol_list_dict
-    # pairs = self.symbol_list.strip.gsub("\r", '')
-    # pairs = pairs.gsub("\t", '')
-    # pairs = pairs.split("\n").map{|pair| pair.split(':')}.map{|k,v| [k.strip, v.strip]}
-    # result = Hash[pairs]
-    pairs = instruments.map{|pair| [pair[:symbol], pair[:name]]}
-    result = Hash[pairs]
-  end
 
   def off 
     self.update_column(:active_at, nil)

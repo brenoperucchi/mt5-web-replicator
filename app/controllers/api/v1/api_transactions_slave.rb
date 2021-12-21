@@ -34,35 +34,36 @@ module API
           message = params[:body]
           content = YAML.load(message)
           if not content.blank? and content.is_a?(Hash)
-            
             action = content['action']
             transaction_id = content['comment'].split("|").last
             slave = TransactionSlave.find_by(id: transaction_id)
-            
-            return unless slave
-            slave.loggings.create(content:message)
-            
-            case action
-            when "CLOSED", "DELETED"
-              api_attributes = APITransactionSerializer.new(message).api_attributes
-              slave.update(api_attributes.merge(state: action.downcase))
-              map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
-            when "MODIFY"
-              master = slave.transaction_master
-              master.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
-              map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
-            when "OPENED"
-              api_attributes = APITransactionSerializer.new(message).api_attributes
-              slave.update(api_attributes.merge(state:'executed', profit:nil))
-              map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
-            when "NOSLTP","ERRORDEAL"
-              if action == "NOSLTP"
-                api_attributes = APITransactionSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
-              else
+            if slave.nil?
+              Logging.create(content:message)
+            else
+              slave.loggings.create(content:message)          
+              case action
+              when "CLOSED", "DELETED"
                 api_attributes = APITransactionSerializer.new(message).api_attributes
+                slave.attributes = api_attributes
+                action == "CLOSED" ? slave.close : slave.deleted
+                map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
+              when "MODIFY"
+                master = slave.master
+                master.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
+                map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
+              when "OPENED"
+                api_attributes = APITransactionSerializer.new(message).api_attributes
+                slave.update(api_attributes.merge(state:'executed', profit:nil))
+                map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
+              when "NOSLTP","ERRORDEAL","TIMEMAX"
+                if action == "NOSLTP"
+                  api_attributes = APITransactionSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
+                else
+                  api_attributes = APITransactionSerializer.new(message).api_attributes
+                end
+                slave.update(api_attributes.merge(state:'error', profit:nil))
+                map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
               end
-              slave.update(api_attributes.merge(state:'error', profit:nil))
-              map = "#{slave.transaction_master.order.trace.id}|#{slave.id}|OK"
             end
             content_type 'text/plain'
             body map

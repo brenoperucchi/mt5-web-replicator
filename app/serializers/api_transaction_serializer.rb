@@ -11,7 +11,8 @@ class APITransactionSerializer < ActiveModel::Serializer
       take_profit: take_profit,
       profit: profit,
       ticket: ticket,
-      open_at: open_at
+      open_at: open_at,
+      ticket_deal: ticket_deal
     }
   end
 
@@ -63,8 +64,12 @@ class APITransactionSerializer < ActiveModel::Serializer
     obj['order_ticket']
   end
 
+  def ticket_deal
+    obj['deal_ticket']
+  end
+
   def open_at
-    Time.at(obj['open_at'].try(:split, ".").try(:first).try(:to_i))
+    Time.zone.at(obj['open_at'].try(:split, ".").try(:first).try(:to_i))
   end
 
 end

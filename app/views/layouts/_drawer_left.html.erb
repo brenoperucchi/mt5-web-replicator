@@ -3,7 +3,7 @@
     <div class="sidebar sidebar-light sidebar-left simplebar" data-simplebar>
       <div class="sidebar-heading sidebar-m-t">Menu</div>
       <ul class="sidebar-menu">
-        <li class="sidebar-menu-item <% if current_page?(root_path) || current_page?(signs_path(:index)) || current_page?(signs_path(:staff)) ||  current_page?(signs_path(:analytics)) %> active<% end %>">
+        <li class="sidebar-menu-item active">
           <a class="sidebar-menu-button" href="<%= root_path %>">
             <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">dvr</i>
             <span class="sidebar-menu-text">Dashboard</span>
@@ -12,45 +12,45 @@
       </ul>
       <div class="sidebar-heading">UI Components</div>
       <div class="sidebar-block p-0">
-<!--     <ul class="sidebar-menu" id="components_menu">
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_buttons))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_buttons) %>">
+    <ul class="sidebar-menu" id="components_menu">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">mouse</i>
               <span class="sidebar-menu-text">Buttons</span>
             </a>
           </li>
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_alerts))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_alerts) %>">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">notifications</i>
               <span class="sidebar-menu-text">Alerts</span>
             </a>
           </li>
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_modals))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_modals) %>">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">aspect_ratio</i>
               <span class="sidebar-menu-text">Modals</span>
             </a>
           </li>
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_icons))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_icons) %>">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">brush</i>
               <span class="sidebar-menu-text">Icons</span>
             </a>
           </li>
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_forms))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_forms) %>">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">text_format</i>
               <span class="sidebar-menu-text">Forms</span>
             </a>
           </li>
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_loaders))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_loaders) %>">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">refresh</i>
               <span class="sidebar-menu-text">Loaders</span>
             </a>
           </li>
-          <li class="sidebar-menu-item <% if current_page?(signs_path(:ui_pagination))%>active<% end%>">
-            <a class="sidebar-menu-button" href="<%= signs_path(:ui_pagination) %>">
+          <li class="sidebar-menu-item active">
+            <a class="sidebar-menu-button" href="">
               <i class="sidebar-menu-icon sidebar-menu-icon--left material-icons">last_page</i>
               <span class="sidebar-menu-text">Pagination</span>
             </a>
@@ -98,7 +98,7 @@
             </a>
           </li>
         </ul>
- -->      
+      
       </div>
       <div class="sidebar-p-a">
         <a href="https://www.frontted.com/themes/stack-rails" class="btn btn-primary btn-block" target="_blank">Purchase PRO &dollar;99</a>

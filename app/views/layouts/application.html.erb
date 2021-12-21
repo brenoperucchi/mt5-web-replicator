@@ -7,13 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <%= csrf_meta_tags %>
 
-    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'all' %>
-    <%= javascript_pack_tag 'core-scripts', 'data-turbolinks-track': 'all' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'all' %>
-
+    <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
 
-  <body class="<%= @body_class || 'layout-default' %>" data-no-turbolink="true" >
+  <body class="<%= @body_class || 'layout-default' %>">
     <!-- Header Layout -->
     <div class="mdk-header-layout js-mdk-header-layout">
 
@@ -46,6 +44,9 @@
     <!-- // END header-layout -->
 
     <%= content_for :footer %>
+
+    
+
     <%= content_for :footer_scripts %>
   </body>
 </html>

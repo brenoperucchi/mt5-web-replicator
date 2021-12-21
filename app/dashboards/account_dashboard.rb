@@ -8,13 +8,15 @@ class AccountDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    name: Field::String,
-    state: Field::String,
-    traces: Field::HasMany,
-    transactions: Field::HasMany,
-    store: Field::BelongsTo,
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    name:           Field::String,
+    state:          Field::String,
+    kind:           Field::String,
+    magics_accept:  Field::String,
+    traces:         Field::HasMany,
+    transactions:   Field::HasMany,
+    store:          Field::BelongsTo,
+    created_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -25,6 +27,7 @@ class AccountDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   name
   state
+  kind
   traces
   transactions
   ].freeze
@@ -34,6 +37,8 @@ class AccountDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   name
   state
+  kind
+  magics_accept
   traces
   store
   transactions
@@ -47,6 +52,8 @@ class AccountDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   state
+  kind
+  magics_accept
   traces
   store
   ].freeze

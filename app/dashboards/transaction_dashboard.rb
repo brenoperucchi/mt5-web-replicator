@@ -28,8 +28,9 @@ class TransactionDashboard < Administrate::BaseDashboard
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     order:              Field::BelongsTo,
     message:            Field::BelongsTo,
+    account:            Field::BelongsTo,
     loggings:           Field::HasMany,
-    transaction_slaves: Field::HasMany.with_options(class_name:'TransactionSlave'),
+    slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -44,6 +45,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   symbol
   order
   profit
+  account
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -70,7 +72,8 @@ class TransactionDashboard < Administrate::BaseDashboard
   updated_at
   message
   loggings
-  transaction_slaves
+  account
+  slaves
   ].freeze
 
   # FORM_ATTRIBUTES

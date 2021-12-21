@@ -6,7 +6,7 @@ class Order < ApplicationRecord
   belongs_to :message
 
   has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
-  has_many :slaves,       through: :transactions, source: :transaction_slaves, class_name:'TransactionSlave'
+  has_many :slaves,       through: :transactions, source: :slaves, class_name:'TransactionSlave', dependent: :destroy
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
 
@@ -41,18 +41,18 @@ class Order < ApplicationRecord
 
     state :prepared do
       def update_state(state)
-        self.update_column(:ready_at, DateTime.now)
+        self.update_column(:ready_at, Time.current)
         system("rm -rf #{Rails.root}/public/output.jpg") 
       end
     end
     state :executed do
       def update_state(state)
-        self.update_column(:execute_at, DateTime.now)
+        self.update_column(:execute_at, Time.current)
       end
       def close_state?(state)
         trans_count = self.transactions.count
         closed_count = self.transactions.closed.count
-        trans_count == closed_count ? self.update_column(:execute_at, DateTime.now) : false
+        trans_count == closed_count ? self.update_column(:execute_at, Time.current) : false
       end
     end
     state :pending do
@@ -81,34 +81,23 @@ class Order < ApplicationRecord
     end
   end
 
-  # def create_transactions!
-  #   limit = self.trace.take_profit_limit.to_i
-  #   takeprofits = message.serializer.takeprofits.count
-  #   for_limit = limit <= takeprofits ? limit : takeprofits
-  #   for i in (0..for_limit-1) do 
-  #     self.trace.accounts.each do |account|
-  #       transaction = account.transactions.create_transactions(message, i)
-  #     end
-  #   end
-  # end
-
   def create_transactions!
     limit = self.trace.take_profit_limit.to_i
     takeprofits = message.serializer.takeprofits.count
     for_limit = limit <= takeprofits ? limit : takeprofits
-    for i in (0..for_limit-1) do 
-      self.trace.accounts.each do |account|
-        transaction = account.transactions.create(message.serializer.transaction_attributes(i))
-        if transaction
-          if trace.kind == "robometa"
+    self.trace.accounts.each do |account|
+      transaction = account.transactions.create(message.serializer.transaction_attributes)
+      if transaction
+        for i in (0..for_limit-1) do 
+          if trace.copy?
             api_attributes = APITransactionSerializer.new(transaction.message.content).api_attributes
           else
             api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id)
           end
-          slave = transaction.transaction_slaves.create(api_attributes.merge(state:'pending', ticket:nil, price_request:transaction.price_request, profit:nil))
-          transaction.execute
+          slave = transaction.slaves.create(api_attributes.merge(state:'pending', ticket:nil, price_request:transaction.price_request, profit:nil, account:account))
         end
       end
+      transaction.execute
     end
   end
 

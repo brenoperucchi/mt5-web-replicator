@@ -8,11 +8,11 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:                 Field::Number,
+    id:                 Field::Number.with_options(searchable: true),
     loggings:           Field::HasMany,
     order:              Field::BelongsTo,
     account:            Field::BelongsTo,
-    transaction_master: Field::BelongsTo.with_options(class_name:'Transaction'),
+    master: Field::BelongsTo.with_options(class_name:'Transaction'),
     ticket:             Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
@@ -44,7 +44,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket
   symbol
   account
-  transaction_master
+  master
   profit
   loggings
   ].freeze
@@ -54,7 +54,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   ticket
-  transaction_master
+  master
   loggings
   state
   profit

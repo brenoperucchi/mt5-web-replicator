@@ -1,6 +1,6 @@
 class Store < ApplicationRecord
 
-  store :settings, accessors: [:master, :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :server_url, :server_real]
+  store :settings, accessors: [:telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :server_real]
   enum state: {disable:0, enable:1, deleted:2}
   
   acts_as_taggable_on :tags

@@ -14,7 +14,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class Telegramf():
 	def __init__(self):
-		self._HOSTNAME = 'localhost'
+		self._HOSTNAME = 'localhost:8090'
 		self._ENVIRONMENT = 'local'
 		self._API_ID = ""
 		self._API_HASH = ""
@@ -120,8 +120,8 @@ def main():
 	while True:
 		stores = telegram.ApiConnection('get')
 		for store in stores:
+			if store['telegram_api_id'] == '' : continue
 			telegram.connect(store['telegram_api_id'], store['telegram_api_hash'], store['telegram_api_number'])
-			# pdb.set_trace()
 			for trace in store['traces']:
 				print(trace['name'])
 				telegram_message = telegram.query_message(trace)

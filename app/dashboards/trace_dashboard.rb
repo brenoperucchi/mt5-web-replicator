@@ -12,8 +12,6 @@ class TraceDashboard < Administrate::BaseDashboard
     id:                  Field::Number,
     name:                Field::String,
     name_id:             Field::String,
-    accounts_accept:     Field::String,
-    magics_accept:       Field::String,
     telegram_option:     Field::String,
     telegram_image:      Field::Boolean,
     telegram_api_id:     Field::String,
@@ -50,19 +48,17 @@ class TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  active
   name
   name_id
+  active
   kind
-  accounts_accept
-  magics_accept
-  accounts
   take_profit_limit
   telegram_option
   telegram_image
   telegram_api_id
   telegram_api_hash
   telegram_api_number
+  accounts
   messages
   instruments
   created_at
@@ -75,8 +71,7 @@ class TraceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   name_id
-  accounts_accept
-  magics_accept
+  active
   kind
   take_profit_limit
   telegram_option
@@ -84,7 +79,7 @@ class TraceDashboard < Administrate::BaseDashboard
   telegram_api_id
   telegram_api_hash
   telegram_api_number
-  active
+  accounts
   ].freeze
 
   # COLLECTION_FILTERS

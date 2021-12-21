@@ -1,0 +1,162 @@
+.container-fluid.page__heading-container
+  .page__heading
+    nav aria-label="breadcrumb" 
+      ol.breadcrumb.mb-0
+        li.breadcrumb-item
+          a href="#" 
+            i.material-icons.icon-20pt home
+        li.breadcrumb-item UI Components
+        li.breadcrumb-item.active aria-current="page"  Forms
+    h1.m-0 Forms
+.container-fluid.page__container
+  .card.card-form
+    .row.no-gutters
+      .col-lg-4.card-body
+        p
+          strong.headings-color Default Forms
+        p.text-muted
+          | Stack supports all of Bootstrap's default form styling in addition to a handful of new input types and features. Please
+          a href="https://getbootstrap.com/docs/4.1/components/forms/" target="_blank"  read the official documentation
+          | for a full list of options from Bootstrap's core library.
+      .col-lg-8.card-form__body.card-body
+        form
+          .form-group
+            label for="exampleInputEmail1"  Your email:
+            input#exampleInputEmail1.form-control placeholder=("Enter your email address ..") type="email" /
+          .form-group
+            label for="exampleInputPassword1"  Your password:
+            input#exampleInputPassword1.form-control placeholder=("Enter your password ..") type="password" /
+          button.btn.btn-primary type="submit"  Submit
+  .card.card-form
+    .row.no-gutters
+      .col-lg-4.card-body
+        p
+          strong.headings-color Form Validation
+        p.text-muted
+          | Provide valuable, actionable feedback to your users with HTML5 form validation. Indicate invalid and valid form fields with
+          code .is-invalid
+          | and
+          code .is-valid
+          | classes.
+      .col-lg-8.card-form__body.card-body
+        form
+          .was-validated
+            .form-row
+              .col-12.col-md-6.mb-3
+                label for="validationSample01"  First name
+                input#validationSample01.form-control placeholder=("First name") required="" type="text" value="Mark" /
+                .invalid-feedback Please provide a first name.
+                .valid-feedback Looks good!
+              .col-12.col-md-6.mb-3
+                label for="validationSample02"  Last name
+                input#validationSample02.form-control placeholder=("Last name") required="" type="text" value="Otto" /
+                .invalid-feedback Please provide a last name.
+                .valid-feedback Looks good!
+            .form-row
+              .col-12.col-md-6.mb-3
+                label for="validationSample03"  City
+                input#validationSample03.form-control placeholder="City" required="" type="text" /
+                .invalid-feedback Please provide a valid city.
+                .valid-feedback Looks good!
+              .col-12.col-md-6.mb-3
+                label for="validationSample04"  State
+                input#validationSample04.form-control placeholder="State" required="" type="text" /
+                .invalid-feedback Please provide a valid state.
+                .valid-feedback Looks good!
+          .form-group
+            .custom-control.custom-checkbox
+              input#invalidCheck01.custom-control-input checked="" required="" type="checkbox" value="" /
+              label.custom-control-label for="invalidCheck01" 
+                | Agree to terms and conditions
+          button.btn.btn-primary type="submit"  Submit
+  .card.card-form
+    .row.no-gutters
+      .col-lg-4.card-body
+        p
+          strong.headings-color Search
+        p.text-muted A dedicated form group alternative for search forms that always keeps the submit button as part of the form control.
+      .col-lg-8.card-form__body.card-body
+        form action="#" 
+          .form-group
+            .row
+              .col-lg
+                label for="searchSample03"  Regular
+                .search-form.search-form--light
+                  input#searchSample03.form-control placeholder=("Search icons") type="text" /
+                  button.btn role="button" type="button" 
+                    i.material-icons search
+              .col-lg
+                label for="searchSample04"  Flush
+                .search-form.form-control-flush.search-form--light
+                  input#searchSample04.form-control.px-0 placeholder=("Search icons") type="text" /
+                  button.btn role="button" type="button" 
+                    i.material-icons search
+          .form-group
+            label for="searchSample01"  Large
+            .search-form.search-form--light.input-group-lg
+              input#searchSample01.form-control placeholder=("Search icons") type="text" /
+              button.btn role="button" type="button" 
+                i.material-icons search
+          .form-group.m-0
+            label for="searchSample02"  Rounded
+            .search-form.form-control-rounded.search-form--light.input-group-lg
+              input#searchSample02.form-control placeholder=("Search icons") type="text" /
+              button.btn role="button" type="button" 
+                i.material-icons search
+  .card.card-form
+    .row.no-gutters
+      .col-lg-4.card-body
+        p
+          strong.headings-color Merge Group
+        p.text-muted A slightly modified version of the default input groups that always keeps icons as a part of the form control. Also works with validation.
+      .col-lg-8.card-form__body.card-body
+        form action="#" 
+          .form-group
+            .input-group.input-group-merge
+              input.form-control.form-control-prepended placeholder=("Input group prepended") required="" type="text" /
+              .input-group-prepend
+                .input-group-text
+                  span.material-icons remove_red_eye
+          .form-group
+            .input-group.input-group-merge
+              input.form-control.form-control-appended placeholder=("Input group appended") required="" type="text" /
+              .input-group-append
+                .input-group-text
+                  span.material-icons lock_outline
+          .form-group
+            .input-group.input-group-merge
+              input.form-control.form-control-prepended.is-valid placeholder=("Input group prepended") required="" type="text" /
+              .input-group-prepend
+                .input-group-text
+                  span.material-icons remove_red_eye
+          .input-group.input-group-merge
+            input.form-control.form-control-appended.is-invalid placeholder=("Input group appended") required="" type="text" /
+            .input-group-append
+              .input-group-text
+                span.material-icons lock_outline
+  .card.card-form
+    .row.no-gutters
+      .col-lg-4.card-body
+        p
+          strong.headings-color Rounded
+        p.text-muted
+          | Form control with rounded corners with the
+          code .form-control-rounded
+          | modifier.
+      .col-lg-8.card-form__body.card-body.d-flex.align-items-center
+        .flex
+          label for="roundedSample01"  Rounded
+          input#roundedSample01.form-control.form-control-rounded placeholder=("Rounded form control ...") type="text" /
+  .card.card-form
+    .row.no-gutters
+      .col-lg-4.card-body
+        p
+          strong.headings-color Flush
+        p.text-muted
+          | Remove paddings and borders from a form control with the
+          code .form-control-flush
+          | modifier.
+      .col-lg-8.card-form__body.card-body.d-flex.align-items-center
+        .flex
+          label for="flushSample01"  Flush
+          input#flushSample01.form-control.form-control-flush placeholder=("Flush form control ...") type="text" /
