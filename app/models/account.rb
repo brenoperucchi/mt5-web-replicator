@@ -16,4 +16,7 @@ class Account < ApplicationRecord
     traces.find_by(kind: :copy) if self.copy?
   end
 
+  def sum_slaves_volume(transaction_id)
+    slaves.joins(:master).where("transaction_slaves.transaction_id=#{transaction_id}", account_id:self.id).map(&:lot).map(&:to_f).reduce(:+)
+  end
 end

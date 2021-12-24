@@ -42,14 +42,17 @@ class TransactionSlave < ApplicationRecord
       def update_state(state)
         if master.slaves.count > 1 and master.slaves.first == self
           master.slaves.not_closed.each do |slave|
-            slave.update(stop_loss: slave.price_open)# unless meta_get_closed_ticket_position(self.order.trace, transc.ticket)          
+            slave.update(stop_loss: slave.price_open)
           end
         end
         master.close if master.slaves.not_closed.count == 0
       end
     end
+  end
 
-
+  def set_sl_and_tp_order(take_profit=nil, stop_loss=nil)
+    attributes = {take_profit:take_profit, stop_loss:stop_loss}.compact
+    self.update(attributes)
   end
 
   # def meta_attributes(value=0)
@@ -75,9 +78,11 @@ class TransactionSlave < ApplicationRecord
     # Rails.logger.debug "ACCOUNT => #{self.account.name}"
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     seconds_ago = (self.created_at - Time.zone.now).to_i.abs
+    trace_id  = master.try(:order).try(:trace).try(:id)
+    comment = "#{trace_id}-#{master.id}-#{self.id}"
     # instrument = master.order.trace.instruments.find_by_symbol(symbol)
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    msg = "#{ordertype}|#{ticket}|#{master.try(:order).try(:trace).try(:id)}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|"
+    msg = "#{ordertype}|#{ticket}|#{trace_id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
   end
 

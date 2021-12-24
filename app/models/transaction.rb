@@ -57,30 +57,43 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def set_sl_and_tp_order(take_profit=nil, stop_loss=nil)
-    attributes = {take_profit:take_profit, stop_loss:stop_loss}.compact
-    self.update(attributes)
-    self.slaves.update_all(attributes)
+
+  def close_copy
+    s_first = slaves.first 
+    slaves.not_closed.each do |slave|
+      if slave.id != s_first.id
+        slave.update(state: "closed")
+      else
+        comment = "#{order.trace.id}-#{self.id}-#{slave.id}"
+        slave.attribute(comment: comment)
+        slave.remove
+      end
+    end
+    
   end
 
-  def copy_attributes(value=0)
-    # openprice = (type.include?('limit') or type.include?('stop')) ? price_request : 0
-    openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    instrument = order.trace.instruments.find_by_symbol(symbol)
-    @meta_attributes = { 
-      instrument: symbol,
-      ordertype: ordertype,
-      volume:self.lot,
-      openprice: openprice,
-      slippage:10,
-      magic_number: self.magic_number.to_i.abs,
-      stoploss: stop_loss,
-      takeprofit: take_profit,
-      trace_id: order.trace.id,
-      transaction_id: self.id,
-      ticket: self.ticket
-    }
+  def set_all_sl_and_tp_order(take_profit=nil, stop_loss=nil)
+    self.slaves.each{|s| s.set_sl_and_tp_order(take_profit, stop_loss)}
   end
+
+  # def copy_attributes(value=0)
+  #   # openprice = (type.include?('limit') or type.include?('stop')) ? price_request : 0
+  #   openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
+  #   instrument = order.trace.instruments.find_by_symbol(symbol)
+  #   @meta_attributes = { 
+  #     instrument: symbol,
+  #     ordertype: ordertype,
+  #     volume:self.lot,
+  #     openprice: openprice,
+  #     slippage:10,
+  #     magic_number: self.magic_number.to_i.abs,
+  #     stoploss: stop_loss,
+  #     takeprofit: take_profit,
+  #     trace_id: order.trace.id,
+  #     transaction_id: self.id,
+  #     ticket: self.ticket
+  #   }
+  # end
 
   def self.create_transactions(message, i)
     transaction = self.create(message.serializer.transaction_attributes(i))

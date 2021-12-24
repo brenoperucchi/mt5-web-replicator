@@ -35,7 +35,7 @@ module API
           content = YAML.load(message)
           if not content.blank? and content.is_a?(Hash)
             action = content['action']
-            transaction_id = content['comment'].split("|").last
+            transaction_id = content['comment'].split("-").last
             slave = TransactionSlave.find_by(id: transaction_id)
             if slave.nil?
               Logging.create(content:message)
@@ -48,8 +48,7 @@ module API
                 action == "CLOSED" ? slave.close : slave.deleted
                 map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
               when "MODIFY"
-                master = slave.master
-                master.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
+                slave.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
                 map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
               when "OPENED"
                 api_attributes = APITransactionSerializer.new(message).api_attributes

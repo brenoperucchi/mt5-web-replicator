@@ -71,11 +71,11 @@ class Order < ApplicationRecord
     when "close_order"
       transactions.map(&:close_order)
     when "set_break_even"
-       transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(0, value)}
+       transactions.executed.reverse.each{|t| t.set_all_sl_and_tp_order(nil, value)}
     when "set_stop_loss"
-      transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(0, value)}
+      transactions.executed.reverse.each{|t| t.set_all_sl_and_tp_order(nil, value)}
     when "set_take_profit"
-      transactions.executed.reverse.each{|t| t.set_sl_and_tp_order(value)}
+      transactions.executed.reverse.each{|t| t.set_all_sl_and_tp_order(value, nil)}
     else
       false
     end
@@ -85,7 +85,7 @@ class Order < ApplicationRecord
     limit = self.trace.take_profit_limit.to_i
     takeprofits = message.serializer.takeprofits.count
     for_limit = limit <= takeprofits ? limit : takeprofits
-    self.trace.accounts.each do |account|
+    self.trace.accounts.slave.each do |account|
       transaction = account.transactions.create(message.serializer.transaction_attributes)
       if transaction
         for i in (0..for_limit-1) do 
