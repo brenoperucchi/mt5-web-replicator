@@ -27,7 +27,7 @@ class TransactionSlave < ApplicationRecord
       transition :pending => :executed
     end
     event :remove do
-      transition :executed => :remove
+      transition [:pending, :executed] => :remove
     end  
     event :close do
       transition [:remove, :executed] => :closed
@@ -78,8 +78,13 @@ class TransactionSlave < ApplicationRecord
     # Rails.logger.debug "ACCOUNT => #{self.account.name}"
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     seconds_ago = (self.created_at - Time.zone.now).to_i.abs
-    trace_id  = master.try(:order).try(:trace).try(:id)
-    comment = "#{trace_id}-#{master.id}-#{self.id}"
+    trace = trace_id  = master.try(:order).try(:trace)
+    trace_id  = trace.try(:id)
+    if trace.copy?
+      comment = "#{trace_id}-#{master.id}-#{master.slaves.last.id}"
+    else
+      comment = "#{trace_id}-#{master.id}-#{self.id}"
+    end
     # instrument = master.order.trace.instruments.find_by_symbol(symbol)
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     msg = "#{ordertype}|#{ticket}|#{trace_id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"

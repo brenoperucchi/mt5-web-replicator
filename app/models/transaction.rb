@@ -59,14 +59,16 @@ class Transaction < ApplicationRecord
 
 
   def close_copy
-    s_first = slaves.first 
+    # last = slaves.last
     slaves.not_closed.each do |slave|
-      if slave.id != s_first.id
-        slave.update(state: "closed")
-      else
-        comment = "#{order.trace.id}-#{self.id}-#{slave.id}"
-        slave.attribute(comment: comment)
+      # if slave.id != slaves.first.id
+      #   slave.update(state: "closed")
+      if slave.id == slaves.first.id
+        # comment = "#{order.trace.id}-#{self.id}-#{last.id}"
+        # slave.attributes = {comment: comment}
         slave.remove
+      else
+        slave.update(state: "closed")
       end
     end
     
