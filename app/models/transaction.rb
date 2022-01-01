@@ -123,4 +123,10 @@ class Transaction < ApplicationRecord
     end
   end
 
+
+  def self.remove(id)
+    TransactionSlave.find(id).update(state: :remove)
+    TransactionSlave.find(id).master.update(state: :executed)  
+  end
+
 end

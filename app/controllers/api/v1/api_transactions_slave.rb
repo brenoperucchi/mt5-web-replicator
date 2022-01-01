@@ -35,14 +35,15 @@ module API
           content = YAML.load(message)
           if not content.blank? and content.is_a?(Hash)
             action = content['action']
+            trace = Trace.find(content['comment'].split("-").first)
             transaction_id = content['comment'].split("-").last
             slave = TransactionSlave.find_by(id: transaction_id)
             if slave.nil?
               Logging.create(content:message)
             else
-              slave.loggings.create(content:message)          
               case action
               when "CLOSED", "DELETED"
+                slave = Transaction.find_by(id: content['comment'].split("-")[1]).slaves.first if trace.copy?
                 api_attributes = APITransactionSerializer.new(message).api_attributes
                 slave.attributes = api_attributes
                 action == "CLOSED" ? slave.close : slave.deleted
@@ -63,6 +64,7 @@ module API
                 slave.update(api_attributes.merge(state:'error', profit:nil))
                 map = "#{slave.master.order.trace.id}|#{slave.id}|OK"
               end
+              slave.loggings.create(content:message)
             end
             content_type 'text/plain'
             body map

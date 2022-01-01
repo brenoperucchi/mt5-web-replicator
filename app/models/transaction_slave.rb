@@ -21,7 +21,7 @@ class TransactionSlave < ApplicationRecord
 
 
   state_machine :initial => :pending do
-    after_transition :executed => :closed, :do => :update_state
+    after_transition [:remove, :executed] => :closed, :do => :update_state
 
     event :execute do
       transition :pending => :executed
@@ -40,12 +40,15 @@ class TransactionSlave < ApplicationRecord
     end
     state :closed do
       def update_state(state)
-        if master.slaves.count > 1 and master.slaves.first == self
+        if master.order.trace.copy?
+          master.close
+        elsif master.slaves.count > 1 and master.slaves.first == self
           master.slaves.not_closed.each do |slave|
             slave.update(stop_loss: slave.price_open)
           end
+        else
+          master.close if master.slaves.not_closed.count == 0
         end
-        master.close if master.slaves.not_closed.count == 0
       end
     end
   end
