@@ -1,4 +1,2 @@
 @import "bootstrap";
-@import '@fortawesome/fontawesome-free/css/all.css';
-@import "/Users/brenoperucchi/Devs/signalforex/vendor/stisla/assets/css/style.css";
-@import "/Users/brenoperucchi/Devs/signalforex/vendor/stisla/assets/css/components.css";
+@import "font-awesome";

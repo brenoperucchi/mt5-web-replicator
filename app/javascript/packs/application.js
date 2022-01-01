@@ -10,8 +10,8 @@ require("@rails/activestorage").start()
 require("channels")
 
 
-import "@bootstrap";
-import '@fortawesome/fontawesome-free/js/all'
+// import "@bootstrap";
+import 'bootstrap'; 
 import 'flag-icon-css/css/flag-icon.css'
 import "/Users/brenoperucchi/Devs/signalforex/vendor/stisla/assets/js/stisla.js"
 import "/Users/brenoperucchi/Devs/signalforex/vendor/stisla/assets/js/scrpt.js"
