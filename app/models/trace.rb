@@ -45,10 +45,11 @@ class Trace < ApplicationRecord
   end
 
   def insert_instruments
-    Instrument::SYMBOLLIST.each do |symbol|
-      self.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes])
+    if self.telegram?
+      Instrument::SYMBOLLIST.each do |symbol|
+        self.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes])
+      end
     end
-
   end
 
 end
