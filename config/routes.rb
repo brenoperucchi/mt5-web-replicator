@@ -1,5 +1,6 @@
 # require 'sidekiq/web'
 Rails.application.routes.draw do
+  get 'pages/index'
   devise_for :users, controllers: {
     sessions: 'users/sessions'
   }

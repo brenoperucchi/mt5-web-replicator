@@ -1,0 +1,55 @@
+section.section
+  .row
+    - @traces.each do |trace|
+      .col-lg-4.col-md-4.col-sm-12
+        .card.card-statistic-2
+          .card-stats
+            .card-stats-title
+              | Order Statistics -
+            .card-stats-items
+              .card-stats-item
+                .card-stats-item-count 24
+                .card-stats-item-label Pending
+              .card-stats-item
+                .card-stats-item-count 12
+                .card-stats-item-label Shipping
+              .card-stats-item
+                .card-stats-item-count 23
+                .card-stats-item-label Completed
+          .card-icon.shadow-primary.bg-primary
+            i.fas.fa-archive
+          .card-wrap
+            .card-header
+              h4 Total Orders
+            .card-body
+              = trace.name
+
+  .row
+    .col-md-12
+      .card
+        .card-header
+          h4 Invoices
+          .card-header-action
+            a.btn.btn-danger href="#" 
+              | View More
+              i.fas.fa-chevron-right
+        .card-body.p-0
+          .table-responsive.table-invoice
+            table.table.table-striped
+              tr
+                th Invoice ID
+                th Customer
+                th Status
+                th Due Date
+                th Action
+              - @executed.each do |transaction| 
+                tr
+                  td
+                    a href="#"  
+                    = transaction.id
+                  td.font-weight-600 Kusnadi
+                  td
+                    .badge.badge-warning Unpaid
+                  td July 19, 2018
+                  td
+                    a.btn.btn-primary href="#"  Detail

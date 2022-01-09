@@ -11,17 +11,25 @@
   </head>
 
   <body class="app">
-    <%= render 'layouts/stisla/body'%>
-    <%= yield %>
-    <footer class="main-footer">
-      <%= content_for :footer %>
-      <div class="footer-left">
-        Copyright &copy; 2018 <div class="bullet"></div> Design By <a href="https://nauval.in/">Muhamad Nauval Azhar</a>
+    <div id="app">
+      <div class="main-wrapper">
+        <!-- Main Content -->
+        <div class="main-content">
+          <%= render 'layouts/stisla/navbar'%>
+          <%= render 'layouts/stisla/body'%>
+          <%= yield %>
+          <footer class="main-footer">
+            <%= content_for :footer %>
+            <div class="footer-left">
+              Copyright &copy; 2018 <div class="bullet"></div> Design By <a href="https://nauval.in/">Muhamad Nauval Azhar</a>
+            </div>
+            <div class="footer-right">
+              2.3.0
+            </div>
+          </footer>
+          <%= javascript_include_tag 'application' %>
+        </div>
       </div>
-      <div class="footer-right">
-        2.3.0
-      </div>
-    </footer>
-    <%= javascript_include_tag 'application' %>
+    </div>
   </body>
 </html>
