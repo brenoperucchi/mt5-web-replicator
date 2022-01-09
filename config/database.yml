@@ -23,7 +23,8 @@ development:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: Rails.application.credentials.config[:aws][:access_key_id]
+  password: 3e2w1q
+  # password: Rails.application.credentials.config[:aws][:access_key_id]
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

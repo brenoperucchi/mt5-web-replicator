@@ -7,15 +7,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <%= csrf_meta_tags %>
 
-    <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= stylesheet_link_tag 'stisla',       media: 'all', 'data-turbolinks-track': 'reload' %>
   </head>
 
   <body class="app">
     <%= render 'layouts/stisla/body'%>
     <%= yield %>
-    <%= content_for :footer %>
-
-    <%= content_for :footer_scripts %>
+    <footer class="main-footer">
+      <%= content_for :footer %>
+      <div class="footer-left">
+        Copyright &copy; 2018 <div class="bullet"></div> Design By <a href="https://nauval.in/">Muhamad Nauval Azhar</a>
+      </div>
+      <div class="footer-right">
+        2.3.0
+      </div>
+    </footer>
+    <%= javascript_include_tag 'application' %>
   </body>
 </html>

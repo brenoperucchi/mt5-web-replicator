@@ -1,2 +1,5 @@
 @import "bootstrap";
 @import "font-awesome";
+@import "~jqvmap/dist/jqvmap.min.css";
+@import "~summernote/dist/summernote-bs4.css";
+/*@import "@fortawesome/fontawesome-free/css/all.css";*/

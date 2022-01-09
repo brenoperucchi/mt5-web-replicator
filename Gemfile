@@ -122,7 +122,8 @@ gem 'administrate-field-acts_as_taggable'
 gem 'ancestry'
 gem 'paper_trail'
 gem 'devise'
-#   gem "font-awesome-rails"
+gem "font-awesome-rails"
+gem 'jquery-rails'
 
 # gem 'stisla-rails'
 
