@@ -6,15 +6,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <%= csrf_meta_tags %>
-
     <%= stylesheet_link_tag 'stisla',       media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application' %>
   </head>
 
-  <body class="app">
+  <body>
     <div id="app">
-      <div class="main-wrapper">
+      <div class="main-wrapper main-wrapper-1" >
         <!-- Main Content -->
-        <div class="main-content">
+        <div class="main-content" style='padding-left:100px;padding-right: 100px;padding-top: 30px;'>
           <%= render 'layouts/stisla/navbar'%>
           <%= render 'layouts/stisla/body'%>
           <%= yield %>
@@ -27,7 +27,7 @@
               2.3.0
             </div>
           </footer>
-          <%= javascript_include_tag 'application' %>
+
         </div>
       </div>
     </div>

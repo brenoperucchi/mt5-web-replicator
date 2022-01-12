@@ -29,6 +29,6 @@
 //= require stisla/jquery.chocolat.min.js
 
 
-//= require stisla/page/index.js
+// require stisla/page/index.js
 //= require stisla/scripts.js
 //= require stisla/custom.js

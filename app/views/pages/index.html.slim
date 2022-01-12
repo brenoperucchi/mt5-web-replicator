@@ -1,26 +1,28 @@
 section.section
   .row
-    - @traces.each do |trace|
+    - @traces.each do |trace|                   
       .col-lg-4.col-md-4.col-sm-12
         .card.card-statistic-2
           .card-stats
             .card-stats-title
-              | Order Statistics -
+              | Robo Transações 
             .card-stats-items
               .card-stats-item
-                .card-stats-item-count 24
-                .card-stats-item-label Pending
+                .card-stats-item-count 
+                  | $
+                  '
+                  = trace.transactions.closed.sum(:profit)
+                .card-stats-item-label $ fechadas
               .card-stats-item
-                .card-stats-item-count 12
-                .card-stats-item-label Shipping
+                .card-stats-item-count = trace.transactions.closed.count
+                .card-stats-item-label Nº fechadas
               .card-stats-item
-                .card-stats-item-count 23
-                .card-stats-item-label Completed
+                .card-stats-item-count = trace.transactions.executed.count
+                .card-stats-item-label Nº abertas
           .card-icon.shadow-primary.bg-primary
             i.fas.fa-archive
           .card-wrap
             .card-header
-              h4 Total Orders
             .card-body
               = trace.name
 
@@ -38,18 +40,18 @@ section.section
             table.table.table-striped
               tr
                 th Invoice ID
-                th Customer
+                th Symbol
                 th Status
-                th Due Date
+                th Created Date
                 th Action
               - @executed.each do |transaction| 
                 tr
                   td
                     a href="#"  
                     = transaction.id
-                  td.font-weight-600 Kusnadi
+                  td.font-weight-600 = transaction.symbol
                   td
-                    .badge.badge-warning Unpaid
-                  td July 19, 2018
+                    .badge.badge-warning = transaction.state
+                  td = transaction.created_at
                   td
                     a.btn.btn-primary href="#"  Detail
