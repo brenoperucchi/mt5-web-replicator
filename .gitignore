@@ -108,3 +108,4 @@ lib/signal/images/data/output.tiff
 *.sublime-workspace
 .rbenv-gemsets
 /config/credentials/development.key
+lib/telegram/tdlib/libtdjson.so
