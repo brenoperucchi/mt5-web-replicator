@@ -20,7 +20,7 @@ class Telegramf():
 		self._API_HASH = ""
 		self._PHONE_NUMBER = ""
 		self._DATABASE_ENCRYPT = 'changeme1234'
-		self._LIBRARY_PATH = f'{dir_path}/tdlib/libtdjson.1.7.9.dylib'
+		self._LIBRARY_PATH = f'{dir_path}/tdlib/libtdjson.so'
 		
 	def connect(self, API_ID, API_HASH, PHONE_NUMBER):
 		self._tg = Telegram(api_id=API_ID, api_hash=API_HASH, phone=PHONE_NUMBER, database_encryption_key=self._DATABASE_ENCRYPT, library_path=self._LIBRARY_PATH)		
