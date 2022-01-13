@@ -42,7 +42,7 @@ namespace :deploy do
       execute "systemctl --user stop telegram_python.service"
   #     # execute "systemctl --user stop python-signal-order.service"
   #      # execute "systemctl --user stop sidekiq.service"
-  #   end
+    end
   end
   task :start do
     # invoke 'unicorn:start'

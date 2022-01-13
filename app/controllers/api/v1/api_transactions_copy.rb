@@ -29,11 +29,13 @@ module API
 
           trace = account.try(:trace_copy)
           return if account.nil?
-          magic_number = account.magics_accept.try(:split).try(:include?, content['magic_number'])
-          
-          # trace = Trace.all.detect{|x| x.accounts_accept.try(:split).try(:include?, params[:account_id])}
-          # magic_number = Trace.all.detect{|x| x.magics_accept.try(:split).try(:include?, content['magic_number'])}
 
+          if account.magics_accept.blank?
+            magic_number = true
+          else
+            magic_number = account.magics_accept.try(:split).try(:include?, content['magic_number'])
+          end
+          
           if magic_number and trace and not content.blank? and content.is_a?(Hash)
             print(params_body)
             case content['action']
