@@ -7,9 +7,9 @@ class TransactionSlave < ApplicationRecord
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
   
-  # scope :pending,   ->{where(state: 'pending')}
+  scope :to_pending,   ->{where(state: 'pending')}
   # scope :executed,  ->{where(state: 'executed')}
-  # scope :remove,  ->{where(state: 'remove')}
+  scope :to_remove,  ->{where(state: 'remove')}
   # scope :closed,  ->{where(state: 'closed')}
   # scope :deleted,  ->{where(state: 'deleted')}
   # scope :error,  ->{where(state: 'error')}

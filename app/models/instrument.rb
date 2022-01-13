@@ -1,5 +1,6 @@
 class Instrument < ApplicationRecord
   belongs_to :trace
+  belongs_to :account
 
   SYMBOLLIST = 
   [
@@ -45,10 +46,11 @@ class Instrument < ApplicationRecord
   	{symbol:'USDPLN', name: 'USDPLN', volumes:"0.04, 0.03, 0.02, 0.01"},
   	{symbol:'USDSEK', name: 'USDSEK', volumes:"0.04, 0.03, 0.02, 0.01"},
   	{symbol:'USDZAR', name: 'USDZAR', volumes:"0.04, 0.03, 0.02, 0.01"},
-  	{symbol:'GOLD', name: 'XAUUSD', volumes:"0.04, 0.03, 0.02, 0.01"},
+  	{symbol:'OIL',  name: 'BRENT',  volumes:"0.04, 0.03, 0.02, 0.01"},
+    {symbol:'GOLD', name: 'XAUUSD', volumes:"0.04, 0.03, 0.02, 0.01"},
   	{symbol:'US30', name: 'UsaInd', volumes:"0.10, 0.10, 0.10, 0.10"},
   	{symbol:'NAS100', name: 'UsaTec', volumes:"0.04, 0.03, 0.02, 0.01"},
-  	{symbol:'BRAIND', name: 'WING21', volumes:"0.20, 0.10, 0.10, 0.10"},
-  	{symbol:'BRADOL', name: 'WDOJ21', volumes:"0.20, 0.10, 0.10, 0.10"},
+  	{symbol:'BRAIND', name: 'WING22', volumes:"0.20, 0.10, 0.10, 0.10"},
+  	{symbol:'BRADOL', name: 'WDOF22', volumes:"0.20, 0.10, 0.10, 0.10"},
   ]
 end
