@@ -26,8 +26,8 @@ set :rbenv_roles, :all # default value
 
 set :unicorn_rack_env, 'production'
 
-# before 'deploy:publishing', 'deploy:stop'
-# after 'deploy:publishing', 'deploy:start'
+before 'deploy:publishing', 'deploy:stop'
+after 'deploy:publishing', 'deploy:start'
 namespace :deploy do
   task :add_default_hooks do
     after 'deploy:starting'#, 'sidekiq:start'
@@ -36,18 +36,18 @@ namespace :deploy do
     after 'deploy:published'#, 'sidekiq:start'
   end
   
-  # task :stop do
+  task :stop do
   #   invoke 'unicorn:stop'
-  #   on roles(:app) do
-  #     # execute "systemctl --user stop python-signal-api.service"
+    on roles(:app) do
+      execute "systemctl --user stop telegram_python.service"
   #     # execute "systemctl --user stop python-signal-order.service"
   #      # execute "systemctl --user stop sidekiq.service"
   #   end
-  # end
+  end
   task :start do
     # invoke 'unicorn:start'
     on roles(:app) do
-      # execute "systemctl --user start sidekiq.service"
+      execute "systemctl --user start telegram_python.service"
       # execute "systemctl restart nginx.service"
       # execute "systemctl --user start python-signal-api.service"
       # execute "systemctl --user start python-signal-order.service"
