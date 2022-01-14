@@ -25,6 +25,8 @@ module API
           map = String.new
           params_body = params[:body]
           content = YAML.load(params_body)
+          print(content)
+          Logging.create(content:params_body)
           account = Account.find_by(name: params[:account_id], kind: :copy)
 
           trace = account.try(:trace_copy)
@@ -37,7 +39,6 @@ module API
           end
           
           if magic_number and trace and not content.blank? and content.is_a?(Hash)
-            print(params_body)
             case content['action']
             when "OPEN"
               comment = content['comment']
