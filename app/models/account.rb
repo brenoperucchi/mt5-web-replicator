@@ -9,8 +9,10 @@ class Account < ApplicationRecord
   has_many :traces,       through: :permissions#, source: :trace 
   has_many :orders,       through: :traces, source: :orders
 
+  has_many :loggings,      as: :loggerable, dependent: :destroy
   has_many :transactions,  class_name: 'Transaction',      foreign_key: 'account_id'
-  has_many :slaves,       class_name: 'TransactionSlave', foreign_key: 'account_id'
+  has_many :slaves,        class_name: 'TransactionSlave', foreign_key: 'account_id'
+
 
   def trace_copy
     traces.find_by(kind: :copy) if self.copy?

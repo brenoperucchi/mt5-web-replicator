@@ -26,11 +26,12 @@ module API
           params_body = params[:body]
           content = YAML.load(params_body)
           print(content)
-          Logging.create(content:params_body)
           account = Account.find_by(name: params[:account_id], kind: :copy)
 
-          trace = account.try(:trace_copy)
           return if account.nil?
+          account.loggings.create(content:params_body)
+
+          trace = account.try(:trace_copy)
 
           if account.magics_accept.blank?
             magic_number = true
