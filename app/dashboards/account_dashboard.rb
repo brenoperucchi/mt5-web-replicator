@@ -14,6 +14,7 @@ class AccountDashboard < Administrate::BaseDashboard
     magics_accept:  Field::String,
     traces:         Field::HasMany,
     transactions:   Field::HasMany,
+    instruments:    Field::HasMany,
     store:          Field::BelongsTo,
     created_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -42,6 +43,7 @@ class AccountDashboard < Administrate::BaseDashboard
   traces
   store
   transactions
+  instruments
   created_at
   updated_at
   ].freeze
