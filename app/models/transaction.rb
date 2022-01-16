@@ -97,12 +97,12 @@ class Transaction < ApplicationRecord
   #   }
   # end
 
-  def self.create_transactions(message, i)
-    transaction = self.create(message.serializer.transaction_attributes(i))
-    attributes_serializer = APITransactionSerializer.new(transaction.message.content).api_attributes
-    transaction.slaves.create(attributes_serializer.merge(state:'pending', ticket:nil, price_request:transaction.price_request))
-    transaction.execute 
-  end
+  # def self.create_transactions(message, i)
+  #   transaction = self.create(message.serializer.transaction_attributes(i).merge(lot: account.instrument_volume(i))
+  #   attributes_serializer = APITransactionSerializer.new(transaction.message.content).api_attributes
+  #   transaction.slaves.create(attributes_serializer.merge(state:'pending', ticket:nil, price_request:transaction.price_request))
+  #   transaction.execute 
+  # end
 
 
   def meta_ordertype

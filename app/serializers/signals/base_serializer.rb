@@ -14,7 +14,7 @@ module Signals
 				ordertype: ordertype, 
 				price_request: price_request, 
 				take_profit: takeprofit[value], 
-				lot: volume(value),	
+				# lot: volume(value),	
 				magic_number: object.trace.name_id.delete("-"), 
 				stop_loss: stoploss,
 				message_id: object.id,
@@ -26,14 +26,14 @@ module Signals
 		  nil
 		end
 
-		def volume(value=0)
-			instrument = object.trace.instruments.find_by(symbol: symbol)
-			begin
-				instrument.volumes.try(:split,', ')[value]
-			rescue
-				object.store.volume_default
-			end
-		end
+		# def volume(value=0)
+		# 	instrument = object.trace.instruments.find_by(symbol: symbol)
+		# 	begin
+		# 		instrument.volumes.try(:split,', ')[value]
+		# 	rescue
+		# 		object.store.volume_default
+		# 	end
+		# end
 
 		def ordertype
 			# "OP_" + type.upcase

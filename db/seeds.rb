@@ -6,9 +6,10 @@
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
 
+telegram_attributes = { telegram_api_id: '980209', telegram_api_hash:'03062326232cb23c6770e7a735c2dae2', telegram_api_number:'5548984222627'}
 if Rails.env.development?
-  	store = Store.create(name:'Store 1', active_at: Time.current)
-  	telegram_attributes = { telegram_api_id: '980209', telegram_api_hash:'03062326232cb23c6770e7a735c2dae2', telegram_api_number:'5548984222627'}
+  	
+  	store = Store.create({name:'Store 1', active_at: Time.current, volume_default: 0.10, state: :enable}.merge(telegram_attributes))
 
   	store.traces.create({name: 'RoboSignal', name_id:'-481414224', active_at: Time.current, telegram_option:'query_name',
 						telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
@@ -42,7 +43,7 @@ if Rails.env.development?
 
 
 elsif Rails.env.production?
-  	store = Store.create(name:'Store 1', active_at: Time.current)
+  	store = Store.create({name:'Store 1', active_at: Time.current, volume_default: 0.10, state: :enable}.merge(telegram_attributes))
 
   	store.traces.create(name: 'SignalCopy', name_id:'2000', active_at: Time.current, telegram_option:'query_name_id',
 						telegram_image:false, take_profit_limit: 2, kind: 'copy')
