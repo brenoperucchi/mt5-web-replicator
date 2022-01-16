@@ -92,7 +92,7 @@ class Order < ApplicationRecord
           if trace.copy?
             api_attributes = APITransactionSerializer.new(transaction.message.content).api_attributes
           else
-            api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id)
+            api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id).merge(lot: account.instrument_volume(i))
           end
           slave = transaction.slaves.create(api_attributes.merge(state:'pending', ticket:nil, price_request:transaction.price_request, profit:nil, account:account))
         end
