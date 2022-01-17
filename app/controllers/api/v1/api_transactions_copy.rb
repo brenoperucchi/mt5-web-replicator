@@ -65,6 +65,7 @@ module API
             when "MODIFY","CLOSE"
               ticket_id = content['order_ticket']
               transaction = Transaction.find_by(ticket: ticket_id)
+              return if transaction.nil?
               transaction.loggings.create(content:params_body)
               if content['action'] == "MODIFY"
                 transaction.set_all_sl_and_tp_order(take_profit=content['take_profit'], stop_loss=content['stop_loss'])
@@ -76,6 +77,7 @@ module API
             when "LOT_IN"
               ticket_id = content['order_ticket']
               transaction = Transaction.find_by(ticket: ticket_id)
+              return if transaction.nil?
               transaction.loggings.create(content:params_body)
               volume = (transaction.account.sum_slaves_volume(transaction.id).to_f - content['volume'].to_f).abs
               comment = transaction.slaves.first.comment
@@ -89,6 +91,7 @@ module API
             when "LOT_OUT"
               ticket_id = content['order_ticket']
               transaction = Transaction.find_by(ticket: ticket_id)
+              return if transaction.nil?
               transaction.loggings.create(content:params_body)
               volume = content['volume'].to_f - transaction.account.sum_slaves_volume(transaction.id).to_f
               transaction.order.trace.accounts.slave.each do |account|

@@ -12,6 +12,10 @@ class Transaction < ApplicationRecord
   scope :executed,    ->{where(state: 'executed')}
   scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
 
+  before_create :set_symbol
+  after_create  :validate_restriction
+  # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
+
   state_machine :initial => :pending do
     after_transition :pending => :executed, :do => :update_state
     after_transition :pending => :executed, :do => :update_state
@@ -128,5 +132,37 @@ class Transaction < ApplicationRecord
     TransactionSlave.find(id).update(state: :remove)
     TransactionSlave.find(id).master.update(state: :executed)  
   end
+
+  def set_symbol
+    if order.trace.telegram?
+      ## TODO - CHANGE FOR SEARCHING FOR EXACTLY SYMBOL ON INSTRUMENTS
+      self.symbol = account.instruments.detect{|x| message.content.gsub(/\W/, '').upcase.include?(x[:symbol].upcase) }.try(:name)
+    else
+      self.symbol = account.instruments.find_by(symbol: message.serializer.symbol).try(:name)
+    end
+  end
+
+  def validate_restriction
+    restrict_nil_instrument? 
+    restrict_symbol?
+  end
+
+
+  def restrict_nil_instrument?
+    if symbol.nil?
+        self.response = "Restrict Instrument"
+        # errors.add(:symbol, "instrument nil")
+        self.erro!
+      end   
+  end
+
+  def restrict_symbol?
+    if message.store.tag_list.map(&:downcase).include?(symbol.try(:downcase))
+        self.response = "Restrict Symbol"
+        # errors.add(:symbol, "store restrict symbol")
+        self.erro!
+      end
+  end
+
 
 end

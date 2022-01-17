@@ -33,7 +33,7 @@ class Account < ApplicationRecord
     end
   end
 
-  def instrument_volume(value=0)
+  def instrument_volume(symbol, value=0)
     instrument = instruments.find_by(symbol: symbol)
     begin
       instrument.volumes.try(:split,', ')[value]

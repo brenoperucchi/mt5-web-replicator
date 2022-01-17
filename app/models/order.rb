@@ -24,7 +24,7 @@ class Order < ApplicationRecord
     after_transition [:prepared, :executed] => :pending, :do => :update_state
 
     event :prepare do
-      transition :pending => :prepared, :if => lambda { |order| order.restrict_symbol? }
+      # transition :pending => :prepared, :if => lambda { |order| order.restrict_symbol? }
     end
     event :execute do
       transition :prepared => :executed
@@ -87,29 +87,30 @@ class Order < ApplicationRecord
     for_limit = limit <= takeprofits ? limit : takeprofits
     self.trace.accounts.slave.each do |account|
       transaction = account.transactions.create(message.serializer.transaction_attributes)
-      if transaction
+      if transaction and not transaction.error?
         for i in (0..for_limit-1) do 
           if trace.copy?
             api_attributes = APITransactionSerializer.new(transaction.message.content).api_attributes
           else
-            api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id).merge(lot: account.instrument_volume(i))
+            api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id).merge(lot: account.instrument_volume(transaction.symbol, i))
           end
-          slave = transaction.slaves.create(api_attributes.merge(state:'pending', ticket:nil, price_request:transaction.price_request, profit:nil, account:account))
+
+          slave = transaction.slaves.create(api_attributes.merge(symbol: transaction.symbol, state:'pending', ticket:nil, price_request:transaction.price_request, profit:nil, account:account))
         end
       end
       transaction.execute
     end
   end
 
-  def restrict_symbol?
-    if self.trace.store.tag_list.map(&:downcase).include?(symbol.downcase)
-      self.message_response = "Restrict Store Symbol"
-      self.erro
-      return false
-    else
-      return true
-    end
-  end
+  # def restrict_symbol?
+  #   if self.trace.store.tag_list.map(&:downcase).include?(symbol.downcase)
+  #     self.message_response = "Restrict Store Symbol"
+  #     self.erro
+  #     return false
+  #   else
+  #     return true
+  #   end
+  # end
 
   def order_pending?
     self.content.upcase.include?('STOP') or self.content.upcase.include?('LIMIT')

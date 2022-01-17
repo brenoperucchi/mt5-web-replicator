@@ -10,7 +10,7 @@ module Signals
 		def transaction_attributes(value=0)
 		  	{
 				ticket: ticket,
-				symbol: symbol, 
+				# symbol: symbol, 
 				ordertype: ordertype, 
 				price_request: price_request, 
 				take_profit: takeprofit[value], 
@@ -55,12 +55,14 @@ module Signals
 
 
 		def order_attributes
-	 		{symbol: symbol, content:object.content.html_safe, content_id: object.content_id}
+	 		# {symbol: symbol, content:object.content.html_safe, content_id: object.content_id}
+	 		{content:object.content.html_safe, content_id: object.content_id}
 		end
 
-		def symbol
-			object.trace.instruments.detect{|x| object.content.gsub(/\W/, '').upcase.include?(x[:symbol].upcase) }.try(:name)
-		end
+		# def symbol
+		# 	binding.pry
+		# 	object.trace.instruments.detect{|x| object.content.gsub(/\W/, '').upcase.include?(x[:symbol].upcase) }.try(:name)
+		# end
 
   end
 end
