@@ -138,7 +138,7 @@ class Transaction < ApplicationRecord
       ## TODO - CHANGE FOR SEARCHING FOR EXACTLY SYMBOL ON INSTRUMENTS
       self.symbol = account.instruments.detect{|x| message.content.gsub(/\W/, '').upcase.include?(x[:symbol].upcase) }.try(:name)
     else
-      self.symbol = account.instruments.find_by(symbol: message.serializer.symbol).try(:name)
+      self.symbol = account.instruments.find_by(symbol: message.serializer.symbol.try(:upcase)).try(:name)
     end
   end
 

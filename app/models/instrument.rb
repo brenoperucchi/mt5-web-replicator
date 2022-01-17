@@ -62,7 +62,7 @@ class Instrument < ApplicationRecord
     {symbol:'FRA40',  name: 'FRA40',  volumes:"0.10, 0.10, 0.10, 0.10"},
     {symbol:'ESP35',  name: 'ESP35',  volumes:"0.10, 0.10, 0.10, 0.10"},
     {symbol:'JP225',  name: 'JP225',  volumes:"0.10, 0.10, 0.10, 0.10"},
-    {symbol:'GerMid50',  name: 'GerMid50',  volumes:"0.10, 0.10, 0.10, 0.10"},
+    {symbol:'GERMID50',  name: 'GERMID50',  volumes:"0.10, 0.10, 0.10, 0.10"},
     {symbol:'HKInd',  name: 'HKInd',  volumes:"0.10, 0.10, 0.10, 0.10"},
   ]
 end
