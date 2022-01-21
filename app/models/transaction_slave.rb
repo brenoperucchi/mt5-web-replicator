@@ -1,6 +1,6 @@
 class TransactionSlave < ApplicationRecord
     
-  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5}
+  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6}
 
   belongs_to :account
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id"
@@ -40,7 +40,7 @@ class TransactionSlave < ApplicationRecord
     end
     state :closed do
       def update_state(state)
-        if master.order.trace.copy?
+        if master.trace.copy?
           master.close
         elsif master.slaves.count > 1 and master.slaves.first == self
           master.slaves.not_closed.each do |slave|
@@ -81,16 +81,16 @@ class TransactionSlave < ApplicationRecord
     # Rails.logger.debug "ACCOUNT => #{self.account.name}"
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     seconds_ago = (self.created_at - Time.zone.now).to_i.abs
-    trace = trace_id  = master.try(:order).try(:trace)
-    trace_id  = trace.try(:id)
-    if trace.copy?
-      comment = "#{trace_id}-#{master.id}-#{master.slaves.last.id}"
-    else
-      comment = "#{trace_id}-#{master.id}-#{self.id}"
-    end
+    # trace = trace_id  = master.try(:order).try(:trace)
+    # trace_id  = trace.try(:id)
+    # if trace.copy?
+    #   comment = "#{trace_id}-#{master.id}-#{master.slaves.last.id}"
+    # else
+    #   comment = "#{trace_id}-#{master.id}-#{self.id}"
+    # end
     # instrument = master.order.trace.instruments.find_by_symbol(symbol)
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    msg = "#{ordertype}|#{ticket}|#{trace_id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
+    msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{master.trace.id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
   end
 

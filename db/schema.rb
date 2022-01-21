@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_12_022200) do
+ActiveRecord::Schema.define(version: 2022_01_19_033917) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -99,6 +99,7 @@ ActiveRecord::Schema.define(version: 2022_01_12_022200) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "account_id"
+    t.string "type"
     t.index ["account_id"], name: "index_messages_on_account_id"
     t.index ["ancestry"], name: "index_messages_on_ancestry"
     t.index ["store_id"], name: "index_messages_on_store_id"
@@ -183,7 +184,7 @@ ActiveRecord::Schema.define(version: 2022_01_12_022200) do
   end
 
   create_table "transaction_slaves", force: :cascade do |t|
-    t.string "ticket"
+    t.string "ticket_master"
     t.decimal "profit"
     t.string "ordertype"
     t.string "symbol"
@@ -204,6 +205,7 @@ ActiveRecord::Schema.define(version: 2022_01_12_022200) do
     t.integer "order_id"
     t.integer "ticket_deal"
     t.bigint "account_id"
+    t.string "ticket_slave"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
@@ -230,9 +232,11 @@ ActiveRecord::Schema.define(version: 2022_01_12_022200) do
     t.bigint "message_id"
     t.datetime "close_at", precision: 6
     t.bigint "account_id"
+    t.bigint "trace_id"
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"
+    t.index ["trace_id"], name: "index_transactions_on_trace_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -265,4 +269,5 @@ ActiveRecord::Schema.define(version: 2022_01_12_022200) do
   add_foreign_key "taggings", "tags"
   add_foreign_key "transaction_slaves", "accounts"
   add_foreign_key "transactions", "accounts"
+  add_foreign_key "transactions", "traces"
 end

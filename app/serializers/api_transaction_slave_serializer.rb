@@ -1,4 +1,4 @@
-class APITransactionSerializer < ActiveModel::Serializer
+class APITransactionSlaveSerializer < ActiveModel::Serializer
   
   def api_attributes
     {
@@ -10,16 +10,20 @@ class APITransactionSerializer < ActiveModel::Serializer
       stop_loss: stop_loss,
       take_profit: take_profit,
       # profit: profit,
-      ticket: ticket,
+      ticket_master: ticket_master,
+      ticket_slave: ticket_slave,
       open_at: open_at,
       # ticket_deal: ticket_deal,
       comment: obj['comment']
-    }
+    }.compact
   end
 
   def obj
-    # binding.pry
-    object
+    if object.is_a?(Hash)
+      object
+    else
+      YAML.load(object)
+    end
   end
 
   # def symbol
@@ -62,8 +66,12 @@ class APITransactionSerializer < ActiveModel::Serializer
   #   obj['comment'].split('|').last
   # end
 
-  def ticket
+  def ticket_master
     obj['order_id']
+  end
+
+  def ticket_slave
+    obj['ticket_slave_id']
   end
 
   # def ticket_deal

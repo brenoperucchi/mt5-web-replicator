@@ -27,6 +27,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     order:              Field::BelongsTo,
+    trace:              Field::BelongsTo,
     message:            Field::BelongsTo,
     account:            Field::BelongsTo,
     loggings:           Field::HasMany,
@@ -43,7 +44,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   symbol
-  order
+  trace
   profit
   account
   ].freeze
@@ -52,6 +53,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  trace
   order
   ticket
   state
@@ -80,6 +82,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  trace
   order
   ticket
   state

@@ -1,8 +1,9 @@
 class Transaction < ApplicationRecord
 
-  belongs_to :order
+  belongs_to :order, optional:true
   belongs_to :message
   belongs_to :account
+  belongs_to :trace, optional:true
 
   has_many :loggings, as: :loggerable, dependent: :destroy
   has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
@@ -12,7 +13,7 @@ class Transaction < ApplicationRecord
   scope :executed,    ->{where(state: 'executed')}
   scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
 
-  before_create :set_symbol
+  # before_create :set_symbol
   after_create  :validate_restriction
   # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
 
@@ -39,17 +40,17 @@ class Transaction < ApplicationRecord
     
     state :error do
       def update_state(state)
-        self.order.erro
+        # self.order.erro
       end
     end
     state :executed do
       def update_state(state)
-        self.order.execute
+        # self.order.execute
       end
     end
     state :closed do
       def update_state(state)
-        self.order.close
+        # self.order.close
         self.update(close_at: Time.current, profit: slaves.sum(:profit))
       end
     end

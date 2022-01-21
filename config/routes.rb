@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
       resources :orders
       resources :messages#, only: [:index]
+      resources :message_metatrader, controller: :messages, type:'Message::Metatrader'
       # get '/messages', to: 'messages#index', as: 'messages', on: :collection
       # end
       

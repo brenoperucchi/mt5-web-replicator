@@ -13,6 +13,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     order:              Field::BelongsTo,
     account:            Field::BelongsTo,
     master: Field::BelongsTo.with_options(class_name:'Transaction'),
+    ticket_master:      Field::String,
+    ticket_slave:       Field::String,
     ticket:             Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
@@ -41,7 +43,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   state
-  ticket
+  ticket_master
+  ticket_slave
   symbol
   account
   master
@@ -53,7 +56,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  ticket
+  ticket_master
+  ticket_slave
   master
   loggings
   state
@@ -78,7 +82,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  ticket
+  ticket_master
+  ticket_slave
   state
   profit
   ordertype
