@@ -13,7 +13,7 @@ module API
           account = Account.find_by(name: params[:account_id])
           if account
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.entire.collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.opened.collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -25,7 +25,7 @@ module API
           if account
             # map = account.slaves.collect{|t| t.api_request_attributes}.join('/')
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.entire.collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.opened.collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -64,7 +64,8 @@ module API
                 else
                   api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
                 end
-                slave.update(api_attributes.merge(state:'error', profit:nil))
+                # slave.update(api_attributes.merge(state:'error', profit:nil))
+                slave.erro
                 map = "#{slave.master.trace.id}|#{slave.id}|OK"
               end
               slave.loggings.create(content:message)

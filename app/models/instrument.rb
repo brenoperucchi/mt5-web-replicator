@@ -47,7 +47,7 @@ class Instrument < ApplicationRecord
   	{symbol:'USDPLN', name: 'USDPLN', volumes:"0.04, 0.03, 0.02, 0.01"},
   	{symbol:'USDSEK', name: 'USDSEK', volumes:"0.04, 0.03, 0.02, 0.01"},
   	{symbol:'USDZAR', name: 'USDZAR', volumes:"0.04, 0.03, 0.02, 0.01"},
-    {symbol:'GOLD', name: 'XAUUSD', volumes:"0.04, 0.03, 0.02, 0.01"},
+    {symbol:'GOLD',   name: 'XAUUSD', volumes:"0.04, 0.03, 0.02, 0.01"},
   	{symbol:'BRAIND', name: 'WING22', volumes:"0.20, 0.10, 0.10, 0.10"},
   	{symbol:'BRADOL', name: 'WDOF22', volumes:"0.20, 0.10, 0.10, 0.10"},
   	{symbol:'OIL',    name: 'Brent',  volumes:"0.04, 0.03, 0.02, 0.01"},
@@ -62,7 +62,7 @@ class Instrument < ApplicationRecord
     {symbol:'FRA40',  name: 'Fra40',  volumes:"0.10, 0.10, 0.10, 0.10"},
     {symbol:'ESP35',  name: 'Esp35',  volumes:"0.10, 0.10, 0.10, 0.10"},
     {symbol:'JP225',  name: 'Jp225',  volumes:"0.10, 0.10, 0.10, 0.10"},
-    {symbol:'GERMID50',  name: 'GerMid50',  volumes:"0.10, 0.10, 0.10, 0.10"},
-    {symbol:'HKIND',  name: 'HKInd',  volumes:"0.10, 0.10, 0.10, 0.10"},
+    {symbol:'GERMID50', name: 'GerMid50',  volumes:"0.10, 0.10, 0.10, 0.10"},
+    {symbol:'HKIND',    name: 'HKInd',     volumes:"0.10, 0.10, 0.10, 0.10"},
   ]
 end

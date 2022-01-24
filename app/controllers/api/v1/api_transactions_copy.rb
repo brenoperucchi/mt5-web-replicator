@@ -24,9 +24,8 @@ module API
         post "/copy/trasmit/:expert_name/:expert_version/:account_id/:account_mode" do
           map = String.new
           # orders = params[:orders]
-          account = Account.find_by(name: params[:account_id], kind: :copy)
-          if account# and params["orders"].present?
-            
+          account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
+          if account
             account.loggings.create(content:params)
             trace = account.try(:trace_copy)
 

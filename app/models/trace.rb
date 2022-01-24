@@ -1,7 +1,5 @@
 class Trace < ApplicationRecord
 
-  # after_create :insert_instruments
-
   enum kind:  {telegram: 0, copy: 1}
 
   store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
@@ -43,13 +41,5 @@ class Trace < ApplicationRecord
   def self.disable
     Trace.all.map(&:off)
   end
-
-  # def insert_instruments
-  #   if self.telegram?
-  #     Instrument::SYMBOLLIST.each do |symbol|
-  #       self.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes])
-  #     end
-  #   end
-  # end
 
 end
