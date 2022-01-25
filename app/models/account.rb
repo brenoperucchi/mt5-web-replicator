@@ -4,6 +4,7 @@ class Account < ApplicationRecord
 
   enum state: {disable: 0, enable: 1}
   enum kind:  {slave: 0, copy: 1}
+  enum meta_type:  {netting: 0, hedging: 1}
 
   store :settings, accessors: [:magics_accept]
 

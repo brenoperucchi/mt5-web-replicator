@@ -11,7 +11,7 @@ class AccountDashboard < Administrate::BaseDashboard
     name:           Field::String,
     state:          Field::String,
     kind:           Field::String,
-    magics_accept:  Field::String,
+    meta_type:      Field::String,
     traces:         Field::HasMany,
     transactions:   Field::HasMany,
     instruments:    Field::HasMany,
@@ -29,6 +29,7 @@ class AccountDashboard < Administrate::BaseDashboard
   name
   state
   kind
+  meta_type
   traces
   transactions
   ].freeze
@@ -39,7 +40,7 @@ class AccountDashboard < Administrate::BaseDashboard
   name
   state
   kind
-  magics_accept
+  meta_type
   traces
   store
   transactions
@@ -55,7 +56,7 @@ class AccountDashboard < Administrate::BaseDashboard
   name
   state
   kind
-  magics_accept
+  meta_type
   traces
   store
   ].freeze

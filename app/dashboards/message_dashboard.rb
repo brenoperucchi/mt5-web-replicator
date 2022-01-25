@@ -60,6 +60,7 @@ class MessageDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   state
+  trace
   content_id
   content
   response

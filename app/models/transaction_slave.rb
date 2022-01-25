@@ -13,15 +13,17 @@ class TransactionSlave < ApplicationRecord
   # scope :closed,  ->{where(state: 'closed')}
   # scope :deleted,  ->{where(state: 'deleted')}
   # scope :error,  ->{where(state: 'error')}
-  scope :opened,    ->{where(state: [:pending, :executed])}
+  scope :opened,    ->{where(state: [:pending, :executed, :remove])}
   scope :entire,    ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
   scope :not_closed,  ->{where.not(state: ['closed', 'deleted'])}
+  scope :not_error,  ->{where.not(state: ['error'])}
 
   validates_presence_of :symbol
 
 
   state_machine :initial => :pending do
     after_transition [:remove, :executed] => :closed, :do => :update_state
+    after_transition [:pending, :executed] => :erro, :do => :update_state
 
     event :execute do
       transition :pending => :executed
@@ -40,7 +42,7 @@ class TransactionSlave < ApplicationRecord
     end
     state :closed do
       def update_state(state)
-        if master.trace.copy?
+        if master.trace.copy? and account.hedging?
           master.close
         elsif master.slaves.count > 1 and master.slaves.first == self
           master.slaves.not_closed.each do |slave|
@@ -51,6 +53,17 @@ class TransactionSlave < ApplicationRecord
         end
       end
     end
+    state :erro do
+      def update_state(state)
+        if master.trace.copy? 
+          if account.hedging?
+            master.erro
+          elsif master.slaves.not_error.not_closed.count == 0
+            master.erro
+          end
+        end
+      end
+    end
   end
 
   def set_sl_and_tp_order(take_profit=nil, stop_loss=nil)
@@ -58,37 +71,9 @@ class TransactionSlave < ApplicationRecord
     self.update(attributes)
   end
 
-  # def meta_attributes(value=0)
-  #   openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-  #   instrument = master.order.trace.instruments.find_by_symbol(symbol)
-  #   @meta_attributes = { 
-  #     instrument: symbol,
-  #     ordertype: ordertype,
-  #     volume:self.lot,
-  #     openprice: openprice,
-  #     slippage:10,
-  #     magic_number: self.magic_number.to_i.abs,
-  #     stoploss: stop_loss,
-  #     takeprofit: take_profit,
-  #     trace_id: master.order.trace.id,
-  #     transaction_id: self.id,
-  #     ticket: self.ticket,
-  #     ticket_deal: self.ticket_deal,
-  #   }
-  # end
-
   def api_request_attributes
-    # Rails.logger.debug "ACCOUNT => #{self.account.name}"
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     seconds_ago = (self.created_at - Time.zone.now).to_i.abs
-    # trace = trace_id  = master.try(:order).try(:trace)
-    # trace_id  = trace.try(:id)
-    # if trace.copy?
-    #   comment = "#{trace_id}-#{master.id}-#{master.slaves.last.id}"
-    # else
-    #   comment = "#{trace_id}-#{master.id}-#{self.id}"
-    # end
-    # instrument = master.order.trace.instruments.find_by_symbol(symbol)
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{master.trace.id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg

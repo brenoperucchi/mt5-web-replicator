@@ -12,10 +12,9 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     loggings:           Field::HasMany,
     order:              Field::BelongsTo,
     account:            Field::BelongsTo,
-    master: Field::BelongsTo.with_options(class_name:'Transaction'),
+    master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     ticket_master:      Field::String,
     ticket_slave:       Field::String,
-    ticket:             Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
     ordertype:          Field::String,
@@ -46,8 +45,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket_master
   ticket_slave
   symbol
-  account
   master
+  account
   profit
   loggings
   ].freeze
@@ -59,6 +58,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket_master
   ticket_slave
   master
+  account
   loggings
   state
   profit

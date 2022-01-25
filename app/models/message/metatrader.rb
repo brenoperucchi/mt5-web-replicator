@@ -26,7 +26,7 @@ class Message::Metatrader < Message
       def update_state(state)
         content = YAML.load(Message.last.content)
         account_mode = content["params"]["account_mode"]
-        self.trace.accounts.slave.each do |account|
+        self.trace.accounts.slave.enable.each do |account|
           # Order All Closed
           if content['orders'].blank?
             account.slaves.map(&:remove) if account.slaves
@@ -52,7 +52,8 @@ class Message::Metatrader < Message
                     api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
                     comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
                     transaction.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account))
-                    transaction.execute
+                    transaction.execute if transaction.valid?
+                    
                   end
                 end
               elsif account_mode == "NETTING" 
@@ -67,7 +68,7 @@ class Message::Metatrader < Message
                       api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
                       comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
                       transaction.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account))
-                      transaction.execute
+                      transaction.execute if transaction.valid?
                     else
                       slave.update(lot: order['lot'], take_profit:order['takeprofit'], stop_loss:order['stoploss']) if order['state_meta'] == "modify"
                     end
