@@ -71,37 +71,9 @@ class TransactionSlave < ApplicationRecord
     self.update(attributes)
   end
 
-  # def meta_attributes(value=0)
-  #   openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-  #   instrument = master.order.trace.instruments.find_by_symbol(symbol)
-  #   @meta_attributes = { 
-  #     instrument: symbol,
-  #     ordertype: ordertype,
-  #     volume:self.lot,
-  #     openprice: openprice,
-  #     slippage:10,
-  #     magic_number: self.magic_number.to_i.abs,
-  #     stoploss: stop_loss,
-  #     takeprofit: take_profit,
-  #     trace_id: master.order.trace.id,
-  #     transaction_id: self.id,
-  #     ticket: self.ticket,
-  #     ticket_deal: self.ticket_deal,
-  #   }
-  # end
-
   def api_request_attributes
-    # Rails.logger.debug "ACCOUNT => #{self.account.name}"
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     seconds_ago = (self.created_at - Time.zone.now).to_i.abs
-    # trace = trace_id  = master.try(:order).try(:trace)
-    # trace_id  = trace.try(:id)
-    # if trace.copy?
-    #   comment = "#{trace_id}-#{master.id}-#{master.slaves.last.id}"
-    # else
-    #   comment = "#{trace_id}-#{master.id}-#{self.id}"
-    # end
-    # instrument = master.order.trace.instruments.find_by_symbol(symbol)
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{master.trace.id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
