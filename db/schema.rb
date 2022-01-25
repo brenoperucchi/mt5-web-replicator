@@ -266,6 +266,7 @@ ActiveRecord::Schema.define(version: 2022_01_19_033917) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "instruments", "accounts"
   add_foreign_key "taggings", "tags"
   add_foreign_key "transaction_slaves", "accounts"
   add_foreign_key "transactions", "accounts"
