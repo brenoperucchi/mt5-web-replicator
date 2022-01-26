@@ -13,7 +13,7 @@ module API
           account = Account.find_by(name: params[:account_id])
           if account
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.opened.collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.entire.collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -25,7 +25,7 @@ module API
           if account
             # map = account.slaves.collect{|t| t.api_request_attributes}.join('/')
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.opened.collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.entire.collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -44,6 +44,7 @@ module API
             if slave.nil?
               Logging.create(content:message)
             else
+              slave.loggings.create(content:message)
               case action
               when "CLOSED", "DELETED"
                 # slave = Transaction.find_by(id: content['comment'].split("-")[1]).slaves.first if trace.copy?
@@ -68,7 +69,6 @@ module API
                 slave.erro
                 map = "#{slave.master.trace.id}|#{slave.id}|OK"
               end
-              slave.loggings.create(content:message)
             end
             content_type 'text/plain'
             body map
