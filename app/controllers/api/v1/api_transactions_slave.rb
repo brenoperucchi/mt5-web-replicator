@@ -37,41 +37,43 @@ module API
           content = YAML.load(message)
           if not content.blank? and content.is_a?(Hash)
             action = content['action']
-            # trace = Trace.find(content['comment'].split("-").first)
-            account = Account.find(content['comment'].split("-").first)
+            account_id = content['comment'].split("-").first
+            account = Account.find_by(id: account_id, state: :enable)
             # transaction_id = content['comment'].split("-").last
-            slave = account.slaves.find_by(ticket_master: content['comment'].split("-").last)
-            if slave.nil?
-              Logging.create(content:message)
-            else
-              case action
-              when "CLOSED", "DELETED"
-                api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(profit:content['profit'])
-                slave.attributes = api_attributes
-                if slave.closed? and slave.loggings.count < 2 and slave.loggings.detect(&:detect_closed?).nil?
-                  slave.state = :executed
-                  slave.master.state = :executed
-                end
-                action == "CLOSED" ? slave.close : slave.deleted
-                map = "#{slave.master.trace.id}|#{slave.id}|OK"
-              when "MODIFY"
-                slave.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
-                map = "#{slave.master.trace.id}|#{slave.id}|OK"
-              when "OPENED"
-                api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
-                slave.update(api_attributes.merge(state:'executed', profit:nil))
-                map = "#{slave.master.trace.id}|#{slave.id}|OK"
-              when "NOSLTP","ERRORDEAL","TIMEMAX"
-                if action == "NOSLTP"
-                  api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
-                else
+            if account
+              slave = account.slaves.find_by(ticket_master: content['comment'].split("-").last)
+              if slave.nil?
+                Logging.create(content:message)
+              else
+                case action
+                when "CLOSED", "DELETED"
+                  api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(profit:content['profit'])
+                  slave.attributes = api_attributes
+                  if slave.closed? and slave.loggings.count < 2 and slave.loggings.detect(&:detect_closed?).nil?
+                    slave.state = :executed
+                    slave.master.state = :executed
+                  end
+                  action == "CLOSED" ? slave.close : slave.deleted
+                  map = "#{slave.master.trace.id}|#{slave.id}|OK"
+                when "MODIFY"
+                  slave.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
+                  map = "#{slave.master.trace.id}|#{slave.id}|OK"
+                when "OPENED"
                   api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
+                  slave.update(api_attributes.merge(state:'executed', profit:nil))
+                  map = "#{slave.master.trace.id}|#{slave.id}|OK"
+                when "NOSLTP","ERRORDEAL","TIMEMAX"
+                  if action == "NOSLTP"
+                    api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
+                  else
+                    api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
+                  end
+                  # slave.update(api_attributes.merge(state:'error', profit:nil))
+                  slave.erro
+                  map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
-                # slave.update(api_attributes.merge(state:'error', profit:nil))
-                slave.erro
-                map = "#{slave.master.trace.id}|#{slave.id}|OK"
+                slave.loggings.create(content:message)
               end
-              slave.loggings.create(content:message)
             end
             content_type 'text/plain'
             body map

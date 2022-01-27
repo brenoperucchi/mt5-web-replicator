@@ -18,7 +18,7 @@ module API
         #   kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
         #   account = Account.find_by(name: params[:account_id], state: 1, kind: kind)
         #   account && account.store.enable? ? account.store : nil 
-        # end      
+        # end
         desc "Return Store Config"
         post "/config/:expert_name/:expert_version/:account_id/:account_mode" do
           kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
