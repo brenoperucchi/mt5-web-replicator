@@ -62,7 +62,6 @@ class Transaction < ApplicationRecord
     end
   end
 
-
   def close_copy
     # last = slaves.last
     slaves.not_closed.each do |slave|

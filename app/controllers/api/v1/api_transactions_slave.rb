@@ -44,12 +44,14 @@ module API
             if slave.nil?
               Logging.create(content:message)
             else
-              slave.loggings.create(content:message)
               case action
               when "CLOSED", "DELETED"
-                # slave = Transaction.find_by(id: content['comment'].split("-")[1]).slaves.first if trace.copy?
                 api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(profit:content['profit'])
                 slave.attributes = api_attributes
+                if slave.closed? and slave.loggings.count < 2 and slave.loggings.detect(&:detect_closed?).nil?
+                  slave.state = :executed
+                  slave.master.state = :executed
+                end
                 action == "CLOSED" ? slave.close : slave.deleted
                 map = "#{slave.master.trace.id}|#{slave.id}|OK"
               when "MODIFY"
@@ -69,6 +71,7 @@ module API
                 slave.erro
                 map = "#{slave.master.trace.id}|#{slave.id}|OK"
               end
+              slave.loggings.create(content:message)
             end
             content_type 'text/plain'
             body map

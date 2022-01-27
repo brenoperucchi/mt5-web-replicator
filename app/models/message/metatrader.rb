@@ -46,7 +46,7 @@ class Message::Metatrader < Message
               instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
               if account_mode == "HEDGING"
                 orders.reverse.each do |order|
-                  transaction = account.transactions.where(ticket: order['order_id']).where.not(state: :closed).try(:last)  
+                  transaction = account.transactions.where(ticket: order['order_id']).try(:last)  
                   if transaction.nil?
                     transaction = account.transactions.create(APITransactionSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', profit:nil, message: self, trace: trace))
                     api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
