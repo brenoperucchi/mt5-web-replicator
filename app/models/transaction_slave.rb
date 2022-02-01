@@ -1,4 +1,6 @@
 class TransactionSlave < ApplicationRecord
+
+  StateMachine::Machine.ignore_method_conflicts = true
     
   enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6}
 

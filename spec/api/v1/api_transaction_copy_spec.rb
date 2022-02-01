@@ -4,8 +4,13 @@ RSpec.describe API::V1::APITransactionsCopy do
   before(:context) do
     @store = create(:store)
     @trace = create(:trace, :copy, store: @store)
-    @account = create(:acount, :copy, store: @store)
-    @account = create(:acount, :slave, store: @store)
+    @account_slave = create(:account, :copy, store: @store)
+    @account1 = create(:account, :slave1, store: @store)
+    @account2 = create(:account, :slave2, store: @store)
+    @ticket_master = 10000001
+    
+    post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/HEDGING', 
+    params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":0.00000000,\"takeprofit\":0.00000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
     # post '/api/v1/orders', params: {
     #   "message_id"=>"723517440",
     #   "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39",
@@ -28,25 +33,103 @@ RSpec.describe API::V1::APITransactionsCopy do
   # let(:order) { FactoryBot.create(:order, :m15_trace) }
   # let(:transaction) { FactoryBot.create(:transaction) }
 
-  describe API::V1::Traces do
+  describe API::V1::APITransactionsCopy do
     context 'POST' do
-      it 'Save transaction from metatrader order' do
-        
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_2_8/5647753/NETTING', params:{"orders"=>"{\"order_id\":333017982,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":0.00000000,\"takeprofit\":0.00000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_28", "account_id"=>"5647753", "account_mode"=>"NETTING"}
+      it 'Hedging - Verify account 5634787' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.transactions.find_by(ticket: @ticket_master)
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(@account1.state).to be == "enable"
+        expect(@account1.kind).to be == "slave"
+        expect(@transaction.ticket).to be == "10000001" 
+        expect(@slave.ticket_master).to be == "10000001" 
+        expect(@transaction.state).to be == "executed"
+        expect(@slave.state).to be == "pending"
+        @slave.execute
+        expect(@slave.state).to be == "executed"
+        expect(response.status).to eq(201)
+      end
 
-    
+      it 'Hedging - Verify account 5634788' do
+        account = Account.find_by(name: 5634788)
+        @transaction = account.transactions.find_by(ticket:@ticket_master)
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(@account2.state).to be == "enable"
+        expect(@account2.kind).to be == "slave"
 
-    # it 'verify kind order' do
-    #   @order = @trace.orders.find_by(message_id: 723517440)
-    #   expect(@order.kind).not_to be == nil
-    # end
+        expect(@transaction.ticket).to be == "10000001" 
+        expect(@slave.ticket_master).to be == "10000001" 
+        expect(@transaction.state).to be== "executed"
+        expect(@slave.state).to be == "pending"
+        @slave.execute
+        expect(@slave.state).to be == "executed"
+        expect(response.status).to eq(201)        
+      end
 
+      it 'Hedging - Post Remove All Orders' do
+        account = Account.find_by(name: 5634788)
+        @transaction = account.transactions.find_by(ticket:@ticket_master)
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        @slave.execute
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/HEDGING', 
+        params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(account.slaves.count).to eq(1)
+        expect(account.slaves.count).not_to eq(2)
+        expect(@transaction.state).to be == "executed"
+        expect(@slave.state).to be == "remove"
+        @slave.close
+        expect(@slave.state).to be == "closed"
+        expect(@slave.master.state).to be == "closed"
+
+
+        # @order = @trace.orders.find_by(message_id: 723517440)
+        # expect(@order.kind).to be == "order"
+      end
+      it 'Hedging - Modify Position first transaction and add another order' do
+        account = Account.find_by(name: 5634788)
+        @transaction = account.transactions.find_by(ticket:@ticket_master)
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        @slave.execute
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/HEDGING', 
+        params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(account.slaves.count).to eq(2)
+        expect(account.slaves.count).not_to eq(1)
+        expect(account.slaves.count).not_to eq(3)
+        expect(@transaction.state).to be == "executed"
+        expect(@slave.take_profit).not_to be == "0.0"
+        expect(@slave.stop_loss).not_to be == "0.0"
+        expect(@slave.take_profit).to be == "1.2"
+        expect(@slave.stop_loss).to be == "1.1"
+        @slave.remove
+        expect(@slave.state).to be == "remove"
+        @slave.close
+        expect(@slave.state).to be == "closed"
+        expect(@slave.master.state).to be == "closed"
+      end
+
+      it 'Hedging - Modify Position first transaction and add another order' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.transactions.find_by(ticket:@ticket_master)
+        @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        @slave.execute
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/HEDGING', 
+        params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        @slave = Account.find_by(name: 5634787).transactions.find_by(ticket:10000002).slaves.find_by(ticket_master: 10000002)
+        expect(@slave.take_profit).not_to eq(0)
+        expect(@slave.stop_loss).not_to eq(0)
+        expect(@slave.take_profit).to be == ("1.2")
+        expect(@slave.stop_loss).to be == ("1.1")
+
+
+      end
+
+    end
+  end
+end    
     # context 'POST /api/v1/orders' do
       
-    #   it 'verify kind order' do
-    #     @order = @trace.orders.find_by(message_id: 723517440)
-    #     expect(@order.kind).to be == "order"
-    #   end
 
     #   it 'save a telegram trace message' do
     #     expect(Order.first.state).to be == "prepared"
@@ -166,5 +249,3 @@ RSpec.describe API::V1::APITransactionsCopy do
     #   end
     # end
 
-  end
-end

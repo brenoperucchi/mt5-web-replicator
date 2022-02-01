@@ -528,6 +528,7 @@ DEPENDENCIES
   jquery-rails
   listen (>= 3.0.5, < 3.2)
   lucky_case
+  minitest
   paper_trail
   postgresql
   pry (~> 0.13.1)

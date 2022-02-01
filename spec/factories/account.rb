@@ -1,17 +1,20 @@
 FactoryBot.define do
   factory :account do
-    active_at { DateTime.now }
+    state { :enable }
 
-    trait :slave do
+    trait :slave1 do
       name {5634787} 
-      state {:enable} 
+      kind {:slave} 
+      trace_ids { 1 } 
+    end
+    trait :slave2 do
+      name {5634788} 
       kind {:slave} 
       trace_ids { 1 } 
     end
     trait :copy do
       name {5647753} 
-      state {:enable} 
-      kind {:slave} 
+      kind {:copy} 
       trace_ids { 1 }
     end
   end

@@ -55,6 +55,7 @@ group :test do
   gem 'terminal-notifier' , git:"https://github.com/d-a-l-l/terminal-notifier.git"
   gem "database_cleaner"
   gem "factory_bot_rails"
+  gem "minitest"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
