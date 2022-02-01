@@ -53,7 +53,9 @@ class Message::Metatrader < Message
                     comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
                     transaction.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account))
                     transaction.execute if transaction.valid?
-                    
+                  elsif order['state_meta'] == "modify"
+                    slave = account.slaves.find_by(ticket_master: transaction.ticket)
+                    slave.update(lot: order['lot'], take_profit:order['takeprofit'], stop_loss:order['stoploss'])
                   end
                 end
               elsif account_mode == "NETTING" 
