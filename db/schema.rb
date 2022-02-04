@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_24_044909) do
+ActiveRecord::Schema.define(version: 2022_02_04_195751) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -207,6 +207,7 @@ ActiveRecord::Schema.define(version: 2022_01_24_044909) do
     t.integer "ticket_deal"
     t.bigint "account_id"
     t.string "ticket_slave"
+    t.datetime "closed_at"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
@@ -267,7 +268,6 @@ ActiveRecord::Schema.define(version: 2022_01_24_044909) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "instruments", "accounts"
   add_foreign_key "taggings", "tags"
   add_foreign_key "transaction_slaves", "accounts"
   add_foreign_key "transactions", "accounts"

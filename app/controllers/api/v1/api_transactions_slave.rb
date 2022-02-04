@@ -13,7 +13,7 @@ module API
           account = Account.find_by(name: params[:account_id])
           if account
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.entire.collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.entire.where('closed_at >=?', (Time.zone.now - 10.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -25,7 +25,7 @@ module API
           if account
             # map = account.slaves.collect{|t| t.api_request_attributes}.join('/')
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.entire.collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.entire.where('closed_at >=?', (Time.zone.now - 10.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map

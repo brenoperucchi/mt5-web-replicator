@@ -51,7 +51,7 @@ class Transaction < ApplicationRecord
     state :closed do
       def update_state(state)
         # self.order.close
-        self.update(close_at: Time.current, profit: slaves.sum(:profit))
+        self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
       end
     end
   end

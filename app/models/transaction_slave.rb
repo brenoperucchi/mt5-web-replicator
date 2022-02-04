@@ -42,8 +42,11 @@ class TransactionSlave < ApplicationRecord
     event :erro do
       transition [:pending, :executed, :closed] => :error
     end
+    
     state :closed do
       def update_state(state)
+        self.update(closed_at: Time.zone.now)
+
         if master.trace.copy? and account.hedging?
           master.close
         elsif master.slaves.count > 1 and master.slaves.first == self
@@ -55,6 +58,7 @@ class TransactionSlave < ApplicationRecord
         end
       end
     end
+   
     state :erro do
       def update_state(state)
         if master.trace.copy? 

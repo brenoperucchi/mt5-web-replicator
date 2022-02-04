@@ -104,7 +104,9 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave.stop_loss).to be == "1.1"
         @slave.remove
         expect(@slave.state).to be == "remove"
+        expect(@slave.closed_at).to be_nil
         @slave.close
+        expect(@slave.closed_at).not_to be_nil
         expect(@slave.state).to be == "closed"
         expect(@slave.master.state).to be == "closed"
       end
