@@ -44,7 +44,7 @@ RSpec.describe API::V1::Orders do
   # in order to pass any filters (e.g. authentication) defined in
   # Finances::EntriesController. Be sure to keep this updated too.
 
-  describe API::V1::Traces do
+  describe API::V1::ApiTelegram do
     context 'POST /api/v*/orders' do
       it 'save a telegram trace message' do
         

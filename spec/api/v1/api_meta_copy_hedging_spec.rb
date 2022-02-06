@@ -63,7 +63,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave.state).to be == "pending"
         @slave.execute
         expect(@slave.state).to be == "executed"
-        expect(response.status).to eq(201)        
+        expect(response.status).to eq(201)
       end
 
       it 'Hedging - Post Remove All Orders' do
@@ -81,11 +81,32 @@ RSpec.describe API::V1::APITransactionsCopy do
         @slave.close
         expect(@slave.state).to be == "closed"
         expect(@slave.master.state).to be == "closed"
-
+        expect(response.status).to eq(201)
 
         # @order = @trace.orders.find_by(message_id: 723517440)
         # expect(@order.kind).to be == "order"
+      end      
+
+      it 'Hedging - Remove Transaction should be deleted on non executed t-slaves' do
+        account_87 = Account.find_by(name: 5634787)
+        account_88 = Account.find_by(name: 5634788)
+        # @transaction = account_87.transactions.find_by(ticket:@ticket_master)
+        @slave_1 = account_87.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        @slave_1.execute
+        expect(@slave_1.state).to be == "executed"
+        @slave_2 = account_88.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(@slave_2.state).to be == "pending"
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/HEDGING', 
+        params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        @slave_1 = account_87.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        @slave_2 = account_88.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(@slave_1.state).to be == "remove"
+        expect(@slave_2.state).to be == "deleted"
+        expect(@slave_1.master.state).to be == "executed"
+        expect(@slave_2.master.state).to be == "closed"
+        expect(response.status).to eq(201)
       end
+
       it 'Hedging - Modify Position first transaction and add another order' do
         account = Account.find_by(name: 5634788)
         @transaction = account.transactions.find_by(ticket:@ticket_master)
@@ -97,6 +118,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(account.slaves.count).to eq(2)
         expect(account.slaves.count).not_to eq(1)
         expect(account.slaves.count).not_to eq(3)
+        expect(@transaction.slaves.count).to eq(1)
         expect(@transaction.state).to be == "executed"
         expect(@slave.take_profit).not_to be == "0.0"
         expect(@slave.stop_loss).not_to be == "0.0"
@@ -109,6 +131,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave.closed_at).not_to be_nil
         expect(@slave.state).to be == "closed"
         expect(@slave.master.state).to be == "closed"
+        expect(response.status).to eq(201)
       end
 
       it 'Hedging - Modify Position first transaction and add another order' do
@@ -123,7 +146,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave.stop_loss).not_to eq(0)
         expect(@slave.take_profit).to be == ("1.2")
         expect(@slave.stop_loss).to be == ("1.1")
-
+        expect(response.status).to eq(201)
 
       end
 

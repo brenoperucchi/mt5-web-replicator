@@ -2,7 +2,7 @@ require 'csv'
 require 'json'
 module API
   module V1
-    class ApiTelegram < Grape::API
+    class APITelegram < Grape::API
       include API::V1::Defaults
 
       resource :traces do

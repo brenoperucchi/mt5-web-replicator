@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe API::V1::Orders do
+RSpec.describe API::V1::APITransactionsSlave do
   before(:context) do
     @store = create(:store, master: '5077669')
     @trace = create(:trace, :first, store: @store)
@@ -26,10 +26,12 @@ RSpec.describe API::V1::Orders do
   # let(:order) { FactoryBot.create(:order, :m15_trace) }
   # let(:transaction) { FactoryBot.create(:transaction) }
 
-  describe API::V1::ApiTelegram do
-    it 'verify kind order' do
-      @order = @trace.orders.find_by(message_id: 723517440)
-      expect(@order.kind).not_to be == nil
+  describe API::V1::APITelegram do
+    context 'POST' do
+      it 'verify kind order' do
+        @order = @trace.orders.find_by(message_id: 723517440)
+        expect(@order.kind).not_to be == nil
+      end
     end
 
     context 'POST /api/v1/orders' do
