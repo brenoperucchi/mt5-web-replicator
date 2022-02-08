@@ -32,8 +32,8 @@ class Message::Metatrader < Message
             account.slaves.map(&:remove) if account.slaves
 
           ### Order Opened and Modify
-          elsif content['orders'].count < account.slaves.executed.count
-            account.slaves.each do |slave|
+          else
+            account.slaves.executed.each do |slave|
               if content['orders'].flatten.detect{|x| x['order_id'].to_s == slave.ticket_master}
                 next
               else
@@ -41,7 +41,7 @@ class Message::Metatrader < Message
               end
             end
           ### Order Opened and Modify
-          else
+          # else
             content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
               instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
               if account_mode == "HEDGING"

@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe API::V1::APITransactionsSlave do
   before(:context) do
-    @store = create(:store, master: '5077669')
-    @trace = create(:trace, :first, store: @store)
+    @store = create(:store)
+    @trace = create(:trace, :copy, store: @store)
     post '/api/v1/orders', params: {
       "message_id"=>"723517440",
       "message"=>"BUY 80.39\n\nTP 80.19\nTP 79.89\nTP 79.39\nSL 81.39",
