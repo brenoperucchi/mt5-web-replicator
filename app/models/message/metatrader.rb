@@ -48,8 +48,8 @@ class Message::Metatrader < Message
                 orders.reverse.each do |order|
                   transaction = account.transactions.where(ticket: order['order_id']).try(:last)  
                   if transaction.nil?
-                    transaction = account.transactions.create(APITransactionSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', profit:nil, message: self, trace: trace))
-                    api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
+                    transaction = account.transactions.create(APITransactionSerializer.new(order).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace))
+                    api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
                     comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
                     transaction.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account))
                     transaction.execute if transaction.valid?
@@ -61,13 +61,13 @@ class Message::Metatrader < Message
               elsif account_mode == "NETTING" 
                 transaction = account.transactions.where(symbol: instrument).where.not(state: :closed).try(:last)
                 if transaction.nil?
-                  transaction = account.transactions.create(APITransactionSerializer.new(orders.last).api_attributes.merge(symbol: instrument, state:'pending', profit:nil, message: self, trace: trace))
+                  transaction = account.transactions.create(APITransactionSerializer.new(orders.last).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace))
                 end
                 unless transaction.error?
                   orders.reverse.each do |order|
                     slave = transaction.slaves.find_by(ticket_master:order['order_id'])
                     unless slave
-                      api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, state:'pending', price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
+                      api_attributes = APITransactionSlaveSerializer.new(order).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
                       comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
                       transaction.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account))
                       transaction.execute if transaction.valid?

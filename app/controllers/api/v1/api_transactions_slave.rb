@@ -13,7 +13,7 @@ module API
           account = Account.find_by(name: params[:account_id])
           if account
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.entire.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -25,7 +25,7 @@ module API
           if account
             # map = account.slaves.collect{|t| t.api_request_attributes}.join('/')
             # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
-            map = account.slaves.entire.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -60,7 +60,8 @@ module API
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "OPENED"
                   api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
-                  slave.update(api_attributes.merge(state:'executed', profit:nil))
+                  slave.attributes = api_attributes
+                  slave.execute
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "NOSLTP","ERRORDEAL","TIMEMAX"
                   if action == "NOSLTP"
