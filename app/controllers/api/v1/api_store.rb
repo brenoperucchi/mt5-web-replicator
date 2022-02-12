@@ -4,8 +4,8 @@ module API
     class APIStore < Grape::API
       include API::V1::Defaults
       format :json
-      formatter :json, 
-           Grape::Formatter::ActiveModelSerializers
+      # formatter :json, 
+      #      Grape::Formatter::ActiveModelSerializers
 
       resource :stores do
         desc "Return all signs"
@@ -20,10 +20,24 @@ module API
         #   account && account.store.enable? ? account.store : nil 
         # end
         desc "Return Store Config"
+        get "/config/:expert_name/:expert_version/:account_id/:account_mode" do
+          kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
+          account = Account.find_by(name: params[:account_id], state: 1, kind: kind)
+          if account && account.store.enable?
+            AccountSerializer.new(account) 
+          else 
+            nil 
+          end
+        end      
+        desc "Return Store Config"
         post "/config/:expert_name/:expert_version/:account_id/:account_mode" do
           kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
           account = Account.find_by(name: params[:account_id], state: 1, kind: kind)
-          account && account.store.enable? ? account.store : nil 
+          if account && account.store.enable?
+            AccountSerializer.new(account) 
+          else 
+            nil 
+          end
         end      
       end
     end
