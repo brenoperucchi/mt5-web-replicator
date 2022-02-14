@@ -1,12 +1,27 @@
 class AccountSerializer < ActiveModel::Serializer
   attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode
 
+
+  def yaml
+    yaml = YAML::load(File.open('config/meta_versions.yml'))
+  end
+
+  def meta_version_accept
+    params = instance_options[:params]
+    yaml[params['expert_name']][params['expert_version']] == "OK" ? true : false
+  end
+
   def store_state
-    object.store.state
+    if meta_version_accept
+      object.store.state
+    else
+      'disable'
+    end  
   end
 
   def store_message
-    ""  
+    params = instance_options[:params]
+    yaml[params['expert_name']]['disable_msg'].gsub("|version|", params['expert_version'].gsub('_','.')) unless meta_version_accept
   end
 
   def account_state

@@ -46,14 +46,7 @@ ActiveRecord::Schema.define(version: 2022_02_12_193116) do
     t.bigint "byte_size", null: false
     t.string "checksum", null: false
     t.datetime "created_at", null: false
-    t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
-  end
-
-  create_table "active_storage_variant_records", force: :cascade do |t|
-    t.bigint "blob_id", null: false
-    t.string "variation_digest", null: false
-    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "clients", force: :cascade do |t|
@@ -106,6 +99,15 @@ ActiveRecord::Schema.define(version: 2022_02_12_193116) do
     t.index ["ancestry"], name: "index_messages_on_ancestry"
     t.index ["store_id"], name: "index_messages_on_store_id"
     t.index ["trace_id"], name: "index_messages_on_trace_id"
+  end
+
+  create_table "morphics", force: :cascade do |t|
+    t.bigint "account_id"
+    t.bigint "transaction_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["account_id"], name: "index_morphics_on_account_id"
+    t.index ["transaction_id"], name: "index_morphics_on_transaction_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -204,7 +206,6 @@ ActiveRecord::Schema.define(version: 2022_02_12_193116) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "state", default: 0
-    t.integer "order_id"
     t.integer "ticket_deal"
     t.bigint "account_id"
     t.string "ticket_slave"
@@ -232,8 +233,9 @@ ActiveRecord::Schema.define(version: 2022_02_12_193116) do
     t.datetime "open_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "meta_order_generate"
+    t.datetime "close_at"
     t.bigint "message_id"
-    t.datetime "close_at", precision: 6
     t.bigint "account_id"
     t.bigint "trace_id"
     t.index ["account_id"], name: "index_transactions_on_account_id"
@@ -268,7 +270,6 @@ ActiveRecord::Schema.define(version: 2022_02_12_193116) do
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "instruments", "accounts"
   add_foreign_key "taggings", "tags"
   add_foreign_key "transaction_slaves", "accounts"

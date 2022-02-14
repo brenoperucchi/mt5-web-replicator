@@ -20,6 +20,12 @@ module API
           def logger
             Rails.logger
           end
+
+          def meta_version_accept
+            yaml = YAML::load(File.open('config/meta_versions.yml'))
+            yaml[params['expert_name']][params['expert_version']].present? ? true : false
+          end
+
         end
 
         rescue_from ActiveRecord::RecordNotFound do |e|
