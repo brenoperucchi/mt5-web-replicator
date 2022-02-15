@@ -3,10 +3,12 @@ signal_slave:
   '1_54': disable
   '1_55': disable
   '1_56': OK
+  '1_57': OK
   disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema'
 signal_copy:
   '1_30': disable
   '1_31': OK
+  '1_32': OK
   disable_msg: 'A versao |version| do SignalCopy esta desabilitado em nosso sistema'
 
 # test:

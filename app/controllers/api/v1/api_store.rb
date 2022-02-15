@@ -35,7 +35,6 @@ module API
         post "/config/:expert_name/:expert_version/:account_id/:account_mode" do
           kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
           account = Account.find_by(name: params[:account_id], state: 1, kind: kind)
-          yaml = YAML::load(File.open('config/meta_versions.yml'))
           if account && account.store.enable? && meta_version_accept
             AccountSerializer.new(account, params:params) 
           else 
