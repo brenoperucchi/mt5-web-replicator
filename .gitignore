@@ -109,3 +109,4 @@ lib/signal/images/data/output.tiff
 .rbenv-gemsets
 /config/credentials/development.key
 lib/telegram/tdlib/libtdjson.so
+app/.DS_Store
