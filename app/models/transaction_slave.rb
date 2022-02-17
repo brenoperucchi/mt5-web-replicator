@@ -32,7 +32,7 @@ class TransactionSlave < ApplicationRecord
       transition :pending => :executed
     end
     event :remove do
-      transition [:pending, :executed] => :remove
+      transition [:error, :pending, :executed] => :remove
     end  
     event :close do
       transition [:remove, :executed] => :closed
