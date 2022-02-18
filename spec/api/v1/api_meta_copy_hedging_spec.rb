@@ -39,6 +39,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         account = Account.find_by(name: 5634787)
         @transaction = account.transactions.find_by(ticket: @ticket_master)
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
+        expect(account.transactions.where(ticket:10000001).count).to eq(1)
         expect(@account1.state).to be == "enable"
         expect(@account1.kind).to be == "slave"
         expect(@transaction.ticket).to be == "10000001" 
