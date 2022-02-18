@@ -79,7 +79,7 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
   # end
 
   def open_at
-    Time.zone.at(obj['open_at'].try(:split, ".").try(:first).try(:to_i))
+    Time.zone.at(obj['open_at'].try(:to_i))
   end
 
 end

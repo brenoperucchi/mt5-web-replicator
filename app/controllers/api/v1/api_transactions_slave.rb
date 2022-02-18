@@ -37,11 +37,15 @@ module API
           content = YAML.load(message)
           if not content.blank? and content.is_a?(Hash)
             action = content['action']
-            account_id = content['comment'].split("-").first
-            account = Account.find_by(id: account_id, state: :enable)
+            account = Account.find_by(name: params[:account_id])
+            # binding.pry
+
+            # account_id = content['comment'].split("-").first
+            # account = Account.find_by(id: account_id, state: :enable)
             # transaction_id = content['comment'].split("-").last
             if account
-              slave = account.slaves.find_by(ticket_master: content['comment'].split("-").last)
+              slave = account.slaves.find_by(comment: content['comment'])
+              # slave = account.slaves.find_by(ticket_master: content['comment'].split("-").last)
               if slave.nil?
                 Logging.create(content:message)
               else
@@ -68,9 +72,9 @@ module API
                     api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
                   else
                     api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
+                    slave.erro
                   end
                   # slave.update(api_attributes.merge(state:'error', profit:nil))
-                  slave.erro
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
                 slave.loggings.create(content:message)
