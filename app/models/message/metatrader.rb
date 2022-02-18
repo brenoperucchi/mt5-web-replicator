@@ -43,7 +43,11 @@ class Message::Metatrader < Message
           ### Order Opened and Modify
           # else
             content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
-              instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+              if account.instrument_control.to_b
+                instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+              else 
+                instrument = symbol
+              end
               if account_mode == "HEDGING"
                 orders.reverse.each do |order|
                   transaction = account.transactions.where(ticket: order['order_id']).try(:last)  

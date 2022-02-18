@@ -8,17 +8,19 @@ class AccountDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    name:             Field::String,
-    state:            Field::String,
-    kind:             Field::String,
-    meta_mode:        Field::String,
-    meta_margin_mode: Field::String,
-    traces:           Field::HasMany,
-    transactions:     Field::HasMany,
-    instruments:      Field::HasMany,
-    store:            Field::BelongsTo,
-    created_at:       Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at:       Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    name:                 Field::String,
+    state:                Field::String,
+    kind:                 Field::String,
+    meta_mode:            Field::String,
+    meta_margin_mode:     Field::String,
+    traces:               Field::HasMany,
+    transactions:         Field::HasMany,
+    instruments:          Field::HasMany,
+    store:                Field::BelongsTo,
+    magics_accept:        Field::String,
+    instrument_control:   Field::Boolean,
+    created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -44,6 +46,8 @@ class AccountDashboard < Administrate::BaseDashboard
   kind
   meta_mode
   meta_margin_mode
+  magics_accept
+  instrument_control
   traces
   store
   transactions
@@ -61,6 +65,8 @@ class AccountDashboard < Administrate::BaseDashboard
   kind
   meta_mode
   meta_margin_mode
+  magics_accept
+  instrument_control
   traces
   store
   ].freeze

@@ -7,7 +7,7 @@ class Account < ApplicationRecord
   enum meta_mode:         {demo: 0, real: 1}
   enum meta_margin_mode:  {netting: 0, hedging: 1}
 
-  store :settings, accessors: [:magics_accept]
+  store :settings, accessors: [:magics_accept, :instrument_control]
 
   belongs_to :store
   has_many :permissions
