@@ -6,14 +6,19 @@
 </p>
 
 <p>
-  <strong>User:</strong>
-  <%= @client.user_id %>
+  <strong>email:</strong>
+  <%= @client.email %>
 </p>
 
 <p>
-  <strong>Active at:</strong>
-  <%= @client.active_at %>
+  <strong>Active:</strong>
+  <%= @client.active %>
 </p>
 
-<%= link_to 'Edit', edit_client_path(@client) %> |
+<p>
+  <strong>Plan:</strong>
+  <%= @client.plan %>
+</p>
+
+<%= link_to 'Edit', edit_client_path(@client.id) %> |
 <%= link_to 'Back', clients_path %>

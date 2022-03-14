@@ -16,11 +16,12 @@
     <% @clients.each do |client| %>
       <tr>
         <td><%= client.name %></td>
-        <td><%= client.user_id %></td>
-        <td><%= client.active_at %></td>
-        <td><%= link_to 'Show', client %></td>
-        <td><%= link_to 'Edit', edit_client_path(client) %></td>
-        <td><%= link_to 'Destroy', client, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= client.email %></td>
+        <td><%= client.active %></td>
+        <td><%= client.plan %></td>
+        <td><%= link_to 'Show', client_path(client.id) %></td>
+        <td><%= link_to 'Edit', edit_client_path(client.id) %></td>
+        <td><%= link_to 'Destroy', client_path(client.id), method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>

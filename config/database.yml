@@ -13,9 +13,20 @@ postgres: &postgres
 
 
 default: &default
-  adapter: sqlite3
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  pool: 5
   timeout: 5000
+  # adapter: sqlite3
+  # pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # timeout: 5000
+
+test:
+  <<: *postgres
+  database: signalforex_test
+  username: signalforex
+  password: Rails.application.credentials[:secret_database]
 
 development:
   # <<: *default
@@ -23,19 +34,19 @@ development:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: 3e2w1q
-  # password: Rails.application.credentials.config[:aws][:access_key_id]
+  password: Rails.application.credentials[:secret_database]
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
-test:
-  <<: *default
-  database: db/test.sqlite3
+
+# test:
+#   <<: *default
+#   database: db/test.sqlite3
 
 production:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: CjGcKx7h56CoBdlM
+  password: Rails.application.credentials[:secret_database]
   

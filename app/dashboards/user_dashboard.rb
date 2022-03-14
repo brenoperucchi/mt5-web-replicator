@@ -12,6 +12,7 @@ class UserDashboard < Administrate::BaseDashboard
     email:          Field::String,
     password:       Field::String,
     store:          Field::BelongsTo,
+    userable:       Field::Polymorphic,
     created_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -26,6 +27,7 @@ class UserDashboard < Administrate::BaseDashboard
   email
   password
   store
+  userable
   created_at
   ].freeze
 
@@ -36,6 +38,7 @@ class UserDashboard < Administrate::BaseDashboard
   email
   password
   store
+  userable
   created_at
   updated_at
   ].freeze
@@ -48,7 +51,6 @@ class UserDashboard < Administrate::BaseDashboard
   email
   password
   store
-  created_at
   ].freeze
 
   # COLLECTION_FILTERS

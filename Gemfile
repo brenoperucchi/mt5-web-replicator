@@ -1,10 +1,13 @@
+def next?
+  File.basename(__FILE__) == "Gemfile.next"
+end
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.7.2'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.0.4.6'
+gem 'rails', '~> 6.1.4.6'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '~> 3.11'
@@ -125,6 +128,25 @@ gem 'paper_trail'
 gem 'devise'
 gem "font-awesome-rails"
 gem 'jquery-rails'
+gem "rest-client"
 
 # gem 'stisla-rails'
 
+
+gem 'pay', '~> 3.0'
+
+# To use Stripe, also include:
+gem 'stripe', '>= 2.8', '< 6.0'
+gem 'dotenv'
+
+# # To use Braintree + PayPal, also include:
+# gem 'braintree', '>= 4.4', '< 5.0'
+
+# # To use Paddle, also include:
+# gem 'paddle_pay', '~> 0.1'
+
+# To use Receipts
+gem 'receipts', '~> 1.1'
+
+gem 'next_rails'
+gem "tailwindcss-rails", "~> 2.0"

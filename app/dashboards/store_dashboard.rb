@@ -17,6 +17,9 @@ class StoreDashboard < Administrate::BaseDashboard
     telegram_api_number: Field::String,
     accounts:   Field::HasMany,
     traces:     Field::HasMany,
+    customers:  Field::HasMany,
+    users:      Field::HasMany,
+    traces:     Field::HasMany,
     tag_list:   Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -47,6 +50,8 @@ class StoreDashboard < Administrate::BaseDashboard
   telegram_api_number
   accounts
   traces
+  customers
+  users
   created_at
   updated_at
   ].freeze

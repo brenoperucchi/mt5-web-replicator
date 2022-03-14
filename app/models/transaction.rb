@@ -2,11 +2,15 @@ class Transaction < ApplicationRecord
 
   belongs_to :order, optional:true
   belongs_to :message
-  belongs_to :account
+  belongs_to :account, optional:true
   belongs_to :trace, optional:true
 
   has_many :loggings, as: :loggerable, dependent: :destroy
   has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
+
+  has_many :balances
+  has_many :accounts, through: :balances, source: :account
+
 
   scope :closed,      ->{where(state: 'closed')}
   scope :finish,      ->{where(state: ['closed', 'error'])}

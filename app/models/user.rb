@@ -5,4 +5,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   belongs_to :store
+  belongs_to :userable, polymorphic: true, optional: true
+  # has_one :customer, :class_name => "Customer", :foreign_key => "user_id"
+
+  validates_uniqueness_of :email, scope: :store
 end

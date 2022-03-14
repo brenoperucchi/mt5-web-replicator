@@ -13,6 +13,7 @@ class LoggingDashboard < Administrate::BaseDashboard
     loggerable:Field::Polymorphic,
     # user:Field::BelongsTo,
     account: Field::String,
+    changeset: Field::String,
     state: Field::String,
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
@@ -39,6 +40,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   loggerable
   content
   account
+  changeset
   created_at
   updated_at
   ].freeze

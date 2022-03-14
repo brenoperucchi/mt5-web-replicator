@@ -1,6 +1,11 @@
 class TransactionSlave < ApplicationRecord
 
   StateMachine::Machine.ignore_method_conflicts = true
+
+  has_paper_trail 
+  # versions: {
+  #   class_name: 'Track'
+  # }
     
   enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6}
 
@@ -8,6 +13,10 @@ class TransactionSlave < ApplicationRecord
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id"
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
+
+  has_many :balances
+  has_many :accounts, through: :balances, source: :slave
+
   
   scope :to_pending,   ->{where(state: 'pending')}
   # scope :executed,  ->{where(state: 'executed')}
@@ -21,6 +30,8 @@ class TransactionSlave < ApplicationRecord
   scope :not_error,  ->{where.not(state: ['error'])}
 
   validates_presence_of :symbol
+  validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], if: Proc.new { account.hedging? }
+  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], if: Proc.new { account.hedging? }
 
 
   state_machine :initial => :pending do

@@ -110,3 +110,8 @@ lib/signal/images/data/output.tiff
 /config/credentials/development.key
 lib/telegram/tdlib/libtdjson.so
 app/.DS_Store
+
+/config/credentials/test.key
+
+/app/assets/builds/*
+!/app/assets/builds/.keep

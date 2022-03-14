@@ -10,6 +10,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:                 Field::Number.with_options(searchable: true),
     loggings:           Field::HasMany,
+    versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
     order:              Field::BelongsTo,
     account:            Field::BelongsTo,
     master:             Field::BelongsTo.with_options(class_name:'Transaction'),
@@ -59,6 +60,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket_slave
   master
   account
+  versions
   loggings
   state
   profit

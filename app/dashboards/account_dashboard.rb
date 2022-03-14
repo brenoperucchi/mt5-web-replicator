@@ -17,6 +17,7 @@ class AccountDashboard < Administrate::BaseDashboard
     transactions:         Field::HasMany,
     instruments:          Field::HasMany,
     store:                Field::BelongsTo,
+    customer:             Field::BelongsTo,
     magics_accept:        Field::String,
     instrument_control:   Field::Boolean,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -32,6 +33,7 @@ class AccountDashboard < Administrate::BaseDashboard
   name
   state
   kind
+  customer
   meta_mode
   meta_margin_mode
   traces
@@ -44,6 +46,7 @@ class AccountDashboard < Administrate::BaseDashboard
   name
   state
   kind
+  customer
   meta_mode
   meta_margin_mode
   magics_accept
@@ -63,6 +66,7 @@ class AccountDashboard < Administrate::BaseDashboard
   name
   state
   kind
+  customer
   meta_mode
   meta_margin_mode
   magics_accept

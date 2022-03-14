@@ -1,6 +1,9 @@
 <h1>Editing Client</h1>
 
-<%= render 'form', client: @client %>
+<%= form_with(model: @client, url:client_path(@client.id), method: :patch, local: true) do |form| %>
+	<% @form = form %>
+	<%= render 'form', locals:{form:@form, client: @client} %>
+<% end %>	
 
-<%= link_to 'Show', @client %> |
+<%= link_to 'Show', clients_path(@client.id) %> |
 <%= link_to 'Back', clients_path %>

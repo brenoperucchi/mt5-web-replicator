@@ -66,10 +66,10 @@ en:
         other: "Categories"
     attributes:
       client:
-        name: "Nammme"
+        name: "Name"
       store:
-        id: "Number"
-        name: "Estate"
+        id: "id"
+        name: "Name"
         tag_list: 'Restrict'
   date:
     abbr_day_names:

@@ -31,7 +31,7 @@ RSpec.describe API::V1::APITransactionsCopy do
   # let!(:trace) { FactoryBot.create(:trace, :first, store: store)}
   # let(:job_image_worker) { ImageWorker.new.perform.first }
   # let(:order) { FactoryBot.create(:order, :m15_trace) }
-  # let(:transaction) { FactoryBot.create(:transaction) }
+  # let(:transaction) { FactoryBot.create(:paramstransaction) }
 
   describe API::V1::APITransactionsCopy do
     context 'POST' do

@@ -8,6 +8,10 @@ Bundler.require(*Rails.groups)
 
 module Signalforex
   class Application < Rails::Application
+
+    config.action_mailer.default_url_options = { host: "imentore.com.br" }
+
+
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.0
     config.time_zone = 'Brasilia'

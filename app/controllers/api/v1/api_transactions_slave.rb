@@ -58,18 +58,23 @@ module API
                     slave.master.state = :executed
                   end
                   action == "CLOSED" ? slave.close : slave.deleted
+                  @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "MODIFY"
                   slave.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
+                  @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "OPENED"
                   api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
                   slave.attributes = api_attributes
                   slave.execute
+                  @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "NOSLTP","ERRORDEAL","TIMEMAX"
                   if action == "NOSLTP"
                     api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
+                    slave.attributes = api_attributes
+                    slave.save
                   else
                     api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
                     slave.erro
@@ -77,7 +82,7 @@ module API
                   # slave.update(api_attributes.merge(state:'error', profit:nil))
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
-                slave.loggings.create(content:message)
+                slave.loggings.create(content:message, changeset: @version.changeset, version:@version)
               end
             end
             content_type 'text/plain'
