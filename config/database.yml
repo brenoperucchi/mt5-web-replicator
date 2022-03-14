@@ -48,5 +48,5 @@ production:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: Rails.application.credentials[:secret_database]
+  password: CjGcKx7h56CoBdlM
   
