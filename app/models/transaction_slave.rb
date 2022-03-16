@@ -1,5 +1,8 @@
 class TransactionSlave < ApplicationRecord
 
+  ENUMS = %w(state)
+  include LibEnums
+
   StateMachine::Machine.ignore_method_conflicts = true
 
   has_paper_trail 

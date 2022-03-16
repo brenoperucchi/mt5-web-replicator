@@ -67,7 +67,6 @@ require "administrate/base_dashboard"
     magics_accept
     instrument_control
     traces
-    store
     ].freeze
 
     # COLLECTION_FILTERS

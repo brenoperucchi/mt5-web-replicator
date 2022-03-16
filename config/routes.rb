@@ -21,8 +21,12 @@ Rails.application.routes.draw do
   # mount Sidekiq::Web => '/sidekiq'
   mount API::Base, at: "/"
   namespace :control do
+    resources :customers
     resources :accounts
     resources :instruments
+    resources :invoices
+    resources :traces
+
   end
   namespace :admin do
     namespace :paper_trail do

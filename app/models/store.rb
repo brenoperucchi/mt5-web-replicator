@@ -1,5 +1,8 @@
 class Store < ApplicationRecord
 
+  ENUMS = %w(state)
+  include LibEnums
+
   store :settings, accessors: [:telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan]
   enum state: {disable:0, enable:1, deleted:2}
   
@@ -12,6 +15,7 @@ class Store < ApplicationRecord
   has_many :transactions, :through => :messages, :source => :transactions, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :customers, dependent: :destroy
+  has_many :invoices, :through => :customers, :source => :invoices
 
   validates_presence_of :plan, :on => :create
 

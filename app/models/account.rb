@@ -1,6 +1,9 @@
+require 'lib_enums'
 class Account < ApplicationRecord
+  ENUMS = %w(state kind meta_mode meta_margin_mode)
 
   include Balance::Base
+  include LibEnums
   
   after_create :insert_instruments
 
@@ -24,7 +27,6 @@ class Account < ApplicationRecord
   # has_many :transactions,  class_name: 'Transaction',      foreign_key: 'account_id'
   has_many :balances
   has_many :transactions, through: :balances, source: :deal
-
 
   def trace_copy
     traces.find_by(kind: :copy) if self.copy?
@@ -50,6 +52,5 @@ class Account < ApplicationRecord
       store.volume_default
     end
   end
-
 
 end

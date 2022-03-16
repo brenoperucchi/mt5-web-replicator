@@ -1,4 +1,7 @@
 class Invoice < ApplicationRecord
+
+  ENUMS = %w(state)
+  include LibEnums
   
   enum state: {pending: 0, paid: 1, denied:2}
   
