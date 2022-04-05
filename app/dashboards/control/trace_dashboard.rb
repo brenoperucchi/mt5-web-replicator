@@ -1,6 +1,7 @@
 require "administrate/base_dashboard"
+require 'traces_helper'
 
-class InvoiceDashboard < Administrate::BaseDashboard
+class Control::TraceDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,14 +9,26 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    state:                Field::String,
-    name:                 Field::String,
-    email:                Field::String,
-    amount:               Field::Number,
-    items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
-    invoiceable:          Field::Polymorphic,
-    created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    id:                  Field::Number,
+    name:                Field::String,
+    name_id:             Field::String,
+    telegram_option:     Field::String.with_options(searchable: false),
+    telegram_image:      Field::Boolean,
+    telegram_api_id:     Field::String.with_options(searchable: false),
+    telegram_api_hash:   Field::String.with_options(searchable: false),
+    telegram_api_number: Field::String.with_options(searchable: false),
+    active:              Field::Boolean,
+    created_at:          Field::DateTime,
+    updated_at:          Field::DateTime,
+    store:               Field::BelongsTo,
+    meta_host:           Field::String,
+    kind:                Field::String,
+    # volumes:           Field::ActsAsTaggable,
+    response:            Field::String,
+    messages:            Field::HasMany.with_options(direction: :desc),
+    take_profit_limit:   Field::Number,
+    instruments:         Field::HasMany,
+    accounts:            Field::HasMany
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -24,23 +37,30 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  state
+  id
+  active
   name
-  email
-  amount
-  items
-  invoiceable
+  store
+  kind
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  state
+  id
   name
-  email
-  amount
-  items
-  invoiceable
+  name_id
+  active
+  kind
+  take_profit_limit
+  telegram_option
+  telegram_image
+  telegram_api_id
+  telegram_api_hash
+  telegram_api_number
+  accounts
+  messages
+  instruments
   created_at
   updated_at
   ].freeze
@@ -49,10 +69,18 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  state
   name
-  email
-  amount
+  name_id
+  active
+  kind
+  store
+  take_profit_limit
+  telegram_option
+  telegram_image
+  telegram_api_id
+  telegram_api_hash
+  telegram_api_number
+  accounts
   ].freeze
 
   # COLLECTION_FILTERS

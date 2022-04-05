@@ -11,6 +11,9 @@ class StoreDashboard < Administrate::BaseDashboard
     id:     Field::Number,
     name:   Field::String,
     state:  Field::String,
+    plan:          Field::String,
+    plan_value:    Field::String,
+    plan_percent:  Field::String,
     volume_default:      Field::String,
     telegram_api_id:     Field::String,
     telegram_api_hash:   Field::String,
@@ -34,6 +37,7 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
+  plan
   tag_list
   ].freeze
 
@@ -43,6 +47,9 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
+  plan
+  plan_value
+  plan_percent
   tag_list
   volume_default
   telegram_api_id
@@ -62,6 +69,9 @@ class StoreDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   state
+  plan
+  plan_value
+  plan_percent
   tag_list
   volume_default
   telegram_api_id

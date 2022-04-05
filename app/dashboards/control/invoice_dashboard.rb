@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class InvoiceDashboard < Administrate::BaseDashboard
+class Control::InvoiceDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -12,7 +12,6 @@ class InvoiceDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     email:                Field::String,
     amount:               Field::Number,
-    items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
     invoiceable:          Field::Polymorphic,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -28,7 +27,6 @@ class InvoiceDashboard < Administrate::BaseDashboard
   name
   email
   amount
-  items
   invoiceable
   ].freeze
 
@@ -39,7 +37,6 @@ class InvoiceDashboard < Administrate::BaseDashboard
   name
   email
   amount
-  items
   invoiceable
   created_at
   updated_at

@@ -1,5 +1,5 @@
 module Admin
-  class TracesController < Admin::ApplicationController
+  class TracesController < Admin::BaseController
     # Overwrite any of the RESTful controller actions to implement custom behavior
     # For example, you may want to send an email after a foo is updated.
     #
@@ -28,35 +28,7 @@ module Admin
     #     resource_class.with_less_stuff
     #   end
     # end
-
-    def new_resource
-        Store.first.try(:traces).try(:new)
-    end
-
-    def create
-        resource = Store.first.try(:traces).try(:new, (resource_params))
-        authorize_resource(resource)
-
-        if resource.save
-          redirect_to(
-            [namespace, resource],
-            notice: translate_with_resource("create.success"),
-          )
-        else
-          render :new, locals: {
-            page: Administrate::Page::Form.new(dashboard, resource),
-          }
-        end
-    end
-
-    # def scoped_resource
-    #     Store.first.traces
-    # end
-
-    # def scope_resource
-    #     Store.first.traces
-    # end
-
+    
     # Override `resource_params` if you want to transform the submitted
     # data before it's persisted. For example, the following would turn all
     # empty values into nil values. It uses other APIs such as `resource_class`

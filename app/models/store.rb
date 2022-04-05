@@ -1,9 +1,9 @@
+require 'lib_enums'
 class Store < ApplicationRecord
-
   ENUMS = %w(state)
   include LibEnums
 
-  store :settings, accessors: [:telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan]
+  store :settings, accessors: [:telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan, :plan_value, :plan_percent]
   enum state: {disable:0, enable:1, deleted:2}
   
   acts_as_taggable_on :tags
@@ -18,6 +18,7 @@ class Store < ApplicationRecord
   has_many :invoices, :through => :customers, :source => :invoices
 
   validates_presence_of :plan, :on => :create
+  validates_presence_of :name
 
   accepts_nested_attributes_for :customers, :users
 

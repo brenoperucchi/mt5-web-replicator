@@ -40,7 +40,7 @@ class TraceDashboard < Administrate::BaseDashboard
   id
   active
   name
-  name_id
+  store
   kind
   ].freeze
 
@@ -73,6 +73,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name_id
   active
   kind
+  store
   take_profit_limit
   telegram_option
   telegram_image

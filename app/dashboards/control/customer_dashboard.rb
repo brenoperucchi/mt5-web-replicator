@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class InvoiceDashboard < Administrate::BaseDashboard
+class Control::CustomerDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,12 +8,13 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    state:                Field::String,
     name:                 Field::String,
-    email:                Field::String,
-    amount:               Field::Number,
-    items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
-    invoiceable:          Field::Polymorphic,
+    email:                DisableTextField,
+    role:                 DisableTextField.with_options(value:"customer"),
+    store_id:             DisableBelongsTo.with_options(attribute: :store),
+    users:                Field::HasMany,
+    accounts:             Field::HasMany,
+    invoices:             Field::HasMany,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -24,23 +25,21 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  state
   name
   email
-  amount
-  items
-  invoiceable
+  role
+  accounts
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  state
   name
-  email
-  amount
-  items
-  invoiceable
+  role
+  store_id
+  users
+  accounts
+  invoices
   created_at
   updated_at
   ].freeze
@@ -49,10 +48,12 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  state
   name
-  email
-  amount
+  role
+  store_id
+  users
+  accounts
+  invoices
   ].freeze
 
   # COLLECTION_FILTERS

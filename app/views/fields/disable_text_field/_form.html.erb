@@ -2,5 +2,6 @@
   <%= f.label field.attribute %>
 </div>
 <div class="field-unit__field">
-  <%= f.text_field field.attribute, disabled:true %>
+  <%= f.text_field field.attribute, value: field.default_value(f.object), disabled:true %>
+  <%= f.hidden_field field.attribute, value: field.default_value(f.object) %>
 </div>

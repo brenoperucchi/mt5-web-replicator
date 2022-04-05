@@ -10,6 +10,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
     email:                Field::String,
+    role:                 Field::String,
     store:                Field::BelongsTo,
     users:                Field::HasMany,
     accounts:             Field::HasMany,
@@ -26,6 +27,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   name
   email
+  role
   accounts
   users
   ].freeze
@@ -35,6 +37,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   name
   email
+  role
   store
   users
   accounts
@@ -49,6 +52,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   email
+  role
   store
   users
   accounts

@@ -1,10 +1,10 @@
+
 module Control
   class BaseController < Admin::ApplicationController
     
     def new_resource
       current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new)
     end
-
 
     def create
       resource = current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new, (resource_params))
@@ -21,6 +21,16 @@ module Control
         }, status: :unprocessable_entity
       end
     end
+
+    def dashboard
+      @dashboard ||= "#{namespace}::#{resource_name.to_s.classify}Dashboard".try(:classify).try(:constantize).try(:new)
+      # @dashboard ||= Control::AccountDashboard.new
+    end
+
+    def scoped_resource
+      current_user.store.send("#{resource_name}".pluralize)
+    end
+
 
   end
 end

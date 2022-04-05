@@ -5,12 +5,16 @@ class ApplicationController < ActionController::Base
 	# layout "application"
 
 	def after_sign_in_path_for(resource)
-		if resource.userable.role.downcase == "admin"	  
+		case resource.userable.role.try(:downcase)
+		when "admin"
 			admin_customers_path
-		else
+		when "customer"
 			control_accounts_path
-		end
-	  # user_path(current_user) # your path
+		else
+			flash[:notice] = "Login error role"
+			sign_out(resource)
+			new_user_session_path
+		end	  
 	end
 
 end

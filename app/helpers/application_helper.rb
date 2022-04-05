@@ -1,4 +1,20 @@
 module ApplicationHelper
+  include Rails.application.routes.url_helpers
+
+  def default_url_options
+     {host: Rails.application.routes.default_url_options[:host]}
+  end
+
+
+  def administrate_url_helper(path)
+    begin
+      polymorphic_path(path)
+      # Rails.application.routes.url_helpers.method_defined?(path)
+    rescue NoMethodError
+      nil
+    end
+  end
+
 	def show_svg(path)
 	 return "/images/#{path}"
 	  # File.open("#{Rails.root}/app/assets/images/#{path}", "rb") do |file|

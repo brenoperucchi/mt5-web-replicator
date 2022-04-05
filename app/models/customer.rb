@@ -21,11 +21,21 @@ class Customer < ApplicationRecord
 
   def create_invoice(name = nil)
     name = name.blank? ? Time.zone.now.strftime("%Y-%m") : name 
-    amount = self.accounts.slave.sum(&:balance_month)
-    invoices.find_or_create_by(name: name) do |invoice| 
-      invoice.amount = amount
-      invoice.email = email
+    invoice = invoices.find_or_create_by(name: name)
+    invoice.items.find_or_create_by(name: :monthly_payment) do |item|
+       item.amount = store.plan_value
     end
+    if store.plan_percent.present?
+      amount = self.accounts.slave.sum(&:balance_month)
+      invoice.items.find_or_create_by(name: :profit_percent,  amount: (amount.to_f * (store.plan_percent.to_f / 100))) 
+    end
+
+    invoice.balance_update
+
+    # invoices.find_or_create_by(name: name) do |invoice| 
+    #   # invoice.amount = amount
+    #   invoice.email = email
+    # end
   end
 
 

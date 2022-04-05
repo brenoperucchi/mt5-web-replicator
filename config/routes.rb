@@ -1,6 +1,7 @@
 # require 'sidekiq/web'
 Rails.application.routes.draw do
 
+  resources :invoice_items
   # post "create_checkout", to: "charge#checkout"
   post "webhook",         to: "charge#webhook"
   get "checkout",   as:'checkout_charge',      to: "charge#checkout"
@@ -33,7 +34,11 @@ Rails.application.routes.draw do
       resources :versions
     end
     resources :customers
-    resources :invoices
+    resources :invoices do
+       get :invoice_send, on: :member
+    end      
+   
+    resources :invoice_items
   	resources :transaction_slaves
     resources :transactions
     resources :loggings

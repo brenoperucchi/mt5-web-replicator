@@ -43,13 +43,13 @@ module Control
     # See https://administrate-prototype.herokuapp.com/customizing_controller_actions
     # for more information
 
-    def dashboard
-      @dashboard ||= Control::AccountDashboard.new
-    end
+    # def dashboard
+    #   @dashboard ||= Control::AccountDashboard.new
+    # end
 
-    def scoped_resource
-      current_user.store.accounts
-    end
+    # def scoped_resource
+    #   current_user.store.accounts
+    # end
 
   end
 end
