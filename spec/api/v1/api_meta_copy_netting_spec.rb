@@ -4,9 +4,11 @@ RSpec.describe API::V1::APITransactionsCopy do
   before(:context) do
     @store = create(:store)
     @trace = create(:trace, :copy, store: @store)
-    @account_slave = create(:account, :copy, store: @store)
-    @account1 = create(:account, :slave1, store: @store)
-    @account2 = create(:account, :slave2, store: @store)
+    @admin = create(:customer, :admin, store:@store)
+    @customer = create(:customer, :client, store:@store)
+    @account_copy = create(:account, :copy, store: @store, customer:@admin)
+    @account1 = create(:account, :slave1, store: @store, customer:@customer)
+    @account2 = create(:account, :slave2, store: @store, customer:@customer)
     @ticket_master = 10000001
     
     post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 

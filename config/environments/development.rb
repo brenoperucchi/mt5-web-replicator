@@ -73,5 +73,8 @@ Rails.application.configure do
 
   # Uncomment if you wish to allow Action Cable access from any origin.
   # config.action_cable.disable_request_forgery_protection = true
-  config.web_console.whitelisted_ips = '192.168.1.0/255.255.255.0'
+  # config.web_console.whitelisted_ips = ['192.168.1.0/192.168.1.255', '127.0.0.0/127.255.255.255']
+  config.web_console.whitelisted_ips =  '0.0.0.0/0.0.0.0'
+
+  config.hosts << "benincasouza.tplinkdns.com"
 end

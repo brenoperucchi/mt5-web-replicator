@@ -3,7 +3,10 @@ class Store < ApplicationRecord
   ENUMS = %w(state)
   include LibEnums
 
-  store :settings, accessors: [:telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan, :plan_value, :plan_percent]
+  store :settings, accessors: [
+                                :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan, :plan_value, :plan_percent, 
+                                :stripe_webhook_secret, :stripe_api_secret
+                              ]
   enum state: {disable:0, enable:1, deleted:2}
   
   acts_as_taggable_on :tags

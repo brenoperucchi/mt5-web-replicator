@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class StoreDashboard < Administrate::BaseDashboard
+class Control::StoreDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,26 +8,18 @@ class StoreDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:     Field::Number,
-    name:   Field::String,
-    state:  Field::String,
+    id:            Field::Number,
+    name:          Field::String,
+    state:         Field::String,
     plan:          Field::String,
     plan_value:    Field::String,
     plan_percent:  Field::String,
-    volume_default:      Field::String,
-    telegram_api_id:     Field::String,
-    telegram_api_hash:   Field::String,
-    telegram_api_number: Field::String,
-    stripe_webhook_secret: Field::String,
-    stripe_api_secret:     Field::String,
-    accounts:   Field::HasMany,
-    traces:     Field::HasMany,
-    customers:  Field::HasMany,
-    users:      Field::HasMany,
-    traces:     Field::HasMany,
-    tag_list:   Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    volume_default:         Field::String,
+    stripe_webhook_secret:  Field::String,
+    stripe_api_secret:      Field::String,
+    tag_list:               Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
+    created_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -45,27 +37,7 @@ class StoreDashboard < Administrate::BaseDashboard
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
-  SHOW_PAGE_ATTRIBUTES = %i[
-  id
-  name
-  state
-  plan
-  plan_value
-  plan_percent
-  tag_list
-  volume_default
-  stripe_api_secret
-  stripe_webhook_secret
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
-  accounts
-  traces
-  customers
-  users
-  created_at
-  updated_at
-  ].freeze
+  SHOW_PAGE_ATTRIBUTES = ATTRIBUTE_TYPES.keys.freeze
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed

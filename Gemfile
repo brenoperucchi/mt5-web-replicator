@@ -83,6 +83,8 @@ gem 'slim'
 gem "administrate"
 gem 'administrate-field-image'
 gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
+gem "administrate-field-nested_has_many"
+
 
 # gem 'ocr_space', path: "vendor/ocr_space"
 gem 'rtesseract'  

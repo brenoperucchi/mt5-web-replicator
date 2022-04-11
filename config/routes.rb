@@ -3,9 +3,9 @@ Rails.application.routes.draw do
 
   resources :invoice_items
   # post "create_checkout", to: "charge#checkout"
+  # get "checkout",       to: "charge#index"
   post "webhook",         to: "charge#webhook"
-  get "checkout",   as:'checkout_charge',      to: "charge#checkout"
-  # get "checkout",         to: "charge#index"
+  get "checkout",         as:'checkout_charge',      to: "charge#checkout"
   
   # get "checkout", to: "pay#checkout"
   get "subscription", to: "pay#subscription"
@@ -22,11 +22,13 @@ Rails.application.routes.draw do
   # mount Sidekiq::Web => '/sidekiq'
   mount API::Base, at: "/"
   namespace :control do
+    resources :transactions
     resources :customers
     resources :accounts
+    resources :traces
     resources :instruments
     resources :invoices
-    resources :traces
+    resources :stores
 
   end
   namespace :admin do

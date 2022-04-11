@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_22_032930) do
+ActiveRecord::Schema.define(version: 2022_04_08_030545) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,6 +119,9 @@ ActiveRecord::Schema.define(version: 2022_03_22_032930) do
     t.text "settings"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "stripe_product_id"
+    t.string "stripe_customer_id"
+    t.string "stripe_invoice_id"
     t.index ["invoiceable_type", "invoiceable_id"], name: "index_invoices_on_invoiceable"
   end
 

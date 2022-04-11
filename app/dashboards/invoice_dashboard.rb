@@ -8,10 +8,16 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    state:                Field::String,
+    id:                   Field::Number,
+    state:                DisableTextField,
     name:                 Field::String,
-    email:                Field::String,
+    email:                DisableTextField,
+    payment_link:         Field::String,
+    stripe_product_id:    Field::String,  
+    stripe_customer_id:   Field::String,  
+    stripe_invoice_id:    Field::String,  
     amount:               Field::Number,
+    # items:                Field::NestedHasMany.with_options(class_name: 'InvoiceItem'),
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
     invoiceable:          Field::Polymorphic,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -24,8 +30,8 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  state
   name
+  state
   email
   amount
   items
@@ -35,9 +41,14 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  state
+  id
   name
+  state
   email
+  payment_link
+  stripe_product_id
+  stripe_customer_id
+  stripe_invoice_id
   amount
   items
   invoiceable
@@ -49,9 +60,11 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  state
   name
+  state
+  items
   email
+  stripe_invoice_id
   amount
   ].freeze
 

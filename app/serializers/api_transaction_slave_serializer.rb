@@ -79,7 +79,7 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
   # end
 
   def open_at
-    Time.zone.at(obj['open_at'].try(:to_i))
+    Time.zone.at(obj['open_at'].try(:to_i)).in_time_zone(obj['timezone']).to_datetime.change(:offset => Time.zone.formatted_offset)
   end
 
 end

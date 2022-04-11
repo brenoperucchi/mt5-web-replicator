@@ -1,5 +1,5 @@
-module Admin
-  class InvoicesController < Admin::BaseController
+module Control
+  class Control::StoresController < Control::BaseController
     # Overwrite any of the RESTful controller actions to implement custom behavior
     # For example, you may want to send an email after a foo is updated.
     #
@@ -43,13 +43,12 @@ module Admin
     # See https://administrate-prototype.herokuapp.com/customizing_controller_actions
     # for more information
 
-    def invoice_send
-      if requested_resource.invoice_send
-        redirect_to admin_invoices_path, :notice => "Invoice Sended!"
-      else
-        redirect_to admin_invoices_path, :alert => "Invoice Not Sended!"
-      end
+    def dashboard
+      @dashboard ||= Control::StoreDashboard.new
+    end
 
+    def scoped_resource
+      Store.where(id:current_user.store)
     end
 
   end

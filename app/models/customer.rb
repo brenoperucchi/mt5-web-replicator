@@ -2,7 +2,7 @@ class Customer < ApplicationRecord
 
   attr_writer :email
 
-  store :settings, accessors: [:role]
+  store :settings, accessors: [:role, :stripe_product_id, :stripe_customer_id]
   
   belongs_to :store
   has_many :users, as: :userable#, dependent: :destroy
@@ -20,7 +20,7 @@ class Customer < ApplicationRecord
   end
 
   def create_invoice(name = nil)
-    name = name.blank? ? Time.zone.now.strftime("%Y-%m") : name 
+    name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
     invoice = invoices.find_or_create_by(name: name)
     invoice.items.find_or_create_by(name: :monthly_payment) do |item|
        item.amount = store.plan_value

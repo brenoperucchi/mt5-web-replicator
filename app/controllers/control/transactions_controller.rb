@@ -1,5 +1,5 @@
-module Admin
-  class InvoicesController < Admin::BaseController
+module Control
+  class TransactionsController < Control::BaseController
     # Overwrite any of the RESTful controller actions to implement custom behavior
     # For example, you may want to send an email after a foo is updated.
     #
@@ -29,6 +29,11 @@ module Admin
     #   end
     # end
 
+
+    # def new_resource
+    #   current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new, ({role:'customer', user_ids:current_user.id}))
+    # end
+
     # Override `resource_params` if you want to transform the submitted
     # data before it's persisted. For example, the following would turn all
     # empty values into nil values. It uses other APIs such as `resource_class`
@@ -42,15 +47,6 @@ module Admin
 
     # See https://administrate-prototype.herokuapp.com/customizing_controller_actions
     # for more information
-
-    def invoice_send
-      if requested_resource.invoice_send
-        redirect_to admin_invoices_path, :notice => "Invoice Sended!"
-      else
-        redirect_to admin_invoices_path, :alert => "Invoice Not Sended!"
-      end
-
-    end
 
   end
 end

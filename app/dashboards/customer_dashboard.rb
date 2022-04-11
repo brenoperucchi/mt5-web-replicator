@@ -10,6 +10,8 @@ class CustomerDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
     email:                Field::String,
+    stripe_customer_id:                Field::String,
+    stripe_product_id:                Field::String,
     role:                 Field::String,
     store:                Field::BelongsTo,
     users:                Field::HasMany,
@@ -38,6 +40,8 @@ class CustomerDashboard < Administrate::BaseDashboard
   name
   email
   role
+  stripe_customer_id
+  stripe_product_id
   store
   users
   accounts
@@ -53,6 +57,8 @@ class CustomerDashboard < Administrate::BaseDashboard
   name
   email
   role
+  stripe_customer_id
+  stripe_product_id
   store
   users
   accounts

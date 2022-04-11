@@ -7,7 +7,7 @@ class DisableTextField < Administrate::Field::Base
   end
 
   def default_value(obj)
-    options[:value]
+    options[:value] || obj.send(attribute)
   end
 
 end

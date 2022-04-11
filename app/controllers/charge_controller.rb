@@ -1,6 +1,6 @@
 class ChargeController < ApplicationController
 	layout 'stripe'
-
+	skip_before_action :verify_authenticity_token, only: [:webhook]
 	# before_action :authenticate_user!#, :find_model
 
 
@@ -36,44 +36,97 @@ class ChargeController < ApplicationController
 	end
 
 	def webhook
-	  # You can use webhooks to receive information about asynchronous payment events.
-	  # For more about our webhook events check out https://stripe.com/docs/webhooks.
-	  webhook_secret = 'rk_test_51KXd9MFpK6wHohcRASCcxzUYVAg4PHnPHpJaxgTbbvNfS909qekZTYvviayeK7xX1FDmWwyFpQVCLDZRQkn7Ljjo00pHYE2iuZ'
-	  payload = request.body.read
-	  if !webhook_secret.empty?
-	    # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
-	    sig_header = request.env['HTTP_STRIPE_SIGNATURE']
-	    event = nil
+		invoice = Invoice.find_by(stripe_invoice_id: params[:data][:object][:id])
+		endpoint_secret = invoice.try(:invoiceable).try(:store).try(:stripe_webhook_secret)
+		if endpoint_secret
+			payload = request.body.read
+			  event = nil
+		  begin
+		    event = Stripe::Event.construct_from(
+		      JSON.parse(payload, symbolize_names: true)
+		    )
+		  rescue JSON::ParserError => e
+		    # Invalid payload
+		    puts "⚠️  Webhook error while parsing basic request. #{e.message})"
+		    head 400
+		  end
+		  # Check if webhook signing is configured.
+		  if endpoint_secret
+		    # Retrieve the event by verifying the signature using the raw body and secret.
+		    signature = request.env['HTTP_STRIPE_SIGNATURE'];
+		    begin
+		      event = Stripe::Webhook.construct_event(
+		        payload, signature, endpoint_secret
+		      )
+		    rescue Stripe::SignatureVerificationError => e
+		      puts "⚠️  Webhook signature verification failed. #{e.message})"
+		      head 400
+		    end
+		  end
 
-	    begin
-	      event = Stripe::Webhook.construct_event(
-	        payload, sig_header, webhook_secret
-	      )
-	    rescue JSON::ParserError => e
-	      # Invalid payload
-	      status 400
-	      return
-	    rescue Stripe::SignatureVerificationError => e
-	      # Invalid signature
-	      puts '⚠️  Webhook signature verification failed.'
-	      status 400
-	      return
-	    end
-	  else
-	    data = JSON.parse(payload, symbolize_names: true)
-	    event = Stripe::Event.construct_from(data)
-	  end
-	  # Get the type of webhook event sent - used to check the status of PaymentIntents.
-	  event_type = event['type']
-	  data = event['data']
-	  data_object = data['object']
+		  # Handle the event
+		  case event.type
+		  when 'invoice.payment_failed'
+		    # invoice = event.data.object # contains a Stripe::Invoice
+		    # Then define and call a method to handle the failed payment of an Invoice.
+		    # handle_failed_invoice(invoice);
+		  when 'invoice.finalized'
+		  	invoice.update(state: 'open')
+		  when 'payment_intent.succeeded'
+		      payment_intent = event.data.object
+		  		puts "🔔  Payment succeeded! (#{payment_intent.id}) - #{payment_intent.status}"
+		  when 'invoice.payment_succeeded'
+		  	invoice.update(state: 'paid')
+		  else
+		    puts "Unhandled event type: #{event.type}"
+		  end
+		  head 200
+		
 
-	  puts '🔔  Payment succeeded!' if event_type == 'checkout.session.completed'
+		else
+			puts "⚠️  Not find stripe invoice id: #{params[:data][:object][:id]})"
+			head 400
+		end
 
-	  content_type 'application/json'
-	  {
-	    status: 'success'
-	  }.to_json
+
+	#   # You can use webhooks to receive information about asynchronous payment events.
+	#   # For more about our webhook events check out https://stripe.com/docs/webhooks.
+	#   webhook_secret = 'rk_test_51KXd9MFpK6wHohcRASCcxzUYVAg4PHnPHpJaxgTbbvNfS909qekZTYvviayeK7xX1FDmWwyFpQVCLDZRQkn7Ljjo00pHYE2iuZ'
+	#   payload = request.body.read
+	#   if !webhook_secret.empty?
+	#     # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
+	#     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
+	#     event = nil
+
+	#     begin
+	#       event = Stripe::Webhook.construct_event(
+	#         payload, sig_header, webhook_secret
+	#       )
+	#     rescue JSON::ParserError => e
+	#       # Invalid payload
+	#       status 400
+	#       return
+	#     rescue Stripe::SignatureVerificationError => e
+	#       # Invalid signature
+	#       puts '⚠️  Webhook signature verification failed.'
+	#       status 400
+	#       return
+	#     end
+	#   else
+	#     data = JSON.parse(payload, symbolize_names: true)
+	#     event = Stripe::Event.construct_from(data)
+	#   end
+	#   # Get the type of webhook event sent - used to check the status of PaymentIntents.
+	#   event_type = event['type']
+	#   data = event['data']
+	#   data_object = data['object']
+
+	#   puts '🔔  Payment succeeded!' if event_type == 'checkout.session.completed'
+
+	#   content_type 'application/json'
+	#   {
+	#     status: 'success'
+	#   }.to_json
 	end
 
 end

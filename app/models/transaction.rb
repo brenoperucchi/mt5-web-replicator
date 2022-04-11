@@ -8,7 +8,7 @@ class Transaction < ApplicationRecord
   has_many :loggings, as: :loggerable, dependent: :destroy
   has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
 
-  has_many :balances
+  has_many :balances, :foreign_key => "deal_id"
   has_many :accounts, through: :balances, source: :account
 
 
