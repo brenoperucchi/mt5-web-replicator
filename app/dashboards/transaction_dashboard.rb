@@ -16,6 +16,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     symbol:             Field::String,
     price_request:      Field::String,
     price_open:         Field::String,
+    price_closed:       Field::String,
     stop_loss:          Field::String,
     take_profit:        Field::String,
     comment:            Field::String,
@@ -62,6 +63,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   symbol
   price_request
   price_open
+  price_closed
   stop_loss
   take_profit
   comment
@@ -91,6 +93,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   symbol
   price_request
   price_open
+  price_closed
   stop_loss
   take_profit
   comment

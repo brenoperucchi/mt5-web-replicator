@@ -19,6 +19,7 @@ class Store < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :customers, dependent: :destroy
   has_many :invoices, :through => :customers, :source => :invoices
+  has_many :instruments, :through => :accounts, :source => :instruments
 
   validates_presence_of :plan, :on => :create
   validates_presence_of :name

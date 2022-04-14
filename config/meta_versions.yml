@@ -4,14 +4,17 @@ signal_slave:
   '1_55': disable
   '1_56': disable
   '1_57': disable
-  '1_58': OK
-  '1_59': OK
+  '1_58': disable
+  '1_59': disable
+  '1_60': OK
   disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_copy:
   '1_30': disable
   '1_31': disable
   '1_32': disable
-  '1_33': OK
-  '1_34': OK
-  '1_35': OK
+  '1_33': disable
+  '1_34': disable
+  '1_35': disable
+  '1_36': disable
+  '1_37': OK
   disable_msg: 'A versao |version| do SignalCopy esta desabilitado em nosso sistema. Atualize seu expert. '

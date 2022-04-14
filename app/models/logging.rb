@@ -9,7 +9,11 @@ class Logging < ApplicationRecord
   def state
     klass_name = loggerable.class.name.to_s
     if klass_name.include?("Transaction")
-      YAML.load(content)["action"]
+      if eval(content)[:body].nil?
+        eval(content)[:action]
+      else
+        eval(content)[:body][:action]
+      end
     elsif klass_name.include?('Account')
       "COPY"
     end

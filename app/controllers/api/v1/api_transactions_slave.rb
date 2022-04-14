@@ -70,6 +70,10 @@ module API
                   slave.execute
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
+                when "NOTFIND"
+                  slave.erro
+                  # binding.pry
+                  @version = slave.versions.last
                 when "NOSLTP","ERRORDEAL","TIMEMAX"
                   if action == "NOSLTP"
                     api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
@@ -80,8 +84,11 @@ module API
                     slave.erro
                   end
                   # slave.update(api_attributes.merge(state:'error', profit:nil))
+                  @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
+                logging_content = nil
+                # logging_content = {body:eval(params[:body]), meta_info:params.except(:body)}
                 slave.loggings.create(content:message, changeset: @version.changeset, version:@version)
               end
             end

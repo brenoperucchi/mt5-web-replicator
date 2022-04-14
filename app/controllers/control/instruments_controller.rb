@@ -44,11 +44,11 @@ module Control
     # for more information
 
     def dashboard
-      @dashboard ||= Control::TraceDashboard.new
+      @dashboard ||= Control::InstrumentDashboard.new
     end
 
     def scoped_resource
-      current_user.store.traces
+      current_user.store.instruments
     end
 
   end

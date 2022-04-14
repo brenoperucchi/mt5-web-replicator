@@ -21,37 +21,45 @@ module API
         # end
 
         desc "Receive Transaction"
-        post "/copy/trasmit/:expert_name/:expert_version/:account_id/:account_mode" do
-          map = String.new
-          # orders = params[:orders]
-          account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
-          if account
-            account.loggings.create(content:params)
-            trace = account.try(:trace_copy)
-
-            if account.magics_accept.blank?
-              magic_number = true
-            else
-              magic_number = account.magics_accept.try(:split).try(:include?, content['magic_number'])
-            end
-
-            if magic_number and trace #and not content.blank? and content.is_a?(Hash)
-              # epoch_time = content['open_at'].split(".").first.to_i
-              # d = Time.at(epoch_time).utc.to_datetime
-              # content_at = Time.new(d.year, d.month, d.day,d.hour,d.minute,d.second, "-03:00").to_datetime
-              # create(content: params, content_id: comment, content_at: content_at, store: trace.store)
-              orders = {orders:[]}
-              params['orders'].split("//").each do |order| 
-                orders[:orders] << [YAML.load(order)]
-              end
-              orders[:params] = params.except('orders')
-              message = Message::Metatrader.create(content: orders.to_json, content_at: Time.zone.now, store: trace.store, trace:trace)
-              message.prepare
-              message.execute
-            end
-          end
+        post "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
           content_type 'text/plain'
-          body map
+          action = params[:action]
+          if action == "closed"
+            parameters = eval(params[:body])
+            Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], comment: "master_profit=>#{parameters[:profit]}")
+            body "OK"
+          elsif action == "orders"    
+            # orders = params[:orders]
+            account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
+            if account
+              account.loggings.create(content:params)
+              trace = account.try(:trace_copy)
+
+              if account.magics_accept.blank?
+                magic_number = true
+              else
+                magic_number = account.magics_accept.try(:split).try(:include?, content['magic_number'])
+              end
+
+              if magic_number and trace #and not content.blank? and content.is_a?(Hash)
+                # epoch_time = content['open_at'].split(".").first.to_i
+                # d = Time.at(epoch_time).utc.to_datetime
+                # content_at = Time.new(d.year, d.month, d.day,d.hour,d.minute,d.second, "-03:00").to_datetime
+                # create(content: params, content_id: comment, content_at: content_at, store: trace.store)
+                orders = {orders:[]}
+                params['orders'].split("//").each do |order| 
+                  orders[:orders] << [YAML.load(order)]
+                end
+                orders[:params] = params.except('orders')
+                message = Message::Metatrader.create(content: orders.to_json, content_at: Time.zone.now, store: trace.store, trace:trace)
+                message.prepare
+                message.execute
+              end
+              body "OK"
+            end
+          else
+            body "OK"
+          end
         end
 
         #   map = String.new

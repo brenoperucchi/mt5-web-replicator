@@ -7,7 +7,12 @@ class DisableBelongsTo <Administrate::Field::Base
   end
 
   def default_value(obj, attr)
-    obj.send(options[:attribute]).try(attr)
+    case options[:type]
+    when 'has_many'
+      obj.send(options[:attribute]).try(options[:association]).map(&attr).join(', ')
+    else
+      obj.send(options[:attribute]).try(attr)
+    end
   end 
 
 end

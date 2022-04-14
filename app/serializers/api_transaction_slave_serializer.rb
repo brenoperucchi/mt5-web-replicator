@@ -39,7 +39,7 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
   end
 
   def price_open
-    obj['price']
+    obj['open_price']
   end
 
   def magic_number
@@ -79,7 +79,9 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
   # end
 
   def open_at
-    Time.zone.at(obj['open_at'].try(:to_i)).in_time_zone(obj['timezone']).to_datetime.change(:offset => Time.zone.formatted_offset)
+    if obj['action'] == "OPENED"
+      Time.zone.at(obj['open_at'].try(:to_i)).in_time_zone(obj['timezone']).to_datetime.change(:offset => Time.zone.formatted_offset)
+    end
   end
 
 end

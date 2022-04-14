@@ -52,11 +52,6 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   volume_default
   stripe_api_secret
   stripe_webhook_secret
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
-  accounts
-  traces
   ].freeze
 
   # COLLECTION_FILTERS

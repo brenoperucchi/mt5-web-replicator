@@ -27,7 +27,7 @@ class APITransactionSerializer < ActiveModel::Serializer
   end
 
   def price_open
-    obj['price']
+    obj['open_price']
   end
 
   def magic_number

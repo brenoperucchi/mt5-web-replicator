@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class Control::CustomerDashboard < Administrate::BaseDashboard
+class Control::InstrumentDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,15 +8,14 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    name:                 Field::String,
-    email:                DisableTextField,
-    role:                 DisableTextField.with_options(value:"customer"),
-    store_id:             DisableBelongsTo.with_options(attribute: :store),
-    users:                Field::HasMany,
-    accounts:             DisableBelongsTo.with_options(type: 'has_many', association: :accounts, attribute: :store),
-    invoices:             DisableBelongsTo.with_options(type: 'has_many', association: :invoices, attribute: :store),
-    created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    trace: Field::BelongsTo,
+    account: FieldAssociation.with_options(type: 'belongs_to'),
+    id: Field::Number,
+    symbol: Field::String,
+    name: Field::String,
+    volumes: Field::String.with_options(searchable: false),
+    created_at: Field::DateTime,
+    updated_at: Field::DateTime,
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -25,20 +24,20 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
+  account
+  id
+  symbol
   name
-  email
-  role
-  accounts
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
+  account
+  id
+  symbol
   name
-  role
-  store_id
-  accounts
-  invoices
+  volumes
   created_at
   updated_at
   ].freeze
@@ -47,11 +46,10 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  account
+  symbol
   name
-  role
-  store_id
-  accounts
-  invoices
+  volumes
   ].freeze
 
   # COLLECTION_FILTERS
@@ -66,14 +64,10 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how signs are displayed
+  # Overwrite this method to customize how instruments are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(sign)
-  #   "Sign ##{sign.id}"
+  # def display_resource(instrument)
+  #   "Instrument ##{instrument.id}"
   # end
-
-   def display_resource(resource)
-    resource.name
-  end
 end

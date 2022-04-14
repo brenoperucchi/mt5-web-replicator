@@ -38,9 +38,9 @@ class TransactionSlave < ApplicationRecord
 
 
   state_machine :initial => :pending do
-    after_transition [:remove,  :executed]   => :closed, :do => :update_state
-    after_transition [:pending, :executed]   => :erro,   :do => :update_state
-    after_transition [:pending]              => :remove, :do => :delete_pending
+    after_transition [:remove,  :executed]            => :closed, :do => :update_state
+    after_transition [:pending]                       => :remove, :do => :delete_pending
+    after_transition [:pending, :remove, :executed]   => :error,   :do => :update_state
 
     event :execute do
       transition :pending => :executed
@@ -81,16 +81,17 @@ class TransactionSlave < ApplicationRecord
       end
     end
    
-    state :erro do
+    state :error do
       def update_state(state)
-        if master.trace.copy? 
+        # if master.trace.copy? 
           if account.hedging?
             master.erro
           elsif master.slaves.not_error.not_closed.count == 0
             master.erro
           end
-        end
+        # end
       end
+    
     end
   end
 
@@ -101,7 +102,7 @@ class TransactionSlave < ApplicationRecord
 
   def api_request_attributes
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
-    seconds_ago = (self.open_at - Time.zone.now).to_i.abs
+    seconds_ago = (self.master.open_at - Time.zone.now).to_i.abs
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{master.trace.id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
