@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class AccountDashboard < Administrate::BaseDashboard
+class PageDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,18 +8,11 @@ class AccountDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    name:                 Field::String,
     state:                Field::String,
-    kind:                 Field::String,
-    meta_mode:            Field::String,
-    meta_margin_mode:     Field::String,
-    traces:               Field::HasMany,
-    transactions:         Field::HasMany,
-    instruments:          Field::HasMany,
-    store:                Field::BelongsTo,
-    customer:             Field::BelongsTo,
-    magics_accept:        Field::String.with_options(searchable: false),
-    instrument_control:   Field::Boolean,
+    name:                 Field::String,
+    email:                Field::String,
+    amount:               Field::Number,
+    invoiceable:          Field::Polymorphic,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -30,31 +23,21 @@ class AccountDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  name
   state
-  kind
-  customer
-  meta_mode
-  meta_margin_mode
-  traces
-  transactions
+  name
+  email
+  amount
+  invoiceable
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  name
   state
-  kind
-  customer
-  meta_mode
-  meta_margin_mode
-  magics_accept
-  instrument_control
-  traces
-  store
-  transactions
-  instruments
+  name
+  email
+  amount
+  invoiceable
   created_at
   updated_at
   ].freeze
@@ -63,16 +46,10 @@ class AccountDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  name
   state
-  kind
-  customer
-  meta_mode
-  meta_margin_mode
-  magics_accept
-  instrument_control
-  traces
-  store
+  name
+  email
+  amount
   ].freeze
 
   # COLLECTION_FILTERS

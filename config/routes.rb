@@ -13,7 +13,7 @@ Rails.application.routes.draw do
 
   resources :customers
   resources :stores
-  get 'pages/index'
+  resources :pages, only: [:index]
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations'
@@ -29,7 +29,6 @@ Rails.application.routes.draw do
     resources :traces
     resources :transactions
     resources :invoices
-
   end
   namespace :admin do
     namespace :paper_trail do

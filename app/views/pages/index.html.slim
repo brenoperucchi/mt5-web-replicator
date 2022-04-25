@@ -1,57 +1,177 @@
-section.section
-  .row
-    - @traces.each do |trace|                   
-      .col-lg-4.col-md-4.col-sm-12
-        .card.card-statistic-2
-          .card-stats
-            .card-stats-title
-              | Robo Transações 
-            .card-stats-items
-              .card-stats-item
-                .card-stats-item-count 
-                  | $
-                  '
-                  = trace.transactions.closed.sum(:profit)
-                .card-stats-item-label $ fechadas
-              .card-stats-item
-                .card-stats-item-count = trace.transactions.closed.count
-                .card-stats-item-label Nº fechadas
-              .card-stats-item
-                .card-stats-item-count = trace.transactions.executed.count
-                .card-stats-item-label Nº abertas
-          .card-icon.shadow-primary.bg-primary
-            i.fas.fa-archive
-          .card-wrap
-            .card-header
-            .card-body
-              = trace.name
+- @traces.each do |trace|                   
+  .flex.flex-col.col-span-full.sm:col-span-6.xl:col-span-4.bg-white.shadow-lg.rounded-sm.border.border-slate-200
+    header.px-5.py-4.border-b.border-slate-100
+      h2.font-semibold.text-slate-800 = trace.name
+    /! Card content
+    .flex.flex-col.h-full
+      /! Live visitors number
+      / .px-5.py-2
+      /   .text-2xl.text-slate-800 Agora
+      / .px-5.py-1
+      /   .flex.items-center
+      /     /! Red dot
+      /     / .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 
+      /     /   .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
+      /     /! Vistors number
+      /     div
+      /       .text-2xl.font-bold.text-blue-500 = "R$ #{trace.transactions.executed.sum(:profit)}"
+      /       .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
+      / .px-5.py-1
+      /   .flex.items-center
+      /     div
+      /       .text-sm.text-slate-800.pt-1      
+      /         = "Compra #{trace.transactions.executed.buy.count}"
+      / .px-5.py-1
+      /   .flex.items-center
+      /     div
+      /       .text-sm.text-slate-800.pt-1      
+      /         = "Venda #{trace.transactions.executed.sell.count}"
 
-  .row
-    .col-md-12
-      .card
-        .card-header
-          h4 Invoices
-          .card-header-action
-            a.btn.btn-danger href="#" 
-              | View More
-              i.fas.fa-chevron-right
-        .card-body.p-0
-          .table-responsive.table-invoice
-            table.table.table-striped
+      /! Chart built with Chart.js 3
+      /! Check out src/js/components/analytics-card-02.js for config
+        / div
+        /   /! Change the height attribute to adjust the chart height
+        /   canvas#analytics-card-02 height="70" width="389" 
+      /! Table
+      .grow.px-5.pt-0.pb-0
+        .overflow-x-auto
+          table.table-auto.w-full
+            /! Table header
+            thead.text-xs.text-slate-800
               tr
-                th Invoice ID
-                th Symbol
-                th Status
-                th Created Date
-                th Action
-              - @executed.each do |transaction| 
-                tr
-                  td
-                    a href="#"  
-                    = transaction.id
-                  td.font-weight-600 = transaction.symbol
-                  td
-                    .badge.badge-warning = transaction.state
-                  td = transaction.created_at
-                  td
-                    a.btn.btn-primary href="#"  Detail
+                th.text-2xl.text-slate-800.text-left.py-2 Agora
+                th.text-2xl.text-slate-800.text-right.py-2 Período
+            /! Table body
+            tbody.text-sm.divide-y.divide-slate-100
+              /! Row
+              tr
+                td.text-3xl.font-bold.text-blue-500
+                  = "R$ #{trace.transactions.executed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
+                td.text-3xl.font-bold.text-blue-500.text-right
+                  = "R$ #{trace.transactions.executed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
+              tr
+                td.text-3xl.font-bold.text-blue-500
+                  = "#{trace.transactions.executed.sum(:profit)} %"
+                  .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
+                td.text-3xl.font-bold.text-blue-500.text-right
+                  = "#{trace.transactions.executed.sum(:profit)} %"
+                  .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
+              tr
+                td.text-3xl.font-bold.text-blue-500
+                  = "#{trace.transactions.executed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Payoff"
+                td.text-3xl.font-bold.text-blue-500.text-right
+                  = "#{trace.transactions.executed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Payoff"
+              tr
+                td.py-2
+                  .font-medium.text-left.text-slate-800 
+                    | Venda
+                    '
+                    = trace.transactions.executed.buy.count
+                td.py-2
+                  .font-medium.text-right.text-slate-800 
+                    | Venda
+                    '
+                    = trace.transactions.executed.buy.count
+              /! Row
+              tr
+                td.py-2
+                  .font-medium.text-left.text-slate-800 
+                    | Venda
+                    '
+                    = trace.transactions.executed.sell.count
+                td.py-2
+                  .font-medium.text-right.text-slate-800 
+                    | Venda
+                    '
+                    = trace.transactions.executed.sell.count
+              tr
+                td.py-2
+                  .font-medium.text-left.text-slate-800 
+                    | Gain
+                    '
+                    = trace.transactions.executed.sell.count
+                td.py-2
+                  .font-medium.text-right.text-slate-800 
+                    | Gain
+                    '
+                    = trace.transactions.executed.sell.count
+              tr
+                td.py-2
+                  .font-medium.text-left.text-slate-800 
+                    | Loss
+                    '
+                    = trace.transactions.executed.sell.count
+
+                td.py-2
+                  .font-medium.text-right.text-slate-800 
+                    | Loss
+                    '
+                    = trace.transactions.executed.sell.count
+
+                    
+
+      / /! Card footer
+      / .text-right.px-5.pb-4
+      /   a.text-sm.font-medium.text-indigo-500.hover:text-indigo-600 href="#0"  Real-Time Report -&gt;
+
+/ section.section
+/   .row
+/     - @traces.each do |trace|                   
+/       .col-lg-4.col-md-4.col-sm-12
+/         .card.card-statistic-2
+/           .card-stats
+/             .card-stats-title
+/               | Robo Transações 
+/             .card-stats-items
+/               .card-stats-item
+/                 .card-stats-item-count 
+/                   | $
+/                   '
+/                   = trace.transactions.closed.sum(:profit)
+/                 .card-stats-item-label $ fechadas
+/               .card-stats-item
+/                 .card-stats-item-count = trace.transactions.closed.count
+/                 .card-stats-item-label Nº fechadas
+/               .card-stats-item
+/                 .card-stats-item-count = trace.transactions.executed.count
+/                 .card-stats-item-label Nº abertas
+/           .card-icon.shadow-primary.bg-primary
+/             i.fas.fa-archive
+/           .card-wrap
+/             .card-header
+/             .card-body
+/               = trace.name
+
+/   .row
+/     .col-md-12
+/       .card
+/         .card-header
+/           h4 Invoices
+/           .card-header-action
+/             a.btn.btn-danger href="#" 
+/               | View More
+/               i.fas.fa-chevron-right
+/         .card-body.p-0
+/           .table-responsive.table-invoice
+/             table.table.table-striped
+/               tr
+/                 th Invoice ID
+/                 th Symbol
+/                 th Status
+/                 th Created Date
+/                 th Action
+/               - @executed.each do |transaction| 
+/                 tr
+/                   td
+/                     a href="#"  
+/                     = transaction.id
+/                   td.font-weight-600 = transaction.symbol
+/                   td
+/                     .badge.badge-warning = transaction.state
+/                   td = transaction.created_at
+/                   td
+/                     a.btn.btn-primary href="#"  Detail

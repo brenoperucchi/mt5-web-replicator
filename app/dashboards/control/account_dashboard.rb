@@ -18,7 +18,7 @@ require "administrate/base_dashboard"
       instruments:          Field::HasMany,
       store:                Field::BelongsTo,
       customer:             Field::BelongsTo,
-      magics_accept:        Field::String,
+      magics_accept:        Field::String.with_options(searchable: false),
       instrument_control:   Field::Boolean,
       created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
