@@ -7,6 +7,7 @@ signal_slave:
   '1_58': disable
   '1_59': disable
   '1_60': OK
+  '1_61': OK
   disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_copy:
   '1_30': disable
