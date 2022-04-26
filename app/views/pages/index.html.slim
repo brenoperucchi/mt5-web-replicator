@@ -5,17 +5,6 @@
     /! Card content
     .flex.flex-col.h-full
       /! Live visitors number
-      / .px-5.py-2
-      /   .text-2xl.text-slate-800 Agora
-      / .px-5.py-1
-      /   .flex.items-center
-      /     /! Red dot
-      /     / .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 
-      /     /   .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
-      /     /! Vistors number
-      /     div
-      /       .text-2xl.font-bold.text-blue-500 = "R$ #{trace.transactions.executed.sum(:profit)}"
-      /       .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
       / .px-5.py-1
       /   .flex.items-center
       /     div
@@ -33,37 +22,37 @@
         /   /! Change the height attribute to adjust the chart height
         /   canvas#analytics-card-02 height="70" width="389" 
       /! Table
-      .grow.px-5.pt-0.pb-0
+      .grow.px-5.pt-2.pb-2
         .overflow-x-auto
           table.table-auto.w-full
             /! Table header
             thead.text-xs.text-slate-800
               tr
-                th.text-2xl.text-slate-800.text-left.py-2 Agora
-                th.text-2xl.text-slate-800.text-right.py-2 Período
+                th.text-xl.text-slate-800.text-left Abertas
+                th.text-xl.text-slate-800.text-right Fechadas
             /! Table body
             tbody.text-sm.divide-y.divide-slate-100
               /! Row
               tr
-                td.text-3xl.font-bold.text-blue-500
+                td.text-2xl.font-bold.text-blue-500
                   = "R$ #{trace.transactions.executed.sum(:profit)}"
                   .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
-                td.text-3xl.font-bold.text-blue-500.text-right
-                  = "R$ #{trace.transactions.executed.sum(:profit)}"
-                  .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
+                td.text-2xl.font-bold.text-blue-500.text-right
+                  = "R$ #{trace.transactions.closed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Posições fechadas #{trace.transactions.closed.count}"
               tr
-                td.text-3xl.font-bold.text-blue-500
-                  = "#{trace.transactions.executed.sum(:profit)} %"
+                td.text-2xl.font-bold.text-blue-500
+                  = "#{trace.hit_rate(:executed)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
-                td.text-3xl.font-bold.text-blue-500.text-right
-                  = "#{trace.transactions.executed.sum(:profit)} %"
+                td.text-2xl.font-bold.text-blue-500.text-right
+                  = "#{trace.hit_rate(:closed)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
               tr
-                td.text-3xl.font-bold.text-blue-500
+                td.text-2xl.font-bold.text-blue-500
                   = "#{trace.transactions.executed.sum(:profit)}"
                   .text-sm.text-slate-800.pt-1 = "Payoff"
-                td.text-3xl.font-bold.text-blue-500.text-right
-                  = "#{trace.transactions.executed.sum(:profit)}"
+                td.text-2xl.font-bold.text-blue-500.text-right
+                  = "#{trace.transactions.closed.sum(:profit)}"
                   .text-sm.text-slate-800.pt-1 = "Payoff"
               tr
                 td.py-2
@@ -75,7 +64,7 @@
                   .font-medium.text-right.text-slate-800 
                     | Venda
                     '
-                    = trace.transactions.executed.buy.count
+                    = trace.transactions.closed.buy.count
               /! Row
               tr
                 td.py-2
@@ -87,32 +76,41 @@
                   .font-medium.text-right.text-slate-800 
                     | Venda
                     '
-                    = trace.transactions.executed.sell.count
+                    = trace.transactions.closed.sell.count
               tr
                 td.py-2
                   .font-medium.text-left.text-slate-800 
                     | Gain
                     '
-                    = trace.transactions.executed.sell.count
+                    = trace.transactions.executed.gain.count
                 td.py-2
                   .font-medium.text-right.text-slate-800 
                     | Gain
                     '
-                    = trace.transactions.executed.sell.count
+                    = trace.transactions.closed.gain.count
               tr
                 td.py-2
                   .font-medium.text-left.text-slate-800 
                     | Loss
                     '
-                    = trace.transactions.executed.sell.count
+                    = trace.transactions.executed.loss.count
 
                 td.py-2
                   .font-medium.text-right.text-slate-800 
                     | Loss
                     '
-                    = trace.transactions.executed.sell.count
+                    = trace.transactions.closed.loss.count
 
                     
+      .px-5.py-5
+        .flex.items-center
+          /! Red dot
+          .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 
+            .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
+          /! Vistors number
+          div
+            .text-2xl.font-bold.text-blue-500 = "R$ #{trace.transactions.sum(:profit_copy)} - #{trace.transactions.sum(:profit).to_f / trace.accounts.count} = #{trace.transactions.sum(:profit_copy).to_f - trace.transactions.sum(:profit).to_f / trace.accounts.count} "
+            .text-sm.text-slate-800.pt-1 = "Diferança aprox. do profit do Copy p/ os Slaves."
 
       / /! Card footer
       / .text-right.px-5.pb-4

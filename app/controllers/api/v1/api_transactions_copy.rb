@@ -26,7 +26,7 @@ module API
           action = params[:action]
           if action == "closed"
             parameters = eval(params[:body])
-            Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], comment: "master_profit=>#{parameters[:profit]}")
+            Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit_copy: parameters[:profit])
             body "OK"
           elsif action == "orders"    
             # orders = params[:orders]

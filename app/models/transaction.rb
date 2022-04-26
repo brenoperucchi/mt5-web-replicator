@@ -18,6 +18,8 @@ class Transaction < ApplicationRecord
   scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
   scope :buy,   ->{where.not(ordertype: 0)}
   scope :sell,  ->{where.not(ordertype: 1)}
+  scope :gain,  ->{where('transactions.profit >= 0')}
+  scope :loss,  ->{where('transactions.profit < 0')}
 
   # before_create :set_symbol
   after_create  :validate_restriction

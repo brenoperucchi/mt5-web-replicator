@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_13_055842) do
+ActiveRecord::Schema.define(version: 2022_04_26_044053) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -372,6 +372,7 @@ ActiveRecord::Schema.define(version: 2022_04_13_055842) do
     t.bigint "account_id"
     t.bigint "trace_id"
     t.string "price_closed"
+    t.decimal "profit_copy", precision: 10, scale: 2
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"
