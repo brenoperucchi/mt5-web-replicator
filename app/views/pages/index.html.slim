@@ -109,7 +109,7 @@
             .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
           /! Vistors number
           div
-            .text-2xl.font-bold.text-blue-500 = "R$ #{trace.transactions.sum(:profit_copy)} - #{trace.transactions.sum(:profit).to_f / trace.accounts.count} = #{trace.transactions.sum(:profit_copy).to_f - trace.transactions.sum(:profit).to_f / trace.accounts.count} "
+            .text-2xl.font-bold.text-blue-500 = "R$ #{trace.transactions.sum(:profit_copy)} - #{trace.transactions.sum(:profit).to_f / trace.accounts.count} = #{number_with_precision((trace.transactions.sum(:profit_copy).to_f - trace.transactions.sum(:profit).to_f / trace.accounts.count), precision: 2) } "
             .text-sm.text-slate-800.pt-1 = "Diferança aprox. do profit do Copy p/ os Slaves."
 
       / /! Card footer
