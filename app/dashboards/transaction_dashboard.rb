@@ -12,6 +12,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     ticket:             Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
+    profit_copy:        Field::String,
     ordertype:          Field::String,
     symbol:             Field::String,
     price_request:      Field::String,
@@ -59,6 +60,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   profit
+  profit_copy
   ordertype
   symbol
   price_request
@@ -89,6 +91,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   profit
+  profit_copy
   ordertype
   symbol
   price_request

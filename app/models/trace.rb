@@ -1,4 +1,7 @@
 class Trace < ApplicationRecord
+  ENUMS = %w(kind)
+
+  include LibEnums
 
   enum kind:  {telegram: 0, copy: 1}
 

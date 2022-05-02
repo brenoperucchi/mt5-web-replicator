@@ -23,10 +23,10 @@ class TraceDashboard < Administrate::BaseDashboard
     store:               Field::BelongsTo,
     meta_host:           Field::String,
     kind:                Field::String,
-    # volumes:           Field::ActsAsTaggable,
     response:            Field::String,
+    take_profit_limit:   Field::String,
+    # volumes:           Field::ActsAsTaggable,
     messages:            Field::HasMany.with_options(direction: :desc),
-    take_profit_limit:   Field::Number,
     instruments:         Field::HasMany,
     accounts:            Field::HasMany
   }.freeze

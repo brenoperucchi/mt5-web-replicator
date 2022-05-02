@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_26_044053) do
+ActiveRecord::Schema.define(version: 2022_05_02_201001) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -420,8 +420,6 @@ ActiveRecord::Schema.define(version: 2022_04_26_044053) do
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
   add_foreign_key "taggings", "tags"
-  add_foreign_key "transaction_slaves", "accounts"
-  add_foreign_key "transactions", "accounts"
   add_foreign_key "transactions", "traces"
   add_foreign_key "versions", "loggings"
 end

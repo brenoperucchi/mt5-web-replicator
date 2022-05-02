@@ -8,6 +8,7 @@ signal_slave:
   '1_59': disable
   '1_60': OK
   '1_61': OK
+  '1_62': OK
   disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_copy:
   '1_30': disable
@@ -19,4 +20,5 @@ signal_copy:
   '1_36': disable
   '1_37': OK
   '1_38': OK
+  '1_39': OK
   disable_msg: 'A versao |version| do SignalCopy esta desabilitado em nosso sistema. Atualize seu expert. '
