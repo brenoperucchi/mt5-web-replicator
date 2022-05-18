@@ -79,8 +79,16 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
   # end
 
   def open_at
-    if obj['action'] == "OPENED"
-      Time.zone.at(obj['open_at'].try(:to_i)).in_time_zone(obj['timezone']).to_datetime.change(:offset => Time.zone.formatted_offset)
+    time = obj['open_at'].try(:to_i)
+    zone = obj['timezone']
+    set_time_zone(time, zone)
+  end
+
+  def set_time_zone(time, zone)
+    if zone.to_i != 0
+      Time.zone.at(time).in_time_zone(zone).to_datetime.change(:offset => Time.zone.formatted_offset)
+    else
+      Time.use_zone(Time.zone.name) { Time.zone.at(time).utc.to_datetime.change(offset: Time.zone.now.strftime("%z")) }
     end
   end
 

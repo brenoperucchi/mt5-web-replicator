@@ -24,7 +24,7 @@ class Message::Metatrader < Message
     
     state :executed do
       def update_state(state)
-        content = YAML.load(Message.last.content)
+        content = YAML.load(self.content)
         account_mode = content["params"]["account_mode"]
         self.trace.accounts.slave.enable.each do |account|
           # Order All Closed

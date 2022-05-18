@@ -12,9 +12,9 @@ class LoggingDashboard < Administrate::BaseDashboard
     content: Field::Text,
     loggerable:Field::Polymorphic,
     # user:Field::BelongsTo,
-    account: Field::String,
+    account: Field::String.with_options(searchable: false),
     changeset: Field::String,
-    state: Field::String,
+    state: Field::String.with_options(searchable: false),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
   }.freeze
