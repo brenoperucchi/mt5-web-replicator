@@ -23,7 +23,7 @@ class APITransactionSerializer < ActiveModel::Serializer
   end
 
   def lot
-    obj['lot']
+    obj['volume']
   end
 
   def price_open

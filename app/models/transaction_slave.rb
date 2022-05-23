@@ -101,10 +101,16 @@ class TransactionSlave < ApplicationRecord
 
   def api_request_attributes
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
-    seconds_ago = (self.master.open_at - Time.zone.now).to_i.abs
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{master.trace.id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
+  end
+
+  private
+
+  def seconds_ago
+    seconds_ago = (self.master.open_at - Time.zone.now).to_i.abs
+    Rails.env.test? ? 0 : seconds_ago
   end
 
 end

@@ -1,3 +1,5 @@
+require 'lib_enums'
+
 class Trace < ApplicationRecord
   ENUMS = %w(kind)
 
