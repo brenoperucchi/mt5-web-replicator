@@ -26,10 +26,6 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
     end
   end
 
-  # def symbol
-  #   obj['order_symbol']
-  # end
-
   def ordertype
     obj['type']
   end
@@ -53,18 +49,6 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
   def take_profit
     obj['takeprofit']
   end
-
-  # def profit
-  #   obj['profit']
-  # end
-
-  # def trace_id
-  #   obj['comment'].split('|').first
-  # end
-
-  # def transaction_id
-  #   obj['comment'].split('|').last
-  # end
 
   def ticket_master
     obj['order_id']

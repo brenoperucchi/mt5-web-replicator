@@ -38,22 +38,16 @@ module API
           if not content.blank? and content.is_a?(Hash)
             action = content['action']
             account = Account.find_by(name: params[:account_id])
-            # binding.pry
-
-            # account_id = content['comment'].split("-").first
-            # account = Account.find_by(id: account_id, state: :enable)
-            # transaction_id = content['comment'].split("-").last
             if account
               slave = account.slaves.find_by(comment: content['comment'])
-              # slave = account.slaves.find_by(ticket_master: content['comment'].split("-").last)
               if slave.nil?
-                Logging.create(content:message)
+                Logging.create(content:message, state: action)
               else
                 case action
                 when "CLOSED", "DELETED"
                   api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(profit:content['profit'])
                   slave.attributes = api_attributes
-                  if slave.closed? and slave.loggings.count < 2 and slave.loggings.detect(&:detect_closed?).nil?
+                  if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
                     slave.state = :executed
                     slave.master.state = :executed
                   end
@@ -83,13 +77,11 @@ module API
                     api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
                     slave.erro
                   end
-                  # slave.update(api_attributes.merge(state:'error', profit:nil))
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
                 logging_content = nil
-                # logging_content = {body:eval(params[:body]), meta_info:params.except(:body)}
-                slave.loggings.create(content:message, changeset: @version.changeset, version:@version)
+                slave.loggings.create(content:message, changeset: @version.changeset, version:@version, state: action)
               end
             end
             content_type 'text/plain'

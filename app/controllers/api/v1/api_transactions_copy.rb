@@ -32,7 +32,7 @@ module API
             # orders = params[:orders]
             account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
             if account
-              account.loggings.create(content:params)
+              account.loggings.create(content:params, state: action.try(:upcase))
               trace = account.try(:trace_copy)
 
               if account.magics_accept.blank?
