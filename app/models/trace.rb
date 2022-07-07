@@ -58,7 +58,7 @@ class Trace < ApplicationRecord
     trades = self.send(type).closed.try(:count).to_f
     gain_trades = self.send(type).closed.try(:gain).try(:count).to_f
     result = (gain_trades/trades)
-    (result * 100).round(2)
+    result = (result * 100).round(2)
     result.nan? ? 0 : result
   end
 
@@ -66,7 +66,7 @@ class Trace < ApplicationRecord
     trades = self.send(type).closed.try(:count).to_f
     loss_trades = self.send(type).closed.try(:loss).try(:count).to_f
     result = (loss_trades/trades)
-    (result * 100).round(2)
+    result = (result * 100).round(2)
     result.nan? ? 0 : result
   end
 

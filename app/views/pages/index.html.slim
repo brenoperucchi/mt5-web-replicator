@@ -42,17 +42,17 @@
                   .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.slaves.closed.count}"
               tr
                 td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.profit_trade(:masters).round(2)} %"
+                  = "#{trace.profit_trade(:masters)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
                 td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.profit_trade(:slaves).round(2)} %"
+                  = "#{trace.profit_trade(:slaves)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
               tr
                 td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.loss_trade(:masters).round(2)} %"
+                  = "#{trace.loss_trade(:masters)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de perda"
                 td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.loss_trade(:slaves).round(2)} %"
+                  = "#{trace.loss_trade(:slaves)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de perda"
               tr
                 td.text-2xl.font-bold.text-blue-500
