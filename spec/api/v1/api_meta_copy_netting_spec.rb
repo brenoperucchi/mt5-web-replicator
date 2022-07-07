@@ -11,7 +11,7 @@ RSpec.describe API::V1::APITransactionsCopy do
     @account2 = create(:account, :slave2, store: @store, customer:@customer)
     @ticket_master = 10000001
     
-    post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+    post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
     params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":0.00000000,\"takeprofit\":0.00000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
     # post '/api/v1/orders', params: {
     #   "message_id"=>"723517440",
@@ -73,7 +73,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = account.transactions.find_by(ticket:@ticket_master)
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         expect(account.slaves.count).to eq(1)
@@ -98,7 +98,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave_1.state).to be == "executed"
         @slave_2 = account_88.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         expect(@slave_2.state).to be == "pending"
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         @slave_1 = account_87.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave_2 = account_88.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
@@ -114,7 +114,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = account.transactions.find_by(ticket:@ticket_master)
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", 
           "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         @slave1 = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
@@ -129,12 +129,12 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = account.transactions.find_by(ticket:@ticket_master)
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}", 
           "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}        
         @slave1 = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave.close
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", 
           "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         @slave1 = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
@@ -149,7 +149,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = account.transactions.find_by(ticket:@ticket_master)
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         expect(account.slaves.count).to eq(2)
@@ -186,7 +186,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = account.transactions.find_by(ticket:@ticket_master)
         @slave = account.transactions.find_by(ticket:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_3_0/5647753/NETTING', 
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 
           params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stoploss\":1.1000000,\"takeprofit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         transaction = Account.find_by(name: 5634787).transactions.find_by(ticket:10000001)
         @slave = transaction.slaves.find_by(ticket_master: 10000002)

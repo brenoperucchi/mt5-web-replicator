@@ -1,14 +1,15 @@
 class PagesController < ApplicationController
+	# skip_before_action :after_sign_in_path_for
 	# layout 'stisla'
   layout 'tailwind_layout2'
 
-	# before_action :sign_up!
+	before_action :sign_up!
 
 
-	# def sign_up!
-	# 	redirect_to new_user_registration_path if !user_signed_in?
+	def sign_up!
+		redirect_to new_user_session_path if !user_signed_in?
 			
-	# end
+	end
 
 	def index
 		respond_to do |wants|

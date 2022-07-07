@@ -45,7 +45,8 @@ Rails.application.routes.draw do
     resources :loggings
     resources :instruments
 
-    resources :orders
+    resources :orders, except:[:edit]
+    resources :deals
     resources :messages#, only: [:index]
     resources :message_metatrader, controller: :messages, type:'Message::Metatrader'
     # get '/messages', to: 'messages#index', as: 'messages', on: :collection

@@ -1,12 +1,19 @@
 class Order < ApplicationRecord
   # has_paper_trail
-  attr_accessor :image_url
+  attr_accessor :image_url, :profit_copy, :profit_slave
 
   belongs_to :trace
   belongs_to :message
+  belongs_to :account
 
-  has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
-  has_many :slaves,       through: :transactions, source: :slaves, class_name:'TransactionSlave', dependent: :destroy
+  # has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
+  has_many :balances
+  has_many :transactions, through: :balances, source: :master,  dependent: :destroy
+  has_many :slaves,       through: :balances, source: :slave,   dependent: :destroy
+
+
+  # has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
+  # has_many :slaves,       through: :transactions, source: :slaves, class_name:'TransactionSlave', dependent: :destroy
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
 
@@ -14,6 +21,7 @@ class Order < ApplicationRecord
 
   scope :error, ->{ where(state: 'error')}
   scope :executed, ->{ where(state: 'executed')}
+  scope :closed, ->{ where(state: 'pending')}
 
   has_one_attached :image
 
@@ -90,7 +98,7 @@ class Order < ApplicationRecord
       if transaction and not transaction.error?
         for i in (0..for_limit-1) do 
           if trace.copy?
-            api_attributes = APITransactionSerializer.new(transaction.message.content).api_attributes
+            api_attributes = SerializerAPITransaction.new(transaction.message.content).api_attributes
           else
             api_attributes = message.serializer.transaction_attributes(i).except(:message_id, :order_id).merge(lot: account.instrument_volume(transaction.symbol, i))
           end
@@ -135,6 +143,15 @@ class Order < ApplicationRecord
   def calcule_lot(value)
     decimal = 10 ** (value.to_s.split('.').last.size)
     (self.trace.lots.to_f * value * decimal).round / decimal.to_f
+  end
+
+
+  def profit_copy
+    transactions.sum(&:profit)
+  end
+
+  def profit_slave
+    slaves.sum(&:profit)
   end
 
 end

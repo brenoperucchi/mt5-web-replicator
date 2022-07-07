@@ -26,10 +26,13 @@ module API
           action = params[:action]
           if action == "closed"
             parameters = eval(params[:body])
-            Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit_copy: parameters[:profit])
+            serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body]))
+            Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at)
             body "OK"
           elsif action == "orders"    
             # orders = params[:orders]
+
+            # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
             account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
             if account
               account.loggings.create(content:params, state: action.try(:upcase))
@@ -52,6 +55,8 @@ module API
                 end
                 orders[:params] = params.except('orders')
                 message = Message::Metatrader.create(content: orders.to_json, content_at: Time.zone.now, store: trace.store, trace:trace)
+                
+                # TODO - Colocar uma trava se account estiver desabilitado
                 message.prepare
                 message.execute
               end

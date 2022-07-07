@@ -1,6 +1,8 @@
 class Balance < ApplicationRecord
-	belongs_to :account
-	belongs_to :deal,  class_name: 'Transaction', foreign_key: 'deal_id', dependent: :destroy
-	belongs_to :slave, class_name: 'TransactionSlave', foreign_key: 'slave_id', optional: true
+	belongs_to :account, optional: true
+	belongs_to :order
+	belongs_to :master,  class_name: 'Transaction', 			foreign_key: 'master_id', optional: true
+	belongs_to :slave,   class_name: 'TransactionSlave', 	foreign_key: 'slave_id', optional: true
+	# belongs_to :deal,  	 class_name: 'Deal', 							foreign_key: 'deal_id', optional: true
 
 end

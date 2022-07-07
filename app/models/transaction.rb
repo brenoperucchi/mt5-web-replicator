@@ -4,20 +4,24 @@ class Transaction < ApplicationRecord
   belongs_to :message
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
+  belongs_to :deal, optional:true
 
   has_many :loggings, as: :loggerable, dependent: :destroy
-  has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
+  # has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
 
-  has_many :balances, :foreign_key => "deal_id"
+  has_many :balances, :foreign_key => "master_id"
   has_many :accounts, through: :balances, source: :account
+
+  has_many :orders,   through: :balances, source: :order, dependent: :destroy
+  has_many :slaves,   through: :orders,    source: :slaves
 
 
   scope :closed,      ->{where(state: 'closed')}
   scope :finish,      ->{where(state: ['closed', 'error'])}
   scope :executed,    ->{where(state: 'executed')}
   scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
-  scope :buy,   ->{where.not(ordertype: 0)}
-  scope :sell,  ->{where.not(ordertype: 1)}
+  scope :buy,   ->{where(ordertype: 0)}
+  scope :sell,  ->{where(ordertype: 1)}
   scope :gain,  ->{where('transactions.profit >= 0')}
   scope :loss,  ->{where('transactions.profit < 0')}
 
@@ -59,7 +63,8 @@ class Transaction < ApplicationRecord
     state :closed do
       def update_state(state)
         # self.order.close
-        self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
+        self.update(close_at: Time.zone.now)
+        # self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
       end
     end
   end
@@ -133,6 +138,10 @@ class Transaction < ApplicationRecord
     when 'sell_stop'
       5
     end
+  end
+
+  def profit
+    read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
   end
 
 

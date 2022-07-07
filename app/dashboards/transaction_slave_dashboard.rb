@@ -22,6 +22,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     symbol:             Field::String,
     price_request:      Field::String,
     price_open:         Field::String,
+    price_closed:       Field::String,
     stop_loss:          Field::String,
     take_profit:        Field::String,
     comment:            Field::String,
@@ -31,6 +32,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     response_error:     Field::String,
     loggings:           Field::HasMany,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     }.freeze
@@ -43,13 +45,13 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   state
-  ticket_master
   ticket_slave
   symbol
-  master
+  price_open
+  price_closed
   account
   profit
-  loggings
+  open_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -68,6 +70,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   symbol
   price_request
   price_open
+  price_closed
   stop_loss
   take_profit
   comment
@@ -76,6 +79,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   response
   response_error
   open_at
+  closed_at
   created_at
   updated_at
   ].freeze

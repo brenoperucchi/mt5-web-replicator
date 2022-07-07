@@ -1,10 +1,11 @@
-class APITransactionSerializer < ActiveModel::Serializer
+class SerializerAPITransaction < ActiveModel::Serializer
   
   def api_attributes
     {
       ordertype: ordertype,
       lot: lot,
       price_open: price_open,
+      # price_closed: price_closed,
       magic_number: magic_number,
       stop_loss: stop_loss,
       take_profit: take_profit,
@@ -15,7 +16,11 @@ class APITransactionSerializer < ActiveModel::Serializer
   end
 
   def obj
-    object
+    if object.is_a?(Hash)
+      object
+    else
+      YAML.load(object)
+    end
   end
 
   def ordertype
@@ -29,6 +34,10 @@ class APITransactionSerializer < ActiveModel::Serializer
   def price_open
     obj['open_price']
   end
+
+  # def price_closed
+  #   obj['close_price']
+  # end
 
   def magic_number
     obj['magicnumber']
@@ -48,7 +57,7 @@ class APITransactionSerializer < ActiveModel::Serializer
 
   def open_at
     time = obj['open_at'].try(:to_i)
-    zone = obj['timezone']
+    zone = obj['timezone'].try(:to_i)
     set_time_zone(time, zone)
   end
 

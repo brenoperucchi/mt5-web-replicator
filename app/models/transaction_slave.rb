@@ -13,11 +13,14 @@ class TransactionSlave < ApplicationRecord
   enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6}
 
   belongs_to :account
-  belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id"
+  belongs_to :deal, optional:true
+  belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
-  has_many :balances
-  has_many :accounts, through: :balances, source: :slave
+  has_many :balances, foreign_key: 'slave_id'
+  has_many :accounts, through: :balances, source: :account
+  has_many :orders,   through: :balances, source: :order
+  # has_many :slaves,   through: :balances, source: :slave
 
   
   scope :to_pending,   ->{where(state: 'pending')}
@@ -30,11 +33,19 @@ class TransactionSlave < ApplicationRecord
   scope :entire,    ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
   scope :not_closed,  ->{where.not(state: ['closed', 'deleted'])}
   scope :not_error,  ->{where.not(state: ['error'])}
+  scope :gain,  ->{where('transaction_slaves.profit >= 0')}
+  scope :loss,  ->{where('transaction_slaves.profit < 0')}
+  scope :buy,   ->{where(ordertype: 0)}
+  scope :sell,  ->{where(ordertype: 1)}
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], if: Proc.new { account.hedging? }
-  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], if: Proc.new { account.hedging? }
+  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], allow_blank: true, allow_nil: true, if: Proc.new { account.hedging? }
 
+
+  def profit
+    read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
+  end
 
   state_machine :initial => :pending do
     after_transition [:remove,  :executed]            => :closed, :do => :update_state
@@ -102,7 +113,8 @@ class TransactionSlave < ApplicationRecord
   def api_request_attributes
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{master.trace.id}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
+    order_trace = balances.first.order.trace.id
+    msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
   end
 

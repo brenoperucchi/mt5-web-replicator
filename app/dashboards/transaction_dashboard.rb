@@ -12,7 +12,6 @@ class TransactionDashboard < Administrate::BaseDashboard
     ticket:             Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
-    profit_copy:        Field::String,
     ordertype:          Field::String,
     symbol:             Field::String,
     price_request:      Field::String,
@@ -26,6 +25,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     response:           Field::String,
     response_error:     Field::String,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     order:              Field::BelongsTo,
@@ -43,12 +43,14 @@ class TransactionDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  ticket
   state
+  ticket
   symbol
+  price_open
+  price_closed
   trace
   profit
-  account
+  open_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -60,7 +62,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   profit
-  profit_copy
   ordertype
   symbol
   price_request
@@ -74,6 +75,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   response
   response_error
   open_at
+  closed_at
   created_at
   updated_at
   message
@@ -91,7 +93,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   profit
-  profit_copy
   ordertype
   symbol
   price_request

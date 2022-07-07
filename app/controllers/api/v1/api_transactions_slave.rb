@@ -45,7 +45,7 @@ module API
               else
                 case action
                 when "CLOSED", "DELETED"
-                  api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(profit:content['profit'])
+                  api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
                   slave.attributes = api_attributes
                   if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
                     slave.state = :executed
@@ -59,7 +59,7 @@ module API
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "OPENED"
-                  api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
+                  api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
                   slave.attributes = api_attributes
                   slave.execute
                   @version = slave.versions.last
@@ -70,17 +70,18 @@ module API
                   @version = slave.versions.last
                 when "NOSLTP","ERRORDEAL","TIMEMAX"
                   if action == "NOSLTP"
-                    api_attributes = APITransactionSlaveSerializer.new(message).api_attributes.merge(stop_loss:0, take_profit:0)
+                    api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
                     slave.attributes = api_attributes
                     slave.save
                   else
-                    api_attributes = APITransactionSlaveSerializer.new(message).api_attributes
+                    api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
                     slave.erro
                   end
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
                 logging_content = nil
+                message << params.except("body").to_s.delete('\\"')
                 slave.loggings.create(content:message, changeset: @version.changeset, version:@version, state: action)
               end
             end

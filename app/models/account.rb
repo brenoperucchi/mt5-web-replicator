@@ -16,15 +16,21 @@ class Account < ApplicationRecord
 
   belongs_to :store
   belongs_to :customer
+
   has_many :permissions
   has_many :traces,       through: :permissions#, source: :trace 
-  has_many :orders,       through: :traces, source: :orders
+  # has_many :orders,       through: :traces, source: :orders
   
   has_many :instruments,                    dependent: :destroy
   has_many :loggings,      as: :loggerable, dependent: :destroy
+  
+  has_many :deals
+  
   has_many :balances
-  has_many :transactions, through: :balances, source: :deal, dependent: :destroy
-  has_many :slaves,        class_name: 'TransactionSlave', foreign_key: 'account_id'
+  has_many :orders,       through: :balances, source: :order,         dependent: :destroy
+  has_many :transactions, through: :orders,   source: :transactions,  dependent: :destroy
+  has_many :slaves,       through: :orders,   source: :slaves,        dependent: :destroy
+  # has_many :slaves,        class_name: 'TransactionSlave', foreign_key: 'account_id'
 
   def trace_copy
     traces.find_by(kind: :copy) if self.copy?
@@ -49,6 +55,10 @@ class Account < ApplicationRecord
     rescue
       store.volume_default
     end
+  end
+
+  def instrument(symbol)
+    instrument_control.to_b ? instruments.find_by(symbol: symbol.try(:upcase)).try(:name) : symbol
   end
 
 end

@@ -1,4 +1,4 @@
-class APITransactionSlaveSerializer < ActiveModel::Serializer
+class SerializerAPITransactionSlave < ActiveModel::Serializer
   
   def api_attributes
     {
@@ -6,6 +6,7 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
       ordertype: ordertype,
       lot: lot,
       price_open: price_open,
+      price_closed: price_closed,
       magic_number: magic_number,
       stop_loss: stop_loss,
       take_profit: take_profit,
@@ -38,6 +39,10 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
     obj['open_price']
   end
 
+  def price_closed
+    obj['close_price'].to_f == 0 ? nil : obj['close_price']
+  end
+
   def magic_number
     obj['magicnumber']
   end
@@ -64,7 +69,7 @@ class APITransactionSlaveSerializer < ActiveModel::Serializer
 
   def open_at
     time = obj['open_at'].try(:to_i)
-    zone = obj['timezone']
+    zone = obj['timezone'].try(:to_i)
     set_time_zone(time, zone)
   end
 

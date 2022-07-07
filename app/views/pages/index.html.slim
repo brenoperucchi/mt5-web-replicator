@@ -28,89 +28,110 @@
             /! Table header
             thead.text-xs.text-slate-800
               tr
-                th.text-xl.text-slate-800.text-left Abertas
-                th.text-xl.text-slate-800.text-right Fechadas
+                th.text-xl.text-slate-800.text-left Master
+                th.text-xl.text-slate-800.text-right Slaves
             /! Table body
             tbody.text-sm.divide-y.divide-slate-100
               /! Row
               tr
                 td.text-2xl.font-bold.text-blue-500
-                  = "R$ #{trace.transactions.executed.sum(:profit)}"
-                  .text-sm.text-slate-800.pt-1 = "Posições abertas #{trace.transactions.executed.count}"
+                  = "R$ #{trace.masters.closed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.masters.closed.count}"
                 td.text-2xl.font-bold.text-blue-500.text-right
-                  = "R$ #{trace.transactions.closed.sum(:profit)}"
-                  .text-sm.text-slate-800.pt-1 = "Posições fechadas #{trace.transactions.closed.count}"
+                  = "R$ #{trace.slaves.closed.sum(:profit)}"
+                  .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.slaves.closed.count}"
               tr
                 td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.hit_rate(:executed)} %"
+                  = "#{trace.profit_trade(:masters).round(2)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
                 td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.hit_rate(:closed)} %"
+                  = "#{trace.profit_trade(:slaves).round(2)} %"
                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
               tr
                 td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.transactions.executed.sum(:profit)}"
+                  = "#{trace.loss_trade(:masters).round(2)} %"
+                  .text-sm.text-slate-800.pt-1 = "Taxa de perda"
+                td.text-2xl.font-bold.text-blue-500.text-right
+                  = "#{trace.loss_trade(:slaves).round(2)} %"
+                  .text-sm.text-slate-800.pt-1 = "Taxa de perda"
+              tr
+                td.text-2xl.font-bold.text-blue-500
+                  = "#{trace.pay_off(:masters).round(2)}"
                   .text-sm.text-slate-800.pt-1 = "Payoff"
                 td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.transactions.closed.sum(:profit)}"
+                  = "#{trace.pay_off(:slaves).round(2)}"
                   .text-sm.text-slate-800.pt-1 = "Payoff"
+              tr
+                td.text-2xl.font-bold.text-blue-500
+                  = "#{trace.profit_factor(:masters).round(2)}"
+                  .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
+                td.text-2xl.font-bold.text-blue-500.text-right
+                  = "#{trace.profit_factor(:slaves).round(2)}"
+                  .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
+              tr
+                td.text-2xl.font-bold.text-blue-500
+                  = "#{trace.drawdown(:masters).round(2)}"
+                  .text-sm.text-slate-800.pt-1 = "Drawdown"
+                td.text-2xl.font-bold.text-blue-500.text-right
+                  = "#{trace.drawdown(:slaves).round(2)}"
+                  .text-sm.text-slate-800.pt-1 = "Drawdown"
               tr
                 td.py-2
                   .font-medium.text-left.text-slate-800 
-                    | Venda
+                    | Compra
                     '
-                    = trace.transactions.executed.buy.count
+                    = trace.masters.closed.buy.count
                 td.py-2
                   .font-medium.text-right.text-slate-800 
-                    | Venda
+                    | Compra
                     '
-                    = trace.transactions.closed.buy.count
+                    = trace.slaves.closed.buy.count
               /! Row
               tr
                 td.py-2
                   .font-medium.text-left.text-slate-800 
                     | Venda
                     '
-                    = trace.transactions.executed.sell.count
+                    = trace.masters.closed.sell.count
                 td.py-2
                   .font-medium.text-right.text-slate-800 
                     | Venda
                     '
-                    = trace.transactions.closed.sell.count
+                    = trace.slaves.closed.sell.count
               tr
                 td.py-2
                   .font-medium.text-left.text-slate-800 
                     | Gain
                     '
-                    = trace.transactions.executed.gain.count
+                    = trace.masters.closed.gain.count
                 td.py-2
                   .font-medium.text-right.text-slate-800 
                     | Gain
                     '
-                    = trace.transactions.closed.gain.count
+                    = trace.slaves.closed.gain.count
               tr
                 td.py-2
                   .font-medium.text-left.text-slate-800 
                     | Loss
                     '
-                    = trace.transactions.executed.loss.count
+                    = trace.masters.closed.loss.count
 
                 td.py-2
                   .font-medium.text-right.text-slate-800 
                     | Loss
                     '
-                    = trace.transactions.closed.loss.count
+                    = trace.slaves.closed.loss.count
 
                     
-      .px-5.py-5
-        .flex.items-center
-          /! Red dot
-          .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 
-            .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
-          /! Vistors number
-          div
-            .text-2xl.font-bold.text-blue-500 = "R$ #{trace.transactions.closed.sum(:profit_copy)} - #{number_with_precision((trace.transactions.closed.sum(:profit).to_f / trace.accounts.count), precision: 2)} = #{number_with_precision((trace.transactions.closed.sum(:profit_copy).to_f - trace.transactions.closed.sum(:profit).to_f / trace.accounts.count), precision: 2) } "
-            .text-sm.text-slate-800.pt-1 = "Diferança aprox. do profit do Copy p/ os Slaves."
+      .px-2.py-2
+      /   .flex.items-center
+      /     /! Red dot
+      /     .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 
+      /       .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
+      /     /! Vistors number
+      /     div
+      /       .text-2xl.font-bold.text-blue-500 = "R$ #{trace.orders.closed.map.sum(&:profit_copy)} - #{number_with_precision((trace.orders.closed.map.sum(&:profit_slave).to_f / trace.accounts.count), precision: 2)} = #{number_with_precision((trace.orders.closed.map.sum(&:profit_copy).to_f - trace.orders.closed.map.sum(&:profit_slave).to_f / trace.accounts.count), precision: 2) } "
+      /       .text-sm.text-slate-800.pt-1 = "Diferança aprox. do profit do Copy p/ os Slaves."
 
       / /! Card footer
       / .text-right.px-5.pb-4
