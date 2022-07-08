@@ -13,7 +13,7 @@ class MessageDashboard < Administrate::BaseDashboard
     content_id: Field::String,
     state: Field::String,
     response: Field::String,
-    order: Field::BelongsTo,
+    orders: Field::HasMany,
     trace: Field::BelongsTo,
     # message: Field::HasOne,
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -47,7 +47,7 @@ class MessageDashboard < Administrate::BaseDashboard
   trace
   content_id
   content
-  order
+  orders
   response
   descendants
   ancestors
