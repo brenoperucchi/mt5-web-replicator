@@ -27,7 +27,11 @@ module API
           if action == "closed"
             parameters = eval(params[:body])
             serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body]))
-            Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at)
+            transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
+            transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
+            transaction.close
+
+            # Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at)
             body "OK"
           elsif action == "orders"    
             # orders = params[:orders]

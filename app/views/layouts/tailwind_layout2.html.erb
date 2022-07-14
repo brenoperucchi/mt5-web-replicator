@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Mosaic HTML Demo - Analytics</title>
+    <title><%= content_for?(:title) ? yield(:title) : "Copy MetaTrader" %></title>
     <%= stylesheet_link_tag  'tailwind', 'data-turbolinks-track': 'reload' %>
     <%= javascript_include_tag "application", defer: true %>
     <%= yield(:header)%>

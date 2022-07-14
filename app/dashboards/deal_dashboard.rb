@@ -12,6 +12,7 @@ class DealDashboard < Administrate::BaseDashboard
     state: Field::String,
     symbol: Field::String,
     ticket: Field::String,
+    ordertype: Field::String,
     store: Field::BelongsTo,
     account: Field::BelongsTo,
     trace: Field::BelongsTo,
@@ -30,6 +31,8 @@ class DealDashboard < Administrate::BaseDashboard
     id
     ticket
     symbol
+    ordertype
+    trace
     masters
     slaves
     created_at
@@ -40,8 +43,9 @@ class DealDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
     id
     ticket
-    state
     symbol
+    ordertype
+    state
     store
     trace
     account

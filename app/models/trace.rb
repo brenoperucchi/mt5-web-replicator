@@ -14,8 +14,6 @@ class Trace < ApplicationRecord
   has_many :masters, :through => :deals, :source => :masters
   has_many :slaves,  :through => :deals, :source => :slaves
 
-
-
   has_many :orders, dependent: :destroy
   has_many :transactions#, :through => :orders, :source => :transactions
   has_many :messages, :class_name => "Message", :foreign_key => "trace_id"

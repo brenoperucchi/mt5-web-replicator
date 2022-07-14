@@ -3,6 +3,7 @@ class Order < ApplicationRecord
   attr_accessor :image_url, :profit_copy, :profit_slave
 
   belongs_to :trace
+  belongs_to :store
   belongs_to :message
   belongs_to :account
 
@@ -10,6 +11,7 @@ class Order < ApplicationRecord
   has_many :balances
   has_many :transactions, through: :balances, source: :master,  dependent: :destroy
   has_many :slaves,       through: :balances, source: :slave,   dependent: :destroy
+  has_many :accounts,     through: :balances, source: :account,  dependent: :destroy
 
 
   # has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy

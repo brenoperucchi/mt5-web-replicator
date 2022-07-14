@@ -18,8 +18,8 @@ class TransactionSlave < ApplicationRecord
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
   has_many :balances, foreign_key: 'slave_id'
-  has_many :accounts, through: :balances, source: :account
   has_many :orders,   through: :balances, source: :order
+  has_many :accounts, through: :orders, source: :accounts
   # has_many :slaves,   through: :balances, source: :slave
 
   
@@ -50,7 +50,7 @@ class TransactionSlave < ApplicationRecord
   state_machine :initial => :pending do
     after_transition [:remove,  :executed]            => :closed, :do => :update_state
     after_transition [:pending]                       => :remove, :do => :delete_pending
-    after_transition [:pending, :remove, :executed]   => :error,   :do => :update_state
+    # after_transition [:pending, :remove, :executed]   => :error,   :do => :update_state
 
     event :execute do
       transition :pending => :executed
@@ -79,30 +79,33 @@ class TransactionSlave < ApplicationRecord
       def update_state(state)
         self.update(closed_at: Time.zone.now)
 
-        if master.trace.copy? and account.hedging?
-          master.close
-        elsif master.slaves.count > 1 and master.slaves.first == self
+        # if master.trace.copy? and account.hedging?
+        #   master.close
+        # elsif master.slaves.count > 1 and master.slaves.first == self
+
+        # NOTE - IF TP1 IS REACH THEN TPs IS MASTER OPEN PRICE
+        if master.slaves.count > 1 and master.slaves.first == self
           master.slaves.not_closed.each do |slave|
             slave.update(stop_loss: slave.price_open)
           end
-        else
-          master.close if master.slaves.not_closed.count == 0
+        # else
+        #   master.close if master.slaves.not_closed.count == 0
         end
       end
     end
    
-    state :error do
-      def update_state(state)
-        # if master.trace.copy? 
-          if account.hedging?
-            master.erro
-          elsif master.slaves.not_error.not_closed.count == 0
-            master.erro
-          end
-        # end
-      end
-    
-    end
+    # state :error do
+    #   def update_state(state)
+    #     # if master.trace.copy? 
+    #       if account.hedging?
+    #         master.erro
+    #       elsif master.slaves.not_error.not_closed.count == 0
+    #         master.erro
+    #       end
+    #     # end
+    #   end    
+    # end
+
   end
 
   def set_sl_and_tp_order(take_profit=nil, stop_loss=nil)
@@ -113,7 +116,7 @@ class TransactionSlave < ApplicationRecord
   def api_request_attributes
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    order_trace = balances.first.order.trace.id
+    order_trace = master.order.trace.id
     msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
   end

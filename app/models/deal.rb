@@ -1,5 +1,5 @@
 class Deal < ApplicationRecord
-  attr_accessor :profit_copy, :profit_slave
+  attr_accessor :ordertype
 
   belongs_to :account, optional:true
   belongs_to :store, optional:true
@@ -8,11 +8,17 @@ class Deal < ApplicationRecord
   has_many :masters,  :class_name => "Transaction",      :foreign_key => "deal_id",  dependent: :destroy
   has_many :slaves,   :class_name => "TransactionSlave", :foreign_key => "deal_id",  dependent: :destroy
 
-
-  def masterss
-    self.send(:masters).select(:ticket)
+  def ordertype
+    case masters.try(:first).try(:ordertype)
+    when "0"
+      "BUY"
+    when "1"
+      "SELL"
+    else
+      'pending'
+    end
   end
-
+  
   # def profit_copy
   #   masters.closed.sum(&:profit)
   # end

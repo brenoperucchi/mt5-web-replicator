@@ -32,7 +32,7 @@ class Transaction < ApplicationRecord
   state_machine :initial => :pending do
     after_transition :pending => :executed, :do => :update_state
     after_transition :pending => :executed, :do => :update_state
-    after_transition :executed => :closed, :do => :update_state
+    # after_transition :executed => :closed, :do => :update_state
     # after_transition :executed => :closed, :do => :break_even
     after_transition [:pending, :executed, :closed] => :error, :do => :update_state
     # after_transition [:executed, :ordered] => :pending, :do => :update_state
@@ -63,7 +63,7 @@ class Transaction < ApplicationRecord
     state :closed do
       def update_state(state)
         # self.order.close
-        self.update(close_at: Time.zone.now)
+        # self.update(close_at: Time.zone.now)
         # self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
       end
     end
