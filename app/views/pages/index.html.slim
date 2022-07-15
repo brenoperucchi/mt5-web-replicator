@@ -1,129 +1,215 @@
-- @traces.each do |trace|                   
-  .flex.flex-col.col-span-full.sm:col-span-6.xl:col-span-4.bg-white.shadow-lg.rounded-sm.border.border-slate-200
-    header.px-5.py-4.border-b.border-slate-100
-      h2.font-semibold.text-slate-800 = trace.name
-    /! Card content
-    .flex.flex-col.h-full
-      /! Live visitors number
-      / .px-5.py-1
-      /   .flex.items-center
-      /     div
-      /       .text-sm.text-slate-800.pt-1      
-      /         = "Compra #{trace.transactions.executed.buy.count}"
-      / .px-5.py-1
-      /   .flex.items-center
-      /     div
-      /       .text-sm.text-slate-800.pt-1      
-      /         = "Venda #{trace.transactions.executed.sell.count}"
+.row
+  - @traces.each do |trace|                   
+    .col-md-6.col-lg-4
+      .card
+        .card-header
+          .card-header-left
+            h5 = trace.name
+          .card-header-right
+            i.icofont.icofont-spinner-alt-5
+        .card-body.p-b-30
+          h2= "R$ #{trace.masters.closed.sum(:profit)}"
+          p.text-muted.m-b-10 Total revenue
+          .row
+            .col-sm-6.col-xs-12
+              p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
+              span.text-muted Taxa de Retorno
+            .col-sm-6.col-xs-12
+              p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
+              span.text-muted Taxa de Perda
+            .col-sm-6.col-xs-12
+              p.text-c-green.f-16.m-0.f-w-400= "#{trace.pay_off(:masters).round(2)}"
+              span.text-muted PayOff
+            .col-sm-6.col-xs-12
+              p.text-c-blue.f-16.m-0.f-w-400= "#{trace.profit_factor(:masters).round(2)}"
+              span.text-muted Fator de Lucro
+            .col-sm-6.col-xs-12
+              p.text-c-green.f-16.m-0.f-w-400= "#{trace.drawdown(:masters).round(2)}"
+              span.text-muted Drawdown
+            .col-sm-6.col-xs-12
+              p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
+              span.text-muted Account Slaves
+            .col-sm-6.col-xs-12
+              p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.buy.count
+              span.text-muted Negociações BUY
+            .col-sm-6.col-xs-12
+              p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.sell.count
+              span.text-muted Negociações Sell
+            .col-sm-6.col-xs-12
+              p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.gain.count
+              span.text-muted Negociações Gain
+            .col-sm-6.col-xs-12
+              p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.loss.count
+              span.text-muted Negociações Loss
+  / .col-md-6.col-lg-4
+  /   .card
+  /     .card-header
+  /       h5 Customer satisfaction
+  /     .card-body
+  /       h2.text-c-green.m-0.text-center.f-w-400 89.73%
+  /       .progress.m-t-30.m-b-30
+  /         .progress-bar.bg-c-green style="width:85%" 
+  /       .row
+  /         .col-6.text-center
+  /           p.text-muted.m-b-5.f-14 previous
+  /           h6 56.75
+  /         .col-6.text-center
+  /           p.text-muted.m-b-5.f-14 Trend
+  /           h6 23.78
+  / .col-md-12.col-lg-4
+  /   .card.online-form
+  /     .card-header
+  /       h5 Online forms
+  /     .card-body
+  /       .row
+  /         .col-sm-6.m-b-10
+  /           h3 68
+  /           p.text-muted.m-0 New submissions
+  /         .col-sm-6.m-b-10
+  /           h3 234
+  /           p.text-muted.m-0 New contacts
+  /       .border-top.m-t-5.p-t-10
+  /         .row
+  /           .col-sm-4.m-t-5
+  /             span.f-16.f-w-400.m-0 472
+  /             p.text-muted.m-b-0 Active forms
+  /           .col-sm-4.m-t-5
+  /             span.f-16.f-w-400.m-0 623
+  /             p.text-muted.m-b-0 Forms views
+  /           .col-sm-4.m-t-5
+  /             span.f-16.f-w-400.m-0 34.6%
+  /             p.text-muted.m-b-0 Conversion
+  /! Project Report End
 
-      /! Chart built with Chart.js 3
-      /! Check out src/js/components/analytics-card-02.js for config
-        / div
-        /   /! Change the height attribute to adjust the chart height
-        /   canvas#analytics-card-02 height="70" width="389" 
-      /! Table
-      .grow.px-5.pt-2.pb-2
-        .overflow-x-auto
-          table.table-auto.w-full
-            /! Table header
-            thead.text-xs.text-slate-800
-              tr
-                th.text-xl.text-slate-800.text-left Master
-                th.text-xl.text-slate-800.text-right Slaves
-            /! Table body
-            tbody.text-sm.divide-y.divide-slate-100
-              /! Row
-              tr
-                td.text-2xl.font-bold.text-blue-500
-                  = "R$ #{trace.masters.closed.sum(:profit)}"
-                  .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.masters.closed.count}"
-                td.text-2xl.font-bold.text-blue-500.text-right
-                  = "R$ #{trace.slaves.closed.sum(:profit)}"
-                  .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.slaves.closed.count}"
-              tr
-                td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.profit_trade(:masters)} %"
-                  .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
-                td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.profit_trade(:slaves)} %"
-                  .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
-              tr
-                td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.loss_trade(:masters)} %"
-                  .text-sm.text-slate-800.pt-1 = "Taxa de perda"
-                td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.loss_trade(:slaves)} %"
-                  .text-sm.text-slate-800.pt-1 = "Taxa de perda"
-              tr
-                td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.pay_off(:masters).round(2)}"
-                  .text-sm.text-slate-800.pt-1 = "Payoff"
-                td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.pay_off(:slaves).round(2)}"
-                  .text-sm.text-slate-800.pt-1 = "Payoff"
-              tr
-                td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.profit_factor(:masters).round(2)}"
-                  .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
-                td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.profit_factor(:slaves).round(2)}"
-                  .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
-              tr
-                td.text-2xl.font-bold.text-blue-500
-                  = "#{trace.drawdown(:masters).round(2)}"
-                  .text-sm.text-slate-800.pt-1 = "Drawdown"
-                td.text-2xl.font-bold.text-blue-500.text-right
-                  = "#{trace.drawdown(:slaves).round(2)}"
-                  .text-sm.text-slate-800.pt-1 = "Drawdown"
-              tr
-                td.py-2
-                  .font-medium.text-left.text-slate-800 
-                    | Compra
-                    '
-                    = trace.masters.closed.buy.count
-                td.py-2
-                  .font-medium.text-right.text-slate-800 
-                    | Compra
-                    '
-                    = trace.slaves.closed.buy.count
-              /! Row
-              tr
-                td.py-2
-                  .font-medium.text-left.text-slate-800 
-                    | Venda
-                    '
-                    = trace.masters.closed.sell.count
-                td.py-2
-                  .font-medium.text-right.text-slate-800 
-                    | Venda
-                    '
-                    = trace.slaves.closed.sell.count
-              tr
-                td.py-2
-                  .font-medium.text-left.text-slate-800 
-                    | Gain
-                    '
-                    = trace.masters.closed.gain.count
-                td.py-2
-                  .font-medium.text-right.text-slate-800 
-                    | Gain
-                    '
-                    = trace.slaves.closed.gain.count
-              tr
-                td.py-2
-                  .font-medium.text-left.text-slate-800 
-                    | Loss
-                    '
-                    = trace.masters.closed.loss.count
 
-                td.py-2
-                  .font-medium.text-right.text-slate-800 
-                    | Loss
-                    '
-                    = trace.slaves.closed.loss.count
+
+
+/ - @traces.each do |trace|                   
+/   .flex.flex-col.col-span-full.sm:col-span-6.xl:col-span-4.bg-white.shadow-lg.rounded-sm.border.border-slate-200
+/     header.px-5.py-4.border-b.border-slate-100
+/       h2.font-semibold.text-slate-800 = trace.name
+/     /! Card content
+/     .flex.flex-col.h-full
+/       /! Live visitors number
+/       / .px-5.py-1
+/       /   .flex.items-center
+/       /     div
+/       /       .text-sm.text-slate-800.pt-1      
+/       /         = "Compra #{trace.transactions.executed.buy.count}"
+/       / .px-5.py-1
+/       /   .flex.items-center
+/       /     div
+/       /       .text-sm.text-slate-800.pt-1      
+/       /         = "Venda #{trace.transactions.executed.sell.count}"
+
+/       /! Chart built with Chart.js 3
+/       /! Check out src/js/components/analytics-card-02.js for config
+/         / div
+/         /   /! Change the height attribute to adjust the chart height
+/         /   canvas#analytics-card-02 height="70" width="389" 
+/       /! Table
+/       .grow.px-5.pt-2.pb-2
+/         .overflow-x-auto
+/           table.table-auto.w-full
+/             /! Table header
+/             thead.text-xs.text-slate-800
+/               tr
+/                 th.text-xl.text-slate-800.text-left Master
+/                 th.text-xl.text-slate-800.text-right Slaves
+/             /! Table body
+/             tbody.text-sm.divide-y.divide-slate-100
+/               /! Row
+/               tr
+/                 td.text-2xl.font-bold.text-blue-500
+/                   = "R$ #{trace.masters.closed.sum(:profit)}"
+/                   .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.masters.closed.count}"
+/                 td.text-2xl.font-bold.text-blue-500.text-right
+/                   = "R$ #{trace.slaves.closed.sum(:profit)}"
+/                   .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.slaves.closed.count}"
+/               tr
+/                 td.text-2xl.font-bold.text-blue-500
+/                   = "#{trace.profit_trade(:masters)} %"
+/                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
+/                 td.text-2xl.font-bold.text-blue-500.text-right
+/                   = "#{trace.profit_trade(:slaves)} %"
+/                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
+/               tr
+/                 td.text-2xl.font-bold.text-blue-500
+/                   = "#{trace.loss_trade(:masters)} %"
+/                   .text-sm.text-slate-800.pt-1 = "Taxa de perda"
+/                 td.text-2xl.font-bold.text-blue-500.text-right
+/                   = "#{trace.loss_trade(:slaves)} %"
+/                   .text-sm.text-slate-800.pt-1 = "Taxa de perda"
+/               tr
+/                 td.text-2xl.font-bold.text-blue-500
+/                   = "#{trace.pay_off(:masters).round(2)}"
+/                   .text-sm.text-slate-800.pt-1 = "Payoff"
+/                 td.text-2xl.font-bold.text-blue-500.text-right
+/                   = "#{trace.pay_off(:slaves).round(2)}"
+/                   .text-sm.text-slate-800.pt-1 = "Payoff"
+/               tr
+/                 td.text-2xl.font-bold.text-blue-500
+/                   = "#{trace.profit_factor(:masters).round(2)}"
+/                   .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
+/                 td.text-2xl.font-bold.text-blue-500.text-right
+/                   = "#{trace.profit_factor(:slaves).round(2)}"
+/                   .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
+/               tr
+/                 td.text-2xl.font-bold.text-blue-500
+/                   = "#{trace.drawdown(:masters).round(2)}"
+/                   .text-sm.text-slate-800.pt-1 = "Drawdown"
+/                 td.text-2xl.font-bold.text-blue-500.text-right
+/                   = "#{trace.drawdown(:slaves).round(2)}"
+/                   .text-sm.text-slate-800.pt-1 = "Drawdown"
+/               tr
+/                 td.py-2
+/                   .font-medium.text-left.text-slate-800 
+/                     | Compra
+/                     '
+/                     = trace.masters.closed.buy.count
+/                 td.py-2
+/                   .font-medium.text-right.text-slate-800 
+/                     | Compra
+/                     '
+/                     = trace.slaves.closed.buy.count
+/               /! Row
+/               tr
+/                 td.py-2
+/                   .font-medium.text-left.text-slate-800 
+/                     | Venda
+/                     '
+/                     = trace.masters.closed.sell.count
+/                 td.py-2
+/                   .font-medium.text-right.text-slate-800 
+/                     | Venda
+/                     '
+/                     = trace.slaves.closed.sell.count
+/               tr
+/                 td.py-2
+/                   .font-medium.text-left.text-slate-800 
+/                     | Gain
+/                     '
+/                     = trace.masters.closed.gain.count
+/                 td.py-2
+/                   .font-medium.text-right.text-slate-800 
+/                     | Gain
+/                     '
+/                     = trace.slaves.closed.gain.count
+/               tr
+/                 td.py-2
+/                   .font-medium.text-left.text-slate-800 
+/                     | Loss
+/                     '
+/                     = trace.masters.closed.loss.count
+
+/                 td.py-2
+/                   .font-medium.text-right.text-slate-800 
+/                     | Loss
+/                     '
+/                     = trace.slaves.closed.loss.count
 
                     
-      .px-2.py-2
+/       .px-2.py-2
       /   .flex.items-center
       /     /! Red dot
       /     .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 

@@ -1,7 +1,7 @@
 class PagesController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	# layout 'stisla'
-  layout 'tailwind_layout2'
+  layout 'mintone'
 
 	# before_action :sign_up!
 

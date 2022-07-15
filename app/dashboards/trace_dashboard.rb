@@ -40,8 +40,9 @@ class TraceDashboard < Administrate::BaseDashboard
   id
   active
   name
-  store
   kind
+  store
+  accounts
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
