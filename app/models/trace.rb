@@ -1,9 +1,11 @@
 require 'lib_enums'
+require 'algo_statistic'
 
 class Trace < ApplicationRecord
   ENUMS = %w(kind)
 
   include LibEnums
+  include AlgoStatistic
 
   enum kind:  {telegram: 0, copy: 1}
 
@@ -55,17 +57,19 @@ class Trace < ApplicationRecord
   def profit_trade(type)
     trades = self.send(type).closed.try(:count).to_f
     gain_trades = self.send(type).closed.try(:gain).try(:count).to_f
-    result = (gain_trades/trades)
-    result = (result * 100).round(2)
-    result.nan? ? 0 : result
+    AlgoStatistic.profit_trade(trades, gain_trades)
+    # result = (gain_trades/trades)
+    # result = (result * 100).round(2)
+    # result.nan? ? 0 : result
   end
 
   def loss_trade(type)
     trades = self.send(type).closed.try(:count).to_f
     loss_trades = self.send(type).closed.try(:loss).try(:count).to_f
-    result = (loss_trades/trades)
-    result = (result * 100).round(2)
-    result.nan? ? 0 : result
+    AlgoStatistic.loss_trade(trades, loss_trades)
+    # result = (loss_trades/trades)
+    # result = (result * 100).round(2)
+    # result.nan? ? 0 : result
   end
 
   def pay_off(type)
@@ -73,54 +77,58 @@ class Trace < ApplicationRecord
       gain_operation = self.send(type).closed.try(:gain).try(:count).to_f
       loss = self.send(type).closed.try(:loss).sum(:profit).abs
       loss_operation = self.send(type).closed.try(:loss).try(:count).to_f
-      result = (gain/gain_operation)/(loss/loss_operation)
-      result.nan? ? 0 : result
+      AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
+      # result = (gain/gain_operation)/(loss/loss_operation)
+      # result.nan? ? 0 : result
 
   end
 
   def profit_factor(type)
-    begin
-      (profit_trade(type)/loss_trade(type)*pay_off(type))    
-    rescue
-      0
-    end
+    AlgoStatistic.profit_factor(profit_trade(type), loss_trade(type), pay_off(type))
+    # begin
+    #   (profit_trade(type)/loss_trade(type)*pay_off(type))    
+    # rescue
+    #   0
+    # end
   end
 
 
   def drawdown(type)
-    drawdown_balance = 0
-    drawdown_max = 0
+    AlgoStatistic.drawdown(self.send(type).closed)
+
+    # drawdown_balance = 0
     # drawdown_max = 0
+    # # drawdown_max = 0
 
-    self.send(type).closed.order(created_at: :desc).each do |association|
-      value = association.profit.to_f
-      # puts "-------------------------------------"
-      # puts "Value   #{value.round(2)}"
-      # puts "Drawdown balance   #{drawdown_balance.round(2)}"
-      # puts "Drawdown max #{drawdown_max.round(2)}"
+    # self.send(type).closed.order(created_at: :desc).each do |association|
+    #   value = association.profit.to_f
+    #   # puts "-------------------------------------"
+    #   # puts "Value   #{value.round(2)}"
+    #   # puts "Drawdown balance   #{drawdown_balance.round(2)}"
+    #   # puts "Drawdown max #{drawdown_max.round(2)}"
 
-      if value < 0 
-        drawdown_balance = drawdown_balance + value
+    #   if value < 0 
+    #     drawdown_balance = drawdown_balance + value
         
-        if drawdown_balance < drawdown_max
-          drawdown_max = drawdown_balance
-        end
+    #     if drawdown_balance < drawdown_max
+    #       drawdown_max = drawdown_balance
+    #     end
 
-      else
-        # puts "Drawdown balance   #{drawdown_balance.round(2)}"
-        # puts "Value   #{value.round(2)}"
-        # puts "drawdown_balance + value = #{(drawdown_balance + value).round(2)} " + "> 0}"
-        drawdown_balance = drawdown_balance + value
-        if drawdown_balance > 0
-          drawdown_balance = 0 
-        end
-      end
-      # puts "Drawdown max #{drawdown_max.round(2)}"
-      # puts "Drawdown balance   #{drawdown_balance.round(2)}"
-      # puts "-------------------------------------"
-      # association.profit.to_f < 0 ? drawdown_balance = association.profit + drawdown_balance  : drawdown_balance
-    end
-    drawdown_max
+    #   else
+    #     # puts "Drawdown balance   #{drawdown_balance.round(2)}"
+    #     # puts "Value   #{value.round(2)}"
+    #     # puts "drawdown_balance + value = #{(drawdown_balance + value).round(2)} " + "> 0}"
+    #     drawdown_balance = drawdown_balance + value
+    #     if drawdown_balance > 0
+    #       drawdown_balance = 0 
+    #     end
+    #   end
+    #   # puts "Drawdown max #{drawdown_max.round(2)}"
+    #   # puts "Drawdown balance   #{drawdown_balance.round(2)}"
+    #   # puts "-------------------------------------"
+    #   # association.profit.to_f < 0 ? drawdown_balance = association.profit + drawdown_balance  : drawdown_balance
+    # end
+    # drawdown_max
   end
 
 end

@@ -13,7 +13,9 @@ Rails.application.routes.draw do
 
   resources :customers
   resources :stores
-  resources :pages, only: [:index]
+  resources :dashboards, only: [:index, :show]# do
+    # get 'show', on: :collection
+  # end
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations'

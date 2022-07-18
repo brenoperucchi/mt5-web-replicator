@@ -61,4 +61,35 @@ class Account < ApplicationRecord
     instrument_control.to_b ? instruments.find_by(symbol: symbol.try(:upcase)).try(:name) : symbol
   end
 
+
+  def profit_trade(type = :slaves)
+    trades = self.send(type).closed.try(:count).to_f
+    gain_trades = self.send(type).closed.try(:gain).try(:count).to_f
+    AlgoStatistic.profit_trade(trades, gain_trades)
+  end
+
+  def loss_trade(type = :slaves)
+    trades = self.send(type).closed.try(:count).to_f
+    loss_trades = self.send(type).closed.try(:loss).try(:count).to_f
+    AlgoStatistic.loss_trade(trades, loss_trades)
+  end
+
+  def pay_off(type = :slaves)
+    gain = self.send(type).closed.try(:gain).sum(:profit).abs
+    gain_operation = self.send(type).closed.try(:gain).try(:count).to_f
+    loss = self.send(type).closed.try(:loss).sum(:profit).abs
+    loss_operation = self.send(type).closed.try(:loss).try(:count).to_f
+    AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
+  end
+
+  def profit_factor(type = :slaves)
+    AlgoStatistic.profit_factor(profit_trade(type), loss_trade(type), pay_off(type))
+  end
+
+
+  def drawdown(type = :slaves)
+    AlgoStatistic.drawdown(self.send(type).closed)
+  end
+
+
 end

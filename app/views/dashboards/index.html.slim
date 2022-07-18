@@ -1,46 +1,47 @@
 .row
   - @traces.each do |trace|                   
     .col-md-6.col-lg-4
-      .card
-        .card-header
-          .card-header-left
-            h5 = trace.name
-          .card-header-right
-            i.icofont.icofont-spinner-alt-5
-        .card-body.p-b-30
-          h2= "R$ #{trace.masters.closed.sum(:profit)}"
-          p.text-muted.m-b-10 Total revenue
-          .row
-            .col-sm-6.col-xs-12
-              p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
-              span.text-muted Taxa de Retorno
-            .col-sm-6.col-xs-12
-              p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
-              span.text-muted Taxa de Perda
-            .col-sm-6.col-xs-12
-              p.text-c-green.f-16.m-0.f-w-400= "#{trace.pay_off(:masters).round(2)}"
-              span.text-muted PayOff
-            .col-sm-6.col-xs-12
-              p.text-c-blue.f-16.m-0.f-w-400= "#{trace.profit_factor(:masters).round(2)}"
-              span.text-muted Fator de Lucro
-            .col-sm-6.col-xs-12
-              p.text-c-green.f-16.m-0.f-w-400= "#{trace.drawdown(:masters).round(2)}"
-              span.text-muted Drawdown
-            .col-sm-6.col-xs-12
-              p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
-              span.text-muted Account Slaves
-            .col-sm-6.col-xs-12
-              p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.buy.count
-              span.text-muted Negociações BUY
-            .col-sm-6.col-xs-12
-              p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.sell.count
-              span.text-muted Negociações Sell
-            .col-sm-6.col-xs-12
-              p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.gain.count
-              span.text-muted Negociações Gain
-            .col-sm-6.col-xs-12
-              p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.loss.count
-              span.text-muted Negociações Loss
+      = link_to dashboard_path(trace) do
+        .card
+          .card-header
+            .card-header-left
+              h5 = trace.name
+            .card-header-right
+              i.icofont.icofont-spinner-alt-5
+          .card-body.p-b-30
+            h2= "R$ #{trace.masters.closed.sum(:profit)}"
+            p.text-muted.m-b-10 Total revenue
+            .row
+              .col-sm-6.col-xs-12
+                p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
+                span.text-muted Taxa de Retorno
+              .col-sm-6.col-xs-12
+                p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
+                span.text-muted Taxa de Perda
+              .col-sm-6.col-xs-12
+                p.text-c-green.f-16.m-0.f-w-400= "#{trace.pay_off(:masters).round(2)}"
+                span.text-muted PayOff
+              .col-sm-6.col-xs-12
+                p.text-c-blue.f-16.m-0.f-w-400= "#{trace.profit_factor(:masters).round(2)}"
+                span.text-muted Fator de Lucro
+              .col-sm-6.col-xs-12
+                p.text-c-green.f-16.m-0.f-w-400= "#{trace.drawdown(:masters).round(2)}"
+                span.text-muted Drawdown
+              .col-sm-6.col-xs-12
+                p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
+                span.text-muted Account Slaves
+              .col-sm-6.col-xs-12
+                p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.buy.count
+                span.text-muted Negociações BUY
+              .col-sm-6.col-xs-12
+                p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.sell.count
+                span.text-muted Negociações SELL
+              .col-sm-6.col-xs-12
+                p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.gain.count
+                span.text-muted Negociações GAIN
+              .col-sm-6.col-xs-12
+                p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.loss.count
+                span.text-muted Negociações LOSS
   / .col-md-6.col-lg-4
   /   .card
   /     .card-header

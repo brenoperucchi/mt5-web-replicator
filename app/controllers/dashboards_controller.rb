@@ -1,4 +1,4 @@
-class PagesController < ApplicationController
+class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	# layout 'stisla'
   layout 'mintone'
@@ -18,7 +18,19 @@ class PagesController < ApplicationController
 				# @executed = current_user.userable.store.transactions.executed
 				@traces = Store.first.traces.active
 				# @traces = current_user.userable.store.traces.active
+			end
+		end
+	end
 
+	def show
+		@trace = Trace.find(params[:id])
+		respond_to do |wants|
+			wants.html do
+				if @trace
+					render action: :show
+				else
+					redirect_to dashboards_path
+				end
 			end
 		end
 	end

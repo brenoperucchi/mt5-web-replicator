@@ -1,0 +1,110 @@
+.row
+  .col-md-12.col-lg-12
+    = link_to dashboard_path(@trace) do
+      .card
+        .card-header
+          .card-header-left
+            h5 = @trace.name
+            h7 Master Copy 
+          .card-header-right
+            i.icofont.icofont-spinner-alt-5
+        .card-body.p-b-30
+          h2= "R$ #{@trace.masters.closed.sum(:profit)}"
+          p.text-muted.m-b-10 Total revenue
+          .row
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
+              span.text-muted Taxa de Retorno
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
+              span.text-muted Taxa de Perda
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.pay_off(:masters).round(2)}"
+              span.text-muted PayOFF
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.profit_factor(:masters).round(2)}"
+              span.text-muted Fator de Lucro
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.drawdown(:masters).round(2)}"
+              span.text-muted Drawdown
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
+              span.text-muted Account Slaves
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= @trace.masters.closed.buy.count
+              span.text-muted Negociações BUY
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= @trace.masters.closed.sell.count
+              span.text-muted Negociações SELL
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= @trace.masters.closed.gain.count
+              span.text-muted Negociações GAIN
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= @trace.masters.closed.loss.count
+              span.text-muted Negociações LOSS
+
+
+.row
+  .col-md-12
+    .card.table-card.latest-activity-card
+      .card-header
+        h5 Account Slaves
+        .card-header-right
+          / .btn-group.card-option
+          /   button.btn.dropdown-toggle aria-expanded="false" aria-haspopup="true" data-toggle="dropdown" type="button" 
+          /     i.feather.icon-more-horizontal
+          /   ul.list-unstyled.card-option.dropdown-menu.dropdown-menu-right
+          /     li.dropdown-item.full-card
+          /       a href="#!" 
+          /         span
+          /           i.feather.icon-maximize
+          /           | maximize
+          /         span style="display:none" 
+          /           i.feather.icon-minimize
+          /           | Restore
+          /     li.dropdown-item.minimize-card
+          /       a href="#!" 
+          /         span
+          /           i.feather.icon-minus
+          /           | collapse
+          /         span style="display:none" 
+          /           i.feather.icon-plus
+          /           | expand
+          /     li.dropdown-item.reload-card
+          /       a href="#!" 
+          /         i.feather.icon-refresh-cw
+          /         | reload
+          /     li.dropdown-item.close-card
+          /       a href="#!" 
+          /         i.feather.icon-trash
+          /         | remove
+      .card-body
+        .table-responsive
+          table.table.table-hover.table-borderless
+            thead
+              tr
+                th Account
+                th Tx Retorno
+                th Tx Perda
+                th PayOFF
+                th Fator Lucro
+                th Drawdown
+                th Total 
+                th BUY
+                th SELL
+                th GAIN
+                th LOSS
+            tbody
+              - @trace.accounts.slave.enable.each do |slave|
+                tr
+                  td = slave.name
+                  td = slave.profit_trade
+                  td = slave.loss_trade
+                  td = slave.pay_off.round(2)
+                  td = slave.profit_factor.round(2)
+                  td = slave.drawdown.round(2)
+                  td = slave.slaves.count
+                  td = slave.slaves.buy.count
+                  td = slave.slaves.sell.count
+                  td = slave.slaves.gain.count
+                  td = slave.slaves.loss.count
