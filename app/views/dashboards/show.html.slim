@@ -1,3 +1,23 @@
+/! [ breadcrumb ] start
+.page-header
+  .page-block
+    .row.align-items-center
+      .col-md-6
+        .page-header-title
+          h5.m-b-10 Trace Dashboards
+        ul.breadcrumb
+          li.breadcrumb-item
+            a href="/admin" 
+              i.feather.icon-home
+          li.breadcrumb-item
+            a href="/dashboards"  Dashboards
+      /!
+        | <div class="col-md-6 text-right"
+        | <button type="button" class="btn btn-primary m-r-5"><i class="feather icon-plus"></i> Filter</button
+        | <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button
+        | </div
+/! [ breadcrumb ] end
+
 .row
   .col-md-12.col-lg-12
     = link_to dashboard_path(@trace) do

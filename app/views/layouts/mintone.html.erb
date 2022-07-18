@@ -43,27 +43,6 @@
 		<!-- [ Main Content ] start -->
 		<div class="pcoded-main-container">
 		    <div class="pcoded-content">
-		        <!-- [ breadcrumb ] start -->
-		        <div class="page-header">
-		            <div class="page-block">
-		                <div class="row align-items-center">
-		                    <div class="col-md-6">
-		                        <div class="page-header-title">
-		                            <h5 class="m-b-10">Trace Dashboards</h5>
-		                        </div>
-		                        <ul class="breadcrumb">
-		                            <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
-		                            <li class="breadcrumb-item"><a href="#!">Dashboards</a></li>
-		                        </ul>
-		                    </div>
-		<!--                     <div class="col-md-6 text-right">
-		                        <button type="button" class="btn btn-primary m-r-5"><i class="feather icon-plus"></i> Filter</button>
-		                        <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button>
-		                    </div> -->
-		                </div>
-		            </div>
-		        </div>
-		        <!-- [ breadcrumb ] end -->
 		        <%= content_for?(:content) ? yield(:content) : yield %>
 		    </div>
 		</div>
