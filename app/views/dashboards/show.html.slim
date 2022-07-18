@@ -10,7 +10,7 @@
             i.icofont.icofont-spinner-alt-5
         .card-body.p-b-30
           h2= "R$ #{@trace.masters.closed.sum(:profit)}"
-          p.text-muted.m-b-10 Total revenue
+          p.text-muted.m-b-10 LUCRO
           .row
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
@@ -30,6 +30,9 @@
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
               span.text-muted Account Slaves
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= "#{@trace.masters.closed.count}"
+              span.text-muted Total
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= @trace.masters.closed.buy.count
               span.text-muted Negociações BUY
@@ -84,6 +87,7 @@
             thead
               tr
                 th Account
+                th Lucro
                 th Tx Retorno
                 th Tx Perda
                 th PayOFF
@@ -98,6 +102,7 @@
               - @trace.accounts.slave.enable.each do |slave|
                 tr
                   td = slave.name
+                  td = slave.slaves.closed.sum(:profit)
                   td = slave.profit_trade
                   td = slave.loss_trade
                   td = slave.pay_off.round(2)
