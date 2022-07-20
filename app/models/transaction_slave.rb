@@ -39,6 +39,10 @@ class TransactionSlave < ApplicationRecord
   scope :loss,  ->{where('transaction_slaves.profit <= 0')}
   scope :buy,   ->{where(ordertype: 0)}
   scope :sell,  ->{where(ordertype: 1)}
+  scope :tracer, ->{where("transaction_slaves.trace_id = ?", trace.id)} 
+  scope :contract_out, ->(date) {where("contract_out_date >= ? AND contract_out_date < ?", date.beginning_of_month, date.end_of_month)}
+
+
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], if: Proc.new { account.hedging? }

@@ -132,9 +132,9 @@
                   td = slave.pay_off.round(2)
                   td = slave.profit_factor.round(2)
                   td = slave.drawdown.round(2)
-                  td = slave.slaves.where(state: [:closed, :error]).count
-                  td = slave.slaves.closed.buy.count
-                  td = slave.slaves.closed.sell.count
-                  td = slave.slaves.closed.gain.count
-                  td = slave.slaves.closed.loss.count
-                  td = slave.slaves.error.count
+                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
+                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.buy.count
+                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.sell.count
+                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.gain.count
+                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.loss.count
+                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).error.count
