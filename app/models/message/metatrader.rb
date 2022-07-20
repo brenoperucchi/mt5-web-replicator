@@ -28,11 +28,11 @@ class Message::Metatrader < Message
         self.trace.accounts.slave.enable.each do |account|
           # Order All Closed
           if content['orders'].blank?
-            account.slaves.where(state: ['pending', 'executed']).map(&:remove) if account.slaves
+            account.slaves.where("transaction_slaves.trace_id = ?", trace.id).where(state: ['pending', 'executed']).map(&:remove) if account.slaves
 
           ### Order Opened and Modify
           else
-            account.slaves.executed.each do |slave|
+            account.slaves.where("transaction_slaves.trace_id = ?", trace.id).executed.each do |slave|
               if content['orders'].flatten.detect{|x| x['order_id'].to_s == slave.ticket_master}
                 next
               else
