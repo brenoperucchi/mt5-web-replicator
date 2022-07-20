@@ -51,20 +51,23 @@
               p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
               span.text-muted Account Slaves
             .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.masters.closed.count}"
+              p.f-20.m-0.f-w-400= "#{@trace.masters.where(state: [:closed, :error]).count}"
               span.text-muted Total
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= @trace.masters.closed.buy.count
-              span.text-muted Negociações BUY
+              span.text-muted Operações BUY
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= @trace.masters.closed.sell.count
-              span.text-muted Negociações SELL
+              span.text-muted Operações SELL
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= @trace.masters.closed.gain.count
-              span.text-muted Negociações GAIN
+              span.text-muted Operações GAIN
             .col-sm-4.col-xs-12
               p.f-20.m-0.f-w-400= @trace.masters.closed.loss.count
-              span.text-muted Negociações LOSS
+              span.text-muted Operações LOSS
+            .col-sm-4.col-xs-12
+              p.f-20.m-0.f-w-400= @trace.masters.error.count
+              span.text-muted Operações Erro
 
 
 .row
@@ -114,10 +117,11 @@
                 th Fator Lucro
                 th Drawdown
                 th Total 
-                th BUY
-                th SELL
-                th GAIN
-                th LOSS
+                th BUY (closed)
+                th SELL (closed)
+                th GAIN (closed)
+                th LOSS (closed)
+                th Error
             tbody
               - @trace.accounts.slave.enable.each do |slave|
                 tr
@@ -128,8 +132,9 @@
                   td = slave.pay_off.round(2)
                   td = slave.profit_factor.round(2)
                   td = slave.drawdown.round(2)
-                  td = slave.slaves.closed.count
+                  td = slave.slaves.where(state: [:closed, :error]).count
                   td = slave.slaves.closed.buy.count
                   td = slave.slaves.closed.sell.count
                   td = slave.slaves.closed.gain.count
                   td = slave.slaves.closed.loss.count
+                  td = slave.slaves.error.count

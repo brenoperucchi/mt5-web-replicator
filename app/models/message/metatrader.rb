@@ -36,6 +36,7 @@ class Message::Metatrader < Message
               if content['orders'].flatten.detect{|x| x['order_id'].to_s == slave.ticket_master}
                 next
               else
+                slave.loggings.create(content: content['orders'], state: "REMOVE")
                 slave.remove
               end
             end
@@ -50,37 +51,6 @@ class Message::Metatrader < Message
               if account_mode == "HEDGING"
                 orders.reverse.each do |order|
                   self.create_order(order, account, account_copy, symbol)
-                  # # balance_order = account.orders.where(content_id: order['order_id']).try(:last)  
-                  # balance_order = account.orders.find_by(content_id: order['order_id'])
-
-                  # # transaction = balance_order.transactions.where(ticket: order['order_id']).try(:first)  
-                  # api_transaction_attributes = SerializerAPITransaction.new(order).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace, account:account)
-                  # if balance_order.nil?
-                  #   balance_order = account.orders.create(message:self, trace: trace, content_id:api_transaction_attributes[:ticket], symbol: instrument, account:account)
-                  # end
-                  # @transaction = transactions.find_by(ticket: order['order_id'])
-                  # if @transaction.nil?
-                  #   @transaction = transactions.create(api_transaction_attributes)
-                  # else
-                  #     balance_order.transaction_ids = @transaction.id
-                  # end
-                  #   # deal = Deal.find_or_create_by(ticket: order['order_id'], symbol:instrument, account: account_copy, store: self.try(:store), trace:self.trace)
-                  #   deal = Deal.create_with(ticket: order['order_id'], symbol:instrument, account: account_copy, store: self.try(:store), trace:self.trace).find_or_create_by(ticket: order['order_id'])
-                  #   # master = Transaction.find_by(ticket: order['order_id'], deal:deal)
-                  #   @transaction.update(deal: deal)
-                                        
-                  #   api_attributes = SerializerAPITransactionSlave.new(order).api_attributes.merge(symbol: instrument, price_request:@transaction.price_open, profit:nil, account:account, price_open:nil, price_closed:nil)
-                  #   comment = api_attributes[:ticket_master]
-                  #   # comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
-                  #   slave = balance_order.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account, master:@transaction, deal:deal))
-
-                  #   @transaction.execute if @transaction.valid?
-                  # if order['state_meta'] == "modify"
-                  #   slave = balance_order.slaves.find_by(ticket_master: order['order_id'])
-                  #   slave.update(take_profit:order['takeprofit'], stop_loss:order['stoploss'])
-                  #   # behavior logging problem if update transaction slave lot 
-                  #   # slave.update(lot: order['lot'], take_profit:order['takeprofit'], stop_loss:order['stoploss'])
-                  # end
                 end
               elsif account_mode == "NETTING" 
                 balance_order = account.orders.where(symbol: instrument).where.not(state: :closed).try(:last)

@@ -42,13 +42,15 @@ module API
               account.loggings.create(content:params, state: action.try(:upcase))
               trace = account.try(:trace_copy)
 
-              if account.magics_accept.blank?
-                magic_number = true
-              else
-                magic_number = account.magics_accept.try(:split).try(:include?, content['magic_number'])
-              end
+              # if account.magics_accept.blank?
+              #   magic_number = true
+              # else
+              #   binding.pry
+              #   magic_number = account.magics_accept.try(:split).try(:include?, content['magic_number'])
+              # end
 
-              if magic_number and trace #and not content.blank? and content.is_a?(Hash)
+              # if magic_number and trace #and not content.blank? and content.is_a?(Hash)
+              if trace #and not content.blank? and content.is_a?(Hash)
                 # epoch_time = content['open_at'].split(".").first.to_i
                 # d = Time.at(epoch_time).utc.to_datetime
                 # content_at = Time.new(d.year, d.month, d.day,d.hour,d.minute,d.second, "-03:00").to_datetime

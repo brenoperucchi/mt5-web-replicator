@@ -19,6 +19,7 @@ class Transaction < ApplicationRecord
   scope :closed,      ->{where(state: 'closed')}
   scope :finish,      ->{where(state: ['closed', 'error'])}
   scope :executed,    ->{where(state: 'executed')}
+  scope :error,    ->{where(state: 'error')}
   scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
   scope :buy,   ->{where(ordertype: 0)}
   scope :sell,  ->{where(ordertype: 1)}
@@ -69,27 +70,26 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def close_order
-    slaves.not_closed.each do |slave|
-      slave.remove
-    end
-  end
+  # def close_order
+  #   slaves.not_closed.each do |slave|
+  #     slave.remove
+  #   end
+  # end
 
-  def close_copy
-    # last = slaves.last
-    slaves.not_closed.each do |slave|
-      # if slave.id != slaves.first.id
-      #   slave.update(state: "closed")
-      if slave.id == slaves.first.id
-        # comment = "#{order.trace.id}-#{self.id}-#{last.id}"
-        # slave.attributes = {comment: comment}
-        slave.remove
-      else
-        slave.update(state: "closed")
-      end
-    end
-    
-  end
+  # def close_copy
+  #   # last = slaves.last
+  #   slaves.not_closed.each do |slave|
+  #     # if slave.id != slaves.first.id
+  #     #   slave.update(state: "closed")
+  #     if slave.id == slaves.first.id
+  #       # comment = "#{order.trace.id}-#{self.id}-#{last.id}"
+  #       # slave.attributes = {comment: comment}
+  #       slave.remove
+  #     else
+  #       slave.update(state: "closed")
+  #     end
+  #   end    
+  # end
 
   def set_all_sl_and_tp_order(take_profit=nil, stop_loss=nil)
     self.slaves.each{|s| s.set_sl_and_tp_order(take_profit, stop_loss)}

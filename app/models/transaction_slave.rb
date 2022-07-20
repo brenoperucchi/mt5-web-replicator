@@ -13,6 +13,7 @@ class TransactionSlave < ApplicationRecord
   enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6}
 
   belongs_to :account
+  belongs_to :trace
   belongs_to :deal, optional:true
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
@@ -117,7 +118,7 @@ class TransactionSlave < ApplicationRecord
   def api_request_attributes
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    order_trace = master.order.trace.id
+    order_trace = self.trace_id
     msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
     return msg
   end

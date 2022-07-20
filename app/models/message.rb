@@ -12,31 +12,33 @@ class Message < ApplicationRecord
 
 	def create_order(order_params, account, account_copy, symbol)
 	  order_attributes = order_params
-	  # message_id = attributes[:message_id]
-	  # account_id = attributes[:account_id]
 	  instrument = account.instrument(symbol)
 	  ticket = order_attributes['order_id']
 
-	  order = store.orders.find_by(content_id: ticket)
- 		serializer_attributes = SerializerAPITransaction.new(order_attributes).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace, account_id:account_id) 	
+	  order = store.orders.find_by(content_id: ticket, account:account)
+ 		serializer_attributes = SerializerAPITransaction.new(order_attributes).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace, account:account_copy) 	
 	  if order.nil?
 	  	order = store.orders.create(message:self, trace: trace, content_id:ticket, symbol: instrument, account:account)
 	  end
-	  transaction = Transaction.create_with(serializer_attributes.merge(order:order)).find_or_create_by(ticket: ticket)
-	  order.transaction_ids = transaction.id
+	  transaction = Transaction.find_by(ticket: ticket)
+	  if order.transactions.empty?
+	  	transaction ||= order.transactions.create(serializer_attributes) 
+	  	transaction.balances.update(account:account_copy)
+	  	order.transaction_ids = transaction.id
+	  end
+	  # transaction = order.transactions.create_with(serializer_attributes.merge(order:order, account:account_copy)).find_or_create_by(ticket: ticket)
+	  # order.transaction_ids = transaction.id
 	  # order.accounts << account
-
+	  # order.account_ids = account.id
+	  # transaction.account_ids = account_copy.id
 
     deal = Deal.create_with(ticket: ticket, symbol:instrument, account: account_copy, store: self.try(:store), trace:self.trace).find_or_create_by(ticket: ticket)
     transaction.update(deal: deal)
                         
     serializer_attributes_slave = SerializerAPITransactionSlave.new(order_attributes).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil, price_closed:nil)
     comment = serializer_attributes_slave[:ticket_master]
-    # binding.pry
-    slave = order.slaves.create(serializer_attributes_slave.merge(symbol:instrument, comment: comment, account:account, master:transaction, deal:deal))
-    # slave.accounts << account
-    # binding.pry
-    # slave.accounts << account
+    slave = order.slaves.create(serializer_attributes_slave.merge(symbol:instrument, comment: comment, account:account, master:transaction, deal:deal, trace: self.trace))
+    slave.balances.update(account:account)
 
     transaction.execute if transaction.valid?
 	  if order['state_meta'] == "modify"

@@ -28,10 +28,10 @@ class Order < ApplicationRecord
   has_one_attached :image
 
   state_machine :initial => :pending do
-    after_transition :pending => :prepared, :do => :update_state
-    after_transition :prepared => :executed, :do => :update_state
-    before_transition :executed => :closed, :do => :close_state?
-    after_transition [:prepared, :executed] => :pending, :do => :update_state
+    # after_transition :pending => :prepared, :do => :update_state
+    # after_transition :prepared => :executed, :do => :update_state
+    # before_transition :executed => :closed, :do => :close_state?
+    # after_transition [:prepared, :executed] => :pending, :do => :update_state
 
     event :prepare do
       # transition :pending => :prepared, :if => lambda { |order| order.restrict_symbol? }
