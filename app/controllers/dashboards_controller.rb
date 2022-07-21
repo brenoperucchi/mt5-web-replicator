@@ -42,6 +42,9 @@ class DashboardsController < ApplicationController
 
 	def account
 		@account = Account.find(params[:id])
+    @account.search_date_begin = @date_begin
+    @account.search_date_end = @date_end
+
 		@trace = Trace.find(params[:trace_id])
 		respond_to do |wants|
 			wants.html do
