@@ -2,6 +2,9 @@ require 'lib_enums'
 require 'algo_statistic'
 
 class Trace < ApplicationRecord
+
+  attr_accessor :search_date_begin, :search_date_end
+
   ENUMS = %w(kind)
 
   include LibEnums
@@ -53,19 +56,37 @@ class Trace < ApplicationRecord
     Trace.all.map(&:off)
   end
 
+  def masters_profit
+    masters_filter(masters.closed).sum(:profit)
+  end
+
+  def masters_total
+    masters_filter(masters.where(state: [:closed, :error]))
+  end
+
+  def masters_scope(type, scope)
+    masters_filter(self.send(type).closed).send(scope)
+  end
+
+
+  def masters_filter(scoped)
+    if self.search_date_begin and self.search_date_end
+      scoped.where(created_at: search_date_begin..search_date_end)
+    else
+      scoped
+    end
+  end
+
 
   def profit_trade(type)
-    trades = self.send(type).closed.try(:count).to_f
-    gain_trades = self.send(type).closed.try(:gain).try(:count).to_f
+    trades = masters_filter(self.send(type).closed).try(:count).to_f
+    gain_trades = masters_filter(self.send(type).closed.try(:gain)).try(:count).to_f
     AlgoStatistic.profit_trade(trades, gain_trades)
-    # result = (gain_trades/trades)
-    # result = (result * 100).round(2)
-    # result.nan? ? 0 : result
   end
 
   def loss_trade(type)
-    trades = self.send(type).closed.try(:count).to_f
-    loss_trades = self.send(type).closed.try(:loss).try(:count).to_f
+    trades = masters_filter(self.send(type).closed).try(:count).to_f
+    loss_trades = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
     AlgoStatistic.loss_trade(trades, loss_trades)
     # result = (loss_trades/trades)
     # result = (result * 100).round(2)
@@ -73,10 +94,10 @@ class Trace < ApplicationRecord
   end
 
   def pay_off(type)
-      gain = self.send(type).closed.try(:gain).sum(:profit).abs
-      gain_operation = self.send(type).closed.try(:gain).try(:count).to_f
-      loss = self.send(type).closed.try(:loss).sum(:profit).abs
-      loss_operation = self.send(type).closed.try(:loss).try(:count).to_f
+      gain = masters_filter(self.send(type).closed).try(:gain).sum(:profit).abs
+      gain_operation = masters_filter(self.send(type).closed).try(:gain).try(:count).to_f
+      loss = masters_filter(self.send(type).closed).try(:loss).sum(:profit).abs
+      loss_operation = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
       AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
       # result = (gain/gain_operation)/(loss/loss_operation)
       # result.nan? ? 0 : result
@@ -94,7 +115,8 @@ class Trace < ApplicationRecord
 
 
   def drawdown(type)
-    AlgoStatistic.drawdown(self.send(type).closed)
+    scoped = masters_filter(masters_filter(self.send(type).closed).order(created_at: :desc))
+    AlgoStatistic.drawdown(scoped)
 
     # drawdown_balance = 0
     # drawdown_max = 0

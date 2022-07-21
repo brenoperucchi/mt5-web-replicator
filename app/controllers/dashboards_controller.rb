@@ -1,5 +1,6 @@
 class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
+	before_action :filter_date
 	# layout 'stisla'
   layout 'mintone'
 
@@ -24,6 +25,10 @@ class DashboardsController < ApplicationController
 
 	def show
 		@trace = Trace.find(params[:id])
+		@trace.search_date_begin = @date_begin
+		@trace.search_date_end = @date_end
+
+
 		respond_to do |wants|
 			wants.html do
 				if @trace
@@ -47,7 +52,15 @@ class DashboardsController < ApplicationController
 				end
 			end
 		end
+	end
 
+
+	def filter_date
+		if params[:datefilter].present?
+			dates = params[:datefilter].split("-")
+			@date_begin = dates[0].strip().to_datetime
+			@date_end = dates[1].strip().to_datetime
+		end
 	end
 
 end

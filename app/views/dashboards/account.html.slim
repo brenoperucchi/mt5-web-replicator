@@ -1,3 +1,24 @@
+/! [ breadcrumb ] start
+.page-header
+  .page-block
+    .row.align-items-center
+      .col-md-6
+        .page-header-title
+          h5.m-b-10 = @account.name
+        ul.breadcrumb
+          li.breadcrumb-item
+            a href="/admin" 
+              i.feather.icon-home
+          li.breadcrumb-item
+            a href="/dashboards"  Dashboards
+          li.breadcrumb-item
+            a href="#{dashboard_url(@trace.id)}" = @trace.name
+      /!
+        | <div class="col-md-6 text-right"
+        | <button type="button" class="btn btn-primary m-r-5"><i class="feather icon-plus"></i> Filter</button
+        | <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button
+        | </div
+/! [ breadcrumb ] end
 .row
   .col-md-12
     .card.table-card.latest-activity-card
@@ -53,7 +74,7 @@
                 th Open At
                 th Closet At
             tbody
-              - @account.slaves.closed.each do |slave|
+              - @account.slaves.where('transaction_slaves.trace_id = ?', @trace.id).closed.each do |slave|
                 tr
                   td = slave.id
                   td = slave.ticket_master

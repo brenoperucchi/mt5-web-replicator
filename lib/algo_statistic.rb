@@ -29,7 +29,7 @@ module AlgoStatistic
 	  drawdown_balance = 0
 	  drawdown_max = 0
 
-	  transactions.order(created_at: :desc).each do |association|
+	  transactions.each do |association|
 	    value = association.profit.to_f
 	    if value < 0 
 	      drawdown_balance = drawdown_balance + value

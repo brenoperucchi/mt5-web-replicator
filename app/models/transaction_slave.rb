@@ -33,14 +33,14 @@ class TransactionSlave < ApplicationRecord
   scope :opened,    ->{where(state: [:pending, :executed, :remove])}
   scope :entire,    ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
   scope :not_closed,  ->{where.not(state: ['closed', 'deleted'])}
+  scope :closed_error,  ->{where.not(state: ['closed', 'error'])}
   scope :not_error,  ->{where.not(state: ['error'])}
   scope :not_gain,  ->{where.not('transaction_slaves.profit >= 0')}
   scope :gain,  ->{where('transaction_slaves.profit >= 0')}
   scope :loss,  ->{where('transaction_slaves.profit <= 0')}
   scope :buy,   ->{where(ordertype: 0)}
   scope :sell,  ->{where(ordertype: 1)}
-  scope :tracer, ->{where("transaction_slaves.trace_id = ?", trace.id)} 
-  scope :contract_out, ->(date) {where("contract_out_date >= ? AND contract_out_date < ?", date.beginning_of_month, date.end_of_month)}
+  # scope :tracer, ->{where("transaction_slaves.trace_id = ?", trace.id)} 
 
 
 

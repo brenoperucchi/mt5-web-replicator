@@ -17,4 +17,7 @@
 //= require mintone/vendor-all.min.js
 //= require mintone/bootstrap.min.js
 //= require mintone/pcoded.min.js
+//= require mintone/moment.min.js
+//= require mintone/daterangepicker.js
+//= require mintone/ac-datepicker.js
 // require mintone/dashboard-server.js

@@ -1,5 +1,7 @@
 require 'lib_enums'
 class Account < ApplicationRecord
+  attr_accessor :search_date_begin, :search_date_end
+
   ENUMS = %w(state kind meta_mode meta_margin_mode)
 
   include Balance::Base
@@ -62,23 +64,40 @@ class Account < ApplicationRecord
   end
 
 
+  def masters_filter(scoped)
+    if self.search_date_begin and self.search_date_end
+      scoped.where(created_at: search_date_begin..search_date_end)
+    else
+      scoped
+    end
+  end
+
+  def slaves_scope(type, scope, trace)
+
+    masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
+  end
+
+  def slave_profit
+    masters_filter(slaves.closed).sum(:profit)
+  end
+
   def profit_trade(type = :slaves)
-    trades = self.send(type).closed.try(:count).to_f
-    gain_trades = self.send(type).closed.try(:gain).try(:count).to_f
+    trades = masters_filter(self.send(type).closed).try(:count).to_f
+    gain_trades = masters_filter(self.send(type).closed).try(:gain).try(:count).to_f
     AlgoStatistic.profit_trade(trades, gain_trades)
   end
 
   def loss_trade(type = :slaves)
-    trades = self.send(type).closed.try(:count).to_f
-    loss_trades = self.send(type).closed.try(:loss).try(:count).to_f
+    trades = masters_filter(self.send(type).closed).try(:count).to_f
+    loss_trades = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
     AlgoStatistic.loss_trade(trades, loss_trades)
   end
 
   def pay_off(type = :slaves)
-    gain = self.send(type).closed.try(:gain).sum(:profit).abs
-    gain_operation = self.send(type).closed.try(:gain).try(:count).to_f
-    loss = self.send(type).closed.try(:loss).sum(:profit).abs
-    loss_operation = self.send(type).closed.try(:loss).try(:count).to_f
+    gain = masters_filter(self.send(type).closed).try(:gain).sum(:profit).abs
+    gain_operation = masters_filter(self.send(type).closed).try(:gain).try(:count).to_f
+    loss = masters_filter(self.send(type).closed).try(:loss).sum(:profit).abs
+    loss_operation = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
 
@@ -88,7 +107,8 @@ class Account < ApplicationRecord
 
 
   def drawdown(type = :slaves)
-    AlgoStatistic.drawdown(self.send(type).closed)
+    scoped = masters_filter(masters_filter(self.send(type).closed).order(created_at: :desc))
+    AlgoStatistic.drawdown(scoped)
   end
 
 

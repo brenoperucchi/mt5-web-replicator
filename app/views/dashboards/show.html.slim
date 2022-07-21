@@ -4,7 +4,7 @@
     .row.align-items-center
       .col-md-6
         .page-header-title
-          h5.m-b-10 Trace Dashboards
+          h5.m-b-10 = @trace.name
         ul.breadcrumb
           li.breadcrumb-item
             a href="/admin" 
@@ -19,55 +19,68 @@
 /! [ breadcrumb ] end
 
 .row
-  .col-md-12.col-lg-12
-    = link_to dashboard_path(@trace) do
-      .card
-        .card-header
-          .card-header-left
-            h5 = @trace.name
-            h7 Master Copy 
-          .card-header-right
-            i.icofont.icofont-spinner-alt-5
-        .card-body.p-b-30
-          h2= "R$ #{@trace.masters.closed.sum(:profit)}"
-          p.text-muted.m-b-10 LUCRO
+  /! [ form-element ] start
+  .col-sm-12
+    .card
+      .card-body
+        form
           .row
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
-              span.text-muted Taxa de Retorno
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
-              span.text-muted Taxa de Perda
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.pay_off(:masters).round(2)}"
-              span.text-muted PayOFF
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.profit_factor(:masters).round(2)}"
-              span.text-muted Fator de Lucro
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.drawdown(:masters).round(2)}"
-              span.text-muted Drawdown
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
-              span.text-muted Account Slaves
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= "#{@trace.masters.where(state: [:closed, :error]).count}"
-              span.text-muted Total
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= @trace.masters.closed.buy.count
-              span.text-muted Operações BUY
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= @trace.masters.closed.sell.count
-              span.text-muted Operações SELL
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= @trace.masters.closed.gain.count
-              span.text-muted Operações GAIN
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= @trace.masters.closed.loss.count
-              span.text-muted Operações LOSS
-            .col-sm-4.col-xs-12
-              p.f-20.m-0.f-w-400= @trace.masters.error.count
-              span.text-muted Operações Erro
+            .col-md-3
+                .form-group
+                  h5 Filtrar Datas
+                  input.form-control name="datefilter" type="text" value="" /
+            .col-md-12
+                button.btn.btn-primary type="submit"  Submit
+
+.row
+  .col-md-12.col-lg-12
+    .card
+      .card-header
+        .card-header-left
+          h5 = @trace.name
+          h7 Master Copy 
+        .card-header-right
+          i.icofont.icofont-spinner-alt-5
+      .card-body.p-b-30
+        h2= "R$ #{@trace.masters_profit}"
+        p.text-muted.m-b-10 LUCRO
+        .row
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
+            span.text-muted Taxa de Retorno
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
+            span.text-muted Taxa de Perda
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.pay_off(:masters).round(2)}"
+            span.text-muted PayOFF
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.profit_factor(:masters).round(2)}"
+            span.text-muted Fator de Lucro
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.drawdown(:masters).round(2)}"
+            span.text-muted Drawdown
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
+            span.text-muted Account Slaves
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.masters_total.count}"
+            span.text-muted Total
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :buy).count
+            span.text-muted Operações BUY
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :sell).count
+            span.text-muted Operações SELL
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :gain).count
+            span.text-muted Operações GAIN
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :loss).count
+            span.text-muted Operações LOSS
+          .col-sm-4.col-xs-12
+            p.f-20.m-0.f-w-400= @trace.masters.error.count
+            span.text-muted Operações Error
 
 
 .row
@@ -123,25 +136,29 @@
                 th LOSS (closed)
                 th Error
             tbody
-              - @trace.accounts.slave.enable.each do |slave|
-                tr[data-href="#{account_dashboards_url(slave, @trace)}"]
-                  td = slave.name
-                  td = slave.slaves.closed.sum(:profit)
-                  td = slave.profit_trade
-                  td = slave.loss_trade
-                  td = slave.pay_off.round(2)
-                  td = slave.profit_factor.round(2)
-                  td = slave.drawdown.round(2)
-                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
-                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.buy.count
-                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.sell.count
-                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.gain.count
-                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.loss.count
-                  td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).error.count
+              - @trace.accounts.slave.enable.each do |account|
+                - account.search_date_begin = @date_begin
+                - account.search_date_end = @date_end
+                tr[data-href="#{account_dashboards_url(account, @trace)}"]
+                  td = account.name
+                  td = account.slave_profit
+                  td = account.profit_trade
+                  td = account.loss_trade
+                  td = account.pay_off.round(2)
+                  td = account.profit_factor.round(2)
+                  td = account.drawdown.round(2)
+                  / td = account.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
+                  td = account.slaves_scope(:slaves, :closed_error, @trace).count
+                  td = account.slaves_scope(:slaves, :buy, @trace).count
+                  td = account.slaves_scope(:slaves, :sell, @trace).count
+                  td = account.slaves_scope(:slaves, :gain, @trace).count
+                  td = account.slaves_scope(:slaves, :loss, @trace).count
+                  td = account.slaves_scope(:slaves, :error, @trace).count
 
 - content_for :header do
   javascript:
     console.log("teste")
+    start = 
     $(document).ready(function(){
       $(document).on("click", "table.table tr", function() {
         var link  = $(this).data("href")
