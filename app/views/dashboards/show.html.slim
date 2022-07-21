@@ -124,7 +124,7 @@
                 th Error
             tbody
               - @trace.accounts.slave.enable.each do |slave|
-                tr
+                tr[data-href="#{account_dashboards_url(slave, @trace)}"]
                   td = slave.name
                   td = slave.slaves.closed.sum(:profit)
                   td = slave.profit_trade
@@ -138,3 +138,13 @@
                   td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.gain.count
                   td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).closed.loss.count
                   td = slave.slaves.where("transaction_slaves.trace_id = ?", @trace.id).error.count
+
+- content_for :header do
+  javascript:
+    console.log("teste")
+    $(document).ready(function(){
+      $(document).on("click", "table.table tr", function() {
+        var link  = $(this).data("href")
+            document.location.href=link;
+      });
+    });

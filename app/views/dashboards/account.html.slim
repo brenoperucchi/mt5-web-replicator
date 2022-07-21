@@ -1,0 +1,82 @@
+.row
+  .col-md-12
+    .card.table-card.latest-activity-card
+      .card-header
+        h5
+          | Account 
+          '
+          = @account.name
+        .card-header-right
+          / .btn-group.card-option
+          /   button.btn.dropdown-toggle aria-expanded="false" aria-haspopup="true" data-toggle="dropdown" type="button" 
+          /     i.feather.icon-more-horizontal
+          /   ul.list-unstyled.card-option.dropdown-menu.dropdown-menu-right
+          /     li.dropdown-item.full-card
+          /       a href="#!" 
+          /         span
+          /           i.feather.icon-maximize
+          /           | maximize
+          /         span style="display:none" 
+          /           i.feather.icon-minimize
+          /           | Restore
+          /     li.dropdown-item.minimize-card
+          /       a href="#!" 
+          /         span
+          /           i.feather.icon-minus
+          /           | collapse
+          /         span style="display:none" 
+          /           i.feather.icon-plus
+          /           | expand
+          /     li.dropdown-item.reload-card
+          /       a href="#!" 
+          /         i.feather.icon-refresh-cw
+          /         | reload
+          /     li.dropdown-item.close-card
+          /       a href="#!" 
+          /         i.feather.icon-trash
+          /         | remove
+      .card-body
+        .table-responsive
+          table.table.table-hover.table-borderless
+            thead
+              tr
+                th ID
+                th Ticket Master
+                th Ticket Slave
+                th Symbol
+                th State
+                th Profit
+                th OrderType
+                th Price Open
+                th Price Closed
+                th Volume
+                th Open At
+                th Closet At
+            tbody
+              - @account.slaves.closed.each do |slave|
+                tr
+                  td = slave.id
+                  td = slave.ticket_master
+                  td = slave.ticket_slave
+                  td = slave.symbol
+                  td = slave.state
+                  td = slave.profit
+                  td = slave.ordertype
+                  td = slave.price_open
+                  td = slave.price_closed
+                  td = slave.lot.to_f.round(2)
+                  td = l(slave.open_at, format: :short2)
+                  td = l(slave.closed_at, format: :short2)
+              tr
+                td
+                td
+                td
+                td
+                td Total Profit
+                td= @account.slaves.closed.sum(:profit)
+                td
+                td
+                td
+                td
+                  
+

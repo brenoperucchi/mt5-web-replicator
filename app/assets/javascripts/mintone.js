@@ -17,4 +17,4 @@
 //= require mintone/vendor-all.min.js
 //= require mintone/bootstrap.min.js
 //= require mintone/pcoded.min.js
-//= require mintone/dashboard-server.js
+// require mintone/dashboard-server.js

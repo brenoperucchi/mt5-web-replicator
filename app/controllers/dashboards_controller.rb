@@ -35,4 +35,19 @@ class DashboardsController < ApplicationController
 		end
 	end
 
+	def account
+		@account = Account.find(params[:id])
+		@trace = Trace.find(params[:trace_id])
+		respond_to do |wants|
+			wants.html do
+				if @account
+					render action: :account
+				else
+					redirect_to dashboards_path
+				end
+			end
+		end
+
+	end
+
 end

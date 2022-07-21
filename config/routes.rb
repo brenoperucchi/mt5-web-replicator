@@ -13,9 +13,9 @@ Rails.application.routes.draw do
 
   resources :customers
   resources :stores
-  resources :dashboards, only: [:index, :show]# do
-    # get 'show', on: :collection
-  # end
+  resources :dashboards, only: [:index, :show] do
+    get 'account/:id/:trace_id', to: 'dashboards#account', on: :collection, as: 'account'
+  end
   devise_for :users, controllers: {
     sessions: 'users/sessions',
     registrations: 'users/registrations'
