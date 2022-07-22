@@ -73,8 +73,8 @@ class Account < ApplicationRecord
   end
 
   def slaves_scope(type, scope, trace)
-
-    masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
+    # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
+    masters_filter(self.send(type).closed_error.send(scope).where("transaction_slaves.trace_id = ?", trace.id))
   end
 
   def slave_profit

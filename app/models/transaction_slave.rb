@@ -33,7 +33,7 @@ class TransactionSlave < ApplicationRecord
   scope :opened,    ->{where(state: [:pending, :executed, :remove])}
   scope :entire,    ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
   scope :not_closed,  ->{where.not(state: ['closed', 'deleted'])}
-  scope :closed_error,  ->{where.not(state: ['closed', 'error'])}
+  scope :closed_error,  ->{where(state: ['closed', 'error'])}
   scope :not_error,  ->{where.not(state: ['error'])}
   scope :not_gain,  ->{where.not('transaction_slaves.profit >= 0')}
   scope :gain,  ->{where('transaction_slaves.profit >= 0')}
