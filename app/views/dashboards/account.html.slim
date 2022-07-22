@@ -19,21 +19,7 @@
         | <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button
         | </div
 
-.row
-  /! [ form-element ] start
-  .col-sm-12
-    .card
-      .card-body
-        form
-          .row
-            .col-md-3
-                .form-group
-                  h5 Filtrar Datas
-                  input.form-control name="datefilter" type="text" value="" /
-            .col-md-12
-                button.btn.btn-primary type="submit"  Submit
-
-
+= render "filter"
 
 /! [ breadcrumb ] end
 .row

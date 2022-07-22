@@ -60,9 +60,11 @@ class DashboardsController < ApplicationController
 
 	def filter_date
 		if params[:datefilter].present?
+			@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
+			@dates = params[:datefilter]
 			dates = params[:datefilter].split("-")
-			@date_begin = dates[0].strip().to_datetime.change(offset: Time.zone.formatted_offset)
-			@date_end = dates[1].strip().to_datetime.change(offset: Time.zone.formatted_offset)
+			@date_begin = dates[0].strip().to_datetime.change(offset: @timezone)
+			@date_end = dates[1].strip().to_datetime.change(offset: @timezone)
 		end
 	end
 
