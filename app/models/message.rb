@@ -22,7 +22,10 @@ class Message < ApplicationRecord
 	  end
 	  transaction = Transaction.find_by(ticket: ticket)
 	  if order.transactions.empty?
-	  	transaction ||= order.transactions.create(serializer_attributes) 
+	  	if transaction.nil?
+	  		transaction = order.transactions.create(serializer_attributes) 
+	  		transaction.loggings.create(content:order_params, state: "OPEN")
+	  	end
 	  	transaction.balances.update(account:account_copy)
 	  	order.transaction_ids = transaction.id
 	  end

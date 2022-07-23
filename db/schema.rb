@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_20_032624) do
+ActiveRecord::Schema.define(version: 2022_07_23_150734) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -343,7 +343,7 @@ ActiveRecord::Schema.define(version: 2022_07_20_032624) do
 
   create_table "transaction_slaves", force: :cascade do |t|
     t.string "ticket_master"
-    t.decimal "profit"
+    t.decimal "profit", default: "0.0"
     t.string "ordertype"
     t.string "symbol"
     t.string "price_request"
@@ -374,7 +374,7 @@ ActiveRecord::Schema.define(version: 2022_07_20_032624) do
   create_table "transactions", force: :cascade do |t|
     t.string "state"
     t.string "ticket"
-    t.decimal "profit"
+    t.decimal "profit", default: "0.0"
     t.bigint "order_id"
     t.string "ordertype"
     t.string "symbol"

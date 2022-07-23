@@ -63,7 +63,15 @@ class Account < ApplicationRecord
     instrument_control.to_b ? instruments.find_by(symbol: symbol.try(:upcase)).try(:name) : symbol
   end
 
+  def slave_profit
+    masters_filter(slaves.closed).sum(:profit)
+  end
 
+  def slaves_scope(type, scope, trace)
+    # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
+    masters_filter(self.send(type).closed_error.send(scope).where("transaction_slaves.trace_id = ?", trace.id))
+  end
+  
   def masters_filter(scoped)
     if self.search_date_begin and self.search_date_end
       scoped.where(created_at: search_date_begin..search_date_end.end_of_day)
@@ -72,14 +80,6 @@ class Account < ApplicationRecord
     end
   end
 
-  def slaves_scope(type, scope, trace)
-    # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
-    masters_filter(self.send(type).closed_error.send(scope).where("transaction_slaves.trace_id = ?", trace.id))
-  end
-
-  def slave_profit
-    masters_filter(slaves.closed).sum(:profit)
-  end
 
   def profit_trade(type = :slaves)
     trades = masters_filter(self.send(type).closed).try(:count).to_f

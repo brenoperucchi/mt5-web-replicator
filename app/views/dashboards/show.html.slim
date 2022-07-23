@@ -30,43 +30,53 @@
         .card-header-right
           i.icofont.icofont-spinner-alt-5
       .card-body.p-b-30
-        h2= "R$ #{@trace.masters_profit}"
+        h2= "R$ #{@trace.masters_transactions.sum(:profit)}"
         p.text-muted.m-b-10 LUCRO
         .row
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
             span.text-muted Taxa de Retorno
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
             span.text-muted Taxa de Perda
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.pay_off(:masters).round(2)}"
             span.text-muted PayOFF
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.profit_factor(:masters).round(2)}"
             span.text-muted Fator de Lucro
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.drawdown(:masters).round(2)}"
             span.text-muted Drawdown
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
             span.text-muted Account Slaves
-          .col-sm-4.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.masters_total.count}"
+        .row 
+          .col-sm-3.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.masters_transactions.count}"
             span.text-muted Total
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :closed).count}"
+            span.text-muted Closed
+          .col-sm-3.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :executed).count}"
+            span.text-muted Executed
+          .col-sm-3.col-xs-12
+            p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :error).count}"
+            span.text-muted Error
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :buy).count
             span.text-muted Operações BUY
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :sell).count
             span.text-muted Operações SELL
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :gain).count
             span.text-muted Operações GAIN
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :loss).count
             span.text-muted Operações LOSS
-          .col-sm-4.col-xs-12
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters.error.count
             span.text-muted Operações Error
 

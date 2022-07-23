@@ -56,16 +56,16 @@ class Trace < ApplicationRecord
     Trace.all.map(&:off)
   end
 
-  def masters_profit
-    masters_filter(masters.closed).sum(:profit)
+  def masters_transactions
+    masters_scope(:masters)
   end
 
-  def masters_total
-    masters_filter(masters.where(state: [:closed, :error]))
-  end
+  # def masters_total
+  #   masters_filter(masters)
+  # end
 
-  def masters_scope(type, scope)
-    masters_filter(self.send(type).closed).send(scope)
+  def masters_scope(type = :masters, scope = :all)
+    masters_filter(self.send(type).send(scope))
   end
 
 
@@ -78,33 +78,35 @@ class Trace < ApplicationRecord
   end
 
 
-  def profit_trade(type)
-    trades = masters_filter(self.send(type).closed).try(:count).to_f
-    gain_trades = masters_filter(self.send(type).closed.try(:gain)).try(:count).to_f
+  def profit_trade(type = :masters)
+    trades = masters_scope(:masters, :closed).try(:count).to_f
+    gain_trades = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
     AlgoStatistic.profit_trade(trades, gain_trades)
   end
 
-  def loss_trade(type)
-    trades = masters_filter(self.send(type).closed).try(:count).to_f
-    loss_trades = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
+  def loss_trade(type = :masters)
+    trades = masters_scope(:masters, :closed).try(:count).to_f
+    puts trades
+    loss_trades = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
+    puts loss_trades
     AlgoStatistic.loss_trade(trades, loss_trades)
     # result = (loss_trades/trades)
     # result = (result * 100).round(2)
     # result.nan? ? 0 : result
   end
 
-  def pay_off(type)
-      gain = masters_filter(self.send(type).closed).try(:gain).sum(:profit).abs
-      gain_operation = masters_filter(self.send(type).closed).try(:gain).try(:count).to_f
-      loss = masters_filter(self.send(type).closed).try(:loss).sum(:profit).abs
-      loss_operation = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
+  def pay_off(type = :masters)
+      gain = masters_scope(:masters, :closed).try(:gain).sum(:profit).abs
+      gain_operation = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
+      loss = masters_scope(:masters, :closed).try(:loss).sum(:profit).abs
+      loss_operation = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
       AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
       # result = (gain/gain_operation)/(loss/loss_operation)
       # result.nan? ? 0 : result
 
   end
 
-  def profit_factor(type)
+  def profit_factor(type = :masters)
     AlgoStatistic.profit_factor(profit_trade(type), loss_trade(type), pay_off(type))
     # begin
     #   (profit_trade(type)/loss_trade(type)*pay_off(type))    
@@ -114,8 +116,8 @@ class Trace < ApplicationRecord
   end
 
 
-  def drawdown(type)
-    scoped = masters_filter(masters_filter(self.send(type).closed).order(created_at: :desc))
+  def drawdown(type = :masters)
+    scoped = masters_scope(:masters, :closed).order(created_at: :desc)
     AlgoStatistic.drawdown(scoped)
 
     # drawdown_balance = 0

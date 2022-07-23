@@ -28,6 +28,7 @@ module API
             parameters = eval(params[:body])
             serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body]))
             transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
+            transaction.loggings.create(content:params, state: action.try(:upcase))
             transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
             transaction.close
 
