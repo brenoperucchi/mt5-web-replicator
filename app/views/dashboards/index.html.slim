@@ -28,7 +28,7 @@
             .card-header-right
               i.icofont.icofont-spinner-alt-5
           .card-body.p-b-30
-            h2= "R$ #{trace.masters.closed.sum(:profit)}"
+            h2= "R$ #{number_with_precision trace.masters.closed.sum(:profit)}"
             p.text-muted.m-b-10 Total revenue
             .row
               .col-sm-6.col-xs-12
@@ -44,7 +44,7 @@
                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.profit_factor(:masters).round(2)}"
                 span.text-muted Fator de Lucro
               .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= "#{trace.drawdown(:masters).round(2)}"
+                p.text-c-green.f-16.m-0.f-w-400= number_with_precision "#{trace.drawdown(:masters).round(2)}"
                 span.text-muted Drawdown
               .col-sm-6.col-xs-12
                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
