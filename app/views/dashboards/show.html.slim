@@ -35,15 +35,15 @@
         .row
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
-            span.text-muted Taxa de Retorno
+            span.text-muted Lucro %
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
-            span.text-muted Taxa de Perda
+            span.text-muted Perda %
           .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.pay_off(:masters).round(2)}"
+            p.f-20.m-0.f-w-400= "#{number_with_precision @trace.pay_off(:masters).round(2)}"
             span.text-muted PayOFF
           .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.profit_factor(:masters).round(2)}"
+            p.f-20.m-0.f-w-400= "#{number_with_precision @trace.profit_factor(:masters).round(2)}"
             span.text-muted Fator de Lucro
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= number_with_precision "#{@trace.drawdown(:masters).round(2)}"
@@ -66,16 +66,16 @@
             span.text-muted Error
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :buy).count
-            span.text-muted Operações BUY
+            span.text-muted Operações Compra
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :sell).count
-            span.text-muted Operações SELL
+            span.text-muted Operações Venda
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :gain).count
-            span.text-muted Operações GAIN
+            span.text-muted Operações Ganho
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :loss).count
-            span.text-muted Operações LOSS
+            span.text-muted Operações Perda
           .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= @trace.masters.error.count
             span.text-muted Operações Error
@@ -122,16 +122,16 @@
               tr
                 th Account
                 th Lucro
-                th Tx Retorno
-                th Tx Perda
-                th PayOFF
+                th Lucro %
+                th Perda %
+                th PayOFF 
                 th Fator Lucro
                 th Drawdown
                 th Total 
-                th BUY (closed)
-                th SELL (closed)
-                th GAIN (closed)
-                th LOSS (closed)
+                th Compra (qtd)
+                th Venda (qtd)
+                th Ganho (qtd)
+                th Perda (qtd)
                 th Error
             tbody
               - @trace.accounts.slave.enable.each do |account|
@@ -142,8 +142,8 @@
                   td = number_with_precision account.slave_profit
                   td = account.profit_trade
                   td = account.loss_trade
-                  td = account.pay_off.round(2)
-                  td = account.profit_factor.round(2)
+                  td = number_with_precision account.pay_off.round(2)
+                  td = number_with_precision account.profit_factor.round(2)
                   td = number_with_precision account.drawdown.round(2)
                   / td = account.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
                   td = account.slaves_scope(:slaves, :closed_error, @trace).count

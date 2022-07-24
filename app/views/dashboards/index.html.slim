@@ -29,19 +29,19 @@
               i.icofont.icofont-spinner-alt-5
           .card-body.p-b-30
             h2= "R$ #{number_with_precision trace.masters.closed.sum(:profit)}"
-            p.text-muted.m-b-10 Total revenue
+            p.text-muted.m-b-10 Lucro
             .row
               .col-sm-6.col-xs-12
                 p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
-                span.text-muted Taxa de Retorno
+                span.text-muted Lucro %
               .col-sm-6.col-xs-12
                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
-                span.text-muted Taxa de Perda
+                span.text-muted Perda %
               .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= "#{trace.pay_off(:masters).round(2)}"
+                p.text-c-green.f-16.m-0.f-w-400= "#{number_with_precision trace.pay_off(:masters).round(2)}"
                 span.text-muted PayOff
               .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= "#{trace.profit_factor(:masters).round(2)}"
+                p.text-c-blue.f-16.m-0.f-w-400= "#{number_with_precision trace.profit_factor(:masters).round(2)}"
                 span.text-muted Fator de Lucro
               .col-sm-6.col-xs-12
                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision "#{trace.drawdown(:masters).round(2)}"
@@ -51,252 +51,13 @@
                 span.text-muted Account Slaves
               .col-sm-6.col-xs-12
                 p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.buy.count
-                span.text-muted Operações BUY
+                span.text-muted Operações Compra
               .col-sm-6.col-xs-12
                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.sell.count
-                span.text-muted Operações SELL
+                span.text-muted Operações Venda
               .col-sm-6.col-xs-12
                 p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.gain.count
-                span.text-muted Operações GAIN
+                span.text-muted Operações Ganho
               .col-sm-6.col-xs-12
                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.loss.count
-                span.text-muted Operações LOSS
-  / .col-md-6.col-lg-4
-  /   .card
-  /     .card-header
-  /       h5 Customer satisfaction
-  /     .card-body
-  /       h2.text-c-green.m-0.text-center.f-w-400 89.73%
-  /       .progress.m-t-30.m-b-30
-  /         .progress-bar.bg-c-green style="width:85%" 
-  /       .row
-  /         .col-6.text-center
-  /           p.text-muted.m-b-5.f-14 previous
-  /           h6 56.75
-  /         .col-6.text-center
-  /           p.text-muted.m-b-5.f-14 Trend
-  /           h6 23.78
-  / .col-md-12.col-lg-4
-  /   .card.online-form
-  /     .card-header
-  /       h5 Online forms
-  /     .card-body
-  /       .row
-  /         .col-sm-6.m-b-10
-  /           h3 68
-  /           p.text-muted.m-0 New submissions
-  /         .col-sm-6.m-b-10
-  /           h3 234
-  /           p.text-muted.m-0 New contacts
-  /       .border-top.m-t-5.p-t-10
-  /         .row
-  /           .col-sm-4.m-t-5
-  /             span.f-16.f-w-400.m-0 472
-  /             p.text-muted.m-b-0 Active forms
-  /           .col-sm-4.m-t-5
-  /             span.f-16.f-w-400.m-0 623
-  /             p.text-muted.m-b-0 Forms views
-  /           .col-sm-4.m-t-5
-  /             span.f-16.f-w-400.m-0 34.6%
-  /             p.text-muted.m-b-0 Conversion
-  /! Project Report End
-
-
-
-
-/ - @traces.each do |trace|                   
-/   .flex.flex-col.col-span-full.sm:col-span-6.xl:col-span-4.bg-white.shadow-lg.rounded-sm.border.border-slate-200
-/     header.px-5.py-4.border-b.border-slate-100
-/       h2.font-semibold.text-slate-800 = trace.name
-/     /! Card content
-/     .flex.flex-col.h-full
-/       /! Live visitors number
-/       / .px-5.py-1
-/       /   .flex.items-center
-/       /     div
-/       /       .text-sm.text-slate-800.pt-1      
-/       /         = "Compra #{trace.transactions.executed.buy.count}"
-/       / .px-5.py-1
-/       /   .flex.items-center
-/       /     div
-/       /       .text-sm.text-slate-800.pt-1      
-/       /         = "Venda #{trace.transactions.executed.sell.count}"
-
-/       /! Chart built with Chart.js 3
-/       /! Check out src/js/components/analytics-card-02.js for config
-/         / div
-/         /   /! Change the height attribute to adjust the chart height
-/         /   canvas#analytics-card-02 height="70" width="389" 
-/       /! Table
-/       .grow.px-5.pt-2.pb-2
-/         .overflow-x-auto
-/           table.table-auto.w-full
-/             /! Table header
-/             thead.text-xs.text-slate-800
-/               tr
-/                 th.text-xl.text-slate-800.text-left Master
-/                 th.text-xl.text-slate-800.text-right Slaves
-/             /! Table body
-/             tbody.text-sm.divide-y.divide-slate-100
-/               /! Row
-/               tr
-/                 td.text-2xl.font-bold.text-blue-500
-/                   = "R$ #{trace.masters.closed.sum(:profit)}"
-/                   .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.masters.closed.count}"
-/                 td.text-2xl.font-bold.text-blue-500.text-right
-/                   = "R$ #{trace.slaves.closed.sum(:profit)}"
-/                   .text-sm.text-slate-800.pt-1 = "Closed Operations #{trace.slaves.closed.count}"
-/               tr
-/                 td.text-2xl.font-bold.text-blue-500
-/                   = "#{trace.profit_trade(:masters)} %"
-/                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
-/                 td.text-2xl.font-bold.text-blue-500.text-right
-/                   = "#{trace.profit_trade(:slaves)} %"
-/                   .text-sm.text-slate-800.pt-1 = "Taxa de acerto"
-/               tr
-/                 td.text-2xl.font-bold.text-blue-500
-/                   = "#{trace.loss_trade(:masters)} %"
-/                   .text-sm.text-slate-800.pt-1 = "Taxa de perda"
-/                 td.text-2xl.font-bold.text-blue-500.text-right
-/                   = "#{trace.loss_trade(:slaves)} %"
-/                   .text-sm.text-slate-800.pt-1 = "Taxa de perda"
-/               tr
-/                 td.text-2xl.font-bold.text-blue-500
-/                   = "#{trace.pay_off(:masters).round(2)}"
-/                   .text-sm.text-slate-800.pt-1 = "Payoff"
-/                 td.text-2xl.font-bold.text-blue-500.text-right
-/                   = "#{trace.pay_off(:slaves).round(2)}"
-/                   .text-sm.text-slate-800.pt-1 = "Payoff"
-/               tr
-/                 td.text-2xl.font-bold.text-blue-500
-/                   = "#{trace.profit_factor(:masters).round(2)}"
-/                   .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
-/                 td.text-2xl.font-bold.text-blue-500.text-right
-/                   = "#{trace.profit_factor(:slaves).round(2)}"
-/                   .text-sm.text-slate-800.pt-1 = "Fator de Lucro"
-/               tr
-/                 td.text-2xl.font-bold.text-blue-500
-/                   = "#{trace.drawdown(:masters).round(2)}"
-/                   .text-sm.text-slate-800.pt-1 = "Drawdown"
-/                 td.text-2xl.font-bold.text-blue-500.text-right
-/                   = "#{trace.drawdown(:slaves).round(2)}"
-/                   .text-sm.text-slate-800.pt-1 = "Drawdown"
-/               tr
-/                 td.py-2
-/                   .font-medium.text-left.text-slate-800 
-/                     | Compra
-/                     '
-/                     = trace.masters.closed.buy.count
-/                 td.py-2
-/                   .font-medium.text-right.text-slate-800 
-/                     | Compra
-/                     '
-/                     = trace.slaves.closed.buy.count
-/               /! Row
-/               tr
-/                 td.py-2
-/                   .font-medium.text-left.text-slate-800 
-/                     | Venda
-/                     '
-/                     = trace.masters.closed.sell.count
-/                 td.py-2
-/                   .font-medium.text-right.text-slate-800 
-/                     | Venda
-/                     '
-/                     = trace.slaves.closed.sell.count
-/               tr
-/                 td.py-2
-/                   .font-medium.text-left.text-slate-800 
-/                     | Gain
-/                     '
-/                     = trace.masters.closed.gain.count
-/                 td.py-2
-/                   .font-medium.text-right.text-slate-800 
-/                     | Gain
-/                     '
-/                     = trace.slaves.closed.gain.count
-/               tr
-/                 td.py-2
-/                   .font-medium.text-left.text-slate-800 
-/                     | Loss
-/                     '
-/                     = trace.masters.closed.loss.count
-
-/                 td.py-2
-/                   .font-medium.text-right.text-slate-800 
-/                     | Loss
-/                     '
-/                     = trace.slaves.closed.loss.count
-
-                    
-/       .px-2.py-2
-      /   .flex.items-center
-      /     /! Red dot
-      /     .relative.flex.items-center.justify-center.w-4.h-4.rounded-full.bg-rose-100.mr-3 aria-hidden="true" 
-      /       .absolute.rounded-full.bg-rose-500 class=("w-1.5 h-1.5") 
-      /     /! Vistors number
-      /     div
-      /       .text-2xl.font-bold.text-blue-500 = "R$ #{trace.orders.closed.map.sum(&:profit_copy)} - #{number_with_precision((trace.orders.closed.map.sum(&:profit_slave).to_f / trace.accounts.count), precision: 2)} = #{number_with_precision((trace.orders.closed.map.sum(&:profit_copy).to_f - trace.orders.closed.map.sum(&:profit_slave).to_f / trace.accounts.count), precision: 2) } "
-      /       .text-sm.text-slate-800.pt-1 = "Diferança aprox. do profit do Copy p/ os Slaves."
-
-      / /! Card footer
-      / .text-right.px-5.pb-4
-      /   a.text-sm.font-medium.text-indigo-500.hover:text-indigo-600 href="#0"  Real-Time Report -&gt;
-
-/ section.section
-/   .row
-/     - @traces.each do |trace|                   
-/       .col-lg-4.col-md-4.col-sm-12
-/         .card.card-statistic-2
-/           .card-stats
-/             .card-stats-title
-/               | Robo Transações 
-/             .card-stats-items
-/               .card-stats-item
-/                 .card-stats-item-count 
-/                   | $
-/                   '
-/                   = trace.transactions.closed.sum(:profit)
-/                 .card-stats-item-label $ fechadas
-/               .card-stats-item
-/                 .card-stats-item-count = trace.transactions.closed.count
-/                 .card-stats-item-label Nº fechadas
-/               .card-stats-item
-/                 .card-stats-item-count = trace.transactions.executed.count
-/                 .card-stats-item-label Nº abertas
-/           .card-icon.shadow-primary.bg-primary
-/             i.fas.fa-archive
-/           .card-wrap
-/             .card-header
-/             .card-body
-/               = trace.name
-
-/   .row
-/     .col-md-12
-/       .card
-/         .card-header
-/           h4 Invoices
-/           .card-header-action
-/             a.btn.btn-danger href="#" 
-/               | View More
-/               i.fas.fa-chevron-right
-/         .card-body.p-0
-/           .table-responsive.table-invoice
-/             table.table.table-striped
-/               tr
-/                 th Invoice ID
-/                 th Symbol
-/                 th Status
-/                 th Created Date
-/                 th Action
-/               - @executed.each do |transaction| 
-/                 tr
-/                   td
-/                     a href="#"  
-/                     = transaction.id
-/                   td.font-weight-600 = transaction.symbol
-/                   td
-/                     .badge.badge-warning = transaction.state
-/                   td = transaction.created_at
-/                   td
-/                     a.btn.btn-primary href="#"  Detail
+                span.text-muted Operações Perda

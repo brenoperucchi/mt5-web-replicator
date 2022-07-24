@@ -1,4 +1,6 @@
+require_relative '../fields/has_many_scope_field.rb'
 require "administrate/base_dashboard"
+
 
 class StoreDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
@@ -11,6 +13,7 @@ class StoreDashboard < Administrate::BaseDashboard
     id:     Field::Number,
     name:   Field::String,
     state:  Field::String,
+    url:    Field::String,
     plan:          Field::String,
     plan_value:    Field::String,
     plan_percent:  Field::String,
@@ -20,7 +23,8 @@ class StoreDashboard < Administrate::BaseDashboard
     telegram_api_number: Field::String,
     stripe_webhook_secret: Field::String,
     stripe_api_secret:     Field::String,
-    accounts:   Field::HasMany,
+    # accounts:   Field::HasMany,
+    accounts:   Fields::HasManyScopeField.with_options(associated: Store.current, scoped: :enable),
     traces:     Field::HasMany,
     customers:  Field::HasMany,
     users:      Field::HasMany,
@@ -49,6 +53,7 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
+  url
   plan
   plan_value
   plan_percent
@@ -56,9 +61,6 @@ class StoreDashboard < Administrate::BaseDashboard
   volume_default
   stripe_api_secret
   stripe_webhook_secret
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
   accounts
   traces
   customers
@@ -73,18 +75,15 @@ class StoreDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   state
+  url
   plan
   plan_value
   plan_percent
   tag_list
+  accounts
   volume_default
   stripe_api_secret
   stripe_webhook_secret
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
-  accounts
-  traces
   ].freeze
 
   # COLLECTION_FILTERS

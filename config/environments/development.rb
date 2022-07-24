@@ -76,5 +76,8 @@ Rails.application.configure do
   # config.web_console.whitelisted_ips = ['192.168.1.0/192.168.1.255', '127.0.0.0/127.255.255.255']
   config.web_console.whitelisted_ips =  '0.0.0.0/0.0.0.0'
 
-  config.hosts << "benincasouza.tplinkdns.com"
+  # config.hosts << "benincasouza.tplinkdns.com"
+  # config.hosts << "store1.imentore.com.br"
+  config.hosts.clear
+  config.action_dispatch.tld_length = 1
 end

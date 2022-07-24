@@ -2,6 +2,8 @@ require 'lib_enums'
 class Store < ApplicationRecord
   ENUMS = %w(state)
   include LibEnums
+  include SentientStore
+
 
   store :settings, accessors: [
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan, :plan_value, :plan_percent, 

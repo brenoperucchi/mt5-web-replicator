@@ -2,6 +2,20 @@ module Admin
   class BaseController < Admin::ApplicationController
 
   	before_action :restrict_not_admin!
+    before_action :current_store
+    helper_method :current_store
+
+    def current_store
+      subdomain = request.subdomain.split('.')
+      session[:store_id] = Store.find_by(url: subdomain) || Store.first   
+      Store.current = session[:store_id]
+      # user_id = current_user.try(:userable).try(:id)
+      # session[:store_id] = user_id || nil if session[:store_id] != user_id 
+      # session[:store_id] ||= Store.where(url: request.subdomain.split('.').first).take
+      # binding.pry
+      # Store.current = Store.find_by_id(session[:store_id])
+    end
+
 
   	def restrict_not_admin!
   		if current_user.userable.role != "admin"

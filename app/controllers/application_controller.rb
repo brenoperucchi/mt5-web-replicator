@@ -1,5 +1,15 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery with: :null_session
+	# include SentientStoreController
+	before_action :current_store
+	helper_method :current_store
+
+	def current_store
+		subdomain = request.subdomain.split('.')
+		session[:store_id] = Store.find_by(url: subdomain) || Store.first		
+	  Store.current = session[:store_id]
+	end
+		
   # protect_from_forgery with: :exception
 
 	# layout "application"

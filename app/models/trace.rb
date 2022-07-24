@@ -77,7 +77,6 @@ class Trace < ApplicationRecord
     end
   end
 
-
   def profit_trade(type = :masters)
     trades = masters_scope(:masters, :closed).try(:count).to_f
     gain_trades = masters_scope(:masters, :closed).try(:gain).try(:count).to_f

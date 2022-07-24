@@ -1,6 +1,16 @@
 
 module Control
   class BaseController < Admin::ApplicationController
+
+    before_action :current_store
+    helper_method :current_store
+
+    def current_store
+      subdomain = request.subdomain.split('.')
+      session[:store_id] = Store.find_by(url: subdomain) || Store.first   
+      Store.current = session[:store_id]
+    end
+
     
     def new_resource
       current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new)

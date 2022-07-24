@@ -1,3 +1,5 @@
+# require 'control/has_many_scope_field.rb'
+require_relative '../../fields/has_many_scope_field.rb'
 require "administrate/base_dashboard"
 require 'traces_helper'
 
@@ -28,7 +30,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     messages:            Field::HasMany.with_options(direction: :desc),
     take_profit_limit:   Field::Number,
     instruments:         Field::HasMany,
-    accounts:            Field::HasMany
+    accounts:            Fields::HasManyScopeField.with_options(associated: Store.current, scoped: :enable)
   }.freeze
 
   # COLLECTION_ATTRIBUTES

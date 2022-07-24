@@ -17,14 +17,14 @@ class DashboardsController < ApplicationController
 			wants.html do 
 				# @executed = Store.first.transactions.executed
 				# @executed = current_user.userable.store.transactions.executed
-				@traces = Store.first.traces.active
+				@traces = current_store.traces.active
 				# @traces = current_user.userable.store.traces.active
 			end
 		end
 	end
 
 	def show
-		@trace = Trace.find(params[:id])
+		@trace = current_store.traces.find(params[:id])
 		@trace.search_date_begin = @date_begin
 		@trace.search_date_end = @date_end
 
@@ -41,11 +41,11 @@ class DashboardsController < ApplicationController
 	end
 
 	def account
-		@account = Account.find(params[:id])
+		@account = current_store.accounts.find(params[:id])
     @account.search_date_begin = @date_begin
     @account.search_date_end = @date_end
 
-		@trace = Trace.find(params[:trace_id])
+		@trace = current_store.traces.find(params[:trace_id])
 		respond_to do |wants|
 			wants.html do
 				if @account

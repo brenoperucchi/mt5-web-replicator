@@ -9,6 +9,7 @@ class StoresController < ApplicationController
 	def create
 		@store = Store.new(store_params)
 		@store.state = "enable"
+		@store.url = @store.name.to_underscore
 		@store.name = @store.customers.try(:first).try(:name)
 		respond_to do |format|
 		  if @store.save
