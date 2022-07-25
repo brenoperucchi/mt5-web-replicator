@@ -2,7 +2,6 @@ require 'lib_enums'
 class Store < ApplicationRecord
   ENUMS = %w(state)
   include LibEnums
-  include SentientStore
 
 
   store :settings, accessors: [

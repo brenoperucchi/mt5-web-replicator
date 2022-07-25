@@ -24,7 +24,7 @@ class StoreDashboard < Administrate::BaseDashboard
     stripe_webhook_secret: Field::String,
     stripe_api_secret:     Field::String,
     # accounts:   Field::HasMany,
-    accounts:   Fields::HasManyScopeField.with_options(associated: Store.current, scoped: :enable),
+    accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     traces:     Field::HasMany,
     customers:  Field::HasMany,
     users:      Field::HasMany,

@@ -1,16 +1,19 @@
 require "administrate/field/associative.rb"
 require "administrate/page/collection"
 require "administrate/order"
+require "sentient_store.rb"
 
 module Fields
   class HasManyScopeField < Administrate::Field::HasMany
+    include SentientStore
+
     def to_s
       data
     end
 
-    def associated
-      options[:associated] if options.key?(:associated)
-    end
+    # def associated
+    #   options[:associated] if options.key?(:associated)
+    # end
 
     def scoped
       options[:scoped] if options.key?(:scoped)
@@ -25,7 +28,15 @@ module Fields
 
 
     def data
-      @data ||= associated.send(associated_class.name.pluralize.downcase.to_sym).scoped
+      @data ||= candidate_resources
+      # if options.key?(:associated)
+      #   @data ||= current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(options[:scoped].to_sym)
+      # elsif options.key?(:scoped)
+      #   @data ||= resource.send(associated_class.name.pluralize.downcase.to_sym).send(options[:scoped].to_sym)
+      # else
+      #   @data ||= associated_class.none
+      # end
+
     end
 
     def order_from_params(params)
@@ -47,9 +58,9 @@ module Fields
 
     def candidate_resources
       if options.key?(:associated)
-        Rails.logger.info("Store.current #{Store.current}")
-        Rails.logger.info("Options #{options}")
-        associated.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+      elsif options.key?(:scoped)
+        resource.send(associated_class.name.pluralize.downcase.to_sym).send(options[:scoped].to_sym)
       elsif options.key?(:includes)
         includes = options.fetch(:includes)
         associated_class.includes(*includes).all

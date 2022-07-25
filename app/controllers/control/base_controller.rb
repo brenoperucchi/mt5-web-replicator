@@ -1,18 +1,6 @@
-
 module Control
   class BaseController < Admin::ApplicationController
 
-    before_action :current_store
-    helper_method :current_store
-
-    def current_store
-      subdomain = request.subdomain.split('.').try(:first)
-      Rails.logger.info("SUB DOMAIN #{request.subdomain}")
-      Rails.logger.info("SUB DOMAIN SPLIT #{subdomain}")
-      session[:store_id] = Store.find_by(url: subdomain) || Store.first   
-      Store.current = session[:store_id]
-    end
-    
     def new_resource
       current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new)
     end
@@ -41,7 +29,6 @@ module Control
     def scoped_resource
       current_user.store.send("#{resource_name}".pluralize)
     end
-
 
   end
 end

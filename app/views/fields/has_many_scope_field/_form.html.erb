@@ -19,6 +19,9 @@ and is augmented with [Selectize].
 [Selectize]: http://brianreavis.github.io/selectize.js
 %>
 
+<% field.current_store_field(@_request.subdomain) %>
+
+
 <div class="field-unit__label">
   <%= f.label field.attribute, for: "#{f.object_name}_#{field.attribute_key}" %>
 </div>

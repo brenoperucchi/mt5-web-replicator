@@ -1,16 +1,11 @@
+require "sentient_store.rb"
+
 class ApplicationController < ActionController::Base
+	include SentientStore
 	protect_from_forgery with: :null_session
 	# include SentientStoreController
 	before_action :current_store
 	helper_method :current_store
-
-	def current_store
-	  subdomain = request.subdomain.split('.').try(:first)
-	  Rails.logger.info("SUB DOMAIN #{request.subdomain}")
-	  Rails.logger.info("SUB DOMAIN SPLIT #{subdomain}")
-	  session[:store_id] = Store.find_by(url: subdomain) || Store.first   
-	  Store.current = session[:store_id]
-	end
 
   # protect_from_forgery with: :exception
 

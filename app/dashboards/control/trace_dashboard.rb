@@ -30,7 +30,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     messages:            Field::HasMany.with_options(direction: :desc),
     take_profit_limit:   Field::Number,
     instruments:         Field::HasMany,
-    accounts:            Fields::HasManyScopeField.with_options(associated: Store.current, scoped: :enable)
+    accounts:            Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable)
   }.freeze
 
   # COLLECTION_ATTRIBUTES

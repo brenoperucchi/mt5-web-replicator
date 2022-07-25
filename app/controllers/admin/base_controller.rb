@@ -2,24 +2,11 @@ module Admin
   class BaseController < Admin::ApplicationController
 
   	before_action :restrict_not_admin!
-    before_action :current_store
-    helper_method :current_store
-
-    def current_store
-      subdomain = request.subdomain.split('.').try(:first)
-      Rails.logger.info("SUB DOMAIN #{request.subdomain}")
-      Rails.logger.info("SUB DOMAIN SPLIT #{subdomain}")
-      session[:store_id] = Store.find_by(url: subdomain) || Store.first   
-      Store.current = session[:store_id]
-    end
-
 
   	def restrict_not_admin!
   		if current_user.userable.role != "admin"
   			redirect_to control_accounts_path, :alert => "Redirect to Control Admin"             
-
-  		end
-  		
+  		end	
   	end
     
     # def new_resource
