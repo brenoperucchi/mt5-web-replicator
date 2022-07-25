@@ -6,11 +6,11 @@ class ApplicationController < ActionController::Base
 
 	def current_store
 	  subdomain = request.subdomain.split('.').try(:first)
-	  session[:store_id] = Store.find_by(url: subdomain) || Store.first   
-	  Store.current = session[:store_id]
 	  Rails.logger.debug("SUB DOMAIN #{request.subdomain}")
 	  Rails.logger.debug("SUB DOMAIN SPLIT #{subdomain}")
-  end
+	  session[:store_id] = Store.find_by(url: subdomain) || Store.first   
+	  Store.current = session[:store_id]
+	end
   		
   # protect_from_forgery with: :exception
 
