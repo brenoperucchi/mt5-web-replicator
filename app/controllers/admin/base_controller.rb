@@ -6,9 +6,11 @@ module Admin
     helper_method :current_store
 
     def current_store
-      subdomain = request.subdomain.split('.')
+      subdomain = request.subdomain.split('.').try(:first)
       session[:store_id] = Store.find_by(url: subdomain) || Store.first   
       Store.current = session[:store_id]
+      Rails.logger.debug("SUB DOMAIN #{request.subdomain}")
+      Rails.logger.debug("SUB DOMAIN SPLIT #{subdomain}")
       # user_id = current_user.try(:userable).try(:id)
       # session[:store_id] = user_id || nil if session[:store_id] != user_id 
       # session[:store_id] ||= Store.where(url: request.subdomain.split('.').first).take
