@@ -1,8 +1,11 @@
+require "sentient_store.rb"
+
 module Control
   class BaseController < Admin::ApplicationController
+    include SentientStore
 
     def new_resource
-      current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new)
+      current_store.try(resource_name.to_s.pluralize.to_sym).try(:new)
     end
 
     def create

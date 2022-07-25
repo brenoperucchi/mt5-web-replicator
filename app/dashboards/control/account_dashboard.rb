@@ -1,3 +1,5 @@
+require_relative '../../fields/has_many_scope_field.rb'
+require_relative '../../fields/belongs_to_field.rb'
 require "administrate/base_dashboard"
 
   class Control::AccountDashboard < Administrate::BaseDashboard
@@ -13,11 +15,11 @@ require "administrate/base_dashboard"
       kind:                 Field::String,
       meta_mode:            Field::String,
       meta_margin_mode:     Field::String,
-      traces:               Field::HasMany,
-      transactions:         Field::HasMany,
-      instruments:          Field::HasMany,
+      traces:               Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :active),
+      transactions:         Fields::HasManyScopeField.with_options(associated: :current_store),
+      instruments:          Fields::HasManyScopeField.with_options(associated: :current_store),
       store:                Field::BelongsTo,
-      customer:             Field::BelongsTo,
+      customer:             Fields::BelongsToField.with_options(associated: :current_store),
       magics_accept:        Field::String.with_options(searchable: false),
       instrument_control:   Field::Boolean,
       created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

@@ -1,3 +1,5 @@
+require_relative '../../fields/has_many_scope_field.rb'
+require_relative '../../fields/belongs_to_field.rb'
 require "administrate/base_dashboard"
 
 class Control::TransactionDashboard < Administrate::BaseDashboard
@@ -26,11 +28,12 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    order:              Field::BelongsTo,
-    trace:              Field::BelongsTo,
-    message:            Field::BelongsTo,
-    account:            Field::BelongsTo,
-    loggings:           Field::HasMany,
+    order:              Fields::BelongsToField.with_options(associated: :current_store),
+    trace:              Fields::BelongsToField.with_options(associated: :current_store),
+    message:            Fields::BelongsToField.with_options(associated: :current_store),
+    account:            Fields::BelongsToField.with_options(associated: :current_store),
+    loggings:           Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :active),
+    # slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
 

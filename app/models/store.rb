@@ -16,7 +16,7 @@ class Store < ApplicationRecord
   has_many :traces, :class_name => "Trace", :foreign_key => "store_id", dependent: :destroy
   has_many :orders#, :through => :traces, :source => :orders, dependent: :destroy
   has_many :messages, :class_name => "Message", :foreign_key => "store_id"
-  has_many :transactions, :through => :messages, :source => :transactions, dependent: :destroy
+  has_many :transactions, :through => :accounts, :source => :transactions, dependent: :destroy
   has_many :users, dependent: :destroy
   has_many :customers, dependent: :destroy
   has_many :invoices, :through => :customers, :source => :invoices

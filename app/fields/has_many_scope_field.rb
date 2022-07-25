@@ -11,12 +11,8 @@ module Fields
       data
     end
 
-    # def associated
-    #   options[:associated] if options.key?(:associated)
-    # end
-
     def scoped
-      options[:scoped] if options.key?(:scoped)
+      options.key?(:scoped) ? options[:scoped] : :all
     end
 
 
@@ -60,7 +56,7 @@ module Fields
       if options.key?(:associated)
         current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
       elsif options.key?(:scoped)
-        resource.send(associated_class.name.pluralize.downcase.to_sym).send(options[:scoped].to_sym)
+        resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
       elsif options.key?(:includes)
         includes = options.fetch(:includes)
         associated_class.includes(*includes).all

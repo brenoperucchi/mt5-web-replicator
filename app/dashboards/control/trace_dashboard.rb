@@ -1,4 +1,3 @@
-# require 'control/has_many_scope_field.rb'
 require_relative '../../fields/has_many_scope_field.rb'
 require "administrate/base_dashboard"
 require 'traces_helper'
@@ -22,15 +21,15 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     active:              Field::Boolean,
     created_at:          Field::DateTime,
     updated_at:          Field::DateTime,
-    store:               Field::BelongsTo,
+    store:               DisableBelongsTo.with_options(attribute: :store),
     meta_host:           Field::String,
     kind:                Field::String,
     # volumes:           Field::ActsAsTaggable,
     response:            Field::String,
     messages:            Field::HasMany.with_options(direction: :desc),
     take_profit_limit:   Field::Number,
-    instruments:         Field::HasMany,
-    accounts:            Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable)
+    instruments:         Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
+    accounts:            Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -42,7 +41,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   id
   active
   name
-  store
   kind
   ].freeze
 

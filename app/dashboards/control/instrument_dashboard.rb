@@ -1,3 +1,5 @@
+require_relative '../../fields/belongs_to_field.rb'
+
 require "administrate/base_dashboard"
 
 class Control::InstrumentDashboard < Administrate::BaseDashboard
@@ -8,8 +10,8 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    trace: Field::BelongsTo,
-    account: FieldAssociation.with_options(type: 'belongs_to'),
+    trace: Fields::BelongsToField.with_options(associated: :current_store),
+    account: Fields::BelongsToField.with_options(associated: :current_store),
     id: Field::Number,
     symbol: Field::String,
     name: Field::String,

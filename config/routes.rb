@@ -29,7 +29,7 @@ Rails.application.routes.draw do
       resources :accounts
       resources :instruments
       resources :traces
-      resources :transactions
+      resources :transactions, except:[:edit]
       resources :invoices
     end
     namespace :admin do

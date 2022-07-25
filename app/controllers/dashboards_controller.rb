@@ -17,7 +17,12 @@ class DashboardsController < ApplicationController
 			wants.html do 
 				# @executed = Store.first.transactions.executed
 				# @executed = current_user.userable.store.transactions.executed
-				@traces = current_store.traces.active
+				if current_store == Store.first
+					@traces = Trace.all.active
+				else
+					@traces = current_store.traces.active
+				end
+
 				# @traces = current_user.userable.store.traces.active
 			end
 		end
@@ -57,6 +62,7 @@ class DashboardsController < ApplicationController
 		end
 	end
 
+	private
 
 	def filter_date
 		if params[:datefilter].present?
@@ -67,5 +73,6 @@ class DashboardsController < ApplicationController
 			@date_end = dates[1].strip().to_datetime.change(offset: @timezone)
 		end
 	end
+
 
 end

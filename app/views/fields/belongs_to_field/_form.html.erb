@@ -16,6 +16,8 @@ that displays all possible records to associate with.
 [1]: http://www.rubydoc.info/gems/administrate/Administrate/Field/BelongsTo
 %>
 
+<% field.current_store_field(@_request.subdomain) %>
+
 <div class="field-unit__label">
   <%= f.label field.permitted_attribute %>
 </div>
@@ -25,3 +27,12 @@ that displays all possible records to associate with.
                include_blank: field.include_blank_option) %>
 </div>
 
+
+
+<% content_for(:javascript) do %>
+  <script type="text/javascript">
+    $(function() {
+      $('.field-unit__field select').selectize({});
+    });
+  </script>
+<% end %>
