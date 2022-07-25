@@ -47,6 +47,8 @@ module Fields
 
     def candidate_resources
       if options.key?(:associated)
+        Rails.logger.info("Store.current #{Store.current}")
+        Rails.logger.info("Options #{options}")
         associated.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
       elsif options.key?(:includes)
         includes = options.fetch(:includes)
