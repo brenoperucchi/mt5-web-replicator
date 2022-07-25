@@ -140,11 +140,11 @@
                 tr[data-href="#{account_dashboards_url(account, @trace)}"]
                   td = account.name
                   td = number_with_precision account.slave_profit
-                  td = account.profit_trade
-                  td = account.loss_trade
-                  td = number_with_precision account.pay_off.round(2)
-                  td = number_with_precision account.profit_factor.round(2)
-                  td = number_with_precision account.drawdown.round(2)
+                  td = account.profit_trade(:slaves, @trace)
+                  td = account.loss_trade(:slaves, @trace)
+                  td = number_with_precision account.pay_off(:slaves, @trace).round(2)
+                  td = number_with_precision account.profit_factor(:slaves, @trace).round(2)
+                  td = number_with_precision account.drawdown(:slaves, @trace).round(2)
                   / td = account.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
                   td = account.slaves_scope(:slaves, :closed_error, @trace).count
                   td = account.slaves_scope(:slaves, :buy, @trace).count

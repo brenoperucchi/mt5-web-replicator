@@ -18,11 +18,11 @@ module AlgoStatistic
 	end
 
 	def self.profit_factor(profit, loss, pay_off)
-	  begin
-	    (profit/loss*pay_off)    
-	  rescue
-	    0
-	  end
+		divide = loss*pay_off
+		return 0 if divide == 0
+		result = profit/divide
+		(result.is_a?(Float) and result.nan?) ? 0 : result
+
 	end
 
 	def self.drawdown(transactions)

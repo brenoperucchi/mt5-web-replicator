@@ -1,6 +1,8 @@
 class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	before_action :filter_date
+	before_action :set_trace, 	only:[:show]
+	before_action :set_account, only:[:account]
 	# layout 'stisla'
   layout 'mintone'
 
@@ -29,7 +31,7 @@ class DashboardsController < ApplicationController
 	end
 
 	def show
-		@trace = current_store.traces.find(params[:id])
+		# @trace = current_store.traces.find(params[:id])
 		@trace.search_date_begin = @date_begin
 		@trace.search_date_end = @date_end
 
@@ -46,11 +48,11 @@ class DashboardsController < ApplicationController
 	end
 
 	def account
-		@account = current_store.accounts.find(params[:id])
+		# @account = current_store.accounts.find(params[:id])
     @account.search_date_begin = @date_begin
     @account.search_date_end = @date_end
 
-		@trace = current_store.traces.find(params[:trace_id])
+		@trace = @account.traces.find(params[:trace_id])
 		respond_to do |wants|
 			wants.html do
 				if @account
@@ -63,6 +65,24 @@ class DashboardsController < ApplicationController
 	end
 
 	private
+
+	def set_trace
+		if current_store == Store.first
+			@trace = Trace.find(params[:id])
+		else
+			@trace = current_store.traces.find(params[:id])
+		end
+		
+	end
+
+	def set_account
+		if current_store == Store.first
+			@account = Account.find(params[:id])
+		else
+			@account = current_store.accounts.find(params[:id])
+		end
+		
+	end
 
 	def filter_date
 		if params[:datefilter].present?

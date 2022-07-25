@@ -67,7 +67,7 @@ class Account < ApplicationRecord
     masters_filter(slaves.closed).sum(:profit)
   end
 
-  def slaves_scope(type, scope, trace)
+  def slaves_scope(type = :slaves, scope = :all, trace)
     # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
     masters_filter(self.send(type).closed_error.send(scope).where("transaction_slaves.trace_id = ?", trace.id))
   end
@@ -81,33 +81,33 @@ class Account < ApplicationRecord
   end
 
 
-  def profit_trade(type = :slaves)
-    trades = masters_filter(self.send(type).closed).try(:count).to_f
-    gain_trades = masters_filter(self.send(type).closed).try(:gain).try(:count).to_f
+  def profit_trade(type = :slaves, trace)
+    trades = slaves_scope(type, :closed, trace).try(:count).to_f
+    gain_trades = slaves_scope(type, :closed, trace).try(:gain).try(:count).to_f
     AlgoStatistic.profit_trade(trades, gain_trades)
   end
 
-  def loss_trade(type = :slaves)
-    trades = masters_filter(self.send(type).closed).try(:count).to_f
-    loss_trades = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
+  def loss_trade(type = :slaves, trace)
+    trades = slaves_scope(type, :closed, trace).try(:count).to_f
+    loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:count).to_f
     AlgoStatistic.loss_trade(trades, loss_trades)
   end
 
-  def pay_off(type = :slaves)
-    gain = masters_filter(self.send(type).closed).try(:gain).sum(:profit).abs
-    gain_operation = masters_filter(self.send(type).closed).try(:gain).try(:count).to_f
-    loss = masters_filter(self.send(type).closed).try(:loss).sum(:profit).abs
-    loss_operation = masters_filter(self.send(type).closed).try(:loss).try(:count).to_f
+  def pay_off(type = :slaves, trace)
+    gain = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
+    gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:count).to_f
+    loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
+    loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:count).to_f
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
 
-  def profit_factor(type = :slaves)
-    AlgoStatistic.profit_factor(profit_trade(type), loss_trade(type), pay_off(type))
+  def profit_factor(type = :slaves, trace)
+    AlgoStatistic.profit_factor(profit_trade(type, trace), loss_trade(type, trace), pay_off(type, trace))
   end
 
 
-  def drawdown(type = :slaves)
-    scoped = masters_filter(masters_filter(self.send(type).closed).order(created_at: :desc))
+  def drawdown(type = :slaves, trace)
+    scoped = slaves_scope(type, :closed, trace).order(created_at: :desc)
     AlgoStatistic.drawdown(scoped)
   end
 

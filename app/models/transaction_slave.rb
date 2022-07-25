@@ -37,7 +37,7 @@ class TransactionSlave < ApplicationRecord
   scope :not_error,  ->{where.not(state: ['error'])}
   scope :not_gain,  ->{where.not('transaction_slaves.profit >= 0')}
   scope :gain,  ->{where('transaction_slaves.profit >= 0')}
-  scope :loss,  ->{where('transaction_slaves.profit <= 0')}
+  scope :loss,  ->{where('transaction_slaves.profit < 0')}
   scope :buy,   ->{where(ordertype: 0)}
   scope :sell,  ->{where(ordertype: 1)}
   # scope :tracer, ->{where("transaction_slaves.trace_id = ?", trace.id)} 

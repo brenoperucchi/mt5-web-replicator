@@ -49,7 +49,7 @@
                 th Open At
                 th Closet At
             tbody
-              - @account.slaves_scope(:slaves, :closed, @trace).order(open_at: 'ASC').each do |slave|
+              - @account.slaves_scope(:slaves, :all, @trace).order(open_at: 'DESC').each do |slave|
                 tr
                   td = slave.id
                   td = slave.ticket_master
@@ -62,7 +62,7 @@
                   td = slave.price_closed
                   td = slave.lot.to_f.round(3)
                   td = l(slave.open_at, format: :short2)
-                  td = l(slave.closed_at, format: :short2)
+                  td = l(slave.closed_at, format: :short2) if slave.closed_at.present?
               tr
                 td
                 td
