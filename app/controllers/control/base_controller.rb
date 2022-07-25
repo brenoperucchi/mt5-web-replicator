@@ -6,11 +6,12 @@ module Control
     helper_method :current_store
 
     def current_store
-      subdomain = request.subdomain.split('.')
+      subdomain = request.subdomain.split('.').try(:first)
       session[:store_id] = Store.find_by(url: subdomain) || Store.first   
       Store.current = session[:store_id]
+      Rails.logger.debug("SUB DOMAIN #{request.subdomain}")
+      Rails.logger.debug("SUB DOMAIN SPLIT #{subdomain}")
     end
-
     
     def new_resource
       current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new)
