@@ -29,8 +29,8 @@ Rails.application.routes.draw do
       resources :accounts
       resources :instruments
       resources :traces
-      resources :transactions, except:[:edit]
-      resources :invoices
+      resources :transactions, except:[:edit, :new]
+      resources :invoices, except:[:new]
     end
     namespace :admin do
       namespace :paper_trail do

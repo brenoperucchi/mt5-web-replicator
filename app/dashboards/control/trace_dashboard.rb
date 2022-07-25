@@ -21,13 +21,13 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     active:              Field::Boolean,
     created_at:          Field::DateTime,
     updated_at:          Field::DateTime,
-    store:               DisableBelongsTo.with_options(attribute: :store),
+    store_id:            DisableBelongsTo.with_options(attribute: :store),
     meta_host:           Field::String,
-    kind:                Field::String,
+    kind:                DisableTextField.with_options(value:"copy"),
     # volumes:           Field::ActsAsTaggable,
     response:            Field::String,
     messages:            Field::HasMany.with_options(direction: :desc),
-    take_profit_limit:   Field::Number,
+    take_profit_limit:   DisableTextField.with_options(value:2),
     instruments:         Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
     accounts:            Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
   }.freeze
@@ -49,7 +49,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
-  name_id
   active
   kind
   take_profit_limit
@@ -70,10 +69,9 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
-  name_id
   active
   kind
-  store
+  store_id
   take_profit_limit
   telegram_option
   telegram_image

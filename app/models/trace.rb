@@ -32,7 +32,7 @@ class Trace < ApplicationRecord
   has_many :permissions, dependent: :destroy
   has_many :accounts, :through => :permissions#, :source => :slave
 
-  # validates_presence_of :take_profit, :on => :create#, :message => "can't be blank"
+  validates_presence_of :name, :on => :create#, :message => "can't be blank"
 
   def volumes
     self.settings['volumes'] || ""
