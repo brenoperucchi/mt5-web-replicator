@@ -7,8 +7,8 @@ module Admin
 
     def current_store
       subdomain = request.subdomain.split('.').try(:first)
-      Rails.logger.debug("SUB DOMAIN #{request.subdomain}")
-      Rails.logger.debug("SUB DOMAIN SPLIT #{subdomain}")
+      Rails.logger.info("SUB DOMAIN #{request.subdomain}")
+      Rails.logger.info("SUB DOMAIN SPLIT #{subdomain}")
       session[:store_id] = Store.find_by(url: subdomain) || Store.first   
       Store.current = session[:store_id]
     end
