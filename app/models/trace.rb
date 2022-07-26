@@ -85,73 +85,39 @@ class Trace < ApplicationRecord
 
   def loss_trade(type = :masters)
     trades = masters_scope(:masters, :closed).try(:count).to_f
-    puts trades
     loss_trades = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
-    puts loss_trades
     AlgoStatistic.loss_trade(trades, loss_trades)
-    # result = (loss_trades/trades)
-    # result = (result * 100).round(2)
-    # result.nan? ? 0 : result
   end
 
   def pay_off(type = :masters)
-      gain = masters_scope(:masters, :closed).try(:gain).sum(:profit).abs
-      gain_operation = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
-      loss = masters_scope(:masters, :closed).try(:loss).sum(:profit).abs
-      loss_operation = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
-      AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
-      # result = (gain/gain_operation)/(loss/loss_operation)
-      # result.nan? ? 0 : result
-
+    gain = masters_scope(:masters, :closed).try(:gain).sum(:profit).abs
+    gain_operation = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
+    loss = masters_scope(:masters, :closed).try(:loss).sum(:profit).abs
+    loss_operation = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
+    AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
 
+  def expect_pay_off(type = :masters)
+    total_trades = masters_scope(type, :closed).count
+    profit_trades = masters_scope(type, :closed).try(:gain).count.to_f
+    loss_trades = masters_scope(type, :closed).try(:loss).count.to_f
+    gross_profit = masters_scope(type, :closed).try(:gain).sum(:profit).abs
+    gross_profit = masters_scope(type, :closed).try(:gain).sum(:profit).abs
+    gross_loss = masters_scope(type, :closed).try(:loss).sum(:profit).abs
+    AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
+  end
+
+
   def profit_factor(type = :masters)
-    AlgoStatistic.profit_factor(profit_trade(type), loss_trade(type), pay_off(type))
-    # begin
-    #   (profit_trade(type)/loss_trade(type)*pay_off(type))    
-    # rescue
-    #   0
-    # end
+    gross_loss = masters_scope(type, :closed).try(:loss).sum(:profit).abs
+    gross_profit = masters_scope(type, :closed).try(:gain).sum(:profit).abs
+    AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type))
   end
 
 
   def drawdown(type = :masters)
     scoped = masters_scope(:masters, :closed).order(created_at: :desc)
     AlgoStatistic.drawdown(scoped)
-
-    # drawdown_balance = 0
-    # drawdown_max = 0
-    # # drawdown_max = 0
-
-    # self.send(type).closed.order(created_at: :desc).each do |association|
-    #   value = association.profit.to_f
-    #   # puts "-------------------------------------"
-    #   # puts "Value   #{value.round(2)}"
-    #   # puts "Drawdown balance   #{drawdown_balance.round(2)}"
-    #   # puts "Drawdown max #{drawdown_max.round(2)}"
-
-    #   if value < 0 
-    #     drawdown_balance = drawdown_balance + value
-        
-    #     if drawdown_balance < drawdown_max
-    #       drawdown_max = drawdown_balance
-    #     end
-
-    #   else
-    #     # puts "Drawdown balance   #{drawdown_balance.round(2)}"
-    #     # puts "Value   #{value.round(2)}"
-    #     # puts "drawdown_balance + value = #{(drawdown_balance + value).round(2)} " + "> 0}"
-    #     drawdown_balance = drawdown_balance + value
-    #     if drawdown_balance > 0
-    #       drawdown_balance = 0 
-    #     end
-    #   end
-    #   # puts "Drawdown max #{drawdown_max.round(2)}"
-    #   # puts "Drawdown balance   #{drawdown_balance.round(2)}"
-    #   # puts "-------------------------------------"
-    #   # association.profit.to_f < 0 ? drawdown_balance = association.profit + drawdown_balance  : drawdown_balance
-    # end
-    # drawdown_max
   end
 
 end

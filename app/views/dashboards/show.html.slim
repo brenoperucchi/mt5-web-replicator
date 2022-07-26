@@ -43,6 +43,9 @@
             p.f-20.m-0.f-w-400= "#{number_with_precision @trace.pay_off(:masters).round(2)}"
             span.text-muted PayOFF
           .col-sm-3.col-xs-12
+            p.f-20.m-0.f-w-400= "#{number_with_precision @trace.expect_pay_off(:masters).round(2)}"
+            span.text-muted Expected PayOFF
+          .col-sm-3.col-xs-12
             p.f-20.m-0.f-w-400= "#{number_with_precision @trace.profit_factor(:masters).round(2)}"
             span.text-muted Fator de Lucro
           .col-sm-3.col-xs-12
@@ -125,13 +128,14 @@
                 th Lucro %
                 th Perda %
                 th PayOFF 
+                th Exp PayOff 
                 th Fator Lucro
                 th Drawdown
-                th Total 
-                th Compra (qtd)
-                th Venda (qtd)
-                th Ganho (qtd)
-                th Perda (qtd)
+                th Total
+                th Buy
+                th Sell
+                th Gain
+                th Loss
                 th Error
             tbody
               - @trace.accounts.slave.enable.each do |account|
@@ -143,6 +147,7 @@
                   td = account.profit_trade(:slaves, @trace)
                   td = account.loss_trade(:slaves, @trace)
                   td = number_with_precision account.pay_off(:slaves, @trace).round(2)
+                  td = account.expect_pay_off(:slaves, @trace).round(2)
                   td = number_with_precision account.profit_factor(:slaves, @trace).round(2)
                   td = number_with_precision account.drawdown(:slaves, @trace).round(2)
                   / td = account.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count

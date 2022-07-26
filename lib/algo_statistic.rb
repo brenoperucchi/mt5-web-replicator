@@ -18,11 +18,15 @@ module AlgoStatistic
 	end
 
 	def self.profit_factor(profit, loss, pay_off)
-		divide = loss*pay_off
-		return 0 if divide == 0
-		result = profit/divide
-		(result.is_a?(Float) and result.nan?) ? 0 : result
+		# divide = loss
+		return 0 if loss == 0
+		result = profit/loss.to_f
+		(result.is_a?(Float) or result.nan?) ? 0 : result
+	end
 
+	def self.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
+		result = (profit_trades/total_trades) * (gross_profit / profit_trades) - (loss_trades / total_trades) * (gross_loss / loss_trades)
+		(result.is_a?(Float) or result.nan?) ? 0 : result
 	end
 
 	def self.drawdown(transactions)

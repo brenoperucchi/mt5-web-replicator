@@ -101,8 +101,19 @@ class Account < ApplicationRecord
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
 
+  def expect_pay_off(type = :slaves, trace)
+    total_trades = slaves_scope(type, :closed, trace).count
+    profit_trades = slaves_scope(type, :closed, trace).try(:gain).count.to_f
+    loss_trades = slaves_scope(type, :closed, trace).try(:loss).count.to_f
+    gross_profit = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
+    gross_loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
+    AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
+  end
+
   def profit_factor(type = :slaves, trace)
-    AlgoStatistic.profit_factor(profit_trade(type, trace), loss_trade(type, trace), pay_off(type, trace))
+    gross_profit = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
+    gross_loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
+    AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace))
   end
 
 
