@@ -11,8 +11,7 @@ class DisableBelongsTo <Administrate::Field::Base
     when 'has_many'
       obj.send(options[:attribute]).try(options[:association]).map(&attr).join(', ')
     else
-      # obj.send(options[:attribute]).try(attr)
-      @data.send(attr)
+      obj.send(options[:attribute]).try(attr)
     end
   end 
 
