@@ -12,11 +12,15 @@ class Message < ApplicationRecord
 
 	def create_order(order_params, account, account_copy, symbol)
 	  order_attributes = order_params
-	  instrument = account.instrument(symbol)
+	  if trace.copy_control_instrument.to_b
+	  	instrument = trace.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
+	  else
+	  	instrument = account.instrument(symbol)
+	  end
 	  ticket = order_attributes['order_id']
 
 	  order = store.orders.find_by(content_id: ticket, account:account)
- 		serializer_attributes = SerializerAPITransaction.new(order_attributes).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace, account:account_copy) 	
+ 		serializer_attributes = SerializerAPITransaction.new(order_attributes).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account_copy) 	
 	  if order.nil?
 	  	order = store.orders.create(message:self, trace: trace, content_id:ticket, symbol: instrument, account:account)
 	  end

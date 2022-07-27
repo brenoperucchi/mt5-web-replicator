@@ -17,7 +17,8 @@ class TraceDashboard < Administrate::BaseDashboard
     telegram_api_id:     Field::String.with_options(searchable: false),
     telegram_api_hash:   Field::String.with_options(searchable: false),
     telegram_api_number: Field::String.with_options(searchable: false),
-    active:              Field::Boolean,
+    active:              Field::Boolean.with_options(searchable: false),
+    copy_control_instrument:  Field::Boolean,
     created_at:          Field::DateTime,
     updated_at:          Field::DateTime,
     store:               Field::BelongsTo,
@@ -53,6 +54,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name_id
   active
   kind
+  copy_control_instrument
   take_profit_limit
   telegram_option
   telegram_image
@@ -75,6 +77,7 @@ class TraceDashboard < Administrate::BaseDashboard
   active
   kind
   store
+  copy_control_instrument
   take_profit_limit
   telegram_option
   telegram_image

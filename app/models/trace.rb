@@ -13,7 +13,7 @@ class Trace < ApplicationRecord
   enum kind:  {telegram: 0, copy: 1}
 
   store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
-                               :telegram_api_id, :telegram_api_hash, :telegram_api_number]
+                               :telegram_api_id, :telegram_api_hash, :telegram_api_number, :copy_control_instrument]
 
   has_many :deals, dependent: :destroy
   has_many :masters, :through => :deals, :source => :masters

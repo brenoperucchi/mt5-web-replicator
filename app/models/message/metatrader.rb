@@ -43,8 +43,10 @@ class Message::Metatrader < Message
           ### Order Opened and Modify
           # else
             content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
-              if account.instrument_control.to_b
-                instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+              if trace.copy_control_instrument.to_b
+                instrument = account_copy.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
+              elsif account.instrument_control.to_b
+                instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
               else 
                 instrument = symbol
               end
@@ -57,7 +59,7 @@ class Message::Metatrader < Message
                 transaction = balance_order.transactions.where(symbol: instrument).where.not(state: :closed).try(:last) if balance_order
                 # transaction = account.transactions.where(symbol: instrument).where.not(state: :closed).try(:last)
                 if transaction.nil?
-                  api_transaction_attributes = SerializerAPITransaction.new(orders.last).api_attributes.merge(symbol: instrument, profit:nil, message: self, trace: trace, account:account)
+                  api_transaction_attributes = SerializerAPITransaction.new(orders.last).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account)
                   balance_order = account.orders.create(message:self, trace: trace, content_id:api_transaction_attributes[:ticket], symbol: instrument, account:account)
                   transaction = balance_order.transactions.create(api_transaction_attributes)
                 end

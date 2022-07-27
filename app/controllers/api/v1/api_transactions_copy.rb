@@ -23,6 +23,7 @@ module API
         desc "Receive Transaction"
         post "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
           content_type 'text/plain'
+          returned = 'NONE'
           action = params[:action]
           if action == "closed"
             parameters = eval(params[:body])
@@ -30,10 +31,14 @@ module API
             transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
             transaction.loggings.create(content:params, state: action.try(:upcase))
             transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
-            transaction.close
-
-            # Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at)
-            body "OK"
+            transaction.close if transaction.can_close?
+            body "OK|OK|OK"
+            # if transaction.close
+            # body "OK|OK|OK"
+            # else
+            #   body returned
+            # end
+              # Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at)
           elsif action == "orders"    
             # orders = params[:orders]
 
@@ -65,12 +70,13 @@ module API
                 
                 # TODO - Colocar uma trava se account estiver desabilitado
                 message.prepare
-                message.execute
+                if message.execute
+                  body "OK|OK|OK"
+                else
+                  body returned
+                end
               end
-              body "OK"
             end
-          else
-            body "OK"
           end
         end
 
