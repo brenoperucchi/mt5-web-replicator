@@ -9,7 +9,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    content: Field::Text,
+    content: Field::Text.with_options(searchable: true),
     loggerable:Field::Polymorphic,
     # user:Field::BelongsTo,
     account: Field::String.with_options(searchable: false),
