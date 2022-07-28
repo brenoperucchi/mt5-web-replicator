@@ -1,5 +1,5 @@
 class AccountSerializer < ActiveModel::Serializer
-  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode
+  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname
 
 
   def yaml
@@ -34,6 +34,10 @@ class AccountSerializer < ActiveModel::Serializer
 
   def account_mode
     object.meta_mode
+  end
+
+  def api_server_hostname
+    object.api_server_hostname(instance_options[:params])
   end
 
   # attributes :id, :name, :telegram_api_id, :telegram_api_number, :telegram_api_hash, :server_real, :state

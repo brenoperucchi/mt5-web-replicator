@@ -29,7 +29,7 @@ module API
             parameters = eval(params[:body])
             serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body]))
             transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
-            transaction.loggings.create(content:params, state: action.try(:upcase))
+            transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.account.name)
             transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
             transaction.close if transaction.can_close?
             body "OK|OK|OK"
@@ -45,7 +45,7 @@ module API
             # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
             account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
             if account
-              account.loggings.create(content:params, state: action.try(:upcase))
+              account.loggings.create(content:params, state: action.try(:upcase), changeset: account.name)
               trace = account.try(:trace_copy)
 
               # if account.magics_accept.blank?
