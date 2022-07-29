@@ -14,7 +14,7 @@ class Account < ApplicationRecord
   enum meta_mode:         {demo: 0, real: 1}
   enum meta_margin_mode:  {netting: 0, hedging: 1}
 
-  store :settings, accessors: [:magics_accept, :instrument_control, :meta]
+  store :settings, accessors: [:magics_accept, :instrument_control]
 
   belongs_to :store
   belongs_to :customer
@@ -36,16 +36,13 @@ class Account < ApplicationRecord
 
 
   def api_server_hostname(params)
-
-    if (Rails.env.production? or Rails.env.development?) and params[:EnvironmentLocal] == "0"
+    if params[:EnvironmentLocal] == "0"
       'signalforex.imentore.com.br'
-    elsif Rails.env.production? and params[:EnvironmentLocal] == "1"
-      'benincasouza.tplinkdns.com:8080'
-    elsif Rails.env.development?
+    elsif params[:EnvironmentLocal] == "1"
       if params[:expert_name] == 'signal_copy'
-        '192.168.1.240:8080'
+        'signallocal.imentore.com.br:8080'
       else
-        '192.168.1.240:80'
+        'signallocal.imentore.com.br:80'
       end
     end    
   end
