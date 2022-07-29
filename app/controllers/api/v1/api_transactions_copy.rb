@@ -1,3 +1,6 @@
+#!/bin/env ruby
+
+# encoding: Windows-1252
 # require 'open-uri'
 require 'json'
 module API
@@ -22,16 +25,19 @@ module API
 
         desc "Receive Transaction"
         post "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
+          puts " ACTION = #{params[:action]}"
           content_type 'text/plain'
           returned = 'NONE'
           action = params[:action]
           if action == "closed"
-            parameters = eval(params[:body])
-            serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body]))
+            parameters = eval(params[:body].encode("UTF-8", "Windows-1252"))
+            serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body].encode("UTF-8", "Windows-1252")))
             transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
-            transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.account.name)
-            transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
-            transaction.close if transaction.can_close?
+            if transaction
+              transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.account.name)
+              transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
+              transaction.close if transaction.can_close?
+            end
             body "OK|OK|OK"
             # if transaction.close
             # body "OK|OK|OK"
@@ -62,7 +68,7 @@ module API
                 # content_at = Time.new(d.year, d.month, d.day,d.hour,d.minute,d.second, "-03:00").to_datetime
                 # create(content: params, content_id: comment, content_at: content_at, store: trace.store)
                 orders = {orders:[]}
-                params['orders'].split("//").each do |order| 
+                params['orders'].encode("UTF-8", "Windows-1252").split("//").each do |order| 
                   orders[:orders] << [YAML.load(order)]
                 end
                 orders[:params] = params.except('orders')
