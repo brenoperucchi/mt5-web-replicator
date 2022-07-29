@@ -27,4 +27,5 @@ signal_copy:
   '1_41': disable
   '1_42': OK
   '1_50': OK
+  '1_51': OK
   disable_msg: 'A versao |version| do SignalCopy esta desabilitado em nosso sistema. Atualize seu expert. '
