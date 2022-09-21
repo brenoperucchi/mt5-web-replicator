@@ -10,7 +10,7 @@ set :log_level, :debug
   
 set :use_sudo, false
 set :bundle_binstubs, nil
-set :linked_files, fetch(:linked_files, []).push('lib/telegram/tdlib/libtdjson.so')
+
 
 set :linked_dirs, fetch(:linked_dirs, []).push('log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'vendor/bundle', 'public/system', 'public/uploads')
 
@@ -39,7 +39,7 @@ namespace :deploy do
   task :stop do
   #   invoke 'unicorn:stop'
     on roles(:app) do
-      execute "systemctl --user stop telegram_python.service"
+      # execute "systemctl --user stop telegram_python.service"
   #     # execute "systemctl --user stop python-signal-order.service"
   #      # execute "systemctl --user stop sidekiq.service"
     end
@@ -47,8 +47,8 @@ namespace :deploy do
   task :start do
     # invoke 'unicorn:start'
     on roles(:app) do
-      execute "systemctl --user stop telegram_python.service"
-      execute "systemctl --user start telegram_python.service"
+      # execute "systemctl --user stop telegram_python.service"
+      # execute "systemctl --user start telegram_python.service"
       # execute "systemctl restart nginx.service"
       # execute "systemctl --user start python-signal-api.service"
       # execute "systemctl --user start python-signal-order.service"

@@ -51,32 +51,11 @@ class Message::Metatrader < Message
                 instrument = symbol
               end
               if account_mode == "HEDGING"
-                orders.reverse.each do |order|
-                  self.create_order_hedging(order, account, account_copy, symbol)
+                orders.reverse.each do |order_params|
+                  self.create_order_hedging(order_params, account, account_copy, symbol)
                 end
               elsif account_mode == "NETTING" 
-                balance_order = account.orders.where(symbol: instrument).where.not(state: :closed).try(:last)
-                transaction = balance_order.transactions.where(symbol: instrument).where.not(state: :closed).try(:last) if balance_order
-                # transaction = account.transactions.where(symbol: instrument).where.not(state: :closed).try(:last)
-                if transaction.nil?
-                  api_transaction_attributes = SerializerAPITransaction.new(orders.last).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account)
-                  balance_order = account.orders.create(message:self, trace: trace, content_id:api_transaction_attributes[:ticket], symbol: instrument, account:account)
-                  transaction = balance_order.transactions.create(api_transaction_attributes)
-                end
-                unless transaction.error?
-                  orders.reverse.each do |order|
-                    slave = transaction.slaves.find_by(ticket_master:order['order_id'])
-                    unless slave
-                      api_attributes = SerializerAPITransactionSlave.new(order).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
-                      comment = api_attributes[:ticket_master]
-                      # comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
-                      balance_order.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account, master:transaction))
-                      transaction.execute if transaction.valid?
-                    else
-                      slave.update(lot: order['lot'], take_profit:order['takeprofit'], stop_loss:order['stoploss']) if order['state_meta'] == "modify"
-                    end
-                  end
-                end
+                self.create_order_netting(orders, account,account_copy, symbol)
               end
             end
           end
@@ -85,6 +64,30 @@ class Message::Metatrader < Message
     end
   end
 
+  def create_order_netting(orders, account, account_copy, symbol)
+    balance_order = account.orders.where(symbol: instrument).where.not(state: :closed).try(:last)
+    transaction = balance_order.transactions.where(symbol: instrument).where.not(state: :closed).try(:last) if balance_order
+    # transaction = account.transactions.where(symbol: instrument).where.not(state: :closed).try(:last)
+    if transaction.nil?
+      api_transaction_attributes = SerializerAPITransaction.new(orders.last).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account)
+      balance_order = account.orders.create(message:self, trace: trace, content_id:api_transaction_attributes[:ticket], symbol: instrument, account:account)
+      transaction = balance_order.transactions.create(api_transaction_attributes)
+    end
+    unless transaction.error?
+      orders.reverse.each do |order|
+        slave = transaction.slaves.find_by(ticket_master:order['order_id'])
+        unless slave
+          api_attributes = SerializerAPITransactionSlave.new(order).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
+          comment = api_attributes[:ticket_master]
+          # comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
+          balance_order.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account, master:transaction))
+          transaction.execute if transaction.valid?
+        else
+          slave.update(lot: order['lot'], take_profit:order['takeprofit'], stop_loss:order['stoploss']) if order['state_meta'] == "modify"
+        end
+      end
+    end
+  end
 
   def create_order_hedging(order_params, account, account_copy, symbol)
     order_attributes = order_params
@@ -109,11 +112,6 @@ class Message::Metatrader < Message
       transaction.balances.update(account:account_copy)
       order.transaction_ids = transaction.id
     end
-    # transaction = order.transactions.create_with(serializer_attributes.merge(order:order, account:account_copy)).find_or_create_by(ticket: ticket)
-    # order.transaction_ids = transaction.id
-    # order.accounts << account
-    # order.account_ids = account.id
-    # transaction.account_ids = account_copy.id
 
     deal = Deal.create_with(ticket: ticket, symbol:instrument, account: account_copy, store: self.try(:store), trace:self.trace).find_or_create_by(ticket: ticket)
     transaction.update(deal: deal)
@@ -121,12 +119,13 @@ class Message::Metatrader < Message
     serializer_attributes_slave = SerializerAPITransactionSlave.new(order_attributes).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil, price_closed:nil)
     comment = serializer_attributes_slave[:ticket_master]
     slave = order.slaves.create(serializer_attributes_slave.merge(symbol:instrument, comment: comment, account:account, master:transaction, deal:deal, trace: self.trace))
+
     slave.balances.update(account:account)
 
     transaction.execute if transaction.valid?
-    if order['state_meta'] == "modify"
-      slave = balance_order.slaves.find_by(ticket_master: ticket)
-      slave.update(take_profit:order['takeprofit'], stop_loss:order['stoploss'])
+    if order_params['state_meta'] == "modify"
+      slave = order.slaves.find_by(ticket_master: ticket)
+      slave.update(take_profit:order_params['takeprofit'], stop_loss:order_params['stoploss'])
     end
   end
 

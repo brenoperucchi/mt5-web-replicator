@@ -11,6 +11,7 @@ class AccountDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     state:                Field::String,
     kind:                 Field::String,
+    stock_kind:           Field::String,
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
     traces:               Field::HasMany,
@@ -32,8 +33,8 @@ class AccountDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   name
   state
-  kind
   customer
+  kind
   meta_mode
   meta_margin_mode
   traces
@@ -45,10 +46,11 @@ class AccountDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   name
   state
-  kind
   customer
+  kind
   meta_mode
   meta_margin_mode
+  stock_kind
   magics_accept
   instrument_control
   traces
@@ -65,10 +67,11 @@ class AccountDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   state
-  kind
   customer
+  kind
   meta_mode
   meta_margin_mode
+  stock_kind
   magics_accept
   instrument_control
   traces

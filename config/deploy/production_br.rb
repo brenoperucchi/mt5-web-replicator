@@ -1,12 +1,12 @@
 set :port, 22
 set :user, 'app'
-set :deploy_to, '/home/app/signalforex'
+set :deploy_to, '/home/app/'
 set :deploy_via, :remote_cache
 set :use_sudo, false
 set :stage, :production
-set :linked_files, fetch(:linked_files, []).push('lib/telegram/tdlib/libtdjson.so')
 
-server '66.94.116.89',
+
+server '189.1.172.121',
 # server 'app.imentore.com.br',
   roles: [:web, :app, :db],
   port: fetch(:port),

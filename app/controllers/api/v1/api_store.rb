@@ -38,6 +38,7 @@ module API
 
           account = Account.find_by(name: params[:account_id], state: 1, kind: kind)
           date_today = Date.today.in_time_zone
+          return true if account.nil?
           result = account.loggings.find_by(state: "START", created_at:date_today.beginning_of_day..date_today.end_of_day)
           account.loggings.create(content:params, state: "START") unless result
           if account && account.store.enable? && meta_version_accept

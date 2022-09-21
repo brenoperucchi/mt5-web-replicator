@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_07_23_185355) do
+ActiveRecord::Schema.define(version: 2022_08_02_025705) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 2022_07_23_185355) do
     t.integer "meta_margin_mode", default: 0
     t.integer "meta_mode", default: 0
     t.bigint "customer_id"
+    t.integer "stock_kind", default: 0
     t.index ["customer_id"], name: "index_accounts_on_customer_id"
     t.index ["store_id"], name: "index_accounts_on_store_id"
   end

@@ -25,9 +25,7 @@ module API
 
         desc "Receive Transaction"
         post "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
-          puts " ACTION = #{params[:action]}"
           content_type 'text/plain'
-          returned = 'NONE'
           action = params[:action]
           if action == "closed"
             parameters = eval(params[:body].encode("UTF-8", "Windows-1252"))
@@ -36,15 +34,10 @@ module API
             if transaction
               transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.account.name)
               transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
+              transaction.save
               transaction.close if transaction.can_close?
             end
             body "OK|OK|OK"
-            # if transaction.close
-            # body "OK|OK|OK"
-            # else
-            #   body returned
-            # end
-              # Transaction.where(ticket: parameters[:deal_ticket]).update_all(price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at)
           elsif action == "orders"    
             # orders = params[:orders]
 
@@ -79,7 +72,7 @@ module API
                 if message.execute
                   body "OK|OK|OK"
                 else
-                  body returned
+                  body :NONE
                 end
               end
             end

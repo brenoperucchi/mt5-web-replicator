@@ -25,7 +25,7 @@ class TraceDashboard < Administrate::BaseDashboard
     meta_host:           Field::String,
     kind:                Field::String,
     response:            Field::String,
-    take_profit_limit:   Field::String,
+    take_profit_limit:   Field::String.with_options(searchable: false),
     # volumes:           Field::ActsAsTaggable,
     messages:            Field::HasMany.with_options(direction: :desc),
     instruments:         Field::HasMany,

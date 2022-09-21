@@ -2,7 +2,7 @@ require 'lib_enums'
 class Account < ApplicationRecord
   attr_accessor :search_date_begin, :search_date_end
 
-  ENUMS = %w(state kind meta_mode meta_margin_mode)
+  ENUMS = %w(state kind meta_mode meta_margin_mode stock_kind)
 
   include Balance::Base
   include LibEnums
@@ -13,6 +13,7 @@ class Account < ApplicationRecord
   enum kind:  {slave: 0, copy: 1}
   enum meta_mode:         {demo: 0, real: 1}
   enum meta_margin_mode:  {netting: 0, hedging: 1}
+  enum stock_kind:  {b3: 0, forex: 1, usa:2, others:4}
 
   store :settings, accessors: [:magics_accept, :instrument_control]
 
@@ -95,29 +96,29 @@ class Account < ApplicationRecord
 
 
   def profit_trade(type = :slaves, trace)
-    trades = slaves_scope(type, :closed, trace).try(:count).to_f
-    gain_trades = slaves_scope(type, :closed, trace).try(:gain).try(:count).to_f
+    trades = slaves_scope(type, :closed, trace).try(:size).to_f
+    gain_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
     AlgoStatistic.profit_trade(trades, gain_trades)
   end
 
   def loss_trade(type = :slaves, trace)
-    trades = slaves_scope(type, :closed, trace).try(:count).to_f
-    loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:count).to_f
+    trades = slaves_scope(type, :closed, trace).try(:size).to_f
+    loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
     AlgoStatistic.loss_trade(trades, loss_trades)
   end
 
   def pay_off(type = :slaves, trace)
     gain = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
-    gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:count).to_f
+    gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
     loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
-    loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:count).to_f
+    loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
 
   def expect_pay_off(type = :slaves, trace)
-    total_trades = slaves_scope(type, :closed, trace).count
-    profit_trades = slaves_scope(type, :closed, trace).try(:gain).count.to_f
-    loss_trades = slaves_scope(type, :closed, trace).try(:loss).count.to_f
+    total_trades = slaves_scope(type, :closed, trace).try(:size)
+    profit_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
+    loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
     gross_profit = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
     gross_loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
     AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
