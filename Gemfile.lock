@@ -18,15 +18,6 @@ GIT
   specs:
     state_machine (1.2.0)
 
-PATH
-  remote: vendor/telegram-bot-ruby
-  specs:
-    telegram-bot-ruby (0.21.0)
-      dry-inflector
-      faraday (~> 2.0)
-      faraday-multipart (~> 1.0)
-      virtus (~> 2.0)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -510,6 +501,11 @@ GEM
       railties (>= 6.0.0)
     tailwindcss-rails (2.0.16-x86_64-linux)
       railties (>= 6.0.0)
+    telegram-bot-ruby (0.21.0)
+      dry-inflector
+      faraday (~> 2.0)
+      faraday-multipart (~> 1.0)
+      virtus (~> 2.0)
     temple (0.8.2)
     thor (1.2.1)
     thread_safe (0.3.6)
@@ -621,7 +617,7 @@ DEPENDENCIES
   state_machine!
   stripe (>= 2.8, < 6.0)
   tailwindcss-rails (~> 2.0)
-  telegram-bot-ruby!
+  telegram-bot-ruby
   terminal-notifier!
   turbolinks (~> 5)
   wannabe_bool

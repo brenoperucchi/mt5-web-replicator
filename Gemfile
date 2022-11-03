@@ -153,4 +153,4 @@ gem 'receipts', '~> 1.1'
 
 gem 'next_rails'
 gem 'tailwindcss-rails', '~> 2.0'
-gem 'telegram-bot-ruby', path: 'vendor/telegram-bot-ruby'
+gem 'telegram-bot-ruby'#, path: 'vendor/telegram-bot-ruby'
