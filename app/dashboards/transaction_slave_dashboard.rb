@@ -16,6 +16,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     ticket_master:      Field::String,
     ticket_slave:       Field::String,
+    ticket_deal:        Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
     ordertype:          Field::String,
@@ -60,6 +61,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   id
   ticket_master
   ticket_slave
+  ticket_deal
   master
   account
   versions
@@ -90,6 +92,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   ticket_master
   ticket_slave
+  ticket_deal
   state
   profit
   ordertype

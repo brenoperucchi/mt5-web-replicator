@@ -10,6 +10,7 @@ module PaperTrail
     ATTRIBUTE_TYPES = {
       item_type:          Field::String,
       item_id:            Field::Number,
+      changeset:          Field::String,
       event:              Field::String,
       whodunnit:          Field::String.with_options(searchable: true),
       object:             Field::Text,
@@ -25,8 +26,7 @@ module PaperTrail
       item_type
       item_id
       event
-      whodunnit
-      object
+      changeset
       created_at
     ].freeze
 
@@ -35,6 +35,7 @@ module PaperTrail
     SHOW_PAGE_ATTRIBUTES = %i[
       item_type
       item_id
+      changeset
       event
       whodunnit
       object

@@ -28,12 +28,12 @@ class TransactionDashboard < Administrate::BaseDashboard
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    order:              Field::BelongsTo,
     trace:              Field::BelongsTo,
     message:            Field::BelongsTo,
     account:            Field::BelongsTo,
-    loggings:           Field::HasMany,
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
+    loggings:           Field::HasMany,
+    versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -57,8 +57,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  trace
-  order
   ticket
   state
   profit
@@ -74,14 +72,16 @@ class TransactionDashboard < Administrate::BaseDashboard
   magic_number
   response
   response_error
+  trace
+  message
+  account
+  versions
+  loggings
+  slaves
   open_at
   closed_at
   created_at
   updated_at
-  message
-  loggings
-  account
-  slaves
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -89,7 +89,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   trace
-  order
   ticket
   state
   profit

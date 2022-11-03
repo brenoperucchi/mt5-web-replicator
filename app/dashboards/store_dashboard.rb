@@ -1,4 +1,4 @@
-require_relative '../fields/has_many_scope_field.rb'
+require_relative '../../app/fields/has_many_scope_field.rb'
 require "administrate/base_dashboard"
 
 
@@ -18,13 +18,16 @@ class StoreDashboard < Administrate::BaseDashboard
     plan_value:    Field::String,
     plan_percent:  Field::String,
     volume_default:      Field::String,
+    telegram_bot_chat_name: Field::String,
+    telegram_bot_chat_id: Field::String,
+    telegram_bot_status: Field::String,
     telegram_api_id:     Field::String,
     telegram_api_hash:   Field::String,
     telegram_api_number: Field::String,
     stripe_webhook_secret: Field::String,
     stripe_api_secret:     Field::String,
-    # accounts:   Field::HasMany,
-    accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
+    accounts:   Field::HasMany,
+    # accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     traces:     Field::HasMany,
     customers:  Field::HasMany,
     users:      Field::HasMany,
@@ -43,8 +46,10 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
+  telegram_bot_chat_name
+  telegram_bot_chat_id
+  telegram_bot_status
   plan
-  tag_list
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -54,6 +59,9 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   state
   url
+  telegram_bot_chat_name
+  telegram_bot_chat_id
+  telegram_bot_status
   plan
   plan_value
   plan_percent
@@ -76,6 +84,9 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   state
   url
+  telegram_bot_chat_name
+  telegram_bot_chat_id
+  telegram_bot_status
   plan
   plan_value
   plan_percent

@@ -1,4 +1,10 @@
 class Transaction < ApplicationRecord
+  include Telegram::Util
+
+  has_paper_trail 
+  # versions: {
+  #   class_name: 'Track'
+  # }
 
   belongs_to :order, optional:true
   belongs_to :message
@@ -9,11 +15,14 @@ class Transaction < ApplicationRecord
   has_many :loggings, as: :loggerable, dependent: :destroy
   # has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
 
-  has_many :balances, :foreign_key => "master_id"
-  has_many :accounts, through: :balances, source: :account
+  # has_many :orders,   through: :balances, source: :order, dependent: :destroy
+  has_many :slaves,   through: :order,    source: :slaves,   dependent: :destroy
+  has_many :accounts, through: :order,    source: :accounts, dependent: :destroy
 
-  has_many :orders,   through: :balances, source: :order, dependent: :destroy
-  has_many :slaves,   through: :orders,    source: :slaves
+  # has_many :balances, :foreign_key => "master_id"
+  # has_many :accounts, through: :balances, source: :account
+  # has_many :orders,   through: :balances, source: :order, dependent: :destroy
+  # has_many :slaves,   through: :orders,    source: :slaves, dependent: :destroy
 
 
   scope :closed,      ->{where(state: 'closed')}
@@ -27,16 +36,20 @@ class Transaction < ApplicationRecord
   scope :gain,  ->{where('transactions.profit >= 0')}
   scope :loss,  ->{where('transactions.profit < 0')}
 
+  scope :pending_executed,  ->{where(state: [:pending, :executed])}
+
   # before_create :set_symbol
   after_create  :validate_restriction
   # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
 
   state_machine :initial => :pending do
     after_transition :pending => :executed, :do => :update_state
-    after_transition :pending => :executed, :do => :update_state
-    # after_transition :executed => :closed, :do => :update_state
-    # after_transition :executed => :closed, :do => :break_even
+    after_transition [:pending, :executed] => [:executed, :closed], :do => lambda { |transaction| transaction.telegram_message }
+    after_transition [:pending, :executed] => :closed, :do => :update_state
+    
+    after_transition :executed => :closed, :do => :update_state
     after_transition [:pending, :executed, :closed] => :error, :do => :update_state
+    # after_transition :executed => :closed, :do => :break_even
     # after_transition [:executed, :ordered] => :pending, :do => :update_state
 
     event :execute do
@@ -61,14 +74,42 @@ class Transaction < ApplicationRecord
       def update_state(state)
         # self.order.execute
       end
+
+      def telegram_message
+        if self.trace.store.telegram_bot_chat_id.present?
+          content = self.telegram_message_prepare(:OPEN)
+          TelegramBot.send_message(self.trace.store.telegram_bot_chat_id, content)
+        end
+      end
     end
+
     state :closed do
       def update_state(state)
-        # self.order.close
+        self.order.close
+      end
+     
+      def telegram_message
+        if self.trace.store.telegram_bot_chat_id.present?
+          content = self.telegram_message_prepare(:CLOSED)
+          TelegramBot.send_message(self.trace.store.telegram_bot_chat_id, content)
+        end
+      end
+
+      def update_state(state)
+        slaves.map(&:remove)
+        order.try(:close)
+        # self.orders.each do |order| 
+        #   slaves.map(&:remove)
+        #   order.try(:close)
+        # end
+        return true
+        # self.orders.where(content_id: self.ticket).each{|order| order.try(:close)}
         # self.update(close_at: Time.zone.now)
         # self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
       end
     end
+
+
   end
 
   # def close_order
@@ -92,8 +133,24 @@ class Transaction < ApplicationRecord
   #   end    
   # end
 
-  def set_all_sl_and_tp_order(take_profit=nil, stop_loss=nil)
-    self.slaves.each{|s| s.set_sl_and_tp_order(take_profit, stop_loss)}
+  def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)
+    self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss)}
+  end
+
+  def set_lot_sl_tp(order_params)
+    attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f}
+    # attributes = {lot:lot, take_profit:take_profit, stop_loss:stop_loss}.compact
+    self.attributes = attributes
+    if self.changes.present?
+      content = self.telegram_message_prepare(:MODIFY)
+      TelegramBot.send_message(self.trace.store.telegram_bot_chat_id, content)
+    end
+    
+    if self.save
+      loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
+      set_slaves_attributes(lot, take_profit, stop_loss)
+    end
+
   end
 
   # def copy_attributes(value=0)

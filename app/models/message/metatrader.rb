@@ -3,7 +3,8 @@ class Message::Metatrader < Message
 
   state_machine :initial => :pending do
     before_transition :pending => :prepared, :do => :update_state
-    after_transition :prepared => :executed, :do => :update_state
+    after_transition :prepared => :executed, :do => lambda { |message| message.create_orders }
+    after_transition :prepared => :executed, :do => lambda { |message| message.close_orders }
     event :prepare do
         transition :pending => :prepared
     end
@@ -20,113 +21,140 @@ class Message::Metatrader < Message
       end
     end
     
-    state :executed do
-      def update_state(state)
-        content = YAML.load(self.content)
-        account_mode = content["params"]["account_mode"]
-        account_copy = Account.find_by(name: content["params"]["account_id"])
-        self.trace.accounts.slave.enable.each do |account|
-          # Order All Closed
-          if content['orders'].blank?
-            account.slaves.where("transaction_slaves.trace_id = ?", trace.id).where(state: ['pending', 'executed']).map(&:remove) if account.slaves
+  end
 
-          ### Order Opened and Modify
-          else
-            account.slaves.where("transaction_slaves.trace_id = ?", trace.id).executed.each do |slave|
-              if content['orders'].flatten.detect{|x| x['order_id'].to_s == slave.ticket_master}
-                next
-              else
-                slave.loggings.create(content: content['orders'], state: "REMOVE")
-                slave.remove
-              end
-            end
-          ### Order Opened and Modify
-          # else
-            content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
-              if trace.copy_control_instrument.to_b
-                instrument = account_copy.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
-              elsif account.instrument_control.to_b
-                instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
-              else 
-                instrument = symbol
-              end
-              if account_mode == "HEDGING"
-                orders.reverse.each do |order_params|
-                  self.create_order_hedging(order_params, account, account_copy, symbol)
-                end
-              elsif account_mode == "NETTING" 
-                self.create_order_netting(orders, account,account_copy, symbol)
-              end
-            end
-          end
-        end              
-      end
+  def close_orders
+    content = YAML.load(self.content)
+
+    # Close All Orders
+    if content['orders'].blank?
+      self.trace.transactions.pending_executed.map(&:close)
+    else
+      self.trace.transactions.pending_executed.each do |transaction|
+        unless content['orders'].flatten.detect{|x| x['order_id'].to_s == transaction.ticket}
+          transaction.close
+        end
+      end      
     end
   end
 
-  def create_order_netting(orders, account, account_copy, symbol)
-    balance_order = account.orders.where(symbol: instrument).where.not(state: :closed).try(:last)
-    transaction = balance_order.transactions.where(symbol: instrument).where.not(state: :closed).try(:last) if balance_order
-    # transaction = account.transactions.where(symbol: instrument).where.not(state: :closed).try(:last)
-    if transaction.nil?
-      api_transaction_attributes = SerializerAPITransaction.new(orders.last).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account)
-      balance_order = account.orders.create(message:self, trace: trace, content_id:api_transaction_attributes[:ticket], symbol: instrument, account:account)
-      transaction = balance_order.transactions.create(api_transaction_attributes)
-    end
-    unless transaction.error?
-      orders.reverse.each do |order|
-        slave = transaction.slaves.find_by(ticket_master:order['order_id'])
-        unless slave
-          api_attributes = SerializerAPITransactionSlave.new(order).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil)
-          comment = api_attributes[:ticket_master]
-          # comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
-          balance_order.slaves.create(api_attributes.merge(symbol:instrument, comment: comment, account:account, master:transaction))
-          transaction.execute if transaction.valid?
-        else
-          slave.update(lot: order['lot'], take_profit:order['takeprofit'], stop_loss:order['stoploss']) if order['state_meta'] == "modify"
+    # if content['orders'].blank?
+    #   self.trace.slaves.pending_executed.map(&:remove)
+    
+    # # Close Specify Order
+    # else
+    #   self.trace.slaves.pending_executed.each do |slave|
+    #     if content['orders'].flatten.detect{|x| x['order_id'].to_s == slave.ticket_master}
+    #       # next
+    #     else
+    #       if slave.remove
+    #         slave.loggings.create(content: "Remove Automatically by MessageMetaTrader#{self.id} \r\n Content-> #{content['orders']}", state: "REMOVE") 
+    #       end
+    #     end
+    #   end
+    # end
+  # end
+
+  def create_orders
+    yaml_content = YAML.load(self.content)
+    account_mode = yaml_content["params"]["account_mode"]
+    account_copy = Account.find_by(name: yaml_content["params"]["account_id"])
+    
+    yaml_content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
+      orders.reverse.each do |order_params|
+        ticket = order_params['order_id']
+        orders = self.trace.orders.where(content_id: ticket)
+        if not order_params['state_meta'].present?
+          unless orders.present?
+            self.trace.create_orders(order_params, account_copy, self, symbol)
+          end
+        elsif order_params['state_meta'] == "modify"
+          orders.each{|order| order.transactions.map{|t| t.set_lot_sl_tp(order_params) }}
         end
       end
     end
   end
 
-  def create_order_hedging(order_params, account, account_copy, symbol)
-    order_attributes = order_params
-    if trace.copy_control_instrument.to_b
-      instrument = trace.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
-    else
-      instrument = account.instrument(symbol)
-    end
-    ticket = order_attributes['order_id']
+  # def order_netting(order_params, account, account_copy, symbol)
+  #   order = account.orders.where(symbol: symbol, account:account).where.not(state: :closed).try(:last)
+  #   transaction = order.transactions.where(symbol: symbol, account:account).where.not(state: :closed).try(:last) if order
+    
+  #   # transaction = account.transactions.where(symbol: symbol).where.not(state: :closed).try(:last)
+  #   # -g.pry
+  #   if transaction.nil?
+  #     api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account)
+      
+  #     order = account.orders.create(message:self, trace: trace, content_id:api_transaction_attributes[:ticket], symbol: symbol, account:account, store:self.store) 
+  #     order.execute
+  #     transaction   = order.transactions.create(api_transaction_attributes)
+  #     transaction.loggings.create(content:order_params, state: "OPEN")
+  #   end
+  #   unless order.error?
+  #     slave = account.slaves.find_by(ticket_master:order_params['order_id'])
+  #     if slave.nil?
+  #       api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: symbol, price_request:order_params['price'], profit:nil, account:account, price_open:nil)
+  #       comment = api_attributes[:ticket_master]
+  #       # comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
+  #       slave = order.slaves.create(api_attributes.merge(symbol:symbol, comment: comment, account:account, master:transaction, trace:self.trace))
+  #       # binding.pry
+  #       # slave.balances.update(account:account)
 
-    order = store.orders.find_by(content_id: ticket, account:account)
-    serializer_attributes = SerializerAPITransaction.new(order_attributes).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account_copy)  
-    if order.nil?
-      order = store.orders.create(message:self, trace: trace, content_id:ticket, symbol: instrument, account:account)
-    end
-    transaction = Transaction.find_by(ticket: ticket)
-    if order.transactions.empty?
-      if transaction.nil?
-        transaction = order.transactions.create(serializer_attributes) 
-        transaction.loggings.create(content:order_params, state: "OPEN")
-      end
-      transaction.balances.update(account:account_copy)
-      order.transaction_ids = transaction.id
-    end
+  #       transaction.execute if transaction.valid?
+  #     else
+  #       if order_params['state_meta'] == "modify"
+  #         transaction.set_lot_sl_tp(order_params["volume"], order_params['take_profit'].to_f, order_params['stop_loss'].to_f)
+  #         # transaction.update(lot: order_params['volume'], take_profit:order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f)
+  #         @version = transaction.versions.last
+  #         transaction.loggings.create(content:order_params, changeset: @version.changeset, version:@version, state: 'MODIFY')
+  #         slave.update(lot: order_params['volume'], take_profit:order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f) 
+  #       end
+  #       # binding.pry
+  #       # @version = @slave.versions.last
+  #       # slave.loggings.create(content:order_params, changeset: @version.changeset, version:@version, state: 'MODIFY')
 
-    deal = Deal.create_with(ticket: ticket, symbol:instrument, account: account_copy, store: self.try(:store), trace:self.trace).find_or_create_by(ticket: ticket)
-    transaction.update(deal: deal)
+  #     end
+  #   end
+  # end
+
+  # def order_hedging(order_params, account, account_copy, symbol)
+  #   if trace.copy_control_instrument.to_b
+  #     instrument = trace.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
+  #   else
+  #     instrument = account.instrument(symbol)
+  #   end
+  #   ticket = order_params['order_id']
+
+  #   order = store.orders.find_by(content_id: ticket, account:account)
+  #   serializer_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: symbol, profit:nil, message: self, trace: trace, account:account_copy)  
+  #   if order.nil?
+  #     order = store.orders.create(message:self, trace: trace, content_id:ticket, symbol: instrument, account:account)
+  #     order.execute
+  #   end
+  #   transaction = Transaction.find_by(ticket: ticket)
+  #   if order.transactions.empty?
+  #     if transaction.nil?
+  #       transaction = order.transactions.create(serializer_attributes) 
+  #       transaction.loggings.create(content:order_params, state: "OPEN")
+  #     end
+  #     order.transaction_ids = transaction.id
+  #   transaction.balances.update(account:account_copy)
+  #   end
+
+  #   deal = Deal.create_with(ticket: ticket, symbol:instrument, account: account_copy, store: self.try(:store), trace:self.trace).find_or_create_by(ticket: ticket)
+  #   transaction.update(deal: deal)
                         
-    serializer_attributes_slave = SerializerAPITransactionSlave.new(order_attributes).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil, price_closed:nil)
-    comment = serializer_attributes_slave[:ticket_master]
-    slave = order.slaves.create(serializer_attributes_slave.merge(symbol:instrument, comment: comment, account:account, master:transaction, deal:deal, trace: self.trace))
+  #   serializer_attributes_slave = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:transaction.price_open, profit:nil, account:account, price_open:nil, price_closed:nil)
+  #   comment = serializer_attributes_slave[:ticket_master]
+  #   slave = order.slaves.create(serializer_attributes_slave.merge(symbol:instrument, comment: comment, account:account, master:transaction, deal:deal, trace: self.trace))
 
-    slave.balances.update(account:account)
+  #   slave.balances.update(account:account)
 
-    transaction.execute if transaction.valid?
-    if order_params['state_meta'] == "modify"
-      slave = order.slaves.find_by(ticket_master: ticket)
-      slave.update(take_profit:order_params['takeprofit'], stop_loss:order_params['stoploss'])
-    end
-  end
+  #   transaction.execute if transaction.valid?
+  #   if order_params['state_meta'] == "modify"
+  #     transaction.set_lot_sl_tp(order_params["volume"], order_params['take_profit'].to_f, order_params['stop_loss'].to_f)
+  #     slave = order.slaves.find_by(ticket_master: ticket)
+  #     slave.update(take_profit:order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f)
+  #   end
+  # end
 
 end

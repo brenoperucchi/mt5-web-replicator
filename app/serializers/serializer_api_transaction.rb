@@ -44,11 +44,11 @@ class SerializerAPITransaction < ActiveModel::Serializer
   end
 
   def stop_loss
-    obj['stoploss']
+    obj['stop_loss'].to_f
   end
 
   def take_profit
-    obj['takeprofit']
+    obj['take_profit'].to_f
   end
 
   def ticket
@@ -63,7 +63,7 @@ class SerializerAPITransaction < ActiveModel::Serializer
 
   def set_time_zone(time, zone)
     if zone.to_i != 0
-      Time.zone.at(time).in_time_zone(zone).to_datetime.change(:offset => Time.zone.formatted_offset)
+     (Time.at(time).utc + zone.hours).to_datetime.change(:offset => Time.zone.formatted_offset)
     else
       Time.use_zone(Time.zone.name) { Time.zone.at(time).utc.to_datetime.change(offset: Time.zone.now.strftime("%z")) }
     end

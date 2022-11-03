@@ -4,7 +4,7 @@ class Store < ApplicationRecord
   include LibEnums
 
 
-  store :settings, accessors: [
+  store :settings, accessors: [ :telegram_bot_chat_name, :telegram_bot_status,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan, :plan_value, :plan_percent, 
                                 :stripe_webhook_secret, :stripe_api_secret
                               ]
@@ -28,4 +28,5 @@ class Store < ApplicationRecord
   accepts_nested_attributes_for :customers, :users
 
   # scope :active, ->{ where.not(active_at:nil)}
+
 end

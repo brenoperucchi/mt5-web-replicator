@@ -12,7 +12,6 @@ module API
         get "/request/:state/:expert_name/:expert_version/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id])
           if account
-            # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
             map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
@@ -23,8 +22,6 @@ module API
         post "/request/:state/:expert_name/:expert_version/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id])
           if account
-            # map = account.slaves.collect{|t| t.api_request_attributes}.join('/')
-            # map = account.slaves.send(params[:state]).collect{|t| t.api_request_attributes}.join('/')
             map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
@@ -35,8 +32,9 @@ module API
           map = String.new
           message = params[:body]
           content = YAML.load(message)
+
           if not content.blank? and content.is_a?(Hash)
-            action = content['action']
+            action = content['meta_state']
             account = Account.find_by(name: params[:account_id])
             if account
               slave = account.slaves.find_by(comment: content['comment'])
@@ -44,6 +42,12 @@ module API
                 Logging.create(content:message, state: action)
               else
                 case action
+                when "OPEN"
+                  api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
+                  slave.attributes = api_attributes
+                  slave.execute
+                  @version = slave.versions.last
+                  map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "CLOSED", "DELETED"
                   api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
                   slave.attributes = api_attributes
@@ -52,38 +56,38 @@ module API
                     slave.master.state = :executed
                   end
                   action == "CLOSED" ? slave.close : slave.deleted
-                  @version = slave.versions.last
+                  @version = slave.versions.last(2).try(:first)
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "MODIFY"
-                  slave.set_sl_and_tp_order(content['take_profit'], content['stop_loss'])
+                  slave.set_sl_and_tp_order(nil, content['take_profit'].to_f, content['stop_loss'].to_f)
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
-                when "OPENED"
-                  api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
-                  slave.attributes = api_attributes
-                  slave.execute
+                when "MODIFY_VOLUME"
                   @version = slave.versions.last
-                  map = "#{slave.master.trace.id}|#{slave.id}|OK"
+                  map = "#{slave.master.trace.id}|#{slave.id}|OK"                  
                 when "NOTFIND"
                   slave.erro
-                  # binding.pry
                   @version = slave.versions.last
                 when "NOSLTP","ERRORDEAL","TIMEMAX"
                   if action == "NOSLTP"
                     api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
                     slave.attributes = api_attributes
                     slave.save
+                    @version = slave.versions.last
                   else
                     api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
                     slave.erro
+                    @version = slave.versions.last
                   end
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
                 logging_content = nil
                 message << params.except("body").to_s.delete('\\"')
-                slave.loggings.create(content:message, changeset: @version.changeset, version:@version, state: action)
+                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action)
               end
+            else
+              Logging.create(content:message, state: action)
             end
             content_type 'text/plain'
             body map

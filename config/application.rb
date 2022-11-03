@@ -14,8 +14,10 @@ module Signalforex
 
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.0
-    config.time_zone = 'Brasilia'
+    config.time_zone = 'America/Sao_Paulo'
     config.autoloader = :classic
+    config.active_record.yaml_column_permitted_classes = [ActiveSupport::HashWithIndifferentAccess]
+
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
@@ -24,6 +26,7 @@ module Signalforex
    	##API
    	config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
    	config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
+    # config.autoload_paths += Dir[Rails.root.join('app', 'fields', '*')]
    	config.middleware.insert_before 0, Rack::Cors do
    	  allow do
    	    origins '*'

@@ -14,15 +14,19 @@ class TransactionSlave < ApplicationRecord
 
   belongs_to :account
   belongs_to :trace
-  belongs_to :deal, optional:true
+  belongs_to :order
+  # belongs_to :deal
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
-  has_many :balances, foreign_key: 'slave_id'
-  has_many :orders,   through: :balances, source: :order
-  has_many :accounts, through: :orders, source: :accounts
-  # has_many :slaves,   through: :balances, source: :slave
 
+  has_many :slaves,       through: :order,    source: :slaves,   dependent: :destroy
+  has_many :transactions, through: :order,    source: :slaves,   dependent: :destroy
+  has_many :accounts,     through: :order,    source: :slaves,   dependent: :destroy
+
+  # has_many :balances, foreign_key: 'slave_id', dependent: :destroy
+  # has_many :orders,   through: :balances, source: :order
+  # has_many :accounts, through: :orders, source: :accounts
   
   scope :to_pending,   ->{where(state: 'pending')}
   # scope :executed,  ->{where(state: 'executed')}
@@ -30,12 +34,14 @@ class TransactionSlave < ApplicationRecord
   # scope :closed,  ->{where(state: 'closed')}
   # scope :deleted,  ->{where(state: 'deleted')}
   # scope :error,  ->{where(state: 'error')}
-  scope :opened,    ->{where(state: [:pending, :executed, :remove])}
-  scope :entire,    ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
-  scope :not_closed,  ->{where.not(state: ['closed', 'deleted'])}
-  scope :closed_error,  ->{where(state: ['closed', 'error'])}
-  scope :not_error,  ->{where.not(state: ['error'])}
-  scope :not_gain,  ->{where.not('transaction_slaves.profit >= 0')}
+  scope :pending_executed,    ->{where(state: [:pending, :executed])}
+  scope :closed_deleted,      ->{where(state: [:closed, :deleted])}
+  scope :opened,              ->{where(state: [:pending, :executed, :remove])}
+  scope :entire,              ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
+  scope :not_closed,          ->{where.not(state: ['closed', 'deleted'])}
+  scope :closed_error,        ->{where(state: ['closed', 'error'])}
+  scope :not_error,           ->{where.not(state: ['error'])}
+  scope :not_gain,            ->{where.not('transaction_slaves.profit >= 0')}
   scope :gain,  ->{where('transaction_slaves.profit >= 0')}
   scope :loss,  ->{where('transaction_slaves.profit < 0')}
   scope :buy,   ->{where(ordertype: 0)}
@@ -77,7 +83,7 @@ class TransactionSlave < ApplicationRecord
     state :remove do
       def delete_pending(state)
         self.deleted
-        self.master.close
+        # self.master.close
       end
     end
     
@@ -85,10 +91,13 @@ class TransactionSlave < ApplicationRecord
       def update_state(state)
         self.update(closed_at: Time.zone.now)
 
+        self.order.close
+        # self.orders.map(&:close)# if orders.first.slaves.closed.count == orders.first.slaves.count
+
         # if master.trace.copy? and account.hedging?
         #   master.close
         # elsif master.slaves.count > 1 and master.slaves.first == self
-
+    
         # NOTE - IF TP1 IS REACH THEN TPs IS MASTER OPEN PRICE
         if master.slaves.count > 1 and master.slaves.first == self
           master.slaves.not_closed.each do |slave|
@@ -114,8 +123,8 @@ class TransactionSlave < ApplicationRecord
 
   end
 
-  def set_sl_and_tp_order(take_profit=nil, stop_loss=nil)
-    attributes = {take_profit:take_profit, stop_loss:stop_loss}.compact
+  def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil)
+    attributes = {lot: lot, take_profit:take_profit, stop_loss:stop_loss}.compact
     self.update(attributes)
   end
 
@@ -123,15 +132,19 @@ class TransactionSlave < ApplicationRecord
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     order_trace = self.trace_id
-    msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}"
+    msg = "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{self.magic_number}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
     return msg
   end
-
-  private
 
   def seconds_ago
     seconds_ago = (self.master.open_at - Time.zone.now).to_i.abs
     Rails.env.test? ? 0 : seconds_ago
+  end
+
+  private
+
+  def openat
+    Rails.env.test? ? 0 : self.open_at.to_i
   end
 
 end

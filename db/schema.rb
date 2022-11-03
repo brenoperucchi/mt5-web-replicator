@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_08_02_025705) do
+ActiveRecord::Schema.define(version: 2022_11_03_032220) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -199,7 +199,9 @@ ActiveRecord::Schema.define(version: 2022_08_02_025705) do
     t.bigint "message_id"
     t.bigint "account_id"
     t.bigint "store_id"
+    t.bigint "deal_id"
     t.index ["account_id"], name: "index_orders_on_account_id"
+    t.index ["deal_id"], name: "index_orders_on_deal_id"
     t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["store_id"], name: "index_orders_on_store_id"
     t.index ["trace_id"], name: "index_orders_on_trace_id"
@@ -300,6 +302,7 @@ ActiveRecord::Schema.define(version: 2022_08_02_025705) do
     t.text "settings"
     t.integer "state", default: 0
     t.string "url"
+    t.integer "telegram_bot_chat_id"
   end
 
   create_table "taggings", id: :serial, force: :cascade do |t|
@@ -362,13 +365,14 @@ ActiveRecord::Schema.define(version: 2022_08_02_025705) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "state", default: 0
-    t.integer "ticket_deal"
+    t.string "ticket_deal"
     t.bigint "account_id"
     t.string "ticket_slave"
     t.datetime "closed_at"
     t.string "price_closed"
     t.integer "deal_id"
     t.integer "trace_id"
+    t.integer "order_id"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end

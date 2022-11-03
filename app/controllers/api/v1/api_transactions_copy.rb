@@ -30,12 +30,19 @@ module API
           if action == "closed"
             parameters = eval(params[:body].encode("UTF-8", "Windows-1252"))
             serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body].encode("UTF-8", "Windows-1252")))
-            transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
-            if transaction
+            # transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
+            Transaction.executed.where(ticket: parameters[:deal_ticket]).each do |transaction|
               transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.account.name)
               transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
               transaction.save
-              transaction.close if transaction.can_close?
+              
+              if transaction.can_close?
+                if transaction.close 
+                  transaction.slaves.each do |slave|
+                    slave.loggings.create(content: "Remove automatically by Transaction##{transaction.id}", state: "REMOVE")
+                  end
+                end
+              end
             end
             body "OK|OK|OK"
           elsif action == "orders"    

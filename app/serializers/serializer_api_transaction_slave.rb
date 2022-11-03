@@ -14,7 +14,7 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
       ticket_master: ticket_master,
       ticket_slave: ticket_slave,
       open_at: open_at,
-      # ticket_deal: ticket_deal,
+      ticket_deal: obj['ticket_deal'],
       comment: obj['comment']
     }.compact
   end
@@ -36,11 +36,11 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   end
 
   def price_open
-    obj['open_price']
+    obj['price_open']
   end
 
   def price_closed
-    obj['close_price'].to_f == 0 ? nil : obj['close_price']
+    obj['price_close'].to_f == 0 ? nil : obj['price_close']
   end
 
   def magic_number
@@ -48,11 +48,11 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   end
 
   def stop_loss
-    obj['stoploss']
+    obj['stop_loss'].to_f
   end
 
   def take_profit
-    obj['takeprofit']
+    obj['take_profit'].to_f
   end
 
   def ticket_master
@@ -75,10 +75,23 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
 
   def set_time_zone(time, zone)
     if zone.to_i != 0
-      Time.zone.at(time).in_time_zone(zone).to_datetime.change(:offset => Time.zone.formatted_offset)
+     (Time.at(time).utc + zone.hours).to_datetime.change(:offset => Time.zone.formatted_offset)
     else
       Time.use_zone(Time.zone.name) { Time.zone.at(time).utc.to_datetime.change(offset: Time.zone.now.strftime("%z")) }
     end
+    # return 0 if time == 0 
+    # if zone.present? and zone != 0
+    #   year  = Time.at(time).utc.strftime('%Y')
+    #   month  = Time.at(time).utc.strftime('%m')
+    #   day  = Time.at(time).utc.strftime('%d')
+    #   hour  = Time.at(time).utc.strftime('%H').to_i - zone.abs
+    #   minute  = Time.at(time).utc.strftime('%M')
+    #   second  = Time.at(time).utc.strftime('%S')
+    #   Time.zone.local(year, month, day, hour, minute, second).to_datetime
+
+    # else
+    #   Time.at(time).to_datetime
+    # end
   end
 
 end

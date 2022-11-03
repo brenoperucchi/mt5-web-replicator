@@ -5,8 +5,12 @@ class Deal < ApplicationRecord
   belongs_to :store, optional:true
   belongs_to :trace, optional:true
 
-  has_many :masters,  :class_name => "Transaction",      :foreign_key => "deal_id",  dependent: :destroy
-  has_many :slaves,   :class_name => "TransactionSlave", :foreign_key => "deal_id",  dependent: :destroy
+  has_many :orders
+  has_many :masters, :through => :orders, :source => :transactions
+  has_many :slaves,  :through => :orders, :source => :slaves
+
+  # has_many :masters,  :class_name => "Transaction",      :foreign_key => "deal_id",  dependent: :destroy
+  # has_many :slaves,   :class_name => "TransactionSlave", :foreign_key => "deal_id",  dependent: :destroy
 
   def ordertype
     case masters.try(:first).try(:ordertype)
