@@ -47,7 +47,8 @@ namespace :deploy do
   task :start do
     # invoke 'unicorn:start'
     on roles(:app) do
-      # execute "systemctl --user stop telegram_python.service"
+      execute "systemctl --user stop puma.service"
+      execute "systemctl --user start puma.service"
       # execute "systemctl --user start telegram_python.service"
       # execute "systemctl restart nginx.service"
       # execute "systemctl --user start python-signal-api.service"

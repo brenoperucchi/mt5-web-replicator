@@ -1,5 +1,5 @@
 class AccountSerializer < ActiveModel::Serializer
-  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname
+  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname, :meta_version_accept
 
 
   def yaml

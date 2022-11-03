@@ -34,16 +34,27 @@ module API
         desc "Return Store Config"
         post "/config/:expert_name/:expert_version/:account_id/:account_mode" do
 
+
+          # attributes = {meta_version_accept: meta_version_accept, account: self.try(:account), account_serializer: account_serializer.attributes}
+
           kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
+
 
           account = Account.find_by(name: params[:account_id], state: 1, kind: kind)
           date_today = Date.today.in_time_zone
           return true if account.nil?
+          
+          @account_serializer = AccountSerializer.new(account, params:params) 
+
+          attributes = {meta_version_accept: meta_version_accept, account: self.try(:account).nil?, expert_name: kind, account_serializer: @account_serializer}
+
           result = account.loggings.find_by(state: "START", created_at:date_today.beginning_of_day..date_today.end_of_day)
-          account.loggings.create(content:params, state: "START") unless result
           if account && account.store.enable? && meta_version_accept
-            AccountSerializer.new(account, params:params) 
+            account.loggings.create(content:attributes, state: "START")
+            # AccountSerializer.new(account, params:params) 
+            @account_serializer
           else 
+            account.loggings.create(content:attributes, state: "NOT START")
             nil 
           end
         end      
