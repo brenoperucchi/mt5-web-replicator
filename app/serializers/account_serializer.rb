@@ -3,7 +3,7 @@ class AccountSerializer < ActiveModel::Serializer
 
 
   def yaml
-    yaml = YAML::load(File.open('config/meta_versions.yml'))
+    yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))
   end
 
   def meta_version_accept
