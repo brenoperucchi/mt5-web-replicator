@@ -50,7 +50,7 @@ module API
 
           result = account.loggings.find_by(state: "START", created_at:date_today.beginning_of_day..date_today.end_of_day)
           if account && account.store.enable? && meta_version_accept
-            account.loggings.create(content:attributes, state: "START")
+            account.loggings.create(content:attributes, state: "START") unless result
             # AccountSerializer.new(account, params:params) 
             @account_serializer
           else 
