@@ -63,6 +63,8 @@ class Message::Metatrader < Message
     yaml_content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
       orders.reverse.each do |order_params|
         ticket = order_params['order_id']
+        
+        # orders = self.trace.orders.where(content_id: ticket, state: :executed)
         orders = self.trace.orders.where(content_id: ticket)
         if not order_params['state_meta'].present?
           unless orders.present?

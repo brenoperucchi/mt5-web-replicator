@@ -25,11 +25,11 @@ module API
           if message_chat_text.present?
             case message_chat_text
             when "/start"
-              TelegramBot.send_message(store.telegram_bot_chat_id, "Iniciando o log das operações")
+              BotTelegram.send_message(store.telegram_bot_chat_id, "Iniciando o log das operações")
             when "/stop"
-              TelegramBot.send_message(store.telegram_bot_chat_id, "Finalizando o log das operações")
+              BotTelegram.send_message(store.telegram_bot_chat_id, "Finalizando o log das operações")
             else
-              TelegramBot.send_message(store.telegram_bot_chat_id, "Ainda estou apreendendo sobre isso")
+              BotTelegram.send_message(store.telegram_bot_chat_id, "Ainda estou apreendendo sobre isso")
             end
           elsif store and status == "left"
             store.telegram_bot_status = status

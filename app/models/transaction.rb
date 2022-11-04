@@ -78,7 +78,7 @@ class Transaction < ApplicationRecord
       def telegram_message
         if self.trace.store.telegram_bot_chat_id.present?
           content = self.telegram_message_prepare(:OPEN)
-          TelegramBot.send_message(self.trace.store.telegram_bot_chat_id, content)
+          BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
         end
       end
     end
@@ -91,7 +91,7 @@ class Transaction < ApplicationRecord
       def telegram_message
         if self.trace.store.telegram_bot_chat_id.present?
           content = self.telegram_message_prepare(:CLOSED)
-          TelegramBot.send_message(self.trace.store.telegram_bot_chat_id, content)
+          BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
         end
       end
 
@@ -143,7 +143,7 @@ class Transaction < ApplicationRecord
     self.attributes = attributes
     if self.changes.present?
       content = self.telegram_message_prepare(:MODIFY)
-      TelegramBot.send_message(self.trace.store.telegram_bot_chat_id, content)
+      BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
     end
     
     if self.save

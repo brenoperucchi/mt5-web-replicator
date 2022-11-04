@@ -4,7 +4,16 @@ require 'telegram/bot'
 TOKEN = '5644649924:AAECYKS2IJWvOqorAgtxmsvV6-gyiZTY7NQ'
 
 
-class	TelegramBot
+class	BotTelegram
+
+	def self.check_chat_id(chat_id, bot)
+		begin
+			bot.api.get_chat(chat_id: chat_id)
+			return true
+		rescue
+			return false
+		end
+	end
 
 
 	def self.channel_id(title)
@@ -47,7 +56,13 @@ class	TelegramBot
 	def self.send_message(chat_id, message)
 		unless Rails.env.test?
 			Telegram::Bot::Client.run(TOKEN) do |bot|
-				bot.api.send_message(chat_id: chat_id, text: message)
+				if check_chat_id(chat_id, bot)
+					begin 
+						bot.api.send_message(chat_id: chat_id, text: message) 
+					rescue
+						true
+					end
+				end
 			end
 		end
 	end
