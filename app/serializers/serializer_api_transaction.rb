@@ -56,12 +56,14 @@ class SerializerAPITransaction < ActiveModel::Serializer
   end
 
   def open_at
-    time = obj['open_at'].try(:to_i)
+    time = obj['open_at']
+    time = time.to_s.include?(".") ? time.split(".").try(:first).to_i : time.to_i
     zone = obj['timezone'].try(:to_i)
     set_time_zone(time, zone)
   end
 
   def set_time_zone(time, zone)
+    return 0 if time.nil?
     if zone.to_i != 0
      (Time.at(time).utc + zone.hours).to_datetime.change(:offset => Time.zone.formatted_offset)
     else

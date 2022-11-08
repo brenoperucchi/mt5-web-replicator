@@ -36,7 +36,8 @@ class Trace < ApplicationRecord
   has_many :permissions, dependent: :destroy
   has_many :accounts, :through => :permissions#, :source => :slave
 
-  validates_presence_of :name, :on => :create#, :message => "can't be blank"
+  validates_presence_of   [:name, :name_id]#, :on => :create#, :message => "can't be blank"
+  validates_uniqueness_of :name_id#, :on => :create#, :message => "must be unique"
 
   def volumes
     self.settings['volumes'] || ""
@@ -75,7 +76,6 @@ class Trace < ApplicationRecord
     instrument = check_instrument(account, symbol)
     api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, profit:nil, message: message, trace: self, account:account)
 
-    # binding.pry
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
       if order.nil?
@@ -84,11 +84,6 @@ class Trace < ApplicationRecord
 
       transaction = order.transactions.find_by(symbol: instrument, account: account)
       transaction ||= order.transactions.create(api_transaction_attributes.merge(account:account))
-      # order.transactions.create_with(api_transaction_attributes).find_or_create_by(symbol: instrument, account: account)
-      # binding.pry
-
-      # transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(symbol: instrument, account: account)
-      # transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(symbol: instrument, account: account)
     elsif account.hedging?
       order = account.orders.create_with(trace: self, message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket)
       transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(ticket: ticket)
@@ -97,8 +92,8 @@ class Trace < ApplicationRecord
     # CREATE ORDER -> TRANSACTION -> SLAVES
     if order and not order.error?
       
-      # transaction = order.transactions.create(api_transaction_attributes)
-      transaction.loggings.new(content:order_params, state: "OPEN")
+
+      transaction.loggings.new(content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN")
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 
         self.accounts.slave.enable.each do |account|
@@ -112,8 +107,6 @@ class Trace < ApplicationRecord
       if order.valid?
         order.execute
         transaction.execute
-        # order.slaves.each{|s| s.balances.update(account:s.account)}
-        # order.transactions.each{|t| t.balances.update(account:account)}
       end
     end
   end

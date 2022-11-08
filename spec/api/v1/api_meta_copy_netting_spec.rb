@@ -28,6 +28,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@transaction.ticket).to be == "10000001" 
         expect(@slave.ticket_master).to be == "10000001" 
         expect(@transaction.state).to be == "executed"
+        expect(@transaction.trace.name_id).to be == "20001"
         expect(@slave.state).to be == "pending"
         expect(@slave.seconds_ago).to be <= 30
         expect(@slave.seconds_ago).to be >= 0
@@ -62,6 +63,7 @@ RSpec.describe API::V1::APITransactionsCopy do
           params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"NETTING"}
         @transaction = account.orders.find_by(content_id:10000001)
         @slave =  @order.slaves.find_by(ticket_master: 10000001, account: account)
+        expect(@slave.trace.name_id).to be == "20001"
         account_87 = Account.find_by(name: 5634787)
         @slave2 = account_87.slaves.find_by(ticket_master: 10000001)
         expect(account.orders.count).to be == 1

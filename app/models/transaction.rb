@@ -1,3 +1,4 @@
+require 'telegram/bot'
 class Transaction < ApplicationRecord
   include Telegram::Util
 

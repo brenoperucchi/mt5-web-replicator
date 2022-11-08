@@ -29,6 +29,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     trace:              Field::BelongsTo,
+    order:              Field::BelongsTo,
     message:            Field::BelongsTo,
     account:            Field::BelongsTo,
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
@@ -73,6 +74,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   response
   response_error
   trace
+  order
   message
   account
   versions

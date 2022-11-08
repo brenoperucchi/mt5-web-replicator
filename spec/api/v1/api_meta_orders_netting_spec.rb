@@ -34,7 +34,7 @@ RSpec.describe API::V1::APITransactionsCopy do
     context 'POST' do
       it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
         post '/api/v1/transactions/request/entire/signal_slave/1_62/5634788/NETTING'
-        expect(response.body).to be ==  "1|10001||1|2|704|1|14940.05|0.2|15036.41|14843.06|pending|UsaTec|0|0|10001|0/1|334198080||1|4|5502|2|2075.9|1.0|2091.0|2053.0|pending|UsaRus|0|0|334198080|0/1|334199528||1|6|706|3|113180.0|1.0|114230.0|112760.0|pending|Bra50|0|0|334199528|0"
+        expect(response.body).to be ==  "1|10001||1|2|20001|1|14940.05|0.2|15036.41|14843.06|pending|UsaTec|0|0|10001|0/1|334198080||1|4|20001|2|2075.9|1.0|2091.0|2053.0|pending|UsaRus|0|0|334198080|0/1|334199528||1|6|20001|3|113180.0|1.0|114230.0|112760.0|pending|Bra50|0|0|334199528|0"
         @account1 = Account.find_by_name("5634787")  
         @slaves = @account1.slaves.where(ticket_master:10001)
         expect(@slaves.first.stop_loss).to be == "15036.41"

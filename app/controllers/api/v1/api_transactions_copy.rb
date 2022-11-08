@@ -32,9 +32,10 @@ module API
             serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body].encode("UTF-8", "Windows-1252")))
             # transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
             Transaction.executed.where(ticket: parameters[:deal_ticket]).each do |transaction|
-              transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.account.name)
+              
               transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
               transaction.save
+              transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.try(:versions).try(:last).try(:changeset))
               
               if transaction.can_close?
                 if transaction.close 

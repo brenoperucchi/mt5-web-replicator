@@ -65,6 +65,8 @@ en:
         one: "Category"
         other: "Categories"
     attributes:
+      trace:
+        name_id: "Magic Number"
       client:
         name: "Name"
       store:

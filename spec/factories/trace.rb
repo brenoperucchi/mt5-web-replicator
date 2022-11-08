@@ -16,7 +16,7 @@ FactoryBot.define do
     end
     trait :copy do
       name { 'SignalCopy' }
-      name_id { '-5647753' }
+      name_id { '20001' }
       take_profit_limit {2} 
       kind {'copy'}
     end
