@@ -64,6 +64,7 @@ Rails.application.routes.draw do
     end
   end    
   # get ':page' => 'signs#show', as: 'signs'
+  get "site", to:"site#index"
   root :to => "dashboards#index" 
   # root 'admin/orders#index'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html

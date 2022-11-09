@@ -75,13 +75,11 @@ class Trace < ApplicationRecord
     ticket = order_params['order_id']
     instrument = check_instrument(account, symbol)
     api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, profit:nil, message: message, trace: self, account:account)
-
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
       if order.nil?
         order = account.orders.create(message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
       end
-
       transaction = order.transactions.find_by(symbol: instrument, account: account)
       transaction ||= order.transactions.create(api_transaction_attributes.merge(account:account))
     elsif account.hedging?
@@ -91,8 +89,6 @@ class Trace < ApplicationRecord
 
     # CREATE ORDER -> TRANSACTION -> SLAVES
     if order and not order.error?
-      
-
       transaction.loggings.new(content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN")
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 

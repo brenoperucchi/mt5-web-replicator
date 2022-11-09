@@ -19,7 +19,7 @@ class DashboardsController < ApplicationController
 			wants.html do 
 				# @executed = Store.first.transactions.executed
 				# @executed = current_user.userable.store.transactions.executed
-				if current_store == Store.first
+				if current_store.nil? or current_store == Store.first 
 					@traces = Trace.all.active
 				else
 					@traces = current_store.traces.active

@@ -1,4 +1,4 @@
-# require 'telegram/bot'
+require 'telegram/bot'
 # require 'pry-byebug'
 
 TOKEN = '5644649924:AAECYKS2IJWvOqorAgtxmsvV6-gyiZTY7NQ'
