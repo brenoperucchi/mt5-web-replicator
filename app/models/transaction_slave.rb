@@ -19,10 +19,8 @@ class TransactionSlave < ApplicationRecord
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
-
-  has_many :slaves,       through: :order,    source: :slaves,   dependent: :destroy
-  has_many :transactions, through: :order,    source: :slaves,   dependent: :destroy
-  has_many :accounts,     through: :order,    source: :slaves,   dependent: :destroy
+  has_many :transactions, through: :order,    source: :slaves
+  has_many :accounts,     through: :order,    source: :slaves
 
   # has_many :balances, foreign_key: 'slave_id', dependent: :destroy
   # has_many :orders,   through: :balances, source: :order

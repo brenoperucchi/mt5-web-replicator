@@ -13,7 +13,7 @@ class Trace < ApplicationRecord
   enum kind:  {telegram: 0, copy: 1}
 
   store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
-                               :telegram_api_id, :telegram_api_hash, :telegram_api_number, :copy_control_instrument]
+                               :telegram_api_id, :telegram_api_hash, :telegram_api_number, :copy_control_instrument, :restrict_control_instrument]
 
   # has_many :deals, dependent: :destroy
   # has_many :masters, :through => :deals, :source => :masters
@@ -88,21 +88,22 @@ class Trace < ApplicationRecord
     end
 
     # CREATE ORDER -> TRANSACTION -> SLAVES
+    if order.valid?
+      order.execute
+    end
+
     if order and not order.error?
       transaction.loggings.new(content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN")
+      transaction.execute
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 
         self.accounts.slave.enable.each do |account|
           order.accounts << account
-          instrument = check_instrument(account, symbol)
+          # instrument = check_instrument(account, symbol)
           api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:nil, account:account, price_open:nil, comment: ticket)
           slave = order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account, master:transaction, trace: self))
         end
 
-      end
-      if order.valid?
-        order.execute
-        transaction.execute
       end
     end
   end

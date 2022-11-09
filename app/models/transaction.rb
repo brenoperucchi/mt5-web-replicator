@@ -17,8 +17,8 @@ class Transaction < ApplicationRecord
   # has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
 
   # has_many :orders,   through: :balances, source: :order, dependent: :destroy
-  has_many :slaves,   through: :order,    source: :slaves,   dependent: :destroy
-  has_many :accounts, through: :order,    source: :accounts, dependent: :destroy
+  has_many :slaves,   through: :order,    source: :slaves
+  has_many :accounts, through: :order,    source: :accounts
 
   # has_many :balances, :foreign_key => "master_id"
   # has_many :accounts, through: :balances, source: :account
@@ -44,11 +44,9 @@ class Transaction < ApplicationRecord
   # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
 
   state_machine :initial => :pending do
+    # after_transition [:pending] => [:executed, :closed], :do => lambda { |transaction| transaction.telegram_message }
     after_transition :pending => :executed, :do => :update_state
-    after_transition [:pending, :executed] => [:executed, :closed], :do => lambda { |transaction| transaction.telegram_message }
     after_transition [:pending, :executed] => :closed, :do => :update_state
-    
-    after_transition :executed => :closed, :do => :update_state
     after_transition [:pending, :executed, :closed] => :error, :do => :update_state
     # after_transition :executed => :closed, :do => :break_even
     # after_transition [:executed, :ordered] => :pending, :do => :update_state
@@ -68,37 +66,21 @@ class Transaction < ApplicationRecord
     
     state :error do
       def update_state(state)
-        # self.order.erro
+        self.order.erro
       end
     end
     state :executed do
       def update_state(state)
-        # self.order.execute
-      end
-
-      def telegram_message
-        if self.trace.store.telegram_bot_chat_id.present?
-          content = self.telegram_message_prepare(:OPEN)
-          BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
-        end
+        self.telegram_message(:OPEN)
+        self.restrict_magic_number?
       end
     end
 
     state :closed do
       def update_state(state)
+        self.telegram_message(:CLOSED)
         self.order.close
-      end
-     
-      def telegram_message
-        if self.trace.store.telegram_bot_chat_id.present?
-          content = self.telegram_message_prepare(:CLOSED)
-          BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
-        end
-      end
-
-      def update_state(state)
-        slaves.map(&:remove)
-        order.try(:close)
+        self.slaves.map(&:remove)
         # self.orders.each do |order| 
         #   slaves.map(&:remove)
         #   order.try(:close)
@@ -109,9 +91,17 @@ class Transaction < ApplicationRecord
         # self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
       end
     end
-
-
   end
+
+
+
+  def telegram_message(state)
+    if self.trace.store.telegram_bot_chat_id.present?
+      content = self.telegram_message_prepare(state)
+      BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
+    end
+  end
+
 
   # def close_order
   #   slaves.not_closed.each do |slave|
@@ -221,6 +211,18 @@ class Transaction < ApplicationRecord
   def validate_restriction
     restrict_nil_instrument? 
     restrict_symbol?
+  end
+
+
+  def restrict_magic_number?
+    unless self.account.magics_accept.blank?
+      unless account.magics_accept.try(:split).try(:include?, magic_number)
+        # binding.pry
+        loggings.create(content:"Account #{account.name} Magic Number Resstrict ##{magic_number}", changeset: versions.last.changeset, version:version, state: 'ERROR')
+        self.erro!
+      end
+    end
+
   end
 
 

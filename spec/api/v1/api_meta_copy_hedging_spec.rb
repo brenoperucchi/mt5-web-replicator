@@ -12,11 +12,46 @@ RSpec.describe API::V1::APITransactionsCopy do
     @ticket_master = 10000001
     
     post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-    params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+    params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
   end
 
   describe API::V1::APITransactionsCopy do
     context 'POST' do
+
+      it 'Hedging - Restrict Magic Number' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        expect(account.orders.where(content_id:10000001).count).to eq(1)
+        expect(@transaction.loggings.count).to be == 1
+        expect(@transaction.state).to be == "executed"
+        expect(@transaction.order.state).to be == "executed"
+
+        Account.find_by(name: 5647753).update(magics_accept: 20000)
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        account = Account.find_by(name: 5647753)
+        order = account.orders.find_by(content_id:10000002)
+        @transaction = order.transactions.first
+        # @slave = account.slaves.find_by(ticket_master: @ticket_master)
+        expect(@transaction.loggings.count).to be == 2
+        expect(@transaction.state).to be == "error"
+        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
+        expect(order.slaves.count).to be == 0
+        # expect(account.orders.where(content_id:10000001).count).to eq(1)
+        # expect(@account1.state).to be == "enable"
+        # expect(@account1.kind).to be == "slave"
+        # expect(@slave.ticket_master).to be == "10000001" 
+        # expect(@transaction.state).to be == "executed"
+        # expect(@slave.state).to be == "pending"
+        # expect(@slave.seconds_ago).to be <= 30
+        # expect(@slave.seconds_ago).to be >= 0
+
+        # @slave.execute
+        # expect(@slave.state).to be == "executed"
+        # expect(response.status).to be == 201
+      end
+
       it 'Hedging - Verify account 5634787' do
         account = Account.find_by(name: 5634787)
         @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
@@ -156,8 +191,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = @account.orders.find_by(content_id:10000002).transactions.first
         @slave = @transaction.slaves.find_by(ticket_master: 10000002)
         expect(@account.orders.count).to be == 2
-        expect(@slave.order.id).to be == 4
-        expect(@slave.order.id).to be == 4
+        expect(@slave.order.content_id).to be == "10000002"
+        expect(@slave.order.id).to be == 5
         expect(@slave.take_profit).not_to be == 0
         expect(@slave.stop_loss).not_to be == 0
         expect(@slave.take_profit).to be == "1.2"
