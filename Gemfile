@@ -101,8 +101,8 @@ gem 'rack-cors'
 
 group :development do
   gem 'foreman'
-  gem 'sidekiq'#, '5.2.9'
-  gem 'sidekiq-scheduler'
+  gem 'sidekiq', '7.0.1'
+  # gem 'sidekiq-scheduler'
 end
 
 group :development do
@@ -114,7 +114,7 @@ group :development do
   gem 'capistrano3-puma'
   gem 'sshkit-sudo'
   # gem 'capistrano-sidekiq'#, git: 'http://github.com/seuros/capistrano-sidekiq'
-  gem 'capistrano-sidekiq', '1.0.3'
+  gem 'capistrano-sidekiq', '2.3.0'
   gem 'capistrano-yarn'
   gem "rename"
   gem 'bcrypt_pbkdf', '~> 1'
@@ -153,4 +153,4 @@ gem 'receipts', '~> 1.1'
 
 gem 'next_rails'
 gem 'tailwindcss-rails', '~> 2.0'
-gem 'telegram-bot-ruby'#, path: 'vendor/telegram-bot-ruby'
+gem 'telegram-bot-ruby'

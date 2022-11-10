@@ -13,7 +13,7 @@ module Signalforex
 
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 6.0
+    config.load_defaults 6.1
     config.time_zone = 'America/Sao_Paulo'
     config.autoloader = :classic
     config.active_record.yaml_column_permitted_classes = [ActiveSupport::HashWithIndifferentAccess]
@@ -34,6 +34,6 @@ module Signalforex
    	  end
    	end
     #SIDEKIQ
-    # config.active_job.queue_adapter = :sidekiq
+    config.active_job.queue_adapter = :sidekiq
   end
 end

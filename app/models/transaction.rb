@@ -14,17 +14,8 @@ class Transaction < ApplicationRecord
   belongs_to :deal, optional:true
 
   has_many :loggings, as: :loggerable, dependent: :destroy
-  # has_many :slaves, :class_name => "TransactionSlave", :foreign_key => "transaction_id", dependent: :destroy
-
-  # has_many :orders,   through: :balances, source: :order, dependent: :destroy
   has_many :slaves,   through: :order,    source: :slaves
   has_many :accounts, through: :order,    source: :accounts
-
-  # has_many :balances, :foreign_key => "master_id"
-  # has_many :accounts, through: :balances, source: :account
-  # has_many :orders,   through: :balances, source: :order, dependent: :destroy
-  # has_many :slaves,   through: :orders,    source: :slaves, dependent: :destroy
-
 
   scope :closed,      ->{where(state: 'closed')}
   scope :finish,      ->{where(state: ['closed', 'error'])}
@@ -81,48 +72,18 @@ class Transaction < ApplicationRecord
         self.telegram_message(:CLOSED)
         self.order.close
         self.slaves.map(&:remove)
-        # self.orders.each do |order| 
-        #   slaves.map(&:remove)
-        #   order.try(:close)
-        # end
         return true
-        # self.orders.where(content_id: self.ticket).each{|order| order.try(:close)}
-        # self.update(close_at: Time.zone.now)
-        # self.update(close_at: Time.zone.now, profit: slaves.sum(:profit))
       end
     end
   end
 
-
-
   def telegram_message(state)
-    if self.trace.store.telegram_bot_chat_id.present?
+    chat_id = self.trace.store.telegram_bot_chat_id
+    if chat_id.present?
       content = self.telegram_message_prepare(state)
-      BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
+      TelegramJob.perform_async(chat_id, content)
     end
   end
-
-
-  # def close_order
-  #   slaves.not_closed.each do |slave|
-  #     slave.remove
-  #   end
-  # end
-
-  # def close_copy
-  #   # last = slaves.last
-  #   slaves.not_closed.each do |slave|
-  #     # if slave.id != slaves.first.id
-  #     #   slave.update(state: "closed")
-  #     if slave.id == slaves.first.id
-  #       # comment = "#{order.trace.id}-#{self.id}-#{last.id}"
-  #       # slave.attributes = {comment: comment}
-  #       slave.remove
-  #     else
-  #       slave.update(state: "closed")
-  #     end
-  #   end    
-  # end
 
   def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)
     self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss)}
@@ -132,44 +93,23 @@ class Transaction < ApplicationRecord
     attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f}
     # attributes = {lot:lot, take_profit:take_profit, stop_loss:stop_loss}.compact
     self.attributes = attributes
+
     if self.changes.present?
-      content = self.telegram_message_prepare(:MODIFY)
-      BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
+      chat_id = self.trace.store.telegram_bot_chat_id
+      if chat_id.present?
+        content = self.telegram_message_prepare(:MODIFY)
+        TelegramJob.perform_async(chat_id, content)
+      end
+
+      # content = self.telegram_message_prepare(:MODIFY)
+      # BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
     end
     
     if self.save
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
       set_slaves_attributes(lot, take_profit, stop_loss)
     end
-
   end
-
-  # def copy_attributes(value=0)
-  #   # openprice = (type.include?('limit') or type.include?('stop')) ? price_request : 0
-  #   openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-  #   instrument = order.trace.instruments.find_by_symbol(symbol)
-  #   @meta_attributes = { 
-  #     instrument: symbol,
-  #     ordertype: ordertype,
-  #     volume:self.lot,
-  #     openprice: openprice,
-  #     slippage:10,
-  #     magic_number: self.magic_number.to_i.abs,
-  #     stoploss: stop_loss,
-  #     takeprofit: take_profit,
-  #     trace_id: order.trace.id,
-  #     transaction_id: self.id,
-  #     ticket: self.ticket
-  #   }
-  # end
-
-  # def self.create_transactions(message, i)
-  #   transaction = self.create(message.serializer.transaction_attributes(i).merge(lot: account.instrument_volume(i))
-  #   attributes_serializer = APITransactionSerializer.new(transaction.message.content).api_attributes
-  #   transaction.slaves.create(attributes_serializer.merge(state:'pending', ticket:nil, price_request:transaction.price_request))
-  #   transaction.execute 
-  # end
-
 
   def meta_ordertype
     # "OP_" + ordertype.upcase
@@ -193,12 +133,6 @@ class Transaction < ApplicationRecord
     read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
   end
 
-
-  def self.remove(id)
-    TransactionSlave.find(id).update(state: :remove)
-    TransactionSlave.find(id).master.update(state: :executed)  
-  end
-
   def set_symbol
     if order.trace.telegram?
       ## TODO - CHANGE FOR SEARCHING FOR EXACTLY SYMBOL ON INSTRUMENTS
@@ -208,12 +142,6 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def validate_restriction
-    restrict_nil_instrument? 
-    restrict_symbol?
-  end
-
-
   def restrict_magic_number?
     unless self.account.magics_accept.blank?
       unless account.magics_accept.try(:split).try(:include?, magic_number)
@@ -222,25 +150,28 @@ class Transaction < ApplicationRecord
         self.erro!
       end
     end
-
   end
 
-
-  def restrict_nil_instrument?
-    if symbol.nil?
-        self.response = "Restrict Instrument"
-        # errors.add(:symbol, "instrument nil")
-        self.erro!
-      end   
+  def validate_restriction
+    # restrict_nil_instrument? 
+    # restrict_symbol?
   end
 
-  def restrict_symbol?
-    if message.store.tag_list.map(&:downcase).include?(symbol.try(:downcase))
-        self.response = "Restrict Symbol"
-        # errors.add(:symbol, "store restrict symbol")
-        self.erro!
-      end
-  end
+  # def restrict_nil_instrument?
+  #   if symbol.nil?
+  #       self.response = "Restrict Instrument"
+  #       # errors.add(:symbol, "instrument nil")
+  #       self.erro!
+  #     end   
+  # end
+
+  # def restrict_symbol?
+  #   if message.store.tag_list.map(&:downcase).include?(symbol.try(:downcase))
+  #       self.response = "Restrict Symbol"
+  #       # errors.add(:symbol, "store restrict symbol")
+  #       self.erro!
+  #     end
+  # end
 
 
 end

@@ -1,4 +1,4 @@
-# require 'sidekiq/web'
+require 'sidekiq/web'
 Rails.application.routes.draw do
   constraints subdomain: /.*/ do
     resources :invoice_items
@@ -21,7 +21,7 @@ Rails.application.routes.draw do
       registrations: 'users/registrations'
     }
     resources :clients
-    # mount Sidekiq::Web => '/sidekiq'
+    mount Sidekiq::Web => '/sidekiq'
     mount API::Base, at: "/"
     namespace :control do
       resources :stores

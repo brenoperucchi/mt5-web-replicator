@@ -26,12 +26,16 @@ set :ssh_options, {
 set :rails_env, :production
 set :conditionally_migrate, true   
 # set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
+
+set :sidekiq_role, :app  
+set :sidekiq_config, "#{current_path}/config/sidekiq.yml"  
+set :sidekiq_env, 'production'  
 set :pty,  false
 append :rbenv_map_bins, 'puma', 'pumactl'
 
 
-# set :sidekiq_env, -> { fetch(:rails_env) }
-# set :sidekiq_concurrency, 5
+set :sidekiq_env, -> { fetch(:rails_env) }
+set :sidekiq_concurrency, 5
 
 # server-based syntax
 # ======================
