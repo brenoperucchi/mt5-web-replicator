@@ -98,14 +98,8 @@ gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
 gem 'rack-cors' 
 
-
 group :development do
   gem 'foreman'
-  gem 'sidekiq', '7.0.1'
-  # gem 'sidekiq-scheduler'
-end
-
-group :development do
   gem 'capistrano', '~> 3.6'
   gem 'capistrano-rails'
   gem 'capistrano-bundler'
@@ -154,3 +148,4 @@ gem 'receipts', '~> 1.1'
 gem 'next_rails'
 gem 'tailwindcss-rails', '~> 2.0'
 gem 'telegram-bot-ruby'
+gem 'sidekiq', '7.0.1'

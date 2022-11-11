@@ -14,6 +14,9 @@ require 'capistrano/rails/assets'
 require 'capistrano/rails/migrations'
 require 'capistrano3/unicorn'
 require 'capistrano/sidekiq'
+install_plugin Capistrano::Sidekiq  # Default sidekiq tasks
+# Then select your service manager
+install_plugin Capistrano::Sidekiq::Systemd
 require 'capistrano/yarn'
 # require 'capistrano/sidekiq/monit' #to require monit tasks # Only for capistrano3
 

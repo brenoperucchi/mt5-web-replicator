@@ -27,15 +27,20 @@ set :rails_env, :production
 set :conditionally_migrate, true   
 # set :sidekiq_config, -> { File.join(shared_path, 'config', 'sidekiq.yml') }
 
-set :sidekiq_role, :app  
-set :sidekiq_config, "#{current_path}/config/sidekiq.yml"  
-set :sidekiq_env, 'production'  
+# set :sidekiq_role, :app  
+# set :sidekiq_config, "#{current_path}/config/sidekiq.yml"  
+# set :sidekiq_env, 'production'  
 set :pty,  false
 append :rbenv_map_bins, 'puma', 'pumactl'
 
 
-set :sidekiq_env, -> { fetch(:rails_env) }
+set :sidekiq_roles => :worker
+set :sidekiq_default_hooks => true
+set :sidekiq_env => fetch(:rack_env, fetch(:rails_env, fetch(:stage)))
+# single config
+set :sidekiq_config_files, ['sidekiq.yml']
 set :sidekiq_concurrency, 5
+# set :sidekiq_env, -> { fetch(:rails_env) }
 
 # server-based syntax
 # ======================
