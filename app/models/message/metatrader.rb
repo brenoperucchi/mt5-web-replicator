@@ -2,25 +2,14 @@ class Message::Metatrader < Message
   self.table_name = "messages"
 
   state_machine :initial => :pending do
-    before_transition :pending => :prepared, :do => :update_state
-    after_transition :prepared => :executed, :do => lambda { |message| message.create_orders }
-    after_transition :prepared => :executed, :do => lambda { |message| message.close_orders }
-    event :prepare do
-        transition :pending => :prepared
-    end
+    after_transition :pending => :executed, :do => lambda { |message| message.create_orders }
+    after_transition :pending => :executed, :do => lambda { |message| message.close_orders }
     event :execute do
-        transition :prepared => :executed
+        transition :pending => :executed
     end
     event :erro do
-      transition [:pending, :prepared, :executed] => :error
-    end
-
-    state :pending do
-      def update_state(state)
-        self.prepare_at = Time.current
-      end
-    end
-    
+      transition [:pending, :executed] => :error
+    end    
   end
 
   def close_orders

@@ -1,9 +1,11 @@
+require 'bot_telegram'
 require 'csv'
 require 'json'
 module API
   module V1
     class APITelegramWebhook < Grape::API
       include API::V1::Defaults
+      helpers BotTelegram
 
       resource :telegram do
         desc "Receive Telegram Message"
@@ -25,11 +27,11 @@ module API
           if message_chat_text.present?
             case message_chat_text
             when "/start"
-              BotTelegram.send_message(store.telegram_bot_chat_id, "Iniciando o log das operações")
+              telegram_send_message(store.telegram_bot_chat_id, "Iniciando o log das operações")
             when "/stop"
-              BotTelegram.send_message(store.telegram_bot_chat_id, "Finalizando o log das operações")
+              telegram_send_message(store.telegram_bot_chat_id, "Finalizando o log das operações")
             else
-              BotTelegram.send_message(store.telegram_bot_chat_id, "Ainda estou apreendendo sobre isso")
+              telegram_send_message(store.telegram_bot_chat_id, "Ainda estou apreendendo sobre isso")
             end
           elsif store and status == "left"
             store.telegram_bot_status = status
