@@ -1,0 +1,177 @@
+/! ::Hero Default::
+section.pt-12.pt-lg-15.pb-7.bg-blur.position-relative.overflow-hidden
+  .container.position-relative
+    .row.align-items-center
+      .col-lg-6.col-md-10.text-center.text-lg-start.ms-lg-0.me-lg-auto.mx-md-auto
+        h1.mb-4.display-3.position-relative.z-index-2= I18n.t :main, scope: 'helpers.site.main.title'
+        p.mb-5.w-lg-75.lead
+          = I18n.t :other1, scope: 'helpers.site.main'
+          /! <p class="mb-5 w-lg-75 lead">Saasley helps to launch your products fast and grow exponentially.
+        .d-flex.justify-content-lg-start.justify-content-center.mb-3
+          a.btn.hover-lift.mb-2.btn-gradient-primary.btn-lg.d-flex.align-items-center href="/demo-request" 
+            = I18n.t :other2, scope: 'helpers.site.main'
+            span.material-symbols-rounded.align-middle.ms-2 arrow_forward
+        / .mb-5.d-flex.align-items-center.justify-content-lg-start.justify-content-center
+        /   div
+        /     a.glightbox.size-60.hover-lift.btn.btn-warning.p-0.rounded-circle.d-flex.align-items-center.justify-content-center data-gallery="videoGallery" href="https://www.youtube.com/watch?v=Ga6RYejo6Hk" 
+        /       span.fs-2.align-middle.material-symbols-rounded play_arrow
+        /   small.d-none.d-sm-block.ms-sm-2 See Saasley in action
+      .col-lg-6.col-md-10.mx-auto.mx-lg-0.position-relative
+        .position-relative.w-100.p-3.p-lg-5
+          .position-relative.w-100.h-auto
+            img.img-fluid.rounded-5 alt="" src="/images/saasley/img/main_page.png" /
+          .bg-white.rotate-4.shadow-lg.position-absolute.end-0.top-0.width-240.h-auto.text-dark.rounded-4.p-3
+            div
+              .d-flex.align-items-center
+                span.flex-shrink-0.width-40.height-40.justify-content-center.align-items-center.d-flex.rounded-circle.bg-opacity-25.bg-warning.text-warning
+                  span.material-symbols-rounded.align-middle.fs-3 workspaces
+                .flex-grow-1.ps-3
+                  h6.mb-0.text-reset= I18n.t :portfolio, scope: 'helpers.site.main'
+          .bg-white.rotate-n4.shadow-lg.position-absolute.start-0.bottom-0.width-200.h-auto.text-dark.rounded-4.p-3
+            div
+              .d-flex.align-items-center
+                span.flex-shrink-0.width-40.height-40.justify-content-center.align-items-center.d-flex.rounded-circle.bg-opacity-25.bg-primary.text-primary
+                  span.material-symbols-rounded.align-middle.fs-3 priority_high
+                .flex-grow-1.ps-3
+                  h6.mb-0.text-reset= I18n.t :warning, scope: 'helpers.site.main'
+/! ::/End hero default/::
+/! ::Features::
+section.position-relative
+  .container.py-9.py-lg-11
+    .row
+      .col-md-4.mb-6.mb-md-0 data-aos="fade-up" 
+        .text-center
+          .mb-4.text-primary
+            span.material-symbols-rounded.align-middle.fs-1 message
+          h5.mb-3= I18n.t :title, scope: 'helpers.site.main.telegram'
+          p.mb-0.px-xl-5
+            = I18n.t :resume, scope: 'helpers.site.main.telegram'
+      .col-md-4.mb-6.mb-md-0 data-aos="fade-up" data-aos-delay="100" 
+        .text-center
+          .mb-4.text-success
+            span.material-symbols-rounded.align-middle.fs-1 payment
+          h5.mb-3= I18n.t :title, scope: 'helpers.site.main.payment'
+          p.mb-0.px-xl-5
+            = I18n.t :resume, scope: 'helpers.site.main.payment'
+      .col-md-4 data-aos="fade-up" data-aos-delay="200" 
+        .text-center
+          .mb-4.text-warning
+            span.material-symbols-rounded.align-middle.fs-1 settings
+          h5.mb-3= I18n.t :title, scope: 'helpers.site.main.management'
+          p.mb-0.px-xl-5
+            = I18n.t :resume, scope: 'helpers.site.main.management'
+/! ::/End Features/::
+/! ::Section with image::
+section.position-relative
+  .container.py-9.py-lg-11.position-relative
+    .row.align-items-center
+      .col-md-6.position-relative.ps-md-5.ps-lg-9.col-sm-9.mb-6.mb-md-0.order-md-last.mx-md-auto data-aos="fade-up" data-aos-delay="100" 
+        .row.align-items-center
+          .col-10
+            .position-relative.pb-7 data-aos="zoom-in-up" 
+              img.img-fluid.rounded-3 alt="" src="/images/saasley/img/invoice-1.png" /
+        .position-absolute.z-index-1.me-3.width-260.w-md-50.w-lg-435.h-auto.end-0.bottom-0.overflow-hidden.shadow-lg.rounded-3 data-aos="zoom-in-down" data-aos-delay="100" 
+          img.img-fluid alt="" src="/images/saasley/img/invoice-2.png" /
+      .col-lg-5.col-md-6.order-md-1.ms-md-auto
+        h2.position-relative.mb-4.fs-1 data-aos="fade-right" 
+          = I18n.t :title, scope: 'helpers.site.main.payment'
+
+        p.lead.mb-4 data-aos="fade-right" data-aos-delay="100" 
+          = I18n.t :resume2, scope: 'helpers.site.main.payment'
+        ul.list-unstyled.mb-4.mb-lg-5 data-aos="fade-right" data-aos-delay="150" 
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :resume3, scope: 'helpers.site.main.payment'
+        / div data-aos="fade-right" data-aos-delay="200" 
+        /   a.fw-bold href="/#" 
+        /     | Learn More About Features
+        /     span.material-symbols-rounded.fs-5.ms-2.align-middle.lh-1 arrow_forward
+/! ::/End Section with image/::
+/! ::Section with image + Feature Icons::
+section.position-relative.border-top
+  .container.pt-9.pt-lg-11
+    / .row.align-items-center
+    /   .col-lg-8.mx-auto.text-center.mb-7
+    /     h2.display-5.mb-0 data-aos="fade-up" 
+    /       | See what Imentore Copy can do for
+    /       | you.
+    /     .bg-primary.width-80.my-7.mx-auto.pt-1.rounded-pill data-aos="fade-up" data-aos-delay="100" 
+    .pb-9.pb-lg-11.border-bottom
+      .row
+        .col-xl-10.mx-auto
+          .row.align-items-center
+            .col-md-6.pe-md-5.pe-lg-7.col-sm-9.mb-6.mb-lg-0 data-aos="fade-up" data-aos-delay="100" 
+              .row.align-items-center
+                .col-12
+                  .position-relative.overflow.rounded-3.shadow-lg
+                    img.img-fluid.rounded-3 alt="" src="/images/saasley/img/telegram.png" /
+            .col-md-6.col-lg-5.mx-auto
+              h2.position-relative.ms-md-n3.ms-lg-0.ms-0.me-lg-n5.fs-1.mb-4 data-aos="fade-up"
+                = I18n.t :resume2, scope: 'helpers.site.main.telegram'
+                / Alfred will be at your disposal.
+              p.mb-4 data-aos="fade-up" data-aos-delay="100" 
+                = I18n.t :resume2, scope: 'helpers.site.main.telegram'
+              ul.list-unstyled.mb-4.mb-lg-5 data-aos="fade-up" data-aos-delay="200" 
+                li.d-flex.mb-3.align-items-start
+                  span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+                  = I18n.t :resume3, scope: 'helpers.site.main.telegram'
+              /   li.d-flex.mb-3.align-items-start
+              /     span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+              /     | Excepteur
+              /     | sint occaecat cupidatat sunt in culpa qui officia deserunt mollit anim id
+              /     | est laborum.
+              / div data-aos="fade-up" data-aos-delay="300" 
+              /   a.fw-bold href="/#" 
+              /     | Learn More About Analytics
+              /     span.material-symbols-rounded.fs-5.ms-2.align-middle.lh-1 arrow_forward
+      / .row.justify-content-around data-aos="zoom-in-down" 
+      /   .col-md-5.col-xl-4.mt-7.mt-lg-11
+      /     div
+      /       .size-60.d-flex.justify-content-center.shadow-lg.rounded-circle.align-items-center.mb-4.bg-opacity-25.bg-primary.text-primary
+      /         span.material-symbols-rounded.fs-2.align-middle commit
+      /       div
+      /         h5.mb-3 Proven Performance
+      /         p.mb-0.text-muted
+      /           | Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+      /           | sed do eiusmod tempor dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+      /           | exercitation ullamco laboris nisi ut aliquip commodo.
+      /   .col-md-5.col-xl-4.mt-7.mt-lg-11 data-aos="zoom-in-down" data-aos-delay="100" 
+      /     div
+      /       .size-60.d-flex.justify-content-center.shadow-lg.rounded-circle.align-items-center.mb-4.bg-opacity-25.bg-warning.text-warning
+      /         span.material-symbols-rounded.fs-2.align-middle commit
+      /       div
+      /         h5.mb-3 Unparalleled Track Record
+      /         p.mb-0.text-muted
+      /           | Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+      /           | sed do eiusmod tempor dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+      /           | exercitation ullamco laboris nisi ut aliquip commodo.
+/! ::/End Section with image + Feature Icons/::
+/! ::Section with image::
+section.position-relative
+  .container.py-9.py-lg-11.position-relative
+    .row.align-items-center
+      .col-md-6.position-relative.ps-md-5.ps-lg-9.col-sm-9.mb-6.mb-md-0.order-md-last.mx-md-auto data-aos="fade-up" data-aos-delay="100" 
+        .row.align-items-center
+          .col-10
+            .position-relative.pb-7 data-aos="zoom-in-up" 
+              img.img-fluid.rounded-3 alt="" src="/images/saasley/img/metatrader-1.jpeg" /
+        .position-absolute.z-index-1.me-3.width-160.w-md-50.w-lg-35.h-auto.end-0.bottom-0.overflow-hidden.shadow-lg.rounded-3 data-aos="zoom-in-down" data-aos-delay="100" 
+          img.img-fluid alt="" src="/images/saasley/img/metatrader-1.jpeg" /
+      .col-lg-5.col-md-6.order-md-1.ms-md-auto
+        h2.position-relative.mb-4.fs-1 data-aos="fade-right" 
+          = I18n.t :resume1, scope: 'helpers.site.main.copy'
+        p.lead.mb-4 data-aos="fade-right" data-aos-delay="100" 
+          = I18n.t :resume2, scope: 'helpers.site.main.copy'
+        ul.list-unstyled.mb-4.mb-lg-5 data-aos="fade-right" data-aos-delay="150" 
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :resume3, scope: 'helpers.site.main.copy'
+        /   li.d-flex.mb-3.align-items-start
+        /     span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+        /     | Officia
+        /     | deserunt mollit anim id est laborum.
+        / div data-aos="fade-right" data-aos-delay="200" 
+        /   a.fw-bold href="/#" 
+        /     | Learn More About Features
+        /     span.material-symbols-rounded.fs-5.ms-2.align-middle.lh-1 arrow_forward
+/! ::/End Section with image/::

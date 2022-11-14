@@ -1,0 +1,90 @@
+nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
+  .container-fluid.position-relative
+    a.navbar-brand href="#" 
+    .logo-light
+      h2.display-6
+        = I18n.t :imentore, scope: 'helpers.site.main.title'
+    / .logo-dark
+      / img.img-fluid alt="" src="/images/saasley/img/logo-white.svg" /
+    button.navbar-toggler.border-0.p-0 aria-controls="offcanvasNavbarDefault" aria-expanded="false" aria-label=("Toggle navigation") data-bs-target="#offcanvasNavbarDefault" data-bs-toggle="offcanvas" type="button" 
+      span.material-symbols-rounded.align-middle menu
+    #offcanvasNavbarDefault.offcanvas.offcanvas-start aria-labelledby="offcanvasNavbarDefaultLabel" data-bs-scroll="true" tabindex="-1" 
+      .offcanvas-header.justify-content-end
+        button.btn-close aria-label="Close" data-bs-dismiss="offcanvas" type="button" 
+      .offcanvas-body
+        ul.me-auto.navbar-nav.ms-xl-4
+          li.nav-item.dropdown
+            /   a.nav-link.dropdown-arrow data-bs-toggle="dropdown" href="#" 
+            /     | Landings
+            /     span.material-symbols-rounded.align-middle.lh-1.dropdown-arrow-icon expand_more
+            /   .dropdown-menu
+            /     a.dropdown-item href="#"  Default
+            /     a.dropdown-item href="index-#"  SignUp
+            /     a.dropdown-item href="index-#"  Decorative
+            / li.nav-item.dropdown.position-static
+            /   a.nav-link.dropdown-arrow data-bs-toggle="dropdown" href="#" 
+            /     | Features
+            /     span.material-symbols-rounded.align-middle.lh-1.dropdown-arrow-icon expand_more
+            /   .dropdown-menu.dropdown-menu-full
+            /     .row
+            /       .col-lg-3.me-lg-auto
+            /         h6.dropdown-header Overview
+            /         a.dropdown-item.py-3.mb-3 href="#" 
+            /         .d-flex.align-items-center
+            /           .flex-shrink-0.shadow-sm.size-40.d-flex.align-items-center.justify-content-center.me-3.rounded-circle.bg-white
+            /             span.material-symbols-rounded.align-middle.fs-4.lh-1.text-secondary fact_check
+            /           .flex-grow-1
+            /             h6.mb-1 Overview
+            /             small.opacity-75.lh-sm
+            /               | Full list
+            /               | of features
+            /       .col-lg-8.ps-lg-8.border-start-lg
+            /         h6.dropdown-header Components
+            /         .row
+            /           .col-lg-4.mb-4.mb-lg-0
+            /             a.dropdown-item href="feature-#"  Animations
+            /             a.dropdown-item href="feature-#"  Buttons
+            /             a.dropdown-item href="feature-call-to-#"  Call to actions
+            /             a.dropdown-item href="feature-#"  Collapse
+            /           .col-lg-4.mb-4.mb-lg-0
+            /             a.dropdown-item href="feature-#"  Clients
+            /             a.dropdown-item href="feature-#"  Forms
+            /             a.dropdown-item href="feature-feature-#"  Feature Images
+            /             a.dropdown-item href="feature-#"  Icon Cards
+            /           .col-lg-4.mb-4.mb-lg-0
+            /             a.dropdown-item href="feature-pricing-#"  Pricing tables
+            /             a.dropdown-item href="feature-swiper-#"  Swiper Slider
+            /             a.dropdown-item href="feature-#"  Testimonials
+            /             a.dropdown-item href="feature-tabbed-#"  Tabbed-content
+          li.nav-item
+            a.nav-link href="#"= I18n.t :pricing, scope: 'helpers.site.main.title'
+          li.nav-item
+            a.nav-link href="#"= I18n.t :support, scope: 'helpers.site.main.title'
+        ul.navbar-nav.ms-xl-auto
+          li.nav-item.dropdown.mb-3.mb-lg-0
+            / a.nav-link.dropdown-arrow data-bs-toggle="dropdown" href="#" 
+            /   | Pages
+            /   span.material-symbols-rounded.align-middle.lh-1.dropdown-arrow-icon expand_more
+            / .dropdown-menu.dropdown-menu-end
+            /   a.dropdown-item href="#"  Customers
+            /   a.dropdown-item href="#"  Typography
+            /   a.dropdown-item href="#" 
+            /     | Custom
+            /     | 404
+            /   a.dropdown-item href="demo-#"  Demo request
+            /   a.dropdown-item href="#"  Sign In
+            /   a.dropdown-item href="#"  Sign Up
+            /   a.dropdown-item href="forgot-#"  Forget password
+          li.nav-item.mb-3.mb-lg-0
+            a.btn.btn-warning.btn-sm.hover-lift href="demo-#" 
+              = I18n.t :request_support, scope: 'helpers.site.main.navbar'
+              span.align-middle.material-symbols-rounded.fs-5.ms-1.d-none.d-xl-inline-block arrow_forward
+          li.nav-item
+            = I18n.t :sign_in, scope: 'helpers.site.main.navbar'
+          li.mt-4.mt-lg-0.nav-item.d-flex.align-items-center.justify-content-lg-center.flex-lg-column.h-100.ms-0.ms-xl-3
+            label.dark-mode-checkbox.d-flex.align-items-center.justify-content-center.rounded-circle.nav-link.p-0 for="ChangeTheme" 
+              input#ChangeTheme.appearance-none type="checkbox" /
+              span.dark-mode-icons.size-30.d-inline-flex.align-items-center.justify-content-center.me-2.me-lg-0
+                span.material-symbols-rounded.align-middle dark_mode
+                span.material-symbols-rounded.align-middle light_mode
+              span.ms-1.d-lg-none Dark Mode

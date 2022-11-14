@@ -16377,7 +16377,6 @@ body.dark-mode .navbar-brand .logo-light{
         flex-grow:1;
         padding:0;
         overflow-y:visible;
-        margin-left: 50px;
     }
     .navbar-expand-lg.headroom--unpinned:not(.headroom--top):not(.headroom--bottom){
         transform:translateY(-100%)
