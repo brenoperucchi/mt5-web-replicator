@@ -16,8 +16,7 @@ module Signalforex
     config.load_defaults 6.1
     config.time_zone = 'America/Sao_Paulo'
     config.autoloader = :classic
-    config.active_record.yaml_column_permitted_classes = [ActiveSupport::HashWithIndifferentAccess]
-
+    config.active_record.yaml_column_permitted_classes = [Symbol, Date, ActiveSupport::HashWithIndifferentAccess]
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers

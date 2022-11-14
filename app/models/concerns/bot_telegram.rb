@@ -3,7 +3,7 @@ require 'telegram/bot'
 
 module 	BotTelegram
 
-	TOKEN = '5644649924:AAECYKS2IJWvOqorAgtxmsvV6-gyiZTY7NQ'
+	TOKEN = Rails.application.credentials[:telegram_token]
 
 	def check_chat_id(chat_id, bot)
 		begin

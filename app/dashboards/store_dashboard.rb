@@ -17,15 +17,12 @@ class StoreDashboard < Administrate::BaseDashboard
     plan:          Field::String,
     plan_value:    Field::String,
     plan_percent:  Field::String,
-    volume_default:      Field::String,
-    telegram_bot_chat_name: Field::String,
-    telegram_bot_chat_id: Field::String,
-    telegram_bot_status: Field::String,
-    telegram_api_id:     Field::String,
-    telegram_api_hash:   Field::String,
-    telegram_api_number: Field::String,
-    stripe_webhook_secret: Field::String,
-    stripe_api_secret:     Field::String,
+    volume_default:         Field::String,
+    telegram_bot_chat_id:   Field::String,
+    telegram_bot_status:    Field::String,
+    telegram_bot_token:     Field::String,
+    stripe_webhook_secret:  Field::String,
+    stripe_api_secret:      Field::String,
     accounts:   Field::HasMany,
     # accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     traces:     Field::HasMany,
@@ -46,7 +43,6 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
-  telegram_bot_chat_name
   telegram_bot_chat_id
   telegram_bot_status
   plan
@@ -59,9 +55,9 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   state
   url
-  telegram_bot_chat_name
   telegram_bot_chat_id
   telegram_bot_status
+  telegram_bot_token
   plan
   plan_value
   plan_percent
@@ -84,9 +80,9 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   state
   url
-  telegram_bot_chat_name
   telegram_bot_chat_id
   telegram_bot_status
+  telegram_bot_token
   plan
   plan_value
   plan_percent

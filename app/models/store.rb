@@ -4,7 +4,7 @@ class Store < ApplicationRecord
   include LibEnums
 
 
-  store :settings, accessors: [ :telegram_bot_chat_name, :telegram_bot_status,
+  store :settings, accessors: [ :telegram_bot_status, :telegram_bot_token,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, :plan, :plan_value, :plan_percent, 
                                 :stripe_webhook_secret, :stripe_api_secret
                               ]
@@ -28,5 +28,13 @@ class Store < ApplicationRecord
   accepts_nested_attributes_for :customers, :users
 
   # scope :active, ->{ where.not(active_at:nil)}
+
+
+  def telegram_bot_token
+    if not telegram_bot_status == "enable" and not self.settings[:telegram_bot_token].present? and not telegram_bot_chat_id.present?
+      self.update(telegram_bot_token: "token#{SecureRandom.hex(3)}")
+    end
+    self.settings[:telegram_bot_token]
+  end
 
 end
