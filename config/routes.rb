@@ -4,7 +4,7 @@ Rails.application.routes.draw do
     resources :invoice_items
     # post "create_checkout", to: "charge#checkout"
     # get "checkout",       to: "charge#index"
-    post "webhook",         to: "charge#webhook"
+    post "stripe/webhook",  to: "charge#webhook"
     get "checkout",         as:'checkout_charge',      to: "charge#checkout"
     
     # get "checkout", to: "pay#checkout"

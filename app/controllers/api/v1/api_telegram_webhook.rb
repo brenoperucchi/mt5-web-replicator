@@ -38,11 +38,11 @@ module API
           if @store.nil?
             telegram_send_message(chat_id, "Atenção!\r\n\nAlfred não instalado, para configura-lo você deve enviar a mensagem com o token dentro do seu grupo. O token pode ser visualizado no:\r\n\nAdmin -> Stores -> Show -> Telegram Bot Token\r\n\nPara configura-lo você deve enviar uma mensagem dentro do seu grupo no telegram.\r\n\nExemplo: /start token123456")          
           elsif @store
-            if message_text.include?("/status")
+            if message_text.to_s.include?("/status")
               chat_title = params.deep_find("title")
               telegram_send_message(@store.telegram_bot_chat_id, "Alfred habilitado para o grupo #{chat_title}")
             end
-            if message_text.include?("/orders")
+            if message_text.to_s.include?("/orders")
               telegram_send_message(@store.telegram_bot_chat_id, "Estamos Implementando essa função")
             end
           end

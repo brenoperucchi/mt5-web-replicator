@@ -11,6 +11,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     invoice:              Field::BelongsTo,
     amount:               Field::String,
+    description:          Field::String,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -24,6 +25,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   name
   amount
   invoice
+  description
   created_at
   ].freeze 
 
@@ -33,6 +35,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   name
   amount
   invoice
+  description
   created_at
   updated_at
   ].freeze

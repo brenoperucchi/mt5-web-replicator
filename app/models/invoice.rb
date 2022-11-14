@@ -26,6 +26,8 @@ class Invoice < ApplicationRecord
     return false if self.state != 'pending'
     changes = false;
 
+    # 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
+
     # Stripe.api_key = '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'
     # Stripe.api_key = 'sk_test_51KXd9MFpK6wHohcRpF1nOLi6bp25UqS4h4lhfDsi9EWCc38ynCH0rfFabkYsz48YO6Xtg6vwUioki1qzmbtly8aZ00ObLPplFN'
 

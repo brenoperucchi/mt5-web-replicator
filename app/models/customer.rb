@@ -27,7 +27,18 @@ class Customer < ApplicationRecord
     end
     if store.plan_percent.present?
       amount = self.accounts.slave.sum(&:balance_month)
-      invoice.items.find_or_create_by(name: :profit_percent,  amount: (amount.to_f * (store.plan_percent.to_f / 100))) 
+      amount_total = (amount.to_f * (store.plan_percent.to_f / 100))
+      
+      description = "Invoice #{name}\r\n\n"
+      self.accounts.slave.map do |account|
+        account.slaves.map do |slave|
+          description << "Date: #{I18n.l slave.created_at, format: :short} - Ticket #{slave.ticket_slave} - Symbol:#{slave.symbol} - Profit:#{slave.profit}\r\n" if slave.profit != 0
+        end
+      end
+
+      description << "Slaves closed count: #{self.accounts.slave.sum(&:balance_month_count)}\r\n"
+      description << "Amount:#{amount.to_f} * Plan Percent:#{store.plan_percent.to_f / 100} = #{amount_total}\r\n"
+      invoice.items.find_or_create_by(name: :profit_percent,  amount: amount_total, description: description) 
     end
 
     invoice.balance_update
