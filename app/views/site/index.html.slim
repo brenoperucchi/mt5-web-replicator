@@ -1,0 +1,25 @@
+= render "layouts/saasley/navbar" 
+= render "layouts/saasley/features" 
+/ = render "layouts/saasley/seactions" 
+/! ::Pricing::
+= render "layouts/saasley/pricing"
+/! ::/End pricing/::
+/! ::Integrations::
+/ = render "layouts/saasley/integrations"
+/! ::/End integrations/::
+/! ::Call to Action::
+section.position-relative
+  .bg-dark.w-100.h-50.bottom-0.start-0.position-absolute
+  .container.position-relative
+    .px-4.py-7.py-lg-9.rounded-4.position-relative.z-index-1.overflow-hidden.text-white.bg-secondary
+      .row.position-relative
+        .col-lg-9.col-md-10.mx-auto.text-center
+          / h5.mb-4 data-aos="fade-up"  Join 250,000 Customers Today
+          h2.display-4.mb-5 data-aos="fade-up" data-aos-delay="100" 
+            = I18n.t :request_demo, scope: 'helpers.site.main.title'
+          .d-flex.flex-wrap.justify-content-center
+            div data-aos="fade-up" data-aos-delay="150" 
+              a.btn.btn-white.btn-lg.hover-lift.me-3 href="/demo_request" 
+                = I18n.t :request_support, scope: 'helpers.site.main.navbar'
+                span.material-symbols-rounded.fs-5.ms-2.align-middle.lh-1 arrow_forward
+/! /::End Call to Action::/

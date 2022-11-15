@@ -1,9 +1,9 @@
 nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
   .container-fluid.position-relative
-    a.navbar-brand href="#" 
     .logo-light
-      h2.display-6
-        = I18n.t :imentore, scope: 'helpers.site.main.title'
+      a.navbar-brand href="/" 
+        h2.display-6
+          = I18n.t :imentore, scope: 'helpers.site.main.title'
     / .logo-dark
       / img.img-fluid alt="" src="/images/saasley/img/logo-white.svg" /
     button.navbar-toggler.border-0.p-0 aria-controls="offcanvasNavbarDefault" aria-expanded="false" aria-label=("Toggle navigation") data-bs-target="#offcanvasNavbarDefault" data-bs-toggle="offcanvas" type="button" 
@@ -59,7 +59,7 @@ nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
           li.nav-item
             a.nav-link href="#pricing"= I18n.t :pricing, scope: 'helpers.site.main.title'
           li.nav-item
-            a.nav-link href="#"= I18n.t :support, scope: 'helpers.site.main.title'
+            a.nav-link href="https://imentore.freshdesk.com/support/home"= I18n.t :support, scope: 'helpers.site.main.title'
         ul.navbar-nav.ms-xl-auto
           li.nav-item.dropdown.mb-3.mb-lg-0
             / a.nav-link.dropdown-arrow data-bs-toggle="dropdown" href="#" 

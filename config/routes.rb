@@ -62,9 +62,12 @@ Rails.application.routes.draw do
       
       root "orders#index"
     end
-  end    
+  end
+
   # get ':page' => 'signs#show', as: 'signs'
-  # get "site", to:"site#index"
+  get "support",      to:"site#support"
+  get "demo_request", to:"site#demo_request"
+
   get 'dashboards', :to => "dashboards#index" 
   root :to => "site#index" 
   # root 'admin/orders#index'

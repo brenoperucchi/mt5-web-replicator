@@ -3,7 +3,7 @@ pt-BR:
     site:
       main:
         other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
-        other2: Tenha 10 dias de uso liberado.
+        other2: Tenha 10 dias para testar.
         portfolio: Compartilhe dashboards com seus clientes.
         warning: Sistema em versão beta.
         navbar:
@@ -36,7 +36,6 @@ pt-BR:
           title: Gestão 
           resume: Tenha todas as informações do que acontece as ordens do Master e Slaves.
           resume2: 
-
     select:
       prompt: Por favor selecione
     submit:

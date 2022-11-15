@@ -3,8 +3,12 @@ class SiteController < ApplicationController
 	before_action :set_locale
 
 	def index
+	end
 
+	def support
+	end
 
+	def demo_request
 	end
 
 
