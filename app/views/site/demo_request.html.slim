@@ -6,8 +6,22 @@ section.position-relative.pt-12.pt-lg-15.pb-9
   .container.position-relative
     .row
       .col-lg-6.col-md-8.mx-auto
-        h2.display-5.text-center See Saasley in Action
-        p.text-center.mb-5 Schedule a 30-minute product demo with expert Q&amp;A.
+        h2.display-5.text-center = I18n.t :title, scope: 'helpers.site.signup_demo'
+        p.text-center.mb-5= I18n.t :resume_title, scope: 'helpers.site.signup_demo'
+        / p.text-center.mb-5 Schedule a 30-minute product demo with expert Q&amp;A.
+        ul.list-unstyled.mb-5.aos-init.aos-animate data-aos="fade-up" data-aos-delay="200" 
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules1, scope: 'helpers.site.signup_demo'
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules2, scope: 'helpers.site.signup_demo'
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules3, scope: 'helpers.site.signup_demo'
+
+
+
         .card.border-0.rounded-4.shadow-lg.py-5.px-4
           .position-relative.z-index-1
             form
