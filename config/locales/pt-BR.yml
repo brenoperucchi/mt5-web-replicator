@@ -2,11 +2,11 @@ pt-BR:
   helpers:
     site:
       signup_demo:
-        title: Regras e clásulas importantes para o uso do sistema.
-        resume_title: Regras para solicitação do nosso sistema
-        rules1: "As contas em operações reais só irão funcionar depois do periódo de testes entre o seu sistema e nosso, por isso valide o quanto antes."
-        rules2: "Caso o seu uso seja a partir de um robo de auto frequência (scalpers), confirme se o tempo de abrir uma operação entre o Master e Slave está de acordo com os seus parametros."
-        rules3: O sistema não é responsável por informar
+        title: Regras importantes para o uso do sistema.
+        resume_title: Leia atentamente todos os itens.
+        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide o quanto antes e exaustivamente."
+        rules2: "Caso o seu uso seja a partir de um robo de auto frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Master e Slave estão de acordo com os seus parametros."
+        rules3: "Valide, valide e valide!"
 
       main:
         other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
