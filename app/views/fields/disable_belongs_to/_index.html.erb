@@ -1,9 +1,0 @@
-<% if field.options[:type] == "has_many" %>
-	
-	<%= field.resource.send(field.options[:attribute]).try(field.options[:association]).map(&:name).join(', ') %>
-
-<% else %>
-
-	<%= field.data.name %>
-
-<% end %>

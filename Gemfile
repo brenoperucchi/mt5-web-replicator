@@ -80,7 +80,7 @@ end
 
 gem 'eventmachine'
 gem 'slim'
-gem "administrate"
+gem "administrate", path: "vendor/administrate"
 gem 'administrate-field-image'
 gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 gem "administrate-field-nested_has_many"
@@ -149,3 +149,4 @@ gem 'next_rails'
 gem 'tailwindcss-rails', '~> 2.0'
 gem 'telegram-bot-ruby'
 gem 'sidekiq', '7.0.1'
+gem 'pundit'

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_14_133209) do
+ActiveRecord::Schema.define(version: 2022_11_25_033216) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -138,7 +138,9 @@ ActiveRecord::Schema.define(version: 2022_11_14_133209) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "stripe_invoice_id"
+    t.bigint "store_id"
     t.index ["invoiceable_type", "invoiceable_id"], name: "index_invoices_on_invoiceable"
+    t.index ["store_id"], name: "index_invoices_on_store_id"
   end
 
   create_table "loggings", force: :cascade do |t|
@@ -295,6 +297,48 @@ ActiveRecord::Schema.define(version: 2022_11_14_133209) do
     t.index ["trace_id"], name: "index_permissions_on_trace_id"
   end
 
+  create_table "plan_items", force: :cascade do |t|
+    t.string "name"
+    t.boolean "recurrent"
+    t.decimal "amount", precision: 10, scale: 2
+    t.bigint "plan_id"
+    t.bigint "store_id"
+    t.text "settings"
+    t.datetime "active_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["plan_id"], name: "index_plan_items_on_plan_id"
+    t.index ["store_id"], name: "index_plan_items_on_store_id"
+  end
+
+  create_table "plan_usages", force: :cascade do |t|
+    t.string "description"
+    t.integer "quantity"
+    t.string "usageable_type", null: false
+    t.bigint "usageable_id", null: false
+    t.bigint "store_id", null: false
+    t.datetime "active_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "charged_at"
+    t.string "resourceable_type"
+    t.bigint "resourceable_id"
+    t.string "handle"
+    t.datetime "disable_at"
+    t.index ["resourceable_type", "resourceable_id"], name: "index_plan_usages_on_resourceable"
+    t.index ["store_id"], name: "index_plan_usages_on_store_id"
+  end
+
+  create_table "plans", force: :cascade do |t|
+    t.string "name"
+    t.text "settings"
+    t.decimal "amount", precision: 10, scale: 2
+    t.datetime "active_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.decimal "amount_extra", precision: 10, scale: 2
+  end
+
   create_table "stores", force: :cascade do |t|
     t.string "name"
     t.datetime "active_at"
@@ -304,6 +348,8 @@ ActiveRecord::Schema.define(version: 2022_11_14_133209) do
     t.integer "state", default: 0
     t.string "url"
     t.integer "telegram_bot_chat_id"
+    t.bigint "plan_id"
+    t.index ["plan_id"], name: "index_stores_on_plan_id"
   end
 
   create_table "taggings", id: :serial, force: :cascade do |t|
@@ -447,10 +493,13 @@ ActiveRecord::Schema.define(version: 2022_11_14_133209) do
   add_foreign_key "customers", "stores"
   add_foreign_key "instruments", "accounts"
   add_foreign_key "invoice_items", "invoices"
+  add_foreign_key "invoices", "stores"
   add_foreign_key "pay_charges", "pay_customers", column: "customer_id"
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
+  add_foreign_key "plan_usages", "stores"
+  add_foreign_key "stores", "plans"
   add_foreign_key "taggings", "tags"
   add_foreign_key "transactions", "traces"
   add_foreign_key "versions", "loggings"

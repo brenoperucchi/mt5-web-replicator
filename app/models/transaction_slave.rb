@@ -15,23 +15,14 @@ class TransactionSlave < ApplicationRecord
   belongs_to :account
   belongs_to :trace
   belongs_to :order
-  # belongs_to :deal
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
   has_many :loggings, as: :loggerable, dependent: :destroy  
   has_many :transactions, through: :order,    source: :slaves
   has_many :accounts,     through: :order,    source: :slaves
-
-  # has_many :balances, foreign_key: 'slave_id', dependent: :destroy
-  # has_many :orders,   through: :balances, source: :order
-  # has_many :accounts, through: :orders, source: :accounts
   
   scope :to_pending,   ->{where(state: 'pending')}
-  # scope :executed,  ->{where(state: 'executed')}
   scope :to_remove,  ->{where(state: 'remove')}
-  # scope :closed,  ->{where(state: 'closed')}
-  # scope :deleted,  ->{where(state: 'deleted')}
-  # scope :error,  ->{where(state: 'error')}
   scope :pending_executed,    ->{where(state: [:pending, :executed])}
   scope :closed_deleted,      ->{where(state: [:closed, :deleted])}
   scope :opened,              ->{where(state: [:pending, :executed, :remove])}
@@ -44,14 +35,10 @@ class TransactionSlave < ApplicationRecord
   scope :loss,  ->{where('transaction_slaves.profit < 0')}
   scope :buy,   ->{where(ordertype: 0)}
   scope :sell,  ->{where(ordertype: 1)}
-  # scope :tracer, ->{where("transaction_slaves.trace_id = ?", trace.id)} 
-
-
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], if: Proc.new { account.hedging? }
   validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], allow_blank: true, allow_nil: true, if: Proc.new { account.hedging? }
-
 
   def profit
     read_attribute(:profit).nil? ? 0 : read_attribute(:profit)

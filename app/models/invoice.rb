@@ -5,13 +5,14 @@ class Invoice < ApplicationRecord
   include LibEnums
 
   delegate :stripe_product_id, :stripe_customer_id, to: :invoiceable
-  delegate :email, to: :invoiceable
+  delegate :email, to: :invoiceable, allow_nil: true
   
   enum state: {pending: 0, open:1, paid: 2, denied:3}
   
   store :settings, accessors: [:email, :payment_link]
 
   # belongs_to :ownerable, polymorphic: true
+  belongs_to :store
   belongs_to :invoiceable, polymorphic: true
   has_many :items, :class_name => "InvoiceItem", :foreign_key => "invoice_id", dependent: :destroy
 

@@ -14,15 +14,14 @@ class StoreDashboard < Administrate::BaseDashboard
     name:   Field::String,
     state:  Field::String,
     url:    Field::String,
-    plan:          Field::String,
-    plan_value:    Field::String,
-    plan_percent:  Field::String,
+    # plan:          Field::String,
     volume_default:         Field::String,
     telegram_bot_chat_id:   Field::String,
     telegram_bot_status:    Field::String,
     telegram_bot_token:     Field::String,
     stripe_webhook_secret:  Field::String,
     stripe_api_secret:      Field::String,
+    plan:       Field::BelongsTo,
     accounts:   Field::HasMany,
     # accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     traces:     Field::HasMany,
@@ -43,9 +42,9 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   name
   state
+  plan
   telegram_bot_chat_id
   telegram_bot_status
-  plan
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -58,17 +57,16 @@ class StoreDashboard < Administrate::BaseDashboard
   telegram_bot_chat_id
   telegram_bot_status
   telegram_bot_token
-  plan
-  plan_value
-  plan_percent
   tag_list
   volume_default
   stripe_api_secret
   stripe_webhook_secret
+  plan
   accounts
   traces
   customers
   users
+
   created_at
   updated_at
   ].freeze
@@ -83,10 +81,8 @@ class StoreDashboard < Administrate::BaseDashboard
   telegram_bot_chat_id
   telegram_bot_status
   telegram_bot_token
-  plan
-  plan_value
-  plan_percent
   tag_list
+  plan
   accounts
   volume_default
   stripe_api_secret

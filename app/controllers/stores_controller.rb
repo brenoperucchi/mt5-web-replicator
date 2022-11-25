@@ -13,7 +13,7 @@ class StoresController < ApplicationController
 		@store.name = @store.customers.try(:first).try(:name)
 		respond_to do |format|
 		  if @store.save
-		  	@store.customers.first.update(user_ids: @store.users.first.id, role: 'customer')
+		  	@store.customers.first.update(user_id: @store.users.first.id, role: 'customer')
 		  	sign_in(@store.users.first)
 		    format.html do 
 		    	if @store.plan == "plan2"

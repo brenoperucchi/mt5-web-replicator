@@ -2,26 +2,26 @@ class Customer < ApplicationRecord
 
   attr_writer :email
 
-  store :settings, accessors: [:role, :stripe_product_id, :stripe_customer_id]
+  CONTROL_ROLE = %w(admin user viewer)
+
+  store :settings, accessors: [:role_control, :role, :stripe_product_id, :stripe_customer_id]
   
   belongs_to :store
-  has_many :users, as: :userable#, dependent: :destroy
+  has_one  :user, as: :userable#, dependent: :destroy
   has_many :accounts
   has_many :invoices, as: :invoiceable#, dependent: :destroy
+
+  delegate :store, :email, to: :user, allow_nil: true
 
   pay_customer
 
   validates_presence_of :name
 
-  accepts_nested_attributes_for :users
-
-  def email
-    users.try(:first).try(:email)
-  end
+  # accepts_nested_attributes_for :user
 
   def create_invoice(name = nil)
     name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
-    invoice = invoices.find_or_create_by(name: name)
+    invoice = invoices.find_or_create_by(name: name, store:store)
     invoice.items.find_or_create_by(name: :monthly_payment) do |item|
        item.amount = store.plan_value
     end

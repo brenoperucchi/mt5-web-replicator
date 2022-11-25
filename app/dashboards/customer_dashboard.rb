@@ -10,11 +10,11 @@ class CustomerDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
     email:                Field::String,
-    stripe_customer_id:                Field::String,
-    stripe_product_id:                Field::String,
+    stripe_customer_id:   Field::String,
+    stripe_product_id:    Field::String,
     role:                 Field::String,
     store:                Field::BelongsTo,
-    users:                Field::HasMany,
+    user:                 Field::HasOne,
     accounts:             Field::HasMany,
     invoices:             Field::HasMany,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -31,7 +31,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   email
   role
   accounts
-  users
+  user
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -43,7 +43,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   stripe_customer_id
   stripe_product_id
   store
-  users
+  user
   accounts
   invoices
   created_at
@@ -60,7 +60,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   stripe_customer_id
   stripe_product_id
   store
-  users
+  user
   accounts
   invoices
   ].freeze

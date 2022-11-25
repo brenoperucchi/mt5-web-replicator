@@ -1,14 +1,44 @@
 pt-BR:
+  administrate:
+    actions:
+      confirm: Você tem certeza?
+      destroy: Deletar
+      edit: Editar
+      edit_resource: Editar %{name}
+      show_resource: Visualizar %{name}
+      new_resource: Criar %{name}
+      back: Voltar
+    controller:
+      create:
+        success: "%{resource} foi criado com sucesso."
+      destroy:
+        success: "%{resource} foi deletado com sucesso."
+      update:
+        success: "%{resource} foi atualizado com sucesso."
+    fields:
+      has_many:
+        more: "Exibindo %{count} de %{total_count}"
+        none: Nenhum
+    form:
+      error: erro
+      errors: "%{pluralized_errors} impediram %{resource_name} de ser gravado:"
+    navigation:
+      back_to_app: Voltar ao site
+    search:
+      clear: Limpar pesquisa
+      label: Pesquisa %{resource}
+
   helpers:
     site:
       signup_demo:
         title: Regras importantes para o uso do sistema.
         resume_title: Leia atentamente todos os itens.
-        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide o quanto antes e exaustivamente."
-        rules2: "Caso o seu uso seja a partir de um robo de auto frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Master e Slave estão de acordo com os seus parametros."
-        rules3: "Valide, valide e valide!"
+        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
+        rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Master e Slave estão de acordo com os seus parametros."
+        rules3: "Use, teste e valide!"
 
       main:
+        app_name: Imentore Copy
         other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
         other2: Tenha 10 dias para testar.
         portfolio: Compartilhe dashboards com seus clientes.

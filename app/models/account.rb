@@ -7,7 +7,8 @@ class Account < ApplicationRecord
   include Balance::Base
   include LibEnums
   
-  after_create :insert_instruments
+  after_save :register_resource_plan
+  # after_save :insert_instruments
 
   enum state: {disable: 0, enable: 1}
   enum kind:  {slave: 0, copy: 1}
@@ -26,6 +27,12 @@ class Account < ApplicationRecord
   
   has_many :instruments,                    dependent: :destroy
   has_many :loggings,      as: :loggerable, dependent: :destroy
+  
+  has_many :plan_usages, as: :usageable
+
+  def register_resource_plan
+    store.register_resource_plan(self, self.kind)
+  end
   
   # has_many :deals
 
