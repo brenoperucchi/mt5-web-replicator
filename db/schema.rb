@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_25_033216) do
+ActiveRecord::Schema.define(version: 2022_11_26_145216) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -27,7 +27,9 @@ ActiveRecord::Schema.define(version: 2022_11_25_033216) do
     t.integer "meta_mode", default: 0
     t.bigint "customer_id"
     t.integer "stock_kind", default: 0
+    t.datetime "deleted_at"
     t.index ["customer_id"], name: "index_accounts_on_customer_id"
+    t.index ["deleted_at"], name: "index_accounts_on_deleted_at"
     t.index ["store_id"], name: "index_accounts_on_store_id"
   end
 

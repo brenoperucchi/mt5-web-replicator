@@ -49,13 +49,16 @@ class Store < ApplicationRecord
 
   def register_resource_plan(resource, name)
     plan.verify_plan_has_items(self)
-    plan_item = plan.plan_items.where(name: name.downcase).take
+    resource_handle = name.capitalize
+    plan_item = plan.plan_items.where(name: resource_handle).take
     klass = resource.class.name.classify.downcase.pluralize
     klass_count = self.send(klass).count
-    if self.plan_usages.where(usageable:resource).count < klass_count
+    
+    # if self.plan_usages.where(usageable:resource).count < klass_count
+    if resource.plan_usage.nil? and not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(active_at:nil) if usage_olders.present?
-      self.plan_usages.create(usageable:plan_item, resourceable:resource,  active_at: DateTime.now, handle:plan_item.name)
+      resource.create_plan_usage(usageable:plan_item,  active_at: DateTime.now, handle:resource_handle, store: self)
     end
   end
 
@@ -79,6 +82,11 @@ class Store < ApplicationRecord
     self.settings[:telegram_bot_token]
   end
 
+  def delete_resource
+    self.invoices.destroy_all
+    PlanUsage.all.update_all(charged_at:nil)
+  end
+
 
   def resource_system
     amount_month = calculate_plan_month
@@ -92,20 +100,37 @@ class Store < ApplicationRecord
     response << "Slave: #{account_slave_total} is amount #{account_slave_total * plan_value.to_f}\r\n"
   end
 
-  def calculate_plan_month
-    date_today = DateTime.now
-    usages = self.plan_usages.where(active_at: date_today.beginning_of_month..date_today.end_of_month, usageable_type:'Plan')
+  def create_invoice_month
+    date_today = DateTime.now + 1.month
+    invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
+    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self)
+
+    usages = self.plan_usages.where(usageable_type:'Plan')
     usages.each do |usage|
-      # next if usages.active_at.month <= DateTime.now.month
-      usage.calculate_usage
+      core_create_invoice_month(invoice, usage, date_today)
     end
 
     %w(Trace Copy Slave).each do |item|
       plan_item = self.plan_items.where(name: item, plan:self.plan)
       self.plan_usages.where(handle:item, usageable_type: 'PlanItem').each do |usage|
-        usage.calculate_usage
+        core_create_invoice_month(invoice, usage, date_today)      
       end
     end
+  end
+
+  private
+  
+  def core_create_invoice_month(invoice, usage, date_today)
+    if usage.disable_at.present?
+
+      puts "usage.active_at.to_date.month #{usage.active_at.to_date.month } == date_today.month #{date_today.month} and usage.active_at.to_date.year #{usage.active_at.to_date.year } == date_today.year #{date_today.year}"
+      return unless usage.active_at.to_date.month <= date_today.month and usage.active_at.to_date.year <= date_today.year
+    end
+    if usage.calculate_usage(date_today)
+      invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount, description: usage.description) 
+      usage.update(charged_at: DateTime.now)
+      invoice.balance_update
+    end   
   end
 
 end
