@@ -6,7 +6,7 @@ set :use_sudo, false
 set :stage, :production
 
 
-server '189.1.172.121',
+server '85.239.248.170',
 # server 'app.imentore.com.br',
   roles: [:web, :app, :db],
   port: fetch(:port),
