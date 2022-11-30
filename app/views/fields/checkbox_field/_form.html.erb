@@ -1,0 +1,10 @@
+
+<div class="field-unit__label">
+  <%= f.label field.attribute, for: "#{f.object_name}_#{field.attribute}" %>
+</div>
+<div class="field-unit__field">
+	<% field.default_values.each do |checkbox| %>
+		<%= f.radio_button :role_control, checkbox %>
+		<%= checkbox %>
+  <% end %>
+</div>

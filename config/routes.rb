@@ -37,6 +37,8 @@ Rails.application.routes.draw do
         resources :versions
       end
       resources :customers
+      resources :plans
+      resources :plan_items
       resources :invoices do
          get :invoice_send, on: :member
       end      
@@ -55,9 +57,9 @@ Rails.application.routes.draw do
       # end
       
       resources :traces
-      resources :stores
       resources :accounts
       resources :users
+      resources :stores
       # resources :sign_traces
       
       root "orders#index"

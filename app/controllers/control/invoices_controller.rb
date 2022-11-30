@@ -16,6 +16,11 @@ module Control
     #   Foo.find_by!(slug: param)
     # end
 
+    def new_resource
+      resource_name.to_s.pluralize.to_sym.try(:new)
+    end
+
+
     # The result of this lookup will be available as `requested_resource`
 
     # Override this if you have certain roles that require a subset

@@ -18,6 +18,18 @@ GIT
   specs:
     state_machine (1.2.0)
 
+PATH
+  remote: vendor/administrate
+  specs:
+    administrate (0.18.0)
+      actionpack (>= 5.0)
+      actionview (>= 5.0)
+      activerecord (>= 5.0)
+      jquery-rails (>= 4.0)
+      kaminari (>= 1.0)
+      sassc-rails (~> 2.1)
+      selectize-rails (~> 0.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -89,14 +101,6 @@ GEM
       activerecord (>= 5.0, < 6.2)
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
-    administrate (0.18.0)
-      actionpack (>= 5.0)
-      actionview (>= 5.0)
-      activerecord (>= 5.0)
-      jquery-rails (>= 4.0)
-      kaminari (>= 1.0)
-      sassc-rails (~> 2.1)
-      selectize-rails (~> 0.6)
     administrate-field-acts_as_taggable (0.0.4)
       acts-as-taggable-on (>= 6.0)
       administrate (< 1.0.0)
@@ -348,6 +352,8 @@ GEM
     public_suffix (5.0.0)
     puma (6.0.0)
       nio4r (~> 2.0)
+    pundit (2.2.0)
+      activesupport (>= 3.0.0)
     racc (1.6.0)
     rack (2.2.4)
     rack-accept (0.4.5)
@@ -550,7 +556,7 @@ PLATFORMS
 
 DEPENDENCIES
   acts-as-taggable-on (~> 7.0)
-  administrate
+  administrate!
   administrate-field-acts_as_taggable
   administrate-field-image
   administrate-field-nested_has_many
@@ -594,6 +600,7 @@ DEPENDENCIES
   pry (~> 0.14.1)
   pry-byebug
   puma (~> 6.0.0)
+  pundit
   rack-cors
   rails (~> 6.1.7)
   rake (>= 13.0.6)

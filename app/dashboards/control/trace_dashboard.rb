@@ -21,7 +21,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     active:              Field::Boolean,
     created_at:          Field::DateTime,
     updated_at:          Field::DateTime,
-    store_id:            DisableBelongsTo.with_options(attribute: :store),
+    store_id:            DisableAssociation.with_options(attribute: :store),
     meta_host:           Field::String,
     kind:                DisableTextField.with_options(value:"copy"),
     # volumes:           Field::ActsAsTaggable,

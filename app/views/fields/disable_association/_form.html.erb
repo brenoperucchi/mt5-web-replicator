@@ -1,5 +1,5 @@
 <% if action_name == "new" or action_name == "create" %>
-  <% unless field.options[:type] == "has_many" %>  
+  <% if field.options[:type] != "has_many" %>  
     <div class="field-unit__label">
       <%= f.label field.attribute %>
     </div>
@@ -16,7 +16,7 @@
   </div>
   <div class="field-unit__field">
     <%= f.text_field field.attribute, value: field.default_value(current_user.userable, :name), disabled:true %>
-    <%= f.hidden_field field.attribute, value: field.default_value(current_user.userable, :id) %>
+    <%= f.hidden_field "account_ids[]", :multiple => true, value: field.default_value(current_user.userable, :id) %>
   </div>
 
 <% end %>

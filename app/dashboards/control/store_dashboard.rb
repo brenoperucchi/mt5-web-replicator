@@ -17,6 +17,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     volume_default:         Field::String,
     stripe_webhook_secret:  Field::String,
     stripe_api_secret:      Field::String,
+    resource_system:        Field::Text,
     tag_list:               Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

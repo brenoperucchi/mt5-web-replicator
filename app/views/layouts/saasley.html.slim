@@ -4,7 +4,7 @@ html lang="en"
     meta charset="UTF-8" /
     meta content="IE=edge" http-equiv="X-UA-Compatible" /
     meta content="width=device-width, initial-scale=1.0" name="viewport" /
-    title Imentore Copy
+    title = title = I18n.t :app_name, scope: 'helpers.site.main'
     /! :Page styles:
     link href="images/saasley/glightbox.min.css" rel="stylesheet" /
     /! :AOS Animation:
@@ -28,7 +28,7 @@ html lang="en"
               a.text-reset.d-table.width-120 href="/" 
                 / img.img-fluid alt="" src="/images/saasley/img/logo-white.svg" /
                 h4
-                  = I18n.t :imentore, scope: 'helpers.site.main.title'
+                  = title = I18n.t :app_name, scope: 'helpers.site.main'
             / p.text-muted
             /   | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pellentesque
             /   | efficitur turpis, vitae dictum dolor tristique in.

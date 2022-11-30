@@ -9,6 +9,8 @@ require 'base'
 module Admin
   class ApplicationController < Administrate::ApplicationController
     before_action :authenticate_user!
+    # include Administrate::Punditize
+
     # before_action :authenticate_admin
     # before_action :authenticate_user!
 

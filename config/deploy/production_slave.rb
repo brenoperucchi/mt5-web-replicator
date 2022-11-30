@@ -1,6 +1,6 @@
 set :port, 22
 set :user, 'app'
-set :deploy_to, '/home/app/'
+set :deploy_to, '/home/app/signalforex'
 set :deploy_via, :remote_cache
 set :use_sudo, false
 set :stage, :production
@@ -29,6 +29,12 @@ set :conditionally_migrate, true
 set :pty,  false
 append :rbenv_map_bins, 'puma', 'pumactl'
 
+set :sidekiq_roles => :worker
+set :sidekiq_default_hooks => true
+set :sidekiq_env => fetch(:rack_env, fetch(:rails_env, fetch(:stage)))
+# single config
+set :sidekiq_config_files, ['sidekiq.yml']
+set :sidekiq_concurrency, 5
 
 # set :sidekiq_env, -> { fetch(:rails_env) }
 # set :sidekiq_concurrency, 5

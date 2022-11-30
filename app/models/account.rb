@@ -7,7 +7,12 @@ class Account < ApplicationRecord
   include Balance::Base
   include LibEnums
   
-  after_create :insert_instruments
+  after_create :register_resource_plan
+  # after_save :insert_instruments
+
+  # default_scope { where(deleted_at: nil) }
+
+  scope :deleted,  -> { unscope(where: :deleted_at).where.not(deleted_at:nil) }
 
   enum state: {disable: 0, enable: 1}
   enum kind:  {slave: 0, copy: 1}
@@ -26,6 +31,25 @@ class Account < ApplicationRecord
   
   has_many :instruments,                    dependent: :destroy
   has_many :loggings,      as: :loggerable, dependent: :destroy
+  
+  has_one :plan_usage, as: :resourceable
+
+  def register_resource_plan
+    store.register_resource_plan(self, self.kind)
+  end
+
+  def destroy
+    self.update(deleted_at: DateTime.now)
+    self.plan_usage.update(disable_at:DateTime.now)
+  end
+
+  def method_name
+    
+  end
+
+  def restore
+    self.update(deleted_at: nil)
+  end
   
   # has_many :deals
 

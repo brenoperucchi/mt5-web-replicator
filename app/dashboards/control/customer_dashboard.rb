@@ -11,10 +11,12 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     email:                DisableTextField,
     role:                 DisableTextField.with_options(value:"customer"),
-    store_id:             DisableBelongsTo.with_options(attribute: :store),
-    users:                Field::HasMany,
-    accounts:             DisableBelongsTo.with_options(type: 'has_many', association: :accounts, attribute: :store),
-    invoices:             DisableBelongsTo.with_options(type: 'has_many', association: :invoices, attribute: :store),
+    # role_control:         Field::String,
+    role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE),
+    store_id:             DisableAssociation.with_options(attribute: :store),
+    user:                 Field::HasOne,
+    accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
+    invoices:             DisableAssociation.with_options(type: 'has_many', association: :invoices),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -36,6 +38,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   name
   role
+  role_control
   store_id
   accounts
   invoices
@@ -49,9 +52,9 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   role
-  store_id
+  role_control
   accounts
-  invoices
+
   ].freeze
 
   # COLLECTION_FILTERS
