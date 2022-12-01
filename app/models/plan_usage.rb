@@ -8,7 +8,7 @@ class PlanUsage < ApplicationRecord
 
   def calculate_usage(date_today=nil)
     changes = false
-    date_today ||= DateTime.now
+    # date_today ||= DateTime.now
     days_month = Time.days_in_month(date_today.month)
     amount_use = usageable.amount
     month_seconds = days_month * 24 * 3600

@@ -2,7 +2,7 @@ class PlanItem < ApplicationRecord
   attr_accessor :active, :amount_extra
 
   belongs_to :plan
-  belongs_to :store
+  belongs_to :store, optional:true
   has_many :plan_usages, as: :usageable
 
   def active=(attribute)

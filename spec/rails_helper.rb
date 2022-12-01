@@ -50,6 +50,7 @@ RSpec.configure do |config|
   end
 
   config.include RSpec::Rails::RequestExampleGroup, type: :request, file_path: /spec\/api/
+  config.include RSpec::Rails::RequestExampleGroup, type: :request, file_path: /spec\/features/
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
 

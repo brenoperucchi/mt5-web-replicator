@@ -304,11 +304,11 @@ ActiveRecord::Schema.define(version: 2022_11_26_145216) do
     t.boolean "recurrent"
     t.decimal "amount", precision: 10, scale: 2
     t.bigint "plan_id"
-    t.bigint "store_id"
     t.text "settings"
     t.datetime "active_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "store_id"
     t.index ["plan_id"], name: "index_plan_items_on_plan_id"
     t.index ["store_id"], name: "index_plan_items_on_store_id"
   end

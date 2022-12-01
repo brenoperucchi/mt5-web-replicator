@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe API::V1::APITransactionsCopy do
   before(:context) do
-    @store = create(:store)
+    @plan = create(:plan)
+    @store = create(:store, plan_id: @plan.id)
     @trace = create(:trace, :copy, store: @store)
     @admin = create(:customer, :admin, store:@store)
     @customer = create(:customer, :client, store:@store)
@@ -37,7 +38,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(slave1.state).to be == "pending"
         expect(slave2.state).to be == "pending"
       end
-
+ 
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 5634787)
         # @transaction = account.orders.find_by(content_id:483857785).transactions.first

@@ -11,7 +11,7 @@ class Customer < ApplicationRecord
   has_many :accounts
   has_many :invoices, as: :invoiceable#, dependent: :destroy
 
-  delegate :store, :email, to: :user, allow_nil: true
+  delegate :email, to: :user, allow_nil: true
 
   pay_customer
 
