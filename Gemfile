@@ -119,7 +119,7 @@ group :development do
   # gem 'unicorn'
 end
 
-gem 'postgresql'
+gem 'pg', '1.4.5'
 gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'
