@@ -7,6 +7,19 @@ GIT
       rails
 
 GIT
+  remote: https://github.com/brenoperucchi/administrate.git
+  revision: d5d0a8547b948c513a50d6a687be9588f4db519c
+  specs:
+    administrate (0.18.0)
+      actionpack (>= 5.0)
+      actionview (>= 5.0)
+      activerecord (>= 5.0)
+      jquery-rails (>= 4.0)
+      kaminari (>= 1.0)
+      sassc-rails (~> 2.1)
+      selectize-rails (~> 0.6)
+
+GIT
   remote: https://github.com/d-a-l-l/terminal-notifier.git
   revision: 3ba9ce569e234062d09c8fd01c4be11e56a9fd1b
   specs:
@@ -17,18 +30,6 @@ GIT
   revision: f770babf2152da074b399a0f68af3710b99f73f7
   specs:
     state_machine (1.2.0)
-
-PATH
-  remote: vendor/administrate
-  specs:
-    administrate (0.18.0)
-      actionpack (>= 5.0)
-      actionview (>= 5.0)
-      activerecord (>= 5.0)
-      jquery-rails (>= 4.0)
-      kaminari (>= 1.0)
-      sassc-rails (~> 2.1)
-      selectize-rails (~> 0.6)
 
 GEM
   remote: https://rubygems.org/

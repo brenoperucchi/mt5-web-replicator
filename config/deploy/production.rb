@@ -4,7 +4,7 @@ set :deploy_to, '/home/app/signalforex'
 set :deploy_via, :remote_cache
 set :use_sudo, false
 set :stage, :production
-set :linked_files, fetch(:linked_files, []).push('lib/telegram/tdlib/libtdjson.so')
+# set :linked_files, fetch(:linked_files, []).push('lib/telegram/tdlib/libtdjson.so')
 
 server '66.94.116.89',
 # server 'app.imentore.com.br',
