@@ -1,3 +1,4 @@
+require 'active_support/testing/time_helpers'
 require 'database_cleaner'
 require 'pry'
 require 'pry-byebug'
@@ -18,6 +19,7 @@ require 'pry-byebug'
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 RSpec.configure do |config|
   # CUSTOM
+  config.include ActiveSupport::Testing::TimeHelpers
   config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
 

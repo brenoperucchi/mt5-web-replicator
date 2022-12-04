@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe API::V1::APITransactionsCopy do
   before(:context) do
-    @plan = create(:plan)
-    @store = create(:store, plan_id: @plan.id)
+    @plan1 = create(:plan, :plan1)
+    @store = create(:store, plan_id: @plan1.id)
     @trace = create(:trace, :copy, store: @store)
     @admin = create(:customer, :admin, store:@store)
     @customer = create(:customer, :client, store:@store)

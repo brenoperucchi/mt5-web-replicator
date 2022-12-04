@@ -132,11 +132,9 @@ class Store < ApplicationRecord
   
   def create_invoice_item(invoice, usage, date_today)
     if usage.disable_at.present?
-
-      puts "usage.active_at.to_date.month #{usage.active_at.to_date.month } == date_today.month #{date_today.month} and usage.active_at.to_date.year #{usage.active_at.to_date.year } == date_today.year #{date_today.year}"
       return unless usage.active_at.to_date.month <= date_today.month and usage.active_at.to_date.year <= date_today.year
       if usage.disable_at
-        return unless usage.disable_at.month == date_today.month and usage.disable_at.year == date_today.year 
+        return unless usage.disable_at.month >= date_today.month and usage.disable_at.year >= date_today.year 
       end
     end
     if usage.calculate_usage(date_today)
