@@ -7,7 +7,7 @@
 postgres: &postgres
   adapter: postgresql
   encoding: unicode
-  host: 10.0.0.1
+  host: 85.239.248.170
   pool: 5
   timeout: 5000
 
