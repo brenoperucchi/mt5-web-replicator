@@ -31,7 +31,7 @@ test:
 development:
   # <<: *default
   # database: db/development.sqlite3
-  <<: *postgres
+  <<: *default
   database: signalforex
   username: signalforex
   password: Rails.application.credentials[:secret_database]
