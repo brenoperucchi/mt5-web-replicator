@@ -15,7 +15,7 @@ postgres: &postgres
 default: &default
   adapter: postgresql
   encoding: unicode
-  host: localhost
+  host: 10.0.0.1
   pool: 5
   timeout: 5000
   # adapter: sqlite3
