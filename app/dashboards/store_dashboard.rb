@@ -22,12 +22,13 @@ class StoreDashboard < Administrate::BaseDashboard
     stripe_webhook_secret:  Field::String,
     stripe_api_secret:      Field::String,
     plan:       Field::BelongsTo,
-    accounts:   Field::HasMany,
+    plan_items: Field::HasMany,
+    accounts:   Field::HasMany.with_options(limit:5),
     # accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     traces:     Field::HasMany,
     customers:  Field::HasMany,
     users:      Field::HasMany,
-    traces:     Field::HasMany,
+    traces:     Field::HasMany.with_options(limit:5),
     tag_list:   Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -62,6 +63,7 @@ class StoreDashboard < Administrate::BaseDashboard
   stripe_api_secret
   stripe_webhook_secret
   plan
+  plan_items
   accounts
   traces
   customers
@@ -83,6 +85,7 @@ class StoreDashboard < Administrate::BaseDashboard
   telegram_bot_token
   tag_list
   plan
+  plan_items
   accounts
   volume_default
   stripe_api_secret

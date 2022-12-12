@@ -27,7 +27,7 @@ class TraceDashboard < Administrate::BaseDashboard
     response:            Field::String,
     take_profit_limit:   Field::String.with_options(searchable: false),
     # volumes:           Field::ActsAsTaggable,
-    messages:            Field::HasMany.with_options(direction: :desc),
+    messages:            Field::HasMany.with_options(direction: :desc, limit: 5),
     instruments:         Field::HasMany,
     accounts:            Field::HasMany
   }.freeze

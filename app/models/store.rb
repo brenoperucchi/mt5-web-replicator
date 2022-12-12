@@ -37,8 +37,8 @@ class Store < ApplicationRecord
   # has_many :plan_lines, -> { distinct }, through: :plan_items, source: :plan_line
 
 
-  # has_many :plan_stores, dependent: :destroy
-  # has_many :plan_items, through: :plan_stores, source: :plan_item, dependent: :destroy
+  has_many :plan_stores, dependent: :destroy
+  has_many :plan_items, through: :plan_stores, source: :plan_item, dependent: :destroy
   # has_many :plans,      through: :plan_stores, source: :plan, dependent: :destroy
   # has_many :plan_lines, through: :plans, source: :plan_lines, dependent: :destroy
 

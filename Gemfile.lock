@@ -8,7 +8,8 @@ GIT
 
 GIT
   remote: https://github.com/brenoperucchi/administrate.git
-  revision: d5d0a8547b948c513a50d6a687be9588f4db519c
+  revision: 530528290b5603d6907e835fa2b19e3ee2ad0fdb
+  branch: main_imentore
   specs:
     administrate (0.18.0)
       actionpack (>= 5.0)

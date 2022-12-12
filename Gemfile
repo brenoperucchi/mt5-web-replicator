@@ -82,10 +82,12 @@ end
 
 gem 'eventmachine'
 gem 'slim'
-gem "administrate",           git: 'https://github.com/brenoperucchi/administrate.git'
+gem "administrate",           git: 'https://github.com/brenoperucchi/administrate.git', branch: 'main_imentore'
 gem 'administrate-field-image'
 gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 gem "administrate-field-nested_has_many"
+# gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
+# gem "administrate",         path: "vendor/administrate"
 # gem "administrate", path: "vendor/administrate"
 # gem 'administrate-field-scoped_has_many', path: "vendor/administrate-field-scoped_has_many"
 

@@ -15,7 +15,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     active:     Field::Boolean,
     recurrent:  Field::Boolean,
     plan:       Field::BelongsTo,
-    store:      Field::BelongsTo,
+    stores:     Field::HasMany,
     active_at:  Field::DateTime,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
@@ -33,7 +33,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     recurrent
     amount
     plan
-    store
+    stores
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -43,7 +43,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     name
     amount
     plan
-    store
+    stores
     active
     recurrent
     active_at
@@ -60,7 +60,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     name
     amount
     plan
-    store
+    stores
   ].freeze
 
   # COLLECTION_FILTERS

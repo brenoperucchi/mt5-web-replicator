@@ -13,13 +13,11 @@ class PlanUsage < ApplicationRecord
     amount_use = usageable.amount
     month_seconds = days_month * 24 * 3600
 
-    # if usageable_type == "Plan" 
     if self.disable_at.present?
       if active_at.month != date_today.month or active_at.year != date_today.year
         usage_seconds = (self.disable_at.to_time - date_today.beginning_of_month.to_time)
       else
         usage_seconds = (self.disable_at.to_time - self.active_at.to_time)
-        # binding.pry
       end
     else
       usage_seconds ||= (date_today.end_of_month.to_time - self.created_at.to_time)

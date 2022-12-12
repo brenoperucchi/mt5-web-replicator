@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_11_26_145216) do
+ActiveRecord::Schema.define(version: 2022_12_05_212031) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -308,9 +308,16 @@ ActiveRecord::Schema.define(version: 2022_11_26_145216) do
     t.datetime "active_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.integer "store_id"
     t.index ["plan_id"], name: "index_plan_items_on_plan_id"
-    t.index ["store_id"], name: "index_plan_items_on_store_id"
+  end
+
+  create_table "plan_stores", force: :cascade do |t|
+    t.bigint "store_id", null: false
+    t.bigint "plan_item_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["plan_item_id"], name: "index_plan_stores_on_plan_item_id"
+    t.index ["store_id"], name: "index_plan_stores_on_store_id"
   end
 
   create_table "plan_usages", force: :cascade do |t|
@@ -500,6 +507,8 @@ ActiveRecord::Schema.define(version: 2022_11_26_145216) do
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
+  add_foreign_key "plan_stores", "plan_items"
+  add_foreign_key "plan_stores", "stores"
   add_foreign_key "plan_usages", "stores"
   add_foreign_key "stores", "plans"
   add_foreign_key "taggings", "tags"

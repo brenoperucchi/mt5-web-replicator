@@ -7,7 +7,6 @@
 postgres: &postgres
   adapter: postgresql
   encoding: unicode
-  host: 85.239.248.170
   pool: 5
   timeout: 5000
 
@@ -26,15 +25,17 @@ test:
   <<: *postgres
   database: signalforex_test
   username: signalforex
-  password: Rails.application.credentials[:secret_database]
+  password: <%= Rails.application.credentials[:secret_database] %>
+  host: localhost
 
 development:
   # <<: *default
   # database: db/development.sqlite3
-  <<: *default
+  <<: *postgres
   database: signalforex
   username: signalforex
-  password: Rails.application.credentials[:secret_database]
+  password: <%= Rails.application.credentials[:secret_database] %>
+  host: localhost
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -48,5 +49,5 @@ production:
   <<: *postgres
   database: signalforex
   username: signalforex
-  password: CjGcKx7h56CoBdlM
-  
+  password: <%= Rails.application.credentials[:secret_database] %>
+  host: 10.0.0.1
