@@ -9,7 +9,7 @@ require 'base'
 module Admin
   class ApplicationController < Administrate::ApplicationController
     before_action :authenticate_user!
-    # include Administrate::Punditize
+    include Administrate::Punditize
 
     # before_action :authenticate_admin
     # before_action :authenticate_user!
@@ -25,6 +25,7 @@ module Admin
 
 
     def index
+      
       authorize_resource(resource_class)
       search_term = params[:search].to_s.strip
       resources = filter_resources(scoped_resource, search_term: search_term)

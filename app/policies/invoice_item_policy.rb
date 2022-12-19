@@ -1,4 +1,4 @@
-class TracePolicy < ApplicationPolicy
+class InvoiceItemPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       scope.all
