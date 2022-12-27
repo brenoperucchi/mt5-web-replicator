@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 module Message
-  class MetatraderDashboard < Administrate::BaseDashboard
+  class MessageDashboard < Administrate::BaseDashboard
     # ATTRIBUTE_TYPES
     # a hash that describes the type of each of the model's fields.
     #
@@ -20,6 +20,8 @@ module Message
       created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       content_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       prepare_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+      # descendants: Field::HasMany.with_options(class_name: 'Message'), 
+      # ancestors: Field::HasMany.with_options(class_name: 'Message'), 
     }.freeze
 
     # COLLECTION_ATTRIBUTES

@@ -1,4 +1,4 @@
-class Message::Metatrader < Message
+class Message::Metatrader < Message::Message
   self.table_name = "messages"
 
   state_machine :initial => :pending do
@@ -147,5 +147,4 @@ class Message::Metatrader < Message
   #     slave.update(take_profit:order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f)
   #   end
   # end
-
 end

@@ -1,5 +1,7 @@
 require "ancestry"
-class Message < ApplicationRecord
+
+class Message::Message < ApplicationRecord
+  self.table_name = "messages"
   has_ancestry
   
   has_many :orders, :class_name => "Order", :foreign_key => "message_id", dependent: :destroy

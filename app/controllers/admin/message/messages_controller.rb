@@ -1,6 +1,18 @@
 module Admin
-	module Messaghe
-	  class MetraderController < Admin::BaseController
+	class Message::MessagesController < Admin::BaseController
+		def resource_name
+			::Message::Message
+		end
+
+
+		def resource_class 
+			::Message::Message
+		end
+
+		def dashboard_class
+			::Message::MessageDashboard
+		end
+
 		# Overwrite any of the RESTful controller actions to implement custom behavior
 		# For example, you may want to send an email after a foo is updated.
 		#
@@ -85,6 +97,5 @@ module Admin
 
 		# See https://administrate-prototype.herokuapp.com/customizing_controller_actions
 		# for more information
-	  end
 	end
 end

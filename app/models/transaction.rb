@@ -8,7 +8,7 @@ class Transaction < ApplicationRecord
   # }
 
   belongs_to :order, optional:true
-  belongs_to :message
+  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
   belongs_to :deal, optional:true

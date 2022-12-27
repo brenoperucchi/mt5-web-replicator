@@ -32,7 +32,12 @@ Rails.application.routes.draw do
       resources :transactions, except:[:edit, :new]
       resources :invoices, except:[:new]
     end
+
     namespace :admin do
+      namespace :message do
+        # resources :messages
+        resources :metatraders
+      end
       namespace :paper_trail do
         resources :versions
       end
@@ -50,9 +55,8 @@ Rails.application.routes.draw do
       resources :instruments
 
       resources :orders#, except:[:edit]
-      resources :deals
-      resources :messages #, only: [:index]
-      resources :messages, as: :message_metatrader #, only: [:index]
+      # resources :deals
+      # resources :messages, as: :message_metatrader #, only: [:index]
       # resources :message_metatrader, controller: :messages, type:'Message::Metatrader'
       # get '/messages', to: 'messages#index', as: 'messages', on: :collection
       # end

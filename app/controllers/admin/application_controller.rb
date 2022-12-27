@@ -23,6 +23,11 @@ module Admin
       # TODO Add authentication logic here.
     end
 
+    def resource_resolver
+      @resource_resolver ||=
+        Administrate::ResourceResolver.new(controller_path)
+    end
+
 
     def index
       

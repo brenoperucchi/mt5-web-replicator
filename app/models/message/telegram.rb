@@ -1,4 +1,5 @@
-class Message::Telegram < Message
+module Messages
+  class Telegram < Message
     self.table_name = "messages"
 
     # attr_accessor :new_value
@@ -117,5 +118,5 @@ class Message::Telegram < Message
     #           return false
     #       end     
     # end
-
+  end
 end

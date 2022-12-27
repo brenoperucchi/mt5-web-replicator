@@ -1,4 +1,4 @@
-class MessagePolicy < ApplicationPolicy
+class Message::MessagePolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       scope.all
@@ -10,15 +10,15 @@ class MessagePolicy < ApplicationPolicy
   end
 
   def index?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
+    true
   end
 
   def edit?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
+    true
   end
 
   def update?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
+    true 
   end
 
   def show?

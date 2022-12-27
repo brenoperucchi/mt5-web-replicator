@@ -11,7 +11,7 @@ module PaperTrail
     end
 
     def index?
-      @user.userable.role == "customer" or @user.userable.role == "admin" 
+      false
     end
 
     def edit?

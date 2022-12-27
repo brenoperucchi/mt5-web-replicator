@@ -4,7 +4,8 @@ class Order < ApplicationRecord
 
   belongs_to :trace
   belongs_to :store
-  belongs_to :message
+  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id
+  # belongs_to :metatrader, class_name: 'Message::Metatrader', foreign_key: :message_id
   belongs_to :account
 
   # has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy

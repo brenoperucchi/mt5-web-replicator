@@ -1,4 +1,4 @@
-class TransactionPolicy < ApplicationPolicy
+class Message::MetatraderPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       scope.all
@@ -14,11 +14,11 @@ class TransactionPolicy < ApplicationPolicy
   end
 
   def edit?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
+    true
   end
 
   def update?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
+    true 
   end
 
   def show?
