@@ -1,5 +1,5 @@
 module Messages
-  class Telegram < Message
+  class Telegram < Message::Message
     self.table_name = "messages"
 
     # attr_accessor :new_value
