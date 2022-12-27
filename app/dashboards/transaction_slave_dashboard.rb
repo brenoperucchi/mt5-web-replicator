@@ -31,7 +31,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     magic_number:       Field::String,
     response:           Field::String,
     response_error:     Field::String,
-    loggings:           Field::HasMany,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
