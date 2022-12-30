@@ -17,7 +17,7 @@ class ApplicationPolicy
   end
 
   def create?
-    false
+   @user.userable.role == "admin" or @user.userable.role_control == "admin" 
   end
 
   def new?
@@ -25,7 +25,7 @@ class ApplicationPolicy
   end
 
   def update?
-    false
+    @user.userable.role == "admin" or @user.userable.role_control == "admin" 
   end
 
   def edit?
@@ -33,7 +33,7 @@ class ApplicationPolicy
   end
 
   def destroy?
-    true
+    false
   end
 
   class Scope

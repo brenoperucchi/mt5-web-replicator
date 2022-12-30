@@ -1,4 +1,4 @@
-require "sentient_store.rb"
+require "sentient_store"
 
 module Control
   class BaseController < Admin::ApplicationController
@@ -7,17 +7,6 @@ module Control
 
     rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-    private
-
-    def user_not_authorized
-      flash[:alert] = "You are not authorized to perform this action."
-      redirect_back(fallback_location: user_session_path)
-    end
-
-
-    def new_resource
-      current_store.try(resource_name.to_s.pluralize.to_sym).try(:new)
-    end
 
     def create
       resource = current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new, (resource_params))
@@ -33,6 +22,18 @@ module Control
           page: Administrate::Page::Form.new(dashboard, resource),
         }, status: :unprocessable_entity
       end
+    end
+
+    private
+
+    def user_not_authorized
+      flash[:alert] = "You are not authorized to perform this action."
+      redirect_back(fallback_location: user_session_path)
+    end
+
+
+    def new_resource
+      current_store.try(resource_name.to_s.pluralize.to_sym).try(:new)
     end
 
     def dashboard

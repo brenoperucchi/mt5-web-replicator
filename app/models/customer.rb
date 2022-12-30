@@ -1,13 +1,14 @@
 class Customer < ApplicationRecord
 
-  attr_writer :email
+  # attr_reader :email, :password
+  # attr_accessor :email, :password
 
-  CONTROL_ROLE = %w(admin user viewer)
+  CONTROL_ROLE = %w(admin user)
 
-  store :settings, accessors: [:role_control, :role, :stripe_product_id, :stripe_customer_id]
+  store :settings, accessors: [:role_control, :role, :stripe_product_id, :stripe_customer_id]#, :email, :password]
   
   belongs_to :store
-  has_one  :user, as: :userable#, dependent: :destroy
+  has_one  :user, as: :userable, validate: true#, dependent: :destroy
   has_many :accounts
   has_many :invoices, as: :invoiceable#, dependent: :destroy
 
@@ -15,7 +16,10 @@ class Customer < ApplicationRecord
 
   pay_customer
 
+  accepts_nested_attributes_for :user
+
   validates_presence_of :name
+  validates_presence_of :role_control, :on => :create, :if => proc { |obj| obj.role == "customer" }
 
   # accepts_nested_attributes_for :user
 

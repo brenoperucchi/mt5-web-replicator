@@ -11,10 +11,12 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     id:            Field::Number,
     name:          Field::String,
     state:         Field::String,
-    plan:          Field::String,
-    plan_value:    Field::String,
-    plan_percent:  Field::String,
+    plan:                   Field::BelongsTo,
+    plan_items:             Field::HasMany,
     volume_default:         Field::String,
+    telegram_bot_chat_id:   Field::String,
+    telegram_bot_status:    Field::String,
+    telegram_bot_token:     Field::String,
     stripe_webhook_secret:  Field::String,
     stripe_api_secret:      Field::String,
     resource_system:        Field::Text,
@@ -33,12 +35,22 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   name
   state
   plan
-  tag_list
+  telegram_bot_chat_id
+  telegram_bot_status
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
-  SHOW_PAGE_ATTRIBUTES = ATTRIBUTE_TYPES.keys.freeze
+  SHOW_PAGE_ATTRIBUTES = %i[
+  name
+  state
+  plan
+  tag_list
+  volume_default
+  stripe_api_secret
+  stripe_webhook_secret
+  ].freeze
+
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
@@ -47,8 +59,6 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   name
   state
   plan
-  plan_value
-  plan_percent
   tag_list
   volume_default
   stripe_api_secret

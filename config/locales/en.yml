@@ -68,7 +68,7 @@ en:
         other: "Categories"
     attributes:
       trace:
-        name_id: "Magic Number"
+        name_id: "Magic Number of Portfolio"
       client:
         name: "Name"
       store:

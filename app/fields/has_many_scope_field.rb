@@ -54,7 +54,12 @@ module Fields
 
     def candidate_resources
       if options.key?(:associated)
-        current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        if resource.respond_to?(:store)
+          resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        else
+          current_store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        end
+        # current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
       elsif options.key?(:scoped)
         resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
       elsif options.key?(:includes)

@@ -9,13 +9,17 @@ class DisableAssociation <Administrate::Field::Base
   def default_value(obj, attr)
     case options[:type]
     when 'has_many' 
-      if options[:scope].nil?
-        obj.send(options[:association]).map(&attr).join(', ')
+      if options[:association].present?
+        resource.send(options[:association]).map(&attr).join(', ')
       elsif options[:scope].present?
-        obj.send(options[:scope]).try(options[:association]).map(&attr).join(', ')
+        resource.send(options[:scope]).try(options[:association]).map(&attr).join(', ')
       end
     else
-      obj.send(options[:attribute]).try(attr)
+      if options.key?(:attribute)
+        resource.send(options[:attribute]).try(attr)
+      else
+        resource.send(attribute).try(attr)
+      end
     end
   end 
 

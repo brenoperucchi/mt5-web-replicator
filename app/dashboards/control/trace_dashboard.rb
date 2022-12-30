@@ -26,7 +26,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     kind:                DisableTextField.with_options(value:"copy"),
     # volumes:           Field::ActsAsTaggable,
     response:            Field::String,
-    messages:            Field::HasMany.with_options(direction: :desc),
+    messages:            Field::HasMany.with_options(direction: :desc, class_name:'Message::Message'),
     take_profit_limit:   DisableTextField.with_options(value:2),
     instruments:         Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
     accounts:            Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
@@ -38,9 +38,9 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
-  active
   name
+  name_id
+  active
   kind
   ].freeze
 
@@ -49,14 +49,10 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
+  name_id
   active
   kind
   take_profit_limit
-  telegram_option
-  telegram_image
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
   accounts
   messages
   instruments
@@ -69,15 +65,11 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  name_id
   active
   kind
   store_id
   take_profit_limit
-  telegram_option
-  telegram_image
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
   accounts
   ].freeze
 

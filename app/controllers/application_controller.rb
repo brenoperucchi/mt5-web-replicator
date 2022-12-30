@@ -1,4 +1,4 @@
-require "sentient_store.rb"
+require "sentient_store"
 
 class ApplicationController < ActionController::Base
 	include SentientStore

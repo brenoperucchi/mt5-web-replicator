@@ -9,12 +9,14 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
-    email:                DisableTextField,
+    # email:                DisableTextField,
     role:                 DisableTextField.with_options(value:"customer"),
     # role_control:         Field::String,
-    role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE),
-    store_id:             DisableAssociation.with_options(attribute: :store),
+    email:                MessagesField,
+    password:             MessagesField,
     user:                 Field::HasOne,
+    role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
+    store_id:             DisableAssociation.with_options(attribute: :store),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
     invoices:             DisableAssociation.with_options(type: 'has_many', association: :invoices),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -29,7 +31,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   name
   email
-  role
+  role_control
   accounts
   ].freeze
 
@@ -37,7 +39,6 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   name
-  role
   role_control
   store_id
   accounts
@@ -51,6 +52,8 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  user
+  store_id
   role
   role_control
   accounts

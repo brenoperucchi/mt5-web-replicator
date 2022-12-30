@@ -10,7 +10,7 @@ class UserDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:             Field::Number,
     email:          Field::String,
-    password:       Field::String,
+    password:       Field::Password,
     store:          Field::BelongsTo,
     userable:       Field::Polymorphic,
     created_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

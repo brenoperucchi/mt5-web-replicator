@@ -13,10 +13,15 @@ module Fields
 		private 
 
 		def candidate_resources
-		  scope = options[:scope] ? options[:scope].call : current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+			if resource.respond_to?(:store)
+				resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+			else
+				# scope = options[:scope] ? options[:scope].call : current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+				resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+		  end
 
-		  order = options.delete(:order)
-		  order ? scope.reorder(order) : scope
+		  # order = options.delete(:order)
+		  # order ? scope.reorder(order) : scope
 		end
 
 	end

@@ -16,7 +16,7 @@ that displays all possible records to associate with.
 [1]: http://www.rubydoc.info/gems/administrate/Administrate/Field/BelongsTo
 %>
 
-<% field.current_store_field(@_request.subdomain) %>
+<%# field.current_store_field(@_request.subdomain, current_user) %>
 
 <div class="field-unit__label">
   <%= f.label field.permitted_attribute %>

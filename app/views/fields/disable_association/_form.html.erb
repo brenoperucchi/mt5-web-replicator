@@ -4,8 +4,8 @@
       <%= f.label field.attribute %>
     </div>
     <div class="field-unit__field">
-      <%= f.text_field field.attribute, value: current_user.userable.name, disabled:true %>
-      <%= f.hidden_field field.attribute, value: current_user.userable.id %>
+      <%= f.text_field field.attribute, value: field.default_value(current_user, :name), disabled:true %>
+      <%= f.hidden_field field.attribute, value: field.default_value(current_user, :id) %>
 
     </div>
   <% end %>

@@ -25,7 +25,7 @@ class Trace < ApplicationRecord
   has_many :slaves,  :through => :orders, :source => :slaves
 
 
-  has_many :messages, :class_name => "Message", :foreign_key => "trace_id"
+  has_many :messages, :class_name => "Message::Message", :foreign_key => "trace_id"
 
   has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id", dependent: :destroy
   belongs_to :store, optional: true
@@ -36,8 +36,8 @@ class Trace < ApplicationRecord
   has_many :permissions, dependent: :destroy
   has_many :accounts, :through => :permissions#, :source => :slave
 
-  validates_presence_of   [:name, :name_id]#, :on => :create#, :message => "can't be blank"
-  validates_uniqueness_of :name_id#, :on => :create#, :message => "must be unique"
+  validates_presence_of   [:name, :name_id]
+  validates_uniqueness_of [:name, :name_id], scope: :store_id
 
   def volumes
     self.settings['volumes'] || ""

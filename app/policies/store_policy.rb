@@ -1,30 +1,32 @@
 class StorePolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
-      binding.pry
       scope.all
     end
 
     def resolve_admin
-      binding.pry
       scope.where(owner: user)
     end
   end
 
   def index?
-    @user.userable.role == "customer"
+    @user.userable.role == "customer" or @user.userable.role == "admin" 
   end
 
   def edit?
-    true
+    @user.userable.role == "customer" or @user.userable.role == "admin" 
   end
 
   def update?
-    edit?
+    @user.userable.role == "customer" or @user.userable.role == "admin" 
   end
 
   def show?
-    true    
+    @user.userable.role == "customer" or @user.userable.role == "admin" 
+  end
+  
+  def new?
+    @user.userable.role == "customer" or @user.userable.role == "admin" 
   end
 
 end

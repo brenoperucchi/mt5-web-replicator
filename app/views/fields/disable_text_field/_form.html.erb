@@ -1,7 +1,14 @@
 <div class="field-unit__label">
   <%= f.label field.attribute %>
 </div>
-<div class="field-unit__field">
-  <%= f.text_field field.attribute, value: field.default_value(f.object), disabled:true %>
-  <%= f.hidden_field field.attribute, value: field.default_value(f.object) %>
-</div>
+<% if action_name == "new" or action_name == "create" %>
+  <div class="field-unit__field">
+    <%= f.text_field field.attribute, value: field.options[:value], disabled:true %>
+    <%= f.hidden_field field.attribute, value: field.options[:value] %>
+  </div>
+<% else %>
+  <div class="field-unit__field">
+    <%= f.text_field field.attribute, value: field.default_value, disabled:true %>
+    <%= f.hidden_field field.attribute, value: field.default_value %>
+  </div>
+<% end %>

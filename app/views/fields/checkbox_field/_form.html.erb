@@ -4,7 +4,7 @@
 </div>
 <div class="field-unit__field">
 	<% field.default_values.each do |checkbox| %>
-		<%= f.radio_button :role_control, checkbox %>
+		<%= f.radio_button :role_control, checkbox, checked: (checkbox == field.options[:default].to_s) %>
 		<%= checkbox %>
   <% end %>
 </div>
