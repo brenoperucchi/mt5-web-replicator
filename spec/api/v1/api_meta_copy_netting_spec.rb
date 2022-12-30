@@ -22,7 +22,6 @@ RSpec.describe API::V1::APITransactionsCopy do
         account = Account.find_by(name: 5634787)
         order = account.orders.find_by(content_id: 10000001)
         @transaction = order.transactions.find_by(ticket: 10000001)
-        # binding.pry
         @slave = order.slaves.find_by(ticket_master: 10000001, account:account)
         expect(@account1.state).to be == "enable"
         expect(@account1.kind).to be == "slave"
@@ -220,7 +219,6 @@ RSpec.describe API::V1::APITransactionsCopy do
         @order = account.orders.find_by(content_id:10000001)
         @transaction = @order.transactions.find_by(ticket: 10000001)
         @slave = @order.slaves.find_by(ticket_master: 10000001, account: account)
-        # binding.pry
 
         @slave.execute
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING', 

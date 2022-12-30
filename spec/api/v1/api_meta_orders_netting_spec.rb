@@ -105,12 +105,10 @@ RSpec.describe API::V1::APITransactionsCopy do
       it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING',
           params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_42", "action"=>"orders", "account_id"=>"3000033103", "account_mode"=>"NETTING"}
-        # binding.pry
         expect(Account.find_by(name:5634787).slaves.last.state).to be == "deleted"
         # expect(@account1.slaves.last.state).to be == "deleted"
         post '/api/v1/transactions/trasmit/signal_slave/1_53/5634787/NETTING', 
           params: {"body"=> "{'account_login':'5634787', 'magic_number':'704', 'action':'NOSLTP', 'order_state':'pending', 'meta_state':'OPEN', 'ticket_slave_id':'0', 'deal_ticket':'0', 'order_symbol':'UsaTec', 'order_type':'1', 'price_open':'14940.800000', 'price_close':'0.000000', 'volume':'0.200000', 'stop_loss':'15036.41000000', 'take_profit':'14843.06000000', 'profit':'0.000000', 'comment':'10001', 'open_at':'1644424225.000000', 'meta_message':'OrderSend Done | Retcode: 10009 | Deal: 290610221 | Order: 334199552 | Comment: 10001'}", "expert_name"=>"signal_slave", "expert_version"=>"1_53", "account_id"=>"3000033104", "account_mode"=>"NETTING"}
-        # binding.pry
 
       end
     end
@@ -119,12 +117,10 @@ RSpec.describe API::V1::APITransactionsCopy do
       it 'Hedging - Check Automattically' do
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/NETTING',
           params: {"orders"=>"", "expert_name"=>"signal_copy", "expert_version"=>"1_42", "action"=>"orders", "account_id"=>"3000033103", "account_mode"=>"NETTING"}
-        # binding.pry
         expect(Account.find_by(name:5634787).slaves.last.state).to be == "deleted"
         # expect(@account1.slaves.last.state).to be == "deleted"
         post '/api/v1/transactions/trasmit/signal_slave/1_53/5634787/NETTING', 
           params: {"body"=> "{'account_login':'5634787', 'magic_number':'704', 'action':'NOSLTP', 'order_state':'pending', 'meta_state':'OPEN', 'ticket_slave_id':'0', 'deal_ticket':'0', 'order_symbol':'UsaTec', 'order_type':'1', 'price_open':'14940.800000', 'price_close':'0.000000', 'volume':'0.200000', 'stop_loss':'15036.41000000', 'take_profit':'14843.06000000', 'profit':'0.000000', 'comment':'10001', 'open_at':'1644424225.000000', 'meta_message':'OrderSend Done | Retcode: 10009 | Deal: 290610221 | Order: 334199552 | Comment: 10001'}", "expert_name"=>"signal_slave", "expert_version"=>"1_53", "account_id"=>"3000033104", "account_mode"=>"NETTING"}
-        # binding.pry
 
       end
     end

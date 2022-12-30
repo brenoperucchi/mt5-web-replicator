@@ -97,7 +97,6 @@ RSpec.describe "PLanStore" do
         expect(@invoice.name).to be == "1-2023-01"
         expect(@invoice.items.count).to be == 4
         expect(@invoice.amount.to_f).to be == 140.00
-        # binding.pry
       end
     end
   end

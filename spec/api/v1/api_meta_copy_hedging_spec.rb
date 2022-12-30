@@ -58,7 +58,6 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
         # @slave = account.orders.find_by(content_id:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave = account.slaves.find_by(ticket_master: @ticket_master)
-        # binding.pry
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@account1.state).to be == "enable"
         expect(@account1.kind).to be == "slave"

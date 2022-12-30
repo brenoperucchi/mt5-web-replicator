@@ -87,7 +87,6 @@ class Message::Metatrader < Message::Message
   #       comment = api_attributes[:ticket_master]
   #       # comment = "#{account.id}-#{transaction.id}-#{api_attributes[:ticket_master]}"
   #       slave = order.slaves.create(api_attributes.merge(symbol:symbol, comment: comment, account:account, master:transaction, trace:self.trace))
-  #       # binding.pry
   #       # slave.balances.update(account:account)
 
   #       transaction.execute if transaction.valid?
@@ -99,7 +98,6 @@ class Message::Metatrader < Message::Message
   #         transaction.loggings.create(content:order_params, changeset: @version.changeset, version:@version, state: 'MODIFY')
   #         slave.update(lot: order_params['volume'], take_profit:order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f) 
   #       end
-  #       # binding.pry
   #       # @version = @slave.versions.last
   #       # slave.loggings.create(content:order_params, changeset: @version.changeset, version:@version, state: 'MODIFY')
 
