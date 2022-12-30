@@ -29,4 +29,8 @@ class UserPolicy < ApplicationPolicy
     @user.userable.role == "customer" or @user.userable.role == "admin" 
   end
 
+  def destroy?
+     @user.userable.role == "admin" 
+  end
+
 end

@@ -8,8 +8,8 @@ class Customer < ApplicationRecord
   store :settings, accessors: [:role_control, :role, :stripe_product_id, :stripe_customer_id]#, :email, :password]
   
   belongs_to :store
-  has_one  :user, as: :userable, validate: true#, dependent: :destroy
-  has_many :accounts
+  has_one  :user, as: :userable, validate: true, dependent: :destroy
+  has_many :accounts, dependent: :nullify
   has_many :invoices, as: :invoiceable#, dependent: :destroy
 
   delegate :email, to: :user, allow_nil: true

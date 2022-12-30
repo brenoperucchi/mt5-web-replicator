@@ -16,7 +16,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     password:             MessagesField,
     user:                 Field::HasOne,
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
-    store_id:             DisableAssociation.with_options(attribute: :store),
+    store_id:             DisableTextField.with_options(default: :current_store),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
     invoices:             DisableAssociation.with_options(type: 'has_many', association: :invoices),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

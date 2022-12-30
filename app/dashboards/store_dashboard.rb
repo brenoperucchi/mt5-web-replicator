@@ -41,6 +41,7 @@ class StoreDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   name
+  url
   state
   plan
   telegram_bot_chat_id

@@ -3,8 +3,13 @@
 </div>
 <% if action_name == "new" or action_name == "create" %>
   <div class="field-unit__field">
-    <%= f.text_field field.attribute, value: field.options[:value], disabled:true %>
-    <%= f.hidden_field field.attribute, value: field.options[:value] %>
+    <%- if field.options.key?(:default) and field.options[:default] == :current_store %>
+      <%= f.text_field field.attribute, value: current_user.try(:store).try(:name), disabled:true %>
+      <%= f.hidden_field field.attribute, value: current_user.try(:store).try(:id) %>
+    <% else %>
+      <%= f.text_field field.attribute, value: field.options[:value], disabled:true %>
+      <%= f.hidden_field field.attribute, value: field.options[:value] %>
+    <% end %>
   </div>
 <% else %>
   <div class="field-unit__field">

@@ -7,6 +7,7 @@ FactoryBot.define do
     trait :client do
       name { 'client' }
       role { 'customer' }
+      role_control { 'admin' }
     end
   end
 end

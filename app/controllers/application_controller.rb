@@ -12,13 +12,13 @@ class ApplicationController < ActionController::Base
 	# layout "application"
 
 	def after_sign_in_path_for(resource)
-		case resource.userable.role.try(:downcase)
+		case resource.userable.try(:role).try(:downcase)
 		when "admin"
 			admin_customers_path
 		when "customer"
 			control_accounts_path
 		else
-			flash[:notice] = "Login error role"
+			flash[:notice] = "Error Login #001"
 			sign_out(resource)
 			new_user_session_path
 		end	  

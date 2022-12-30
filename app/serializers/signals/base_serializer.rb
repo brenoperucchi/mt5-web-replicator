@@ -60,7 +60,6 @@ module Signals
 		end
 
 		# def symbol
-		# 	binding.pry
 		# 	object.trace.instruments.detect{|x| object.content.gsub(/\W/, '').upcase.include?(x[:symbol].upcase) }.try(:name)
 		# end
 
