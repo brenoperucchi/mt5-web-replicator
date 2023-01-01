@@ -72,6 +72,7 @@ Rails.application.routes.draw do
   end
 
   # get ':page' => 'signs#show', as: 'signs'
+  post "create_store",      to:"site#create_store"
   get "support",      to:"site#support"
   get "demo_request", to:"site#demo_request"
 

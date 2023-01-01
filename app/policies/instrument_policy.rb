@@ -18,7 +18,7 @@ class InstrumentPolicy < ApplicationPolicy
   end
 
   def update?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
+    @user.userable.role == "admin" or @user.userable.role_control == "admin" 
   end
 
   def show?
@@ -27,6 +27,10 @@ class InstrumentPolicy < ApplicationPolicy
   
   def new?
     @user.userable.role == "customer" or @user.userable.role == "admin" 
+  end
+
+  def destroy?
+    @user.userable.role == "admin" or @user.userable.role_control == "admin" 
   end
 
 end

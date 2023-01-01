@@ -24,42 +24,55 @@ section.position-relative.pt-12.pt-lg-15.pb-9
 
         .card.border-0.rounded-4.shadow-lg.py-5.px-4
           .position-relative.z-index-1
-            form
-              .mb-3
-                label.form-label for="demo_f_name" 
-                  | First
-                  '
-                  | Name
-                input#demo_f_name.form-control placeholder="John" type="text" /
-              .mb-3
-                label.form-label for="demo_l_name" 
-                  | Last
-                  '
-                  | Name
-                input#demo_l_name.form-control placeholder="Doe" type="text" /
-              .mb-3
-                label.form-label for="demo_email" 
-                  | Work Email
-                  small.text-danger *
-                input#demo_email.form-control placeholder="john@doe.com" required="" type="email" /
-              .mb-3
-                label.form-label for="demo_job_title" 
-                  | Job
-                  '
-                  | Title
-                input#demo_job_title.form-control placeholder=("React Developer") type="text" /
-              .mb-3
-                label.form-label Team size
-                select#teamSize.form-select name="teamSize" 
-                  option value="0-10"  0-10
-                  option value="10-25"  10-25
-                  option value="25-50"  25-50
-                  option value="50+"  50+
-              .d-grid.mb-3
-                button.btn.btn-primary type="submit" 
-                  | Submit
-                  '
-                  | Request
+            = simple_form_for @store do |f|
+              = f.input :name, label: 'Your username please', error: 'Username is mandatory, please specify one'
+              = f.input :email, placeholder: 'user@domain.com'
+              = f.input :url, label: 'Your username please', error: 'Username is mandatory, please specify one'
+              = f.select :plan_id, Plan.all.pluck(:name, :id)
+              / - f.object.customers.new if f.object.customers.blank?
+              / = f.simple_fields_for :customers do |ff| 
+              /   = ff.input :name, label: 'Your username please', error: 'Username is mandatory, please specify one'
+              /   - ff.object.build_user if ff.object.user.nil?
+              /   = ff.simple_fields_for :user do |fff| 
+              /     = fff.input :email, placeholder: 'user@domain.com'
+                
+              = f.button :submit
+            / form
+            /   .mb-3
+            /     label.form-label for="demo_f_name" 
+            /       | First
+            /       '
+            /       | Name
+            /     input#demo_f_name.form-control placeholder="John" type="text" /
+            /   .mb-3
+            /     label.form-label for="demo_l_name" 
+            /       | Last
+            /       '
+            /       | Name
+            /     input#demo_l_name.form-control placeholder="Doe" type="text" /
+            /   .mb-3
+            /     label.form-label for="demo_email" 
+            /       | Work Email
+            /       small.text-danger *
+            /     input#demo_email.form-control placeholder="john@doe.com" required="" type="email" /
+            /   .mb-3
+            /     label.form-label for="demo_job_title" 
+            /       | Job
+            /       '
+            /       | Title
+            /     input#demo_job_title.form-control placeholder=("React Developer") type="text" /
+            /   .mb-3
+            /     label.form-label Team size
+            /     select#teamSize.form-select name="teamSize" 
+            /       option value="0-10"  0-10
+            /       option value="10-25"  10-25
+            /       option value="25-50"  25-50
+            /       option value="50+"  50+
+            /   .d-grid.mb-3
+            /     button.btn.btn-primary type="submit" 
+            /       | Submit
+            /       '
+            /       | Request
             p.mb-0.small.text-muted
               | We care about your privacy. To learn more, see our
               a.text-decoration-underline href="#!"  Privacy Policy

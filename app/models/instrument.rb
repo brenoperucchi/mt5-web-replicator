@@ -1,7 +1,10 @@
 
 class Instrument < ApplicationRecord
+  belongs_to :store, optional: true
   belongs_to :trace, optional: true
   belongs_to :account, optional: true
+
+
 
   SYMBOLLIST = 
   [

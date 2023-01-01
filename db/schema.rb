@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_30_073839) do
+ActiveRecord::Schema.define(version: 2022_12_30_183310) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -115,7 +115,9 @@ ActiveRecord::Schema.define(version: 2022_12_30_073839) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "account_id"
+    t.bigint "store_id"
     t.index ["account_id"], name: "index_instruments_on_account_id"
+    t.index ["store_id"], name: "index_instruments_on_store_id"
     t.index ["trace_id"], name: "index_instruments_on_trace_id"
   end
 
@@ -501,6 +503,7 @@ ActiveRecord::Schema.define(version: 2022_12_30_073839) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "customers", "stores"
   add_foreign_key "instruments", "accounts"
+  add_foreign_key "instruments", "stores"
   add_foreign_key "invoice_items", "invoices"
   add_foreign_key "invoices", "stores"
   add_foreign_key "pay_charges", "pay_customers", column: "customer_id"

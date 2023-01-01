@@ -3,8 +3,17 @@
   <%= f.label field.attribute, for: "#{f.object_name}_#{field.attribute}" %>
 </div>
 <div class="field-unit__field">
-	<% field.default_values.each do |checkbox| %>
-		<%= f.radio_button :role_control, checkbox, checked: (checkbox == field.options[:default].to_s) %>
-		<%= checkbox %>
+	<% if f.object.send(field.attribute) == "owner" %>
+		<%= f.text_field field.attribute, value: f.object.send(field.attribute), disabled:true %>
+		<%= f.hidden_field field.attribute, value: f.object.send(field.attribute) %>
+	<% else %>
+		<% field.default_values.each do |checkbox| %>
+			<% if action_name == "new" %>
+				<%= f.radio_button field.attribute, checkbox, checked: (checkbox == field.options[:default].to_s) %>
+			<% else %>
+				<%= f.radio_button field.attribute, checkbox, checked: (checkbox == f.object.send(field.attribute)) %>
+			<% end %>
+			<%= checkbox %>
+	  <% end %>
   <% end %>
 </div>

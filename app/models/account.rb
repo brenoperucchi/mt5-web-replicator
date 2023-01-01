@@ -24,15 +24,23 @@ class Account < ApplicationRecord
 
   belongs_to :store
   belongs_to :customer
+  
+  has_one :plan_usage, as: :resourceable
 
   has_many :permissions
   has_many :traces,       through: :permissions#, source: :trace 
-  # has_many :orders,       through: :traces, source: :orders
-  
+
   has_many :instruments,                    dependent: :destroy
   has_many :loggings,      as: :loggerable, dependent: :destroy
-  
-  has_one :plan_usage, as: :resourceable
+
+  has_many :balances,     dependent: :destroy, autosave: true
+  has_many :orders,       through: :balances, source: :order,         dependent: :destroy, autosave: true
+  has_many :transactions, through: :orders,   source: :transactions,  dependent: :destroy
+  has_many :slaves,       ->(account) { where("transaction_slaves.account_id = ?", account.id).distinct },
+                           through: :orders, source: :slaves, dependent: :destroy
+
+  validates_presence_of :name
+  validates_uniqueness_of :name, scope: :store_id
 
   def register_resource_plan
     store.register_resource_plan(self, self.kind)
@@ -43,46 +51,10 @@ class Account < ApplicationRecord
     self.plan_usage.update(disable_at:DateTime.now)
   end
 
-  def method_name
-    
-  end
-
   def restore
     self.update(deleted_at: nil)
   end
   
-  # has_many :deals
-
-  # has_many :balances,  dependent: :destroy
-  # has_many :orders,       through: :balances, source: :balanceable,  dependent: :destroy, source_type: 'Order'
-  # has_many :transactions, through: :orders,   source: :transactions,  dependent: :destroy#, source_type: 'Transaction'
-  # has_many :slaves,       through: :orders,   source: :slaves,       dependent: :destroy
-  # has_many :balances,  dependent: :destroy, autosave: true
-
-  # has_many :orders, dependent: :destroy
-  # has_many :transactions,  through: :orders,   source: :transactions,  dependent: :destroy
-  # has_many :slaves,        through: :orders,   source: :slaves,        dependent: :destroy
-
-
-  has_many :balances,  dependent: :destroy, autosave: true
-  has_many :orders,       through: :balances, source: :order,         dependent: :destroy, autosave: true
-  
-  has_many :transactions, through: :orders,   source: :transactions,  dependent: :destroy
-  has_many :slaves,       ->(account) { where("transaction_slaves.account_id = ?", account.id).distinct },
-                           through: :orders, source: :slaves, dependent: :destroy
-
-  # has_many :slaves, through: :orders, source: :slaves, dependent: :destroy
-
-  # has_many :slaves,       ->(account) { where("transaction_slaves.account_id = ?", account.id).distinct },
-  #                          through: :orders, source: :slaves, dependent: :destroy
-
-  # has_many :slaves, class_name: 'TransactionSlave', foreign_key: 'account_id'
-  # has_many :balances,  dependent: :destroy, autosave: true
-  # has_many :orders,       -> { distinct }, through: :balances, source: :order,         dependent: :destroy, autosave: true
-  # has_many :transactions, -> { distinct }, through: :orders,   source: :transactions,  dependent: :destroy
-  # # has_many :slaves, class_name: 'TransactionSlave', foreign_key: 'account_id'
-
-
   def api_server_hostname(params)
     if params[:EnvironmentLocal] == "0"
       'signalforex.imentore.com.br'
@@ -106,7 +78,7 @@ class Account < ApplicationRecord
   def insert_instruments
     if self.slave?
       Instrument::SYMBOLLIST.each do |symbol|
-        self.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes])
+        self.instruments.create(symbol: symbol[:symbol], name: symbol[:name], volumes:symbol[:volumes], store: self.store)
       end
     end
   end

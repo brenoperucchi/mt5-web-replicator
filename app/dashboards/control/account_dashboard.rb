@@ -10,6 +10,7 @@ require "administrate/base_dashboard"
     # which determines how the attribute is displayed
     # on pages throughout the dashboard.
     ATTRIBUTE_TYPES = {
+      id:                   Field::String,
       name:                 Field::String,
       state:                Field::String,
       kind:                 Field::String,
@@ -32,14 +33,19 @@ require "administrate/base_dashboard"
     # By default, it's limited to four items to reduce clutter on index pages.
     # Feel free to add, remove, or rearrange items.
     COLLECTION_ATTRIBUTES = %i[
+    id
     name
+    customer
     state
     kind
+    traces
+    transactions
     ].freeze
 
     # SHOW_PAGE_ATTRIBUTES
     # an array of attributes that will be displayed on the model's show page.
     SHOW_PAGE_ATTRIBUTES = %i[
+    id
     name
     state
     kind

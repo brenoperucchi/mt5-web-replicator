@@ -7,18 +7,32 @@ module Fields
 		include SentientStore
 
 		def scoped
-		  options.key?(:scoped) ? options[:scoped] : :all
+		  options.key?(:scoped) ? options[:scoped] : nil
+		end
+
+		def associated_resource_options(current_user =nil)
+		  candidate_resources(current_user).map do |resource|
+		    [display_candidate_resource(resource), resource.send(primary_key)]
+		  end
 		end
 
 		private 
 
-		def candidate_resources
-			if resource.respond_to?(:store)
-				resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-			else
-				# scope = options[:scope] ? options[:scope].call : current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-				resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-		  end
+		def candidate_resources(current_user=nil)
+			if current_user
+				if current_user.respond_to?(:store)
+					collection = current_user.store.send(associated_class.name.pluralize.downcase.to_sym)
+					collection = collection.send(scoped) if scoped
+					collection
+				else
+					# scope = options[:scope] ? options[:scope].call : current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+					if resource.respond_to?(associated_class.name.downcase.to_sym)
+						resource.send(associated_class.name.downcase.to_sym).send(scoped)
+					else					
+						resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+					end
+			  end
+			end
 
 		  # order = options.delete(:order)
 		  # order ? scope.reorder(order) : scope

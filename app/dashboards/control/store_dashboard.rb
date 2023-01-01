@@ -13,6 +13,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     state:         Field::String,
     plan:                   Field::BelongsTo,
     plan_items:             Field::HasMany,
+    language:        DisableTextField.with_options(value: 'pt-BR'),
     volume_default:         Field::String,
     telegram_bot_chat_id:   Field::String,
     telegram_bot_status:    Field::String,
@@ -45,6 +46,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   name
   state
   plan
+  language
   tag_list
   volume_default
   stripe_api_secret
@@ -59,6 +61,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   name
   state
   plan
+  language
   tag_list
   volume_default
   stripe_api_secret

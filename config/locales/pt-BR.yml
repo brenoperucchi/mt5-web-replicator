@@ -34,7 +34,7 @@ pt-BR:
         title: Regras importantes para o uso do sistema.
         resume_title: Leia atentamente todos os itens.
         rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
-        rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Master e Slave estão de acordo com os seus parametros."
+        rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
         rules3: "Use, teste e valide!"
 
       main:
@@ -80,6 +80,118 @@ pt-BR:
       submit: Salvar %{model}
       update: Atualizar %{model}
   activerecord:
+    attributes:
+      customer:
+        name: Nome
+        user_id: Usuário
+        store_id: Sistema
+        role: Regra Principal
+        role_control: Regra Cliente
+      account:
+        name: Numero
+        state: Situação
+        kind: Tipo de conta
+        customer_id: Cliente
+        meta_mode: MetaTrader Modo (demo/real)
+        meta_margin_mode: Meta Margem (netting/heading)
+        magics_accept: Magic Number Aceito
+        instrument_control: Controle de Ativo
+        traces: Portfólio
+        transactions: Transação
+      trace:
+        id: #ID
+        name: Nome
+        name_id: Magic Number
+        active: Ativo
+        kind: Tipo
+        take_profit_limit: Limite TakeProfit
+        accounts: Conta
+        messages: Mensagem
+        transactions: Transação
+        instruments: Ativos
+        created_at: criado
+        updated_at: atualizado
+      store:
+        name: Nome
+        state: Situação
+        plan_id: Plano
+        language: Idioma
+        tag_list: Restrição de Ativos
+        volume_default: Volume Default
+        stripe_api_secret: Stripe API (secret)
+        stripe_webhook_secret: Stripe Webhook (secret)
+      instrument:
+        id: #ID
+        account: Conta
+        symbol: Ativo
+        name: Ativo troca
+        volumes: Volumes
+        created_at: Criado
+        updated_at: Atualizado
+      transaction:
+        id: #ID
+        trace: Portfólio
+        order: Ordem
+        ticket: Ticket
+        state: Situação
+        profit: Ganho
+        ordertype: Tipo Ordem
+        symbol: Ativo
+        price_request: Preço Inicial
+        price_open: Preço Aberto
+        stop_loss: Stop Loss
+        take_profit: Take Profit
+        comment: Comentário
+        lot: Volume
+        magic_number: Magic Number
+        response: response
+        response_error: response_error
+        open_at: Abertura
+        created_at: Criado
+        updated_at: Atualizado
+        message: Mensagem
+        loggings: Logs
+        account: Contas
+        slaves: Slaves
+      invoice:
+        id: #ID 
+        name: Nome 
+        state: Situação
+        email: e-mail
+        payment_link: Link Pagamaneto 
+        stripe_product_id: Stripe Product ID
+        stripe_customer_id: Stripe Customer ID
+        stripe_invoice_id: Stripe Invoice ID
+        amount: valor 
+        items: items
+        invoiceable: Invoiceable
+        created_at: Criado
+        updated_at: Atualizado
+    models:
+      customer:
+        one: cliente
+        other: clientes
+      account:
+        one: conta
+        other: contas
+      trace:
+        one: portfólio
+        other: portfólios
+      store:
+        one: sistema
+        other: sistema
+      instrument:
+        one: ativo
+        other: ativos
+      transaction:
+        one: transação
+        other: transações
+      invoice:
+        one: fatura
+        other: Faturas
+      user:
+        one: Usuário
+        other: Usuários
     errors:
       messages:
         record_invalid: 'A validação falhou: %{errors}'

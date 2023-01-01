@@ -14,6 +14,8 @@ class StoreDashboard < Administrate::BaseDashboard
     name:   Field::String,
     state:  Field::String,
     url:    Field::String,
+    language:        Field::String,
+    # language:        DisableTextField.with_options(value: 'pt-BR'),
     # plan:          Field::String,
     volume_default:         Field::String,
     telegram_bot_chat_id:   Field::String,
@@ -55,6 +57,7 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   state
   url
+  language
   telegram_bot_chat_id
   telegram_bot_status
   telegram_bot_token
@@ -80,6 +83,7 @@ class StoreDashboard < Administrate::BaseDashboard
   name
   state
   url
+  language
   telegram_bot_chat_id
   telegram_bot_status
   telegram_bot_token

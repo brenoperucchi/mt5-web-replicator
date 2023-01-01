@@ -9,8 +9,8 @@ class SiteController < ApplicationController
 	end
 
 	def demo_request
+		@store = Store.new
 	end
-
 
 	def set_locale
 		locale = params[:locale]

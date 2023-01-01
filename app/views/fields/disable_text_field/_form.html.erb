@@ -5,7 +5,7 @@
   <div class="field-unit__field">
     <%- if field.options.key?(:default) and field.options[:default] == :current_store %>
       <%= f.text_field field.attribute, value: current_user.try(:store).try(:name), disabled:true %>
-      <%= f.hidden_field field.attribute, value: current_user.try(:store).try(:id) %>
+      <%= f.hidden_field field.attribute, value: current_user.try(:store).try(:id) %> 
     <% else %>
       <%= f.text_field field.attribute, value: field.options[:value], disabled:true %>
       <%= f.hidden_field field.attribute, value: field.options[:value] %>
@@ -13,7 +13,13 @@
   </div>
 <% else %>
   <div class="field-unit__field">
-    <%= f.text_field field.attribute, value: field.default_value, disabled:true %>
-    <%= f.hidden_field field.attribute, value: field.default_value %>
+    <% if field.default_value.blank? %>
+      <%= f.text_field field.attribute, value: field.options[:value], disabled:true %>
+      <%= f.hidden_field field.attribute, value: field.options[:value] %>
+
+    <% else %>
+      <%= f.text_field field.attribute, value: field.default_value, disabled:true %>
+      <%= f.hidden_field field.attribute, value: field.default_value %>
+    <% end %>
   </div>
 <% end %>

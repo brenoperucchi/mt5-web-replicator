@@ -42,7 +42,7 @@ module Control
     end
 
     def scoped_resource
-      current_store.send("#{resource_name}".pluralize)
+      current_user.store.send("#{resource_name}".pluralize)
     end
 
   end

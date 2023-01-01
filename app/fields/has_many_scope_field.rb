@@ -46,6 +46,20 @@ module Fields
       @order ||= Administrate::Order.new(sort_by, direction)
     end
 
+    def data
+      if options.key?(:associated)
+        if resource.respond_to?(:store)
+          @data ||= resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        else
+          current_store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        end
+      else
+        @data = resource.send(associated_class.name.pluralize.downcase.to_sym)
+        @data = @data.send(scoped) if @data.respond_to?(scoped)
+        @data
+      end
+    end
+
     private
 
     def includes

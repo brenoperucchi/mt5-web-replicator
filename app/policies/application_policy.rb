@@ -9,31 +9,35 @@ class ApplicationPolicy
   end
 
   def index?
-    true
-  end
-
-  def show?
-    true
-  end
-
-  def create?
-   @user.userable.role == "admin" or @user.userable.role_control == "admin" 
-  end
-
-  def new?
-    create?
-  end
-
-  def update?
-    @user.userable.role == "admin" or @user.userable.role_control == "admin" 
+    @user.userable.role == "admin" or @user.userable.role_control == "owner" or @user.userable.role_control == "admin"
   end
 
   def edit?
-    update?
+    index?
+  end
+
+  def update?
+    index?
+  end
+
+  def show?
+    index?
+  end
+  
+  def new?
+    index?
+  end
+
+  def create?
+    index?
   end
 
   def destroy?
-    false
+    if @user.userable.role == "admin" or @user.userable.role_control == "owner"
+      true
+    else
+      false
+    end
   end
 
   class Scope

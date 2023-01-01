@@ -10,12 +10,13 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    trace: Fields::BelongsToField.with_options(associated: :current_store),
-    account: Fields::BelongsToField.with_options(associated: :current_store),
-    id: Field::Number,
-    symbol: Field::String,
-    name: Field::String,
-    volumes: Field::String.with_options(searchable: false),
+    id:         Field::Number,
+    symbol:     Field::String,
+    name:       Field::String,
+    volumes:    Field::String.with_options(searchable: false),
+    store_id:   DisableTextField.with_options(default: :current_store),
+    trace:      Fields::BelongsToField.with_options(associated: :current_store),
+    account:    Fields::BelongsToField.with_options(associated: :current_store),
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -26,8 +27,8 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  account
   id
+  account
   symbol
   name
   ].freeze
@@ -35,8 +36,8 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  account
   id
+  account
   symbol
   name
   volumes
@@ -52,6 +53,7 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   symbol
   name
   volumes
+  store_id
   ].freeze
 
   # COLLECTION_FILTERS

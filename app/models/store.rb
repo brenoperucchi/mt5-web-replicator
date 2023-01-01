@@ -1,12 +1,14 @@
 require 'lib_enums'
 class Store < ApplicationRecord
-  ENUMS = %w(state)
+  ENUMS    = %w(state)
+  LANGUAGE = {portuguese:'pt-BR', english:'EN'}
   include LibEnums
 
   attr_reader :resource_system
+  attr_accessor :email
 
 
-  store :settings, accessors: [ :telegram_bot_status, :telegram_bot_token,
+  store :settings, accessors: [ :language, :telegram_bot_status, :telegram_bot_token,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, 
                                 :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id
                               ]
@@ -27,7 +29,7 @@ class Store < ApplicationRecord
   has_many :transactions, :through => :accounts, :source => :transactions, dependent: :destroy
   has_many :customers,    :through => :users, source: :userable, source_type: 'Customer'
   has_many :invoices, as: :invoiceable#, dependent: :destroy
-  has_many :instruments,  :through => :accounts, :source => :instruments
+  has_many :instruments, dependent: :destroy
 
   # has_many :plan_items#, dependent: :destroy
   has_many :plan_usages#, dependent: :destroy

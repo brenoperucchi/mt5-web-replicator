@@ -18,18 +18,19 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     telegram_api_id:     Field::String.with_options(searchable: false),
     telegram_api_hash:   Field::String.with_options(searchable: false),
     telegram_api_number: Field::String.with_options(searchable: false),
-    active:              Field::Boolean,
-    created_at:          Field::DateTime,
-    updated_at:          Field::DateTime,
-    store_id:            DisableAssociation.with_options(attribute: :store),
     meta_host:           Field::String,
+    response:            Field::String,
+    active:              Field::Boolean,
     kind:                DisableTextField.with_options(value:"copy"),
     # volumes:           Field::ActsAsTaggable,
-    response:            Field::String,
     messages:            Field::HasMany.with_options(direction: :desc, class_name:'Message::Message'),
+    store_id:            DisableAssociation.with_options(attribute: :store),
     take_profit_limit:   DisableTextField.with_options(value:2),
     instruments:         Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
+    orders:              Fields::HasManyScopeField.with_options(associated: :trace, scoped: :enable),
     accounts:            Fields::HasManyScopeField.with_options(associated: :current_store, scoped: :enable),
+    created_at:          Field::DateTime,
+    updated_at:          Field::DateTime,
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -42,6 +43,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   name_id
   active
   kind
+  accounts
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -55,6 +57,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   take_profit_limit
   accounts
   messages
+  orders
   instruments
   created_at
   updated_at

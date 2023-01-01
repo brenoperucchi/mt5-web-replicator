@@ -9,10 +9,17 @@ require 'base'
 module Admin
   class ApplicationController < Administrate::ApplicationController
     before_action :authenticate_user!
+    before_action :set_locale!
     include Administrate::Punditize
 
     # before_action :authenticate_admin
     # before_action :authenticate_user!
+
+
+    def set_locale!
+      locale = current_user.try(:store).language.blank? ? 'pt-BR' : current_user.try(:store).language
+      I18n.locale = locale
+    end
 
 
     def scoped_resource

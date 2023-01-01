@@ -9,28 +9,4 @@ class UserPolicy < ApplicationPolicy
     end
   end
 
-  def index?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
-  end
-
-  def edit?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
-  end
-
-  def update?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
-  end
-
-  def show?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
-  end
-  
-  def new?
-    @user.userable.role == "customer" or @user.userable.role == "admin" 
-  end
-
-  def destroy?
-     @user.userable.role == "admin" 
-  end
-
 end
