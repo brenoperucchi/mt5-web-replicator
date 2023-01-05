@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_12_30_183310) do
+ActiveRecord::Schema.define(version: 2023_01_05_062414) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -83,6 +83,16 @@ ActiveRecord::Schema.define(version: 2022_12_30_183310) do
     t.index ["user_id"], name: "index_clients_on_user_id"
   end
 
+  create_table "customer_plans", force: :cascade do |t|
+    t.string "name"
+    t.decimal "amount", precision: 10, scale: 2
+    t.bigint "store_id", null: false
+    t.text "settings"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["store_id"], name: "index_customer_plans_on_store_id"
+  end
+
   create_table "customers", force: :cascade do |t|
     t.string "name"
     t.datetime "active_at"
@@ -90,6 +100,8 @@ ActiveRecord::Schema.define(version: 2022_12_30_183310) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "settings"
     t.bigint "store_id"
+    t.integer "customer_plan_id"
+    t.index ["customer_plan_id"], name: "index_customers_on_customer_plan_id"
     t.index ["store_id"], name: "index_customers_on_store_id"
   end
 
@@ -501,6 +513,7 @@ ActiveRecord::Schema.define(version: 2022_12_30_183310) do
   add_foreign_key "accounts", "customers"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "customer_plans", "stores"
   add_foreign_key "customers", "stores"
   add_foreign_key "instruments", "accounts"
   add_foreign_key "instruments", "stores"

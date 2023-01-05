@@ -29,6 +29,7 @@ class Store < ApplicationRecord
   has_many :transactions, :through => :accounts, :source => :transactions, dependent: :destroy
   has_many :customers,    :through => :users, source: :userable, source_type: 'Customer'
   has_many :invoices, as: :invoiceable#, dependent: :destroy
+  has_many :customer_plans, dependent: :destroy
   has_many :instruments, dependent: :destroy
 
   # has_many :plan_items#, dependent: :destroy

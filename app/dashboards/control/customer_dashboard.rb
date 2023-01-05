@@ -15,6 +15,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     email:                MessagesField,
     password:             MessagesField,
     user:                 Field::HasOne,
+    customer_plan:        Field::BelongsTo,
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     store_id:             DisableTextField.with_options(default: :current_store),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
@@ -40,6 +41,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   name
   role_control
+  customer_plan
   store_id
   accounts
   invoices
@@ -54,6 +56,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   name
   user
   store_id
+  customer_plan
   role
   role_control
   accounts

@@ -25,12 +25,13 @@ Rails.application.routes.draw do
     mount API::Base, at: "/"
     namespace :control do
       resources :customers
+      resources :customer_plans
       resources :accounts
       resources :traces
-      resources :stores
       resources :instruments
       resources :transactions, except:[:edit, :new]
       resources :invoices, except:[:new]
+      resources :stores
     end
 
     namespace :admin do
@@ -49,6 +50,7 @@ Rails.application.routes.draw do
       end      
      
       resources :invoice_items
+      resources :customer_plans
     	resources :transaction_slaves
       resources :transactions
       resources :loggings

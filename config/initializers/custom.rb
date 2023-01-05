@@ -26,6 +26,19 @@ def round_to_5_minutes(t)
 end
 
 class String
+  def to_class
+      my_const = Kernel.const_get(self)
+      my_const.is_a?(Class) ? my_const : nil
+  rescue NameError 
+      nil
+  end
+
+  def is_a_defined_class?
+      true if self.to_class
+  rescue NameError
+      false
+  end
+
   def underscore
     self.gsub(/::/, '/').
     gsub(/([A-Z]+)([A-Z][a-z])/,'\1_\2').
