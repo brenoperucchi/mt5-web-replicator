@@ -4,7 +4,7 @@ end
 source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
-ruby '2.7.7'
+ruby '3.2.0'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 6.1.7'
@@ -24,7 +24,7 @@ gem 'jbuilder', '~> 2.7'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-gem 'bundler', '2.2.31'
+gem 'bundler'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
@@ -151,7 +151,6 @@ gem 'dotenv'
 gem 'receipts', '~> 1.1'
 
 gem 'next_rails'
-gem 'tailwindcss-rails', '~> 2.0'
 gem 'telegram-bot-ruby'
 gem 'sidekiq', '7.0.1'
 gem 'pundit'
