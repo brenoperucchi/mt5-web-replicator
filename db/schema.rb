@@ -193,15 +193,6 @@ ActiveRecord::Schema.define(version: 2023_01_05_062414) do
     t.index ["trace_id"], name: "index_messages_on_trace_id"
   end
 
-  create_table "morphics", force: :cascade do |t|
-    t.bigint "account_id"
-    t.bigint "transaction_id"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["account_id"], name: "index_morphics_on_account_id"
-    t.index ["transaction_id"], name: "index_morphics_on_transaction_id"
-  end
-
   create_table "orders", force: :cascade do |t|
     t.string "state"
     t.string "response"
@@ -498,7 +489,8 @@ ActiveRecord::Schema.define(version: 2023_01_05_062414) do
   end
 
   create_table "versions", force: :cascade do |t|
-    t.string "item_type", null: false
+    t.string "item_type"
+    t.string "{:null=>false}"
     t.bigint "item_id", null: false
     t.string "event", null: false
     t.string "whodunnit"

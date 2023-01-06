@@ -46,7 +46,7 @@ class Store < ApplicationRecord
   # has_many :plan_lines, through: :plans, source: :plan_lines, dependent: :destroy
 
   validates_presence_of :plan, :on => :create
-  validates_presence_of :name
+  validates_presence_of :name, :email, :url
 
   accepts_nested_attributes_for :customers, :users
 
@@ -67,9 +67,9 @@ class Store < ApplicationRecord
     end
   end
 
-  def email
-    users.first.email    
-  end
+  # def email
+  #   users.first.email    
+  # end
 
   def register_plan_update
     if plan_id_changed? or self.plan_usages.empty?

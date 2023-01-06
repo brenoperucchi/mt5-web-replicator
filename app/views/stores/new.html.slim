@@ -24,11 +24,11 @@ section.position-relative.pt-12.pt-lg-15.pb-9
           .position-relative.z-index-1
             = simple_form_for @store do |f|
               .mb-3
-                = f.input :name, label: 'Your name please', error: 'Username is mandatory, please specify one'
+                = f.input :name, label: 'Your name please'
               .mb-3
                 = f.input :email, placeholder: 'user@gmail.com'
               .mb-3
-                = f.input :url, label: 'Specify URL address', placeholder: 'signal', error: 'URL is mandatory, please specify one'
+                = f.input :url, label: 'Specify URL address', placeholder: 'signal'
               .mb-3
                 = f.select :plan_id, Plan.all.pluck(:name, :id),{}, {class: 'teamSize form-select'}
               / - f.object.customers.new if f.object.customers.blank?

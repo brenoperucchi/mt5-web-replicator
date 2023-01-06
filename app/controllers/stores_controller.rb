@@ -1,5 +1,5 @@
 class StoresController < ApplicationController
-	layout 'tailwind'
+	layout "saasley"
 
 	def new
 		@store = Store.new

@@ -1,0 +1,39 @@
+= render "layouts/saasley/navbar" 
+= content_for :header do 
+  css:
+    .flex-wrap.flex {display: none!important;}
+
+
+section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
+  .container.position-relative
+    .row.justify-content-center
+      .col-md-6.col-lg-5.col-xl-4
+        h2.display-6
+          | Welcome Back!
+        p.text-muted.mb-4
+          | Fill the details to continue...
+        / = render layout: "auth_layout", locals: { title: "Sign in" }  do
+        = simple_form_for(resource, as: resource_name, url: session_path(resource_name), data: { turbo: false }) do |f|
+
+          .mb-3
+            / = f.label :email, class: "form-label"
+            = f.input :email, autofocus: true, autocomplete: "email", class: "form-control"
+
+          .mb-3
+            / .d-flex.justify-content-between.align-items-center.mb-2
+              = f.label :password, class: "form-label"
+            = f.input :password, autocomplete: "current-password", class: "form-control pe-5", id:"login_password"
+
+          .mb-3
+            - if devise_mapping.rememberable?
+              = f.input :remember_me, class: 'checkbox_class', as: :boolean
+              '
+              / = f.label :remember_me
+          .d-grid.mb-3
+            = f.submit "Sign in", class: "btn btn-primary"
+      p.text-muted.small.mb-0
+          small
+            | Don't have an account yet? 
+          span.vr.mx-2.align-middle
+          a.text-decoration-underline[href="#!"]
+            | Create One
