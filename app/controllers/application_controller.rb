@@ -6,6 +6,7 @@ class ApplicationController < ActionController::Base
 	# include SentientStoreController
 	before_action :current_store
 	helper_method :current_store
+	before_action :set_current_user
 
   # protect_from_forgery with: :exception
 
@@ -23,5 +24,11 @@ class ApplicationController < ActionController::Base
 			new_user_session_path
 		end	  
 	end
+
+  private
+
+  def set_current_user
+    Current.user = current_user
+  end
 
 end

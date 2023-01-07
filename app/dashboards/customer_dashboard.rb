@@ -13,6 +13,7 @@ class CustomerDashboard < Administrate::BaseDashboard
     stripe_customer_id:   Field::String,
     stripe_product_id:    Field::String,
     role:                 Field::String,
+    role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     store:                Field::BelongsTo,
     user:                 Field::HasOne,
     customer_plan:        Field::BelongsTo,
@@ -31,6 +32,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   name
   email
   role
+  role_control
   accounts
   user
   ].freeze
@@ -41,6 +43,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   name
   email
   role
+  role_control
   stripe_customer_id
   stripe_product_id
   store
@@ -58,6 +61,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   role
+  role_control
   stripe_customer_id
   stripe_product_id
   store

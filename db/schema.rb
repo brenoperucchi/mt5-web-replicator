@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_01_05_062414) do
+ActiveRecord::Schema.define(version: 2023_01_06_192008) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -100,9 +100,9 @@ ActiveRecord::Schema.define(version: 2023_01_05_062414) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "settings"
     t.bigint "store_id"
-    t.integer "customer_plan_id"
+    t.bigint "customer_plan_id"
     t.index ["customer_plan_id"], name: "index_customers_on_customer_plan_id"
-    t.index ["store_id"], name: "index_customers_on_store_id"
+    t.index ["store_id"], name: "index_customers_store_id"
   end
 
   create_table "deals", force: :cascade do |t|
@@ -191,6 +191,15 @@ ActiveRecord::Schema.define(version: 2023_01_05_062414) do
     t.index ["ancestry"], name: "index_messages_on_ancestry"
     t.index ["store_id"], name: "index_messages_on_store_id"
     t.index ["trace_id"], name: "index_messages_on_trace_id"
+  end
+
+  create_table "morphics", force: :cascade do |t|
+    t.bigint "account_id"
+    t.bigint "transaction_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["account_id"], name: "index_morphics_on_account_id"
+    t.index ["transaction_id"], name: "index_morphics_on_transaction_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -489,8 +498,7 @@ ActiveRecord::Schema.define(version: 2023_01_05_062414) do
   end
 
   create_table "versions", force: :cascade do |t|
-    t.string "item_type"
-    t.string "{:null=>false}"
+    t.string "item_type", null: false
     t.bigint "item_id", null: false
     t.string "event", null: false
     t.string "whodunnit"
@@ -506,6 +514,7 @@ ActiveRecord::Schema.define(version: 2023_01_05_062414) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "customer_plans", "stores"
+  add_foreign_key "customers", "customer_plans"
   add_foreign_key "customers", "stores"
   add_foreign_key "instruments", "accounts"
   add_foreign_key "instruments", "stores"

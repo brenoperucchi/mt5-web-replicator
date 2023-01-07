@@ -14,8 +14,8 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     id: Field::Number,
     amount: Field::String.with_options(searchable: false),
     name: Field::String,
-    store: Field::BelongsTo,
-    customers: Field::HasMany,
+    store_id:            DisableAssociation.with_options(attribute: :store),
+    customers: Fields::HasManyScopeField.with_options(associated: :current_store),
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -39,7 +39,7 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     name
     amount
     customers
-    store
+    store_id
     created_at
     updated_at
   ].freeze
@@ -50,7 +50,7 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
     name
     amount
-    store
+    store_id
     customers
   ].freeze
 

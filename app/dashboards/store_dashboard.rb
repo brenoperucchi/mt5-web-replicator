@@ -14,6 +14,7 @@ class StoreDashboard < Administrate::BaseDashboard
     name:   Field::String,
     state:  Field::String,
     url:    Field::String,
+    email:        Field::String,
     language:        Field::String,
     # language:        DisableTextField.with_options(value: 'pt-BR'),
     # plan:          Field::String,
@@ -55,6 +56,7 @@ class StoreDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
+  email
   state
   url
   language
@@ -81,6 +83,7 @@ class StoreDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  email
   state
   url
   language

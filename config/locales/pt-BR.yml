@@ -81,10 +81,12 @@ pt-BR:
       update: Atualizar %{model}
   activerecord:
     attributes:
+
       customer:
         name: Nome
         user_id: Usuário
         store_id: Sistema
+        customer_plan_id: Plano
         role: Regra Principal
         role_control: Regra Cliente
       account:
@@ -168,6 +170,9 @@ pt-BR:
         created_at: Criado
         updated_at: Atualizado
     models:
+      customer_plan:
+        one: Plano
+        other: Planos
       customer:
         one: cliente
         other: clientes

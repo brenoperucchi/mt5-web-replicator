@@ -5,10 +5,10 @@ class Store < ApplicationRecord
   include LibEnums
 
   attr_reader :resource_system
-  attr_accessor :email
+  # attr_accessor :email
 
 
-  store :settings, accessors: [ :language, :telegram_bot_status, :telegram_bot_token,
+  store :settings, accessors: [ :email, :language, :telegram_bot_status, :telegram_bot_token,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, 
                                 :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id
                               ]
@@ -64,6 +64,14 @@ class Store < ApplicationRecord
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(active_at:nil) if usage_olders.present?
       resource.create_plan_usage(usageable:plan_item,  active_at: DateTime.now, handle:resource_handle, store: self)
+    end
+  end
+
+  def register_resource_plan_customer(resource, name)
+    if not resource.try(:deleted_at)
+      usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
+      usage_olders.update_all(disable_at:DateTime.now) if usage_olders.present?
+      resource.plan_usages.create(usageable:resource.customer_plan,  active_at: DateTime.now, handle:name, store: self)
     end
   end
 

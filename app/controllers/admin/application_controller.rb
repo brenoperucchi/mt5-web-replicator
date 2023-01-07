@@ -10,6 +10,8 @@ module Admin
   class ApplicationController < Administrate::ApplicationController
     before_action :authenticate_user!
     before_action :set_locale!
+    before_action :set_current_user
+
     include Administrate::Punditize
 
     # before_action :authenticate_admin
@@ -83,5 +85,11 @@ module Admin
     # def records_per_page
     #   params[:per_page] || 20
     # end
+    private
+
+    def set_current_user
+      Current.user = current_user
+    end
+    
   end
 end
