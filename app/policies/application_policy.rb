@@ -9,7 +9,8 @@ class ApplicationPolicy
   end
 
   def index?
-    @user.userable.role == "admin" or @user.userable.role_control == "owner" or @user.userable.role_control == "admin"
+    # @user.userable.role == "administrator" or @user.userable.role_control == "owner" or @user.userable.role_control == "admin"
+    true
   end
 
   def edit?
@@ -33,7 +34,7 @@ class ApplicationPolicy
   end
 
   def destroy?
-    if @user.userable.role == "admin" or @user.userable.role_control == "owner"
+    if @user.userable.role == "administrator" or @user.userable.role_control == "owner"
       true
     else
       false

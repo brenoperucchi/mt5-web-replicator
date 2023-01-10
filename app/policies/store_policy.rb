@@ -10,7 +10,7 @@ class StorePolicy < ApplicationPolicy
   end
 
   def destroy?
-    @user.userable.role == "admin"
+    @user.userable.role == "administrator"
   end
 
 end

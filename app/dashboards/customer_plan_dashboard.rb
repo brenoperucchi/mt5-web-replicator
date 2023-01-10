@@ -10,6 +10,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     amount: Field::String.with_options(searchable: false),
+    kind: CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
     name: Field::String,
     store: Field::BelongsTo,
     customers: Field::HasMany,
@@ -25,6 +26,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
     id
     name
+    kind
     amount
     customers
   ].freeze
@@ -35,6 +37,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     id
     name
     amount
+    kind
     customers
     store
     created_at
@@ -47,6 +50,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
     name
     amount
+    kind
     store
     customers
   ].freeze

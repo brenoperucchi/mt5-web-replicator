@@ -5,7 +5,11 @@ class CheckboxField < Administrate::Field::Base
   end
 
   def default_values
-    resource.class.const_get :CONTROL_ROLE
+    if options[:collection_key].is_a?(Array) 
+      options[:collection_key]
+    else resource.class.const_defined?(options[:collection_key])
+      resource.class.const_get options[:collection_key]
+    end
   end
 
 end

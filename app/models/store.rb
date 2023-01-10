@@ -28,7 +28,7 @@ class Store < ApplicationRecord
 
   has_many :transactions, :through => :accounts, :source => :transactions, dependent: :destroy
   has_many :customers,    :through => :users, source: :userable, source_type: 'Customer'
-  has_many :invoices, as: :invoiceable#, dependent: :destroy
+  has_many :invoices, dependent: :destroy#, as: :invoiceable#, dependent: :destroy
   has_many :customer_plans, dependent: :destroy
   has_many :instruments, dependent: :destroy
 
@@ -51,6 +51,10 @@ class Store < ApplicationRecord
   accepts_nested_attributes_for :customers, :users
 
   # scope :active, ->{ where.not(active_at:nil)}
+
+  def customer_plan
+    customer_plans.active.try(:first)
+  end
 
   def register_resource_plan(resource, name)
     # plan.verify_plan_has_items(self)
@@ -92,7 +96,6 @@ class Store < ApplicationRecord
     self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "Plan")
   end
 
-
   def telegram_bot_token
     if not telegram_bot_status == "enable" and not self.settings[:telegram_bot_token].present? and not telegram_bot_chat_id.present?
       self.update(telegram_bot_token: "token#{SecureRandom.hex(3)}")
@@ -100,11 +103,16 @@ class Store < ApplicationRecord
     self.settings[:telegram_bot_token]
   end
 
+  def create_customer_invoice
+    self.customers.user.each do |customer|
+      customer.create_invoice
+    end
+  end
+
   def delete_resource
     self.invoices.destroy_all
     PlanUsage.all.update_all(charged_at:nil)
   end
-
 
   def resource_system
     amount_month = calculate_plan_month

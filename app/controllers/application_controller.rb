@@ -13,10 +13,9 @@ class ApplicationController < ActionController::Base
 	# layout "application"
 
 	def after_sign_in_path_for(resource)
-		case resource.userable.try(:role).try(:downcase)
-		when "admin"
+		if resource.userable.try(:administrator?)
 			admin_customers_path
-		when "customer"
+		elsif resource.userable.try(:customer?)
 			control_accounts_path
 		else
 			flash[:notice] = "Error Login #001"

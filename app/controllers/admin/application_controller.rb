@@ -8,9 +8,10 @@ require 'base'
 # you're free to overwrite the RESTful controller actions.
 module Admin
   class ApplicationController < Administrate::ApplicationController
+    before_action :set_current_user
+    helper_method :set_current_user
     before_action :authenticate_user!
     before_action :set_locale!
-    before_action :set_current_user
 
     include Administrate::Punditize
 
@@ -38,8 +39,7 @@ module Admin
     end
 
 
-    def index
-      
+    def index      
       authorize_resource(resource_class)
       search_term = params[:search].to_s.strip
       resources = filter_resources(scoped_resource, search_term: search_term)
@@ -85,7 +85,6 @@ module Admin
     # def records_per_page
     #   params[:per_page] || 20
     # end
-    private
 
     def set_current_user
       Current.user = current_user

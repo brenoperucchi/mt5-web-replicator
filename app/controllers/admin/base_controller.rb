@@ -4,7 +4,7 @@ module Admin
   	before_action :restrict_not_admin!
 
   	def restrict_not_admin!
-  		if current_user.userable.role != "admin"
+  		if current_user.userable.role != "administrator"
   			redirect_to control_accounts_path, :alert => "Redirect to Control Admin"             
   		end	
   	end

@@ -1,19 +1,26 @@
-
 <div class="field-unit__label">
   <%= f.label field.attribute, for: "#{f.object_name}_#{field.attribute}" %>
 </div>
 <div class="field-unit__field">
-	<% if f.object.send(field.attribute) == "owner" %>
-		<%= f.text_field field.attribute, value: f.object.send(field.attribute), disabled:true %>
-		<%= f.hidden_field field.attribute, value: f.object.send(field.attribute) %>
-	<% else %>
-		<% field.default_values.each do |checkbox| %>
-			<% if action_name == "new" %>
-				<%= f.radio_button field.attribute, checkbox, checked: (checkbox == field.options[:default].to_s) %>
-			<% else %>
-				<%= f.radio_button field.attribute, checkbox, checked: (checkbox == f.object.send(field.attribute)) %>
+		<% if action_name == "edit" or action_name == "create" %>
+			<% if f.object.send(field.attribute) == "owner" %>
+				<%= f.text_field field.attribute, value: f.object.send(field.attribute), disabled:true %>
+				<%= f.hidden_field field.attribute, value: f.object.send(field.attribute) %>
+		  <% else %>
+				<% field.default_values.each do |checkbox| %>
+					<%= f.radio_button field.attribute, checkbox, checked: (checkbox.try(:to_sym) == f.object.send(field.attribute).try(:to_sym)) %>
+					<%= checkbox %>
+				<% end %>
 			<% end %>
-			<%= checkbox %>
-	  <% end %>
-  <% end %>
+		<% elsif action_name == "new" or action_name == "create" %>
+			<% field.default_values.each do |checkbox| %>
+				<%= f.radio_button field.attribute, checkbox, checked: (checkbox.try(:to_sym) == field.options[:default]) %>
+				<%= checkbox %>
+			<% end %>
+		<% else %>
+			<% field.default_values.each do |checkbox| %>
+				<%= f.radio_button field.attribute, checkbox, checked: (checkbox.try(:to_sym) == f.object.send(field.attribute).try(:to_sym)) %>
+				<%= checkbox %>
+			<% end %>
+  	<% end %>
 </div>

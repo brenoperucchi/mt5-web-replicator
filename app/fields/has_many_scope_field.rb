@@ -5,7 +5,6 @@ require "sentient_store.rb"
 
 module Fields
   class HasManyScopeField < Administrate::Field::HasMany
-    include SentientStore
 
     def to_s
       data
@@ -22,19 +21,6 @@ module Fields
       end
     end
 
-
-    def data
-      @data ||= candidate_resources
-      # if options.key?(:associated)
-      #   @data ||= current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(options[:scoped].to_sym)
-      # elsif options.key?(:scoped)
-      #   @data ||= resource.send(associated_class.name.pluralize.downcase.to_sym).send(options[:scoped].to_sym)
-      # else
-      #   @data ||= associated_class.none
-      # end
-
-    end
-
     def order_from_params(params)
       Administrate::Order.new(
         params.fetch(:order, sort_by),
@@ -46,12 +32,22 @@ module Fields
       @order ||= Administrate::Order.new(sort_by, direction)
     end
 
-    def data
+    # def resources(page = 1, order = self.order, current_user = nil)
+    #   resources = order.apply(data(current_user)).page(page).per(limit)
+    #   includes.any? ? resources.includes(*includes) : resources
+    # end
+
+
+    def data(current_user=nil)
       if options.key?(:associated)
         if resource.respond_to?(:store)
           @data ||= resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
         else
-          current_store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+          if resource.respond_to?(scoped)
+            resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+          else
+            resource.send(associated_class.name.pluralize.downcase.to_sym)
+          end
         end
       else
         @data = resource.send(associated_class.name.pluralize.downcase.to_sym)
@@ -71,7 +67,11 @@ module Fields
         if resource.respond_to?(:store)
           resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
         else
-          current_store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+          if resource.respond_to?(scoped)
+            resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+          else
+            resource.send(associated_class.name.pluralize.downcase.to_sym)
+          end
         end
         # current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
       elsif options.key?(:scoped)

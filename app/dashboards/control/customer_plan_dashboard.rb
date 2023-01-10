@@ -12,10 +12,12 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    amount: Field::String.with_options(searchable: false),
+    active: Field::Boolean,
     name: Field::String,
-    store_id:            DisableAssociation.with_options(attribute: :store),
+    amount: Field::String.with_options(searchable: false),
+    store_id: DisableAssociation.with_options(attribute: :store),
     customers: Fields::HasManyScopeField.with_options(associated: :current_store),
+    kind: CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
@@ -27,7 +29,9 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     id
+    active
     name
+    kind
     amount
     customers
   ].freeze
@@ -36,7 +40,9 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
     id
+    active
     name
+    kind
     amount
     customers
     store_id
@@ -48,7 +54,9 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+    active
     name
+    kind
     amount
     store_id
     customers

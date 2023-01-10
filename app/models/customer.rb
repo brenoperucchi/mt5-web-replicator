@@ -2,13 +2,16 @@ class Customer < ApplicationRecord
 
   CONTROL_ROLE = %w(admin user)
 
-  store :settings, accessors: [:role_control, :role, :stripe_product_id, :stripe_customer_id]#, :email, :password]
+  store :settings, accessors: [:stripe_product_id, :stripe_customer_id]#, :email, :password]
+
+  enum role: {administrator:0, customer:1}
+  enum role_control: {owner:0, admin:1, user:2}
 
   before_update :register_plan_update
   after_create :register_plan_create
   
   belongs_to :store
-  belongs_to :customer_plan, optional:true
+  belongs_to :customer_plan, optional: true
   
   has_one  :user, as: :userable, validate: true, dependent: :destroy
   has_many :plan_usages, as: :resourceable, :dependent => :destroy
@@ -23,7 +26,8 @@ class Customer < ApplicationRecord
   accepts_nested_attributes_for :user
 
   validates_presence_of :name
-  validates_presence_of [:customer_plan, :role_control], :on => :create, :if => proc { |obj| obj.role == "customer" }
+  validates :role_control, inclusion:["user", "admin"], :if => proc { |obj| obj.customer? }
+  # validates_presence_of [:customer_plan, :role_control], :if => proc { |obj| obj.customer? and obj.owner? }
 
   def register_plan_update
     if customer_plan_id_changed? or self.plan_usages.empty?
@@ -39,12 +43,11 @@ class Customer < ApplicationRecord
   def create_invoice(name = nil)
     name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
     invoice = invoices.find_or_create_by(name: name, store:store)
-    invoice.items.find_or_create_by(name: :monthly_payment) do |item|
-       item.amount = store.plan_value
-    end
-    if store.plan_percent.present?
+    if customer_plan.try(:fixed?)
+      invoice.items.find_or_create_by(name: :customer_monthly_payment, amount: customer_plan.amount)
+    else
       amount = self.accounts.slave.sum(&:balance_month)
-      amount_total = (amount.to_f * (store.plan_percent.to_f / 100))
+      amount_total = (amount.to_f * (customer_plan.try(:amount).to_f / 100))
       
       description = "Invoice #{name}\r\n\n"
       self.accounts.slave.map do |account|
@@ -54,7 +57,7 @@ class Customer < ApplicationRecord
       end
 
       description << "Slaves closed count: #{self.accounts.slave.sum(&:balance_month_count)}\r\n"
-      description << "Amount:#{amount.to_f} * Plan Percent:#{store.plan_percent.to_f / 100} = #{amount_total}\r\n"
+      description << "Amount:#{amount.to_f} * Plan Percent:#{customer_plan.try(:amount).to_f / 100} = #{amount_total}\r\n"
       invoice.items.find_or_create_by(name: :profit_percent,  amount: amount_total, description: description) 
     end
 

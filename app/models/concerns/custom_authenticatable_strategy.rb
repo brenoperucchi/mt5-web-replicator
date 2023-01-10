@@ -30,8 +30,8 @@ class CustomAuthenticatableStrategy < Devise::Strategies::Authenticatable
     # exist in the database if the password hashing algorithm is not called.
     mapping.to.new.password = password if !hashed && Devise.paranoid
     unless resource
-      binding.pry
-      # Devise.paranoid ? fail(:invalid) : fail(:not_found_in_database)
+      # binding.pry
+      Devise.paranoid ? fail(:invalid) : fail(:not_found_in_database)
     end
   end
 

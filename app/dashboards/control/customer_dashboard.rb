@@ -9,13 +9,11 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
-    # email:                DisableTextField,
-    role:                 DisableTextField.with_options(value:"customer"),
-    # role_control:         Field::String,
     email:                MessagesField,
     password:             MessagesField,
     user:                 Field::HasOne,
     customer_plan:        Field::BelongsTo,
+    role:                 DisableTextField.with_options(value:"customer"),
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     store_id:             DisableTextField.with_options(default: :current_store),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
