@@ -329,6 +329,8 @@ GEM
     nio4r (2.5.8)
     nokogiri (1.13.10-x86_64-darwin)
       racc (~> 1.4)
+    nokogiri (1.13.10-x86_64-linux)
+      racc (~> 1.4)
     notiffany (0.1.3)
       nenv (~> 0.1)
       shellany (~> 0.0)
@@ -491,6 +493,7 @@ GEM
       activesupport (>= 5.2)
       sprockets (>= 3.0.0)
     sqlite3 (1.5.4-x86_64-darwin)
+    sqlite3 (1.5.4-x86_64-linux)
     sshkit (1.21.3)
       net-scp (>= 1.1.2)
       net-ssh (>= 2.8.0)
@@ -547,6 +550,7 @@ GEM
 
 PLATFORMS
   x86_64-darwin-19
+  x86_64-linux
 
 DEPENDENCIES
   acts-as-taggable-on (~> 7.0)
