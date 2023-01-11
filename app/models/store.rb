@@ -26,7 +26,7 @@ class Store < ApplicationRecord
   has_many :messages, :class_name => "Message", :foreign_key => "store_id"
   has_many :users, dependent: :destroy
 
-  has_many :transactions, :through => :accounts, :source => :transactions, dependent: :destroy
+  has_many :transactions,-> { distinct }, :through => :accounts, :source => :transactions, dependent: :destroy
   has_many :customers,    :through => :users, source: :userable, source_type: 'Customer'
   has_many :invoices, dependent: :destroy#, as: :invoiceable#, dependent: :destroy
   has_many :customer_plans, dependent: :destroy
