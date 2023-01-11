@@ -8,6 +8,7 @@ class Account < ApplicationRecord
   include LibEnums
   
   after_create :register_resource_plan
+  after_destroy :set_destroy
   # after_save :insert_instruments
 
   # default_scope { where(deleted_at: nil) }
@@ -40,14 +41,13 @@ class Account < ApplicationRecord
                            through: :orders, source: :slaves, dependent: :destroy
 
   validates_presence_of :name
-  validates_uniqueness_of :name, scope: :store_id
+  validates_uniqueness_of :name
 
   def register_resource_plan
     store.register_resource_plan(self, self.kind)
   end
 
-  def destroy
-    self.update(deleted_at: DateTime.now)
+  def set_destroy
     self.plan_usage.update(disable_at:DateTime.now)
   end
 
