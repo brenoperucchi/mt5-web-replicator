@@ -13,7 +13,7 @@ class Invoice < ApplicationRecord
 
   # belongs_to :ownerable, polymorphic: true
   belongs_to :store
-  belongs_to :invoiceable, polymorphic: true
+  belongs_to :invoiceable, polymorphic: true, optional:true
   has_many :items, :class_name => "InvoiceItem", :foreign_key => "invoice_id", dependent: :destroy
 
   accepts_nested_attributes_for :items, reject_if: :all_blank, allow_destroy: true
