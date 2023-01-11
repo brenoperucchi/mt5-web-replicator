@@ -37,7 +37,7 @@ class Customer < ApplicationRecord
 
   def register_plan_create
     plan = CustomerPlan.find_by(id:self.customer_plan_id)
-    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan")
+    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   end
 
   def create_invoice(name = nil)

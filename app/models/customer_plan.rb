@@ -8,7 +8,7 @@ class CustomerPlan < ApplicationRecord
 
   scope :active,  -> { where.not(active_at:nil) }
 
-  validates_presence_of [:name, :amount], :if => proc { |obj| Current.user.userable.role == "customer" }
+  validates_presence_of [:name, :amount], :if => proc { |obj| !Current.user.nil? and Current.user.userable.role == "customer" }
   validates_presence_of :active, :if => :validate_active_at
 
   accepts_nested_attributes_for :customers

@@ -2,12 +2,15 @@ FactoryBot.define do
   factory :customer do
     trait :admin do
       name { 'admin' }
-      role { 'admin' }
-    end
-    trait :client do
-      name { 'client' }
       role { 'customer' }
       role_control { 'admin' }
+      customer_plan_id { 1 }
+    end
+    trait :customer do
+      name { 'client' }
+      role { 'customer' }
+      role_control { 'user' }
+      customer_plan_id { 1 }
     end
   end
 end

@@ -5,8 +5,10 @@ RSpec.describe API::V1::APITransactionsCopy do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
     @trace = create(:trace, :copy, store: @store)
-    @admin = create(:customer, :admin, store:@store)
-    @customer = create(:customer, :client, store:@store)
+    @user_customer = create(:user, :customer, store: @store)
+    @user_admin = create(:user, :admin, store: @store)
+    @admin = create(:customer, :admin, store:@store, user:@user_admin)
+    @customer = create(:customer, :customer, store:@store, user:@user_customer)
     @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')
@@ -20,6 +22,7 @@ RSpec.describe API::V1::APITransactionsCopy do
     context 'POST' do
 
       it 'Hedging - Restrict Magic Number' do
+        Current.user = @user
         account = Account.find_by(name: 5634787)
         expect(account.orders.where(content_id:483857785).count).to be == 1
 
