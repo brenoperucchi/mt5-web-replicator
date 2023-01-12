@@ -28,7 +28,7 @@ class Account < ApplicationRecord
   
   has_one :plan_usage, as: :resourceable
 
-  has_many :permissions
+  has_many :permissions, dependent: :destroy
   has_many :traces,       through: :permissions#, source: :trace 
 
   has_many :instruments,                    dependent: :destroy
@@ -38,7 +38,7 @@ class Account < ApplicationRecord
   has_many :orders,       through: :balances, source: :order,         dependent: :destroy, autosave: true
   has_many :transactions, through: :orders,   source: :transactions,  dependent: :destroy
   has_many :slaves,       ->(account) { where("transaction_slaves.account_id = ?", account.id).distinct },
-                           through: :orders, source: :slaves, dependent: :destroy
+                           through: :orders, source: :slaves,         dependent: :destroy
 
   validates_presence_of :name
   validates_uniqueness_of :name
@@ -47,11 +47,12 @@ class Account < ApplicationRecord
     store.register_resource_plan(self, self.kind)
   end
 
-  def set_destroy
+  def soft_destroy
+    self.update(deleted_at: DateTime.now)
     self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
   end
 
-  def restore
+  def soft_restore
     self.update(deleted_at: nil)
   end
   

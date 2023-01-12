@@ -24,6 +24,15 @@ module Control
       end
     end
 
+    def destroy
+      sdsds
+      if requested_resource.soft_destroy
+        flash[:notice] = translate_with_resource("destroy.success")
+      else
+        flash[:error] = requested_resource.errors.full_messages.join("<br/>")
+      end
+      redirect_to after_resource_destroyed_path(requested_resource)
+    end
     private
 
     def user_not_authorized

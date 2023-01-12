@@ -1,0 +1,15 @@
+pg_basebackup -h 85.239.248.170 -p 5432 -U postgres -D /var/lib/pgsql/13/data -Fp -T /usr/local/var/pgsql-backup9 -P -v
+pg_basebackup -h 85.239.248.170 -p 5432 -U repuser -D /usr/local/var/pgsql-backup10 -P -v
+
+initdb -U postgres -D /usr/local/var/pgsql-backup99 --locale=en_US.UTF-8
+
+/usr/local/Cellar/postgresql@14/14.6/bin/pg_upgrade \
+ --old-datadir=/usr/local/var/pgsql-backup10/ \
+ --new-datadir=/usr/local/var/pgsql-backup100/  \
+ --old-bindir=/usr/local/Cellar/postgresql@13/13.9/bin  \
+ --new-bindir=/usr/local/Cellar/postgresql@14/14.6/bin  \
+ --old-port=5432 \
+ --new-port=5432 --username=postgres --socketdir=/private/tmp \
+ --old-options '-c config_file=/usr/local/var/pgsql-backup10/postgresql.conf' \
+ --new-options '-c config_file=/usr/local/var/pgsql-backup100/postgresql.conf' \
+ --check
