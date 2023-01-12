@@ -25,7 +25,6 @@ module Control
     end
 
     def destroy
-      sdsds
       if requested_resource.soft_destroy
         flash[:notice] = translate_with_resource("destroy.success")
       else
