@@ -48,7 +48,7 @@ class Account < ApplicationRecord
   end
 
   def set_destroy
-    self.plan_usage.update(disable_at:DateTime.now)
+    self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
   end
 
   def restore
