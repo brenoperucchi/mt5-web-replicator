@@ -47,9 +47,9 @@ module Control
     #   @dashboard ||= Control::AccountDashboard.new
     # end
 
-    # def scoped_resource
-    #   current_user.store.accounts
-    # end
+    def scoped_resource
+      current_user.store.accounts.not_deleted
+    end
 
   end
 end

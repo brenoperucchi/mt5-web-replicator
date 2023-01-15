@@ -56,7 +56,7 @@ class Store < ApplicationRecord
     customer_plans.active.try(:first)
   end
 
-  def register_resource_plan(resource, name)
+  def register_store_plan_usage(resource, name)
     # plan.verify_plan_has_items(self)
     resource_handle = name.capitalize
     plan_item = plan.plan_items.where(name: resource_handle).take
@@ -71,17 +71,13 @@ class Store < ApplicationRecord
     end
   end
 
-  def register_resource_plan_customer(resource, name)
+  def register_resource_plan_usage(resource, name)
     if not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(disable_at:DateTime.now) if usage_olders.present?
       resource.plan_usages.create(usageable:resource.customer_plan,  active_at: DateTime.now, handle:name, store: self)
     end
   end
-
-  # def email
-  #   users.first.email    
-  # end
 
   def register_plan_update
     if plan_id_changed? or self.plan_usages.empty?

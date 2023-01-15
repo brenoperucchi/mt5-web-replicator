@@ -6,14 +6,14 @@ class Account < ApplicationRecord
 
   include Balance::Base
   include LibEnums
+  include LibControl
   
-  after_create :register_resource_plan
-  after_destroy :set_destroy
+  # after_create :register_resource_plan
   # after_save :insert_instruments
 
   # default_scope { where(deleted_at: nil) }
 
-  scope :deleted,  -> { unscope(where: :deleted_at).where.not(deleted_at:nil) }
+  scope :not_deleted,  -> { where(deleted_at:nil) }
 
   enum state: {disable: 0, enable: 1}
   enum kind:  {slave: 0, copy: 1}
@@ -43,18 +43,18 @@ class Account < ApplicationRecord
   validates_presence_of :name
   validates_uniqueness_of :name
 
-  def register_resource_plan
-    store.register_resource_plan(self, self.kind)
-  end
+  # def register_resource_plan
+  #   store.register_resource_plan(self, self.kind)
+  # end
 
-  def soft_destroy
-    self.update(deleted_at: DateTime.now)
-    self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
-  end
+  # def soft_destroy
+  #   self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
+  #   self.update(deleted_at: DateTime.now)
+  # end
 
-  def soft_restore
-    self.update(deleted_at: nil)
-  end
+  # def soft_restore
+  #   self.update(deleted_at: nil)
+  # end
   
   def api_server_hostname(params)
     if params[:EnvironmentLocal] == "0"

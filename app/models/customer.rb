@@ -1,11 +1,17 @@
 class Customer < ApplicationRecord
 
   CONTROL_ROLE = %w(admin user)
+  ENUMS = %w(role role_control)
 
   store :settings, accessors: [:stripe_product_id, :stripe_customer_id]#, :email, :password]
 
   enum role: {administrator:0, customer:1}
   enum role_control: {owner:0, admin:1, user:2}
+  
+  include LibControl
+  include LibEnums
+
+  scope :not_deleted, -> { where(deleted_at:nil) }
 
   before_update :register_plan_update
   after_create :register_plan_create
@@ -14,7 +20,7 @@ class Customer < ApplicationRecord
   belongs_to :customer_plan, optional: true
   
   has_one  :user, as: :userable, validate: true, dependent: :destroy
-  has_many :plan_usages, as: :resourceable, :dependent => :destroy
+  has_one :plan_usage, as: :resourceable, :dependent => :destroy
   
   has_many :accounts, dependent: :nullify
   has_many :customer_plans, dependent: :nullify
@@ -30,14 +36,14 @@ class Customer < ApplicationRecord
   # validates_presence_of [:customer_plan, :role_control], :if => proc { |obj| obj.customer? and obj.owner? }
 
   def register_plan_update
-    if customer_plan_id_changed? or self.plan_usages.empty?
+    if customer_plan_id_changed? or self.plan_usage.empty?
       store.register_resource_plan_customer(self, self.class.name.capitalize) if Current.user.try(:userable).try(:role) == "customer"
     end
   end
 
   def register_plan_create
     plan = CustomerPlan.find_by(id:self.customer_plan_id)
-    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+    creating = self.create_plan_usage(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   end
 
   def create_invoice(name = nil)
