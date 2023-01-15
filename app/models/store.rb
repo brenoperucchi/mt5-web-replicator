@@ -137,27 +137,31 @@ class Store < ApplicationRecord
 
     usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|
-      create_invoice_item(invoice, usage, date_today)
+      amount = usage.usageable.amount
+      create_invoice_item(invoice, usage, date_today, amount)
     end
 
     %w(Trace Copy Slave Customer).each do |item|
-      plan_item = plan.plan_items.where(name: item, plan:self.plan)
+      # plan_item = plan.plan_items.find_by(name: item, plan:self.plan)
+      # amount = plan_item ? plan_item.amount : plan.amount_extra
       self.plan_usages.where(handle:item).each do |usage|
-        create_invoice_item(invoice, usage, date_today)      
+        amount = item == "Customer" ? usage.usageable.amount_extra : usage.usageable.amount
+        # amount = usage.usageable_type == item ? usage.usageable.amount_extra : usage.usageable.amount
+        create_invoice_item(invoice, usage, date_today, amount)      
       end
     end
   end
 
   private
   
-  def create_invoice_item(invoice, usage, date_today)
+  def create_invoice_item(invoice, usage, date_today, amount=nil)
     if usage.disable_at.present?
       return unless usage.active_at.to_date.month <= date_today.month and usage.active_at.to_date.year <= date_today.year
       if usage.disable_at
         return unless usage.disable_at.month >= date_today.month and usage.disable_at.year >= date_today.year 
       end
     end
-    if usage.calculate_usage(date_today)
+    if usage.calculate_usage(date_today, amount)
       invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount, description: usage.description) 
       usage.update(charged_at: date_today)
       invoice.balance_update

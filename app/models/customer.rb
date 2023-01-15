@@ -37,7 +37,7 @@ class Customer < ApplicationRecord
   # validates_presence_of [:customer_plan, :role_control], :if => proc { |obj| obj.customer? and obj.owner? }
 
   def register_plan_update
-    if customer_plan_id_changed? or self.plan_usage.empty?
+    if customer_plan_id_changed? or self.plan_usages.empty?
       store.register_resource_plan_customer(self, self.class.name.capitalize) if Current.user.try(:userable).try(:role) == "customer"
     end
   end

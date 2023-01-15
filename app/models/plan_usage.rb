@@ -6,11 +6,11 @@ class PlanUsage < ApplicationRecord
   belongs_to :store
 
 
-  def calculate_usage(date_today=nil)
+  def calculate_usage(date_today=nil, amount_use)
     changes = false
     # date_today ||= DateTime.now
     days_month = Time.days_in_month(date_today.month)
-    amount_use = usageable.amount
+    amount_use ||= usageable.amount
     month_seconds = days_month * 24 * 3600
 
     if self.disable_at.present?
