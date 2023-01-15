@@ -5,7 +5,7 @@ module LibControl
 		after_create :register_resource_plan
 
 		def soft_destroy
-		  self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
+		  self.plan_usages.where(disable_at:nil).update_all(disable_at:DateTime.now)
 		  self.update(deleted_at: DateTime.now)
 		end
 
@@ -15,11 +15,7 @@ module LibControl
 
 		def register_resource_plan
 			named = self.respond_to?(:kind) ? self.kind : self.class.name.capitalize
-
-			if self.is_a?(Store)
-		  	store.register_store_plan_usage(self, named)
-		  else
-		  	store.register_resource_plan_usage(self, named)
+	  	store.register_resources_usages(self, named)
 		end
 
 	end

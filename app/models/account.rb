@@ -26,7 +26,8 @@ class Account < ApplicationRecord
   belongs_to :store
   belongs_to :customer
   
-  has_one :plan_usage, as: :resourceable
+  # has_one  :plan_usage,  as: :resourceable
+  has_many :plan_usages, as: :resourceable
 
   has_many :permissions, dependent: :destroy
   has_many :traces,       through: :permissions#, source: :trace 

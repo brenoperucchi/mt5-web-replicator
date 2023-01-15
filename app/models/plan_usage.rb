@@ -33,8 +33,8 @@ class PlanUsage < ApplicationRecord
       changes = true
     end
     if changes
-      self.description = "#{usageable.class.name} ID ##{usageable.id} - #{self.resourceable.class.name} ##{self.resourceable.id} - PlanUsage ID ##{self.id}\r\n"
-      self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{self.proportional} - amount: #{amount_use} - seconds: #{usage_seconds}\r\n"
+      self.description = "#{usageable.class.name} ID ##{usageable.id} - #{self.resourceable_type} ##{self.resourceable_id} - PlanUsage ID ##{self.id}\r\n"
+      self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{self.proportional} - amount: #{self.amount} - seconds: #{usage_seconds}\r\n"
     end
     return changes
   end

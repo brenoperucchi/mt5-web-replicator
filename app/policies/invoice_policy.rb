@@ -7,7 +7,11 @@ class InvoicePolicy < ApplicationPolicy
     def resolve_admin
       scope.where(owner: user)
     end
+
   end
 
+  def invoice_send?
+    true
+  end
 
 end

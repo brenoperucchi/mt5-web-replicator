@@ -20,7 +20,8 @@ class Customer < ApplicationRecord
   belongs_to :customer_plan, optional: true
   
   has_one  :user, as: :userable, validate: true, dependent: :destroy
-  has_one :plan_usage, as: :resourceable, :dependent => :destroy
+  # has_one :plan_usage, as: :usageable, :dependent => :destroy
+  has_many :plan_usages, as: :resourceable
   
   has_many :accounts, dependent: :nullify
   has_many :customer_plans, dependent: :nullify
@@ -43,7 +44,7 @@ class Customer < ApplicationRecord
 
   def register_plan_create
     plan = CustomerPlan.find_by(id:self.customer_plan_id)
-    creating = self.create_plan_usage(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+    creating = self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   end
 
   def create_invoice(name = nil)

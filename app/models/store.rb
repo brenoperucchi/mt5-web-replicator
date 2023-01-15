@@ -56,28 +56,33 @@ class Store < ApplicationRecord
     customer_plans.active.try(:first)
   end
 
-  def register_store_plan_usage(resource, name)
+  def register_resources_usages(resource, name)
     # plan.verify_plan_has_items(self)
     resource_handle = name.capitalize
-    plan_item = plan.plan_items.where(name: resource_handle).take
+    usageable = plan.plan_items.where(name: resource_handle).take
+    usageable ||= plan
     klass = resource.class.name.classify.downcase.pluralize
     klass_count = self.send(klass).count
     
     # if self.plan_usages.where(usageable:resource).count < klass_count
-    if resource.plan_usage.nil? and not resource.try(:deleted_at)
+    if resource.plan_usages.blank? and not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(active_at:nil) if usage_olders.present?
-      resource.create_plan_usage(usageable:plan_item,  active_at: DateTime.now, handle:resource_handle, store: self)
+      resource.plan_usages.create(usageable:usageable,  active_at: DateTime.now, handle:resource_handle, store: self)
     end
   end
 
-  def register_resource_plan_usage(resource, name)
+  def register_customer_plan(resource, name)
     if not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(disable_at:DateTime.now) if usage_olders.present?
       resource.plan_usages.create(usageable:resource.customer_plan,  active_at: DateTime.now, handle:name, store: self)
     end
   end
+
+  # def email
+  #   users.first.email    
+  # end
 
   def register_plan_update
     if plan_id_changed? or self.plan_usages.empty?
@@ -130,14 +135,14 @@ class Store < ApplicationRecord
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
     invoice = self.invoices.find_or_create_by(name: invoice_name, store:self)
 
-    usages = self.plan_usages.where(usageable_type:'Plan')
+    usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|
       create_invoice_item(invoice, usage, date_today)
     end
 
-    %w(Trace Copy Slave).each do |item|
+    %w(Trace Copy Slave Customer).each do |item|
       plan_item = plan.plan_items.where(name: item, plan:self.plan)
-      self.plan_usages.where(handle:item, usageable_type: 'PlanItem').each do |usage|
+      self.plan_usages.where(handle:item).each do |usage|
         create_invoice_item(invoice, usage, date_today)      
       end
     end

@@ -25,6 +25,7 @@ RSpec.describe "PLanStore" do
         @store.create_invoice_month
         @invoice = @store.invoices.first
         expect(@invoice.name).to be == "1-2022-11"
+        binding.pry
         expect(@invoice.items.count).to be == 4
         expect(@invoice.amount.to_f).to be == 140.00
         travel_to Date.parse("2022-12-01")
@@ -58,7 +59,7 @@ RSpec.describe "PLanStore" do
       it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
         travel_to Date.parse("2022-11-17")
         freeze_time
-        @account2.destroy
+        @account2.soft_destroy
         travel_to Date.parse("2022-11-23")
         @account3 = create(:account, :slave3, store: @store, customer:@customer, meta_margin_mode: 'hedging')
         travel_to Date.parse("2022-11-30")
@@ -68,7 +69,7 @@ RSpec.describe "PLanStore" do
         expect(@invoice.amount.to_f).to be == 134.00
         travel_to Date.parse("2022-12-17")
         freeze_time
-        @account3.destroy
+        @account3.soft_destroy
         travel_to Date.parse("2022-12-31")
         @store.create_invoice_month
         @invoice = @store.invoices.last
@@ -91,7 +92,7 @@ RSpec.describe "PLanStore" do
         expect(@invoice.name).to be == "1-2022-12"
         expect(@invoice.items.count).to be == 5
         expect(@invoice.amount.to_f).to be == 156.45
-        @store.accounts.find(3).destroy
+        @store.accounts.find(3).soft_destroy
         travel_to Date.parse("2023-01-01")
         freeze_time
         @store.create_invoice_month

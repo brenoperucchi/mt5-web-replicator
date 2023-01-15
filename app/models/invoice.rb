@@ -4,7 +4,7 @@ class Invoice < ApplicationRecord
 
   include LibEnums
 
-  delegate :stripe_product_id, :stripe_customer_id, to: :invoiceable
+  delegate :stripe_product_id, :stripe_customer_id, to: :store
   delegate :email, to: :invoiceable, allow_nil: true
   
   enum state: {pending: 0, open:1, paid: 2, denied:3}
