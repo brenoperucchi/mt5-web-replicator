@@ -36,11 +36,10 @@ pt-BR:
         rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
         rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
         rules3: "Use, teste e valide!"
-
       main:
         app_name: Imentore Copy
         other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
-        other2: Tenha 10 dias para testar.
+        other2: 10 dias para testes.
         portfolio: Compartilhe dashboards com seus clientes.
         warning: Sistema em versão beta.
         navbar:
@@ -69,10 +68,20 @@ pt-BR:
         pricing:
           title: Nossos planos.
           sign_in: Assine
+          trace: "%{limit} Portfólio"
+          copy: "%{limit} Contas Copy"
+          slave: "%{limit} Contas Slaves"
+          charge: Cobrança automatica para clientes
+          telegram: "%{limit} Robo Telegram Bot - Alfred"
+          extra: "%{amount} R$ por recurso extra"
         management: 
           title: Gestão 
           resume: Tenha todas as informações do que acontece as ordens do Master e Slaves.
           resume2: 
+      session:
+        dont_have_account: "Ainda não tem uma conta?"
+        create_one: "Crie uma agora!"
+
     select:
       prompt: Por favor selecione
     submit:

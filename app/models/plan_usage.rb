@@ -8,9 +8,9 @@ class PlanUsage < ApplicationRecord
 
   def calculate_usage(date_today=nil, amount_use)
     changes = false
+    amount_use ||= usageable.amount
     # date_today ||= DateTime.now
     days_month = Time.days_in_month(date_today.month)
-    amount_use ||= usageable.amount
     month_seconds = days_month * 24 * 3600
 
     if self.disable_at.present?

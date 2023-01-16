@@ -14,6 +14,7 @@ class Users::SessionsController < Devise::SessionsController
   #   super
   # end
   def new
+    flash[:notice] = nil
     self.resource = resource_class.new(sign_in_params)
     # super
   end
@@ -25,20 +26,24 @@ class Users::SessionsController < Devise::SessionsController
   # end
   # POST /resource/sign_in
   def create
-    # binding.pry
     # self.resource = warden.authenticate!
-    self.resource = warden.authenticate!(auth_options)
     # self.resource = resource_class.new(sign_in_params)
-    # user = User.where(email: resource.email).take
+    self.resource = User.where(email: sign_in_params["email"]).take
     # resource.store = Store.first
-    # binding.pry
-    if user_signed_in?
-      sign_in(resource_name, resource)
+    if warden.authenticated?
+      sign_in(resource)
       set_flash_message!(:notice, :signed_in)
       # yield resource if block_given?
       # redirect_to admin_store_path, notice: I18n.t(:signed_in, scope: 'devise.sessions')
       respond_with resource, location: after_sign_in_path_for(resource)
     else
+      # "unauthenticated" indicates a login failure
+      if !resource
+        flash[:notice] = "*** Login Failure: bad email address given: #{sign_in_params["email"]}"
+      else
+        flash[:notice] = "*** Login Failure: password mismatch for: #{sign_in_params["email"]}"
+      end
+      self.resource ||= resource_class.new
       render :new
     end
 
@@ -47,7 +52,6 @@ class Users::SessionsController < Devise::SessionsController
     # # @resource.validate_off = true
     # # referer = stored_location_for(resource) || request.referer || root_path
     # # user = User.where(email: email , store: current_store).take
-    # binding.pry
     # if not @resource.valid?
     #   render :new
     # # elsif user.nil?

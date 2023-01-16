@@ -1,37 +1,51 @@
-# Files in the config/locales directory are used for internationalization
-# and are automatically loaded by Rails. If you want to use locales other
-# than English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t 'hello'
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t('hello') %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# The following keys must be escaped otherwise they will not be retrieved by
-# the default I18n backend:
-#
-# true, false, on, off, yes, no
-#
-# Instead, surround them with single quotes.
-#
-# en:
-#   'true': 'foo'
-#
-# To learn more, please read the Rails Internationalization guide
-# available at https://guides.rubyonrails.org/i18n.html.
 en:
   helpers:
     site:
-      title: Imentore Copy
+      signup_demo:
+        title: Regras importantes para o uso do sistema.
+        resume_title: Leia atentamente todos os itens.
+        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
+        rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
+        rules3: "Use, teste e valide!"
+      main:
+        app_name: Imentore Copy
+        other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
+        other2: 10 days for trial.
+        portfolio: Share dashboard with your customers.
+        warning: Beta version
+        navbar:
+          request_support: Give a try!
+          sign_in: Sign In
+        title:
+          main: Um software para gerenciar seu negócio.
+          imentore: imentore copy
+          pricing: preços
+          support: suporte
+          request_demo: Estamos em fase de testes, neste momento as serão selecionadas somente alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após período de teste o cliente deverá optar por um plano com 10% desconto na mensalidade no primeiro ano.
+        telegram: 
+          title: Telegram
+          resume: Conectando o nosso robo Alfred em seu grupo você terá acompanhamento das operações realizadas. 
+          resume2: Compartilhe as suas operações em seu grupo do Telegram com Alfred Bot
+          resume3: Alfred irá avisar quando uma ordem abrir, fechar ou mesmo modifações de operações.
+        payment:
+          title: Cobrança Automática
+          resume: O sistema cobrará dos clientes de forma automática.
+          resume2: A cobrança poderá ser por um plano com valor específico ou uma porcentagem do ganho do cliente.
+          resume3: A tecnologia da empresa STRIPE fornecerá diversos relatórios e está totalmente integrada em nosso sistema.
+        copy: 
+          resume1: O sistema copiará as entradas de um robo, sinais telegram, ou mesmo entradas de um Trader manual.  
+          resume2: Na entradas manuais, o cliente poderá continuar usando o seu sistema de trader favorito (Profit, Tryd, e demais), basta que a mesma conta tenha acesso o Metatrader 5
+          resume3: O sistema dará todas informações Log entradas tanto da conta COPY quanto das contas SLAVES.
+        pricing:
+          title: Nossos planos.
+          sign_in: Assine
+        management: 
+          title: Gestão 
+          resume: Tenha todas as informações do que acontece as ordens do Master e Slaves.
+          resume2: 
+      session:
+        dont_have_account: "Don't Have an account yet?"
+        create_one: "Create one"
     label:
       store:
         id: Id

@@ -80,7 +80,7 @@ RSpec.describe "PLanStore" do
   end
   describe "Plan 1 remove account and account and change month" do
     context 'POST' do
-      it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
+      it 'Account with Travel Date Forward' do 
         travel_to Date.parse("2022-12-01")
         freeze_time
         travel_to Date.parse("2022-12-15")

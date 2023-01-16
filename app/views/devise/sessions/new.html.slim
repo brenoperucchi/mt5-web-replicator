@@ -6,6 +6,11 @@
 
 section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
   .container.position-relative
+    - if flash[:notice].present?
+      .row.justify-content-center
+        .col-md-6.col-lg-5.col-xl-4
+        .alert.alert-danger[role="alert"]
+          = flash[:notice]
     .row.justify-content-center
       .col-md-6.col-lg-5.col-xl-4
         h2.display-6
@@ -13,7 +18,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
         p.text-muted.mb-4
           | Fill the details to continue...
         / = render layout: "auth_layout", locals: { title: "Sign in" }  do
-        = simple_form_for(resource, as: resource_name, url: session_path(resource_name), data: { turbo: false }) do |f|
+        = simple_form_for(resource, as: resource_name, url: session_path(resource_name),method: :post, data: { turbo: false }) do |f|
 
           .mb-3
             / = f.label :email, class: "form-label"
@@ -33,7 +38,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
             = f.submit "Sign in", class: "btn btn-primary"
       p.text-muted.small.mb-0
           small
-            | Don't have an account yet? 
+            = I18n.t :dont_have_account, scope: 'helpers.site.session'
           span.vr.mx-2.align-middle
           a.text-decoration-underline[href="#!"]
-            | Create One
+            = I18n.t :create_one, scope: 'helpers.site.session'

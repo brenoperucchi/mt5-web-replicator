@@ -25,7 +25,10 @@ module Signalforex
    	##API
    	config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
    	config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
-    config.autoload_paths += Dir[Rails.root.join('app', 'fields', '*')]
+    config.autoload_paths += Dir[Rails.root.join('lib')]
+    config.autoload_paths += Dir[Rails.root.join('app','fields')]
+
+    # /Users/brenoperucchi/Devs/signalforex/app/fields/has_many_scope_field.rb
    	config.middleware.insert_before 0, Rack::Cors do
    	  allow do
    	    origins '*'
