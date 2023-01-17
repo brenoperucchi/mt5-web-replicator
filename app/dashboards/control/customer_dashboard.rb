@@ -1,4 +1,5 @@
 require "administrate/base_dashboard"
+require_relative '../../fields/belongs_to_field.rb'
 
 class Control::CustomerDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
@@ -12,7 +13,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     email:                MessagesField,
     password:             MessagesField,
     user:                 Field::HasOne,
-    customer_plan:        Field::BelongsTo,
+    customer_plan:        Fields::BelongsToField.with_options(associated: :current_store, dashboard:'control'),
     role:                 DisableTextField.with_options(value:"customer"),
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     store_id:             DisableTextField.with_options(default: :current_store),
@@ -81,6 +82,6 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # end
 
    def display_resource(resource)
-    resource.name
+    resource.name.capitalize
   end
 end

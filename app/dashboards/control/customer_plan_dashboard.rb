@@ -77,7 +77,7 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # Overwrite this method to customize how customer plans are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(customer_plan)
-  #   "CustomerPlan ##{customer_plan.id}"
-  # end
+  def display_resource(customer_plan)
+    "CustomerPlan ##{customer_plan.name}"
+  end
 end

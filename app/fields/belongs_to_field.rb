@@ -21,7 +21,7 @@ module Fields
 		def candidate_resources(current_user=nil)
 			if current_user
 				if current_user.respond_to?(:store)
-					collection = current_user.store.send(associated_class.name.pluralize.downcase.to_sym)
+					collection = current_user.store.send(associated_class.name.to_underscore.pluralize.downcase.to_sym)
 					collection = collection.send(scoped) if scoped
 					collection
 				else
@@ -33,9 +33,22 @@ module Fields
 					end
 			  end
 			end
-
 		  # order = options.delete(:order)
 		  # order ? scope.reorder(order) : scope
+		end
+
+		def display_candidate_resource(resource)
+		  associated_dashboard.display_resource(resource)
+		end
+
+		def associated_dashboard
+			if options.key?(:dashboard) and options[:dashboard].try(:downcase) == "control"
+				if "Control::#{associated_class_name}Dashboard".is_a_defined_class?
+					return "Control::#{associated_class_name}Dashboard".constantize.new
+				end
+			end
+
+			super
 		end
 
 	end
