@@ -1,6 +1,8 @@
 class Plan < ApplicationRecord
   attr_accessor :active, :recurrent
 
+  store :settings, accessors:[:discount]
+
   has_many :stores
 
   has_many :plan_items, dependent: :destroy
@@ -34,6 +36,14 @@ class Plan < ApplicationRecord
 
   def active
     self.active_at.nil? ? false : true
+  end
+
+  def amount_discount
+    if self.discount.blank? or self.discount.nil?
+      self.amount
+    else
+      self.amount * (1-discount.to_f/100)
+    end
   end
 
 end

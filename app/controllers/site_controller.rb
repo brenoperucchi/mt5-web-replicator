@@ -9,7 +9,7 @@ class SiteController < ApplicationController
 	end
 
 	def demo_request
-		@store = Store.new
+		redirect_to new_store_path
 	end
 
 	def set_locale

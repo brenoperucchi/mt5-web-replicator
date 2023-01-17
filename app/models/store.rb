@@ -5,7 +5,7 @@ class Store < ApplicationRecord
   include LibEnums
 
   attr_reader :resource_system
-  # attr_accessor :email
+  attr_accessor :password
 
 
   store :settings, accessors: [ :email, :language, :telegram_bot_status, :telegram_bot_token,
@@ -33,7 +33,7 @@ class Store < ApplicationRecord
   has_many :instruments, dependent: :destroy
 
   # has_many :plan_items#, dependent: :destroy
-  has_many :plan_usages#, dependent: :destroy
+  has_many :plan_usages, dependent: :destroy
 
   # has_many :plan_items, dependent: :destroy
   # has_many :plans, -> { distinct }, through: :plan_items, source: :plan
@@ -47,6 +47,7 @@ class Store < ApplicationRecord
 
   validates_presence_of :plan, :on => :create
   validates_presence_of :name, :email, :url
+  validates_uniqueness_of :url
 
   accepts_nested_attributes_for :customers, :users
 
@@ -137,16 +138,16 @@ class Store < ApplicationRecord
 
     usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|
-      amount = usage.usageable.amount
-      create_invoice_item(invoice, usage, date_today, amount)
+      create_invoice_item(invoice, usage, date_today, usage.usageable.amount_discount)
     end
 
-    %w(Trace Copy Slave Customer).each do |item|
-      # plan_item = plan.plan_items.find_by(name: item, plan:self.plan)
-      # amount = plan_item ? plan_item.amount : plan.amount_extra
+    %w(Trace Copy Slave).each do |item|
       self.plan_usages.where(handle:item).each do |usage|
-        amount = item == "Customer" ? usage.usageable.amount_extra : usage.usageable.amount
-        # amount = usage.usageable_type == item ? usage.usageable.amount_extra : usage.usageable.amount
+        if usage.try(:usageable).try(:amount).nil? or usage.try(:usageable).try(:amount) == 0
+          amount = usage.usageable.plan.amount_extra
+        else
+          amount = usage.usageable.amount
+        end
         create_invoice_item(invoice, usage, date_today, amount)      
       end
     end

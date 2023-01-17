@@ -19,24 +19,30 @@ section.position-relative.pt-12.pt-lg-15.pb-9
           li.d-flex.mb-3.align-items-start
             span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
             = I18n.t :rules3, scope: 'helpers.site.signup_demo'
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules4, scope: 'helpers.site.signup_demo'
 
-        .card.border-0.rounded-4.shadow-lg.py-1.px-4
+        .card.border-0.rounded-4.shadow-lg.py-4.px-4
           .position-relative.z-index-1
             = simple_form_for @store do |f|
+              / .mb-3
+              /   = f.input :name, error: 'Username is mandatory, please specify one'
+              / .mb-3
+              /   = f.input :email, placeholder: 'user@gmail.com'
               .mb-3
-                = f.input :name, label: 'Your name please', error: 'Username is mandatory, please specify one'
+                = f.input :url, placeholder: 'store.imentore.com.br', error: 'URL is mandatory, please specify one'
               .mb-3
-                = f.input :email, placeholder: 'user@gmail.com'
-              .mb-3
-                = f.input :url, label: 'Specify URL address', placeholder: 'signal', error: 'URL is mandatory, please specify one'
-              .mb-3
+                = f.label :plan
                 = f.select :plan_id, Plan.all.pluck(:name, :id),{}, {class: 'teamSize form-select'}
-              / - f.object.customers.new if f.object.customers.blank?
-              / = f.simple_fields_for :customers do |ff| 
-              /   = ff.input :name, label: 'Your username please', error: 'Username is mandatory, please specify one'
-              /   - ff.object.build_user if ff.object.user.nil?
-              /   = ff.simple_fields_for :user do |fff| 
-              /     = fff.input :email, placeholder: 'user@domain.com'
+              .mb-3
+                - f.object.customers.new if f.object.customers.blank?
+                = f.simple_fields_for :customers do |ff| 
+                  = ff.input :name, label: 'Your username please', error: 'Username is mandatory, please specify one'
+                  - ff.object.build_user if ff.object.user.nil?
+                  = ff.simple_fields_for :user do |fff| 
+                    = fff.input :email, placeholder: 'user@domain.com'
+                    = fff.input :password
                 
               = f.button :submit, class: 'button btn btn-primary'
             / form

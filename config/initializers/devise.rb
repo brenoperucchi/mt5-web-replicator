@@ -318,29 +318,3 @@ Devise.setup do |config|
 
   end
 end
-
-Warden::Manager.before_failure do |env, opts|
-  email = env["action_dispatch.request.request_parameters"][:user] &&
-          env["action_dispatch.request.request_parameters"][:user][:email]
-  # unfortunately, the User object has been lost by the time 
-  # we get here; so we take a db hit because I care to see 
-  # if the email matched a user account in our system
-  user_exists = User.where(email: email).exists?
-  if opts[:message] == :unconfirmed
-    # this is a special case for me because I'm using :confirmable
-    # the login was correct, but the user hasn't confirmed their 
-    # email address yet
-    ::Rails.logger.info "*** Login Failure: unconfirmed account access: #{email}"
-  elsif opts[:action] == "unauthenticated"
-    # "unauthenticated" indicates a login failure
-    if !user_exists
-      # bad email:
-      # no user found by this email address
-      ::Rails.logger.info "*** Login Failure: bad email address given: #{email}"
-    else
-      # the user exists in the db, must have been a bad password
-      ::Rails.logger.info "*** Login Failure: email-password mismatch: #{email}"
-    end
-  end
-end
-

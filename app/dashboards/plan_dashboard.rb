@@ -12,7 +12,7 @@ class PlanDashboard < Administrate::BaseDashboard
     amount: Field::String.with_options(searchable: false),
     amount_extra: Field::String.with_options(searchable: false),
     name: Field::String,
-    settings: Field::Text,
+    discount: Field::String.with_options(searchable: false),
     stores: Field::HasMany,
     plan_items: Field::HasMany,
     active: Field::Boolean,
@@ -31,6 +31,7 @@ class PlanDashboard < Administrate::BaseDashboard
     name
     amount
     amount_extra
+    discount
     active
   ].freeze
 
@@ -41,6 +42,7 @@ class PlanDashboard < Administrate::BaseDashboard
     name
     amount
     amount_extra
+    discount
     active
     stores
     plan_items
@@ -56,6 +58,7 @@ class PlanDashboard < Administrate::BaseDashboard
     name
     amount
     amount_extra
+    discount
     stores
     active
     plan_items

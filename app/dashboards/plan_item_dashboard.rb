@@ -12,6 +12,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     name:       Field::String,
     amount:     Field::String.with_options(searchable: false),
     settings:   Field::Text,
+    limit:      Field::Number,
     active:     Field::Boolean,
     recurrent:  Field::Boolean,
     plan:       Field::BelongsTo,
@@ -42,6 +43,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     id
     name
     amount
+    limit
     plan
     stores
     active
@@ -59,6 +61,7 @@ class PlanItemDashboard < Administrate::BaseDashboard
     recurrent
     name
     amount
+    limit
     plan
     stores
   ].freeze

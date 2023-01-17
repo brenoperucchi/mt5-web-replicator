@@ -18,6 +18,60 @@ RSpec.describe "PLanStore" do
     @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')    
   end
 
+  describe "Plan - insert discount value" do
+    it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
+      travel_to Date.parse("2022-11-01")
+      @store.create_invoice_month
+      @invoice = @store.invoices.first
+      expect(Plan.first.amount_discount.to_f).to be == 50.0
+      expect(@invoice.name).to be == "1-2022-11"
+      expect(@invoice.items.count).to be == 4
+      expect(@invoice.amount.to_f).to be == 140.00
+      travel_to Date.parse("2022-12-01")
+      Plan.first.update(settings:{"discount":30})
+      expect(Plan.first.amount_discount.to_f).to be == 35.0
+      @store.create_invoice_month
+      @invoice = @store.invoices.find_by(name:"1-2022-12")
+      expect(@invoice.name).to be == "1-2022-12"
+      expect(@invoice.items.count).to be == 4
+      expect(@invoice.amount.to_f).to be == 125.00
+    end
+  end
+  describe "Plan Item without amount" do
+    it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
+      travel_to Date.parse("2022-11-01")
+      Plan.first.plan_items.update_all(amount:nil)
+      @store.create_invoice_month
+      @invoice = @store.invoices.first
+      expect(@invoice.name).to be == "1-2022-11"
+      expect(@invoice.items.count).to be == 4
+      expect(@invoice.amount.to_f).to be == 140.00
+      travel_to Date.parse("2022-12-01")
+      @store.create_invoice_month
+      @invoice = @store.invoices.find_by(name:"1-2022-12")
+      expect(@invoice.name).to be == "1-2022-12"
+      expect(@invoice.items.count).to be == 4
+      expect(@invoice.amount.to_f).to be == 140.00
+    end
+  end
+  describe "Plan Item amount change from plan amount_extra" do
+    it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
+      travel_to Date.parse("2022-11-01")
+      Plan.first.plan_items.update_all(amount:15)
+      @store.create_invoice_month
+      @invoice = @store.invoices.first
+      expect(@invoice.name).to be == "1-2022-11"
+      expect(@invoice.items.count).to be == 4
+      expect(@invoice.amount.to_f).to be == 95.00
+      @account3 = create(:account, :slave3, store: @store, customer:@customer, meta_margin_mode: 'hedging')    
+      travel_to Date.parse("2022-12-01")
+      @store.create_invoice_month
+      @invoice = @store.invoices.find_by(name:"1-2022-12")
+      expect(@invoice.name).to be == "1-2022-12"
+      expect(@invoice.items.count).to be == 5
+      expect(@invoice.amount.to_f).to be == 110.00
+    end
+  end
   describe "Plan 1" do
     context 'POST' do
       it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
@@ -25,14 +79,14 @@ RSpec.describe "PLanStore" do
         @store.create_invoice_month
         @invoice = @store.invoices.first
         expect(@invoice.name).to be == "1-2022-11"
-        expect(@invoice.items.count).to be == 6
-        expect(@invoice.amount.to_f).to be == 200.00
+        expect(@invoice.items.count).to be == 4
+        expect(@invoice.amount.to_f).to be == 140.00
         travel_to Date.parse("2022-12-01")
         @store.create_invoice_month
         @invoice = @store.invoices.find_by(name:"1-2022-12")
         expect(@invoice.name).to be == "1-2022-12"
-        expect(@invoice.items.count).to be == 6
-        expect(@invoice.amount.to_f).to be == 200.00
+        expect(@invoice.items.count).to be == 4
+        expect(@invoice.amount.to_f).to be == 140.00
 
 
       end
@@ -48,8 +102,8 @@ RSpec.describe "PLanStore" do
         @store.create_invoice_month
         @invoice = @store.invoices.first
         expect(@invoice.name).to be == "1-2022-12"
-        expect(@invoice.items.count).to be == 7
-        expect(@invoice.amount.to_f).to be == 227.42
+        expect(@invoice.items.count).to be == 5
+        expect(@invoice.amount.to_f).to be == 167.42
       end
     end
   end
@@ -64,8 +118,8 @@ RSpec.describe "PLanStore" do
         travel_to Date.parse("2022-11-30")
         @store.create_invoice_month
         @invoice = @store.invoices.find_by(name:"1-2022-11")
-        expect(@invoice.items.count).to be == 7
-        expect(@invoice.amount.to_f).to be == 194.00
+        expect(@invoice.items.count).to be == 5
+        expect(@invoice.amount.to_f).to be == 134.00
         travel_to Date.parse("2022-12-17")
         freeze_time
         @account3.soft_destroy
@@ -73,8 +127,8 @@ RSpec.describe "PLanStore" do
         @store.create_invoice_month
         @invoice = @store.invoices.last
         expect(@invoice.name).to be == "1-2022-12"
-        expect(@invoice.items.count).to be == 6
-        expect(@invoice.amount.to_f).to be == 185.48
+        expect(@invoice.items.count).to be == 4
+        expect(@invoice.amount.to_f).to be == 125.48
       end
     end
   end
@@ -89,16 +143,16 @@ RSpec.describe "PLanStore" do
         @store.create_invoice_month
         @invoice = @store.invoices.first
         expect(@invoice.name).to be == "1-2022-12"
-        expect(@invoice.items.count).to be == 7
-        expect(@invoice.amount.to_f).to be == 216.45
+        expect(@invoice.items.count).to be == 5
+        expect(@invoice.amount.to_f).to be == 156.45
         @store.accounts.find(3).soft_destroy
         travel_to Date.parse("2023-01-01")
         freeze_time
         @store.create_invoice_month
         @invoice = @store.invoices.find_by(name:"1-2023-01")
         expect(@invoice.name).to be == "1-2023-01"
-        expect(@invoice.items.count).to be == 6
-        expect(@invoice.amount.to_f).to be == 200.00
+        expect(@invoice.items.count).to be == 4
+        expect(@invoice.amount.to_f).to be == 140.00
       end
     end
   end
@@ -114,8 +168,8 @@ RSpec.describe "PLanStore" do
         @invoice = @store.invoices.first
 
         expect(@invoice.name).to be == "1-2022-12"
-        expect(@invoice.items.count).to be == 7
-        expect(@invoice.amount.to_f).to be == 216.45
+        expect(@invoice.items.count).to be == 5
+        expect(@invoice.amount.to_f).to be == 156.45
         @store.accounts.find(3).soft_destroy
         travel_to Date.parse("2023-01-01")
         freeze_time
@@ -123,8 +177,8 @@ RSpec.describe "PLanStore" do
         @store.create_invoice_month
         @invoice = @store.invoices.find_by(name:"1-2023-01")
         expect(@invoice.name).to be == "1-2023-01"
-        expect(@invoice.items.count).to be == 5
-        expect(@invoice.amount.to_f).to be == 170.00
+        expect(@invoice.items.count).to be == 4
+        expect(@invoice.amount.to_f).to be == 140.00
       end
     end
   end

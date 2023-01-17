@@ -19,7 +19,7 @@ class Customer < ApplicationRecord
   belongs_to :store
   belongs_to :customer_plan, optional: true
   
-  has_one  :user, as: :userable, validate: true, dependent: :destroy
+  has_one  :user, as: :userable, dependent: :destroy
   # has_one :plan_usage, as: :usageable, :dependent => :destroy
   has_many :plan_usages, as: :resourceable
   
@@ -33,7 +33,7 @@ class Customer < ApplicationRecord
   accepts_nested_attributes_for :user
 
   validates_presence_of :name
-  validates :role_control, inclusion:["user", "admin"], :if => proc { |obj| obj.customer? }
+  validates :role_control, inclusion:["user", "admin"], :if => proc { |obj| obj.customer? and not obj.owner? }
   # validates_presence_of [:customer_plan, :role_control], :if => proc { |obj| obj.customer? and obj.owner? }
 
   def register_plan_update
@@ -44,7 +44,7 @@ class Customer < ApplicationRecord
 
   def register_plan_create
     plan = CustomerPlan.find_by(id:self.customer_plan_id)
-    creating = self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   end
 
   def create_invoice(name = nil)
