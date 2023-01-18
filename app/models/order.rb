@@ -4,7 +4,7 @@ class Order < ApplicationRecord
 
   belongs_to :trace
   belongs_to :store
-  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id
+  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id, dependent: :destroy
   # belongs_to :metatrader, class_name: 'Message::Metatrader', foreign_key: :message_id
   belongs_to :account
 
@@ -14,7 +14,7 @@ class Order < ApplicationRecord
   has_many :slaves,       class_name: 'TransactionSlave', dependent: :destroy, foreign_key: :order_id
 
   has_many :balances, dependent: :destroy, autosave: true
-  has_many :accounts,                      through: :balances, source: :account, dependent: :destroy, autosave: true
+  has_many :accounts,                      through: :balances, source: :account, autosave: true
   # has_many :transactions, -> { distinct }, through: :balances, source: :master,  dependent: :destroy
   # has_many :slaves,       -> { distinct }, through: :balances, source: :slave,   dependent: :destroy
 
