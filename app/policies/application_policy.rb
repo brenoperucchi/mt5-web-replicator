@@ -34,11 +34,7 @@ class ApplicationPolicy
   end
 
   def destroy?
-    if @user.userable.role == "administrator" or @user.userable.role_control == "owner"
-      true
-    else
-      false
-    end
+    @user.userable.role == "administrator" or @user.userable.role_control == "owner"
   end
 
   class Scope

@@ -18,6 +18,9 @@ module Admin
     # before_action :authenticate_admin
     # before_action :authenticate_user!
 
+    def authenticate_user!
+      redirect_to user_session_path, notice: I18n.t(:must_be_logged, scope: 'helpers.core.app_controller') unless user_signed_in?
+    end
 
     def set_locale!
       locale = current_user.try(:store).language.blank? ? 'pt-BR' : current_user.try(:store).language

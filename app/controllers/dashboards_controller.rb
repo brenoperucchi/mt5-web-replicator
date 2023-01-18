@@ -30,17 +30,13 @@ class DashboardsController < ApplicationController
 				else
 					@traces = current_store.traces.active
 				end
-
-				# @traces = current_user.userable.store.traces.active
 			end
 		end
 	end
 
 	def show
-		# @trace = current_store.traces.find(params[:id])
 		@trace.search_date_begin = @date_begin
 		@trace.search_date_end = @date_end
-
 
 		respond_to do |wants|
 			wants.html do

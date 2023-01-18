@@ -145,7 +145,7 @@ class Transaction < ApplicationRecord
   def restrict_magic_number?
     unless self.account.magics_accept.blank?
       unless account.magics_accept.try(:split).try(:include?, magic_number)
-        loggings.create(content:"Account #{account.name} Magic Number Resstrict ##{magic_number}", changeset: versions.last.changeset, version:version, state: 'ERROR')
+        loggings.create(content:"Account #{account.name} Magic Number Restrict ##{magic_number}", changeset: versions.last.changeset, version:version, state: 'ERROR')
         self.erro!
       end
     end

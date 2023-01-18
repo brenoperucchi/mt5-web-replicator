@@ -1,12 +1,16 @@
 en:
   helpers:
+    core:
+      app_controller:
+        must_be_logged: 'Você deve estar logado'
     site:
       signup_demo:
         title: Regras importantes para o uso do sistema.
         resume_title: Leia atentamente todos os itens.
         rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
         rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
-        rules3: "Use, teste e valide!"
+        rules3: "Tenha sempre um grupo (telegram/whatsapp) com os seus clientes, pois caso aconteça algum problema na conexão servidor e cliente, você poderá informar sobre as informações de ordens fechadas ou abertas"
+        rules4: "Use, teste e valide!"
       main:
         app_name: Imentore Copy
         other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
@@ -39,6 +43,15 @@ en:
         pricing:
           title: Nossos planos.
           sign_in: Assine
+          trace: "%{limit} Portfólio"
+          copy: "%{limit} Contas Copy"
+          slave: "%{limit} Contas Slaves"
+          charge: Cobrança automatica para clientes
+          telegram: "%{limit} Robo Telegram Bot - Alfred"
+          extra: "%{amount} R$ por cada recurso extra"
+          announce1: "Todos os planos com %{value}% de desconto por limitado"
+          announce2: descontos válidos por 1 ano.
+          price: "%{value} "
         management: 
           title: Gestão 
           resume: Tenha todas as informações do que acontece as ordens do Master e Slaves.

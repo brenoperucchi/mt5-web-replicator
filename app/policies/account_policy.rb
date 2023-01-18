@@ -9,4 +9,8 @@ class AccountPolicy < ApplicationPolicy
     end
   end
 
+  def destroy?
+    @user.userable.role == "administrator"
+  end
+
 end

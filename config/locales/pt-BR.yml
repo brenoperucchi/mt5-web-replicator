@@ -1,35 +1,8 @@
 pt-BR:
-  administrate:
-    actions:
-      confirm: Você tem certeza?
-      destroy: Deletar
-      edit: Editar
-      edit_resource: Editar %{name}
-      show_resource: Visualizar %{name}
-      new_resource: Criar %{name}
-      back: Voltar
-    controller:
-      create:
-        success: "%{resource} foi criado com sucesso."
-      destroy:
-        success: "%{resource} foi deletado com sucesso."
-      update:
-        success: "%{resource} foi atualizado com sucesso."
-    fields:
-      has_many:
-        more: "Exibindo %{count} de %{total_count}"
-        none: Nenhum
-    form:
-      error: erro
-      errors: "%{pluralized_errors} impediram %{resource_name} de ser gravado:"
-    navigation:
-      back_to_app: Voltar ao site
-      dashboard: Dashboards
-    search:
-      clear: Limpar pesquisa
-      label: Pesquisa %{resource}
-
   helpers:
+    core:
+      app_controller:
+        must_be_logged: 'Você deve estar logado'
     site:
       signup_demo:
         title: Regras importantes para o uso do sistema.
@@ -425,3 +398,33 @@ pt-BR:
       long: "%d de %B de %Y, %H:%M"
       short: "%d de %B, %H:%M"
     pm: ''
+
+  administrate:
+    actions:
+      confirm: Você tem certeza?
+      destroy: Deletar
+      edit: Editar
+      edit_resource: Editar %{name}
+      show_resource: Visualizar %{name}
+      new_resource: Criar %{name}
+      back: Voltar
+    controller:
+      create:
+        success: "%{resource} foi criado com sucesso."
+      destroy:
+        success: "%{resource} foi deletado com sucesso."
+      update:
+        success: "%{resource} foi atualizado com sucesso."
+    fields:
+      has_many:
+        more: "Exibindo %{count} de %{total_count}"
+        none: Nenhum
+    form:
+      error: erro
+      errors: "%{pluralized_errors} impediram %{resource_name} de ser gravado:"
+    navigation:
+      back_to_app: Voltar ao site
+      dashboard: Dashboards
+    search:
+      clear: Limpar pesquisa
+      label: Pesquisa %{resource}

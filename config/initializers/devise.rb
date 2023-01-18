@@ -314,7 +314,7 @@ Devise.setup do |config|
   config.warden do |manager|
     # manager.strategies.add(:custom_authenticatable, CustomAuthenticatableStrategy)
     # manager.default_strategies(:scope => :user).unshift :custom_authenticatable
-    manager.failure_app = DeviseCustomFailure
+    # manager.failure_app = DeviseCustomFailure
 
   end
 end
