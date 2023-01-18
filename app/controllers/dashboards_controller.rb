@@ -3,6 +3,7 @@ class DashboardsController < ApplicationController
 	before_action :filter_date
 	before_action :set_trace, 	only:[:show]
 	before_action :set_account, only:[:account]
+	# before_action :authenticate_user
 	# layout 'stisla'
   layout 'mintone'
 
@@ -20,7 +21,12 @@ class DashboardsController < ApplicationController
 				# @executed = Store.first.transactions.executed
 				# @executed = current_user.userable.store.transactions.executed
 				if current_store.nil? or current_store == Store.first 
-					@traces = Trace.all.active
+					if user_signed_in? and current_user.userable.administrator?
+						@traces = Trace.all.active
+					else
+						flash[:notice] = 'do_you_must_be_login'
+						redirect_to user_session_path
+					end
 				else
 					@traces = current_store.traces.active
 				end

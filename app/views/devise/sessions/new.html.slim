@@ -22,7 +22,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
 
           .mb-3
             / = f.label :email, class: "form-label"
-            = f.input :email, autofocus: true, autocomplete: "email", class: "form-control"
+            = f.input :email, autofocus: true, autocomplete: "email", input_html:{class: "form-control", value:params[:email]}
 
           .mb-3
             / .d-flex.justify-content-between.align-items-center.mb-2

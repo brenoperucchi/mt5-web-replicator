@@ -47,7 +47,6 @@ module Fields
 					return "Control::#{associated_class_name}Dashboard".constantize.new
 				end
 			end
-
 			super
 		end
 

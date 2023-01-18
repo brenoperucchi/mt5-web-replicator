@@ -14,7 +14,7 @@ class Users::SessionsController < Devise::SessionsController
   #   super
   # end
   def new
-    flash[:notice] = nil
+
     self.resource = resource_class.new(sign_in_params)
     # super
   end
@@ -38,7 +38,8 @@ class Users::SessionsController < Devise::SessionsController
         flash[:notice] = "*** Login Failure: password mismatch for: #{sign_in_params["email"]}"
       end
       self.resource ||= resource_class.new
-      render :new
+      # render :new
+      redirect_to user_session_url(email: sign_in_params["email"])
     end
   end
 

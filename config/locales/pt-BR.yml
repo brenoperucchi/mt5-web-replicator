@@ -24,6 +24,7 @@ pt-BR:
       errors: "%{pluralized_errors} impediram %{resource_name} de ser gravado:"
     navigation:
       back_to_app: Voltar ao site
+      dashboard: Dashboards
     search:
       clear: Limpar pesquisa
       label: Pesquisa %{resource}

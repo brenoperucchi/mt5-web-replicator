@@ -12,7 +12,6 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    active: Field::Boolean,
     name: Field::String,
     amount: Field::String.with_options(searchable: false),
     store_id: DisableAssociation.with_options(attribute: :store),
@@ -29,7 +28,6 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     id
-    active
     name
     kind
     amount
@@ -40,7 +38,6 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
     id
-    active
     name
     kind
     amount
@@ -54,7 +51,6 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-    active
     name
     kind
     amount
@@ -78,6 +74,6 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # across all pages of the admin dashboard.
   #
   def display_resource(customer_plan)
-    "CustomerPlan ##{customer_plan.name}"
+    customer_plan.try(:name).try(:capitalize)
   end
 end

@@ -82,6 +82,10 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   # end
 
    def display_resource(resource)
-    resource.name.capitalize
+    if resource.respond_to?(:name)
+      resource.name.capitalize
+    else
+      "Customer ##{resource.id}"
+    end
   end
 end
