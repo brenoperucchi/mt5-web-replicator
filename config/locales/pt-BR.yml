@@ -1,8 +1,13 @@
 pt-BR:
   helpers:
-    core:
+    controller:
       app_controller:
-        must_be_logged: 'Você deve estar logado'
+        admin:
+          must_be_logged: 'Você deve estar logado'
+        after_sign_error: "Contacte o suporte - error #001."
+      session:
+        bad_login_email: "*** Email inválido: %{email}"
+        bad_login_password: "*** Senha incorreta para o email: %{email}"
     site:
       signup_demo:
         title: Regras importantes para o uso do sistema.
@@ -59,7 +64,8 @@ pt-BR:
       session:
         dont_have_account: "Ainda não tem uma conta?"
         create_one: "Crie uma agora!"
-
+        title1: Seja bem vindo!
+        title2: Preencha os dados para o acesso ao sistema
     select:
       prompt: Por favor selecione
     submit:
@@ -68,7 +74,15 @@ pt-BR:
       update: Atualizar %{model}
   activerecord:
     attributes:
-
+      customer_plan:
+        id: #ID
+        name: Nome
+        kind: Tipo
+        amount: Valor
+        customers: Clientes
+        store_id: Sistema
+        created_at: criado
+        updated_at: atualizado
       customer:
         name: Nome
         user_id: Usuário
@@ -186,6 +200,11 @@ pt-BR:
         one: Usuário
         other: Usuários
     errors:
+      models:
+        store:
+          attributes:
+            password:
+              invalid_password: inválido
       messages:
         record_invalid: 'A validação falhou: %{errors}'
         restrict_dependent_destroy:

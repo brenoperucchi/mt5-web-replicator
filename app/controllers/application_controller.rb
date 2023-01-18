@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
 		elsif resource.userable.try(:customer?)
 			control_accounts_path
 		else
-			flash[:notice] = "Error Login #001"
+			flash[:notice] = I18n.t(:after_sign_error, scope: 'helpers.controller.app_controller') unless user_signed_in? 
 			sign_out(resource)
 			new_user_session_path
 		end	  

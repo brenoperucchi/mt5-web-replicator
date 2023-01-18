@@ -32,28 +32,17 @@ module Fields
       @order ||= Administrate::Order.new(sort_by, direction)
     end
 
-    # def resources(page = 1, order = self.order, current_user = nil)
-    #   resources = order.apply(data(current_user)).page(page).per(limit)
-    #   includes.any? ? resources.includes(*includes) : resources
-    # end
+
+    def resources(page = 1, order = self.order)
+      resources = order.apply(data).page(page).per(limit)
+      includes.any? ? resources.includes(*includes) : resources
+    end
 
 
     def data(current_user=nil)
-      if options.key?(:associated)
-        if resource.respond_to?(:store)
-          @data ||= resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-        else
-          if resource.respond_to?(scoped)
-            resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-          else
-            resource.send(associated_class.name.pluralize.downcase.to_sym)
-          end
-        end
-      else
-        @data = resource.send(associated_class.name.pluralize.downcase.to_sym)
-        @data = @data.send(scoped) if @data.respond_to?(scoped)
-        @data
-      end
+      data = resource.send(attribute.to_s.pluralize)
+      data = data.send(scoped) if options.key?(:scoped) and data.respond_to?(scoped)
+      data
     end
 
     private
@@ -63,25 +52,24 @@ module Fields
     end
 
     def candidate_resources
-      if options.key?(:associated)
-        if resource.respond_to?(:store)
-          resource.store.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+      if options.key?(:associated) 
+        if resource.respond_to?(options[:associated])
+          data = resource.send(options[:associated]).send(attribute.to_s.pluralize).send(scoped)
         else
-          if resource.respond_to?(scoped)
-            resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-          else
-            resource.send(associated_class.name.pluralize.downcase.to_sym)
-          end
+          data = resource.send(attribute.to_s.pluralize)
         end
-        # current_store_field.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
-      elsif options.key?(:scoped)
-        resource.send(associated_class.name.pluralize.downcase.to_sym).send(scoped)
+        # current_store_field.send(attribute.to_s.pluralize).send(scoped)
       elsif options.key?(:includes)
         includes = options.fetch(:includes)
-        associated_class.includes(*includes).all
+        data = associated_class.includes(*includes).all
       else
-        associated_class.all
+        data = associated_class.all
       end
+      data = data.send(scoped) if options.key?(:scoped) and data.respond_to?(scoped)
+      order_options = options.key?(:sort_by) ? options[:sort_by].to_s : "id" 
+      order_options = options.key?(:direction) ? order_options + options[:direction].to_s : order_options
+      data = data.order(order_options) unless order_options.blank?
+      data 
     end
 
     def display_candidate_resource(resource)

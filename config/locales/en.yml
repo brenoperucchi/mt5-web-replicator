@@ -1,19 +1,24 @@
 en:
   helpers:
-    core:
+    controller:
       app_controller:
-        must_be_logged: 'Você deve estar logado'
+        admin:
+          must_be_logged: 'You must be logged'
+        after_sign_error: "Talk to support - error #001."
+      session:
+        bad_login_email: "Bad email address given: %{email}"
+        bad_login_password: "*** Bad email address given: %{email}"
     site:
       signup_demo:
-        title: Regras importantes para o uso do sistema.
-        resume_title: Leia atentamente todos os itens.
-        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
-        rules2: "Caso o seu uso seja a partir de um robo de auta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
-        rules3: "Tenha sempre um grupo (telegram/whatsapp) com os seus clientes, pois caso aconteça algum problema na conexão servidor e cliente, você poderá informar sobre as informações de ordens fechadas ou abertas"
-        rules4: "Use, teste e valide!"
+        title: Important rules for using the system.
+        resume_title: Read all items carefully.
+        rules1: "The system will initially allow operations on a demo account. Only after the trial period of 10 days of evaluation and with approval from our team will the system allow the use of a real account, so validate within this period."
+        rules2: "If using a high-frequency robot (scalper), confirm that the opening and closing times for operations between Copy and Slave are in accordance with your parameters."
+        rules3: "Always have a group (telegram/whatsapp) with your customers, because if there is a problem with the server and client connection, you will be able to inform them about information on closed or open orders"
+        rules4: "Use, test and validate!"
       main:
         app_name: Imentore Copy
-        other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
+        other1: Manage your signals, copy trades, or even turn your manual entry into automatic orders.
         other2: 10 days for trial.
         portfolio: Share dashboard with your customers.
         warning: Beta version
@@ -21,87 +26,190 @@ en:
           request_support: Give a try!
           sign_in: Sign In
         title:
-          main: Um software para gerenciar seu negócio.
-          imentore: imentore copy
-          pricing: preços
-          support: suporte
-          request_demo: Estamos em fase de testes, neste momento as serão selecionadas somente alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após período de teste o cliente deverá optar por um plano com 10% desconto na mensalidade no primeiro ano.
-        telegram: 
+          main: A software to manage your business.
+          Imentore: Imentore copy
+          pricing: prices
+          support: support
+          request_demo: We are in the testing phase, at this time only a few customers will be selected to test and evaluate our system with all the features. After the trial period, the customer must opt for a plan with a 10% discount on the monthly fee for the first year.
+        telegram:
           title: Telegram
-          resume: Conectando o nosso robo Alfred em seu grupo você terá acompanhamento das operações realizadas. 
-          resume2: Compartilhe as suas operações em seu grupo do Telegram com Alfred Bot
-          resume3: Alfred irá avisar quando uma ordem abrir, fechar ou mesmo modifações de operações.
+          summarizes: By connecting our robot Alfred to your group, you will be able to monitor the operations carried out.
+          resume2: Share your operations in your Telegram group with Alfred Bot
+          resume3: Alfred will notify when an order opens, closes or even changes to operations.
         payment:
-          title: Cobrança Automática
-          resume: O sistema cobrará dos clientes de forma automática.
-          resume2: A cobrança poderá ser por um plano com valor específico ou uma porcentagem do ganho do cliente.
-          resume3: A tecnologia da empresa STRIPE fornecerá diversos relatórios e está totalmente integrada em nosso sistema.
-        copy: 
-          resume1: O sistema copiará as entradas de um robo, sinais telegram, ou mesmo entradas de um Trader manual.  
-          resume2: Na entradas manuais, o cliente poderá continuar usando o seu sistema de trader favorito (Profit, Tryd, e demais), basta que a mesma conta tenha acesso o Metatrader 5
-          resume3: O sistema dará todas informações Log entradas tanto da conta COPY quanto das contas SLAVES.
+          title: Automatic Billing
+          summarizes: The system will charge customers automatically.
+          resume2: The charge may be for a plan with a specific amount or a percentage of the customer's earnings.
+          resume3: The company's technology STRIPE will provide several reports and is fully integrated into our system.
+        copy:
+          resume1: The system will copy the inputs of a robot, telegram signals, or even inputs of a Manual Trader.
+          resume2: In manual entries, the client will be able to continue using his favorite trader system (Profit, Tryd, and others), just that the same account has access to Metatrader 5
+          resume3: The system will provide all log information entered both from the COPY account and from the SLAVES accounts.
         pricing:
-          title: Nossos planos.
-          sign_in: Assine
-          trace: "%{limit} Portfólio"
-          copy: "%{limit} Contas Copy"
-          slave: "%{limit} Contas Slaves"
-          charge: Cobrança automatica para clientes
+          title: Our plans.
+          sign_in: sign
+          trace: "%{limit} Portfolio"
+          copy: "%{limit} Copy Accounts"
+          slave: "%{limit} Slave Accounts"
+          charge: Automatic billing for customers
           telegram: "%{limit} Robo Telegram Bot - Alfred"
-          extra: "%{amount} R$ por cada recurso extra"
-          announce1: "Todos os planos com %{value}% de desconto por limitado"
-          announce2: descontos válidos por 1 ano.
+          extra: "%{amount} R$ for each extra resource"
+          announce1: "All plans %{value}% off for a limited time"
+          announce2: discounts valid for 1 year.
           price: "%{value} "
-        management: 
-          title: Gestão 
-          resume: Tenha todas as informações do que acontece as ordens do Master e Slaves.
-          resume2: 
+        management:
+          title: Management
+          resume: Have all the information of what happens to the orders of the Master and Slaves.
+          resume2:
       session:
         dont_have_account: "Don't Have an account yet?"
         create_one: "Create one"
-    label:
-      store:
-        id: Id
-        name: Name
-        tag_list: Restrict 
+        title1: Welcome Back!
+        title2: Fill the details to continue...
     select:
       prompt: Please select
     submit:
       create: Create %{model}
       submit: Save %{model}
       update: Update %{model}
-  administrate:
-    sidebar:
-      # language: "Español"
   activerecord:
+    attributes:
+      customer_plan:
+        id: #ID
+        name: name
+        kind: kind
+        amount: amount
+        customers: customers
+        store_id: System
+        created_at: created_at
+        updated_at: updated_at
+      customer:
+        name: name
+        user_id: User
+        store_id: System
+        customer_plan_id: Customer Plan
+        role: Role system
+        role_control: Customer
+      account:
+        name: Name
+        state: State
+        kind: Kind
+        customer_id: Customer
+        meta_mode: MetaTrader Mode (demo/real)
+        meta_margin_mode: Meta Margem (netting/heading)
+        magics_accept: Accept Magic Number 
+        instrument_control: Instrument control
+        traces: Portfolio
+        transactions: Transaction
+      trace:
+        id: #id
+        name: Name
+        name_id: Magic Number
+        active: active
+        kind: kind
+        take_profit_limit: Take Profit limit
+        accounts: accounts
+        messages: messages
+        transactions: transactions
+        instruments: instruments
+        created_at: created_at
+        updated_at: updated_at
+      store:
+        name: name
+        state: state
+        plan_id: Plan
+        url: Url address
+        language: language
+        tag_list: Instrument Restriction 
+        volume_default: Default Volume
+        stripe_api_secret: Stripe API Secret
+        stripe_webhook_secret: Stripe Webhook Secret
+      instrument:
+        id: #id
+        account: Account
+        symbol: Symbol
+        name: Symbol Change
+        volumes: Volumes
+        created_at: created_at
+        updated_at: updated_at
+      transaction:
+        id: #id
+        trace: Portfolio
+        order: Order
+        ticket: Ticket
+        state: State
+        profit: Profit
+        ordertype: Order type
+        symbol: Symbol
+        price_request: Request Price
+        price_open: Open Price
+        stop_loss: Stop loss
+        take_profit: Take profit
+        comment: comment
+        lot: lot
+        magic_number: magic_number
+        response: response
+        response_error: response_error
+        open_at: open_at
+        created_at: created_at
+        updated_at: updated_at
+        message: Message
+        loggings: Logs
+        account: Account
+        slaves: Slaves
+      invoice:
+        id: #id
+        name: Name
+        state: State
+        email: Email
+        payment_link: Payment link
+        stripe_product_id: Stripe Product Id
+        stripe_customer_id: Stripe Customer Id
+        stripe_invoice_id: Stripe Invoice Id
+        amount: Amount
+        items: Items
+        invoiceable: Invoiceable
+        created_at: created_at
+        updated_at: updated_at
+    models:
+      customer_plan:
+        one: Plan
+        other: Plans
+      customer:
+        one: customer
+        other: customers
+      account:
+        one: account
+        other: accounts
+      trace:
+        one: portfolio
+        other: portfolios
+      store:
+        one: system
+        other: system
+      instrument:
+        one: instrument
+        other: instruments
+      transaction:
+        one: transaction
+        other: transactions
+      invoice:
+        one: invoice
+        other: inovices
+      user:
+        one: user
+        other: users
     errors:
+      models:
+        store:
+          attributes:
+            password:
+              invalid_password: invalid
       messages:
         record_invalid: "Validation failed: %{errors}"
         restrict_dependent_destroy:
           has_one: "Cannot delete record because a dependent %{record} exists"
           has_many: "Cannot delete record because dependent %{record} exist"
-    models:
-      store:
-        one: "Store"
-        other: "stores"
-      product:
-        one: "Product"
-        other: "Products"
-      user:
-        one: "User"
-        other: "Users"
-      category:
-        one: "Category"
-        other: "Categories"
-    attributes:
-      trace:
-        name_id: "Magic Number of Portfolio"
-      client:
-        name: "Name"
-      store:
-        id: "id"
-        name: "Name"
-        tag_list: 'Restrict'
   date:
     abbr_day_names:
     - Sun

@@ -20,8 +20,8 @@ module Fields
 
 		def candidate_resources(current_user=nil)
 			if current_user
-				if current_user.respond_to?(:store)
-					collection = current_user.store.send(associated_class.name.to_underscore.pluralize.downcase.to_sym)
+				if options.key?(:associated) and current_user.respond_to?(options[:associated])
+					collection = current_user.send(options[:associated]).send(associated_class.name.to_underscore.pluralize.downcase.to_sym)
 					collection = collection.send(scoped) if scoped
 					collection
 				else

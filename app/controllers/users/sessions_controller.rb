@@ -33,9 +33,9 @@ class Users::SessionsController < Devise::SessionsController
       respond_with resource, location: after_sign_in_path_for(resource)
     else
       if !resource
-        flash[:notice] = "*** Login Failure: bad email address given: #{sign_in_params["email"]}"
+        flash[:notice] = I18n.t(:bad_login_email, scope: 'helpers.controller.session', email: sign_in_params["email"])
       else
-        flash[:notice] = "*** Login Failure: password mismatch for: #{sign_in_params["email"]}"
+        flash[:notice] = I18n.t(:bad_login_password, scope: 'helpers.controller.session', email: sign_in_params["email"])
       end
       self.resource ||= resource_class.new
       # render :new
