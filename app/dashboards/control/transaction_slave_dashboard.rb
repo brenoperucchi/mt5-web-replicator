@@ -47,7 +47,6 @@ module Control
     COLLECTION_ATTRIBUTES = %i[
     state
     ticket_slave
-    symbol
     price_open
     price_closed
     account

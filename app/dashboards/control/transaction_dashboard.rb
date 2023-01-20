@@ -45,7 +45,6 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   state
   ticket
-  symbol
   price_open
   price_closed
   account

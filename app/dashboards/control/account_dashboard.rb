@@ -48,8 +48,8 @@ require "administrate/base_dashboard"
     id
     name
     state
-    kind
     customer
+    kind
     meta_mode
     meta_margin_mode
     magics_accept

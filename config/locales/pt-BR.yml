@@ -91,9 +91,9 @@ pt-BR:
         role: Regra Principal
         role_control: Regra Cliente
       account:
-        name: Numero
+        name: Metatrader Conta
         state: Situação
-        kind: Tipo de conta
+        kind: Tipo de conta (copy/slave)
         customer_id: Cliente
         meta_mode: MetaTrader Modo (demo/real)
         meta_margin_mode: Meta Margem (netting/heading)
