@@ -31,8 +31,6 @@ module Control
       comment:            Field::String,
       lot:                Field::String,
       magic_number:       Field::String,
-      response:           Field::String,
-      response_error:     Field::String,
       open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -103,8 +101,6 @@ module Control
     comment
     lot
     magic_number
-    response
-    response_error
     open_at
     created_at
     updated_at

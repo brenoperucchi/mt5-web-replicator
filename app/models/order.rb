@@ -132,6 +132,20 @@ class Order < ApplicationRecord
   #   end
   # end
 
+
+  def restrict_magic_number(resource)
+    unless resource.account.magics_accept.blank?
+      trace_magic_number = self.try(:trace).try(:name_id)
+      magic_numbers = resource.account.magics_accept.try(:split).try(:flatten)
+      changeset = resource.try(:versions).try(:last).try(:changeset)
+      version = resource.try(:version)
+      unless magic_numbers.try(:include?, trace_magic_number)
+        resource.loggings.create(content:"Account #{resource.account.name} Magic Number Restrict #{trace_magic_number} Account only accept #{magic_numbers}", changeset: changeset, version:version, state: 'ERROR')
+        resource.erro!
+      end
+    end
+  end  
+
   def order_pending?
     self.content.upcase.include?('STOP') or self.content.upcase.include?('LIMIT')
   end

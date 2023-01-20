@@ -13,6 +13,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
     order:              Field::BelongsTo,
     account:            Field::BelongsTo,
+    trace:              Field::BelongsTo,
     master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     ticket_master:      Field::String,
     ticket_slave:       Field::String,
@@ -29,8 +30,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     comment:            Field::String,
     lot:                Field::String,
     magic_number:       Field::String,
-    response:           Field::String,
-    response_error:     Field::String,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -43,7 +42,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
   state
   ticket_slave
   symbol
@@ -52,6 +50,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   account
   profit
   open_at
+  closed_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -61,6 +60,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket_master
   ticket_slave
   ticket_deal
+  trace
   master
   account
   versions
@@ -77,8 +77,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   comment
   lot
   magic_number
-  response
-  response_error
   open_at
   closed_at
   created_at
@@ -103,8 +101,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   comment
   lot
   magic_number
-  response
-  response_error
   open_at
   created_at
   updated_at

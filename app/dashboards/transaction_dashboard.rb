@@ -22,8 +22,6 @@ class TransactionDashboard < Administrate::BaseDashboard
     comment:            Field::String,
     lot:                Field::String,
     magic_number:       Field::String,
-    response:           Field::String,
-    response_error:     Field::String,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -43,15 +41,15 @@ class TransactionDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
   state
   ticket
   symbol
   price_open
   price_closed
-  trace
+  account
   profit
   open_at
+  closed_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -71,8 +69,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   comment
   lot
   magic_number
-  response
-  response_error
   trace
   order
   message
@@ -104,8 +100,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   comment
   lot
   magic_number
-  response
-  response_error
   open_at
   ].freeze
 

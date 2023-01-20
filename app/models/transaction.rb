@@ -35,9 +35,8 @@ class Transaction < ApplicationRecord
   # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
 
   state_machine :initial => :pending do
-    # after_transition [:pending] => [:executed, :closed], :do => lambda { |transaction| transaction.telegram_message }
-    after_transition :pending => :executed, :do => :update_state
-    after_transition [:pending, :executed] => :closed, :do => :update_state
+    after_transition :pending => :executed,                    :do => :update_state
+    after_transition [:pending, :executed] => :closed,         :do => :update_state
     after_transition [:pending, :executed, :closed] => :error, :do => :update_state
     # after_transition :executed => :closed, :do => :break_even
     # after_transition [:executed, :ordered] => :pending, :do => :update_state
@@ -143,12 +142,13 @@ class Transaction < ApplicationRecord
   end
 
   def restrict_magic_number?
-    unless self.account.magics_accept.blank?
-      unless account.magics_accept.try(:split).try(:include?, magic_number)
-        loggings.create(content:"Account #{account.name} Magic Number Restrict ##{magic_number}", changeset: versions.last.changeset, version:version, state: 'ERROR')
-        self.erro!
-      end
-    end
+    order.restrict_magic_number(self)
+    # unless self.account.magics_accept.blank?
+    #   unless account.magics_accept.try(:split).try(:include?, magic_number)
+    #     loggings.create(content:"Account #{account.name} Magic Number Restrict ##{magic_number}", changeset: versions.last.changeset, version:version, state: 'ERROR')
+    #     self.erro!
+    #   end
+    # end
   end
 
   def validate_restriction
