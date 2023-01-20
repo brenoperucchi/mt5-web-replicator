@@ -132,6 +132,20 @@ en:
         volumes: Volumes
         created_at: created_at
         updated_at: updated_at
+      order:
+        id: #ID
+        state: State
+        symbol: Symbol
+        content_id: Ticket
+        trace: Portfolio
+        account: Account
+        message: Message 
+        profit_copy: Profit Copy
+        profit_slave: Profit Slaves
+        created_at: created_at
+        updated_at: updated_at
+        transactions: transactions
+        slaves: Slaves
       transaction:
         id: #id
         trace: Portfolio
@@ -171,6 +185,14 @@ en:
         invoiceable: Invoiceable
         created_at: created_at
         updated_at: updated_at
+      message:
+        state: State
+        trace: Portfolio
+        content_id: ID
+        content: Content
+        orders: Orders
+        content_at: content_at
+        created_at: created_at
     models:
       customer_plan:
         one: Plan
@@ -199,6 +221,10 @@ en:
       user:
         one: user
         other: users
+      order:
+        one: Order
+        other: Orders
+
     errors:
       models:
         store:

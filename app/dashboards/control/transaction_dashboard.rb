@@ -18,14 +18,14 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
     symbol:             Field::String,
     price_request:      Field::String,
     price_open:         Field::String,
+    price_closed:       Field::String,
     stop_loss:          Field::String,
     take_profit:        Field::String,
     comment:            Field::String,
     lot:                Field::String,
     magic_number:       Field::String,
-    response:           Field::String,
-    response_error:     Field::String,
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     order:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
@@ -33,8 +33,8 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
     message:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
     account:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
     loggings:           Fields::HasManyScopeField.with_options(associated: :store, scoped: :active),
-    # slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
+    # slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -43,13 +43,15 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
-  ticket
   state
+  ticket
   symbol
-  trace
-  profit
+  price_open
+  price_closed
   account
+  profit
+  open_at
+  closed_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -65,13 +67,12 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   symbol
   price_request
   price_open
+  price_closed
   stop_loss
   take_profit
   comment
   lot
   magic_number
-  response
-  response_error
   open_at
   created_at
   updated_at
@@ -94,13 +95,12 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   symbol
   price_request
   price_open
+  price_closed
   stop_loss
   take_profit
   comment
   lot
   magic_number
-  response
-  response_error
   open_at
   ].freeze
 

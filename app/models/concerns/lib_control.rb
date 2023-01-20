@@ -46,7 +46,6 @@ module LibControl
   # 	end
 
   # 	def remove_resource_plan
-  # 		binding.pry
   # 	  store.register_resource_plan(self, self.kind)
   # 	end
 

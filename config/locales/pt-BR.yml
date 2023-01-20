@@ -109,6 +109,7 @@ pt-BR:
         kind: Tipo
         take_profit_limit: Limite TakeProfit
         accounts: Conta
+        orders: Ordens
         messages: Mensagem
         transactions: Transação
         instruments: Ativos
@@ -132,13 +133,27 @@ pt-BR:
         volumes: Volumes
         created_at: Criado
         updated_at: Atualizado
+      order:
+        id: #ID
+        state: Situação
+        symbol: Ativo
+        content_id: Ticket
+        trace: Portfólio
+        account: Contas
+        message: Mensagem 
+        profit_copy: Copy Lucro
+        profit_slave: Slave Lucro
+        created_at: criado
+        updated_at: atualizado
+        transactions: Transações
+        slaves: Slaves
       transaction:
         id: #ID
         trace: Portfólio
         order: Ordem
         ticket: Ticket
         state: Situação
-        profit: Ganho
+        profit: Lucro
         ordertype: Tipo Ordem
         symbol: Ativo
         price_request: Preço Inicial
@@ -199,6 +214,9 @@ pt-BR:
       user:
         one: Usuário
         other: Usuários
+      order:
+        one: Ordem
+        other: Ordens
     errors:
       models:
         store:

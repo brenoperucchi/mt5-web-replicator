@@ -42,7 +42,7 @@ module Fields
 		end
 
 		def associated_dashboard
-			if options.key?(:dashboard) and options[:dashboard].try(:downcase) == "control"
+			if options.key?(:dashboard) and options[:dashboard].try(:downcase).try(:to_s) == "control"
 				if "Control::#{associated_class_name}Dashboard".is_a_defined_class?
 					return "Control::#{associated_class_name}Dashboard".constantize.new
 				end

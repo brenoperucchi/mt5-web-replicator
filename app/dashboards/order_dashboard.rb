@@ -15,7 +15,6 @@ class OrderDashboard < Administrate::BaseDashboard
     profit_copy: DisableTextField,
     profit_slave: DisableTextField,
     content_id: Field::String,
-    image: Administrate::Field::Image,
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     ready_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     execute_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -58,7 +57,6 @@ class OrderDashboard < Administrate::BaseDashboard
   profit_slave
   created_at
   updated_at
-  image
   transactions
   slaves
   ].freeze
