@@ -93,25 +93,26 @@ en:
       account:
         name: Name
         state: State
-        kind: Kind
         customer_id: Customer
+        kind: Account Kind (copy/slave)
         meta_mode: MetaTrader Mode (demo/real)
         meta_margin_mode: Meta Margem (netting/heading)
         magics_accept: Accept Magic Number 
         instrument_control: Instrument control
         traces: Portfolio
-        transactions: Transaction
+        transactions: Transactions
       trace:
         id: #id
         name: Name
         name_id: Magic Number
-        active: active
+        active: Active
         kind: kind
         take_profit_limit: Take Profit limit
-        accounts: accounts
+        accounts: Accounts
+        orders: Orders
         messages: messages
-        transactions: transactions
-        instruments: instruments
+        transactions: Transactions
+        instruments: Instruments
         created_at: created_at
         updated_at: updated_at
       store:
@@ -156,6 +157,34 @@ en:
         ordertype: Order type
         symbol: Symbol
         price_request: Request Price
+        price_closed: Close Price
+        price_open: Open Price
+        stop_loss: Stop loss
+        take_profit: Take profit
+        comment: comment
+        lot: lot
+        magic_number: magic_number
+        response: response
+        response_error: response_error
+        open_at: open_at
+        created_at: created_at
+        updated_at: updated_at
+        message: Message
+        loggings: Logs
+        account: Account
+        slaves: Slaves
+      transaction_slave:
+        id: #id
+        trace: Portfolio
+        order: Order
+        ticket_slave: Ticket
+        ticket_master: Ticket Master
+        state: State
+        profit: Profit
+        ordertype: Order type
+        symbol: Symbol
+        price_request: Request Price
+        price_closed: Close Price
         price_open: Open Price
         stop_loss: Stop loss
         take_profit: Take profit
