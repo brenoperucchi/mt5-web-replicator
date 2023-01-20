@@ -14,6 +14,7 @@ module Control
       versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
       order:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
       account:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+      trace:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
       master:             Field::BelongsTo.with_options(class_name:'Transaction'),
       ticket_master:      Field::String,
       ticket_slave:       Field::String,
@@ -59,17 +60,18 @@ module Control
     # an array of attributes that will be displayed on the model's show page.
     SHOW_PAGE_ATTRIBUTES = %i[
     id
-    ticket_master
+    symbol
+    state
+    trace
+    account
+    master
+    order
     ticket_slave
     ticket_deal
-    master
-    account
-    versions
+    ticket_master
     loggings
-    state
     profit
     ordertype
-    symbol
     price_request
     price_open
     price_closed
@@ -78,8 +80,6 @@ module Control
     comment
     lot
     magic_number
-    response
-    response_error
     open_at
     closed_at
     created_at

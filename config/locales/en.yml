@@ -195,32 +195,32 @@ en:
         created_at: created_at
     models:
       customer_plan:
-        one: Plan
-        other: Plans
+        one: Customer Plan
+        other: Customers Plans
       customer:
-        one: customer
-        other: customers
+        one: Customer
+        other: Customers
       account:
-        one: account
-        other: accounts
+        one: Account
+        other: Accounts
       trace:
-        one: portfolio
-        other: portfolios
+        one: Portfolio
+        other: Portfolios
       store:
-        one: system
-        other: system
+        one: System
+        other: System
       instrument:
-        one: instrument
-        other: instruments
+        one: Instrument
+        other: Instruments
       transaction:
-        one: transaction
-        other: transactions
+        one: Transaction
+        other: Transactions
       invoice:
-        one: invoice
-        other: inovices
+        one: Invoice
+        other: Inovices
       user:
-        one: user
-        other: users
+        one: User
+        other: Users
       order:
         one: Order
         other: Orders

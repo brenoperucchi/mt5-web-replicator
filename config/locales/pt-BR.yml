@@ -158,6 +158,34 @@ pt-BR:
         symbol: Ativo
         price_request: Preço Inicial
         price_open: Preço Aberto
+        price_closed: Preço Fechado
+        stop_loss: Stop Loss
+        take_profit: Take Profit
+        comment: Comentário
+        lot: Volume
+        magic_number: Magic Number
+        response: response
+        response_error: response_error
+        open_at: Abertura
+        created_at: Criado
+        updated_at: Atualizado
+        message: Mensagem
+        loggings: Logs
+        account: Contas
+        slaves: Slaves
+      transaction_slave:
+        id: #ID
+        trace: Portfólio
+        order: Ordem
+        ticket_slave: Ticket
+        ticket_master: Ticket Master
+        state: Situação
+        profit: Lucro
+        ordertype: Tipo Ordem
+        symbol: Ativo
+        price_request: Preço Inicial
+        price_open: Preço Aberto
+        price_closed: Preço Fechado
         stop_loss: Stop Loss
         take_profit: Take Profit
         comment: Comentário
@@ -186,10 +214,18 @@ pt-BR:
         invoiceable: Invoiceable
         created_at: Criado
         updated_at: Atualizado
+      message:
+        state: Situação
+        trace: Portfólio
+        content_id: ID
+        content: Conteúdo
+        orders: Ordens
+        content_at: conteúdo em 
+        created_at: criado
     models:
       customer_plan:
-        one: Plano
-        other: Planos
+        one: Plano (cliente)
+        other: Planos (clientes)
       customer:
         one: cliente
         other: clientes

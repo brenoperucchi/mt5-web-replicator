@@ -58,13 +58,16 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  symbol
+  state
   trace
+  account
+  slaves
   order
   ticket
-  state
+  loggings
   profit
   ordertype
-  symbol
   price_request
   price_open
   price_closed
@@ -77,9 +80,6 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   created_at
   updated_at
   message
-  loggings
-  account
-  slaves
   ].freeze
 
   # FORM_ATTRIBUTES

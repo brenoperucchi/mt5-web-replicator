@@ -58,10 +58,10 @@ module Control
     message
     profit_copy
     profit_slave
-    created_at
-    updated_at
     transactions
     slaves
+    created_at
+    updated_at
     ].freeze
 
     # FORM_ATTRIBUTES
