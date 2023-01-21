@@ -41,6 +41,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.find_by(account:@account1).account.magics_accept).to be == "2000"
         expect(order.slaves.find_by(account:@account2).account.magics_accept).to be == nil
         expect(order.slaves.find_by(account:@account1).loggings.last.state).to be == "ERROR"
+        expect(order.state).to be == "executed"
       end
     end
 

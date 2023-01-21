@@ -92,7 +92,7 @@ pt-BR:
         role_control: Regra Cliente
       account:
         name: Metatrader Conta
-        state: Situação
+        state: Status
         kind: Tipo de conta (copy/slave)
         customer_id: Cliente
         meta_mode: MetaTrader Modo (demo/real)
@@ -117,7 +117,7 @@ pt-BR:
         updated_at: atualizado
       store:
         name: Nome
-        state: Situação
+        state: Status
         plan_id: Plano
         url: Endereço URL
         language: Idioma
@@ -135,7 +135,7 @@ pt-BR:
         updated_at: Atualizado
       order:
         id: #ID
-        state: Situação
+        state: Status
         symbol: Ativo
         content_id: Ticket
         trace: Portfólio
@@ -152,7 +152,7 @@ pt-BR:
         trace: Portfólio
         order: Ordem
         ticket: Ticket
-        state: Situação
+        state: Status
         profit: Lucro
         ordertype: Tipo Ordem
         symbol: Ativo
@@ -179,7 +179,7 @@ pt-BR:
         order: Ordem
         ticket_slave: Ticket
         ticket_master: Ticket Master
-        state: Situação
+        state: Status
         profit: Lucro
         ordertype: Tipo Ordem
         symbol: Ativo
@@ -203,7 +203,7 @@ pt-BR:
       invoice:
         id: #ID 
         name: Nome 
-        state: Situação
+        state: Status
         email: e-mail
         payment_link: Link Pagamaneto 
         stripe_product_id: Stripe Product ID
@@ -215,7 +215,7 @@ pt-BR:
         created_at: Criado
         updated_at: Atualizado
       message:
-        state: Situação
+        state: Status
         trace: Portfólio
         content_id: ID
         content: Conteúdo

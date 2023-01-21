@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_01_16_220424) do
+ActiveRecord::Schema.define(version: 2023_01_20_203645) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -177,7 +177,10 @@ ActiveRecord::Schema.define(version: 2023_01_16_220424) do
     t.text "changeset"
     t.integer "version_id"
     t.string "state"
+    t.string "resourceable_type"
+    t.bigint "resourceable_id"
     t.index ["loggerable_type", "loggerable_id"], name: "index_loggings_on_loggerable_type_and_loggerable_id"
+    t.index ["resourceable_type", "resourceable_id"], name: "index_loggings_on_resourceable"
     t.index ["user_id"], name: "index_loggings_on_user_id"
   end
 

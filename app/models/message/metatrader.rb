@@ -21,7 +21,9 @@ class Message::Metatrader < Message::Message
     else
       self.trace.transactions.pending_executed.each do |transaction|
         unless content['orders'].flatten.detect{|x| x['order_id'].to_s == transaction.ticket}
+          transaction.loggings.create(content: "Remove automatically by Close Order ##{transaction.id}", state: "CLOSED", resourceable:self)
           transaction.close
+          # transaction.close_info
         end
       end      
     end

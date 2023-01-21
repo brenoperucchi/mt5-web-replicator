@@ -11,6 +11,7 @@ class LoggingDashboard < Administrate::BaseDashboard
     id: Field::Number,
     content: Field::Text.with_options(searchable: true),
     loggerable:Field::Polymorphic,
+    resourceable:Field::Polymorphic,
     # user:Field::BelongsTo,
     account: Field::String.with_options(searchable: false),
     changeset: Field::String.with_options(searchable: true),
@@ -28,6 +29,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   id
   state
   loggerable
+  resourceable
   content
   account
   created_at
@@ -38,6 +40,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   loggerable
+  resourceable
   content
   account
   changeset

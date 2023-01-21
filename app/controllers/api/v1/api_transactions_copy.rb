@@ -25,7 +25,7 @@ module API
               if transaction.can_close?
                 if transaction.close 
                   transaction.slaves.each do |slave|
-                    slave.loggings.create(content: "Remove automatically by Transaction##{transaction.id}", state: "REMOVE")
+                    slave.loggings.create(content: "Remove automatically by API Closed Transaction##{transaction.id}", state: "REMOVE")
                   end
                 end
               end

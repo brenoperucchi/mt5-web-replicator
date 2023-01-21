@@ -127,14 +127,11 @@ class TransactionSlave < ApplicationRecord
   end
 
   def api_request_attributes
+    magicnumber = self.try(:trace).try(:name_id)
     deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
     openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
     order_trace = self.trace_id
     "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{magicnumber}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
-  end
-
-  def magicnumber
-    self.try(:trace).try(:name_id)
   end
 
   def seconds_ago

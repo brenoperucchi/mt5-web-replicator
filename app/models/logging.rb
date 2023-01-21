@@ -1,6 +1,7 @@
 class Logging < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :loggerable, polymorphic: true
+  belongs_to :resourceable, polymorphic: true, optional:true
   belongs_to :version, :class_name => "PaperTrail::Version", :foreign_key => "version_id", optional: true
 
   def detect_closed?

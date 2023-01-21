@@ -33,6 +33,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.find_by(account:@account_copy).state).to be == "error"
         expect(order.transactions.count).to be == 1
         expect(order.slaves.count).to be == 0
+        expect(order.state).to be == "error"
       end
     end
     context 'POST' do
