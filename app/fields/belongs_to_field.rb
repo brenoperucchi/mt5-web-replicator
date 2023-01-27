@@ -2,8 +2,8 @@ require "administrate/field/associative.rb"
 require "administrate/field/belongs_to"
 require "sentient_store.rb"
 
-# module Fields
-	class Fields::BelongsToField < Administrate::Field::BelongsTo
+module Fields
+	class BelongsToField < Administrate::Field::BelongsTo
 		include SentientStore
 
 		def scoped
@@ -51,4 +51,4 @@ require "sentient_store.rb"
 		end
 
 	end
-# end
+end

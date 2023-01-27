@@ -31,8 +31,8 @@ module Signalforex
     # config.autoload_paths += Dir[Rails.root.join('app','controllers', 'concerns')]
     config.autoload_paths << "#{Rails.root}/app/controllers/concerns"
     config.eager_load_paths << "#{Rails.root}/app/controllers/concerns"
-    config.autoload_paths << "#{Rails.root}/app/fields"
-    config.eager_load_paths << "#{Rails.root}/app/fields"
+    # config.autoload_paths << "#{Rails.root}/app/fields"
+    # config.eager_load_paths << "#{Rails.root}/app/fields"
 
 
     # /Users/brenoperucchi/Devs/signalforex/app/fields/has_many_scope_field.rb
