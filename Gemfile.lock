@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: https://github.com/brenoperucchi/administrate.git
-  revision: fb807d40ea937529cb0711b17eae1446c4a21bcd
+  revision: 7aac879d5ad37d37824bae5ec625f7c1ea4e891b
   branch: main_imentore
   specs:
-    administrate (0.18.0)
+    administrate (0.18.1)
       actionpack (>= 5.0)
       actionview (>= 5.0)
       activerecord (>= 5.0)
@@ -172,7 +172,7 @@ GEM
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
-    concurrent-ruby (1.1.10)
+    concurrent-ruby (1.2.0)
     connection_pool (2.3.0)
     crass (1.0.6)
     database_cleaner (2.0.1)
@@ -328,16 +328,16 @@ GEM
     next_rails (1.2.1)
       colorize (>= 0.8.1)
     nio4r (2.5.8)
-    nokogiri (1.13.10)
+    nokogiri (1.14.0)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
     notiffany (0.1.3)
       nenv (~> 0.1)
       shellany (~> 0.0)
     orm_adapter (0.5.0)
-    paper_trail (14.0.0)
-      activerecord (>= 6.0)
-      request_store (~> 1.4)
+    paper_trail (13.0.0)
+      activerecord (>= 5.2)
+      request_store (~> 1.1)
     pay (3.0.24)
       rails (>= 6.0.0)
     pdf-core (0.9.0)
@@ -359,7 +359,7 @@ GEM
     pundit (2.3.0)
       activesupport (>= 3.0.0)
     racc (1.6.2)
-    rack (2.2.5)
+    rack (2.2.6.2)
     rack-accept (0.4.5)
       rack (>= 0.4)
     rack-cors (1.1.1)
@@ -386,7 +386,7 @@ GEM
     rails-dom-testing (2.0.3)
       activesupport (>= 4.2.0)
       nokogiri (>= 1.6)
-    rails-html-sanitizer (1.4.4)
+    rails-html-sanitizer (1.5.0)
       loofah (~> 2.19, >= 2.19.1)
     railties (6.1.7)
       actionpack (= 6.1.7)
@@ -591,7 +591,7 @@ DEPENDENCIES
   lucky_case
   minitest
   next_rails
-  paper_trail
+  paper_trail (= 13.0.0)
   pay (~> 3.0)
   pg (= 1.4.5)
   pry (~> 0.14.1)

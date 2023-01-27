@@ -117,3 +117,5 @@ app/.DS_Store
 !/app/assets/builds/.keep
 
 /config/credentials/develpoment.key
+public/mntpoint/signal_copy_trasmit.txt
+public/mntpoint/signal_copy_trasmit.txt.tmp

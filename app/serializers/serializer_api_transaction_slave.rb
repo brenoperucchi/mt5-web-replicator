@@ -56,7 +56,7 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   end
 
   def ticket_master
-    obj['order_id']
+    obj['ticket_id']
   end
 
   def ticket_slave

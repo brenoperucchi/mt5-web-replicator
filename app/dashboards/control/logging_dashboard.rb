@@ -1,9 +1,7 @@
-require_relative '../../fields/has_many_scope_field.rb'
-require_relative '../../fields/belongs_to_field.rb'
 require "administrate/base_dashboard"
 
 module Control
-  class OrderDashboard < Administrate::BaseDashboard
+  class LoggingDashboard < Administrate::BaseDashboard
     # ATTRIBUTE_TYPES
     # a hash that describes the type of each of the model's fields.
     #
@@ -11,23 +9,16 @@ module Control
     # which determines how the attribute is displayed
     # on pages throughout the dashboard.
     ATTRIBUTE_TYPES = {
-      id:           Field::Number,
-      created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      message:      Field::BelongsTo,
-      content:      DisableTextField,
-      profit_copy:  DisableTextField,
-      profit_slave: DisableTextField,
-      content_id:   Field::String,
-      updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      ready_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      execute_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      state:        Field::String,
-      symbol:       Field::String,
-      trace:        Field::BelongsTo,
-      account:      Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-      transactions: Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
-      # slaves: Field::HasMany,
-      slaves:       Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
+      id: Field::Number,
+      content: Field::Text.with_options(searchable: true),
+      loggerable:Field::Polymorphic,
+      resourceable:Field::Polymorphic,
+      # user:Field::BelongsTo,
+      account: Field::String.with_options(searchable: false),
+      changeset: Field::String.with_options(searchable: true),
+      state: Field::String.with_options(searchable: false),
+      created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+      updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
     }.freeze
 
     # COLLECTION_ATTRIBUTES
@@ -36,31 +27,24 @@ module Control
     # By default, it's limited to four items to reduce clutter on index pages.
     # Feel free to add, remove, or rearrange items.
     COLLECTION_ATTRIBUTES = %i[
-    created_at
+    id
     state
-    symbol
-    content_id
-    trace
+    loggerable
+    resourceable
+    content
     account
-    profit_copy
-    profit_slave
-
+    created_at
     ].freeze
 
     # SHOW_PAGE_ATTRIBUTES
     # an array of attributes that will be displayed on the model's show page.
     SHOW_PAGE_ATTRIBUTES = %i[
     id
-    state
-    symbol
-    content_id
-    trace
+    loggerable
+    resourceable
+    content
     account
-    message
-    profit_copy
-    profit_slave
-    transactions
-    slaves
+    changeset
     created_at
     updated_at
     ].freeze
@@ -69,12 +53,8 @@ module Control
     # an array of attributes that will be displayed
     # on the model's form (`new` and `edit`) pages.
     FORM_ATTRIBUTES = %i[
-    state
-    symbol
+    id
     content
-    content_id
-    trace
-
     ].freeze
 
     # COLLECTION_FILTERS
@@ -89,11 +69,11 @@ module Control
     #   }.freeze
     COLLECTION_FILTERS = {}.freeze
 
-    # Overwrite this method to customize how signs are displayed
+    # Overwrite this method to customize how Loggings are displayed
     # across all pages of the admin dashboard.
     #
-    # def display_resource(sign)
-    #   "Sign ##{sign.id}"
+    # def display_resource(Logging)
+    #   "Logging ##{Logging.id}"
     # end
   end
 end

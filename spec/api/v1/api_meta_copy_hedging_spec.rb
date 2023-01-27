@@ -15,21 +15,40 @@ RSpec.describe API::V1::APITransactionsCopy do
     @ticket_master = 10000001
     
     post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-    params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+    params: {"orders"=>"{\"ticket_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
   end
 
-  describe API::V1::APITransactionsCopy do 
+  describe API::V1::APITransactionsCopy do
     context 'Create and Restrict Transaction' do
       it 'Restrict Magic Number' do 
-        @account_copy.update(magics_accept: "2000")
-        expect(@account_copy.magics_accept).to be == "2000"
+        @account_copy.update(magics_accept: "2000 2001")
+        expect(@account_copy.magics_accept).to be == "2000 2001"
         open_at = Time.zone.now.to_i.to_s
         open_at = open_at + ".00000000"
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING',
-        params: {"orders"=>"{\"order_id\":1001,\"price\":14946.46000000,\"volume\":0.20000000,\"stop_loss\":14782.05000000,\"take_profit\":14976.35000000,\"type\":0,\"magicnumber\":2001,\"symbol\":\"UsaTec\",\"comment\":\"VLL[7AF] E$|B 0.20\",\"open_at\":\"1644417000\",\"state_meta\":null}//{\"order_id\":334171235,\"price\":2063.60000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] E$|S 1.00\",\"open_at\":\"1644417028\",\"state_meta\":null}//{\"order_id\":334179884,\"price\":2066.75000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 2.00\",\"open_at\":\"1644420708\",\"state_meta\":null}//{\"order_id\":334181440,\"price\":2073.05000000,\"volume\":1.00000000,\"stop_loss\":2091.00000000,\"take_profit\":2053.00000000,\"type\":1,\"magicnumber\":5502,\"symbol\":\"UsaRus\",\"comment\":\"VLL[61F] E$|S 1.00\",\"open_at\":\"1644420853\",\"state_meta\":null}//{\"order_id\":334185075,\"price\":14926.43000000,\"volume\":0.20000000,\"stop_loss\":14782.05000000,\"take_profit\":14976.35000000,\"type\":0,\"magicnumber\":703,\"symbol\":\"UsaTec\",\"comment\":\"VLL[7AF] N$|B 0.40\",\"open_at\":\"1644421440\",\"state_meta\":null}//{\"order_id\":334186108,\"price\":2072.97000000,\"volume\":1.00000000,\"stop_loss\":2050.17000000,\"take_profit\":2077.12000000,\"type\":0,\"magicnumber\":701,\"symbol\":\"UsaRus\",\"comment\":\"VLL[3BE] E$|B 1.00\",\"open_at\":\"1644421560\",\"state_meta\":null}//{\"order_id\":334190820,\"price\":2069.95000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 3.00\",\"open_at\":\"1644422374\",\"state_meta\":null}//{\"order_id\":334196413,\"price\":14871.81000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] E$|S 0.20\",\"open_at\":\"1644423600\",\"state_meta\":null}//{\"order_id\":334197255,\"price\":2072.80000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 4.00\",\"open_at\":\"1644423815\",\"state_meta\":null}//{\"order_id\":334197268,\"price\":14895.81000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] N$|S 0.40\",\"open_at\":\"1644423816\",\"state_meta\":null}//{\"order_id\":334197995,\"price\":14918.81000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] N$|S 0.60\",\"open_at\":\"1644423961\",\"state_meta\":null}//{\"order_id\":334198079,\"price\":2075.95000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 5.00\",\"open_at\":\"1644423970\",\"state_meta\":null}//{\"order_id\":334198080,\"price\":2075.90000000,\"volume\":1.00000000,\"stop_loss\":2091.00000000,\"take_profit\":2053.00000000,\"type\":1,\"magicnumber\":5502,\"symbol\":\"UsaRus\",\"comment\":\"VLL[61F] N$|S 2.00\",\"open_at\":\"1644423970\",\"state_meta\":null}//{\"order_id\":334198351,\"price\":113000.00000000,\"volume\":1.00000000,\"stop_loss\":111760.00000000,\"take_profit\":113230.00000000,\"type\":0,\"magicnumber\":705,\"symbol\":\"Bra50\",\"comment\":\"VLL[847] E$|B 1.00\",\"open_at\":\"1644424020\",\"state_meta\":null}//{\"order_id\":334198352,\"price\":112980.00000000,\"volume\":1.00000000,\"stop_loss\":114230.00000000,\"take_profit\":112760.00000000,\"type\":1,\"magicnumber\":706,\"symbol\":\"Bra50\",\"comment\":\"VLL[B29] E$|S 1.00\",\"open_at\":\"1644424020\",\"state_meta\":null}//{\"order_id\":334199527,\"price\":14940.05000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] N$|S 0.80\",\"open_at\":\"1644424361\",\"state_meta\":null}//{\"order_id\":334199528,\"price\":113180.00000000,\"volume\":1.00000000,\"stop_loss\":114230.00000000,\"take_profit\":112760.00000000,\"type\":1,\"magicnumber\":706,\"symbol\":\"Bra50\",\"comment\":\"VLL[B29] N$|S 2.00\",\"open_at\":\"#{open_at}\",\"timezone\":0,time\"state_meta\":null}"}
-        order = Order.where(content_id:1001).take
-        expect(order.content_id).to be == "1001"
-        expect(order.transactions.find_by(account:@account_copy).ticket).to be == "1001"
+        params: {"orders"=>"{\"ticket_id\":2001,\"price\":14946.46000000,\"volume\":0.20000000,\"stop_loss\":14782.05000000,\"take_profit\":14976.35000000,\"type\":0,\"magicnumber\":2001,\"symbol\":\"UsaTec\",\"comment\":\"VLL[7AF] E$|B 0.20\",\"open_at\":\"1644417000\",\"state_meta\":null}//{\"ticket_id\":2000,\"price\":2063.60000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":2000,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] E$|S 1.00\",\"open_at\":\"1644417028\",\"state_meta\":null}//{\"ticket_id\":2002,\"price\":2066.75000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":2002,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 2.00\",\"open_at\":\"1644420708\",\"state_meta\":null}//{\"ticket_id\":334181440,\"price\":2073.05000000,\"volume\":1.00000000,\"stop_loss\":2091.00000000,\"take_profit\":2053.00000000,\"type\":1,\"magicnumber\":5502,\"symbol\":\"UsaRus\",\"comment\":\"VLL[61F] E$|S 1.00\",\"open_at\":\"1644420853\",\"state_meta\":null}//{\"ticket_id\":334185075,\"price\":14926.43000000,\"volume\":0.20000000,\"stop_loss\":14782.05000000,\"take_profit\":14976.35000000,\"type\":0,\"magicnumber\":703,\"symbol\":\"UsaTec\",\"comment\":\"VLL[7AF] N$|B 0.40\",\"open_at\":\"1644421440\",\"state_meta\":null}//{\"ticket_id\":334186108,\"price\":2072.97000000,\"volume\":1.00000000,\"stop_loss\":2050.17000000,\"take_profit\":2077.12000000,\"type\":0,\"magicnumber\":701,\"symbol\":\"UsaRus\",\"comment\":\"VLL[3BE] E$|B 1.00\",\"open_at\":\"1644421560\",\"state_meta\":null}//{\"ticket_id\":334190820,\"price\":2069.95000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 3.00\",\"open_at\":\"1644422374\",\"state_meta\":null}//{\"ticket_id\":334196413,\"price\":14871.81000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] E$|S 0.20\",\"open_at\":\"1644423600\",\"state_meta\":null}//{\"ticket_id\":334197255,\"price\":2072.80000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 4.00\",\"open_at\":\"1644423815\",\"state_meta\":null}//{\"ticket_id\":334197268,\"price\":14895.81000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] N$|S 0.40\",\"open_at\":\"1644423816\",\"state_meta\":null}//{\"ticket_id\":334197995,\"price\":14918.81000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] N$|S 0.60\",\"open_at\":\"1644423961\",\"state_meta\":null}//{\"ticket_id\":334198079,\"price\":2075.95000000,\"volume\":1.00000000,\"stop_loss\":2086.30000000,\"take_profit\":2059.47000000,\"type\":1,\"magicnumber\":702,\"symbol\":\"UsaRus\",\"comment\":\"VLL[E82] N$|S 5.00\",\"open_at\":\"1644423970\",\"state_meta\":null}//{\"ticket_id\":334198080,\"price\":2075.90000000,\"volume\":1.00000000,\"stop_loss\":2091.00000000,\"take_profit\":2053.00000000,\"type\":1,\"magicnumber\":5502,\"symbol\":\"UsaRus\",\"comment\":\"VLL[61F] N$|S 2.00\",\"open_at\":\"1644423970\",\"state_meta\":null}//{\"ticket_id\":334198351,\"price\":113000.00000000,\"volume\":1.00000000,\"stop_loss\":111760.00000000,\"take_profit\":113230.00000000,\"type\":0,\"magicnumber\":705,\"symbol\":\"Bra50\",\"comment\":\"VLL[847] E$|B 1.00\",\"open_at\":\"1644424020\",\"state_meta\":null}//{\"ticket_id\":334198352,\"price\":112980.00000000,\"volume\":1.00000000,\"stop_loss\":114230.00000000,\"take_profit\":112760.00000000,\"type\":1,\"magicnumber\":706,\"symbol\":\"Bra50\",\"comment\":\"VLL[B29] E$|S 1.00\",\"open_at\":\"1644424020\",\"state_meta\":null}//{\"ticket_id\":334199527,\"price\":14940.05000000,\"volume\":0.20000000,\"stop_loss\":15036.41000000,\"take_profit\":14843.06000000,\"type\":1,\"magicnumber\":704,\"symbol\":\"UsaTec\",\"comment\":\"VLL[9CE] N$|S 0.80\",\"open_at\":\"1644424361\",\"state_meta\":null}//{\"ticket_id\":334199528,\"price\":113180.00000000,\"volume\":1.00000000,\"stop_loss\":114230.00000000,\"take_profit\":112760.00000000,\"type\":1,\"magicnumber\":706,\"symbol\":\"Bra50\",\"comment\":\"VLL[B29] N$|S 2.00\",\"open_at\":\"#{open_at}\",\"timezone\":0,time\"state_meta\":null}"}
+        expect(Order.all.count).to be == 18
+        expect(Order.error.count).to be == 15
+        expect(Order.executed.count).to be == 2
+        expect(Order.closed.count).to be == 1
+        
+        expect(Transaction.all.count).to be == 18
+        expect(Transaction.error.count).to be == 15
+        expect(Transaction.executed.count).to be == 2
+        expect(Transaction.closed.count).to be == 0
+        expect(Transaction.closed_info.count).to be == 1
+
+        expect(TransactionSlave.all.count).to be == 6
+        expect(TransactionSlave.error.count).to be == 0
+        expect(TransactionSlave.executed.count).to be == 0
+        expect(TransactionSlave.closed.count).to be == 0
+        expect(TransactionSlave.pending.count).to be == 4
+        expect(TransactionSlave.remove.count).to be == 0
+        expect(TransactionSlave.deleted.count).to be == 2
+
+        order = Order.where(content_id:2002).take
+        expect(order.content_id).to be == "2002"
+        expect(order.transactions.find_by(account:@account_copy).ticket).to be == "2002"
         expect(order.transactions.find_by(account:@account_copy).state).to be == "error"
         expect(order.transactions.count).to be == 1
         expect(order.slaves.count).to be == 0
@@ -47,7 +66,7 @@ RSpec.describe API::V1::APITransactionsCopy do
 
         Account.find_by(name: 5647753).update(magics_accept: 20000)
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-        params: {"orders"=>"{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        params: {"orders"=>"{\"ticket_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
         account = Account.find_by(name: 5647753)
         order = account.orders.find_by(content_id:10000002)
         @transaction = order.transactions.first
@@ -108,7 +127,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave.state).to be == "remove"
         @slave.close
         expect(@slave.state).to be == "closed"
-        expect(@slave.master.state).to be == "closed"
+        expect(@slave.master.state).to be == "closed_info"
         expect(response.status).to be == 201
 
         # @order = @trace.orders.find_by(message_id: 723517440)
@@ -130,18 +149,18 @@ RSpec.describe API::V1::APITransactionsCopy do
         @slave_2 = account_88.slaves.find_by(ticket_master: @ticket_master)
         expect(@slave_1.state).to be == "remove"
         expect(@slave_2.state).to be == "deleted"
-        expect(@slave_1.master.state).to be == "closed"
-        expect(@slave_2.master.state).to be == "closed"
+        expect(@slave_1.master.state).to be == "closed_info"
+        expect(@slave_2.master.state).to be == "closed_info"
         expect(response.status).to be == 201
       end
 
-      it 'Hedging - Remove first transaction and add another transaction' do
+      it 'Hedging - Remove first transaction and add another transaction' do 
         account = Account.find_by(name: 5634788)
         @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
         @slave = account.slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-          params: {"orders"=>"{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", 
+          params: {"orders"=>"{\"ticket_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", 
           "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
         @slave1 = account.slaves.find_by(ticket_master: @ticket_master)
         expect(@slave1.state).to be == "remove"
@@ -156,7 +175,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @slave = account.slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-          params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}",
+          params: {"orders"=>"{\"ticket_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"ticket_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}",
           "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
         @slave = account.slaves.find_by(ticket_master: @ticket_master)
         expect(@slave.state).to be == "executed"
@@ -190,7 +209,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @slave = account.slaves.find_by(ticket_master: @ticket_master)
         @slave.execute
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-          params: {"orders"=>"{\"order_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"order_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", 
+          params: {"orders"=>"{\"ticket_id\":10000001,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"modify\"}//{\"ticket_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":1.1000000,\"take_profit\":1.2000000,\"type\":0,\"magicnumber\":0,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", 
           "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
         @account = Account.find_by(name: 5634787)
         @transaction = @account.orders.find_by(content_id:10000002).transactions.first
@@ -225,7 +244,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave.ticket_master).to be == "10000001"
         expect(@transaction.ticket).to be == "10000001"
         expect(@slave.state).to be == "remove"
-        expect(@slave.master.state).to be == "closed"
+        expect(@slave.master.state).to be == "closed_info"
         expect(@order1.id).to be == 1
         expect(@order1.state).to be == "closed"
 
@@ -233,7 +252,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave2.ticket_master).to be == "10000001"
         expect(@transaction2.ticket).to be == "10000001"
         expect(@slave2.state).to be == "deleted"
-        expect(@slave2.master.state).to be == "closed"
+        expect(@slave2.master.state).to be == "closed_info"
         expect(@order2.id).to be == 1
         expect(@order2.state).to be == "closed"
         # expect(@account.orders.count).to be == 2

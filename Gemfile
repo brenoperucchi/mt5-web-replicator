@@ -126,7 +126,7 @@ gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'
 gem 'ancestry'
-gem 'paper_trail'
+gem 'paper_trail', '13.0.0'
 gem 'devise'
 gem "font-awesome-rails"
 gem 'jquery-rails'

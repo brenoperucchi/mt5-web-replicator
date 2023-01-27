@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_01_20_203645) do
+ActiveRecord::Schema.define(version: 2023_01_26_050635) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -486,6 +486,7 @@ ActiveRecord::Schema.define(version: 2023_01_20_203645) do
     t.string "price_closed"
     t.datetime "closed_at"
     t.integer "deal_id"
+    t.integer "ticket_deal"
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"

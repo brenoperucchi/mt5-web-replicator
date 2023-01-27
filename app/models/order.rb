@@ -4,38 +4,26 @@ class Order < ApplicationRecord
 
   belongs_to :trace
   belongs_to :store
-  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id, dependent: :destroy
-  # belongs_to :metatrader, class_name: 'Message::Metatrader', foreign_key: :message_id
   belongs_to :account
-
-  # has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
+  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id#, dependent: :destroy
 
   has_many :transactions, dependent: :destroy
   has_many :slaves,       class_name: 'TransactionSlave', dependent: :destroy, foreign_key: :order_id
 
   has_many :balances, dependent: :destroy, autosave: true
-  has_many :accounts,                      through: :balances, source: :account, autosave: true
-  # has_many :transactions, -> { distinct }, through: :balances, source: :master,  dependent: :destroy
-  # has_many :slaves,       -> { distinct }, through: :balances, source: :slave,   dependent: :destroy
-
-  # has_many :transactions, :class_name => "Transaction", :foreign_key => "order_id", dependent: :destroy
-  # has_many :slaves,       through: :transactions, source: :slaves, class_name:'TransactionSlave', dependent: :destroy
+  has_many :accounts, through: :balances, source: :account, autosave: true
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
-
   scope :ready, ->{ where(state: 'prepared').where.not(state:'error') }
-
   scope :error, ->{ where(state: 'error')}
   scope :executed, ->{ where(state: 'executed')}
-  scope :closed, ->{ where(state: 'pending')}
+  scope :closed, ->{ where(state: 'closed')}
+  scope :pending, ->{ where(state: 'pending')}
 
   has_one_attached :image
 
   state_machine :initial => :pending do
-    # after_transition :pending => :prepared, :do => :update_state
     after_transition :executed => :closed, :do => :update_state
-    # before_transition :executed => :closed, :do => :close_state?
-    # after_transition [:prepared, :executed] => :pending, :do => :update_state
 
     event :prepare do
       # transition :pending => :prepared, :if => lambda { |order| order.restrict_symbol? }
@@ -136,15 +124,31 @@ class Order < ApplicationRecord
   def restrict_magic_number(resource)
     unless resource.account.magics_accept.blank?
       trace_magic_number = self.try(:trace).try(:name_id)
-      magic_numbers = resource.account.magics_accept.try(:split).try(:flatten)
+      magic_numbers = resource.account.magics_accept.try(:split, (/[\s,']/)) || []
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
-      unless magic_numbers.try(:include?, trace_magic_number)
-        resource.loggings.create(content:"Account #{resource.account.name} Magic Number Restrict #{trace_magic_number} Account only accept #{magic_numbers}", changeset: changeset, version:version, state: 'ERROR')
+      unless magic_numbers.detect{|x| x == resource.magic_number}
+        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has Magic Number #{resource.magic_number} - Account #{resource.try(:account).try(:name)} is restrict to #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
         resource.erro!
       end
     end
+    resource.error?
   end  
+
+
+  def api_request_attributes(resource)
+    magicnumber = resource.try(:trace).try(:name_id)
+    ticket_master = resource.try(:ticket) || resource.try(:ticket_master)
+    ticket_slave = resource.try(:ticket_slave) || 0
+    master_id  = resource.try(:master).try(:id) || 0
+    deal_ticket = resource.try(:ticket_deal).blank? ? 0 : resource.ticket_deal
+    seconds_ago = resource.try(:seconds_ago) || 0
+    openprice = (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
+    order_trace = self.trace_id
+    openat = Rails.env.test? ? 0 : resource.open_at.to_i
+
+    "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{magicnumber}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{resource.comment}|#{openat}"
+  end
 
   def order_pending?
     self.content.upcase.include?('STOP') or self.content.upcase.include?('LIMIT')
@@ -161,8 +165,8 @@ class Order < ApplicationRecord
 
     elsif url
       # path = rails_blob_path(self.image, disposition: "attachment", only_path: true)
-    # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")
-    # result = resource.convert url: "http://benincasouza.tplinkdns.com:8080/#{path}"
+      # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")
+      # result = resource.convert url: "http://benincasouza.tplinkdns.com:8080/#{path}"
     end
   end
 

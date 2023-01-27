@@ -17,13 +17,17 @@ class Message::Metatrader < Message::Message
 
     # Close All Orders
     if content['orders'].blank?
-      self.trace.transactions.pending_executed.map(&:close)
+      self.trace.transactions.pending_executed.each do |transaction|
+        transaction.close
+        transaction.close_info
+        transaction.loggings.create(content: "Remove automatically by Close Orders Blank #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
+      end
     else
       self.trace.transactions.pending_executed.each do |transaction|
-        unless content['orders'].flatten.detect{|x| x['order_id'].to_s == transaction.ticket}
-          transaction.loggings.create(content: "Remove automatically by Close Order ##{transaction.id}", state: "CLOSED", resourceable:self)
+        unless content['orders'].flatten.detect{|x| x['ticket_id'].to_s == transaction.ticket}
           transaction.close
-          # transaction.close_info
+          transaction.close_info
+          transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
         end
       end      
     end
@@ -53,7 +57,7 @@ class Message::Metatrader < Message::Message
     
     yaml_content['orders'].flatten.group_by{|d|d['symbol']}.each_with_index do |(symbol, orders), index|
       orders.reverse.each do |order_params|
-        ticket = order_params['order_id']
+        ticket = order_params['ticket_id']
         
         # orders = self.trace.orders.where(content_id: ticket, state: :executed)
         orders = self.trace.orders.where(content_id: ticket)

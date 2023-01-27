@@ -1,5 +1,5 @@
-require_relative '../../fields/has_many_scope_field.rb'
-require_relative '../../fields/belongs_to_field.rb'
+#require_relative '../../fields/has_many_scope_field.rb'
+#require_relative '../../fields/belongs_to_field.rb'
 require "administrate/base_dashboard"
 
 class Control::TransactionDashboard < Administrate::BaseDashboard

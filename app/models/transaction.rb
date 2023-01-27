@@ -18,6 +18,7 @@ class Transaction < ApplicationRecord
   has_many :accounts, through: :order,    source: :accounts
 
   scope :closed,      ->{where(state: 'closed')}
+  scope :closed_info,      ->{where(state: 'closed_info')}
   scope :finish,      ->{where(state: ['closed', 'error'])}
   scope :executed,    ->{where(state: 'executed')}
   scope :error,    ->{where(state: 'error')}
@@ -45,10 +46,10 @@ class Transaction < ApplicationRecord
       transition :pending => :executed
     end
     event :close do
-      transition [:pending, :executed] => :closed
+      transition [:pending, :executed, :closed_info] => :closed
     end
     event :close_info do
-      transition [:pending, :executed] => :closed_info
+      transition [:closed] => :closed_info
     end
     event :restart do
       transition [:executed, :error, :closed] => :pending
@@ -64,8 +65,9 @@ class Transaction < ApplicationRecord
     end
     state :executed do
       def update_state(state)
-        self.telegram_message(:OPEN)
-        self.restrict_magic_number?
+        if self.restrict_magic_number?
+          self.telegram_message(:OPEN)
+        end
       end
     end
 
@@ -157,6 +159,15 @@ class Transaction < ApplicationRecord
   def validate_restriction
     # restrict_nil_instrument? 
     # restrict_symbol?
+  end
+
+
+  def api_request_attributes
+    order.api_request_attributes(self)
+  end
+
+  def self.api_request_attributes
+    self.closed_info.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
   end
 
   # def restrict_nil_instrument?

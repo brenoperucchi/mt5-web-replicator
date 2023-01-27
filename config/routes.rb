@@ -29,6 +29,7 @@ Rails.application.routes.draw do
       resources :traces
       resources :orders, except:[:edit, :new, :destroy, :update]
       resources :transactions, only:[:show]
+      resources :loggings, only:[:show]
       resources :transaction_slaves, only:[:show]
       resources :invoices, except:[:new]
       resources :customers

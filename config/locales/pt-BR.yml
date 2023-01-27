@@ -177,7 +177,7 @@ pt-BR:
         id: #ID
         trace: Portfólio
         order: Ordem
-        ticket_slave: Ticket
+        ticket_slave: Ticket Slave
         ticket_master: Ticket Master
         state: Status
         profit: Lucro

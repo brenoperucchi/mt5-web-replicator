@@ -10,7 +10,7 @@ class TransactionSlave < ApplicationRecord
   #   class_name: 'Track'
   # }
     
-  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6}
+  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, closed_info:7}
 
   belongs_to :account
   belongs_to :trace
@@ -25,7 +25,7 @@ class TransactionSlave < ApplicationRecord
   scope :to_remove,  ->{where(state: 'remove')}
   scope :pending_executed,    ->{where(state: [:pending, :executed])}
   scope :closed_deleted,      ->{where(state: [:closed, :deleted])}
-  scope :opened,              ->{where(state: [:pending, :executed, :remove])}
+  scope :opened,              ->{where(state: [:pending, :executed, :remove, :closed_info])}
   scope :entire,              ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
   scope :not_closed,          ->{where.not(state: ['closed', 'deleted'])}
   scope :closed_error,        ->{where(state: ['closed', 'error'])}
@@ -127,11 +127,12 @@ class TransactionSlave < ApplicationRecord
   end
 
   def api_request_attributes
-    magicnumber = self.try(:trace).try(:name_id)
-    deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
-    openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    order_trace = self.trace_id
-    "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{magicnumber}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
+    order.api_request_attributes(self)
+    # magicnumber = self.try(:trace).try(:name_id)
+    # deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
+    # openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
+    # order_trace = self.trace_id
+    # "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{magicnumber}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
   end
 
   def seconds_ago
@@ -141,10 +142,5 @@ class TransactionSlave < ApplicationRecord
     Rails.env.test? ? 0 : seconds_ago
   end
 
-  private
-
-  def openat
-    Rails.env.test? ? 0 : self.open_at.to_i
-  end
 
 end

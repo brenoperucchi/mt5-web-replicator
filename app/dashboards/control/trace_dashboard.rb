@@ -23,7 +23,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     active:              Field::Boolean,
     kind:                DisableTextField.with_options(value:"copy"),
     # volumes:           Field::ActsAsTaggable,
-    messages:            Fields::HasManyScopeField.with_options(associated: :store, direction: :desc, sort_by: :created_at),
+    # messages:            Fields::HasManyScopeField.with_options(associated: :store, direction: :desc, sort_by: :created_at),
     store_id:            DisableAssociation.with_options(attribute: :store),
     take_profit_limit:   DisableTextField.with_options(value:2),
     instruments:         Fields::HasManyScopeField.with_options(associated: :store, scoped: :enable),
@@ -56,7 +56,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   kind
   take_profit_limit
   accounts
-  messages
   orders
   instruments
   created_at

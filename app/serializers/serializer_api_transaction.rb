@@ -11,7 +11,8 @@ class SerializerAPITransaction < ActiveModel::Serializer
       take_profit: take_profit,
       ticket: ticket,
       open_at: open_at,
-      comment: obj['comment']
+      comment: obj['comment'],
+      ticket_deal: obj['ticket_deal'],
     }
   end
 
@@ -52,7 +53,7 @@ class SerializerAPITransaction < ActiveModel::Serializer
   end
 
   def ticket
-    obj['order_id']
+    obj['ticket_id']
   end
 
   def open_at

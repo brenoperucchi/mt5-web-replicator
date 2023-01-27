@@ -9,6 +9,10 @@ class LoggingPolicy < ApplicationPolicy
     end
   end
 
+  def show?
+    true
+  end
+
   def destroy?
     @user.userable.role == "administrator"
   end

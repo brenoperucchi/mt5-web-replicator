@@ -72,7 +72,7 @@ class Trace < ApplicationRecord
 
 
   def create_orders(order_params, account, message, symbol)
-    ticket = order_params['order_id']
+    ticket = order_params['ticket_id']
     instrument = check_instrument(account, symbol)
     api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, profit:nil, message: message, trace: self, account:account)
     if account.netting?

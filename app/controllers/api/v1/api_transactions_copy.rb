@@ -16,7 +16,8 @@ module API
             parameters = eval(params[:body].encode("UTF-8", "Windows-1252"))
             serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body].encode("UTF-8", "Windows-1252")))
             # transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
-            Transaction.executed.where(ticket: parameters[:deal_ticket]).each do |transaction|
+            # Transaction.executed.where(ticket: parameters[:deal_ticket]).each do |transaction|
+            Transaction.where(ticket: parameters[:ticket_id]).each do |transaction|
               
               transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
               transaction.save
@@ -25,7 +26,7 @@ module API
               if transaction.can_close?
                 if transaction.close 
                   transaction.slaves.each do |slave|
-                    slave.loggings.create(content: "Remove automatically by API Closed Transaction##{transaction.id}", state: "REMOVE")
+                    slave.loggings.create(content: "Remove automatically by API Transaction Copy Action Closed ##{transaction.id}", state: "REMOVE")
                   end
                 end
               end
@@ -48,7 +49,11 @@ module API
                 
                 # TODO - Colocar uma trava se account estiver desabilitado
                 if message.execute
-                  body "OK|OK|OK"
+                  if account.transactions.closed_info.present?
+                    body account.transactions.api_request_attributes
+                  else  
+                    body "OK|OK|OK"
+                  end
                 else
                   content_error = "Message::Metatrader ##{message.try(:id)} cannot executed - Account Name #{account.try(:name)}"
                   account.loggings.create(content:content_error, state: "ERROR", changeset: message.try(:errors).try(:full_messages))
