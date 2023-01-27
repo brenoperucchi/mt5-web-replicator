@@ -124,7 +124,8 @@ class Order < ApplicationRecord
   def restrict_magic_number(resource)
     unless resource.account.magics_accept.blank?
       trace_magic_number = self.try(:trace).try(:name_id)
-      magic_numbers = resource.account.magics_accept.try(:split, (/[\s,']/)) || []
+      delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
+      magic_numbers = resource.account.magics_accept.try(:split, (Regexp.union(delimiters))) || []
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
