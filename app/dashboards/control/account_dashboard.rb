@@ -20,7 +20,7 @@ require "administrate/base_dashboard"
       transactions:         Fields::HasManyScopeField.with_options(associated: :store),
       instruments:          Fields::HasManyScopeField.with_options(associated: :store),
       store:                Field::BelongsTo,
-      customer:             Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+      customer:             ::Fields::BelongsToFieldwith_options(associated: :store, dashboard:'control'),
       magics_accept:        Field::String.with_options(searchable: false),
       instrument_control:   Field::Boolean,
       created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
