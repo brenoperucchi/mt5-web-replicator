@@ -66,7 +66,6 @@ end
 # 		  until file.eof?
 # 		    buffer = file.read
 # 		    puts buffer
-# 		    binding.pry
 # 		    # Do something with buffer
 # 		    # puts buffer
 # 		  end
