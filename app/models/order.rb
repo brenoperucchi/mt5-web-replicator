@@ -128,7 +128,7 @@ class Order < ApplicationRecord
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has Magic Number #{resource.magic_number} - Account #{resource.try(:account).try(:name)}. Accepted #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
         resource.erro!
       end
     end
