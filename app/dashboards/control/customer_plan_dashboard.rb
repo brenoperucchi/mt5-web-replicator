@@ -1,5 +1,5 @@
-require_relative '../../fields/has_many_scope_field.rb'
-require_relative '../../fields/belongs_to_field.rb'
+require 'has_many_scope_field.rb'
+require 'belongs_to_field'
 require "administrate/base_dashboard"
 
 

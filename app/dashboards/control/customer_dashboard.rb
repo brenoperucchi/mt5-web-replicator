@@ -1,5 +1,5 @@
 require "administrate/base_dashboard"
-require_relative '../../fields/belongs_to_field.rb'
+require 'belongs_to_field'
 
 class Control::CustomerDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES

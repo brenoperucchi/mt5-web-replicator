@@ -1,4 +1,4 @@
-require_relative '../../fields/has_many_scope_field.rb'
+require 'has_many_scope_field.rb'
 require "administrate/base_dashboard"
 require 'traces_helper'
 

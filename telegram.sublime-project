@@ -15,7 +15,6 @@
         ".svn",
         ".git",
         ".hg",
-        "bin/",
         "vendor/plugins",
         "public/images",
         "public/assets",

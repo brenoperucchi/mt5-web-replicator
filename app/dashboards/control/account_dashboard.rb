@@ -1,6 +1,8 @@
-require_relative '../../fields/has_many_scope_field.rb'
-require_relative '../../fields/belongs_to_field.rb'
+require 'belongs_to_field'
+require 'has_many_scope_field.rb'
 require "administrate/base_dashboard"
+
+
 
   class Control::AccountDashboard < Administrate::BaseDashboard
     # ATTRIBUTE_TYPES
