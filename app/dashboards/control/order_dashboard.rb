@@ -24,10 +24,10 @@ module Control
       state:        Field::String,
       symbol:       Field::String,
       trace:        Field::BelongsTo,
-      account:      ::Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-      transactions: ::Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
+      account:      Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+      transactions: Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
       # slaves: Field::HasMany,
-      slaves:       ::Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
+      slaves:       Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
     }.freeze
 
     # COLLECTION_ATTRIBUTES

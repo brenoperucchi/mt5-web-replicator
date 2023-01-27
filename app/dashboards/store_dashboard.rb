@@ -27,7 +27,7 @@ class StoreDashboard < Administrate::BaseDashboard
     plan:       Field::BelongsTo,
     plan_items: Field::HasMany,
     accounts:   Field::HasMany.with_options(limit:5),
-    # accounts:   ::Fields::HasManyScopeField.with_options(scoped: :enable),
+    # accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     customers:  Field::HasMany,
     users:      Field::HasMany,
     traces:     Field::HasMany.with_options(limit:5),
