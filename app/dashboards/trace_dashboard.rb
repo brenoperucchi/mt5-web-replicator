@@ -50,9 +50,9 @@ class TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  active
   name
   name_id
-  active
   kind
   copy_control_instrument
   take_profit_limit
@@ -72,12 +72,12 @@ class TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  active
+  copy_control_instrument
   name
   name_id
-  active
   kind
   store
-  copy_control_instrument
   take_profit_limit
   telegram_option
   telegram_image

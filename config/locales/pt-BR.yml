@@ -96,7 +96,7 @@ pt-BR:
         kind: Tipo de conta (copy/slave)
         customer_id: Cliente
         meta_mode: MetaTrader Modo (demo/real)
-        meta_margin_mode: Meta Margem (netting/heading)
+        meta_margin_mode: Meta Margem (netting/hedging)
         magics_accept: Magic Number Aceito
         instrument_control: Controle de Ativo
         traces: Portfólio

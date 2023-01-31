@@ -99,7 +99,7 @@ class Trace < ApplicationRecord
         return true if account.netting? and order.slaves.count > 0 
         self.accounts.slave.enable.each do |account|
           order.accounts << account
-          # instrument = check_instrument(account, symbol)
+          instrument = check_instrument(account, symbol)
           api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:nil, account:account, price_open:nil, comment: ticket)
           slave = order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account, master:transaction, trace: self))
         end
@@ -110,7 +110,25 @@ class Trace < ApplicationRecord
 
   def check_instrument(account, symbol)
     if copy_control_instrument.to_b
-      account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
+      instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+      if account.slave?
+        instrument ||= accounts.copy.first.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+      end
+      instrument || symbol
+
+
+      # if account.slave?
+      #   accounts.copy.each do |copy| 
+      #     copy.instruments.each do |x| 
+      #       if x.symbol == symbol 
+      #         instrument = x.try(:name) 
+      #         break
+      #       end
+      #     end
+      #   end
+      # end
+      # instrument || symbol
+
     elsif account.instrument_control.to_b
       account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
     else 
