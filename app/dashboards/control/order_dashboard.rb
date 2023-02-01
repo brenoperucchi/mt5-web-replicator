@@ -45,7 +45,7 @@ module Control
     account
     profit_copy
     profit_slave
-
+    updated_at
     ].freeze
 
     # SHOW_PAGE_ATTRIBUTES
