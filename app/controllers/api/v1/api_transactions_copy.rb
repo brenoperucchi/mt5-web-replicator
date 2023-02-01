@@ -8,7 +8,15 @@ module API
       include API::V1::Defaults
 
       resource :transactions do 
-        desc "Receive Transaction"
+        get "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
+          account = Account.find_by(name: params[:account_id], kind: :copy)
+          if account
+            map = account.transactions.api_request_attributes(:closed_info)
+          end
+          content_type 'text/plain'
+          body map
+        end
+
         post "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
           content_type 'text/plain'
           action = params[:action]
@@ -50,7 +58,7 @@ module API
                 # TODO - Colocar uma trava se account estiver desabilitado
                 if message.execute
                   if account.transactions.closed_info.present?
-                    body account.transactions.api_request_attributes
+                    body account.transactions.api_request_attributes(:closed_info)
                   else  
                     body "OK|OK|OK"
                   end

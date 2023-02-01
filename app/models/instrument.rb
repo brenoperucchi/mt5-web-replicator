@@ -1,5 +1,5 @@
-
 class Instrument < ApplicationRecord
+  # include LibControl
   belongs_to :store, optional: true
   belongs_to :trace, optional: true
   belongs_to :account, optional: true

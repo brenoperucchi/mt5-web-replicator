@@ -5,17 +5,19 @@ module LibControl
 		after_create :register_resource_plan
 
 		def soft_destroy
-		  self.plan_usages.where(disable_at:nil).update_all(disable_at:DateTime.now)
-		  self.update(deleted_at: DateTime.now)
+		  self.plan_usages.where(disable_at:nil).update_all(disable_at:DateTime.now) if self.respond_to?(:plan_usages)
+		  self.update(deleted_at: DateTime.now) if self.respond_to?(:deleted_at)
 		end
 
 		def soft_restore
-		  self.update(deleted_at: nil)
+		  self.update(deleted_at: nil) if self.respond_to?(:deleted_at)
 		end
 
 		def register_resource_plan
-			named = self.respond_to?(:kind) ? self.kind : self.class.name.capitalize
-	  	store.register_resources_usages(self, named)
+      if self.respond_to?(:plan_usages)
+        named = self.respond_to?(:kind) ? self.kind : self.class.name.capitalize 
+	  	  store.register_resources_usages(self, named)
+      end
 		end
 
 	end

@@ -166,8 +166,9 @@ class Transaction < ApplicationRecord
     order.api_request_attributes(self)
   end
 
-  def self.api_request_attributes
-    self.closed_info.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
+  def self.api_request_attributes(scope)
+    return if scope.nil?
+    self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
   end
 
   # def restrict_nil_instrument?

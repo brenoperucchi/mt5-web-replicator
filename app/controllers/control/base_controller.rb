@@ -25,12 +25,16 @@ module Control
     end
 
     def destroy
-      if requested_resource.soft_destroy
-        flash[:notice] = translate_with_resource("destroy.success")
+      if requested_resource.respond_to?(:soft_destroy)
+        if requested_resource.soft_destroy
+          flash[:notice] = translate_with_resource("destroy.success")
+        else
+          flash[:error] = translate_with_resource("destroy.failure") + requested_resource.errors.full_messages.join("<br/>")
+        end
+        redirect_to after_resource_destroyed_path(requested_resource)
       else
-        flash[:error] = requested_resource.errors.full_messages.join("<br/>")
+        super
       end
-      redirect_to after_resource_destroyed_path(requested_resource)
     end
     private
 

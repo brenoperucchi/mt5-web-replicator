@@ -484,10 +484,13 @@ pt-BR:
     controller:
       create:
         success: "%{resource} foi criado com sucesso."
+        failure: "%{resource} com error ao criar."
       destroy:
         success: "%{resource} foi deletado com sucesso."
+        failure: "%{resource} com error ao remover."
       update:
         success: "%{resource} foi atualizado com sucesso."
+        failure: "%{resource} com error ao atualizar."
     fields:
       has_many:
         more: "Exibindo %{count} de %{total_count}"
