@@ -54,7 +54,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   active
   name
   name_id
-  copy_control_instrument
   kind
   take_profit_limit
   accounts
@@ -69,7 +68,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   active
-  copy_control_instrument
   name
   name_id
   kind

@@ -73,7 +73,7 @@ class Trace < ApplicationRecord
 
   def create_orders(order_params, account, message, symbol)
     ticket = order_params['ticket_id']
-    instrument = check_instrument(account, symbol)
+    instrument = check_instrument(account, symbol, nil)
     api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, profit:nil, message: message, trace: self, account:account)
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
@@ -97,43 +97,27 @@ class Trace < ApplicationRecord
       transaction.execute
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 
-        self.accounts.slave.enable.each do |account|
-          order.accounts << account
-          instrument = check_instrument(account, symbol)
-          api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:nil, account:account, price_open:nil, comment: ticket)
-          slave = order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account, master:transaction, trace: self))
+        self.accounts.slave.enable.each do |account_slave|
+          order.accounts << account_slave
+          instrument = check_instrument(account, symbol, account_slave)
+          api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:nil, account:account_slave, price_open:nil, comment: ticket)
+          slave = order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self))
         end
 
       end
     end
   end
 
-  def check_instrument(account, symbol)
-    if copy_control_instrument.to_b
-      instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
-      if account.slave?
-        instrument ||= accounts.copy.first.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+  def check_instrument(account, symbol, account_slave=nil)
+    if self.copy_control_instrument.to_b
+      if account.copy?
+        instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+      else account.slave?
+        instrument = account.first.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
+        instrument ||= account_slave.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
       end
-      instrument || symbol
-
-
-      # if account.slave?
-      #   accounts.copy.each do |copy| 
-      #     copy.instruments.each do |x| 
-      #       if x.symbol == symbol 
-      #         instrument = x.try(:name) 
-      #         break
-      #       end
-      #     end
-      #   end
-      # end
-      # instrument || symbol
-
-    elsif account.instrument_control.to_b
-      account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
-    else 
-      symbol
     end
+    instrument || symbol
   end
 
   def masters_scope(type = :masters, scope = :all)
