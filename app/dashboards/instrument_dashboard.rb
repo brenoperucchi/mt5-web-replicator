@@ -8,14 +8,15 @@ class InstrumentDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
+    id: Field::Number,
     trace: Field::BelongsTo,
     account: Field::BelongsTo,
-    id: Field::Number,
+    store: Field::BelongsTo,
     symbol: Field::String,
     name: Field::String,
     volumes: Field::String.with_options(searchable: false),
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -24,11 +25,11 @@ class InstrumentDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
-  account
-  trace
   symbol
   name
+  account
+  store
+  created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -38,7 +39,7 @@ class InstrumentDashboard < Administrate::BaseDashboard
   symbol
   name
   account
-  trace
+  store
   volumes
   created_at
   updated_at
@@ -51,7 +52,7 @@ class InstrumentDashboard < Administrate::BaseDashboard
   symbol
   name
   account
-  trace
+  store
   volumes
   ].freeze
 

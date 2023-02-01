@@ -17,8 +17,8 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
     store_id:   DisableTextField.with_options(default: :current_store),
     trace:      Fields::BelongsToField.with_options(associated: :store),
     account:    Fields::BelongsToField.with_options(associated: :store),
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -27,10 +27,10 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
   symbol
   name
   account
+  created
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
