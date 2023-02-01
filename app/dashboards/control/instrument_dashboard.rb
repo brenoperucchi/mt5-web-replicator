@@ -30,7 +30,7 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   symbol
   name
   account
-  created
+  created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES

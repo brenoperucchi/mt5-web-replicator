@@ -10,7 +10,7 @@ class Control::InvoiceDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     state:                Field::String,
     name:                 Field::String,
-    email:                Field::String,
+    email:                Field::String.with_options(searchable: false),
     amount:               Field::Number,
     invoiceable:          Field::Polymorphic,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

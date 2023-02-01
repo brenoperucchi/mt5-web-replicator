@@ -11,14 +11,14 @@ module Control
     # which determines how the attribute is displayed
     # on pages throughout the dashboard.
     ATTRIBUTE_TYPES = {
-      id:           Field::Number,
+      id:           Field::Number.with_options(searchable: true),
       created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       message:      Field::BelongsTo,
       content:      DisableTextField,
       profit_copy:  DisableTextField,
       profit_slave: DisableTextField,
       content_id:   Field::String,
-      ordertype:    Field::String,
+      ordertype:    Field::String.with_options(searchable: false),
       updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       ready_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       execute_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

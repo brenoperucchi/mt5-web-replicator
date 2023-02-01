@@ -8,7 +8,7 @@ class AccountDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    name:                 Field::String,
+    id:                   Field::Number.with_options(searchable: true),
     state:                Field::String,
     kind:                 Field::String,
     stock_kind:           Field::String,

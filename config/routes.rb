@@ -25,9 +25,9 @@ Rails.application.routes.draw do
     mount API::Base, at: "/"
     namespace :control do
       resources :accounts
-      resources :instruments
       resources :traces
       resources :orders, except:[:edit, :new, :destroy, :update]
+      resources :instruments
       resources :transactions, only:[:show]
       resources :loggings, only:[:show]
       resources :transaction_slaves, only:[:show]

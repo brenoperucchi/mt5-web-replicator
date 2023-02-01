@@ -14,8 +14,8 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     name: Field::String,
     store: Field::BelongsTo,
     customers: Field::HasMany,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -24,7 +24,6 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-    id
     name
     kind
     amount

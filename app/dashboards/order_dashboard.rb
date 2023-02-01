@@ -8,7 +8,7 @@ class OrderDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:           Field::Number,
+    id:           Field::Number.with_options(searchable: true),
     content:      DisableTextField,
     profit_copy:  DisableTextField,
     profit_slave: DisableTextField,
@@ -16,7 +16,7 @@ class OrderDashboard < Administrate::BaseDashboard
     ordertype:    Field::String,
     state:        Field::String,
     symbol:       Field::String,
-    ordertype:    Field::String,
+    ordertype:    Field::String.with_options(searchable: false),
     trace:        Field::BelongsTo,
     account:      Field::BelongsTo,
     message:      Field::BelongsTo,

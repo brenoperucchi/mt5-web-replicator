@@ -17,8 +17,8 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     store_id: DisableAssociation.with_options(attribute: :store),
     customers: Fields::HasManyScopeField.with_options(associated: :store),
     kind: CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -27,11 +27,11 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-    id
     name
     kind
     amount
     customers
+    created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
