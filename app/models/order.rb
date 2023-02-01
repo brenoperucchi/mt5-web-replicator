@@ -147,8 +147,8 @@ class Order < ApplicationRecord
     openprice = (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
     order_trace = self.trace_id
     openat = Rails.env.test? ? 0 : resource.open_at.to_i
-
-    "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{magicnumber}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{resource.comment}|#{openat}"
+    comment = resource.try(:comment).to_s.gsub(/[^0-9A-Za-z]/, '_')
+    "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{magicnumber}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
   end
 
   def order_pending?
