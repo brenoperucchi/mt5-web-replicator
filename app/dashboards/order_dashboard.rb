@@ -8,22 +8,24 @@ class OrderDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    message: Field::BelongsTo,
-    content: DisableTextField,
-    profit_copy: DisableTextField,
+    id:           Field::Number,
+    content:      DisableTextField,
+    profit_copy:  DisableTextField,
     profit_slave: DisableTextField,
-    content_id: Field::String,
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    ready_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    execute_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    state: Field::String,
-    symbol: Field::String,
-    trace: Field::BelongsTo,
-    account: Field::BelongsTo,
+    content_id:   Field::String,
+    ordertype:    Field::String,
+    state:        Field::String,
+    symbol:       Field::String,
+    ordertype:    Field::String,
+    trace:        Field::BelongsTo,
+    account:      Field::BelongsTo,
+    message:      Field::BelongsTo,
     transactions: Field::HasMany,
-    slaves: Field::HasMany,
+    slaves:       Field::HasMany,
+    created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    ready_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    execute_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -55,6 +57,7 @@ class OrderDashboard < Administrate::BaseDashboard
   message
   profit_copy
   profit_slave
+  ordertype
   created_at
   updated_at
   transactions

@@ -18,6 +18,7 @@ module Control
       profit_copy:  DisableTextField,
       profit_slave: DisableTextField,
       content_id:   Field::String,
+      ordertype:    Field::String,
       updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       ready_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       execute_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -59,6 +60,7 @@ module Control
     message
     profit_copy
     profit_slave
+    ordertype
     transactions
     slaves
     created_at

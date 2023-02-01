@@ -185,4 +185,21 @@ class Order < ApplicationRecord
     slaves.sum(&:profit)
   end
 
+  def ordertype
+    case transactions.try(:first).try(:ordertype)
+    when "0"
+      "BUY"
+    when '1'
+      'SELL'
+    when '2'
+      'BUY LIMIT'
+    when '3'
+      'BUY STOP'
+    when '4'
+      'SELL LIMIT'
+    when '5'
+      'SELL STOP'
+    end
+  end
+
 end
