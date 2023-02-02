@@ -145,9 +145,9 @@ class Trace < ApplicationRecord
   end
 
   def pay_off(type = :masters)
-    gain = masters_scope(:masters, :closed).try(:gain).sum(:profit).abs
+    gain = masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit).abs
     gain_operation = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
-    loss = masters_scope(:masters, :closed).try(:loss).sum(:profit).abs
+    loss = masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit).abs
     loss_operation = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
@@ -156,15 +156,15 @@ class Trace < ApplicationRecord
     total_trades = masters_scope(type, :closed).count
     profit_trades = masters_scope(type, :closed).try(:gain).count.to_f
     loss_trades = masters_scope(type, :closed).try(:loss).count.to_f
-    gross_profit = masters_scope(type, :closed).try(:gain).sum(:profit).abs
-    gross_profit = masters_scope(type, :closed).try(:gain).sum(:profit).abs
-    gross_loss = masters_scope(type, :closed).try(:loss).sum(:profit).abs
+    gross_profit = masters_scope(type, :closed).try(:gain).to_a.sum(&:profit).abs
+    gross_profit = masters_scope(type, :closed).try(:gain).to_a.sum(&:profit).abs
+    gross_loss = masters_scope(type, :closed).try(:loss).to_a.sum(&:profit).abs
     AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
   end
 
   def profit_factor(type = :masters)
-    gross_loss = masters_scope(type, :closed).try(:loss).sum(:profit).abs
-    gross_profit = masters_scope(type, :closed).try(:gain).sum(:profit).abs
+    gross_loss = masters_scope(type, :closed).try(:loss).to_a.sum(&:profit).abs
+    gross_profit = masters_scope(type, :closed).try(:gain).to_a.sum(&:profit).abs
     AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type))
   end
 

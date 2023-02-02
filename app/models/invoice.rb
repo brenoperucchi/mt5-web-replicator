@@ -20,7 +20,7 @@ class Invoice < ApplicationRecord
 
 
   def balance_update
-    self.update(amount: items.sum(:amount))  
+    self.update(amount: items.to_a.sum(&:amount))  
   end
 
   def invoice_send

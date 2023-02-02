@@ -99,7 +99,7 @@ class Account < ApplicationRecord
   end
 
   def slave_profit
-    masters_filter(slaves.closed).sum(:profit)
+    masters_filter(slaves.closed).to_a.sum(&:profit)
   end
 
   def slaves_scope(type = :slaves, scope = :all, trace)
@@ -129,9 +129,9 @@ class Account < ApplicationRecord
   end
 
   def pay_off(type = :slaves, trace)
-    gain = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
+    gain = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
     gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-    loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
+    loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
     loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
@@ -140,14 +140,14 @@ class Account < ApplicationRecord
     total_trades = slaves_scope(type, :closed, trace).try(:size)
     profit_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
     loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-    gross_profit = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
-    gross_loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
+    gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
     AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
   end
 
   def profit_factor(type = :slaves, trace)
-    gross_profit = slaves_scope(type, :closed, trace).try(:gain).sum(:profit).abs
-    gross_loss = slaves_scope(type, :closed, trace).try(:loss).sum(:profit).abs
+    gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
     AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace))
   end
 

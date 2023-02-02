@@ -69,7 +69,7 @@
                 td OPERATIONS
                 td = @account.slaves_scope(:slaves, :closed, @trace).count
                 td TOTAL PROFIT
-                td= @account.slaves_scope(:slaves, :closed, @trace).sum(:profit)
+                td= @account.slaves_scope(:slaves, :closed, @trace).to_a.sum(&:profit)
                 td
                 td
                 td
