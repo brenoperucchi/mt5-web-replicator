@@ -463,6 +463,7 @@ GEM
       sprockets (> 3.0)
       sprockets-rails
       tilt
+    sd_notify (0.1.1)
     selectize-rails (0.12.6)
     selenium-webdriver (4.7.1)
       rexml (~> 3.2, >= 3.2.5)
@@ -607,6 +608,7 @@ DEPENDENCIES
   rspec-rails (~> 4.0.1)
   rtesseract
   sass-rails (~> 5)
+  sd_notify
   selenium-webdriver
   sidekiq (= 7.0.1)
   simple_form
