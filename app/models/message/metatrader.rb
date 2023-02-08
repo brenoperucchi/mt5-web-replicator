@@ -112,7 +112,7 @@ class Message::Metatrader < Message::Message
   # end
 
   # def order_hedging(order_params, account, account_copy, symbol)
-  #   if trace.copy_control_instrument.to_b
+  #   if trace.instrument_control.to_b
   #     instrument = trace.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) || symbol
   #   else
   #     instrument = account.instrument(symbol)

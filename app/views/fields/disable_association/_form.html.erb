@@ -1,3 +1,9 @@
+<% content_for :head do %>
+  <style type="text/css">
+    .field-unit.field-hide {display: none!important;}
+  </style>
+<% end %>
+
 <% if action_name == "new" or action_name == "create" %>
   <% if field.options[:type] != "has_many" %>  
     <div class="field-unit__label">

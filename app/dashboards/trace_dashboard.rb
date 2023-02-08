@@ -18,7 +18,7 @@ class TraceDashboard < Administrate::BaseDashboard
     telegram_api_hash:   Field::String.with_options(searchable: false),
     telegram_api_number: Field::String.with_options(searchable: false),
     active:              Field::Boolean.with_options(searchable: false),
-    copy_control_instrument:  Field::Boolean,
+    instrument_control:  Field::Boolean,
     created_at:          Field::DateTime,
     updated_at:          Field::DateTime,
     store:               Field::BelongsTo,
@@ -55,7 +55,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   kind
-  copy_control_instrument
+  instrument_control
   take_profit_limit
   telegram_option
   telegram_image
@@ -74,7 +74,7 @@ class TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   active
-  copy_control_instrument
+  instrument_control
   name
   name_id
   kind

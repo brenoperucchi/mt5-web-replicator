@@ -23,10 +23,11 @@ RSpec.describe API::V1::APITransactionsCopy do
 
   describe API::V1::APITransactionsCopy do
     context 'POST' do
-      it 'Hedging - Copy Control Instrument' do
-        @trace.copy_control_instrument = 1
-        @trace.save
-        @trace.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
+      it 'Hedging - Control Instrument' do
+        @account_copy.instrument_control = true
+        @account_copy.save
+        @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
+        expect(@account_copy.name).to be == "5647753"
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
           {\"ticket_id\":10001,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
@@ -36,8 +37,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.symbol).not_to be == "GBPCAD"
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(order.transactions.first.symbol).to be == "GBPUSD"
-        expect(order.slaves.first.symbol).to be == "GBPUSD"
-        expect(order.slaves.first.symbol).not_to be == "GBPCAD"
+        expect(order.slaves.first.symbol).to be == "GBPCAD"
+        expect(order.slaves.first.symbol).not_to be == "GBPUSD"
         
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
@@ -45,7 +46,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         order = Order.find_by(content_id: 10002)          
         expect(order.content_id).to be == "10002"
         expect(order.state).to be == "executed"
-        expect(order.symbol).to be == "GBPCAD"
+        expect(order.symbol).to be == "GBPUSD"
+        expect(order.transactions.first.symbol).to be == "GBPUSD"
         expect(order.slaves.first.symbol).to be == "GBPCAD"
         expect(order.slaves.first.symbol).not_to be == "GBPUSD"
       end

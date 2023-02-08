@@ -17,7 +17,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
     traces:               Fields::HasManyScopeField.with_options(associated: :store, scoped: :active),
-    transactions:         Fields::HasManyScopeField.with_options(associated: :store),
+    orders:               Fields::HasManyScopeField.with_options(associated: :store),
     instruments:          Fields::HasManyScopeField.with_options(associated: :store),
     store:                Field::BelongsTo,
     customer:             Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
@@ -38,7 +38,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   state
   kind
   traces
-  transactions
+  orders
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -47,15 +47,15 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   id
   name
   state
-  customer
   kind
   meta_mode
   meta_margin_mode
   magics_accept
-  instrument_control
-  traces
+  customer
   store
-  transactions
+  traces
+  orders
+  instrument_control
   instruments
   created_at
   updated_at

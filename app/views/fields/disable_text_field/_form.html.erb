@@ -1,7 +1,13 @@
-<div class="field-unit__label">
-  <%= f.label field.attribute %>
-</div>
+<% content_for :head do %>
+  <style type="text/css">
+    .field-unit.field-hide {display: none!important;}
+  </style>
+<% end %>
+
 <% if action_name == "new" or action_name == "create" %>
+  <div class="field-unit__label">
+    <%= f.label field.attribute %>
+  </div>
   <div class="field-unit__field">
     <%- if field.options.key?(:default) and field.options[:default] == :current_store %>
       <%= f.text_field field.attribute, value: current_user.try(:store).try(:name), disabled:true %>
@@ -12,6 +18,9 @@
     <% end %>
   </div>
 <% else %>
+  <div class="field-unit__label">
+    <%= f.label field.attribute %>
+  </div>
   <div class="field-unit__field">
     <% if field.default_value.blank? %>
       <%= f.text_field field.attribute, value: field.options[:value], disabled:true %>

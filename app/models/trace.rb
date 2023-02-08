@@ -13,7 +13,7 @@ class Trace < ApplicationRecord
   enum kind:  {telegram: 0, copy: 1}
 
   store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
-                               :telegram_api_id, :telegram_api_hash, :telegram_api_number, :copy_control_instrument, :restrict_control_instrument]
+                               :telegram_api_id, :telegram_api_hash, :telegram_api_number, :instrument_control, :restrict_control_instrument]
 
   # has_many :deals, dependent: :destroy
   # has_many :masters, :through => :deals, :source => :masters
@@ -73,7 +73,7 @@ class Trace < ApplicationRecord
 
   def create_orders(order_params, account, message, symbol)
     ticket = order_params['ticket_id']
-    instrument = check_instrument(account, symbol, nil)
+    instrument = check_instrument(account, symbol)
     api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, profit:nil, message: message, trace: self, account:account)
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
@@ -109,13 +109,9 @@ class Trace < ApplicationRecord
   end
 
   def check_instrument(account, symbol, account_slave=nil)
-    if self.copy_control_instrument.to_b
-      if account.copy?
-        instrument = account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
-      else account.slave?
-        instrument = account.first.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
-        instrument ||= account_slave.instruments.find_by(symbol: symbol.try(:upcase)).try(:name)
-      end
+    if account_slave
+      instrument = account_slave.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) if account_slave.instrument_control.to_b
+      instrument ||= account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) if account.instrument_control.to_b
     end
     instrument || symbol
   end

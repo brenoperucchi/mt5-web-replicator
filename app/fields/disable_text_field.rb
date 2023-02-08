@@ -10,4 +10,9 @@ class DisableTextField < Administrate::Field::Base
     resource.send(attribute)
   end
 
+  def html_class
+    hide_class = options[:type] == 'hide'? ' field-hide' : ""
+    self.class.html_class + hide_class
+  end
+
 end

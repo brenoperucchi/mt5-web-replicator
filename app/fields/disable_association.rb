@@ -6,6 +6,12 @@ class DisableAssociation <Administrate::Field::Base
     data
   end
 
+  def html_class
+    hide_class = options[:type] == 'hide'? ' field-hide' : ""
+    self.class.html_class + hide_class
+  end
+
+
   def default_value(obj, attr)
     case options[:type]
     when 'has_many' 
