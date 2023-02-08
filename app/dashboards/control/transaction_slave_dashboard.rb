@@ -44,6 +44,7 @@ module Control
     # Feel free to add, remove, or rearrange items.
     COLLECTION_ATTRIBUTES = %i[
     state
+    symbol
     ticket_slave
     price_open
     price_closed
@@ -59,24 +60,24 @@ module Control
     id
     symbol
     state
+    loggings
+    ticket_slave
+    ticket_deal
+    ticket_master
     trace
     account
     master
     order
-    ticket_slave
-    ticket_deal
-    ticket_master
-    loggings
-    profit
     ordertype
+    profit
     price_request
     price_open
     price_closed
     stop_loss
     take_profit
+    magic_number
     comment
     lot
-    magic_number
     open_at
     closed_at
     created_at
@@ -102,8 +103,6 @@ module Control
     lot
     magic_number
     open_at
-    created_at
-    updated_at
     ].freeze
 
     # COLLECTION_FILTERS

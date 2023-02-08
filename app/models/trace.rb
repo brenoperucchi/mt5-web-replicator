@@ -9,18 +9,15 @@ class Trace < ApplicationRecord
 
   include LibEnums
   include AlgoStatistic
+  include LibControl
 
   enum kind:  {telegram: 0, copy: 1}
 
   store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
                                :telegram_api_id, :telegram_api_hash, :telegram_api_number, :instrument_control, :restrict_control_instrument]
 
-  # has_many :deals, dependent: :destroy
-  # has_many :masters, :through => :deals, :source => :masters
-  # has_many :slaves,  :through => :deals, :source => :slaves
-
-  has_many :orders, dependent: :destroy
-  has_many :transactions#, :through => :orders, :source => :transactions
+  has_many :orders
+  has_many :transactions
   has_many :masters, :through => :orders, :source => :transactions
   has_many :slaves,  :through => :orders, :source => :slaves
 
@@ -31,6 +28,7 @@ class Trace < ApplicationRecord
   belongs_to :store, optional: true
 
   scope :active,   ->{ where.not(active_at:nil)}
+  scope :not_deleted,  -> { where(deleted_at:nil) }
   # scope :telegram, ->{ where(kind:'telegram')}
 
   has_many :permissions, dependent: :destroy
@@ -38,6 +36,10 @@ class Trace < ApplicationRecord
 
   validates_presence_of   [:name, :name_id]
   validates_uniqueness_of [:name, :name_id], scope: :store_id
+
+  def soft_destroy_custom
+    self.update_column(:active_at, nil)
+  end
 
   def volumes
     self.settings['volumes'] || ""
@@ -53,13 +55,15 @@ class Trace < ApplicationRecord
 
   alias_method :active?, :active
 
-  def off 
-    self.update_column(:active_at, nil)
-  end
 
-  def self.disable
-    Trace.all.map(&:off)
-  end
+
+  # def off 
+  #   self.update_column(:active_at, nil)
+  # end
+
+  # def self.disable
+  #   Trace.all.map(&:off)
+  # end
 
   def masters_transactions
     masters_scope(:masters)

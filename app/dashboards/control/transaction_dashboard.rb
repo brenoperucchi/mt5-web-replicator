@@ -44,6 +44,7 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   state
+  symbol
   ticket
   price_open
   price_closed
@@ -59,22 +60,22 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   id
   symbol
   state
+  loggings
+  ticket
   trace
   account
-  slaves
   order
-  ticket
-  loggings
-  profit
+  slaves
   ordertype
+  profit
   price_request
   price_open
   price_closed
   stop_loss
   take_profit
+  magic_number
   comment
   lot
-  magic_number
   open_at
   created_at
   updated_at
@@ -85,8 +86,6 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  trace
-  order
   ticket
   state
   profit

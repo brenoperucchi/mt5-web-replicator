@@ -48,7 +48,7 @@ module Control
     end
 
     def scoped_resource
-      current_user.store.traces
+      current_user.store.traces.not_deleted
     end
 
   end

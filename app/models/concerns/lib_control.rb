@@ -6,6 +6,7 @@ module LibControl
 
 		def soft_destroy
 		  self.plan_usages.where(disable_at:nil).update_all(disable_at:DateTime.now) if self.respond_to?(:plan_usages)
+      self.soft_destroy_custom if self.respond_to?(:soft_destroy_custom)
 		  self.update(deleted_at: DateTime.now) if self.respond_to?(:deleted_at)
 		end
 

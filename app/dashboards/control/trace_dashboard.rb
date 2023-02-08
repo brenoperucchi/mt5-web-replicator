@@ -58,7 +58,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   take_profit_limit
   accounts
   orders
-  instruments
   created_at
   updated_at
   ].freeze

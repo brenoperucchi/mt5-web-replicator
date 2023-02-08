@@ -48,10 +48,10 @@ class Account < ApplicationRecord
   #   store.register_resource_plan(self, self.kind)
   # end
 
-  # def soft_destroy
-  #   self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
-  #   self.update(deleted_at: DateTime.now)
-  # end
+  #libcontrol was calling this method
+  def soft_destroy_custom
+    self.trace_ids = nil
+  end
 
   # def soft_restore
   #   self.update(deleted_at: nil)
