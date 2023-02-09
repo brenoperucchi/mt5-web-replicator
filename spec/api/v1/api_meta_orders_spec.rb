@@ -5,13 +5,15 @@ RSpec.describe API::V1::APITransactionsCopy do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
     @trace = create(:trace, :copy, store: @store)
+    @trace2 = create(:trace, :copy2, store: @store)
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)
     @customer = create(:customer, :customer, store:@store, user:@user_customer)
-    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2], instrument_control:true)
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @account4 = create(:account, :slave4, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     
     post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
     params: {"orders"=>"
@@ -22,16 +24,17 @@ RSpec.describe API::V1::APITransactionsCopy do
   end
 
   describe API::V1::APITransactionsCopy do
-    context 'POST' do
-      it 'Hedging - Control Instrument' do
-        @account_copy.instrument_control = true
-        @account_copy.save
+    context 'Control Instrument' do #, focus:true do
+      it 'Hedging - Change instruments on copy to slaves' do
+        @trace.instrument_control = true
+        @trace.save
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "5647753"
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
           {\"ticket_id\":10001,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
         order = Order.find_by(content_id: 10001)          
+        expect(order.trace.instrument_control).to be == true
         expect(order.content_id).to be == "10001"
         expect(order.state).to be == "executed"
         expect(order.symbol).not_to be == "GBPCAD"
@@ -42,7 +45,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
-          {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
         order = Order.find_by(content_id: 10002)          
         expect(order.content_id).to be == "10002"
         expect(order.state).to be == "executed"
@@ -50,6 +53,20 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.first.symbol).to be == "GBPUSD"
         expect(order.slaves.first.symbol).to be == "GBPCAD"
         expect(order.slaves.first.symbol).not_to be == "GBPUSD"
+      end
+      it 'Hedging - Control Instrument'do #, focus:true do
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"
+        {\"ticket_id\":10003,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        orders = Order.where(content_id: 10003)
+        expect(orders.count).to be == 2
+        order = orders.last
+        expect(order.trace.instrument_control).to be == nil
+        expect(order.account.name).to be == "5647753"
+        expect(order.account.instrument_control).to be == true
+        expect(order.trace.name).to be == "SignalCopy2"
+        expect(order.transactions.first.symbol).to be == "GBPUSD"
+        expect(order.slaves.first.symbol).to be == "GBPUSD"
       end
     end
   end
@@ -70,8 +87,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.count).to be == 2
         slave1 = order.slaves.first
         slave2 = order.slaves.last
-        expect(slave1.id).to be == 3
-        expect(slave2.id).to be == 4
+        expect(slave1.id).to be == 4
+        expect(slave2.id).to be == 5
         expect(slave1.state).to be == "pending"
         expect(slave2.state).to be == "pending"
       end
@@ -79,7 +96,7 @@ RSpec.describe API::V1::APITransactionsCopy do
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 5634787)
         # @transaction = account.orders.find_by(content_id:483857785).transactions.first
-        message = Message::Metatrader.create(content: nil, content_at: Time.zone.now, store: @trace.store, trace:@trace)
+        message = Message::Metatrader.create(content: nil, content_at: Time.zone.now, store: @trace.store, trace_ids:@trace.id)
         message.update_columns(state: "executed")
         if message.execute
           body "OK|OK|OK"

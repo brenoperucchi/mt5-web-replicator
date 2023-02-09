@@ -20,5 +20,11 @@ FactoryBot.define do
       take_profit_limit {2} 
       kind {'copy'}
     end
+    trait :copy2 do
+      name { 'SignalCopy2' }
+      name_id { '20002' }
+      take_profit_limit {2} 
+      kind {'copy'}
+    end
   end
 end

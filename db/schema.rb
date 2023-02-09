@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_08_052340) do
+ActiveRecord::Schema.define(version: 2023_02_08_210845) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -201,6 +201,13 @@ ActiveRecord::Schema.define(version: 2023_02_08_052340) do
     t.index ["ancestry"], name: "index_messages_on_ancestry"
     t.index ["store_id"], name: "index_messages_on_store_id"
     t.index ["trace_id"], name: "index_messages_on_trace_id"
+  end
+
+  create_table "messages_traces", force: :cascade do |t|
+    t.bigint "trace_id", null: false
+    t.bigint "message_id", null: false
+    t.index ["message_id"], name: "index_messages_traces_on_message_id"
+    t.index ["trace_id"], name: "index_messages_traces_on_trace_id"
   end
 
   create_table "morphics", force: :cascade do |t|
@@ -534,6 +541,8 @@ ActiveRecord::Schema.define(version: 2023_02_08_052340) do
   add_foreign_key "instruments", "stores"
   add_foreign_key "invoice_items", "invoices"
   add_foreign_key "invoices", "stores"
+  add_foreign_key "messages_traces", "messages"
+  add_foreign_key "messages_traces", "traces"
   add_foreign_key "pay_charges", "pay_customers", column: "customer_id"
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"

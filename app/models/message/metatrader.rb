@@ -14,22 +14,23 @@ class Message::Metatrader < Message::Message
 
   def close_orders
     content = YAML.load(self.content)
-
-    # Close All Orders
-    if content['orders'].blank?
-      self.trace.transactions.pending_executed.each do |transaction|
-        transaction.close
-        transaction.close_info
-        transaction.loggings.create(content: "Remove automatically by Close Orders Blank #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
-      end
-    else
-      self.trace.transactions.pending_executed.each do |transaction|
-        unless content['orders'].flatten.detect{|x| x['ticket_id'].to_s == transaction.ticket}
+    self.traces.each do |trace|
+      # Close All Orders
+      if content['orders'].blank?
+        trace.transactions.pending_executed.each do |transaction|
           transaction.close
           transaction.close_info
-          transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
+          transaction.loggings.create(content: "Remove automatically by Close Orders Blank #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
         end
-      end      
+      else
+        trace.transactions.pending_executed.each do |transaction|
+          unless content['orders'].flatten.detect{|x| x['ticket_id'].to_s == transaction.ticket}
+            transaction.close
+            transaction.close_info
+            transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
+          end
+        end      
+      end
     end
   end
 
@@ -60,13 +61,17 @@ class Message::Metatrader < Message::Message
         ticket = order_params['ticket_id']
         
         # orders = self.trace.orders.where(content_id: ticket, state: :executed)
-        orders = self.trace.orders.where(content_id: ticket)
-        if not order_params['state_meta'].present?
-          unless orders.present?
-            self.trace.create_orders(order_params, account_copy, self, symbol)
+        self.traces.each do |trace|
+          orders = trace.orders.where(content_id: ticket)
+          if not order_params['state_meta'].present?
+            unless orders.present?
+              trace.create_orders(order_params, account_copy, self, symbol)
+            end
+          elsif order_params['state_meta'] == "modify"
+            orders.each do |order| 
+              order.transactions.map{|t| t.set_lot_sl_tp(order_params) }
+            end
           end
-        elsif order_params['state_meta'] == "modify"
-          orders.each{|order| order.transactions.map{|t| t.set_lot_sl_tp(order_params) }}
         end
       end
     end

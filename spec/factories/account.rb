@@ -23,6 +23,13 @@ FactoryBot.define do
       meta_margin_mode { 'hedging' }
       trace_ids { 1 } 
     end
+    trait :slave4 do
+      name {202020} 
+      kind {'slave'} 
+      meta_mode { 'demo' }
+      meta_margin_mode { 'hedging' }
+      trace_ids { 2 } 
+    end
     trait :copy do
       name {5647753} 
       kind {'copy'} 

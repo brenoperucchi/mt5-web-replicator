@@ -45,15 +45,15 @@ module API
             account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
             if account
               account.loggings.create(content:params, state: action.try(:upcase), changeset: account.name)
-              trace = account.try(:trace_copy)
+              traces = account.traces.copy.ids
 
-              if trace #and not content.blank? and content.is_a?(Hash)
+              if traces.present? #and not content.blank? and content.is_a?(Hash)
                 orders = {orders:[]}
                 params['orders'].encode("UTF-8", "Windows-1252").split("//").each do |order| 
                   orders[:orders] << [YAML.load(order)]
                 end
                 orders[:params] = params.except('orders')
-                message = Message::Metatrader.create(content: orders.to_json, content_at: Time.zone.now, store: trace.store, trace:trace)
+                message = Message::Metatrader.create(content: orders.to_json, content_at: Time.zone.now, store: account.store, trace_ids:traces)
                 
                 # TODO - Colocar uma trava se account estiver desabilitado
                 if message.execute

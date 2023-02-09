@@ -40,9 +40,9 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
+  active
   name
   name_id
-  active
   kind
   accounts
   ].freeze
@@ -52,6 +52,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   active
+  instrument_control
   name
   name_id
   kind
@@ -67,6 +68,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   active
+  instrument_control
   name
   name_id
   kind

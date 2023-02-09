@@ -14,7 +14,7 @@ module Message
       state: Field::String,
       response: Field::String,
       orders: Field::HasMany,
-      trace: Field::BelongsTo,
+      traces: Field::HasMany,
       # message: Field::HasOne,
       updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -32,12 +32,10 @@ module Message
     COLLECTION_ATTRIBUTES = %i[
     id
     state
-    content_id
     content
-    response
-    trace
+    traces
+    orders
     created_at
-    content_at
 
     ].freeze
 
@@ -45,9 +43,9 @@ module Message
     # an array of attributes that will be displayed on the model's show page.
     SHOW_PAGE_ATTRIBUTES = %i[
     state
-    trace
     content_id
     content
+    traces
     orders
     response
     content_at
@@ -59,7 +57,7 @@ module Message
     # on the model's form (`new` and `edit`) pages.
     FORM_ATTRIBUTES = %i[
     state
-    trace
+    traces
     content_id
     content
     response

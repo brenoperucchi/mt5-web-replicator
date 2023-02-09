@@ -21,8 +21,8 @@ class Trace < ApplicationRecord
   has_many :masters, :through => :orders, :source => :transactions
   has_many :slaves,  :through => :orders, :source => :slaves
 
-
-  has_many :messages, :class_name => "Message::Message", :foreign_key => "trace_id"
+  # has_many :messages, :class_name => "Message::Message", :foreign_key => "trace_id"
+  has_and_belongs_to_many :messages, :class_name => "Message::Message"
 
   has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id", dependent: :destroy
   belongs_to :store, optional: true
@@ -87,8 +87,8 @@ class Trace < ApplicationRecord
       transaction = order.transactions.find_by(symbol: instrument, account: account)
       transaction ||= order.transactions.create(api_transaction_attributes.merge(account:account))
     elsif account.hedging?
-      order = account.orders.create_with(trace: self, message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket)
-      transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(ticket: ticket)
+      order = account.orders.create_with(trace: self, message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket, trace:self)
+      transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(ticket: ticket, trace:self)
     end
 
     # CREATE ORDER -> TRANSACTION -> SLAVES
@@ -113,7 +113,7 @@ class Trace < ApplicationRecord
   end
 
   def check_instrument(account, symbol, account_slave=nil)
-    if account_slave
+    if account_slave and self.instrument_control.to_b
       instrument = account_slave.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) if account_slave.instrument_control.to_b
       instrument ||= account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) if account.instrument_control.to_b
     end
