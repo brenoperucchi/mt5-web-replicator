@@ -48,10 +48,10 @@ module Control
       current_store.try(resource_name.to_s.pluralize.to_sym).try(:new)
     end
 
-    def dashboard
-      @dashboard ||= "#{namespace}::#{resource_name.to_s.classify}Dashboard".try(:classify).try(:constantize).try(:new)
-      # @dashboard ||= Control::AccountDashboard.new
-    end
+    # def dashboard
+    #   @dashboard ||= "#{namespace}::#{resource_name.to_s.classify}Dashboard".try(:classify).try(:constantize).try(:new)
+    #   # @dashboard ||= Control::AccountDashboard.new
+    # end
 
     def scoped_resource
       current_user.store.send("#{resource_name}".pluralize)

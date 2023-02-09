@@ -43,7 +43,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   active
   name
   name_id
-  kind
   accounts
   ].freeze
 
@@ -55,7 +54,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   instrument_control
   name
   name_id
-  kind
   take_profit_limit
   accounts
   orders
@@ -71,7 +69,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   instrument_control
   name
   name_id
-  kind
   store_id
   take_profit_limit
   accounts

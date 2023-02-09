@@ -8,10 +8,10 @@ GIT
 
 GIT
   remote: https://github.com/brenoperucchi/administrate.git
-  revision: 7aac879d5ad37d37824bae5ec625f7c1ea4e891b
+  revision: fb0dd2c3962fdf8afd1c75162512e2690f61a7d1
   branch: main_imentore
   specs:
-    administrate (0.18.1)
+    administrate (0.18.2)
       actionpack (>= 5.0)
       actionview (>= 5.0)
       activerecord (>= 5.0)

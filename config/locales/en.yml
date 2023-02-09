@@ -467,6 +467,7 @@ en:
     pm: pm
 
   administrate:
+    namespace_alternate: control
     actions:
       confirm: Are you sure?
       destroy: Destroy

@@ -41,14 +41,14 @@ module Fields
 		  associated_dashboard.display_resource(resource)
 		end
 
-		def associated_dashboard
-			if options.key?(:dashboard) and options[:dashboard].try(:downcase).try(:to_s) == "control"
-				if "Control::#{associated_class_name}Dashboard".is_a_defined_class?
-					return "Control::#{associated_class_name}Dashboard".constantize.new
-				end
-			end
-			super
-		end
+		# def associated_dashboard
+		# 	if options.key?(:dashboard) and options[:dashboard].try(:downcase).try(:to_s) == "control"
+		# 		if "Control::#{associated_class_name}Dashboard".is_a_defined_class?
+		# 			return "Control::#{associated_class_name}Dashboard".constantize.new
+		# 		end
+		# 	end
+		# 	super
+		# end
 
 	end
 end

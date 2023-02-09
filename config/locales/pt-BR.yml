@@ -474,6 +474,7 @@ pt-BR:
     pm: ''
 
   administrate:
+    namespace_alternate: control
     actions:
       confirm: Você tem certeza?
       destroy: Deletar
