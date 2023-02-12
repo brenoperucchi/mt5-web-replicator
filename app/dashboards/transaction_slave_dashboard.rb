@@ -9,12 +9,6 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id:                 Field::Number.with_options(searchable: true),
-    loggings:           Field::HasMany,
-    versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
-    order:              Field::BelongsTo,
-    account:            Field::BelongsTo,
-    trace:              Field::BelongsTo,
-    master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     ticket_master:      Field::String,
     ticket_slave:       Field::String,
     ticket_deal:        Field::String,
@@ -30,6 +24,12 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     comment:            Field::String,
     lot:                Field::String,
     magic_number:       Field::String,
+    order:              Field::BelongsTo,
+    account:            Field::BelongsTo,
+    trace:              Field::BelongsTo,
+    versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
+    loggings:           Fields::HasManyScopeField.with_options(associated: :store, scoped: :active),
+    master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -47,8 +47,9 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   symbol
   price_open
   price_closed
-  account
   profit
+  loggings
+  account
   open_at
   closed_at
   ].freeze

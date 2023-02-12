@@ -4,7 +4,7 @@ RSpec.describe API::V1::APITransactionsCopy do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store)
+    @trace = create(:trace, :copy, store: @store, instrument_control: true)
     @trace2 = create(:trace, :copy2, store: @store)
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
@@ -24,10 +24,8 @@ RSpec.describe API::V1::APITransactionsCopy do
   end
 
   describe API::V1::APITransactionsCopy do
-    context 'Control Instrument' do #, focus:true do
+    context 'Control Instrument'do #, focus:true do
       it 'Hedging - Change instruments on copy to slaves' do
-        @trace.instrument_control = true
-        @trace.save
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "5647753"
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
@@ -45,7 +43,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
-        {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+          {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
         order = Order.find_by(content_id: 10002)          
         expect(order.content_id).to be == "10002"
         expect(order.state).to be == "executed"
@@ -54,10 +52,10 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.first.symbol).to be == "GBPCAD"
         expect(order.slaves.first.symbol).not_to be == "GBPUSD"
       end
-      it 'Hedging - Control Instrument'do #, focus:true do
+      it 'Trace - Create order all traces'do #, focus:true do
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
-        {\"ticket_id\":10003,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+          {\"ticket_id\":10003,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
         orders = Order.where(content_id: 10003)
         expect(orders.count).to be == 2
         order = orders.last
@@ -67,6 +65,27 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.trace.name).to be == "SignalCopy2"
         expect(order.transactions.first.symbol).to be == "GBPUSD"
         expect(order.slaves.first.symbol).to be == "GBPUSD"
+      end
+      
+      it 'Trace - One trace disable'do #, focus:true do
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"
+          {\"ticket_id\":10004,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        slaves = TransactionSlave.where(ticket_master: 10004)
+        expect(slaves.count).to be == 3
+        expect(slaves[0].trace).to be == @trace
+        expect(slaves[1].trace).to be == @trace
+        expect(slaves[2].trace).to be == @trace2
+        
+        @trace2.soft_destroy
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"
+          {\"ticket_id\":10005,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        slaves = TransactionSlave.where(ticket_master: 10005)
+        expect(slaves.count).to be == 2
+        expect(slaves[0].trace).to be == @trace
+        expect(slaves[1].trace).to be == @trace
+        expect(TransactionSlave.where(ticket_master: 10005, trace:@trace2)).to be_empty
       end
     end
   end

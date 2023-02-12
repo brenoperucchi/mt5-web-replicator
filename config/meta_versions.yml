@@ -22,6 +22,7 @@ signal_slave:
   '2_03': disable
   '2_04': OK
   '2_05': OK
+  '2_06': OK
   disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_copy:
   '1_30': disable

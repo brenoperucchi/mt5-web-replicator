@@ -61,7 +61,7 @@ class Message::Metatrader < Message::Message
         ticket = order_params['ticket_id']
         
         # orders = self.trace.orders.where(content_id: ticket, state: :executed)
-        self.traces.each do |trace|
+        self.traces.active.not_deleted.each do |trace|
           orders = trace.orders.where(content_id: ticket)
           if not order_params['state_meta'].present?
             unless orders.present?
