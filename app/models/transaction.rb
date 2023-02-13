@@ -8,7 +8,7 @@ class Transaction < ApplicationRecord
   # }
 
   belongs_to :order, optional:true
-  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id
+  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id, optional:true
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
   belongs_to :deal, optional:true
@@ -74,7 +74,7 @@ class Transaction < ApplicationRecord
     state :closed do
       def update_state(state)
         self.telegram_message(:CLOSED)
-        self.order.close
+        self.try(:order).try(:close)
         self.slaves.map(&:remove)
         return true
       end

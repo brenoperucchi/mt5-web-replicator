@@ -89,7 +89,7 @@ RSpec.describe API::V1::APITransactionsCopy do
       end
     end
   end
-  describe API::V1::APITransactionsCopy do
+  describe API::V1::APITransactionsCopy, focus:true do
     context 'POST' do
       it 'Hedging - Restrict Magic Number' do
         Current.user = @user
@@ -110,6 +110,9 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(slave2.id).to be == 5
         expect(slave1.state).to be == "pending"
         expect(slave2.state).to be == "pending"
+        transaction.close
+        expect(transaction.state).to be == "closed"
+
       end
  
       it 'Hedging - Restrict Magic Number' do
