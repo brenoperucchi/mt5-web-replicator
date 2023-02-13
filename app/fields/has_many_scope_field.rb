@@ -10,8 +10,17 @@ module Fields
       data
     end
 
-    def scoped
-      options.key?(:scoped) ? options[:scoped] : :all
+    def scoped(data)
+      if options.key?(:scoped) 
+        if options[:scoped].is_a?(Array)
+          data = data.send(:instance_eval, "#{options[:scoped].join(".").to_s}")
+        else
+          data = data.send(options[:scoped]) if data.respond_to?(options[:scoped])
+        end
+      else
+        data = data.respond_to?(:not_deleted) ? data.not_deleted : data.all
+      end
+      data
     end
 
 
@@ -41,7 +50,7 @@ module Fields
 
     def data(current_user=nil)
       data = resource.send(attribute.to_s.pluralize)
-      data = data.send(scoped) if options.key?(:scoped) and data.respond_to?(scoped)
+      data = scoped(data)
       data
     end
 
@@ -54,18 +63,17 @@ module Fields
     def candidate_resources
       if options.key?(:associated) 
         if resource.respond_to?(options[:associated])
-          data = resource.send(options[:associated]).send(attribute.to_s.pluralize).send(scoped)
+          data = resource.send(options[:associated]).send(attribute.to_s.pluralize)
         else
           data = resource.send(attribute.to_s.pluralize)
         end
-        # current_store_field.send(attribute.to_s.pluralize).send(scoped)
       elsif options.key?(:includes)
         includes = options.fetch(:includes)
         data = associated_class.includes(*includes).all
       else
         data = associated_class.all
       end
-      data = data.send(scoped) if options.key?(:scoped) and data.respond_to?(scoped)
+      data = scoped(data)
       order_options = options.key?(:sort_by) ? options[:sort_by].to_s : "id" 
       order_options = options.key?(:direction) ? order_options + options[:direction].to_s : order_options
       data = data.order(order_options) unless order_options.blank?
@@ -75,15 +83,6 @@ module Fields
     def display_candidate_resource(resource)
       associated_dashboard.display_resource(resource)
     end
-
-    # def associated_dashboard
-    #   if options.key?(:dashboard) and options[:dashboard].try(:downcase).try(:to_s) == "control"
-    #     if "Control::#{associated_class_name}Dashboard".is_a_defined_class?
-    #       return "Control::#{associated_class_name}Dashboard".constantize.new
-    #     end
-    #   end
-    #   super
-    # end
 
   end
 end

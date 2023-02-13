@@ -31,7 +31,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     account:            Field::BelongsTo,
     trace:              Field::BelongsTo,
     versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
-    loggings:           Fields::HasManyScopeField.with_options(associated: :store, scoped: :active),
+    loggings:           Fields::HasManyScopeField.with_options(associated: :store),
     master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

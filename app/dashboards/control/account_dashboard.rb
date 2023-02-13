@@ -16,7 +16,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     kind:                 Field::String,
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
-    traces:               Fields::HasManyScopeField.with_options(associated: :store, scoped: :active, dashboard:'control'),
+    traces:               Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     orders:               Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     instruments:          Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     store:                Field::BelongsTo,
