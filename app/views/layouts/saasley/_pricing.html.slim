@@ -40,6 +40,36 @@ section.position-relative.overflow-hidden#pricing
                   - amount_extra = number_with_precision plan.amount_extra, precision:2
                   = I18n.t :extra, amount:amount_extra, scope:'helpers.site.main.pricing'
                   | 
+        .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" 
+          .card.mb-4.mb-lg-0.shadow-lg.rounded-4.border-0.overflow-hidden
+            span.badge.bg-dark.rounded-bottom-0.py-3.fs-6 Premium
+            .px-4.py-4
+              h5.mb-2
+              p.text-muted.mb-0
+                = I18n.t :title1, scope:'helpers.site.main.pricing.premium'
+            .card-body.pt-0.pb-4.px-4
+              / h1.display-5
+              /   span.fw-light.small 
+              /   | --
+              / small.text-muted.font-monospace.mb-4.d-block Por Mês
+              a.w-100.btn.btn-lg.btn-gradient-primary.hover-lift[href="mailto:contato@imentore.com.br"]
+                = I18n.t :title2, scope:'helpers.site.main.pricing.premium'
+              ul.list-unstyled.mb-0.pt-4
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :telegram, limit:nil, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :charge, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :slave, limit:20, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :copy, limit:20, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :trace, limit:20, scope:'helpers.site.main.pricing'
     /               li.d-flex.align-items-center.mb-3
     /                 span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
     /                 | 1 Contas Master (demo)
@@ -52,41 +82,6 @@ section.position-relative.overflow-hidden#pricing
     /               li.d-flex.align-items-center.mb-3
     /                 span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3 cancel
     /                 | 0 R$ por recurso extra
-    /     .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" 
-    /       .card.mb-4.mb-lg-0.shadow-lg.rounded-4.border-0.overflow-hidden
-    /         / span.badge.bg-warning.rounded-bottom-0.py-3.fs-6 Best value
-    /         .px-4.py-4
-    /           h5.mb-2 Premium
-    /           /!
-    /             | <p class="text-muted mb-0">For teams that need to create project plans with
-    /             | confidence.</p
-    /         .card-body.pt-0.pb-4.px-4
-    /           h1.display-5
-    /             span.fw-light.small BR$
-    /             | 100
-    /           small.text-muted.font-monospace.mb-4.d-block Por Mês
-    /           form action="/demo_request"
-    /             button.w-100.btn.btn-lg.btn-gradient-secondary.hover-lift
-    /               = I18n.t :sign_in, scope: 'helpers.site.main.pricing'
-    /           ul.list-unstyled.mb-0.pt-4
-    /             li.d-flex.align-items-center.mb-3
-    /               span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3 cancel
-    /               | Cobrança automatica para clientes
-    /             li.d-flex.align-items-center.mb-3
-    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
-    /               | 1 Telegram Bot - Alfred
-    /             li.d-flex.align-items-center.mb-3
-    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
-    /               | 2 Portfolio
-    /             li.d-flex.align-items-center.mb-3
-    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
-    /               | 2 Contas Master
-    /             li.d-flex.align-items-center.mb-3
-    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
-    /               | 3 Contas Slaves
-    /             li.d-flex.align-items-center.mb-3
-    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
-    /               | 2 Usuários admin
     /     .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" data-aos-delay="150" 
     /       .card.shadow-lg.rounded-4.border-0.overflow-hidden
     /         .px-4.py-4

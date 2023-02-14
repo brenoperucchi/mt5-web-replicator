@@ -46,6 +46,9 @@ pt-BR:
           resume2: Na entradas manuais o cliente poderá continuar usando o seu sistema de trader favorito (Profit, Tryd...), basta que na mesma conta tenha acesso ao Metatrader.
           resume3: O sistema dará todas informações Log entradas tanto da conta COPY quanto das contas SLAVES.
         pricing:
+          premium:
+            title1: Servidor exclusivo de acordo com a sua demanda ao lado dos grandes centros (B3 ou Forex). 
+            title2: Entre em contato
           title: Nossos planos.
           sign_in: Assine
           trace: "%{limit} Portfólio"
@@ -58,8 +61,8 @@ pt-BR:
           announce2: descontos válidos por 1 ano.
           price: "%{value} "
         management: 
-          title: Gestão 
-          resume: Tenha todas as informações do que acontece as ordens do Master e Slaves.
+          title: Gestão & Portfólios 
+          resume: Gerenciamento de contas por Portfólios e logs de informações dos sistemas.
           resume2: 
       session:
         dont_have_account: "Ainda não tem uma conta?"
@@ -108,6 +111,7 @@ pt-BR:
         active: Ativo
         kind: Tipo
         take_profit_limit: Limite TakeProfit
+        instrument_control: Controle de Ativo
         accounts: Conta
         orders: Ordens
         messages: Mensagem

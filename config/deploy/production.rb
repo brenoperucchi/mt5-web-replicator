@@ -31,7 +31,7 @@ set :conditionally_migrate, true
 # set :sidekiq_config, "#{current_path}/config/sidekiq.yml"  
 # set :sidekiq_env, 'production'  
 set :pty,  false
-append :rbenv_map_bins, 'puma', 'pumactl'
+#append :rbenv_map_bins, 'puma', 'pumactl'
 
 
 set :sidekiq_roles => :worker

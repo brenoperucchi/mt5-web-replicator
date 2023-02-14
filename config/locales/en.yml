@@ -46,6 +46,9 @@ en:
           resume2: In manual entries, the client will be able to continue using his favorite trader system (Profit, Tryd, and others), just that the same account has access to Metatrader 5
           resume3: The system will provide all log information entered both from the COPY account and from the SLAVES accounts.
         pricing:
+          premium:
+            title1: Exclusive server according to your demand next to the big centers (B3 or Forex).
+            title2: Get in touch
           title: Our plans.
           sign_in: sign
           trace: "%{limit} Portfolio"
@@ -58,8 +61,8 @@ en:
           announce2: discounts valid for 1 year.
           price: "%{value} "
         management:
-          title: Management
-          resume: Have all the information of what happens to the orders of the Master and Slaves.
+          title: Management & Portfolios
+          resume: Account management by Portfolios and system information logs.
           resume2:
       session:
         dont_have_account: "Don't Have an account yet?"
@@ -108,6 +111,7 @@ en:
         active: Active
         kind: kind
         take_profit_limit: Take Profit limit
+        instrument_control: Instrumetn Control
         accounts: Accounts
         orders: Orders
         messages: messages
