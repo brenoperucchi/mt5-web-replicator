@@ -28,6 +28,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     kind
     amount
     customers
+    store
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES

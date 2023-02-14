@@ -46,6 +46,10 @@ pt-BR:
           resume2: Na entradas manuais o cliente poderá continuar usando o seu sistema de trader favorito (Profit, Tryd...), basta que na mesma conta tenha acesso ao Metatrader.
           resume3: O sistema dará todas informações Log entradas tanto da conta COPY quanto das contas SLAVES.
         pricing:
+          plan:
+            basic: Básico
+            business: Negócio
+            premium: Premium
           premium:
             title1: Servidor exclusivo de acordo com a sua demanda ao lado dos grandes centros (B3 ou Forex). 
             title2: Entre em contato
@@ -57,7 +61,7 @@ pt-BR:
           charge: Cobrança automatica para clientes
           telegram: "%{limit} Robo Telegram Bot - Alfred"
           extra: "%{amount} R$ por cada recurso extra"
-          announce1: "Todos os planos com %{value}% de desconto por limitado"
+          announce1: "Todos os planos com %{value}% de desconto por tempo limitado"
           announce2: descontos válidos por 1 ano.
           price: "%{value} "
         management: 

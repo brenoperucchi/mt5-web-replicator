@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_08_210845) do
+ActiveRecord::Schema.define(version: 2023_02_14_171257) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -102,13 +102,11 @@ ActiveRecord::Schema.define(version: 2023_02_08_210845) do
     t.text "settings"
     t.bigint "store_id"
     t.bigint "customer_plan_id"
-    t.bigint "plan_id"
     t.integer "role", default: 0
     t.integer "role_control", default: 0
     t.datetime "deleted_at"
     t.index ["customer_plan_id"], name: "index_customers_on_customer_plan_id"
     t.index ["deleted_at"], name: "index_customers_on_deleted_at"
-    t.index ["plan_id"], name: "index_customers_on_plan_id"
     t.index ["store_id"], name: "index_customers_on_store_id"
   end
 
@@ -535,7 +533,6 @@ ActiveRecord::Schema.define(version: 2023_02_08_210845) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "customer_plans", "stores"
   add_foreign_key "customers", "customer_plans"
-  add_foreign_key "customers", "plans"
   add_foreign_key "customers", "stores"
   add_foreign_key "instruments", "accounts"
   add_foreign_key "instruments", "stores"
@@ -552,5 +549,6 @@ ActiveRecord::Schema.define(version: 2023_02_08_210845) do
   add_foreign_key "plan_usages", "stores"
   add_foreign_key "stores", "plans"
   add_foreign_key "taggings", "tags"
+  add_foreign_key "transactions", "traces"
   add_foreign_key "versions", "loggings"
 end

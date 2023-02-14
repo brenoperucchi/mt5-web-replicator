@@ -46,6 +46,10 @@ en:
           resume2: In manual entries, the client will be able to continue using his favorite trader system (Profit, Tryd, and others), just that the same account has access to Metatrader 5
           resume3: The system will provide all log information entered both from the COPY account and from the SLAVES accounts.
         pricing:
+          plan:
+            basic: Basic
+            business: Business
+            premium: Premium
           premium:
             title1: Exclusive server according to your demand next to the big centers (B3 or Forex).
             title2: Get in touch

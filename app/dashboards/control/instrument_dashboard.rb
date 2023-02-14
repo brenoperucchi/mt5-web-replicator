@@ -14,7 +14,7 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
     symbol:     Field::String,
     name:       Field::String,
     volumes:    Field::String.with_options(searchable: false),
-    store_id:   DisableTextField.with_options(default: :current_store),
+    store_id:   DisableTextField.with_options(default: :current_store, type: 'hide'),
     trace:      Fields::BelongsToField.with_options(associated: :store),
     account:    Fields::BelongsToField.with_options(associated: :store),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

@@ -24,7 +24,7 @@ class Customer < ApplicationRecord
   has_many :plan_usages, as: :resourceable
   
   has_many :accounts, dependent: :nullify
-  has_many :customer_plans, dependent: :nullify
+  # has_many :customer_plans, dependent: :nullify
   has_many :invoices, as: :invoiceable#, dependent: :destroy
 
   delegate :email, to: :user, allow_nil: true

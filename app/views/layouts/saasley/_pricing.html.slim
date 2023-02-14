@@ -14,7 +14,7 @@ section.position-relative.overflow-hidden#pricing
             .card.mb-4.mb-lg-0.shadow-lg.rounded-4.border-0.overflow-hidden
               / span.badge.bg-warning.rounded-bottom-0.py-3.fs-6 60% de desconto no recurso extra
               .px-4.py-4
-                h5.mb-2 = plan.name
+                h5.mb-2 = I18n.t plan.name.downcase, scope: 'helpers.site.main.pricing.plan'
                 /! <p class="mb-0 text-muted">For individuals or startup teams..</p
               .card-body.pt-0.pb-4.px-4
                 h1.display-5.d-sm-inline-block
@@ -42,7 +42,7 @@ section.position-relative.overflow-hidden#pricing
                   | 
         .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" 
           .card.mb-4.mb-lg-0.shadow-lg.rounded-4.border-0.overflow-hidden
-            span.badge.bg-dark.rounded-bottom-0.py-3.fs-6 Premium
+            span.badge.bg-dark.rounded-bottom-0.py-3.fs-6 = I18n.t :premium, scope: 'helpers.site.main.pricing.plan'
             .px-4.py-4
               h5.mb-2
               p.text-muted.mb-0

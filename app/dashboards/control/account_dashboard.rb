@@ -65,6 +65,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  instrument_control
   name
   state
   customer
@@ -72,7 +73,6 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   meta_mode
   meta_margin_mode
   magics_accept
-  instrument_control
   traces
   ].freeze
 

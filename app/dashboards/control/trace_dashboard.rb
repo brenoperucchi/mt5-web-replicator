@@ -67,6 +67,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   active
   instrument_control
+  kind
   name
   name_id
   store_id
