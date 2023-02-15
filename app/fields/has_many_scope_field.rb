@@ -17,9 +17,8 @@ module Fields
         else
           data = data.send(options[:scoped]) if data.respond_to?(options[:scoped])
         end
-      else
-        data = data.respond_to?(:not_deleted) ? data.not_deleted : data.all
       end
+      data = data.respond_to?(:not_deleted) ? data.not_deleted : data
       data
     end
 
