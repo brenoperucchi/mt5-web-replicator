@@ -27,9 +27,9 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     # messages:               Fields::HasManyScopeField.with_options(associated: :store, direction: :desc, sort_by: :created_at),
     store_id:                 DisableAssociation.with_options(attribute: :store, type:'hide'),
     take_profit_limit:        DisableTextField.with_options(value:2, type:'hide'),
-    instruments:              Fields::HasManyScopeField.with_options(associated: :store),
-    orders:                   Fields::HasManyScopeField.with_options(associated: :trace),
-    accounts:                 Fields::HasManyScopeField.with_options(associated: :store),
+    instruments:              Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
+    orders:                   Fields::HasManyScopeField.with_options(associated: :trace, dashboard:'control'),
+    accounts:                 Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     created_at:               Field::DateTime,
     updated_at:               Field::DateTime,
   }.freeze

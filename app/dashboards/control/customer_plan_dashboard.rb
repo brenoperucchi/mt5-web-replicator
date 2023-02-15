@@ -15,7 +15,7 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     name: Field::String,
     amount: Field::String.with_options(searchable: false),
     store_id: DisableAssociation.with_options(attribute: :store),
-    customers: Fields::HasManyScopeField.with_options(associated: :store),
+    customers: Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     kind: CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
