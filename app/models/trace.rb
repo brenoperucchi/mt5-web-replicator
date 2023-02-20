@@ -102,10 +102,12 @@ class Trace < ApplicationRecord
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 
         self.accounts.slave.enable.each do |account_slave|
-          order.accounts << account_slave
+          
           instrument = check_instrument(account, symbol, account_slave)
           api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:nil, account:account_slave, price_open:nil, comment: ticket)
-          slave = order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self))
+          if order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self))
+            order.accounts << account_slave
+          end
         end
 
       end

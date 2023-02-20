@@ -16,7 +16,7 @@ class AccountDashboard < Administrate::BaseDashboard
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
     traces:               Field::HasMany,
-    transactions:         Field::HasMany,
+    orders:         Fields::HasManyScopeField.with_options(associated: :trace, dashboard:'control'),
     instruments:          Field::HasMany,
     store:                Field::BelongsTo,
     customer:             Field::BelongsTo,
@@ -32,6 +32,7 @@ class AccountDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
+  id
   name
   state
   customer
@@ -39,12 +40,13 @@ class AccountDashboard < Administrate::BaseDashboard
   meta_mode
   meta_margin_mode
   traces
-  transactions
+  orders
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
+  id
   name
   state
   customer
@@ -56,7 +58,7 @@ class AccountDashboard < Administrate::BaseDashboard
   instrument_control
   traces
   store
-  transactions
+  orders
   instruments
   created_at
   updated_at

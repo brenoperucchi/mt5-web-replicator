@@ -1,3 +1,15 @@
+class Numeric
+  def to_sign
+    if self > 0
+      "+#{self}"
+    elsif zero?
+      "0"
+    else
+      "#{self}"
+    end
+  end
+end
+
 class Hash
   def to_o
     JSON.parse to_json, object_class: OpenStruct

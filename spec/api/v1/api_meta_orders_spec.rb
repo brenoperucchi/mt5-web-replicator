@@ -24,6 +24,25 @@ RSpec.describe API::V1::APITransactionsCopy do
   end
 
   describe API::V1::APITransactionsCopy do
+    context 'Control Instrument' do# focus:true do
+      it 'Hedging - Change instruments on copy to slaves' do
+        account = Account.find_by_name(5634788)
+        expect(account.id).to be == 3
+        expect(account.balances.count).to be == 4
+        expect(account.orders.count).to be == 4
+        expect(account.balances.where(account_id: 3).count).to be == 4
+        account.orders.each do |order|
+          expect(order.slaves.where(account_id: 1).count).to be == 0
+          expect(order.slaves.where(account_id: 2).count).to be == 1
+          expect(order.slaves.where(account_id: 3).count).to be == 1
+          expect(order.slaves.where(account_id: 4).count).to be == 0
+        end
+        # %w(483852116 483854383 483854633 483857785).each do |account_name|
+          # account
+          # expect(Order.find)
+        # end
+      end
+    end
     context 'Control Instrument'do #, focus:true do
       it 'Hedging - Change instruments on copy to slaves' do
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)

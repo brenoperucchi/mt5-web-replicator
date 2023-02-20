@@ -71,7 +71,12 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
     time = obj['open_at']
     time = time.to_s.include?(".") ? time.split(".").try(:first).to_i : time.to_i
     zone = obj['timezone'].try(:to_i)
-    set_time_zone(time, zone)
+
+    unless obj.key?("time_trader")
+      set_time_zone(time, zone)
+    else
+      time_zone(obj['time_gmt'], obj['time_trader'], obj['open_at'])
+    end
   end
 
   def set_time_zone(time, zone)
@@ -81,19 +86,12 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
     else
       Time.use_zone(Time.zone.name) { Time.zone.at(time).utc.to_datetime.change(offset: Time.zone.now.strftime("%z")) }
     end
-    # return 0 if time == 0 
-    # if zone.present? and zone != 0
-    #   year  = Time.at(time).utc.strftime('%Y')
-    #   month  = Time.at(time).utc.strftime('%m')
-    #   day  = Time.at(time).utc.strftime('%d')
-    #   hour  = Time.at(time).utc.strftime('%H').to_i - zone.abs
-    #   minute  = Time.at(time).utc.strftime('%M')
-    #   second  = Time.at(time).utc.strftime('%S')
-    #   Time.zone.local(year, month, day, hour, minute, second).to_datetime
+  end
 
-    # else
-    #   Time.at(time).to_datetime
-    # end
+  def time_zone(time_gmt, time_trader, time_open)
+    time_zone = ((DateTime.parse(time_trader).to_i - DateTime.parse(time_gmt).to_i).to_f/3600).round
+    time_gmt = DateTime.parse(time_open + time_zone.to_sign) 
+    time_gmt.in_time_zone
   end
 
 end

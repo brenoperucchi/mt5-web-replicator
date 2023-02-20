@@ -20,6 +20,7 @@ class OrderDashboard < Administrate::BaseDashboard
     trace:        Field::BelongsTo,
     account:      Field::BelongsTo,
     message:      Field::BelongsTo,
+    store:        Field::BelongsTo,
     transactions: Field::HasMany,
     slaves:       Field::HasMany,
     created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -72,6 +73,7 @@ class OrderDashboard < Administrate::BaseDashboard
   symbol
   content
   content_id
+  store
   trace
 
   ].freeze

@@ -14,7 +14,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     email:         Field::String.with_options(searchable: false),
     plan:                   Field::BelongsTo,
     plan_items:             Field::HasMany,
-    language:        DisableTextField.with_options(value: 'pt-BR'),
+    language:               DisableTextField.with_options(value: 'pt-BR'),
     volume_default:         Field::String.with_options(searchable: false),
     telegram_bot_chat_id:   Field::String.with_options(searchable: false),
     telegram_bot_status:    Field::String.with_options(searchable: false),
