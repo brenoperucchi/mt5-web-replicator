@@ -123,7 +123,13 @@ class Trace < ApplicationRecord
   end
 
   def masters_scope(type = :masters, scope = :all)
-    masters_filter(self.send(type).send(scope))
+    data = masters_filter(self.send(type))
+    if scope.is_a?(Array)
+      data = data.send(:instance_eval, "#{scope.join(".").to_s}")
+    else
+      data = data.send(scope) if data.respond_to?(scope)
+    end
+    data
   end
 
   def masters_filter(scoped)

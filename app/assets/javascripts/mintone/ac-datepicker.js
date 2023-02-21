@@ -30,16 +30,23 @@ $(document).ready(function() {
 	});
 	$(function() {
 
-		var start = moment().subtract(29, 'days');
-		var end = moment();
+		// var start = moment().subtract(29, 'days');
+		// var end = moment();
+		var start = moment($('input[name="datefilter"]').val().split(" - ")[0], "DD/MM/YYYY");
+		var end = 	moment($('input[name="datefilter"]').val().split(" - ")[1], "DD/MM/YYYY");
 
 		function cb(start, end) {
-			$('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+			$('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
 		}
 
 		$('#reportrange').daterangepicker({
 			startDate: start,
 			endDate: end,
+			autoUpdateInput: false,
+		  	locale: {
+				format: 'DD/MM/YYYY',
+			  	cancelLabel: 'Clear'
+			},
 			ranges: {
 			   'Today': [moment(), moment()],
 			   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
@@ -50,13 +57,26 @@ $(document).ready(function() {
 			}
 		}, cb);
 
+		$('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+		  $('input[name="datefilter"]').val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+		  // $('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+
+		});
+
+		$('#reportrange').on('cancel.daterangepicker', function(ev, picker) {
+		  $('input[name="datefilter"]').val('');
+		  $('#reportrange span').html('');
+		});
+
 		cb(start, end);
+	  // $('#reportrange span').html($('input[name="datefilter"]').val());;
 
 	});
 	$(function() {
 	  $('input[name="datefilter"]').daterangepicker({
 		  autoUpdateInput: false,
 		  locale: {
+		  	  format: 'DD/MM/YYYY',
 			  cancelLabel: 'Clear'
 		  }
 	  });

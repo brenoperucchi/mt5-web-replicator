@@ -139,8 +139,8 @@
                 th Error
             tbody
               - @trace.accounts.slave.enable.each do |account|
-                - account.search_date_begin = @date_begin
-                - account.search_date_end = @date_end
+                - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+                - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
                 tr[data-href="#{account_dashboards_url(account, @trace)}"]
                   td = account.name
                   td = number_with_precision account.slave_profit
@@ -157,14 +157,3 @@
                   td = account.slaves_scope(:slaves, :gain, @trace).count
                   td = account.slaves_scope(:slaves, :loss, @trace).count
                   td = account.slaves_scope(:slaves, :error, @trace).count
-
-- content_for :header do
-  javascript:
-    console.log("teste")
-    start = 
-    $(document).ready(function(){
-      $(document).on("click", "table.table tr", function() {
-        var link  = $(this).data("href")
-            document.location.href=link;
-      });
-    });

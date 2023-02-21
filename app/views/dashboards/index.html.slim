@@ -17,8 +17,13 @@
         | </div
 /! [ breadcrumb ] end
 
+= render "filter"
+
 .row
   - @traces.each do |trace|                   
+    - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+    - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
+
     .col-md-6.col-lg-4
       = link_to dashboard_path(trace) do
         .card
@@ -28,7 +33,7 @@
             .card-header-right
               i.icofont.icofont-spinner-alt-5
           .card-body.p-b-30
-            h2= "R$ #{number_with_precision trace.masters.closed.sum(:profit)}"
+            h2= "R$ #{number_with_precision trace.masters_scope(:masters, :closed).to_a.sum(&:profit)}"
             p.text-muted.m-b-10 Lucro
             .row
               .col-sm-6.col-xs-12
@@ -50,14 +55,16 @@
                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
                 span.text-muted Account Slaves
               .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.buy.count
+                p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :buy]).count
                 span.text-muted Operações Compra
               .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.sell.count
+                p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :sell]).count
                 span.text-muted Operações Venda
               .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= trace.masters.closed.gain.count
+                p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :gain]).count
                 span.text-muted Operações Ganho
               .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= trace.masters.closed.loss.count
+                p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
                 span.text-muted Operações Perda
+- content_for :footer do
+

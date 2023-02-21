@@ -16,6 +16,10 @@ class DashboardsController < ApplicationController
 	# end
 
 	def index
+		# @date_today = Date.today
+		# session[:date_begin] ||= @date_today
+		# session[:date_end] ||= @date_today
+		# @dates ||= "#{@date_today.strftime('%d/%m/%Y')} - #{@date_today.strftime('%d/%m/%Y')}"
 		respond_to do |wants|
 			wants.html do 
 				# @executed = Store.first.transactions.executed
@@ -35,8 +39,8 @@ class DashboardsController < ApplicationController
 	end
 
 	def show
-		@trace.search_date_begin = @date_begin
-		@trace.search_date_end = @date_end
+		@trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
+		@trace.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
 
 		respond_to do |wants|
 			wants.html do
@@ -51,8 +55,8 @@ class DashboardsController < ApplicationController
 
 	def account
 		# @account = current_store.accounts.find(params[:id])
-    @account.search_date_begin = @date_begin
-    @account.search_date_end = @date_end
+    @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
+    @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
 
 		@trace = @account.traces.find(params[:trace_id])
 		respond_to do |wants|
@@ -87,12 +91,29 @@ class DashboardsController < ApplicationController
 	end
 
 	def filter_date
-		if params[:datefilter].present?
-			@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
-			@dates = params[:datefilter]
-			dates = params[:datefilter].split("-")
-			@date_begin = dates[0].strip().to_datetime.change(offset: @timezone)
-			@date_end = dates[1].strip().to_datetime.change(offset: @timezone)
+		# binding.pry
+		# if params[:datefilter].present?
+		date_today = Date.today
+		# dates = "#{date_today} - #{date_today}"
+		@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
+		# session[:dates] = params[:datefilter]
+		if params[:datefilter].blank? and session[:date_begin].nil? and session[:date_end].nil?
+			dates = "#{date_today.strftime('%d/%m/%Y')} - #{date_today.strftime('%d/%m/%Y')}"
+			session[:dates] = dates
+			session[:date_begin] = dates.split("-")[0]
+			session[:date_end] = dates.split("-")[1]					
+
+		else
+			if params[:datefilter].present? 
+				dates = params[:datefilter].split("-")
+				if dates[0] != session[:date_begin] or dates[1] != session[:date_end]
+					session[:dates] = params[:datefilter]
+					session[:date_begin] = dates[0]
+					session[:date_end] = dates[1]					
+				end
+			else
+				session[:dates] = "#{session[:date_begin]} - #{session[:date_end]}"
+			end
 		end
 	end
 
