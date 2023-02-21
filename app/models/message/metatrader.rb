@@ -13,18 +13,20 @@ class Message::Metatrader < Message::Message
   end
 
   def close_orders
-    content = YAML.load(self.content)
+    yaml_content = YAML.load(self.content)
+    account_copy = Account.find_by(name: yaml_content["params"]["account_id"])
     self.traces.each do |trace|
+
       # Close All Orders
-      if content['orders'].blank?
-        trace.transactions.pending_executed.each do |transaction|
+      if yaml_content['orders'].blank?
+        trace.masters.where(account:account_copy).pending_executed.each do |transaction|
           transaction.close
           transaction.close_info
           transaction.loggings.create(content: "Remove automatically by Close Orders Blank #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
         end
       else
-        trace.transactions.pending_executed.each do |transaction|
-          unless content['orders'].flatten.detect{|x| x['ticket_id'].to_s == transaction.ticket}
+        trace.masters.where(account:account_copy).pending_executed.each do |transaction|
+          unless yaml_content['orders'].flatten.detect{|x| x['ticket_id'].to_s == transaction.ticket}
             transaction.close
             transaction.close_info
             transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
@@ -33,23 +35,6 @@ class Message::Metatrader < Message::Message
       end
     end
   end
-
-    # if content['orders'].blank?
-    #   self.trace.slaves.pending_executed.map(&:remove)
-    
-    # # Close Specify Order
-    # else
-    #   self.trace.slaves.pending_executed.each do |slave|
-    #     if content['orders'].flatten.detect{|x| x['order_id'].to_s == slave.ticket_master}
-    #       # next
-    #     else
-    #       if slave.remove
-    #         slave.loggings.create(content: "Remove Automatically by MessageMetaTrader#{self.id} \r\n Content-> #{content['orders']}", state: "REMOVE") 
-    #       end
-    #     end
-    #   end
-    # end
-  # end
 
   def create_orders
     yaml_content = YAML.load(self.content)

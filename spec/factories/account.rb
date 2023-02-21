@@ -24,7 +24,7 @@ FactoryBot.define do
       trace_ids { 1 } 
     end
     trait :slave4 do
-      name {202020} 
+      name {202001} 
       kind {'slave'} 
       meta_mode { 'demo' }
       meta_margin_mode { 'hedging' }
@@ -32,6 +32,12 @@ FactoryBot.define do
     end
     trait :copy do
       name {5647753} 
+      kind {'copy'} 
+      meta_margin_mode { 'hedging' }
+      trace_ids { 1 }
+    end
+    trait :copy2 do
+      name {201002} 
       kind {'copy'} 
       meta_margin_mode { 'hedging' }
       trace_ids { 1 }

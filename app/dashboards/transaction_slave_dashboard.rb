@@ -50,9 +50,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   symbol
   price_open
   price_closed
-  profit
-  loggings
   account
+  profit
   open_at
   closed_at
   ].freeze

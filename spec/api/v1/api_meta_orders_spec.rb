@@ -14,16 +14,79 @@ RSpec.describe API::V1::APITransactionsCopy do
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account4 = create(:account, :slave4, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @account_copy2 = create(:account, :copy2, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2])
     
     post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
     params: {"orders"=>"
       {\"ticket_id\":483852116,\"open_price\":0.87114000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":1,\"magicnumber\":57392193,\"symbol\":\"EURGBP\",\"comment\":\"57392193\",\"open_at\":1668124835,\"timezone\":-4,\"state_meta\":null}//
       {\"ticket_id\":483854383,\"open_price\":1.16938000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57395585,\"symbol\":\"GBPUSD\",\"comment\":\"57395585\",\"open_at\":1668130203,\"timezone\":-4,\"state_meta\":null}//
       {\"ticket_id\":483854633,\"open_price\":1.16734000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57395828,\"symbol\":\"GBPUSD\",\"comment\":\"57395828\",\"open_at\":1668130644,\"timezone\":-4,\"state_meta\":null}//
-      {\"ticket_id\":483857785,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+      {\"ticket_id\":483857785,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", 
+        "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
   end
 
   describe API::V1::APITransactionsCopy do
+    context 'Traces - Close Orders' do
+      it 'Traces with two accounts copys' do
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/201002/HEDGING', 
+        params: {"orders"=>"
+          {\"ticket_id\":2011,\"open_price\":0.87114000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":1,\"magicnumber\":57392193,\"symbol\":\"EURGBP\",\"comment\":\"57392193\",\"open_at\":1668124835,\"timezone\":-4,\"state_meta\":null}//
+          {\"ticket_id\":2012,\"open_price\":1.16938000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57395585,\"symbol\":\"GBPUSD\",\"comment\":\"57395585\",\"open_at\":1668130203,\"timezone\":-4,\"state_meta\":null}",
+           "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"201002", "account_mode"=>"HEDGING"}
+        expect(Account.find_by_name(5647753).traces.first.masters.count).to be == 6
+        expect(Account.find_by_name(5647753).traces.last.masters.count).to be == 6
+
+        expect(Account.find_by_name(5647753).traces.first.transactions.count).to be == 6
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'closed_info').count).to be == 0
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'executed').count).to be == 6
+        expect(Account.find_by_name(5647753).traces.last.transactions.where(state:'executed').count).to be == 6
+        
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'executed').count).to be == 6
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'closed_info').count).to be == 0
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'executed').count).to be == 6
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'closed_info').count).to be == 0
+
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/201002/HEDGING', 
+        params: {"orders"=>"
+          {\"ticket_id\":2011,\"open_price\":0.87114000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":1,\"magicnumber\":57392193,\"symbol\":\"EURGBP\",\"comment\":\"57392193\",\"open_at\":1668124835,\"timezone\":-4,\"state_meta\":null}",
+           "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"201002", "account_mode"=>"HEDGING"}
+        expect(Account.find_by_name(5647753).traces.first.transactions.count).to be == 6
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'closed_info').count).to be == 1
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'executed').count).to be == 5
+        expect(Account.find_by_name(5647753).traces.last.transactions.where(state:'executed').count).to be == 5
+        
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'executed').count).to be == 5
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'closed_info').count).to be == 1
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'executed').count).to be == 5
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'closed_info').count).to be == 1
+
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/201002/HEDGING', 
+        params: {"orders"=>"",
+           "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"201002", "account_mode"=>"HEDGING"}
+        expect(Account.find_by_name(5647753).traces.first.transactions.count).to be == 6
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'closed_info').count).to be == 2
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'executed').count).to be == 4
+        expect(Account.find_by_name(5647753).traces.last.transactions.where(state:'executed').count).to be == 4
+        
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'executed').count).to be == 4
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'closed_info').count).to be == 2
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'executed').count).to be == 4
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'closed_info').count).to be == 2
+
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"", 
+            "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        expect(Account.find_by_name(5647753).traces.first.transactions.count).to be == 6
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'closed_info').count).to be == 6
+        expect(Account.find_by_name(5647753).traces.first.transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(5647753).traces.last.transactions.where(state:'executed').count).to be == 0
+        
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(201002).traces.first.transactions.where(state:'closed_info').count).to be == 6
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(201002).traces.last.transactions.where(state:'closed_info').count).to be == 6
+      end
+    end
     context 'Control Instrument' do# focus:true do
       it 'Hedging - Change instruments on copy to slaves' do
         account = Account.find_by_name(5634788)
