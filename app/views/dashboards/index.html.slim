@@ -67,4 +67,10 @@
                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
                 span.text-muted Operações Perda
 - content_for :footer do
-
+  javascript:
+    $(document).ready(function(){      
+      $(document).on("click", "table.table tr", function() {
+        var link  = $(this).data("href")
+            document.location.href=link;
+      });
+    });

@@ -157,3 +157,12 @@
                   td = account.slaves_scope(:slaves, :gain, @trace).count
                   td = account.slaves_scope(:slaves, :loss, @trace).count
                   td = account.slaves_scope(:slaves, :error, @trace).count
+
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){
+      $(document).on("click", "table.table tr", function() {
+        var link  = $(this).data("href")
+            document.location.href=link;
+      });
+    });
