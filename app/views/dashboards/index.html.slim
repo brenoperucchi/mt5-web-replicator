@@ -19,53 +19,86 @@
 
 = render "filter"
 
-.row
-  - @traces.each do |trace|                   
-    - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-    - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
 
-    .col-md-6.col-lg-4
-      = link_to dashboard_path(trace) do
-        .card
-          .card-header
-            .card-header-left
-              h5 = trace.name
-            .card-header-right
-              i.icofont.icofont-spinner-alt-5
-          .card-body.p-b-30
-            h2= "R$ #{number_with_precision trace.masters_scope(:masters, :closed).to_a.sum(&:profit)}"
-            p.text-muted.m-b-10 Lucro
-            .row
-              .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
-                span.text-muted Lucro %
-              .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
-                span.text-muted Perda %
-              .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= "#{number_with_precision trace.pay_off(:masters).round(2)}"
-                span.text-muted PayOff
-              .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= "#{number_with_precision trace.profit_factor(:masters).round(2)}"
-                span.text-muted Fator de Lucro
-              .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= number_with_precision "#{trace.drawdown(:masters).round(2)}"
-                span.text-muted Drawdown
-              .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
-                span.text-muted Account Slaves
-              .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :buy]).count
-                span.text-muted Operações Compra
-              .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :sell]).count
-                span.text-muted Operações Venda
-              .col-sm-6.col-xs-12
-                p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :gain]).count
-                span.text-muted Operações Ganho
-              .col-sm-6.col-xs-12
-                p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
-                span.text-muted Operações Perda
+.row
+  .col-xl-12.col-md-12
+    .row
+      - @traces.each do |trace|                   
+        - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+        - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
+        = link_to dashboard_path(trace) do
+        .col-sm-4
+          = link_to dashboard_path(trace) do
+            .card.profile-view
+              .card-body
+                h5
+                  = trace.name
+                  - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
+                  - if amount_profit.to_f >= 0
+                    strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-c-green
+                      = amount_profit
+                  - else
+                    strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-c-red
+                      = amount_profit
+                .row
+                  .col-6.text-center
+                    p.text-muted.m-b-0
+                      | Lucro Bruto
+                    span.text-c-green
+                      = number_with_precision trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision:2
+                  .col-6.text-center
+                    p.text-muted.m-b-0
+                      | Perda Bruta
+                    span.text-c-red
+                      = number_with_precision trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision:2
+
+/ .row
+/   - @traces.each do |trace|                   
+/     - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+/     - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
+
+/     .col-md-6.col-lg-4
+/       = link_to dashboard_path(trace) do
+/         .card
+/           .card-header
+/             .card-header-left
+/               h5 = trace.name
+/             .card-header-right
+/               i.icofont.icofont-spinner-alt-5
+/           .card-body.p-b-30
+/             h2= "R$ #{number_with_precision trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2}"
+/             p.text-muted.m-b-10 Lucro
+/             .row
+/               .col-sm-6.col-xs-12
+/                 p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
+/                 span.text-muted Lucro %
+/               .col-sm-6.col-xs-12
+/                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
+/                 span.text-muted Perda %
+/               .col-sm-6.col-xs-12
+/                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision trace.pay_off(:masters).round(2), precision:2
+/                 span.text-muted PayOff
+/               .col-sm-6.col-xs-12
+/                 p.text-c-blue.f-16.m-0.f-w-400= number_with_precision trace.profit_factor(:masters).round(2), precision:2
+/                 span.text-muted Fator de Lucro
+/               .col-sm-6.col-xs-12
+/                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision trace.drawdown(:masters).round(2), precision:2
+/                 span.text-muted Drawdown
+/               .col-sm-6.col-xs-12
+/                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
+/                 span.text-muted Account Slaves
+/               .col-sm-6.col-xs-12
+/                 p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :buy]).count
+/                 span.text-muted Operações Compra
+/               .col-sm-6.col-xs-12
+/                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :sell]).count
+/                 span.text-muted Operações Venda
+/               .col-sm-6.col-xs-12
+/                 p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :gain]).count
+/                 span.text-muted Operações Ganho
+/               .col-sm-6.col-xs-12
+/                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
+/                 span.text-muted Operações Perda
 - content_for :footer do
   javascript:
     $(document).ready(function(){      

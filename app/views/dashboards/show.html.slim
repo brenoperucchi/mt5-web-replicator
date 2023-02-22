@@ -21,142 +21,274 @@
 = render "filter"
 
 .row
-  .col-md-12.col-lg-12
-    .card
-      .card-header
-        .card-header-left
-          h5 = @trace.name
-          h7 Master Copy 
-        .card-header-right
-          i.icofont.icofont-spinner-alt-5
-      .card-body.p-b-30
-        h2= "R$ #{number_with_precision @trace.masters_transactions.sum(:profit)}"
-        p.text-muted.m-b-10 LUCRO
-        .row
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
-            span.text-muted Lucro %
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
-            span.text-muted Perda %
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{number_with_precision @trace.pay_off(:masters).round(2)}"
-            span.text-muted PayOFF
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{number_with_precision @trace.expect_pay_off(:masters).round(2)}"
-            span.text-muted Expected PayOFF
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{number_with_precision @trace.profit_factor(:masters).round(2)}"
-            span.text-muted Fator de Lucro
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= number_with_precision "#{@trace.drawdown(:masters).round(2)}"
-            span.text-muted Drawdown
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
-            span.text-muted Account Slaves
-        .row 
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.masters_transactions.count}"
-            span.text-muted Total
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :closed).count}"
-            span.text-muted Closed
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :executed).count}"
-            span.text-muted Executed
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :error).count}"
-            span.text-muted Error
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :buy).count
-            span.text-muted Operações Compra
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :sell).count
-            span.text-muted Operações Venda
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :gain).count
-            span.text-muted Operações Ganho
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :loss).count
-            span.text-muted Operações Perda
-          .col-sm-3.col-xs-12
-            p.f-20.m-0.f-w-400= @trace.masters.error.count
-            span.text-muted Operações Error
+  .col-xl-12.col-md-12
+    .row
+      .col-sm-4
+        .card.profile-view
+          .card-body
+            h5
+              | Fator de Lucro
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.profit_factor(:masters).round(2), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Oper positivas
+                span.text-c-green
+                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision:2
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Oper. negativas
+                span.text-c-red
+                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision:2 
+      .col-sm-4
+        .card.profile-view
+          .card-body
+            h5
+              | Taxa de acerto
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              = "#{@trace.profit_trade(:masters)} %"
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Oper positivas
+                span.text-c-green
+                  = @trace.masters_scope(:masters, :closed).try(:gain).to_a.count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Oper. negativas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, :closed).try(:loss).to_a.count
+      .col-sm-4
+        .card.profile-view
+          .card-body
+            h5
+              | Lucro / Max DD
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              / - profit = @trace.profit_trade - @trace.loss_trade
+              = number_with_precision @trace.profit_drawdown, precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Lucro líquido
+                span.text-c-green
+                  = number_with_precision(@trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Max DD
+                span.text-c-red
+                  = @trace.drawdown
+    .row
+      .col-sm-3
+        .card.profile-view
+          .card-body
+            h5
+              | Operações abertas
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Compras
+                span.text-c-green
+                  = @trace.masters_scope(:masters, [:executed, :buy]).count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Vendas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, [:executed, :sell]).count
+      .col-sm-3
+        .card.profile-view
+          .card-body
+            h5
+              | Operações Fechadas
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Compras
+                span.text-c-green
+                  = @trace.masters_scope(:masters, [:closed, :buy]).count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Vendas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, [:closed, :sell]).count
+      .col-sm-3
+        .card.profile-view
+          .card-body
+            h5
+              | Operações com Error
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Compras
+                span.text-c-green
+                  = @trace.masters_scope(:masters, [:error, :buy]).count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Vendas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, [:error, :sell]).count
+      .col-sm-3
+        .card.profile-view
+          .card-body
+            h5
+              | Total
+            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.masters_scope(:masters).to_a.sum(&:profit), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Compras
+                span.text-c-green
+                  = @trace.masters_scope(:masters, :buy).count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Vendas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, :sell).count
+
+/ .row
+/   .col-md-12.col-lg-12
+/     .card
+/       .card-header
+/         .card-header-left
+/           h5 = @trace.name
+/           h7 Master Copy 
+/         .card-header-right
+/           i.icofont.icofont-spinner-alt-5
+/       .card-body.p-b-30
+/         h2= "R$ #{number_with_precision @trace.masters_transactions.sum(:profit), precision:2}"
+/         p.text-muted.m-b-10 LUCRO
+/         .row
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.profit_trade(:masters)} %"
+/             span.text-muted Lucro %
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.loss_trade(:masters)} %"
+/             span.text-muted Perda %
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{number_with_precision @trace.pay_off(:masters).round(2), precision:2}"
+/             span.text-muted PayOFF
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{number_with_precision @trace.expect_pay_off(:masters).round(2), precision:2}"
+/             span.text-muted Expected PayOFF
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{number_with_precision @trace.profit_factor(:masters).round(2), precision:2}"
+/             span.text-muted Fator de Lucro
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= number_with_precision "#{@trace.drawdown(:masters).round(2)}", precision:2
+/             span.text-muted Drawdown
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.accounts.slave.count}"
+/             span.text-muted Account Slaves
+/         .row 
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.masters_transactions.count}"
+/             span.text-muted Total
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :closed).count}"
+/             span.text-muted Closed
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :executed).count}"
+/             span.text-muted Executed
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= "#{@trace.masters_scope(:masters, :error).count}"
+/             span.text-muted Error
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :buy).count
+/             span.text-muted Operações Compra
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :sell).count
+/             span.text-muted Operações Venda
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :gain).count
+/             span.text-muted Operações Ganho
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= @trace.masters_scope(:masters, :loss).count
+/             span.text-muted Operações Perda
+/           .col-sm-3.col-xs-12
+/             p.f-20.m-0.f-w-400= @trace.masters.error.count
+/             span.text-muted Operações Error
 
 
-.row
-  .col-md-12
-    .card.table-card.latest-activity-card
-      .card-header
-        h5 Account Slaves
-        .card-header-right
-          / .btn-group.card-option
-          /   button.btn.dropdown-toggle aria-expanded="false" aria-haspopup="true" data-toggle="dropdown" type="button" 
-          /     i.feather.icon-more-horizontal
-          /   ul.list-unstyled.card-option.dropdown-menu.dropdown-menu-right
-          /     li.dropdown-item.full-card
-          /       a href="#!" 
-          /         span
-          /           i.feather.icon-maximize
-          /           | maximize
-          /         span style="display:none" 
-          /           i.feather.icon-minimize
-          /           | Restore
-          /     li.dropdown-item.minimize-card
-          /       a href="#!" 
-          /         span
-          /           i.feather.icon-minus
-          /           | collapse
-          /         span style="display:none" 
-          /           i.feather.icon-plus
-          /           | expand
-          /     li.dropdown-item.reload-card
-          /       a href="#!" 
-          /         i.feather.icon-refresh-cw
-          /         | reload
-          /     li.dropdown-item.close-card
-          /       a href="#!" 
-          /         i.feather.icon-trash
-          /         | remove
-      .card-body
-        .table-responsive
-          table.table.table-hover.table-borderless
-            thead
-              tr
-                th Account
-                th Lucro
-                th Lucro %
-                th Perda %
-                th PayOFF 
-                th Exp PayOff 
-                th Fator Lucro
-                th Drawdown
-                th Total
-                th Buy
-                th Sell
-                th Gain
-                th Loss
-                th Error
-            tbody
-              - @trace.accounts.slave.enable.each do |account|
-                - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-                - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
-                tr[data-href="#{account_dashboards_url(account, @trace)}"]
-                  td = account.name
-                  td = number_with_precision account.slave_profit
-                  td = account.profit_trade(:slaves, @trace)
-                  td = account.loss_trade(:slaves, @trace)
-                  td = number_with_precision account.pay_off(:slaves, @trace).round(2)
-                  td = account.expect_pay_off(:slaves, @trace).round(2)
-                  td = number_with_precision account.profit_factor(:slaves, @trace).round(2)
-                  td = number_with_precision account.drawdown(:slaves, @trace).round(2)
-                  / td = account.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
-                  td = account.slaves_scope(:slaves, :closed_error, @trace).count
-                  td = account.slaves_scope(:slaves, :buy, @trace).count
-                  td = account.slaves_scope(:slaves, :sell, @trace).count
-                  td = account.slaves_scope(:slaves, :gain, @trace).count
-                  td = account.slaves_scope(:slaves, :loss, @trace).count
-                  td = account.slaves_scope(:slaves, :error, @trace).count
+/ .row
+/   .col-md-12
+/     .card.table-card.latest-activity-card
+/       .card-header
+/         h5 Account Slaves
+/         .card-header-right
+/           / .btn-group.card-option
+/           /   button.btn.dropdown-toggle aria-expanded="false" aria-haspopup="true" data-toggle="dropdown" type="button" 
+/           /     i.feather.icon-more-horizontal
+/           /   ul.list-unstyled.card-option.dropdown-menu.dropdown-menu-right
+/           /     li.dropdown-item.full-card
+/           /       a href="#!" 
+/           /         span
+/           /           i.feather.icon-maximize
+/           /           | maximize
+/           /         span style="display:none" 
+/           /           i.feather.icon-minimize
+/           /           | Restore
+/           /     li.dropdown-item.minimize-card
+/           /       a href="#!" 
+/           /         span
+/           /           i.feather.icon-minus
+/           /           | collapse
+/           /         span style="display:none" 
+/           /           i.feather.icon-plus
+/           /           | expand
+/           /     li.dropdown-item.reload-card
+/           /       a href="#!" 
+/           /         i.feather.icon-refresh-cw
+/           /         | reload
+/           /     li.dropdown-item.close-card
+/           /       a href="#!" 
+/           /         i.feather.icon-trash
+/           /         | remove
+/       .card-body
+/         .table-responsive
+/           table.table.table-hover.table-borderless
+/             thead
+/               tr
+/                 th Account
+/                 th Lucro
+/                 th Lucro %
+/                 th Perda %
+/                 th PayOFF 
+/                 th Exp PayOff 
+/                 th Fator Lucro
+/                 th Drawdown
+/                 th Total
+/                 th Buy
+/                 th Sell
+/                 th Gain
+/                 th Loss
+/                 th Error
+/             tbody
+/               - @trace.accounts.slave.enable.each do |account|
+/                 - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+/                 - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
+/                 tr[data-href="#{account_dashboards_url(account, @trace)}"]
+/                   td = account.name
+/                   td = number_with_precision account.slave_profit, precision:2
+/                   td = account.profit_trade(:slaves, @trace)
+/                   td = account.loss_trade(:slaves, @trace)
+/                   td = number_with_precision account.pay_off(:slaves, @trace).round(2), precision:2
+/                   td = account.expect_pay_off(:slaves, @trace).round(2)
+/                   td = number_with_precision account.profit_factor(:slaves, @trace).round(2), precision:2
+/                   td = number_with_precision account.drawdown(:slaves, @trace).round(2), precision:2
+/                   / td = account.slaves.where("transaction_slaves.trace_id = ?", @trace.id).where(state: [:closed, :error]).count
+/                   td = account.slaves_scope(:slaves, :closed_error, @trace).count
+/                   td = account.slaves_scope(:slaves, :buy, @trace).count
+/                   td = account.slaves_scope(:slaves, :sell, @trace).count
+/                   td = account.slaves_scope(:slaves, :gain, @trace).count
+/                   td = account.slaves_scope(:slaves, :loss, @trace).count
+/                   td = account.slaves_scope(:slaves, :error, @trace).count
 
 - content_for :footer do
   javascript:
