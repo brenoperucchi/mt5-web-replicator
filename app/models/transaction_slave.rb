@@ -138,7 +138,7 @@ class TransactionSlave < ApplicationRecord
   def seconds_ago
     difference = (self.master.created_at - self.open_at).to_i
     difference = difference > 1 ? difference : 0
-    seconds_ago = (self.master.open_at - Time.zone.now).to_i.abs
+    seconds_ago = (self.master.open_at - Time.zone.now + difference).to_i.abs
     Rails.env.test? ? 0 : seconds_ago
   end
 
