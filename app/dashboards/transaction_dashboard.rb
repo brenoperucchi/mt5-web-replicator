@@ -57,6 +57,12 @@ class TransactionDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   ticket
+  order
+  trace
+  slaves
+  account
+  versions
+  loggings
   state
   profit
   ordertype
@@ -69,13 +75,6 @@ class TransactionDashboard < Administrate::BaseDashboard
   comment
   lot
   magic_number
-  trace
-  order
-  message
-  account
-  versions
-  loggings
-  slaves
   open_at
   closed_at
   created_at

@@ -20,6 +20,9 @@ class Order < ApplicationRecord
   scope :closed, ->{ where(state: 'closed')}
   scope :pending, ->{ where(state: 'pending')}
 
+
+  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
+
   has_one_attached :image
 
   state_machine :initial => :pending do

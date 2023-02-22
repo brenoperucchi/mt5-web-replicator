@@ -185,7 +185,7 @@ en:
         id: #id
         trace: Portfolio
         order: Order
-        ticket_slave: Ticket
+        ticket_slave: Ticket Slave
         ticket_master: Ticket Master
         state: State
         profit: Profit

@@ -9,8 +9,10 @@
           li.breadcrumb-item
             a href="/admin" 
               i.feather.icon-home
+              '
+              | Admin
           li.breadcrumb-item
-            a href="/dashboards"  Dashboards
+            a href="/dashboards" Dashboards
           li.breadcrumb-item
             a href="#{dashboard_url(@trace.id)}" = @trace.name
       /!

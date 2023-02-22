@@ -46,6 +46,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   state
+  ticket_master
   ticket_slave
   symbol
   price_open
@@ -63,6 +64,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket_master
   ticket_slave
   ticket_deal
+  order
   trace
   master
   account

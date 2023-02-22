@@ -38,7 +38,7 @@ class TransactionSlave < ApplicationRecord
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], if: Proc.new { account.try(:hedging?) }
-  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], allow_blank: true, allow_nil: true, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], allow_blank: false, allow_nil: false, if: Proc.new { account.try(:hedging?) }
 
   after_create :restrict_magic_number?
 
