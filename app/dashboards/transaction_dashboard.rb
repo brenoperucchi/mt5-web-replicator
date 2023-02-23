@@ -61,10 +61,10 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   order
   trace
-  slaves
   account
-  versions
   loggings
+  versions
+  slaves
   profit
   ordertype
   price_request
