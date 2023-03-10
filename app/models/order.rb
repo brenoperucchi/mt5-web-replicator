@@ -25,6 +25,17 @@ class Order < ApplicationRecord
 
   has_one_attached :image
 
+  class << self
+    def ransackable_scopes(_auth_object = nil)
+      %i[profit_search]
+    end
+  end
+
+  def self.profit_search(value)
+    self.joins(:transactions).where(transactions:{profit:0..value.to_f})
+  end
+
+
   state_machine :initial => :pending do
     after_transition :executed => :closed, :do => :update_state
 
@@ -181,11 +192,15 @@ class Order < ApplicationRecord
 
 
   def profit_copy
-    transactions.sum(&:profit)
+    profits = transactions.to_a
+    return 0 if profits.blank?
+    profits.sum(&:profit) / profits.count
   end
 
   def profit_slave
-    slaves.sum(&:profit)
+    profits = slaves.to_a
+    return 0 if profits.blank?
+    profits.sum(&:profit) / profits.count
   end
 
   def ordertype

@@ -35,6 +35,17 @@ class Transaction < ApplicationRecord
   after_create  :validate_restriction
   # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
 
+
+  class << self
+    def ransackable_scopes(_auth_object = nil)
+      %i[profit_search]
+    end
+  end
+
+  def self.profit_search(value)
+    self.where(profit:0..value.to_f)
+  end
+
   state_machine :initial => :pending do
     after_transition :pending => :executed,                    :do => :update_state
     after_transition [:pending, :executed] => :closed,         :do => :update_state

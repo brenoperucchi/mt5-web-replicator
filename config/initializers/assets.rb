@@ -14,7 +14,7 @@ Rails.application.config.assets.paths << Rails.root.join('app', 'javascript', 'c
 # application.js, application.css, and all non-JS/CSS in the app/assets
 # folder are already added.
 Rails.application.config.assets.precompile += %w( application.js stisla.css stripe.scss mintone.css mintone.js saasley.css saasley.js)
-Rails.application.config.assets.precompile += ['application.js', 'controllers/index.js', 'controllers/application.js', 'controllers/hello_controller.js']
+Rails.application.config.assets.precompile += ['application.js', 'controllers/index.js', 'controllers/application.js', 'controllers/hello_controller.js' , 'jquery.session.js']
 
 
 # Add node_modules folder to the asset load path.

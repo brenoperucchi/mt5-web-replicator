@@ -1,5 +1,6 @@
 module Control
   class OrdersController < Control::BaseController
+    prepend AdministrateRansack::Searchable
 
     def new_resource
       # current_store.try(resource_name.to_s.pluralize.to_sym).try(:new)

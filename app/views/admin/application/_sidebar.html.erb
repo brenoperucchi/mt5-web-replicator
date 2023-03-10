@@ -1,0 +1,16 @@
+<nav id="sidebar" class="order-last active">
+  <div class="custom-menu">
+    <button type="button" id="sidebarCollapse" class="btn btn-primary">
+    </button>
+  </div>
+  <div class="search">
+    <% attribute_types = {
+      symbol: Administrate::Field::String,
+      profit_search: Administrate::Field::String,
+      account_id: Administrate::Field::Select.with_options(collection: Account.account_search(current_user)), 
+      state: Administrate::Field::Select.with_options(collection: states)
+    } %>
+
+    <%= render('administrate_ransack/filters', attribute_types: attribute_types, options: { tags: 'select' } ) %>
+  </div>
+</nav>

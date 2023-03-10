@@ -86,6 +86,7 @@ gem "administrate",           git: 'https://github.com/brenoperucchi/administrat
 gem 'administrate-field-image'
 gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 gem "administrate-field-nested_has_many"
+gem 'administrate_ransack', path: "vendor/administrate_ransack"
 # gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
 # gem "administrate",         path: "vendor/administrate"
 # gem "administrate", path: "vendor/administrate"
@@ -156,3 +157,4 @@ gem 'sidekiq', '7.0.1'
 gem 'pundit'
 gem 'simple_form'
 gem 'sd_notify'
+gem 'newrelic_rpm'

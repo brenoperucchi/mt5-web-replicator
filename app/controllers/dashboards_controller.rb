@@ -91,7 +91,6 @@ class DashboardsController < ApplicationController
 	end
 
 	def filter_date
-		# binding.pry
 		# if params[:datefilter].present?
 		date_today = Date.today
 		# dates = "#{date_today} - #{date_today}"

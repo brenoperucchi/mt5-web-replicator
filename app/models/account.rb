@@ -14,6 +14,9 @@ class Account < ApplicationRecord
   # default_scope { where(deleted_at: nil) }
 
   scope :not_deleted,  -> { where(deleted_at:nil) }
+  scope :control_store, ->(store) { where(store: store )}
+
+
 
   enum state: {disable: 0, enable: 1}
   enum kind:  {slave: 0, copy: 1}
@@ -47,6 +50,18 @@ class Account < ApplicationRecord
   # def register_resource_plan
   #   store.register_resource_plan(self, self.kind)
   # end
+
+  def self.account_search(current_user)
+    if current_user.userable.administrator?
+      self.all.map{|x| [x.name, x.id]}   
+    else
+      self.control_store(current_user.store).map{|x| [x.name, x.id]} 
+    end
+  end
+
+  def admin_label
+    name.upcase
+  end
 
   #libcontrol was calling this method
   def soft_destroy_custom

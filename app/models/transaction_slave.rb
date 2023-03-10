@@ -42,6 +42,18 @@ class TransactionSlave < ApplicationRecord
 
   after_create :restrict_magic_number?
 
+
+  class << self
+    def ransackable_scopes(_auth_object = nil)
+      %i[profit_search]
+    end
+  end
+
+  def self.profit_search(value)
+    self.where(profit:0..value.to_f)
+  end
+
+
   def profit
     read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
   end
