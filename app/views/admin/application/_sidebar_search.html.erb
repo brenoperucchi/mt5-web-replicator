@@ -11,6 +11,6 @@
       state: Administrate::Field::Select.with_options(collection: states)
     } %>
 
-    <%= render('administrate_ransack/filters', attribute_types: attribute_types, options: { tags: 'select' } ) %>
+    <%= render('administrate_ransack/filters', attribute_labels: attribute_labels, attribute_types: attribute_types, options: { tags: 'select' } ) %>
   </div>
 </nav>

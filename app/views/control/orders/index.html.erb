@@ -69,7 +69,9 @@
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
             <% states = [ ['pending', 'pending'], ['executed', 'executed'], ['error', 'error'], ['closed', 'closed'] ] %>
-            <%= render "admin/application/sidebar", states:states %>
+            <% attribute_labels = { profit_search: 'Profit Copy' } %>
+            <%= render "admin/application/sidebar_search", states:states,  attribute_labels:attribute_labels%>
+
             
             <div id="content" class="">
               <section class="main-content__body main-content__body--flush">

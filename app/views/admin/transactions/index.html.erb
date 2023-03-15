@@ -69,8 +69,8 @@
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
             <% states = [ ['pending', 'pending'], ['executed', 'executed'], ['error', 'error'], ['closed', 'closed'], ['closed_info', 'closed_info'] ] %>
-            <%= render "admin/application/sidebar", states:states %>
-
+            <% attribute_labels = { profit_search: 'Profit' } %>
+            <%= render "admin/application/sidebar_search", states:states,  attribute_labels:attribute_labels%>
 
 
             <div id="content" class="">
