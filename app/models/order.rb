@@ -198,7 +198,7 @@ class Order < ApplicationRecord
   end
 
   def profit_slave
-    profits = slaves.to_a
+    profits = slaves.closed.to_a
     return 0 if profits.blank?
     profits.sum(&:profit) / profits.count
   end
