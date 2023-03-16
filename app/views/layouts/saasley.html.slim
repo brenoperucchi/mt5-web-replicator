@@ -23,6 +23,7 @@ html lang="en"
     link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet" /
     /! :Main style:
     link href="/images/saasley/theme.min.css" rel="stylesheet" /
+
   body
     = yield
     /! :Footer:
@@ -63,5 +64,5 @@ html lang="en"
               | © Copyright 2022. Saasley inc.
     /! :Theme script:
     script src="/images/saasley/theme.bundle.js" 
-    script[type="text/javascript"]
-      | window.$sleek=[];window.SLEEK_PRODUCT_ID=647246002;(function(){d=document;s=d.createElement("script");s.src="https://client.sleekplan.com/sdk/e.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();
+    script
+      |  function initFreshChat() { window.fcWidget.init({ token: "48421366-e108-4c42-a272-a6a857144ea9", host: "https://imentore.freshchat.com" }); } function initialize(i,t){var e;i.getElementById(t)? initFreshChat():((e=i.createElement("script")).id=t,e.async=!0, e.src="https://imentore.freshchat.com/js/widget.js",e.onload=initFreshChat,i.head.appendChild(e))} function initiateCall(){initialize(document,"Freshchat-js-sdk")} window.addEventListener?window.addEventListener("load",initiateCall,!1): window.attachEvent("load",initiateCall,!1); 
