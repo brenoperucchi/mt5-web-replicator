@@ -12,7 +12,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:                   Field::Number.with_options(searchable: true),
     name:                 Field::String,
-    state:                Field::String,
+    state:                Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     kind:                 Field::String,
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
@@ -64,9 +64,9 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  state
   instrument_control
   name
-  state
   customer
   kind
   meta_mode

@@ -2,17 +2,17 @@ require 'lib_enums'
 class Store < ApplicationRecord
   ENUMS    = %w(state)
   LANGUAGE = {portuguese:'pt-BR', english:'EN'}
-  include LibEnums
+  # include LibEnums
 
   attr_reader :resource_system
   attr_accessor :password
 
 
-  store :settings, accessors: [ :email, :language, :telegram_bot_status, :telegram_bot_token,
+  store :settings, accessors: [ :email, :language, :telegram_bot_status, :telegram_bot_token, :dashboard_restrict,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, 
                                 :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id
                               ]
-  enum state: {disable:0, enable:1, deleted:2}
+  enum state: {disable:0, enable:1}
   acts_as_taggable_on :tags
   
   before_update :register_plan_update
@@ -52,6 +52,15 @@ class Store < ApplicationRecord
   accepts_nested_attributes_for :customers, :users
 
   # scope :active, ->{ where.not(active_at:nil)}
+
+  # def status=(attribute)
+  #   self.state = attribute.blank? ? 0 : attribute.to_i
+  # end
+
+  # def status
+  #   self.state
+  # #   # self.state == "enable" ? "1" : "0"
+  # end
 
   def customer_plan
     customer_plans.active.try(:first)

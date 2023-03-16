@@ -10,7 +10,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:            Field::Number,
     name:          Field::String,
-    state:         Field::String,
+    state:         Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     email:         Field::String.with_options(searchable: false),
     plan:                   Field::BelongsTo,
     plan_items:             Field::HasMany,

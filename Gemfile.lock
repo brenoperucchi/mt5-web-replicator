@@ -8,7 +8,7 @@ GIT
 
 GIT
   remote: https://github.com/brenoperucchi/administrate.git
-  revision: fb0dd2c3962fdf8afd1c75162512e2690f61a7d1
+  revision: 83d3124b0fbfd35b5db62bf371fa18b76d702817
   branch: main_imentore
   specs:
     administrate (0.18.2)

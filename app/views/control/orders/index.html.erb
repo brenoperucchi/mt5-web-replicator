@@ -68,9 +68,11 @@
 
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
+            <% attribute_types_custom = { content_id: Administrate::Field::String } %>            
             <% states = [ ['pending', 'pending'], ['executed', 'executed'], ['error', 'error'], ['closed', 'closed'] ] %>
             <% attribute_labels = { profit_search: 'Profit Copy' } %>
-            <%= render "admin/application/sidebar_search", states:states,  attribute_labels:attribute_labels%>
+            
+            <%= render "admin/application/sidebar_search", states:states,  attribute_labels:attribute_labels, attribute_types_custom:attribute_types_custom %>
 
             
             <div id="content" class="">

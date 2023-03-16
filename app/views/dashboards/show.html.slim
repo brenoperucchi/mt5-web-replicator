@@ -81,7 +81,7 @@
                 p.text-muted.m-b-0
                   | Max DD
                 span.text-c-red
-                  = @trace.drawdown
+                  = number_with_precision @trace.drawdown, precision:2
     .row
       .col-sm-3
         .card.profile-view

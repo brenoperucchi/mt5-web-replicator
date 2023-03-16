@@ -179,7 +179,7 @@ class Transaction < ApplicationRecord
 
   def self.api_request_attributes(scope)
     return if scope.nil?
-    self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 330.days)).collect{|t| t.api_request_attributes}.join('/')
+    self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 60.days)).collect{|t| t.api_request_attributes}.join('/')
   end
 
   # def restrict_nil_instrument?

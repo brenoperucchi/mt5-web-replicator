@@ -10,14 +10,13 @@ class StoreDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:     Field::Number,
-    name:   Field::String,
-    state:  Field::String,
-    url:    Field::String,
-    email:        Field::String,
-    language:        Field::String,
-    # language:        DisableTextField.with_options(value: 'pt-BR'),
-    # plan:          Field::String,
+    id:                  Field::Number,
+    name:                Field::String,
+    url:                 Field::String,
+    email:               Field::String,
+    language:            Field::String,
+    state:                  Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
+    dashboard_restrict:     Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     volume_default:         Field::String,
     telegram_bot_chat_id:   Field::String,
     telegram_bot_status:    Field::String,
@@ -27,7 +26,6 @@ class StoreDashboard < Administrate::BaseDashboard
     plan:       Field::BelongsTo,
     plan_items: Field::HasMany,
     accounts:   Field::HasMany.with_options(limit:5),
-    # accounts:   Fields::HasManyScopeField.with_options(scoped: :enable),
     customers:  Field::HasMany,
     users:      Field::HasMany,
     traces:     Field::HasMany.with_options(limit:5),
@@ -55,9 +53,10 @@ class StoreDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  state
+  dashboard_restrict
   name
   email
-  state
   url
   language
   telegram_bot_chat_id
@@ -82,9 +81,10 @@ class StoreDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  state
+  dashboard_restrict
   name
   email
-  state
   url
   language
   telegram_bot_chat_id

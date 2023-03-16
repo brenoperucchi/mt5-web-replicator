@@ -149,8 +149,8 @@ pt-BR:
         trace: Portfólio
         account: Contas
         message: Mensagem 
-        profit_copy: Copy Lucro
-        profit_slave: Slave Lucro
+        profit_copy: Lucro Copy
+        profit_slave: Lucro Slaves
         created_at: criado
         updated_at: atualizado
         transactions: Copy
