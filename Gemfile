@@ -158,3 +158,7 @@ gem 'pundit'
 gem 'simple_form'
 gem 'sd_notify'
 gem 'newrelic_rpm'
+
+# Stylesheet inlining for email **
+# gem 'inky-rb', require: 'inky'
+# gem 'premailer-rails'

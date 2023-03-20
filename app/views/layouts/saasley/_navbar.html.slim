@@ -85,7 +85,17 @@ nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
           li.mt-4.mt-lg-0.nav-item.d-flex.align-items-center.justify-content-lg-center.flex-lg-column.h-100.ms-0.ms-xl-3
             label.dark-mode-checkbox.d-flex.align-items-center.justify-content-center.rounded-circle.nav-link.p-0 for="ChangeTheme" 
               input#ChangeTheme.appearance-none type="checkbox" /
-              span.dark-mode-icons.size-30.d-inline-flex.align-items-center.justify-content-center.me-2.me-lg-0
-                span.material-symbols-rounded.align-middle dark_mode
-                span.material-symbols-rounded.align-middle light_mode
-              span.ms-1.d-lg-none Dark Mode
+              span.dark-mode-icons.size-30.d-inline-flex.align-items-center.justify-content-center.me-2.me-lg-7.ms-lg-3
+                - if params[:locale].try(:upcase) == "EN"
+                  a.nav-link href="?locale=pt-BR"
+                    span.align-middle 
+                    | Idioma
+                    '
+                    | pt-BR                  
+                - elsif params[:locale].nil? or params[:locale].try(:upcase) == "PT-BR"
+                  a.nav-link href="?locale=en"
+                    span.align-middle 
+                    | Language
+                    '
+                    | English
+              / span.ms-1.d-lg-none Dark Mode

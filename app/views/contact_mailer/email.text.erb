@@ -1,0 +1,14 @@
+<%= @user.userable.name %>
+<%= @user.email %>
+<%=  I18n.l Time.zone.now, :format => "%e %B", :locale => I18n.locale %>/<%=  I18n.l Time.zone.now, :format => "%Y", :locale => I18n.locale %>
+
+Prezado Cliente
+O sistema está pronto para ser usado. O próximo passo é fazer a leitura dos tutorais de como usar o sistema.
+
+Tutoriais -> https://imentore.freshdesk.com/support/solutions/151000071868
+
+Acesso ao administrador:
+https://www.imentore.com.br/admin
+
+login: <%= @user.email %>
+Senha: previalmente cadastrada

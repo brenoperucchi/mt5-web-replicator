@@ -80,4 +80,10 @@ Rails.application.configure do
   # config.hosts << "store1.imentore.com.br"
   config.hosts.clear
   config.action_dispatch.tld_length = 1
+
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = { :address => 'localhost', :port => 1025 }
+  config.action_mailer.raise_delivery_errors = false
+
 end

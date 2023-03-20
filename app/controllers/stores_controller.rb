@@ -18,18 +18,20 @@ class StoresController < ApplicationController
 		  	user = @store.users.create(email:store_params[:email], password:store_params[:password], userable:customer)
 		  	if customer.save and user.valid?
 			  	# @store.customers.first.update(user_id: @store.users.first.id, role: 'customer')
+
 			  	sign_in(user)
+			  	ContactMailer.email(user).deliver_now
 			    format.html { redirect_to control_accounts_path }
-		    	format.json { render :show, status: :created, location: @client }
+		    	format.json { render :show, status: :created, location: @store }
 			  else
 					@store.errors.add(:base, :problem_on_create)
 					format.html { render :new }
-					format.json { render json: @client.errors, status: :unprocessable_entity }
+					format.json { render json: @store.errors, status: :unprocessable_entity }
 			  end
 		  else
 		  	@store.errors.add(:password, :invalid_password) if store_params[:password].blank?
 		    format.html { render :new }
-		    format.json { render json: @client.errors, status: :unprocessable_entity }
+		    format.json { render json: @store.errors, status: :unprocessable_entity }
 		  end
 		end
 		

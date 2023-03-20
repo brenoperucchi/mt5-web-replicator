@@ -49,6 +49,10 @@ RSpec.configure do |config|
     DatabaseCleaner.clean
   end
 
+  #devise
+  config.include Devise::Test::ControllerHelpers, type: :controller
+
+
   config.include RSpec::Rails::RequestExampleGroup, type: :request, file_path: /spec\/api/
   config.include RSpec::Rails::RequestExampleGroup, type: :request, file_path: /spec\/features/
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
