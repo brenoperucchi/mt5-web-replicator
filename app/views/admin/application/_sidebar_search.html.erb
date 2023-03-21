@@ -4,7 +4,9 @@
     </button>
   </div>
   <div class="search">
-    <% attribute_types = {
+    <% 
+      namespace = local_assigns[:namespace] || :admin 
+      attribute_types = {
       symbol: Administrate::Field::String,
       profit_search: Administrate::Field::String,
       account_id: Administrate::Field::Select.with_options(collection: Account.account_search(current_user)), 
@@ -14,7 +16,6 @@
     <% if defined?(attribute_types_custom) %>
       <% attribute_types = attribute_types_custom.merge(attribute_types.merge) %>
     <% end %>
-
-    <%= render('administrate_ransack/filters', attribute_labels: attribute_labels, attribute_types: attribute_types, options: { tags: 'select' } ) %>
+    <%= render('administrate_ransack/filters', attribute_labels: attribute_labels, attribute_types: attribute_types, options: { tags: 'select' }, namespace: namespace ) %>
   </div>
 </nav>
