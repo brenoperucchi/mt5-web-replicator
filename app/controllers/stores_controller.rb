@@ -1,4 +1,8 @@
 class StoresController < ApplicationController
+	before_action :check_captcha, only: [:create]
+  respond_to :html, :xml, :json
+
+
 	layout "saasley"
 
 	def new
@@ -44,8 +48,10 @@ class StoresController < ApplicationController
 	end
 
 	def alert_recaptcha
-	  self.resource = resource_class.new sign_in_params
-	  respond_with_navigational(resource) { render :new }
+	  @store = Store.new store_params
+	  respond_to do |format| 
+	  	format.html { render :new }
+	  end
 	end
 
 	  # Only allow a list of trusted parameters through.

@@ -2,8 +2,16 @@
 /! ::Hero Default::
 section.position-relative.pt-12.pt-lg-15.pb-9
   svg.position-absolute.start-0.bottom-0.text-dark.h-auto.d-none.d-md-block fill="currentColor" height="276" viewbox=("0 0 1200 276") width="100%" xmlns="http://www.w3.org/2000/svg" 
-    path clip-rule="evenodd" d=("M0 132L50 102C100 72 200 12 300 18C400 24 500 96 600 90C700 84 800 0 900 0C1000 0 1100 84 1150 126L1200 168V276H1150C1100 276 1000 276 900 276C800 276 700 276 600 276C500 276 400 276 300 276C200 276 100 276 50 276H0V132Z") fill-rule="evenodd" 
+    / path clip-rule="evenodd" d=("M0 132L50 102C100 72 200 12 300 18C400 24 500 96 600 90C700 84 800 0 900 0C1000 0 1100 84 1150 126L1200 168V276H1150C1100 276 1000 276 900 276C800 276 700 276 600 276C500 276 400 276 300 276C200 276 100 276 50 276H0V132Z") fill-rule="evenodd" 
   .container.position-relative
+    .row
+      - if flash[:notice].present? or flash[:recaptcha_error].present?
+
+        .row.justify-content-center
+          .col-md-6.col-lg-5.col-xl-4
+          .alert.alert-danger[role="alert"]
+            = flash[:notice]
+            = flash[:recaptcha_error]
     .row
       .col-lg-6.col-md-8.mx-auto
         h2.display-5.text-center = I18n.t :title, scope: 'helpers.site.signup_demo'
