@@ -158,6 +158,8 @@ gem 'pundit'
 gem 'simple_form'
 gem 'sd_notify'
 gem 'newrelic_rpm'
+gem 'recaptcha'
+
 
 # Stylesheet inlining for email **
 # gem 'inky-rb', require: 'inky'

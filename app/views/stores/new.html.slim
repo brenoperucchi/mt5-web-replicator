@@ -42,6 +42,8 @@ section.position-relative.pt-12.pt-lg-15.pb-9
               /   - ff.object.build_user if ff.object.user.nil?
               /   = ff.simple_fields_for :user do |fff| 
               /     = fff.input :email, placeholder: 'user@domain.com'
+              .mb-3
+                = recaptcha_tags 
                 
               = f.button :submit, class: 'button btn btn-primary'
             / form

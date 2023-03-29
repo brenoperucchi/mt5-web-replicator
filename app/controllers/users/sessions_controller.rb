@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Users::SessionsController < Devise::SessionsController
+  prepend_before_action :check_captcha, only: [:create]
+
   layout "saasley"
 
   # def auth_options
@@ -54,4 +56,14 @@ class Users::SessionsController < Devise::SessionsController
   # def configure_sign_in_params
   #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
   # end
+  private
+
+  def check_captcha
+    alert_recaptcha unless verify_recaptcha
+  end
+
+  def alert_recaptcha
+    self.resource = resource_class.new sign_in_params
+    respond_with_navigational(resource) { render :new }
+  end
 end

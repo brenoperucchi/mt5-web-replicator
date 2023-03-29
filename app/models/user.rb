@@ -11,4 +11,6 @@ class User < ApplicationRecord
   validates_uniqueness_of :email, scope: [:store_id]
   validates_presence_of :email
   validates_presence_of :password, :on => :create
+
+
 end
