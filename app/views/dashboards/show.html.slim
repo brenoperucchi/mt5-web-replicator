@@ -210,7 +210,8 @@
                 th Op Closes 
                 th Op Error
                 th 
-                th Total
+                th Qtd Total
+                th $ Total
             tbody
               - @trace.accounts.slave.enable.each do |account|
                 - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
@@ -219,14 +220,15 @@
                   td = account.name
                   td
                   td = number_with_precision account.profit_factor(:slaves, @trace).round(2), precision:2
-                  td = account.profit_trade(:slaves)
-                  td = number_with_precision account.profit_drawdown, precision:2
+                  td = account.profit_trade(:slaves, @trace)
+                  td = number_with_precision account.profit_factor(:slaves, @trace), precision:2
                   td 
-                  td = number_with_precision account.masters_scope(:slaves, :executed).to_a.sum(&:profit), precision:2
-                  td = number_with_precision account.masters_scope(:slaves, :closed).to_a.sum(&:profit), precision:2
-                  td = number_with_precision account.masters_scope(:slaves, :error).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(:slaves, :executed, @trace).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(:slaves, :closed, @trace).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(:slaves, :error, @trace).to_a.sum(&:profit), precision:2
                   td 
-                  td = number_with_precision account.masters_scope(:slaves).to_a.sum(&:profit), precision:2
+                  td = account.slaves_scope(:slaves, :all, @trace).count
+                  td = number_with_precision account.slaves_scope(:slaves, :all, @trace).to_a.sum(&:profit), precision:2
 
 
 - content_for :footer do
