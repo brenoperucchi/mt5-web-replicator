@@ -1,5 +1,5 @@
 require "administrate/field/associative.rb"
-require "administrate/field/belongs_to"
+require "administrate/field/belongs_to.rb"
 require "sentient_store.rb"
 
 module Fields
