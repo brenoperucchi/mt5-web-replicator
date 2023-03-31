@@ -30,7 +30,7 @@
         - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
         = link_to dashboard_path(trace) do
         .col-sm-4
-          = link_to dashboard_path(trace) do
+          = link_to dashboard_path(trace, datefilter:params[:datefilter]) do
             .card.profile-view
               .card-body
                 h5

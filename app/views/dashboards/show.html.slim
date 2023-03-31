@@ -216,7 +216,7 @@
               - @trace.accounts.slave.enable.each do |account|
                 - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
                 - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
-                tr[data-href="#{account_dashboards_url(account, @trace)}"]
+                tr[data-href="#{account_dashboards_url(account, @trace, datefilter:params[:datefilter])}"]
                   td = account.name
                   td
                   td = number_with_precision account.profit_factor(:slaves, @trace).round(2), precision:2

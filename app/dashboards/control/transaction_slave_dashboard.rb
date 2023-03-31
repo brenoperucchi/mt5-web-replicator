@@ -1,5 +1,5 @@
 require "administrate/base_dashboard"
-require 'has_many_scope_field.rb'
+require 'has_many_scope_field'
 require 'belongs_to_field'
 
 class Control::TransactionSlaveDashboard < Administrate::BaseDashboard
