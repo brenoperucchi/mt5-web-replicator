@@ -15,7 +15,7 @@ module Signalforex
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.1
     config.time_zone = 'America/Sao_Paulo'
-    # config.autoloader = :classic
+    config.autoloader = :classic
     config.active_record.yaml_column_permitted_classes = [Symbol, Date, ActiveSupport::HashWithIndifferentAccess]
 
     # Settings in config/environments/* take precedence over those specified here.
@@ -27,7 +27,7 @@ module Signalforex
    	# config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
     # config.autoload_paths += Dir[Rails.root.join('lib')]
     config.autoload_paths += Dir[Rails.root.join('app','fields', '*')]
-    config.autoload_paths += Dir[Rails.root.join('app','controllers', ,'concerns', '*')]
+    config.autoload_paths += Dir[Rails.root.join('app','controllers', 'concerns', '*')]
     # config.autoload_paths << "#{Rails.root}/app/fields"
     # config.autoload_paths += Dir[Rails.root.join('app','controllers', 'concerns')]
     config.autoload_paths << "#{Rails.root}/app/controllers/concerns"
