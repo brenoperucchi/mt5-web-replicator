@@ -18,7 +18,7 @@ pt-BR:
         rules4: "Use, teste e valide!"
       main:
         app_name: Imentore Copy
-        other1: Gerencie os seus sinais, copy trades, ou mesmo transforme a sua entrada manual em ordens automáticas.
+        other1: Tenho um Gerenciador de Copy para Robos, entradas manuais e sinais. 
         other2: 10 dias para testes.
         portfolio: Compartilhe dashboards com seus clientes.
         warning: Sistema em versão beta.
@@ -26,7 +26,7 @@ pt-BR:
           request_support: Faça um teste
           sign_in: Acesse
         title:
-          main: Um software para gerenciar seu negócio.
+          main: Gerenciador Copy Trades
           imentore: imentore copy
           pricing: preços
           support: suporte

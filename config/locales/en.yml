@@ -18,7 +18,7 @@ en:
         rules4: "Use, test and validate!"
       main:
         app_name: Imentore Copy
-        other1: Manage your signals, copy trades, or even turn your manual entry into automatic orders.
+        other1: Have a Copy Manager for Robots, manual entries and signals.
         other2: 10 days for trial.
         portfolio: Share dashboard with your customers.
         warning: Beta version
@@ -26,7 +26,7 @@ en:
           request_support: Give a try!
           sign_in: Sign In
         title:
-          main: A software to manage your business.
+          main: Copy Trades Manager
           Imentore: Imentore copy
           pricing: prices
           support: support

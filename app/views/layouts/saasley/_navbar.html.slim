@@ -1,11 +1,16 @@
 nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
   .container-fluid.position-relative
+    #top
+      #logo
+        h1
+          a[href="/"]
+            | Imentore
     .logo-light
-      a.navbar-brand href="/" 
-        h2.display-6
-          = title = I18n.t :app_name, scope: 'helpers.site.main'
+      / a.navbar-brand href="/" 
+      /   h2.display-6
+      /     = title = I18n.t :app_name, scope: 'helpers.site.main'
     / .logo-dark
-      / img.img-fluid alt="" src="/images/saasley/img/logo-white.svg" /
+    /   img.img-fluid alt="" src="/images/saasley/img/imentore-logo.png" /
     button.navbar-toggler.border-0.p-0 aria-controls="offcanvasNavbarDefault" aria-expanded="false" aria-label=("Toggle navigation") data-bs-target="#offcanvasNavbarDefault" data-bs-toggle="offcanvas" type="button" 
       span.material-symbols-rounded.align-middle menu
     #offcanvasNavbarDefault.offcanvas.offcanvas-start aria-labelledby="offcanvasNavbarDefaultLabel" data-bs-scroll="true" tabindex="-1" 
@@ -99,3 +104,19 @@ nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
                     '
                     | English
               / span.ms-1.d-lg-none Dark Mode
+
+css:
+  #top h1 a {
+      display: block;
+      width: 202px;
+      height: 64px;
+      text-indent: -3000px;
+      overflow: hidden;
+      background: url(/images/saasley/img/imentore-logo.png) no-repeat 0 0;
+      margin-top: 0px;
+      margin-left: 20px;
+  }
+
+  #top h1 a:hover {
+      background-position: 0 -64px;
+  }

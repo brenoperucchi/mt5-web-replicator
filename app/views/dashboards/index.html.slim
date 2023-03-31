@@ -37,11 +37,11 @@
                   = trace.name
                   - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
                   - if amount_profit.to_f >= 0
-                    strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-c-green
-                      = amount_profit
+                    strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-muted
+                      = number_with_precision amount_profit
                   - else
                     strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-c-red
-                      = amount_profit
+                      = number_with_precision amount_profit
                 .row
                   .col-6.text-center
                     p.text-muted.m-b-0

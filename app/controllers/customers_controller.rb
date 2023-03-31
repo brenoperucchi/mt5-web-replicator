@@ -1,8 +1,8 @@
 class CustomersController < ApplicationController
-	layout 'tailwind'
+	# layout 'tailwind'
 
-	def new
-		@customer = Customer.new
-		@customer.user = User.new
-	end
+	# def new
+	# 	@customer = Customer.new
+	# 	@customer.user = User.new
+	# end
 end
