@@ -18,12 +18,15 @@ class DashboardsController < ApplicationController
 	def index
 		respond_to do |wants|
 			wants.html do 
-				current_store ||= Store.first
-				if current_store.dashboard_restrict == "enable" and not user_signed_in?
-					flash[:notice] = 'do_you_must_be_login'
-					redirect_to user_session_path
+				unless current_store.nil?
+					if current_store.dashboard_restrict == "enable" and not user_signed_in?
+						flash[:notice] = 'do_you_must_be_login'
+						redirect_to user_session_path
+					else
+						@traces = current_store.traces.active
+					end
 				else
-					@traces = current_store.traces.active
+					redirect_to root_path
 				end
 			end
 		end
