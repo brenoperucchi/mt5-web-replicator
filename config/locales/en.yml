@@ -12,14 +12,14 @@ en:
       signup_demo:
         title: Important rules for using the system.
         resume_title: Read all items carefully.
-        rules1: "The system will initially allow operations on a demo account. Only after the trial period of 10 days of evaluation and with approval from our team will the system allow the use of a real account, so validate within this period."
+        rules1: "The system will initially allow operations on a demo account. Only after the trial period of 30 days of evaluation and with approval from our team will the system allow the use of a real account, so validate within this period."
         rules2: "If using a high-frequency robot (scalper), confirm that the opening and closing times for operations between Copy and Slave are in accordance with your parameters."
         rules3: "Always have a group (telegram/whatsapp) with your customers, because if there is a problem with the server and client connection, you will be able to inform them about information on closed or open orders"
         rules4: "Use, test and validate!"
       main:
         app_name: Imentore Copy
         other1: Have a Copy Manager for Robots, manual entries and signals.
-        other2: 10 days for trial.
+        other2: 30 days for trial.
         portfolio: Share dashboard with your customers.
         warning: Beta version
         navbar:

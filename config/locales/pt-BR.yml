@@ -12,14 +12,14 @@ pt-BR:
       signup_demo:
         title: Regras importantes para o uso do sistema.
         resume_title: Leia atentamente todos os itens.
-        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 10 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
+        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 30 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
         rules2: "Caso o seu uso seja a partir de um robô de alta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
         rules3: "Tenha sempre um grupo (telegram/whatsapp) com os seus clientes, pois caso aconteça algum problema na conexão servidor e cliente, você poderá informar sobre as informações de ordens fechadas ou abertas"
         rules4: "Use, teste e valide!"
       main:
         app_name: Imentore Copy
         other1: Tenho um Gerenciador de Copy para Robos, entradas manuais e sinais. 
-        other2: 10 dias para testes.
+        other2: 30 dias para testes.
         portfolio: Compartilhe dashboards com seus clientes.
         warning: Sistema em versão beta.
         navbar:
