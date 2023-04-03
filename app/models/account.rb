@@ -166,6 +166,12 @@ class Account < ApplicationRecord
     AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace))
   end
 
+  def profit_drawdown(type = :slaves, trace)
+    gain = self.slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit)
+    loss = self.slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit)
+    profit = gain - loss
+    AlgoStatistic.profit_drawdown(profit, drawdown(type, trace))
+  end
 
   def drawdown(type = :slaves, trace)
     scoped = slaves_scope(type, :closed, trace).order(created_at: :desc)

@@ -152,13 +152,6 @@ class Trace < ApplicationRecord
     AlgoStatistic.loss_trade(trades, loss_trades)
   end
 
-  def profit_drawdown(type = :masters)
-    gain = self.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit)
-    loss = self.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit)
-    profit = gain - loss
-    AlgoStatistic.profit_drawdown(profit, drawdown)
-  end
-
   def pay_off(type = :masters)
     gain = masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit).abs
     gain_operation = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
@@ -181,6 +174,13 @@ class Trace < ApplicationRecord
     gross_loss = masters_scope(type, :closed).try(:loss).to_a.sum(&:profit).abs
     gross_profit = masters_scope(type, :closed).try(:gain).to_a.sum(&:profit).abs
     AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type))
+  end
+
+  def profit_drawdown(type = :masters)
+    gain = self.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit)
+    loss = self.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit)
+    profit = gain - loss
+    AlgoStatistic.profit_drawdown(profit, drawdown)
   end
 
   def drawdown(type = :masters)

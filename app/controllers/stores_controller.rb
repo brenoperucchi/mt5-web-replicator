@@ -22,7 +22,6 @@ class StoresController < ApplicationController
 		  	user = @store.users.create(email:store_params[:email], password:store_params[:password], userable:customer)
 		  	if customer.save and user.valid?
 			  	# @store.customers.first.update(user_id: @store.users.first.id, role: 'customer')
-
 			  	sign_in(user)
 			  	ContactMailer.email(user).deliver_now
 			    format.html { redirect_to control_accounts_path }
@@ -44,7 +43,9 @@ class StoresController < ApplicationController
 	private
 
 	def check_captcha
-	  alert_recaptcha unless verify_recaptcha
+		unless Rails.env.test?
+	  	alert_recaptcha unless verify_recaptcha
+	  end
 	end
 
 	def alert_recaptcha
