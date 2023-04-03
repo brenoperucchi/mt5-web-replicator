@@ -19,7 +19,7 @@ class Customer < ApplicationRecord
   belongs_to :store
   belongs_to :customer_plan, optional: true
   
-  has_one  :user, as: :userable, dependent: :destroy
+  has_one  :user, as: :userable
   # has_one :plan_usage, as: :usageable, :dependent => :destroy
   has_many :plan_usages, as: :resourceable
   

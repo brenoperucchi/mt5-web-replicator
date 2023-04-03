@@ -31,7 +31,7 @@
         h5
           | Account 
           '
-          = @account.name
+          = "#{@account.name} - #{@account.kind}"
         .card-header-right
       .card-body
         .table-responsive
@@ -94,13 +94,3 @@
                 td - 
                 td -
                 td -
-                  
-
-- content_for :footer do
-  javascript:
-    $(document).ready(function(){
-      $(document).on("click", "table.table tr", function() {
-        var link  = $(this).data("href")
-            document.location.href=link;
-      });
-    });
