@@ -14,7 +14,7 @@ class StoreDashboard < Administrate::BaseDashboard
     name:                Field::String,
     url:                 Field::String,
     email:               Field::String,
-    language:            Field::String,
+    language:               Field::Select.with_options(collection: Store::LANGUAGE),
     state:                  Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     dashboard_restrict:     Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     volume_default:         Field::String,

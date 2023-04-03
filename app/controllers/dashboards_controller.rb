@@ -3,6 +3,7 @@ class DashboardsController < ApplicationController
 	before_action :filter_date
 	before_action :set_trace, 	only:[:show]
 	before_action :set_account, only:[:account]
+
 	# before_action :authenticate_user
 	# layout 'stisla'
   layout 'mintone'
@@ -65,6 +66,15 @@ class DashboardsController < ApplicationController
 	end
 
 	private
+
+	def set_locale
+		if current_store.nil?
+			I18n.locale = 'en'
+		else
+			I18n.locale = current_store.language
+		end
+	end
+
 
 	def set_trace
 		if current_store == Store.first
