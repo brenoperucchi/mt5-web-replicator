@@ -36,11 +36,15 @@
       .card-body
         .table-responsive
           table.table.table-hover.table-borderless
+            - type = @account.slave? ? :slaves : :transactions
             thead
               tr
                 th ID
-                th Ticket Master
-                th Ticket Slave
+                - if @account.copy?
+                  th Ticket
+                - else
+                  th Ticket Master
+                  th Ticket Slave
                 th Symbol
                 th State
                 th Profit
@@ -51,11 +55,25 @@
                 th Open At
                 th Closet At
             tbody
-              - @account.slaves_scope(:slaves, :all, @trace).order(open_at: 'DESC').each do |slave|
+              tr
+                td - 
+                td - 
+                td OPERATIONS
+                td = @account.slaves_scope(type, :all, @trace).count
+                td TOTAL PROFIT
+                td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
+                td - 
+                td - 
+                td -
+                td -
+              - @account.slaves_scope(type, :all, @trace).order(open_at: 'DESC').each do |slave|
                 tr
                   td = slave.id
-                  td = slave.ticket_master
-                  td = slave.ticket_slave
+                  - if @account.copy?
+                    td = slave.ticket
+                  - else
+                    td = slave.ticket_master
+                    td = slave.ticket_slave
                   td = slave.symbol
                   td = slave.state
                   td = number_with_precision slave.profit, precision:2
@@ -66,16 +84,16 @@
                   td = l(slave.open_at, format: :short2)
                   td = l(slave.closed_at, format: :short2) if slave.closed_at.present?
               tr
-                td
-                td
+                td - 
+                td - 
                 td OPERATIONS
-                td = @account.slaves_scope(:slaves, :closed, @trace).count
+                td = @account.slaves_scope(type, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.slaves_scope(:slaves, :closed, @trace).to_a.sum(&:profit)
-                td
-                td
-                td
-                td
+                td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
+                td - 
+                td - 
+                td -
+                td -
                   
 
 - content_for :footer do

@@ -158,7 +158,7 @@
               .col-4.text-center
                 p.text-muted.m-b-0
                   | Total
-                span.text-c-red
+                span
                   = @trace.masters_scope(:masters).count
 
 .row
@@ -217,19 +217,20 @@
                 - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
                 - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
                 tr[data-href="#{account_dashboards_url(account, @trace, datefilter:params[:datefilter])}"]
+                  - type = account.slave? ? :slaves : :transactions
                   td = "#{account.name} - #{account.kind}"
                   td
-                  td = number_with_precision account.profit_factor(:slaves, @trace).round(2), precision:2
-                  td = account.profit_trade(:slaves, @trace)
-                  td = number_with_precision account.profit_factor(:slaves, @trace), precision:2
+                  td = number_with_precision account.profit_factor(type, @trace).round(2), precision:2
+                  td = account.profit_trade(type, @trace)
+                  td = number_with_precision account.profit_factor(type, @trace), precision:2
                   td 
-                  td = number_with_precision account.slaves_scope(:slaves, :executed, @trace).to_a.sum(&:profit), precision:2
-                  td = number_with_precision account.slaves_scope(:slaves, :closed, @trace).to_a.sum(&:profit), precision:2
-                  td = number_with_precision account.slaves_scope(:slaves, :error, @trace).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(type, :executed, @trace).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(type, :closed, @trace).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(type, :error, @trace).to_a.sum(&:profit), precision:2
                   td 
-                  td = account.slaves_scope(:slaves, :all, @trace).count
-                  td = number_with_precision account.slaves_scope(:slaves, :all, @trace).to_a.sum(&:profit), precision:2
-
+                  td = account.slaves_scope(type, :all, @trace).count
+                  td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision:2
+                  / td= binding.pry                  
 
 - content_for :footer do
   javascript:

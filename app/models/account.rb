@@ -118,8 +118,9 @@ class Account < ApplicationRecord
   end
 
   def slaves_scope(type = :slaves, scope = :all, trace)
+    table_name = type == :slaves ? "transaction_slaves" : "transactions"
     # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
-    masters_filter(self.send(type).closed_error.send(scope).where("transaction_slaves.trace_id = ?", trace.id))
+    masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id))
   end
   
   def masters_filter(scoped)
@@ -129,7 +130,6 @@ class Account < ApplicationRecord
       scoped
     end
   end
-
 
   def profit_trade(type = :slaves, trace)
     trades = slaves_scope(type, :closed, trace).try(:size).to_f
@@ -171,6 +171,5 @@ class Account < ApplicationRecord
     scoped = slaves_scope(type, :closed, trace).order(created_at: :desc)
     AlgoStatistic.drawdown(scoped)
   end
-
 
 end
