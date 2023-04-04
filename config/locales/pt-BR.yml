@@ -18,7 +18,7 @@ pt-BR:
         rules4: "Use, teste e valide!"
       main:
         app_name: Imentore Copy
-        other1: Tenho um Gerenciador de Copy para Robos, entradas manuais e sinais. 
+        other1: Gerenciador de Copy para Robos, entradas manuais e sinais. 
         other2: 30 dias para testes.
         portfolio: Compartilhe dashboards com seus clientes.
         warning: Sistema em versão beta.
@@ -66,7 +66,7 @@ pt-BR:
           price: "%{value} "
         management: 
           title: Gestão & Portfólios 
-          resume: Gestão por Portfólios, Restrição por magic number, Controle de
+          resume: Gestão por Portfólios, Restrição por magic number, Controle de Ativos e muitos mais
           resume2: 
       session:
         dont_have_account: "Ainda não tem uma conta?"

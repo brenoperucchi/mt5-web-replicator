@@ -18,7 +18,7 @@ en:
         rules4: "Use, test and validate!"
       main:
         app_name: Imentore Copy
-        other1: Have a Copy Manager for Robots, manual entries and signals.
+        other1: Copy Manager for Robots, manual entries and signals.
         other2: 30 days for trial.
         portfolio: Share dashboard with your customers.
         warning: Beta version
@@ -66,7 +66,7 @@ en:
           price: "%{value} "
         management:
           title: Management & Portfolios
-          resume: Account management by Portfolios and system information logs.
+          resume: Portfolio Management, Magic Number Restriction, Asset Control and many more
           resume2:
       session:
         dont_have_account: "Don't Have an account yet?"
