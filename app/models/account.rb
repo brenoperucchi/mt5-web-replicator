@@ -156,19 +156,19 @@ class Account < ApplicationRecord
     profit_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
     loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
     gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit)
+    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
     AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
   end
 
   def profit_factor(type = :slaves, trace)
     gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit)
+    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
     AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace)).abs
   end
 
   def profit_drawdown(type = :slaves, trace)
-    gain = self.slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit)
-    loss = self.slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit)
+    gain = self.slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+    loss = self.slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
     profit = gain - loss
     AlgoStatistic.profit_drawdown(profit, drawdown(type, trace)).abs
   end

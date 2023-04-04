@@ -1,7 +1,7 @@
 require 'lib_enums'
 class Store < ApplicationRecord
   ENUMS    = %w(state)
-  LANGUAGE = {portuguese:'pt-BR', english:'EN'}
+  LANGUAGE = {Português:'pt-BR', English:'en'}
   # include LibEnums
 
   attr_reader :resource_system
@@ -61,7 +61,7 @@ class Store < ApplicationRecord
   #   self.state
   # #   # self.state == "enable" ? "1" : "0"
   # end
-
+  
   def customer_plan
     customer_plans.active.try(:first)
   end
