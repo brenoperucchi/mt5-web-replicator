@@ -1,6 +1,7 @@
 ---
 imentore_copy:
   '2_07': OK
+  '2_08': OK
   disable_msg: 'A versao |version| do Imentore Copy esta desabilitado em nosso sistema. Atualize seu expert. '
 imentore_slave:
   '2_07': OK
@@ -26,9 +27,9 @@ signal_slave:
   '2_01': disable
   '2_02': disable
   '2_03': disable
-  '2_04': OK
-  '2_05': OK
-  '2_06': OK
+  '2_04': disable
+  '2_05': disable
+  '2_06': disable
   disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_copy:
   '1_30': disable
@@ -50,8 +51,8 @@ signal_copy:
   '1_53': disable
   '2_00': disable
   '2_01': disable
-  '2_04': OK
-  '2_05': OK
-  '2_06': OK
-  '2_07': OK
+  '2_04': disable
+  '2_05': disable
+  '2_06': disable
+  '2_07': disable
   disable_msg: 'A versao |version| do SignalCopy esta desabilitado em nosso sistema. Atualize seu expert. '
