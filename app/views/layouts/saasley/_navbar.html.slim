@@ -3,7 +3,7 @@ nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
     #top
       #logo
         h1
-          a[href="/"]
+          = link_to root_path(request.query_parameters)
             | Imentore
     .logo-light
       / a.navbar-brand href="/" 
@@ -81,24 +81,24 @@ nav.navbar.navbar-expand-lg.navbar-transparent.navbar-sticky.navbar-light
             /   a.dropdown-item href="#"  Sign Up
             /   a.dropdown-item href="forgot-#"  Forget password
           li.nav-item.mb-3.mb-lg-0
-            a.btn.btn-warning.btn-sm.hover-lift href="/demo_request" 
+            = link_to demo_request_path(request.query_parameters), class: 'btn btn-primary btn-sm hover-lift' do
               = I18n.t :request_support, scope: 'helpers.site.main.navbar'
               span.align-middle.material-symbols-rounded.fs-5.ms-1.d-none.d-xl-inline-block arrow_forward
           li.nav-item
-            a.nav-link href="/users/sign_in"
+            = link_to new_user_session_path(request.query_parameters), class: 'nav-link' do
               = I18n.t :sign_in, scope: 'helpers.site.main.navbar'
           li.mt-4.mt-lg-0.nav-item.d-flex.align-items-center.justify-content-lg-center.flex-lg-column.h-100.ms-0.ms-xl-3
             label.dark-mode-checkbox.d-flex.align-items-center.justify-content-center.rounded-circle.nav-link.p-0 for="ChangeTheme" 
               input#ChangeTheme.appearance-none type="checkbox" /
               span.dark-mode-icons.size-30.d-inline-flex.align-items-center.justify-content-center.me-2.me-lg-7.ms-lg-3
                 - if params[:locale].try(:upcase) == "EN"
-                  a.nav-link href="?locale=pt-BR"
+                  a.nav-link href="/?locale=pt-BR"
                     span.align-middle 
                     | Idioma
                     '
                     | pt-BR                  
                 - elsif params[:locale].nil? or params[:locale].try(:upcase) == "PT-BR"
-                  a.nav-link href="?locale=en"
+                  a.nav-link href="/?locale=en"
                     span.align-middle 
                     | Language
                     '

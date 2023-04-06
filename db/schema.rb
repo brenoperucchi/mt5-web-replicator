@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_02_14_210235) do
+ActiveRecord::Schema.define(version: 2023_04_06_180114) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -388,6 +388,7 @@ ActiveRecord::Schema.define(version: 2023_02_14_210235) do
     t.string "url"
     t.integer "telegram_bot_chat_id"
     t.bigint "plan_id"
+    t.string "email"
     t.index ["plan_id"], name: "index_stores_on_plan_id"
   end
 

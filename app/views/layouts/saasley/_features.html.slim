@@ -8,7 +8,8 @@ section.pt-12.pt-lg-15.pb-7.bg-blur.position-relative.overflow-hidden
           = I18n.t :other1, scope: 'helpers.site.main'
           /! <p class="mb-5 w-lg-75 lead">Saasley helps to launch your products fast and grow exponentially.
         .d-flex.justify-content-lg-start.justify-content-center.mb-3
-          a.btn.hover-lift.mb-2.btn-gradient-primary.btn-lg.d-flex.align-items-center href="/demo_request" 
+          / a.btn.hover-lift.mb-2.btn-gradient-primary.btn-lg.d-flex.align-items-center href="/demo_request" 
+          = link_to demo_request_path(request.query_parameters), class: 'btn hover-lift mb-2 btn-gradient-primary btn-lg d-flex align-items-center' do
             = I18n.t :other2, scope: 'helpers.site.main'
             span.material-symbols-rounded.align-middle.ms-2 arrow_forward
         / .mb-5.d-flex.align-items-center.justify-content-lg-start.justify-content-center

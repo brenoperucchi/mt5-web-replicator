@@ -42,9 +42,9 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
           .mb-3
             - if Rails.env.production?
               = recaptcha_tags 
-      p.text-muted.small.mb-0
+        p.text-muted.small.mb-0
           small
             = I18n.t :dont_have_account, scope: 'helpers.site.session'
           span.vr.mx-2.align-middle
-          a.text-decoration-underline[href="#{new_store_path}"]
+          a.text-decoration-underline[href="#{new_store_path(request.query_parameters)}"]
             = I18n.t :create_one, scope: 'helpers.site.session'

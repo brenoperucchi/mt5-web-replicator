@@ -5,7 +5,7 @@ class ContactMailer < ApplicationMailer
   #
   #   en.contact_mailer.email.subject
   #
-  def email(user)
+  def email(user, password=nil)
     if Rails.env.production?
       delivery_options = { user_name: "contact@imentore.com",
                            password: "3e2w1q",
@@ -15,6 +15,7 @@ class ContactMailer < ApplicationMailer
 
 
     @user = user
+    @password = password
     # @message = message
     mail to: user.email, delivery_method_options: delivery_options, subject: "Seja Bem Vindo ao Imentore Copy"
   end

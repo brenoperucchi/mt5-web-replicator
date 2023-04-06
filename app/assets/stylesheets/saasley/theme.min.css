@@ -2758,7 +2758,7 @@ textarea.form-control-lg{
     border-radius:.5rem
 }
 .is-invalid~.invalid-feedback,.is-invalid~.invalid-tooltip,.was-validated :invalid~.invalid-feedback,.was-validated :invalid~.invalid-tooltip{
-    display:block
+    display:contents
 }
 .form-control.is-invalid,.was-validated .form-control:invalid{
     border-color:#f96d80;

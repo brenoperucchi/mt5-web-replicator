@@ -8,7 +8,7 @@ class Store < ApplicationRecord
   attr_accessor :password
 
 
-  store :settings, accessors: [ :email, :language, :telegram_bot_status, :telegram_bot_token, :dashboard_restrict,
+  store :settings, accessors: [ :language, :telegram_bot_status, :telegram_bot_token, :dashboard_restrict,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, 
                                 :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id
                               ]
@@ -47,7 +47,7 @@ class Store < ApplicationRecord
 
   validates_presence_of :plan, :on => :create
   validates_presence_of :name, :email, :url
-  validates_uniqueness_of :url
+  validates_uniqueness_of :url, :email
 
   accepts_nested_attributes_for :customers, :users
 

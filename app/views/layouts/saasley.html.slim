@@ -12,9 +12,9 @@ html lang="en"
     meta content="width=device-width, initial-scale=1.0" name="viewport" /
     title = title = I18n.t :app_name, scope: 'helpers.site.main'
     /! :Page styles:
-    link href="/images/saasley/glightbox.min.css" rel="stylesheet" /
+    / link href="/images/saasley/glightbox.min.css" rel="stylesheet" /
     /! :AOS Animation:
-    link href="/images/saasley/aos.css" rel="stylesheet" /
+    / link href="/images/saasley/aos.css" rel="stylesheet" /
     /! :Google fonts:
     link href="https://fonts.googleapis.com" rel="preconnect" /
     link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" /
@@ -22,7 +22,9 @@ html lang="en"
     /! :Material symbols sharp icons:
     link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet" /
     /! :Main style:
-    link href="/images/saasley/theme.min.css" rel="stylesheet" /
+    / link href="/images/saasley/theme.min.css" rel="stylesheet" /
+    = stylesheet_link_tag  'saasley', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "saasley"
     css:
       .bottom-image {
         position: fixed;

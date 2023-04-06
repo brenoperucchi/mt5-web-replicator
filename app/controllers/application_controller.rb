@@ -7,6 +7,7 @@ class ApplicationController < ActionController::Base
 	before_action :current_store
 	helper_method :current_store
 	before_action :set_current_user
+	before_action :set_locale
 
   # protect_from_forgery with: :exception
 
@@ -29,5 +30,16 @@ class ApplicationController < ActionController::Base
   def set_current_user
     Current.user = current_user
   end
+
+  def set_locale
+  	locale = params[:locale]
+  	case locale
+  	when "en"
+  		I18n.locale = 'en'
+  	else
+  		I18n.locale = 'pt-BR'
+  	end
+  end
+
 
 end
