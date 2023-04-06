@@ -1,5 +1,5 @@
 class StoresController < ApplicationController
-	before_action :check_captcha, only: [:create]
+	prepend_before_action :check_captcha, only: [:create]
   respond_to :html, :xml, :json
 
 
