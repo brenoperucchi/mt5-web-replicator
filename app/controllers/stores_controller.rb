@@ -5,6 +5,11 @@ class StoresController < ApplicationController
 
 	layout "saasley"
 
+	def index
+		@store = Store.new
+		render :new
+	end
+
 	def new
 		@store = Store.new
 	end
@@ -51,7 +56,7 @@ class StoresController < ApplicationController
 	private
 
 	def check_captcha
-		if Rails.env.production?
+		unless Rails.env.test?
 	  	alert_recaptcha unless verify_recaptcha
 	  end
 	end

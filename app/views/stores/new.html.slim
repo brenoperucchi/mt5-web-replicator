@@ -18,16 +18,16 @@ section.pt-11.pt-lg-15.pb-lg-12.border-bottom.position-relative.overflow-hidden
           = I18n.t :title2, scope: 'helpers.site.signup_demo'
         .position-relative.z-index-1                
           = simple_form_for @store, url: stores_path, method: :post do |f|
-
             .position-relative.mb-2.d-flex.flex-column.flex-sm-row.align-items-md-center
               = f.input :email, placeholder: I18n.t(:placeholder_email, scope: 'helpers.site.signup_demo'), input_html:{class: "form-control flex-grow-1 me-sm-2 mb-2 mb-sm-0 shadow form-control-lg"}, label:false,wrapper: false
               '
               = f.button :submit, I18n.t(:submit, scope: 'helpers.site.signup_demo'), class: 'btn btn-primary btn-lg flex-shrink-0',wrapper: false
-        p.mb-0.small.opacity-50
-          = I18n.t :title3, scope: 'helpers.site.signup_demo'
-        .row.mb-3
-          .mb-3
-            = recaptcha_tags 
+            p.mb-0.small.opacity-50
+              = I18n.t :title3, scope: 'helpers.site.signup_demo'
+            - unless Rails.env.test?
+              .row.mb-3
+                .mb-3
+                  = recaptcha_tags 
           
       .col-lg-6.text-center.text-lg-start.mx-auto.mx-lg-0.col-md-10
         h4.display-7.text-center = I18n.t :title4, scope: 'helpers.site.signup_demo'
