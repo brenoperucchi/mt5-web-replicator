@@ -55,7 +55,7 @@ class Account < ApplicationRecord
     if current_user.userable.administrator?
       self.all.map{|x| [x.name, x.id]}   
     else
-      self.control_store(current_user.store).map{|x| [x.name, x.id]} 
+      self.control_store(current_user.store).order('name desc').map{|x| [x.name, x.id]} 
     end
   end
 

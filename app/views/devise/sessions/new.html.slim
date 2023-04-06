@@ -40,7 +40,8 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
           .d-grid.mb-3
             = f.submit "Sign in", class: "btn btn-primary"
           .mb-3
-            = recaptcha_tags 
+            - if Rails.env.production?
+              = recaptcha_tags 
       p.text-muted.small.mb-0
           small
             = I18n.t :dont_have_account, scope: 'helpers.site.session'
