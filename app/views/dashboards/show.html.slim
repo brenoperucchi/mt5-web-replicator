@@ -1,3 +1,5 @@
+
+
 /! [ breadcrumb ] start
 .page-header
   .page-block
@@ -23,6 +25,34 @@
 /! [ breadcrumb ] end
 
 = render "filter"
+
+.row
+  .col-xl-12.col-md-12
+    .tab-content
+      .row
+        .col-md-12
+          .card
+            .card-body
+              .row
+                .col-lg-6.col-md-6
+                  .d-flex.m-b-10.no-block
+                    h5.card-title.m-b-0.align-self-center.text-uppercase
+                      | Day amount
+                  ul.list-inline.m-b-10.text-uppercase.lp-5.font-medium.font-12
+                    li
+                      i.fa.fa-square.m-r-5.text-warning
+                      |  Portfolio
+                / .col-lg-6.col-md-6.text-right
+                /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+                /     li
+                /       | Last week
+                /     li
+                /       | Last month
+                /     li
+                /       i.flaticon-calendar.text-primary.f-16
+              .clearfix
+              #morris-area-chart[data-chart="#{@trace.copy_group_by_day.to_json}"]
+              .clearfix
 
 .row
   .col-xl-12.col-md-12
@@ -239,3 +269,4 @@
             document.location.href=link;
       });
     });
+  = javascript_include_tag "mintone_chart"

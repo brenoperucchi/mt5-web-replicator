@@ -37,6 +37,13 @@ class Trace < ApplicationRecord
   validates_presence_of   [:name, :name_id]
   validates_uniqueness_of [:name, :name_id], scope: :store_id
 
+
+  def copy_group_by_day
+    transactions.group_by{|x| x.created_at.to_date.to_s(:db)}.map {|k,v| {day:k, portfolio:v.sum(&:profit).to_f}}
+  end
+
+
+
   def soft_destroy_custom
     self.update_column(:active_at, nil)
   end

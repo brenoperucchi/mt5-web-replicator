@@ -157,6 +157,9 @@ gem 'simple_form'
 gem 'sd_notify'
 gem 'newrelic_rpm'
 gem 'recaptcha'
+gem 'link_thumbnailer'
+gem 'imgix'
+
 
 
 # Stylesheet inlining for email **
