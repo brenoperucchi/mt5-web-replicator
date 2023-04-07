@@ -602,7 +602,7 @@ DEPENDENCIES
   better_errors
   binding_of_caller
   bootsnap (>= 1.6.0)
-  bundler
+  bundler (= 2.4.1)
   capistrano (~> 3.6)
   capistrano-bundler
   capistrano-rails
