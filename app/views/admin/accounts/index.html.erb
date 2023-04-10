@@ -85,13 +85,18 @@
               </div>
             </div>
           </div>
-<% content_for :javascript do %>
-<!-- Event snippet for Inscrição conversion page -->
-<script>
-  gtag('event', 'conversion', {
-      'send_to': 'AW-1036376326/zrY6COKr2gEQhrKX7gM',
-      'value': 1.0,
-      'currency': 'BRL'
-  });
-</script>
+<% content_for :head do %>
+  <!-- Event snippet for Inscrição conversion page -->
+  <!-- Google tag (gtag.js) --> 
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-1036376326"></script>
+  <script>
+     window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date());
+  </script>
+  <script>
+    gtag('event', 'conversion', {
+        'send_to': 'AW-1036376326/zrY6COKr2gEQhrKX7gM',
+        'value': 1.0,
+        'currency': 'BRL'
+    });
+  </script>
 <% end %>
