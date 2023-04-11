@@ -33,7 +33,7 @@ html lang="en"
       }
     script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
     script
-      |  window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
+      | window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
   body
     = yield
     /! :Footer:
@@ -73,8 +73,12 @@ html lang="en"
             small.text-muted
               | © Copyright 2022. Saasley inc.
     /! :Theme script:
-    a[class='bottom-image' aria-label="Chat on WhatsApp" href="https://wa.me/5548988227539?text=Tenho%20interesse%20em%20conhecer%20o%20produto."] 
-      img alt="Chat on WhatsApp" src="/fonts/WhatsAppButtonGreenLarge.svg" 
+    - if params['locale'] == "en"
+      a[class='bottom-image' aria-label="Chat on WhatsApp" href="https://wa.me/5548988227539?text=I%20am%20interested%20in%20knowing%20the%20product."] 
+        img alt="Fale via WhatsApp" src="/fonts/WhatsAppButtonGreenLarge.svg" 
+    - else
+      a[class='bottom-image' aria-label="Chat on WhatsApp" href="https://wa.me/5548988227539?text=Tenho%20interesse%20em%20conhecer%20o%20produto."] 
+        img alt="Chat on WhatsApp" src="/fonts/WhatsAppButtonGreenLarge.svg" 
   
     = javascript_include_tag "saasley/theme.bundle.js" 
     / script
