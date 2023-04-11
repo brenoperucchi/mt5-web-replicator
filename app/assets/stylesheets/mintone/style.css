@@ -28427,7 +28427,7 @@ a.text-dark:hover, a.text-dark:focus {
 
 .card {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .card .card-header {
@@ -28538,7 +28538,7 @@ a.text-dark:hover, a.text-dark:focus {
 
 .card .card-block,
   .card .card-body {
-    padding: 20px 25px;
+    padding: 15px 20px;
 }
 
 .card.card-load {
