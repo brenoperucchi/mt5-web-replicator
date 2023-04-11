@@ -152,7 +152,28 @@
   });
 
 </script>
-<!-- custom-chart js -->
+<script type="text/javascript">
+  $(document).ready(function(){
+    $(".btn-primary#filter").click(function(){
+      // $.session.set("filterCollapse",true);
+      if($('.row.collapse').hasClass('show')){
+        $.session.set("filterCollapse",false);
+      } else{
+       $.session.set("filterCollapse",true);
+      }
+      $(".collapse").collapse('toggle');
+    });
+  });
+    (function($) {
+    "use strict";
+
+    if(($.session.get("filterCollapse")) == 'true'){
+      $(".collapse").collapse('show');
+    }
+
+  })(jQuery);
+
+</script>
 
 </body>
 

@@ -38,11 +38,61 @@ class Trace < ApplicationRecord
   validates_uniqueness_of [:name, :name_id], scope: :store_id
 
 
-  def copy_group_by_day
-    transactions.group_by{|x| x.created_at.to_date.to_s(:db)}.map {|k,v| {day:k, portfolio:v.sum(&:profit).to_f}}
+  def dashboard_capital_accumulated
+    amount_total = 0
+    collection = masters_filter(transactions)
+    collection = collection.size >=10 ? collection : transactions
+    collection.order('created_at asc').group_by{|x| x.created_at.to_date.to_s(:db)}.map do |k,v|
+      # binding.pry
+      amount_total = v.sum(&:profit) + amount_total
+      {day:k, portfolio: amount_total.to_f, amount: number_with_precision(v.sum(&:profit), precision:2, separator: ',')}
+    end
   end
 
+  def dashboard_drawdown
+    amount_total = 0
+    collection = masters_filter(transactions)
+    collection = collection.size >=10 ? collection : transactions
+    collection.loss.order('created_at asc').group_by{|x| x.created_at.to_date.to_s(:db)}.map do |k,v|
+      # binding.pry
+      amount_total = AlgoStatistic.drawdown(v)
+      {day:k, drawdown: number_with_precision(amount_total, precision:2, separator: '.')}
+    end
+  end
 
+  def dashboard_monthy_amount
+    # amount_total = 0
+    # collection = masters_filter(transactions)
+    # collection = collection.size >=10 ? collection : transactions
+    # date    = ['date']
+    # capital = ['capital']
+    # profit  = ['profit']
+    # array = []
+    # collection.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.each do |k,v|
+    #   # binding.pry
+    #   amount_total = v.sum(&:profit) + amount_total
+    #   date.push(k)
+    #   capital.push(amount_total)
+    #   profit.push(number_with_precision(v.sum(&:profit), precision:2, separator: ','))
+    #   # 
+    # end
+    # array.push(date, capital, profit)
+    amount_total = 0
+    collection = masters_filter(transactions)
+    collection = collection.size >=10 ? collection : transactions
+    date    = ['date']
+    capital = ['capital']
+    profit  = ['profit']
+    array = []
+    collection.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
+      # binding.pry
+      amount_total = v.sum(&:profit) + amount_total
+      # date.push(k)
+      # capital.push(amount_total)
+      # profit.push(number_with_precision(v.sum(&:profit), precision:2, separator: ','))
+      {date:k, capital: amount_total, profit: v.sum(&:profit)} 
+    end
+  end
 
   def soft_destroy_custom
     self.update_column(:active_at, nil)

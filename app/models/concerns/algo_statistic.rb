@@ -35,12 +35,12 @@ module AlgoStatistic
 		(result.is_a?(Float) or result.nan?) ? 0 : result
 	end
 
-	def self.drawdown(transactions)
+	def self.drawdown(collection)
 	  drawdown_balance = 0
 	  drawdown_max = 0
 
-	  transactions.each do |association|
-	    value = association.profit.to_f
+	  collection.each do |record|
+	    value = record.profit.to_f
 	    if value < 0 
 	      drawdown_balance = drawdown_balance + value
 	      

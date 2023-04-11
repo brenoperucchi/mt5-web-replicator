@@ -1,4 +1,5 @@
-
+- content_for :header do
+  = stylesheet_link_tag "mintone/morris.css"
 
 /! [ breadcrumb ] start
 .page-header
@@ -16,6 +17,10 @@
           li.breadcrumb-item
             a href="/dashboards" Dashboards
           li.breadcrumb-item
+      .col-md-6.text-right
+        button#filter.btn.btn-primary.m-r-5[type="button"]
+          i.feather.icon-plus
+          |  Filtro
 
       /!
         | <div class="col-md-6 text-right"
@@ -85,14 +90,16 @@
                 span.text-c-red
                   = number_with_precision @trace.drawdown, precision:2
     .row
-      .col-sm-12
+      .col-sm-6
         .card
           .card-body
             .row
-              .col-lg-6.col-md-6
+              .col-lg-12.col-md-12
                 .d-flex.m-b-10.no-block
-                  h5.card-title.m-b-0.align-self-center.text-uppercase
-                    | Day amount
+                  h5
+                    | Curva de capital 
+                    '
+                    = "(útlimos #{@trace.dashboard_capital_accumulated.size} dias)"
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
               /     li
@@ -102,7 +109,28 @@
               /     li
               /       i.flaticon-calendar.text-primary.f-16
             .clearfix
-            #morris-area-chart[data-chart="#{@trace.copy_group_by_day.to_json}"]
+            #morris-area-chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
+            .clearfix
+      .col-sm-6
+        .card
+          .card-body
+            .row
+              .col-lg-12.col-md-12
+                .d-flex.m-b-10.no-block
+                  h5
+                    | Drawdown
+                    '
+                    = "(útlimos #{@trace.dashboard_drawdown.size} dias)"
+              / .col-lg-6.col-md-6.text-right
+              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+              /     li
+              /       | Last week
+              /     li
+              /       | Last month
+              /     li
+              /       i.flaticon-calendar.text-primary.f-16
+            .clearfix
+            #morris-area-chart-dashboard_drawdown[data-chart="#{@trace.dashboard_drawdown.to_json}"]
             .clearfix
 
     .row
@@ -183,6 +211,56 @@
                   | Total
                 span
                   = @trace.masters_scope(:masters).count
+
+    .row
+      .col-lg-12
+        .card
+          .card-body
+            .row
+              .col-lg-12.col-md-12
+                .d-flex.m-b-10.no-block
+                  h5
+                    | Capital Amount
+                    '
+                    = "(útlimos #{@trace.dashboard_monthy_amount.size} dias)"
+              / .col-lg-6.col-md-6.text-right
+              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+              /     li
+              /       | Last week
+              /     li
+              /       | Last month
+              /     li
+              /       i.flaticon-calendar.text-primary.f-16
+            .clearfix
+            #morris-area-chart-dashboard_monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
+            .clearfix
+/ .row
+/   .col-lg-12.col-md-12
+/     .card.panel-main.o-income.panel-refresh
+/       .refresh-container
+/         .preloader
+/           .loader
+
+/       .card-body.panel-wrapper
+/         .d-flex.m-b-10.no-block
+/           h5.card-title.m-b-0.align-self-center
+/             | Memory usage
+/           .ml-auto.text-muted-blue
+/             a.pull-left.text-muted-blue.inline-block.refresh.mr-15[href="#"]
+/               i.fas.fa-sync
+/               |  Update 
+/         ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+/           li.list-inline-item
+/             i.fa.fa-square.m-r-5.text-warning
+/             |  Total
+/           li.list-inline-item
+/             i.fa.fa-square.m-r-5.text-danger
+/             |  Used
+/           li.list-inline-item
+/             i.fa.fa-square.m-r-5.text-primary
+/             |  Free
+/         #memory_usage[style="height:260px; width:100%;"]
+/         #memory_usage-chart-monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
 
 .row
   .col-md-12

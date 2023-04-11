@@ -19,5 +19,6 @@
 //= require mintone/pcoded.min.js
 //= require mintone/moment.min.js
 //= require mintone/daterangepicker.js
+//= require mintone/jquery.session.js
 // require mintone/ac-datepicker.js
 // require mintone/dashboard-server.js
