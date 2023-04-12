@@ -38,12 +38,12 @@ en:
           request_demo: We are in the testing phase, at this time only a few customers will be selected to test and evaluate our system with all the features. After the trial period, the customer must opt for a plan with a 10% discount on the monthly fee for the first year.
         telegram:
           title: Telegram
-          summarizes: By connecting our robot Alfred to your group, you will be able to monitor the operations carried out.
+          resume: By connecting our robot Alfred to your group, you will be able to monitor the operations carried out.
           resume2: Share your operations in your Telegram group with Alfred Bot
           resume3: Alfred will notify when an order opens, closes or even changes to operations.
         payment:
           title: Automatic Billing
-          summarizes: The system will charge customers automatically.
+          resume: The system will charge customers automatically.
           resume2: The charge may be for a plan with a specific amount or a percentage of the customer's earnings.
           resume3: The company's technology STRIPE will provide several reports and is fully integrated into our system.
         copy:
