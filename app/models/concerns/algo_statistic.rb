@@ -39,8 +39,11 @@ module AlgoStatistic
 	  drawdown_balance = 0
 	  drawdown_max = 0
 
-	  collection.each do |record|
-	    value = record.profit.to_f
+
+	  # collection.each do |record|
+	  #   value = record.profit.to_f
+	  collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
+	    value = record.sum(&:profit)
 	    if value < 0 
 	      drawdown_balance = drawdown_balance + value
 	      
@@ -63,8 +66,10 @@ module AlgoStatistic
 	  drawdown_max = 0
 	  drawdown_days = 0
 
-	  collection.each do |record|
-	    value = record.profit.to_f
+	  # collection.each do |record|
+	  #   value = record.profit.to_f
+	  collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
+	    value = record.sum(&:profit)
 	    if value < 0 
 	      drawdown_balance = drawdown_balance + value
 	      
@@ -83,29 +88,111 @@ module AlgoStatistic
 	  drawdown_days
 	end
 
+
 	def self.drawdown_dates(collection)
 	  drawdown_balance = 0
 	  drawdown_max = 0
 	  drawdown_dates = []
+	  drawdown_dates_max = []
 
-	  collection.each do |record|
-	    value = record.profit.to_f
+
+	  collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
+	    value = record.sum(&:profit)
 	    if value < 0 
 	      drawdown_balance = drawdown_balance + value
-	      
+      	drawdown_dates.push(Date.strptime(date,"%Y  %m %d"))
 	      if drawdown_balance < drawdown_max
-	      	drawdown_dates.push(record.created_at.to_s(:db))
+	      	drawdown_dates_max = (drawdown_dates)
 	        drawdown_max = drawdown_balance
 	      end
-
-	    else
+  		else
 	      drawdown_balance = drawdown_balance + value
-	      if drawdown_balance > 0
+	      if drawdown_balance > drawdown_max
 	        drawdown_balance = 0 
+	      	drawdown_dates = []
 	      end
 	    end
 	  end
-	  drawdown_dates
+	  return drawdown_dates_max
 	end
+
+	# def self.drawdown_dates(collection)
+	#   drawdown_balance = 0
+	#   drawdown_max = 0
+	#   drawdown_dates = []
+	#   drawdown_dates_max = []
+
+	#   # collection.reverse.each do |record|
+	#   collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
+	#     # value = record.profit.to_f
+	#     value = record.sum(&:profit)
+	#     # puts "----------BEGIN-------------"
+	#     # # puts "Date => #{record.created_at.strftime("%Y/%m/%d")}"
+	#     # puts "Date => #{date}"
+	#     # puts "Value => #{value.to_f}"
+	#     # puts "drawdown_balance => #{drawdown_balance.to_f}"
+	#     if value < 0 
+	#       # puts "drawdown_balance + value => #{drawdown_balance.to_f} + #{value} = #{drawdown_balance + value}"
+	#       drawdown_balance = drawdown_balance + value
+	#       # puts "drawdown_max => #{drawdown_max.to_f}"
+	#       # puts "if drawdown_balance < drawdown_max => #{drawdown_balance} < #{drawdown_max} = #{drawdown_balance < drawdown_max}"
+  #     	# # drawdown_dates.push([record.created_at.strftime("%Y/%m/%d"), value])
+  #     	drawdown_dates.push(Date.strptime(date,"%Y  %m %d"))
+  #     	# puts "drawdown_dates => #{drawdown_dates}"
+	#       if drawdown_balance < drawdown_max
+	#       	drawdown_dates_max = (drawdown_dates)
+  #     		# puts "drawdown_dates_max => #{drawdown_dates}"
+	#         drawdown_max = drawdown_balance
+	#         # puts "drawdown_max = drawdown_balance => #{drawdown_max.to_f}"
+	#       end
+  # 		else
+	#     	# puts "ELSE"
+	#       # puts "drawdown_balance + value => #{drawdown_balance.to_f} + #{value} = #{drawdown_balance + value}"
+	#       drawdown_balance = drawdown_balance + value
+	#       # puts "if drawdown_balance > drawdown_max => #{drawdown_balance} > #{drawdown_max} = #{drawdown_balance > drawdown_max}"
+	#       if drawdown_balance > drawdown_max
+	#         drawdown_balance = 0 
+	#       	# puts "Value >= 0 ELSE - drawdown_dates => #{drawdown_dates}"
+	#       	drawdown_dates = []
+	#       	# puts "Value >= 0 ELSE - drawdown_dates => #{drawdown_dates}"
+	#         # puts "drawdown_balance = 0  => #{drawdown_balance.to_f}"
+	#         # puts "drawdown_max 		 = 0  => #{drawdown_max.to_f}"
+	#       end
+	#     end
+	#     # puts "----------END-------------"
+	#   end
+	#   # "#{drawdown_dates.first.strftime("%Y/%m/%d")} - #{drawdown_dates.last.strftime("%Y/%m/%d")}"
+	#   # puts "drawdown_dates => #{drawdown_dates}"
+	#   return drawdown_dates_max
+	# end
+
+	# def self.drawdown_dates(collection)
+	#   drawdown_balance = 0
+	#   drawdown_max = 0
+	#   drawdown_dates = []
+
+	#   collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
+	#     value = record.sum(&:profit)
+  #     drawdown_balance = drawdown_balance + value
+	#     if value < 0 
+	      
+	#       if drawdown_balance < drawdown_max
+	#       	drawdown_dates.push("#{date} - #{value}")
+	#       	drawdown_dates.push(date)
+	#         drawdown_max = drawdown_balance
+	#       end
+
+	#     else
+	#       # drawdown_balance = drawdown_balance + value
+	#       if drawdown_balance > drawdown_max
+	#         drawdown_balance = drawdown_max
+	#         # drawdown_max = 0
+	#       end
+	#     end
+	#   end
+	#   drawdown_dates
+	#   # return [] unless drawdown_dates.present?
+	#   # "#{Date.strptime(drawdown_dates.first,"%Y  %m %d").strftime("%Y/%m/%d")} - #{Date.strptime(drawdown_dates.first,"%Y  %m %d").strftime("%Y/%m/%d")}"
+	# end
 	
 end

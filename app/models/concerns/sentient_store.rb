@@ -16,15 +16,10 @@ module SentientStore
 			# end
 
 			def current_store
-				if user_signed_in?
-					current_user.try(:store)
-				else
 				  subdomain = request.subdomain.split('.').try(:first)
-				  unless subdomain.nil? 
-				  	session[:store_id] = Store.find_by(url: subdomain) || Store.first   
-				  end
+				  session[:store_id] = Store.find_by(url: subdomain) unless subdomain.nil? 
+				  session[:store_id] ||= current_user.try(:store) || Store.first   
 				end
-			end
 
 		end
 	end

@@ -100,6 +100,8 @@ class TransactionDashboard < Administrate::BaseDashboard
   lot
   magic_number
   open_at
+  created_at
+  closed_at
   ].freeze
 
   # COLLECTION_FILTERS

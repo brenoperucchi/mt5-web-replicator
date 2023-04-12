@@ -1,6 +1,12 @@
 module ApplicationHelper
   include Rails.application.routes.url_helpers
 
+
+  def i18n_l(date, format=:default)
+    return nil if date.nil?
+    I18n.l date, format:format
+  end
+
   def default_url_options
      {host: Rails.application.routes.default_url_options[:host]}
   end

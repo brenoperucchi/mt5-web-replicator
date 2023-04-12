@@ -39,6 +39,7 @@ class ApplicationController < ActionController::Base
   	else
   		I18n.locale = 'pt-BR'
   	end
+  	I18n.locale = current_store ? current_store.language : locale
   end
 
 

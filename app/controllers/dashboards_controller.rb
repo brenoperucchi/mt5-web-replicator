@@ -67,13 +67,13 @@ class DashboardsController < ApplicationController
 
 	private
 
-	def set_locale
-		if current_store.nil?
-			I18n.locale = 'pt-BR'
-		else
-			I18n.locale = current_store.language
-		end
-	end
+	# def set_locale
+	# 	if current_store.nil?
+	# 		I18n.locale = 'pt-BR'
+	# 	else
+	# 		I18n.locale = current_store.language
+	# 	end
+	# end
 
 
 	def set_trace

@@ -90,7 +90,7 @@
                 span.text-c-red
                   = number_with_precision @trace.drawdown, precision:2
     .row
-      .col-sm-6
+      .col-sm-8
         .card
           .card-body
             .row
@@ -111,7 +111,39 @@
             .clearfix
             #morris-area-chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
             .clearfix
-      .col-sm-6
+      .col-sm-4
+        .card.profile-view[style="margin-bottom: 17px;"]
+          .card-body
+            h5
+              | Drawdown
+            strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block.text-c-red
+              / - profit = @trace.profit_trade - @trace.loss_trade
+              = number_with_precision @trace.profit_drawdown, precision:2
+            .row
+              .col-lg-12.text-center
+                p.text-muted.m-b-0
+                  - dates = @trace.drawdown_dates
+                  = "Days: #{@trace.drawdown_days} - Dates: #{i18n_l dates.first} to #{i18n_l dates.last}"
+        .card.profile-view[style="margin-bottom: 17px;"]
+          .card-body
+            h5
+              | Operações abertas
+            strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Compras
+                span.text-c-green
+                  = @trace.masters_scope(:masters, [:executed, :buy]).count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Vendas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, [:executed, :sell]).count
+                  
+    .row
+      .col-sm-8
         .card
           .card-body
             .row
@@ -132,50 +164,12 @@
             .clearfix
             #morris-area-chart-dashboard_drawdown[data-chart="#{@trace.dashboard_drawdown.to_json}"]
             .clearfix
-
-    .row
-      .col-sm-3
-        .card.profile-view
-          .card-body
-            h5
-              | Operações abertas
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  | Compras
-                span.text-c-green
-                  = @trace.masters_scope(:masters, [:executed, :buy]).count
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  | Vendas
-                span.text-c-red
-                  = @trace.masters_scope(:masters, [:executed, :sell]).count
-      .col-sm-3
-        .card.profile-view
-          .card-body
-            h5
-              | Operações Fechadas
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  | Compras
-                span.text-c-green
-                  = @trace.masters_scope(:masters, [:closed, :buy]).count
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  | Vendas
-                span.text-c-red
-                  = @trace.masters_scope(:masters, [:closed, :sell]).count
-      .col-sm-3
-        .card.profile-view
+      .col-sm-4
+        .card.profile-view[style="margin-bottom: 15px;"]
           .card-body
             h5
               | Operações com Error
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
@@ -188,12 +182,11 @@
                   | Vendas
                 span.text-c-red
                   = @trace.masters_scope(:masters, [:error, :sell]).count
-      .col-sm-3
-        .card.profile-view
+        .card.profile-view[style="margin-bottom: 15px;"]
           .card-body
             h5
               | Total
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters).to_a.sum(&:profit), precision:2
             .row
               .col-4.text-center
@@ -213,7 +206,7 @@
                   = @trace.masters_scope(:masters).count
 
     .row
-      .col-lg-12
+      .col-lg-8
         .card
           .card-body
             .row
@@ -234,34 +227,24 @@
             .clearfix
             #morris-area-chart-dashboard_monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
             .clearfix
-/ .row
-/   .col-lg-12.col-md-12
-/     .card.panel-main.o-income.panel-refresh
-/       .refresh-container
-/         .preloader
-/           .loader
-
-/       .card-body.panel-wrapper
-/         .d-flex.m-b-10.no-block
-/           h5.card-title.m-b-0.align-self-center
-/             | Memory usage
-/           .ml-auto.text-muted-blue
-/             a.pull-left.text-muted-blue.inline-block.refresh.mr-15[href="#"]
-/               i.fas.fa-sync
-/               |  Update 
-/         ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
-/           li.list-inline-item
-/             i.fa.fa-square.m-r-5.text-warning
-/             |  Total
-/           li.list-inline-item
-/             i.fa.fa-square.m-r-5.text-danger
-/             |  Used
-/           li.list-inline-item
-/             i.fa.fa-square.m-r-5.text-primary
-/             |  Free
-/         #memory_usage[style="height:260px; width:100%;"]
-/         #memory_usage-chart-monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
-
+      .col-sm-4
+        .card.profile-view[style="margin-bottom: 15px;"]
+          .card-body
+            h5
+              | Operações Fechadas
+            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
+              = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
+            .row
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Compras
+                span.text-c-green
+                  = @trace.masters_scope(:masters, [:closed, :buy]).count
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  | Vendas
+                span.text-c-red
+                  = @trace.masters_scope(:masters, [:closed, :sell]).count
 .row
   .col-md-12
     .card.table-card.latest-activity-card
