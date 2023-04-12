@@ -43,7 +43,7 @@ class Trace < ApplicationRecord
     collection = masters_scope(:masters, :closed).order(created_at: :asc)
     collection_array = []
     if collection.present?
-      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, amount: 0}]
+      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
       (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
         profit = collection.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
         amount_total = profit + amount_total
