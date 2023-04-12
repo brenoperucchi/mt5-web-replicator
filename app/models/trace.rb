@@ -42,10 +42,12 @@ class Trace < ApplicationRecord
     amount_total = 0
     collection = masters_filter(self.transactions)
     collection_array = []
-    (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
-      profit = self.transactions.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
-      amount_total = profit + amount_total
-      collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, amount: profit.to_f})
+    if collection.present?
+      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
+        profit = self.transactions.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
+        amount_total = profit + amount_total
+        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, amount: profit.to_f})
+      end
     end
     collection_array
   end
@@ -54,10 +56,12 @@ class Trace < ApplicationRecord
     amount_total = 0
     collection = masters_filter(self.transactions)
     collection_array = []
-    (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
-      records = self.transactions.where(created_at: date.beginning_of_day..date.end_of_day)
-      drawdown = AlgoStatistic.drawdown(records)
-      collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
+    if collection.present?
+      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
+        records = self.transactions.where(created_at: date.beginning_of_day..date.end_of_day)
+        drawdown = AlgoStatistic.drawdown(records)
+        collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
+      end
     end
     collection_array
   end
@@ -222,6 +226,16 @@ class Trace < ApplicationRecord
   def drawdown(type = :masters)
     scoped = masters_scope(:masters, :closed).order(created_at: :desc)
     AlgoStatistic.drawdown(scoped)
+  end
+
+  def drawdown_days(type = :masters)
+    scoped = masters_scope(:masters, :closed).order(created_at: :desc)
+    AlgoStatistic.drawdown_days(scoped)
+  end
+
+  def drawdown_dates(type = :masters)
+    scoped = masters_scope(:masters, :closed).order(created_at: :desc)
+    AlgoStatistic.drawdown_dates(scoped)
   end
 
 end
