@@ -40,24 +40,35 @@ class Trace < ApplicationRecord
 
   def dashboard_capital_accumulated
     amount_total = 0
-    collection = masters_filter(transactions)
-    collection = collection.size >=10 ? collection : transactions
-    collection.order('created_at asc').group_by{|x| x.created_at.to_date.to_s(:db)}.map do |k,v|
-      # binding.pry
-      amount_total = v.sum(&:profit) + amount_total
-      {day:k, portfolio: amount_total.to_f, amount: number_with_precision(v.sum(&:profit), precision:2, separator: ',')}
+    collection = masters_filter(self.transactions)
+    collection_array = []
+    (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
+      profit = self.transactions.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
+      amount_total = profit + amount_total
+      collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, amount: profit.to_f})
     end
+    collection_array
   end
 
   def dashboard_drawdown
     amount_total = 0
-    collection = masters_filter(transactions)
-    collection = collection.size >=10 ? collection : transactions
-    collection.loss.order('created_at asc').group_by{|x| x.created_at.to_date.to_s(:db)}.map do |k,v|
-      # binding.pry
-      amount_total = AlgoStatistic.drawdown(v)
-      {day:k, drawdown: number_with_precision(amount_total, precision:2, separator: '.')}
+    collection = masters_filter(self.transactions)
+    collection_array = []
+    (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
+      records = self.transactions.where(created_at: date.beginning_of_day..date.end_of_day)
+      drawdown = AlgoStatistic.drawdown(records)
+      collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
     end
+    collection_array
+
+    # amount_total = 0
+    # collection = masters_filter(transactions)
+    # # collection = collection.size >=10 ? collection : transactions
+    # collection.loss.order('created_at asc').group_by{|x| x.created_at.to_date.to_s(:db)}.map do |k,v|
+    #   # binding.pry
+    #   amount_total = AlgoStatistic.drawdown(v)
+    #   {day:k, drawdown: number_with_precision(amount_total, precision:2, separator: '.')}
+    # end
   end
 
   def dashboard_monthy_amount
@@ -78,13 +89,13 @@ class Trace < ApplicationRecord
     # end
     # array.push(date, capital, profit)
     amount_total = 0
-    collection = masters_filter(transactions)
-    collection = collection.size >=10 ? collection : transactions
+    # collection = masters_filter(transactions)
+    # collection = collection.size >=10 ? collection : transactions
     date    = ['date']
     capital = ['capital']
     profit  = ['profit']
     array = []
-    collection.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
+    self.transactions.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
       # binding.pry
       amount_total = v.sum(&:profit) + amount_total
       # date.push(k)
@@ -135,7 +146,7 @@ class Trace < ApplicationRecord
   def create_orders(order_params, account, message, symbol)
     ticket = order_params['ticket_id']
     instrument = check_instrument(account, symbol)
-    api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, profit:nil, message: message, trace: self, account:account)
+    api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
       if order.nil?

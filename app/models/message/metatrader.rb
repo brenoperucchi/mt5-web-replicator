@@ -56,6 +56,10 @@ class Message::Metatrader < Message::Message
             orders.each do |order| 
               order.transactions.map{|t| t.set_lot_sl_tp(order_params) }
             end
+          elsif order_params['state_meta'] == "modify_profit"
+            orders.each do |order| 
+              order.transactions.map{|t| t.set_profit(order_params['profit']) }
+            end
           end
         end
       end

@@ -100,12 +100,16 @@ class Transaction < ApplicationRecord
     end
   end
 
+  def set_profit(profit)
+    self.update_columns(profit: profit)
+  end
+
   def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)
     self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss)}
   end
 
   def set_lot_sl_tp(order_params)
-    attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f}
+    attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f, profit:order_params["profit"]}
     # attributes = {lot:lot, take_profit:take_profit, stop_loss:stop_loss}.compact
     self.attributes = attributes
 

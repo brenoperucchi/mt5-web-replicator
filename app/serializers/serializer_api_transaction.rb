@@ -13,6 +13,7 @@ class SerializerAPITransaction < ActiveModel::Serializer
       open_at: open_at,
       comment: obj['comment'],
       ticket_deal: obj['ticket_deal'],
+      profit: obj['profit'],
     }
   end
 
