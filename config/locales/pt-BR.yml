@@ -8,6 +8,31 @@ pt-BR:
       session:
         bad_login_email: "*** Email inválido: %{email}"
         bad_login_password: "*** Senha incorreta para o email: %{email}"
+    dashboards:
+      dashboards: Portfólios
+      admin: Administrador
+      filter: Filtro
+      site: Site Principal
+      show:
+        profit_factor: Fator de Lucro
+        oper_gain: Operações positivas
+        oper_loss: Operações negativas
+        profit_trade: Taxa de acerto
+        profit_drawdown: Lucro / Max DD
+        profit_net: Lucro Líquido
+        max_dd: Max DD
+        curve_capital: Curva de capital
+        days: "%{days} dias "
+        months: "%{month} meses"
+        drawdown: Drawdown
+        dates: "%{date1} até %{date2}"
+        orders_open: Ordens Abertas
+        orders_errors: Ordens Errors
+        orders_closed: Ordens Fechadas
+        buy: Compras
+        sell: Vendas
+        capital_amount: Evolução do capital
+        total: Total
     site:
       signup_demo:
         title: Gerenciador de Copy para Robos, entradas manuais e sinais

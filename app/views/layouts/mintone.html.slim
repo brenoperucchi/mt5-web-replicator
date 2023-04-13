@@ -1,0 +1,62 @@
+doctype html
+html[lang="en"]
+  head
+    meta[charset="utf-8"]
+    title
+      = content_for?(:title) ? yield(:title) : "Copy MetaTrader"
+    meta[charset="utf-8"]
+    meta[http-equiv="X-UA-Compatible" content="IE=edge"]
+    meta[name="description" content=""]
+    meta[name="keywords" content=""]
+    meta[name="author" content=""]
+    meta[property="og:title" content="Dashboard Imentore Copy"]
+    meta[property="og:url" content="https://www.imentore.com.br/dashboards"]
+    meta[property="og:description" content="Gerencie os seus de robos, sinais, operações manuais de forma automática."]
+    meta[property="og:type" content="website"]
+    meta[property="og:image" content="http://www.imentore.com.br/dash_thumbnail.png"]
+    meta[charset="UTF-8"]
+    meta[content="IE=edge" http-equiv="X-UA-Compatible"]
+    meta[content="width=device-width, initial-scale=1.0" name="viewport"]
+    = stylesheet_link_tag  'mintone', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "mintone"
+    = yield(:header)
+  body
+    .loader-bg
+      .loader-track
+        .loader-fill
+    .content-main.container
+      .pcoded-main-container
+        .pcoded-content
+          .page-header
+            .page-block
+              .row.align-items-center
+                .col-md-6
+                  .page-header-title
+                    -if @account
+                      h5.m-b-10 = "#{@trace.try(:name)} - #{@account.try(:name)}" || I18n.t(:dashboards, scope:'helpers.dashboards')
+                    - else
+                      h5.m-b-10 = @trace.try(:name) || I18n.t(:dashboards, scope:'helpers.dashboards')
+                  ul.breadcrumb
+                    li.breadcrumb-item
+                      - if user_signed_in? and not current_user.try(:userable).try(:user?)
+                        a href="/admin" 
+                          i.feather.icon-home
+                          '
+                          = I18n.t :admin, scope:'helpers.dashboards'
+                      - else
+                        a href="/" 
+                          i.feather.icon-home
+                          '
+                          = I18n.t :site, scope:'helpers.dashboards'
+                    = yield(:breadcrumb)
+                .col-md-6.text-right
+                  button#filter.btn.btn-primary.m-r-5[type="button"]
+                    i.feather.icon-plus
+                    = I18n.t :filter, scope:'helpers.dashboards'
+
+          = content_for?(:content) ? yield(:content) : yield
+    = content_for :footer
+    script
+      |  $(document).ready(function(){ $(function() { var start = moment($('input[name="datefilter"]').val().split(" - ")[0], "DD/MM/YYYY"); var end = moment($('input[name="datefilter"]').val().split(" - ")[1], "DD/MM/YYYY"); function cb(start, end) { $('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY')); } $('#reportrange').daterangepicker({ startDate: start, endDate: end, autoUpdateInput: false, locale: { format: 'DD/MM/YYYY', cancelLabel: 'Clear' }, ranges: { 'Today': [moment(), moment()], 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')], 'Last 7 Days': [moment().subtract(6, 'days'), moment()], 'Last 30 Days': [moment().subtract(29, 'days'), moment()], 'This Month': [moment().startOf('month'), moment().endOf('month')], 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')] } }, cb); $('#reportrange').on('apply.daterangepicker', function(ev, picker) { $('input[name="datefilter"]').val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY')); }); $('#reportrange').on('cancel.daterangepicker', function(ev, picker) { $('input[name="datefilter"]').val(''); $('#reportrange span').html(''); }); cb(start, end); }); }); 
+    script[type="text/javascript"]
+      |  $(document).ready(function(){ $(".btn-primary#filter").click(function(){ // $.session.set("filterCollapse",true); if($('.row.collapse').hasClass('show')){ $.session.set("filterCollapse",false); } else{ $.session.set("filterCollapse",true); } $(".collapse").collapse('toggle'); }); }); (function($) { "use strict"; if(($.session.get("filterCollapse")) == 'true'){ $(".collapse").collapse('show'); } })(jQuery); 

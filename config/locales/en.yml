@@ -8,6 +8,31 @@ en:
       session:
         bad_login_email: "Bad email address given: %{email}"
         bad_login_password: "*** Bad email address given: %{email}"
+    dashboards:
+      dashboards: Portfolios
+      admin: Administrator
+      filter: Filter
+      site: Main website
+      show:
+        profit_factor: Profit Factor
+        oper_gain: Gain
+        oper_loss: Loss
+        profit_trade: Success rate
+        profit_drawdown: Profit / Max DD
+        profit_net: Net Profit
+        max_dd: Max DD
+        curve_capital: Capital Curve
+        days: "%{days} days "
+        months: "%{month} months"
+        drawdown: Drawdown
+        dates: "%{date1} to %{date2}"
+        orders_open: Open Orders
+        orders_errors: Errors Orders
+        orders_closed: Orders Closed 
+        buy: Buy
+        sell: Sell
+        capital_amount: Evolution of capital
+        total: Total
     site:
       signup_demo:
         title: Better business planning for any kind of brand

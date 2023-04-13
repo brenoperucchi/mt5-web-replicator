@@ -29206,8 +29206,9 @@ strong {
 }
 
 .page-header .page-header-title + .breadcrumb > .breadcrumb-item:last-child a {
-    color: #535763;
+/*    color: #535763;*/
     font-weight: 400;
+    font-size: 16px!important;
 }
 
 .page-header:not(.breadcumb-sticky) .page-header-title + .breadcrumb > .breadcrumb-item a {

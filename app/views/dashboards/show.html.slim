@@ -1,33 +1,49 @@
 - content_for :header do
   = stylesheet_link_tag "mintone/morris.css"
 
-/! [ breadcrumb ] start
-.page-header
-  .page-block
-    .row.align-items-center
-      .col-md-6
-        .page-header-title
-          h5.m-b-10 = @trace.name
-        ul.breadcrumb
-          li.breadcrumb-item
-            a href="/admin" 
-              i.feather.icon-home
-              '
-              | Admin
-          li.breadcrumb-item
-            a href="/dashboards" Dashboards
-          li.breadcrumb-item
-      .col-md-6.text-right
-        button#filter.btn.btn-primary.m-r-5[type="button"]
-          i.feather.icon-plus
-          |  Filtro
+- content_for :breadcrumb do
+  li.breadcrumb-item
+    a href="/dashboards" 
+      = I18n.t :dashboards, scope:'helpers.dashboards'
+  li.breadcrumb-item
+    a href="#{dashboard_url(@trace.id)}" 
+      = @trace.name
 
-      /!
-        | <div class="col-md-6 text-right"
-        | <button type="button" class="btn btn-primary m-r-5"><i class="feather icon-plus"></i> Filter</button
-        | <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button
-        | </div
-/! [ breadcrumb ] end
+
+/ /! [ breadcrumb ] start
+/ .page-header
+/   .page-block
+/     .row.align-items-center
+/       .col-md-6
+/         .page-header-title
+/           h5.m-b-10 = @trace.name
+/         ul.breadcrumb
+/           li.breadcrumb-item
+/             - if user_signed_in? and not current_user.user?
+/               a href="/admin" 
+/                 i.feather.icon-home
+/                 '
+/                 = I18n.t :admin, scope:'helpers.dashboards'
+/             - else
+/               a href="/" 
+/                 i.feather.icon-home
+/                 '
+/                 = I18n.t :site, scope:'helpers.dashboards'
+/           li.breadcrumb-item
+/             a href="/dashboards"
+/               = I18n.t :dashboards, scope:'helpers.dashboards'
+/           li.breadcrumb-item
+/       .col-md-6.text-right
+/         button#filter.btn.btn-primary.m-r-5[type="button"]
+/           i.feather.icon-plus
+/           = I18n.t :filter, scope:'helpers.dashboards'
+
+/       /!
+/         | <div class="col-md-6 text-right"
+/         | <button type="button" class="btn btn-primary m-r-5"><i class="feather icon-plus"></i> Filter</button
+/         | <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button
+/         | </div
+/ /! [ breadcrumb ] end
 
 = render "filter"
 
@@ -38,55 +54,55 @@
         .card.profile-view
           .card-body
             h5
-              | Fator de Lucro
+              = I18n.t :profit_factor, scope:'helpers.dashboards.show'
             strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.profit_factor(:masters).round(2), precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Oper positivas
+                  = I18n.t :oper_gain, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision:2
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Oper. negativas
+                  = I18n.t :oper_loss, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = number_with_precision @trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision:2 
       .col-sm-4
         .card.profile-view
           .card-body
             h5
-              | Taxa de acerto
+              = I18n.t :profit_trade, scope:'helpers.dashboards.show'
             strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
               = "#{@trace.profit_trade(:masters)} %"
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Oper positivas
+                  = I18n.t :oper_gain, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = @trace.masters_scope(:masters, :closed).try(:gain).to_a.count
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Oper. negativas
+                  = I18n.t :oper_loss, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = @trace.masters_scope(:masters, :closed).try(:loss).to_a.count
       .col-sm-4
         .card.profile-view
           .card-body
             h5
-              | Lucro / Max DD
+              = I18n.t :profit_drawdown, scope:'helpers.dashboards.show'
             strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
               / - profit = @trace.profit_trade - @trace.loss_trade
               = number_with_precision @trace.profit_drawdown, precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Lucro líquido
+                  = I18n.t :profit_net, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = number_with_precision(@trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Max DD
+                  = I18n.t :max_dd, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = number_with_precision @trace.drawdown, precision:2
     .row
@@ -97,9 +113,9 @@
               .col-lg-12.col-md-12
                 .d-flex.m-b-10.no-block
                   h5
-                    | Curva de capital 
+                    = I18n.t :curve_capital, scope:'helpers.dashboards.show'
                     '
-                    = "(útlimos #{@trace.dashboard_capital_accumulated.size} dias)"
+                    = (I18n.t :days, scope:'helpers.dashboards.show', days: @trace.dashboard_capital_accumulated.size).try(:downcase)
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
               /     li
@@ -115,32 +131,34 @@
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
-              | Drawdown
+              = I18n.t :drawdown, scope:'helpers.dashboards.show'
             strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block.text-c-red
               / - profit = @trace.profit_trade - @trace.loss_trade
               = number_with_precision @trace.drawdown, precision:2
             .row
               .col-lg-12.text-center
-                p.text-muted.m-b-0
+                h6.text-muted.m-b-0
                   - dates = @trace.drawdown_dates
-                  = "Days: #{dates.try(:size)} - "
+                  = (I18n.t :days, scope:'helpers.dashboards.show', days: dates.try(:size)).try(:downcase)
                   - if dates.present?
-                    = "Dates: #{i18n_l dates.first} to #{i18n_l dates.last}"
+                    | - 
+                    '
+                    = I18n.t :dates, scope:'helpers.dashboards.show', date1: i18n_l(dates.first), date2: i18n_l(dates.last)
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
-              | Operações abertas
+              = I18n.t :orders_open, scope:'helpers.dashboards.show'
             strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Compras
+                  = I18n.t :buy, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = @trace.masters_scope(:masters, [:executed, :buy]).count
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Vendas
+                  = I18n.t :sell, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = @trace.masters_scope(:masters, [:executed, :sell]).count
                   
@@ -152,9 +170,9 @@
               .col-lg-12.col-md-12
                 .d-flex.m-b-10.no-block
                   h5
-                    | Drawdown
-                    '
-                    = "(útlimos #{@trace.dashboard_drawdown.size} dias)"
+                    = I18n.t :drawdown, scope:'helpers.dashboards.show'
+                    = " - "
+                    = (I18n.t :days, scope:'helpers.dashboards.show', days: @trace.dashboard_drawdown.size).try(:downcase)
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
               /     li
@@ -170,35 +188,35 @@
         .card.profile-view[style="margin-bottom: 15px;"]
           .card-body
             h5
-              | Operações com Error
+              = I18n.t :orders_errors, scope:'helpers.dashboards.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Compras
+                  = I18n.t :buy, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = @trace.masters_scope(:masters, [:error, :buy]).count
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Vendas
+                  = I18n.t :sell, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = @trace.masters_scope(:masters, [:error, :sell]).count
         .card.profile-view[style="margin-bottom: 15px;"]
           .card-body
             h5
-              | Operações Fechadas
+              = I18n.t :orders_closed, scope:'helpers.dashboards.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Compras
+                  = I18n.t :buy, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = @trace.masters_scope(:masters, [:closed, :buy]).count
               .col-6.text-center
                 p.text-muted.m-b-0
-                  | Vendas
+                  = I18n.t :sell, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = @trace.masters_scope(:masters, [:closed, :sell]).count
 
@@ -210,9 +228,9 @@
               .col-lg-12.col-md-12
                 .d-flex.m-b-10.no-block
                   h5
-                    | Capital Amount
-                    '
-                    = "(útlimos #{@trace.dashboard_monthy_amount.size} meses)"
+                    = I18n.t :capital_amount, scope:'helpers.dashboards.show'
+                    = " - "
+                    = (I18n.t :months, scope:'helpers.dashboards.show', month: @trace.dashboard_monthy_amount.size).try(:downcase)
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
               /     li
@@ -228,23 +246,23 @@
         .card.profile-view[style="margin-bottom: 15px;"]
           .card-body
             h5
-              | Total
+              = I18n.t :total, scope:'helpers.dashboards.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters).to_a.sum(&:profit), precision:2
             .row
               .col-4.text-center
                 p.text-muted.m-b-0
-                  | Compras
+                  = I18n.t :buy, scope:'helpers.dashboards.show'
                 span.text-c-green
                   = @trace.masters_scope(:masters, :buy).count
               .col-4.text-center
                 p.text-muted.m-b-0
-                  | Vendas
+                  = I18n.t :sell, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = @trace.masters_scope(:masters, :sell).count
               .col-4.text-center
                 p.text-muted.m-b-0
-                  | Total
+                  = I18n.t :total, scope:'helpers.dashboards.show'
                 span
                   = @trace.masters_scope(:masters).count
 
