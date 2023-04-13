@@ -10,7 +10,7 @@ pt-BR:
         bad_login_password: "*** Senha incorreta para o email: %{email}"
     site:
       signup_demo:
-        title: Gerencie o seu negócio de forma eficiente
+        title: Gerenciador de Copy para Robos, entradas manuais e sinais
         title2: Comece hoje
         title3: Não é necessário nenhum tipo de pagamento
         title4: Regras importantes para o uso do sistema

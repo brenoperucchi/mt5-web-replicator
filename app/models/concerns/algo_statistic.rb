@@ -61,32 +61,32 @@ module AlgoStatistic
 	  drawdown_max
 	end
 
-	def self.drawdown_days(collection)
-	  drawdown_balance = 0
-	  drawdown_max = 0
-	  drawdown_days = 0
+	# def self.drawdown_days(collection)
+	#   drawdown_balance = 0
+	#   drawdown_max = 0
+	#   drawdown_days = 0
 
-	  # collection.each do |record|
-	  #   value = record.profit.to_f
-	  collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
-	    value = record.sum(&:profit)
-	    if value < 0 
-	      drawdown_balance = drawdown_balance + value
+	#   # collection.each do |record|
+	#   #   value = record.profit.to_f
+	#   collection.group_by{|x| x.created_at.strftime("%Y %m %d")}.each do |date, record|
+	#     value = record.sum(&:profit)
+	#     if value < 0 
+	#       drawdown_balance = drawdown_balance + value
 	      
-	      if drawdown_balance < drawdown_max
-	      	drawdown_days += 1
-	        drawdown_max = drawdown_balance
-	      end
+	#       if drawdown_balance < drawdown_max
+	#       	drawdown_days += 1
+	#         drawdown_max = drawdown_balance
+	#       end
 
-	    else
-	      drawdown_balance = drawdown_balance + value
-	      if drawdown_balance > 0
-	        drawdown_balance = 0 
-	      end
-	    end
-	  end
-	  drawdown_days
-	end
+	#     else
+	#       drawdown_balance = drawdown_balance + value
+	#       if drawdown_balance > 0
+	#         drawdown_balance = 0 
+	#       end
+	#     end
+	#   end
+	#   drawdown_days
+	# end
 
 
 	def self.drawdown_dates(collection)

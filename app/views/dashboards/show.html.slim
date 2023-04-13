@@ -123,7 +123,9 @@
               .col-lg-12.text-center
                 p.text-muted.m-b-0
                   - dates = @trace.drawdown_dates
-                  = "Days: #{@trace.drawdown_days} - Dates: #{i18n_l dates.first} to #{i18n_l dates.last}"
+                  = "Days: #{dates.try(:size)} - "
+                  - if dates.present?
+                    = "Dates: #{i18n_l dates.first} to #{i18n_l dates.last}"
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5

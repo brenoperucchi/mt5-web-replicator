@@ -232,10 +232,10 @@ class Trace < ApplicationRecord
     AlgoStatistic.drawdown(scoped)
   end
 
-  def drawdown_days(type = :masters)
-    scoped = masters_scope(:masters, :closed).order(created_at: :asc)
-    AlgoStatistic.drawdown_days(scoped)
-  end
+  # def drawdown_days(type = :masters)
+  #   scoped = masters_scope(:masters, :closed).order(created_at: :asc)
+  #   AlgoStatistic.drawdown_days(scoped)
+  # end
 
   def drawdown_dates(type = :masters)
     scoped = masters_scope(:masters, :closed).order(created_at: :asc)
