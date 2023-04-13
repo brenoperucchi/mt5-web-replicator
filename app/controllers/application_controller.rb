@@ -33,13 +33,16 @@ class ApplicationController < ActionController::Base
 
   def set_locale
   	locale = params[:locale]
-  	case locale
-  	when "en"
-  		I18n.locale = 'en'
-  	else
-  		I18n.locale = 'pt-BR'
+  	if locale
+			case locale
+			when "en"
+				I18n.locale = 'en'
+			else
+				I18n.locale = 'pt-BR'
+			end
+		else
+  		I18n.locale = current_store ? current_store.language : locale
   	end
-  	I18n.locale = current_store ? current_store.language : locale
   end
 
 
