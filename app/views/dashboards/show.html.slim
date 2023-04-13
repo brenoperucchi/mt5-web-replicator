@@ -3,47 +3,8 @@
 
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="/dashboards" 
-      = I18n.t :dashboards, scope:'helpers.dashboards'
-  li.breadcrumb-item
     a href="#{dashboard_url(@trace.id)}" 
       = @trace.name
-
-
-/ /! [ breadcrumb ] start
-/ .page-header
-/   .page-block
-/     .row.align-items-center
-/       .col-md-6
-/         .page-header-title
-/           h5.m-b-10 = @trace.name
-/         ul.breadcrumb
-/           li.breadcrumb-item
-/             - if user_signed_in? and not current_user.user?
-/               a href="/admin" 
-/                 i.feather.icon-home
-/                 '
-/                 = I18n.t :admin, scope:'helpers.dashboards'
-/             - else
-/               a href="/" 
-/                 i.feather.icon-home
-/                 '
-/                 = I18n.t :site, scope:'helpers.dashboards'
-/           li.breadcrumb-item
-/             a href="/dashboards"
-/               = I18n.t :dashboards, scope:'helpers.dashboards'
-/           li.breadcrumb-item
-/       .col-md-6.text-right
-/         button#filter.btn.btn-primary.m-r-5[type="button"]
-/           i.feather.icon-plus
-/           = I18n.t :filter, scope:'helpers.dashboards'
-
-/       /!
-/         | <div class="col-md-6 text-right"
-/         | <button type="button" class="btn btn-primary m-r-5"><i class="feather icon-plus"></i> Filter</button
-/         | <button type="button" class="btn btn-outline-primary"><i class="feather icon-rotate-cw"></i> Reload</button
-/         | </div
-/ /! [ breadcrumb ] end
 
 = render "filter"
 
