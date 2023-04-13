@@ -69,6 +69,7 @@ en:
           announce1: "All plans %{value}% off for a limited time"
           announce2: discounts valid for 1 year.
           price: "%{value} "
+          month: Monthly 
         management:
           title: Management & Portfolios
           resume: Portfolio Management, Magic Number Restriction, Asset Control and many more
@@ -508,7 +509,7 @@ en:
       error: error
       errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
     navigation:
-      back_to_app: Back to app
+      back_to_app: Back to site
     search:
       clear: Clear search
       label: Search %{resource}

@@ -2,6 +2,7 @@ class SiteController < ApplicationController
 	layout "saasley"
 
 	def index
+		@dolar = 5
 	end
 
 	def support

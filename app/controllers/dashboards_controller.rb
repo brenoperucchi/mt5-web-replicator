@@ -3,6 +3,7 @@ class DashboardsController < ApplicationController
 	before_action :filter_date
 	before_action :set_trace, 	only:[:show]
 	before_action :set_account, only:[:account]
+	before_action :dashboard_restrict
 
 	# before_action :authenticate_user
 	# layout 'stisla'
@@ -16,20 +17,24 @@ class DashboardsController < ApplicationController
 			
 	# end
 
+	def dashboard_restrict
+		unless @trace.nil? and current_store.nil?
+			@current_store = @trace.try(:store)
+			@current_store ||= current_store
+			if @current_store.dashboard_restrict == "enable" and (not user_signed_in? or @current_store.users.find_by(id:current_user.try(:id)).nil?)
+				sign_out current_user
+				redirect_to user_session_path, notice: "Dashboard restrict. You must be logged"
+			else
+				@traces = @current_store.traces.active
+			end
+		else
+			redirect_to root_path, notice: "Dashboard not found"
+		end
+	end
+
 	def index
 		respond_to do |wants|
-			wants.html do 
-				unless current_store.nil?
-					if current_store.dashboard_restrict == "enable" and not user_signed_in?
-						flash[:notice] = 'do_you_must_be_login'
-						redirect_to user_session_path
-					else
-						@traces = current_store.traces.active
-					end
-				else
-					redirect_to root_path
-				end
-			end
+			wants.html { render :index}
 		end
 	end
 
@@ -77,7 +82,14 @@ class DashboardsController < ApplicationController
 
 
 	def set_trace
-		@trace = Trace.find(params[:id])		
+		@trace = Trace.find_by(id:params[:id])		
+		unless @trace.nil?
+		else
+			redirect_to root_path, notice: "Dashboard Not found"
+		end
+
+
+
 	end
 
 	def set_account

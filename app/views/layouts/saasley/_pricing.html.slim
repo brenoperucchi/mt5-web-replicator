@@ -20,10 +20,17 @@ section.position-relative.overflow-hidden#pricing
                 h1.display-5.d-sm-inline-block
                   span.fw-light.small = I18n.t :unit, scope:'number.currency.format'
                   '
-                - value_discount = number_with_precision plan.amount_discount, precision:2
+                - if I18n.locale == :en
+                  - value_discount = number_with_precision (plan.amount_discount / @dolar), precision:2
+                - else
+                  - value_discount = number_with_precision plan.amount_discount, precision:2
                 h1.ms-sm-2.d-md-inline-block= I18n.t :price, value: value_discount, scope: 'helpers.site.main.pricing' 
-                h5.ms-sm-2.d-sm-inline-block.text-muted.text-decoration-line-through= number_with_precision plan.amount, precision:2
-                span.small.text-muted.font-monospace.mb-4.d-block Por Mês              
+                - if I18n.locale == :en
+                  h5.ms-sm-2.d-sm-inline-block.text-muted.text-decoration-line-through= number_with_precision (plan.amount / @dolar), precision:2
+                - else
+                  h5.ms-sm-2.d-sm-inline-block.text-muted.text-decoration-line-through= number_with_precision plan.amount, precision:2
+                span.small.text-muted.font-monospace.mb-4.d-block 
+                  = I18n.t :month, value: value_discount, scope: 'helpers.site.main.pricing' 
                 form action="/demo_request"
                   button.w-100.btn.btn-lg.btn-gradient-secondary.hover-lift
                     = I18n.t :sign_in, scope: 'helpers.site.main.pricing'
@@ -37,7 +44,10 @@ section.position-relative.overflow-hidden#pricing
                       = I18n.t item.name.downcase, limit:item.limit, scope:'helpers.site.main.pricing'
                 li.d-flex.align-items-center.mb-3
                   span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
-                  - amount_extra = number_with_precision plan.amount_extra, precision:2
+                  - if I18n.locale == :en
+                    - amount_extra = number_with_precision (plan.amount_extra / @dolar), precision:2
+                  - else
+                    - amount_extra = number_with_precision plan.amount_extra, precision:2
                   = I18n.t :extra, amount:amount_extra, scope:'helpers.site.main.pricing'
                   | 
         .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" 

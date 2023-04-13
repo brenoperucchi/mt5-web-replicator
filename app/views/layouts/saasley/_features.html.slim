@@ -1,6 +1,13 @@
 /! ::Hero Default::
 section.pt-12.pt-lg-15.pb-7.bg-blur.position-relative.overflow-hidden
   .container.position-relative
+    - if flash[:notice].present? or flash[:recaptcha_error].present?
+      .row.justify-content-center
+        .col-md-6.col-lg-5.col-xl-4
+        .alert.alert-danger[role="alert"]
+          = flash[:notice]
+          = flash[:recaptcha_error]
+  .container.position-relative
     .row.align-items-center
       .col-lg-6.col-md-10.text-center.text-lg-start.ms-lg-0.me-lg-auto.mx-md-auto
         h1.mb-4.display-3.position-relative.z-index-2= I18n.t :main, scope: 'helpers.site.main.title'

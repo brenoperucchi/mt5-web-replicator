@@ -69,6 +69,7 @@ pt-BR:
           announce1: "Todos os planos com %{value}% de desconto por tempo limitado"
           announce2: descontos válidos por 1 ano.
           price: "%{value} "
+          month: Por mês
         management: 
           title: Gestão & Portfólios 
           resume: Gestão por Portfólios, Restrição por magic number, Controle de Ativos e muitos mais
