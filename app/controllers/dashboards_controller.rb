@@ -77,12 +77,7 @@ class DashboardsController < ApplicationController
 
 
 	def set_trace
-		if current_store == Store.first
-			@trace = Trace.find(params[:id])
-		else
-			@trace = current_store.traces.find(params[:id])
-		end
-		
+		@trace = Trace.find(params[:id])		
 	end
 
 	def set_account
