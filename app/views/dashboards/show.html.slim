@@ -52,7 +52,7 @@
           .card-body
             h5
               = I18n.t :profit_drawdown, scope:'helpers.dashboards.show'
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+            strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block
               / - profit = @trace.profit_trade - @trace.loss_trade
               = number_with_precision @trace.profit_drawdown, precision:2
             .row
@@ -66,6 +66,17 @@
                   = I18n.t :max_dd, scope:'helpers.dashboards.show'
                 span.text-c-red
                   = number_with_precision @trace.drawdown, precision:2
+            .row[style="margin-top:3px;"]
+              .col-12.text-center
+                h6.text-muted
+                  - dates = @trace.drawdown_dates
+                  = I18n.t :drawdown_days, scope:'helpers.dashboards.show', count: dates.try(:size)
+                  '
+                  - if dates.present?
+                    | - 
+                    '
+                    = I18n.t :dates, scope:'helpers.dashboards.show', date1: i18n_l(dates.first), date2: i18n_l(dates.last)
+
     .row
       .col-sm-8
         .card
@@ -76,7 +87,7 @@
                   h5
                     = I18n.t :curve_capital, scope:'helpers.dashboards.show'
                     '
-                    = (I18n.t :days, scope:'helpers.dashboards.show', days: @trace.dashboard_capital_accumulated.size).try(:downcase)
+                    = (I18n.t :days, scope:'helpers.dashboards.show', count:@trace.dashboard_capital_accumulated.size).try(:downcase)
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
               /     li
@@ -92,24 +103,27 @@
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
-              = I18n.t :drawdown, scope:'helpers.dashboards.show'
-            strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block.text-c-red
+              = I18n.t :pay_off, scope:'helpers.dashboards.show'
+            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               / - profit = @trace.profit_trade - @trace.loss_trade
-              = number_with_precision @trace.drawdown, precision:2
-            .row
-              .col-lg-12.text-center
-                h6.text-muted.m-b-0
-                  - dates = @trace.drawdown_dates
-                  = (I18n.t :days, scope:'helpers.dashboards.show', days: dates.try(:size)).try(:downcase)
-                  - if dates.present?
-                    | - 
-                    '
-                    = I18n.t :dates, scope:'helpers.dashboards.show', date1: i18n_l(dates.first), date2: i18n_l(dates.last)
+              = number_with_precision @trace.pay_off, precision:2
+            .row.m-t-0
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  = (I18n.t :average_gain, scope:'helpers.dashboards.show').capitalize
+                span.text-c-green
+                  = number_with_precision @trace.average(:masters, [:closed, :gain])
+              .col-6.text-center
+                p.text-muted.m-b-0
+                  = (I18n.t :average_loss, scope:'helpers.dashboards.show').capitalize
+                span.text-c-red
+                  = number_with_precision @trace.average(:masters, [:closed, :loss])
+
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
               = I18n.t :orders_open, scope:'helpers.dashboards.show'
-            strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block
+            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
@@ -133,7 +147,7 @@
                   h5
                     = I18n.t :drawdown, scope:'helpers.dashboards.show'
                     = " - "
-                    = (I18n.t :days, scope:'helpers.dashboards.show', days: @trace.dashboard_drawdown.size).try(:downcase)
+                    = (I18n.t :days, scope:'helpers.dashboards.show', count:@trace.dashboard_drawdown.size).try(:downcase)
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
               /     li

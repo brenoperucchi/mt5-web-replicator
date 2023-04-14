@@ -12,7 +12,7 @@ pt-BR:
       dashboards: Portfólios
       admin: Administrador
       filter: Filtro
-      site: Site Principal
+      site: imentore.com.br
       show:
         profit_factor: Fator de Lucro
         oper_gain: Operações positivas
@@ -20,12 +20,22 @@ pt-BR:
         profit_trade: Taxa de acerto
         profit_drawdown: Lucro / Max DD
         profit_net: Lucro Líquido
+        pay_off: Payoff 
         max_dd: Max DD
         curve_capital: Curva de capital
-        days: "%{days} dias "
-        months: "%{month} meses"
+        average_gain: Média de Ganho por operações
+        average_loss: Média de Perda por operações 
+        days:
+          zero: ""
+          one: "1 dia"
+          other: "%{count} dias"
+        drawdown_days: 
+          zero: ""
+          one: "1 dia Drawdown"
+          other: "%{count} dias Drawdowns"
+        months: "%{month}"
         drawdown: Drawdown
-        dates: "%{date1} até %{date2}"
+        dates: "%{date1} à %{date2}"
         orders_open: Ordens Abertas
         orders_errors: Ordens Errors
         orders_closed: Ordens Fechadas

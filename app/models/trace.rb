@@ -237,6 +237,12 @@ class Trace < ApplicationRecord
     AlgoStatistic.drawdown_dates(scoped)
   end
 
+  def average(type = :masters, scope)
+    scoped = masters_scope(type, scope) 
+    return 0 if scoped.size == 0
+    scoped.sum(&:profit) / scoped.size
+  end
+
   # def drawdown_days(type = :masters)
   #   scoped = masters_scope(:masters, :closed).order(created_at: :asc)
   #   AlgoStatistic.drawdown_days(scoped)

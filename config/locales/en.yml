@@ -12,7 +12,7 @@ en:
       dashboards: Portfolios
       admin: Administrator
       filter: Filter
-      site: Main website
+      site: imentore.com
       show:
         profit_factor: Profit Factor
         oper_gain: Gain
@@ -20,9 +20,16 @@ en:
         profit_trade: Success rate
         profit_drawdown: Profit / Max DD
         profit_net: Net Profit
+        pay_off: Payoff 
         max_dd: Max DD
         curve_capital: Capital Curve
-        days: "%{days} days "
+        average_gain: Average Gain by ordens
+        average_loss: Average Loss by ordens
+        days: "%{days} days"
+        drawdown_days: 
+          zero: ""
+          one: "1 dia"
+          other: "%{count} dias"
         months: "%{month} months"
         drawdown: Drawdown
         dates: "%{date1} to %{date2}"
