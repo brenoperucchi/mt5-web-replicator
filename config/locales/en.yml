@@ -26,10 +26,14 @@ en:
         average_gain: Average Gain by ordens
         average_loss: Average Loss by ordens
         days: "%{days} days"
+        days:
+          zero: ""
+          one: "1 day"
+          other: "%{count} days"
         drawdown_days: 
           zero: ""
-          one: "1 dia"
-          other: "%{count} dias"
+          one: "1 drawdown day"
+          other: "%{count} drawdowns days"
         months: "%{month} months"
         drawdown: Drawdown
         dates: "%{date1} to %{date2}"

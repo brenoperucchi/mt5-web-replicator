@@ -32835,7 +32835,7 @@ pre[class*=language-]:before {
     }
 }
 
-@media only screen and (max-width: 575px) {
+@/*media only screen and (max-width: 575px) {
     .pcoded-header .main-search.open .input-group .search-close {
         display: none;
     }
@@ -32908,7 +32908,7 @@ pre[class*=language-]:before {
     .card {
         margin-bottom: 15px;
     }
-}
+}*/
 
 @media only screen and (max-width: 1200px) and (min-width: 768px) {
     .pcoded-navbar .header-logo {

@@ -31,8 +31,8 @@ pt-BR:
           other: "%{count} dias"
         drawdown_days: 
           zero: ""
-          one: "1 dia Drawdown"
-          other: "%{count} dias Drawdowns"
+          one: "1 dia de drawdown"
+          other: "%{count} dias drawdowns"
         months: "%{month}"
         drawdown: Drawdown
         dates: "%{date1} à %{date2}"

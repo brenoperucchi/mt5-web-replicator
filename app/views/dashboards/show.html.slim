@@ -112,12 +112,12 @@
                 p.text-muted.m-b-0
                   = (I18n.t :average_gain, scope:'helpers.dashboards.show').capitalize
                 span.text-c-green
-                  = number_with_precision @trace.average(:masters, [:closed, :gain])
+                  = number_with_precision @trace.average(:masters, [:closed, :gain]), precision:2
               .col-6.text-center
                 p.text-muted.m-b-0
                   = (I18n.t :average_loss, scope:'helpers.dashboards.show').capitalize
                 span.text-c-red
-                  = number_with_precision @trace.average(:masters, [:closed, :loss])
+                  = number_with_precision @trace.average(:masters, [:closed, :loss]), precision:2
 
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
