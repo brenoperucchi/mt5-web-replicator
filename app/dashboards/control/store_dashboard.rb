@@ -10,7 +10,9 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:            Field::Number,
     name:          Field::String,
-    state:         Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
+    url:           Field::String,
+    state:                  Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
+    dashboard_restrict:     Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     email:         Field::String.with_options(searchable: false),
     plan:                   Field::BelongsTo,
     plan_items:             Field::HasMany,
@@ -36,6 +38,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   state
   name
   plan
+  url
   telegram_bot_chat_id
   telegram_bot_status
   ].freeze
@@ -45,9 +48,11 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   state
+  dashboard_restrict
   name
   email
   plan
+  url
   language
   stripe_api_secret
   stripe_webhook_secret
@@ -59,8 +64,10 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   state
+  dashboard_restrict
   name
   email
+  url
   plan
   language
   stripe_api_secret

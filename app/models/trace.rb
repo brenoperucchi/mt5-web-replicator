@@ -174,7 +174,7 @@ class Trace < ApplicationRecord
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
-    if @trace.restrict_magic_number
+    if self.try(:restrict_magic_number)
       magics = accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
 
       if magics.present?

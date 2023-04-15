@@ -52,8 +52,9 @@ html[lang="en"]
                           = I18n.t :site, scope:'helpers.dashboards'
                     - if current_store
                       li.breadcrumb-item
-                        a href="/dashboards" 
+                        = link_to dashboards_path(params: request.query_parameters) do
                           = I18n.t :dashboards, scope:'helpers.dashboards'
+                        / a href="/dashboards" 
                     = yield(:breadcrumb)
                   /! [ breadcrumb ] started
 
