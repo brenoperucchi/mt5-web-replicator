@@ -174,6 +174,13 @@ class Trace < ApplicationRecord
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
+    magics = accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
+
+    if magics.present?
+      magics = magics.map(&:to_i)
+      data = data.where(magic_number:[magics])
+    end
+
     data
   end
 
