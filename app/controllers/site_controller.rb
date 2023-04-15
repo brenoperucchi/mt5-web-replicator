@@ -13,4 +13,9 @@ class SiteController < ApplicationController
 	end
 
 
+	def robos
+		render :robos, layout:'mintone'
+	end
+
+
 end

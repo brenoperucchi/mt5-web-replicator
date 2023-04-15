@@ -80,6 +80,7 @@ Rails.application.routes.draw do
   post "create_store",      to:"site#create_store"
   get "support",      to:"site#support"
   get "demo_request", to:"site#demo_request"
+  get "robos", to:"site#robos"
 
   get 'dashboards', :to => "dashboards#index" 
   root :to => "site#index" 

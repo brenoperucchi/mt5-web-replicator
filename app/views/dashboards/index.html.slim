@@ -1,38 +1,55 @@
 = render "filter"
 
-
 .row
-  .col-xl-12.col-md-12
-    .row
-      - @traces.each do |trace|                   
-        - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-        - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
-        = link_to dashboard_path(trace) do
-        .col-sm-4
-          = link_to dashboard_path(trace, datefilter:params[:datefilter]) do
-            .card.profile-view
-              .card-body
-                h5
-                  = trace.name
-                  - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
-                  - if amount_profit.to_f >= 0
-                    strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-muted
-                      = number_with_precision amount_profit
-                  - else
-                    strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block.text-c-red
-                      = number_with_precision amount_profit
-                .row
-                  .col-6.text-center
-                    p.text-muted.m-b-0
-                      | Lucro Bruto
-                    span.text-c-green
-                      = number_with_precision trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision:2
-                  .col-6.text-center
-                    p.text-muted.m-b-0
-                      | Perda Bruta
-                    span.text-c-red
-                      = number_with_precision trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision:2
-
+  - @traces.each do |trace|                   
+    - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+    - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
+    .col-md-6.col-xl-6
+      = link_to dashboard_path(trace) do
+        .card.widget-card-user
+          .card-body.p-b-0
+            .card-user
+              .row
+                .col-md-6
+                  / span.badge.badge-success.float-right
+                  /   | NEW
+                  / img.img-radius.wid-80[src="assets/images/user/avatar-2.jpg" alt=""]
+                  h4.p-t-10.p-b-10.m-t-0
+                    = trace.name
+                  h2.f-40.m-b-20.p-l-20
+                    - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
+                    - if amount_profit.to_f >= 0
+                      strong.text-left
+                        = number_with_precision amount_profit
+                    - else
+                      strong.text-left
+                        = number_with_precision amount_profit
+                  / p.text-muted.p-t-10.p-b-10.m-0
+                    | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.
+                .col-md-6.p-t-20.p-b-20
+                  - values = trace.masters_scope(:masters, :closed).to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  - values = values.map(&:to_i).delete_if{|x| x == 0} if values
+                  #power-card-chart1[height='75' style="margin-top:0px;margin-right:40px;" data-chart="#{values.compact}"]
+          .card-footer.border-top.bg-light
+            .row
+              .col-sm-3.footer-menu.text-center.border-right
+                p.text-muted.f-w-400.m-0.f-16
+                  = I18n.t :profit_trade, scope:'helpers.dashboards.show'
+                span.f-18.f-w-400
+                  = "#{trace.profit_trade(:masters)} %"
+              .col-sm-3.footer-menu.text-center.border-right
+                p.text-muted.f-w-400.m-0.f-16
+                  = I18n.t :profit_factor, scope:'helpers.dashboards.show'
+                span.f-18.f-w-400
+                  = number_with_precision trace.profit_factor(:masters).round(2), precision:2
+              .col-sm-3.footer-menu.text-center
+                p.text-muted.f-w-400.m-0.f-16
+                  = I18n.t :pay_off, scope:'helpers.dashboards.show'
+                span.f-18.f-w-400
+                  = number_with_precision trace.pay_off, precision:2
+              .col-sm-3.footer-menu.text-center.border-right
+                button.btn.btn-primary.btn-lg[type="button"]
+                  | Contratar 
 / .row
 /   - @traces.each do |trace|                   
 /     - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
@@ -81,8 +98,69 @@
 /                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
 /                 span.text-muted Operações Perda
 - content_for :footer do
+  = javascript_include_tag "mintone/chart/apexcharts.min.js"
   javascript:
-    $(document).ready(function(){      
+    $(document).ready(function(){ 
+
+      $("[id='power-card-chart1']").each(function(index, value) {
+
+          var options = {
+              chart: {
+                  type: 'bar',
+                  height: 100,
+                  sparkline: {
+                      enabled: true
+                  }
+              },
+              dataLabels: {
+                  enabled: false
+              },
+              series: [{
+                  name: 'series1',
+                  data: $(this).data("chart"),
+              }],
+              plotOptions: {
+                bar: {
+                  colors: {
+                    ranges: [{
+                      from: -9999999,
+                      to: -1,
+                      color: '#F15B46'
+                    }, {
+                      from: 1,
+                      to: 9999999,
+                      color: '#4886ff'
+                    }]
+                  },
+                }
+              },
+              yaxis: {
+                  min: -100,
+                  max: 100,
+              },
+              tooltip: {
+                  theme: 'dark',
+                  fixed: {
+                      enabled: false
+                  },
+                  x: {
+                      show: false,
+                  },
+                  y: {
+                      title: {
+                          formatter: function(seriesName) {
+                              return 'Profit'
+                          }
+                      }
+                  },
+                  marker: {
+                      show: false
+                  }
+              }
+          };
+          var chart = new ApexCharts(value, options);
+          chart.render();
+      });     
       $(document).on("click", "table.table tr", function() {
         var link  = $(this).data("href")
             document.location.href=link;
