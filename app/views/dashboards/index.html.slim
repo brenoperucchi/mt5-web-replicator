@@ -42,12 +42,12 @@
                   = I18n.t :profit_factor, scope:'helpers.dashboards.show'
                 span.f-18.f-w-400
                   = number_with_precision trace.profit_factor(:masters).round(2), precision:2
-              .col-sm-3.footer-menu.text-center
+              .col-sm-3.footer-menu.text-center.border-right
                 p.text-muted.f-w-400.m-0.f-16
                   = I18n.t :pay_off, scope:'helpers.dashboards.show'
                 span.f-18.f-w-400
                   = number_with_precision trace.pay_off, precision:2
-              .col-sm-3.footer-menu.text-center.border-right
+              .col-sm-3.footer-menu.text-center
                 button.btn.btn-primary.btn-lg[type="button"]
                   | Contratar 
 / .row
