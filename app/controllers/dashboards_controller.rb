@@ -1,7 +1,7 @@
 class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
+	before_action :set_trace
 	before_action :filter_date
-	before_action :set_trace, 	only:[:show]
 	before_action :set_account, only:[:account]
 	before_action :dashboard_restrict
 
@@ -58,7 +58,7 @@ class DashboardsController < ApplicationController
     @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
     @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
 
-		@trace = @account.traces.find(params[:trace_id])
+		# @trace = @account.traces.find(params[:trace_id])
 		respond_to do |wants|
 			wants.html do
 				if @account
@@ -103,6 +103,9 @@ class DashboardsController < ApplicationController
 
 	def filter_date
 		# if params[:datefilter].present?
+		session[:magic_number] = params[:magic_number]
+		@trace.restrict_magic_number = params[:magic_number]
+
 		date_today = Date.today
 		# dates = "#{date_today} - #{date_today}"
 		@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset

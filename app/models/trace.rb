@@ -3,7 +3,7 @@ require 'algo_statistic'
 
 class Trace < ApplicationRecord
 
-  attr_accessor :search_date_begin, :search_date_end
+  attr_accessor :search_date_begin, :search_date_end, :restrict_magic_number
 
   ENUMS = %w(kind)
 
@@ -174,11 +174,13 @@ class Trace < ApplicationRecord
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
-    magics = accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
+    if @trace.restrict_magic_number
+      magics = accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
 
-    if magics.present?
-      magics = magics.map(&:to_i)
-      data = data.where(magic_number:[magics])
+      if magics.present?
+        magics = magics.map(&:to_i)
+        data = data.where(magic_number:[magics])
+      end
     end
 
     data
