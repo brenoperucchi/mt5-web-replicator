@@ -157,7 +157,7 @@ en:
         active: Active
         kind: kind
         take_profit_limit: Take Profit limit
-        instrument_control: Instrumetn Control
+        instrument_control: Instrument Control
         accounts: Accounts
         orders: Orders
         messages: messages
