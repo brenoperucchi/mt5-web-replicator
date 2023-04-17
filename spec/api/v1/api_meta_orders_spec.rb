@@ -74,7 +74,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(Transaction.closed_info.count).to be == 8
       end
 
-      it 'With out restrict_magic on trace' do
+      it 'With out restrict_magic on trace' do#, focus:true do
         # @account_copy.trace_ids = 1
         trace = Trace.first
         trace.magics_accept =  "10001"        
@@ -122,7 +122,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         trace.dashboard_magic_number = true
         trace.save
         expect(orders.sum(&:profit_copy).to_f).to be == 800.00
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 200.00
+        expect(trace.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 200.00
         expect(Transaction.closed_info.count).to be == 8
       end
     end

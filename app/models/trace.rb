@@ -130,9 +130,10 @@ class Trace < ApplicationRecord
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
+
     if self.try(:dashboard_magic_number)
-      magics = self.map(&:magics_accept).reject { |item| item.blank? }
-      magics ||= accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
+      magics   = Order.magic_numbers_split(self.magics_accept)
+      magics ||= Order.magic_numbers_split(accounts.copy.map(&:magics_accept))
 
       if magics.present?
         magics = magics.map(&:to_i)
@@ -146,8 +147,7 @@ class Trace < ApplicationRecord
   def restrict_magic_number(resource)
     unless self.magics_accept.blank?
       trace_magic_number = self.try(:trace).try(:name_id)
-      delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
-      magic_numbers = self.magics_accept.try(:split, (Regexp.union(delimiters))) || []
+      magic_numbers = Order.magic_numbers_split(self.magics_accept)
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}

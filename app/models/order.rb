@@ -138,8 +138,7 @@ class Order < ApplicationRecord
   def restrict_magic_number(resource)
     unless resource.account.magics_accept.blank?
       trace_magic_number = self.try(:trace).try(:name_id)
-      delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
-      magic_numbers = resource.account.magics_accept.try(:split, (Regexp.union(delimiters))) || []
+      magic_numbers = self.class.magic_numbers_split(resource.account.magics_accept)
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
@@ -183,6 +182,14 @@ class Order < ApplicationRecord
       # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")
       # result = resource.convert url: "http://benincasouza.tplinkdns.com:8080/#{path}"
     end
+  end
+
+
+  def self.magic_numbers_split(magic_numbers)
+    delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
+    magic_numbers = magic_numbers.try(:split, (Regexp.union(delimiters))).try(:flatten)
+    magic_numbers.reject! { |item| item.blank? } if magic_numbers
+    (magic_numbers.blank? or magic_numbers.nil?) ? nil : magic_numbers
   end
 
   def calcule_lot(value)
