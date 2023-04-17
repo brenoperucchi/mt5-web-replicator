@@ -27,7 +27,7 @@
             .col-md-2[style="margin-top:32px;"]
               .custom-control.custom-switch
                 / = check_box_tag :magic_number, 'customswitch1', 'on', class: 'custom-control-input', true
-                = check_box_tag :restrict_magic_number, 'on', params[:restrict_magic_number].present?, class: 'custom-control-input', id:'customswitch1'
+                = check_box_tag :dashboard_magic_number, 'on', params[:dashboard_magic_number].present?, class: 'custom-control-input', id:'customswitch1'
                 / input#customswitch1.custom-control-input[type="checkbox" name="magic_number" value="#{}"]
                 label.custom-control-label[for="customswitch1"]
                   | Restrict Magic Number

@@ -26,6 +26,7 @@ class TraceDashboard < Administrate::BaseDashboard
     kind:                Field::String,
     response:            Field::String,
     take_profit_limit:   Field::String.with_options(searchable: false),
+    magics_accept:        Field::String.with_options(searchable: false),
     # volumes:           Field::ActsAsTaggable,
     messages:            Field::HasMany.with_options(direction: :desc, limit: 5),
     instruments:         Field::HasMany,
@@ -55,6 +56,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   kind
+  magics_accept
   instrument_control
   take_profit_limit
   telegram_option
@@ -79,6 +81,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name_id
   kind
   store
+  magics_accept
   take_profit_limit
   telegram_option
   telegram_image

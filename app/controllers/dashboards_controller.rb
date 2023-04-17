@@ -39,9 +39,9 @@ class DashboardsController < ApplicationController
 	end
 
 	def show
-		@trace.search_date_begin 			= session[:date_begin].strip().to_datetime.change(offset: @timezone) 
-		@trace.search_date_end 				= session[:date_end].strip().to_datetime.change(offset: @timezone) 
-		@trace.restrict_magic_number 	= session[:restrict_magic_number]
+		@trace.search_date_begin 				= session[:date_begin].strip().to_datetime.change(offset: @timezone) 
+		@trace.search_date_end 					= session[:date_end].strip().to_datetime.change(offset: @timezone) 
+		@trace.dashboard_magic_number 	= session[:dashboard_magic_number]
 
 		respond_to do |wants|
 			wants.html do
@@ -104,7 +104,7 @@ class DashboardsController < ApplicationController
 
 	def filters
 		# if params[:datefilter].present?
-		session[:restrict_magic_number] = params[:restrict_magic_number].present? ? true : false
+		session[:dashboard_magic_number] = params[:dashboard_magic_number].present? ? true : false
 
 		date_today = Date.today
 		# dates = "#{date_today} - #{date_today}"

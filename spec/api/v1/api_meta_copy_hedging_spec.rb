@@ -55,6 +55,99 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.state).to be == "error"
       end
     end
+    
+    context 'POST' do
+      it 'Hedging - Should Restrict Order by Magic Number On Copy Account' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        expect(account.orders.where(content_id:10000001).count).to eq(1)
+        expect(@transaction.loggings.count).to be == 1
+        expect(@transaction.state).to be == "executed"
+        expect(@transaction.order.state).to be == "executed"
+
+        Account.find_by(name: 5647753).update(magics_accept: "20000")
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"{\"ticket_id\":10000003,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        account = Account.find_by(name: 5647753)
+        order = account.orders.find_by(content_id:10000003)
+        @transaction = order.transactions.first
+        expect(@transaction.loggings.count).to be == 2
+        expect(@transaction.state).to be == "error"
+        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
+        expect(order.slaves.count).to be == 0
+      end
+    end
+
+    context 'POST' do
+      it 'Hedging - Should Not Restrict Order by Magic Number On Copy Account' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        expect(account.orders.where(content_id:10000001).count).to eq(1)
+        expect(@transaction.loggings.count).to be == 1
+        expect(@transaction.state).to be == "executed"
+        expect(@transaction.order.state).to be == "executed"
+
+        Account.find_by(name: 5647753).update(magics_accept: "20001")
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"{\"ticket_id\":10000004,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        account = Account.find_by(name: 5647753)
+        order = account.orders.find_by(content_id:10000004)
+        @transaction = order.transactions.first
+        expect(@transaction.loggings.count).to be == 1
+        expect(@transaction.state).to be == "executed"
+        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
+        expect(order.slaves.count).to be == 2
+      end
+    end
+
+    context 'POST' do
+      it 'Hedging - Should Restrict Order by Magic Number On Trace' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        expect(account.orders.where(content_id:10000001).count).to eq(1)
+        expect(@transaction.loggings.count).to be == 1
+        expect(@transaction.state).to be == "executed"
+        expect(@transaction.order.state).to be == "executed"
+
+        Trace.find(1).update(magics_accept: "20001")
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"{\"ticket_id\":10000005,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20000,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        account = Account.find_by(name: 5647753)
+        order = account.orders.find_by(content_id:10000005)
+        @transaction = order.transactions.first
+        expect(@transaction.loggings.count).to be == 2
+        expect(@transaction.state).to be == "error"
+        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
+        expect(order.slaves.count).to be == 0
+      end
+    end
+
+    context 'POST' do
+      it 'Hedging - Should Restrict Order by Magic Number On Trace' do
+        account = Account.find_by(name: 5634787)
+        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        expect(account.orders.where(content_id:10000001).count).to eq(1)
+        expect(@transaction.loggings.count).to be == 1
+        expect(@transaction.state).to be == "executed"
+        expect(@transaction.order.state).to be == "executed"
+
+        Trace.find(1).update(magics_accept: "20001")
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"{\"ticket_id\":10000006,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20000,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
+        account = Account.find_by(name: 5647753)
+        order = account.orders.find_by(content_id:10000006)
+        @transaction = order.transactions.first
+        expect(@transaction.loggings.count).to be == 2
+        expect(@transaction.state).to be == "error"
+        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
+        expect(order.slaves.count).to be == 0
+      end
+    end
+    
     context 'POST' do
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 5634787)
@@ -64,7 +157,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@transaction.state).to be == "executed"
         expect(@transaction.order.state).to be == "executed"
 
-        Account.find_by(name: 5647753).update(magics_accept: 20000)
+        Account.find_by(name: 5647753).update(magics_accept: "20000")
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"{\"ticket_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"USDCAD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
         account = Account.find_by(name: 5647753)
@@ -216,7 +309,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @slave = @transaction.slaves.find_by(ticket_master: 10000002)
         expect(@account.orders.count).to be == 2
         expect(@slave.order.content_id).to be == "10000002"
-        expect(@slave.order.id).to be == 22
+        expect(@slave.order.id).to be == 26
         expect(@slave.take_profit).not_to be == 0
         expect(@slave.stop_loss).not_to be == 0
         expect(@slave.take_profit).to be == "1.2"

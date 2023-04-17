@@ -3,7 +3,7 @@ require 'algo_statistic'
 
 class Trace < ApplicationRecord
 
-  attr_accessor :search_date_begin, :search_date_end, :restrict_magic_number
+  attr_accessor :search_date_begin, :search_date_end, :dashboard_magic_number
 
   ENUMS = %w(kind)
 
@@ -13,8 +13,11 @@ class Trace < ApplicationRecord
 
   enum kind:  {telegram: 0, copy: 1}
 
-  store :settings, accessors: [:telegram_option, :telegram_image, :take_profit_limit, 
-                               :telegram_api_id, :telegram_api_hash, :telegram_api_number, :instrument_control, :restrict_control_instrument]
+  store :settings, accessors: [
+                                :telegram_option, :telegram_image, :take_profit_limit, 
+                                :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
+                                :instrument_control, :restrict_control_instrument, :magics_accept
+                              ]
 
   has_many :orders
   has_many :transactions
@@ -36,51 +39,6 @@ class Trace < ApplicationRecord
 
   validates_presence_of   [:name, :name_id]
   validates_uniqueness_of [:name, :name_id], scope: :store_id
-
-
-  def dashboard_capital_accumulated
-    amount_total = 0
-    collection = masters_scope(:masters, :closed).order(created_at: :asc)
-    collection_array = []
-    if collection.present?
-      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
-      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
-        profit = collection.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
-        amount_total = profit + amount_total
-        profit_value = profit <= 0 ? 0 : profit
-        loss_value = profit >= 0 ? 0 : profit
-        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value.to_f, loss:loss_value.to_f})
-      end
-    end
-    collection_array
-  end
-
-  def dashboard_drawdown
-    amount_total = 0
-    collection = masters_scope(:masters, :closed).order(created_at: :asc)
-    collection_array = []
-    if collection.present?
-      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), drawdown: 0}]
-      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
-        records = collection.where(created_at: date.beginning_of_day..date.end_of_day)
-        drawdown = AlgoStatistic.drawdown(records)
-        collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
-      end
-    end
-    collection_array
-  end
-
-  def dashboard_monthy_amount
-    amount_total = 0
-    date    = ['date']
-    capital = ['capital']
-    profit  = ['profit']
-    array = []
-    self.transactions.closed.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
-      amount_total = v.sum(&:profit) + amount_total
-      {date:k, capital: amount_total, profit: v.sum(&:profit)} 
-    end
-  end
 
   def soft_destroy_custom
     self.update_column(:active_at, nil)
@@ -117,8 +75,6 @@ class Trace < ApplicationRecord
   # def masters_total
   #   masters_filter(masters)
   # end
-
-
 
   def create_orders(order_params, account, message, symbol)
     ticket = order_params['ticket_id']
@@ -174,8 +130,9 @@ class Trace < ApplicationRecord
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
-    if self.try(:restrict_magic_number)
-      magics = accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
+    if self.try(:dashboard_magic_number)
+      magics = self.map(&:magics_accept).reject { |item| item.blank? }
+      magics ||= accounts.copy.map(&:magics_accept).reject { |item| item.blank? }
 
       if magics.present?
         magics = magics.map(&:to_i)
@@ -185,6 +142,22 @@ class Trace < ApplicationRecord
 
     data
   end
+
+  def restrict_magic_number(resource)
+    unless self.magics_accept.blank?
+      trace_magic_number = self.try(:trace).try(:name_id)
+      delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
+      magic_numbers = self.magics_accept.try(:split, (Regexp.union(delimiters))) || []
+      changeset = resource.try(:versions).try(:last).try(:changeset)
+      version = resource.try(:version)
+      unless magic_numbers.detect{|x| x == resource.magic_number}
+        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.erro!
+      end
+    end
+    resource.error?
+  end  
+
 
   def masters_filter(scoped)
     if self.search_date_begin and self.search_date_end
@@ -251,6 +224,51 @@ class Trace < ApplicationRecord
     return 0 if scoped.size == 0
     scoped.sum(&:profit) / scoped.size
   end
+
+  def dashboard_capital_accumulated
+    amount_total = 0
+    collection = masters_scope(:masters, :closed).order(created_at: :asc)
+    collection_array = []
+    if collection.present?
+      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
+      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
+        profit = collection.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
+        amount_total = profit + amount_total
+        profit_value = profit <= 0 ? 0 : profit
+        loss_value = profit >= 0 ? 0 : profit
+        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value.to_f, loss:loss_value.to_f})
+      end
+    end
+    collection_array
+  end
+
+  def dashboard_drawdown
+    amount_total = 0
+    collection = masters_scope(:masters, :closed).order(created_at: :asc)
+    collection_array = []
+    if collection.present?
+      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), drawdown: 0}]
+      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
+        records = collection.where(created_at: date.beginning_of_day..date.end_of_day)
+        drawdown = AlgoStatistic.drawdown(records)
+        collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
+      end
+    end
+    collection_array
+  end
+
+  def dashboard_monthy_amount
+    amount_total = 0
+    date    = ['date']
+    capital = ['capital']
+    profit  = ['profit']
+    array = []
+    self.transactions.closed.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
+      amount_total = v.sum(&:profit) + amount_total
+      {date:k, capital: amount_total, profit: v.sum(&:profit)} 
+    end
+  end
+
 
   # def drawdown_days(type = :masters)
   #   scoped = masters_scope(:masters, :closed).order(created_at: :asc)
