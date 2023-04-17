@@ -26,6 +26,107 @@ RSpec.describe API::V1::APITransactionsCopy do
   end
 
   describe API::V1::APITransactionsCopy do
+
+    context 'Trace - masters_scope'do 
+      it 'With out restrict_magic on trace' do
+        # @account_copy.trace_ids = 1
+        @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
+        expect(@account_copy.name).to be == "5647753"
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"
+          {\"ticket_id\":10001,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}// 
+          {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}// 
+          {\"ticket_id\":10003,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}// 
+          {\"ticket_id\":10004,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", 
+            "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        orders = Order.all
+        expect(orders.count).to be == 16
+        expect(orders.pending.count).to be == 0
+        expect(orders.error.count).to be == 0
+        expect(orders.executed.count).to be == 8
+        expect(orders.closed.count).to be == 8
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"", 
+          "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        orders = Order.all
+        expect(orders.count).to be == 16
+        expect(orders.pending.count).to be == 0
+        expect(orders.error.count).to be == 0
+        expect(orders.executed.count).to be == 0
+        expect(orders.closed.count).to be == 16
+        expect(orders.sum(&:profit_copy)).to be == 0
+        expect(Transaction.closed_info.count).to be == 16
+        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit)).to be == 0
+        request.headers['Content-Type'] = 'application/json'
+        request.headers['Accept'] = 'application/json'
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10001','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10002','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10003','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10004','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        orders = Order.all
+        expect(orders.count).to be == 16
+        expect(orders.pending.count).to be == 0
+        expect(orders.error.count).to be == 0
+        expect(orders.executed.count).to be == 0
+        expect(orders.closed.count).to be == 16
+        expect(orders.sum(&:profit_copy).to_f).to be == 800.00
+        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 400.00
+        expect(Transaction.closed_info.count).to be == 8
+      end
+
+      it 'With out restrict_magic on trace' do
+        # @account_copy.trace_ids = 1
+        trace = Trace.first
+        trace.magics_accept =  "10001"        
+        trace.save
+
+        @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
+        expect(@account_copy.name).to be == "5647753"
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"
+          {\"ticket_id\":10001,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":10001,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}// 
+          {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":10001,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}// 
+          {\"ticket_id\":10003,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":10002,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}// 
+          {\"ticket_id\":10004,\"open_price\":1.16541000,\"volume\":0.54000000,\"profit\":0,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":10002,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", 
+            "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        orders = Order.all
+        expect(orders.count).to be == 16
+        expect(orders.pending.count).to be == 0
+        expect(orders.error.count).to be == 2
+        expect(orders.executed.count).to be == 6
+        expect(orders.closed.count).to be == 8
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
+        params: {"orders"=>"", 
+          "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
+        orders = Order.all
+        expect(orders.count).to be == 16
+        expect(orders.pending.count).to be == 0
+        expect(orders.error.count).to be == 2
+        expect(orders.executed.count).to be == 0
+        expect(orders.closed.count).to be == 14
+        expect(orders.sum(&:profit_copy)).to be == 0
+        expect(Transaction.closed_info.count).to be == 14
+        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit)).to be == 0
+        request.headers['Content-Type'] = 'application/json'
+        request.headers['Accept'] = 'application/json'
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10001','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10002','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10003','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10004','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
+        orders = Order.all
+        expect(orders.count).to be == 16
+        expect(orders.pending.count).to be == 0
+        expect(orders.error.count).to be == 2
+        expect(orders.executed.count).to be == 0
+        expect(orders.closed.count).to be == 14
+        trace.dashboard_magic_number = true
+        trace.save
+        expect(orders.sum(&:profit_copy).to_f).to be == 800.00
+        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 200.00
+        expect(Transaction.closed_info.count).to be == 8
+      end
+    end
+
     context 'Traces - Close Orders' do
       it 'Traces with two accounts copys' do
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/201002/HEDGING', 
@@ -106,7 +207,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         # end
       end
     end
-    context 'Control Instrument'do #, focus:true do
+    context 'Control Instrument'do 
       it 'Hedging - Change instruments on copy to slaves' do
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "5647753"
@@ -134,7 +235,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.first.symbol).to be == "GBPCAD"
         expect(order.slaves.first.symbol).not_to be == "GBPUSD"
       end
-      it 'Trace - Create order all traces'do #, focus:true do
+      it 'Trace - Create order all traces'do 
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
           {\"ticket_id\":10003,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
@@ -149,7 +250,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.first.symbol).to be == "GBPUSD"
       end
       
-      it 'Trace - One trace disable'do #, focus:true do
+      it 'Trace - One trace disable'do 
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
         params: {"orders"=>"
           {\"ticket_id\":10004,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
