@@ -263,7 +263,7 @@ class Trace < ApplicationRecord
     capital = ['capital']
     profit  = ['profit']
     array = []
-    self.transactions.closed.order('closed_at asc').group_by{|x| x.closed_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
+    self.transactions.closed.where.not(closed_at:nil).order('closed_at asc').group_by{|x| x.closed_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
       amount_total = v.sum(&:profit) + amount_total
       {date:k, capital: amount_total, profit: v.sum(&:profit)} 
     end
