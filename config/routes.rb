@@ -68,6 +68,7 @@ Rails.application.routes.draw do
       
       resources :traces
       resources :accounts
+      resources :account_servers
       resources :users
       resources :stores
       # resources :sign_traces

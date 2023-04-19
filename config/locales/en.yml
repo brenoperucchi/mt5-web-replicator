@@ -153,7 +153,7 @@ en:
       trace:
         id: #id
         name: Name
-        name_id: Magic Number
+        name_id: Magic Number Portfolio
         active: Active
         kind: kind
         take_profit_limit: Take Profit limit

@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class AccountDashboard < Administrate::BaseDashboard
+class AccountServerDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -10,22 +10,9 @@ class AccountDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:                   Field::Number.with_options(searchable: true),
     name:                 Field::String,
-    state:                Field::String,
-    kind:                 Field::String,
-    stock_kind:           Field::String,
-    meta_mode:            Field::String,
-    meta_margin_mode:     Field::String,
-    traces:               Field::HasMany,
-    orders:               Field::HasMany,
-    instruments:          Field::HasMany,
-    account_server:       Field::BelongsTo,
-    store:                Field::BelongsTo,
-    customer:             Field::BelongsTo,
-    magics_accept:        Field::String.with_options(searchable: false),
-    instrument_control:   Field::Boolean,
+    accounts:             Field::HasMany,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    deleted_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -35,34 +22,17 @@ class AccountDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  state
   name
-  customer
-  kind
-  meta_mode
-  meta_margin_mode
-  traces
-  orders
+  accounts
+  created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  state
-  customer
-  kind
-  meta_mode
-  meta_margin_mode
-  stock_kind
-  magics_accept
-  instrument_control
-  traces
-  store
-  account_server
-  orders
-  instruments
-  deleted_at
+  name
+  accounts
   created_at
   updated_at
   ].freeze
@@ -72,20 +42,10 @@ class AccountDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   id
-  state
-  customer
-  kind
-  meta_mode
-  meta_margin_mode
-  stock_kind
-  magics_accept
-  instrument_control
-  traces
-  store
-  account_server
-  orders
-  instruments
-  deleted_at
+  name
+  accounts
+  created_at
+  updated_at
   ].freeze
 
   # COLLECTION_FILTERS

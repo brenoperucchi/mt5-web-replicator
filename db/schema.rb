@@ -10,10 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_04_06_180114) do
+ActiveRecord::Schema.define(version: 2023_04_19_031235) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "account_servers", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
 
   create_table "accounts", force: :cascade do |t|
     t.string "name"
@@ -28,6 +34,8 @@ ActiveRecord::Schema.define(version: 2023_04_06_180114) do
     t.bigint "customer_id"
     t.integer "stock_kind", default: 0
     t.datetime "deleted_at"
+    t.bigint "account_server_id"
+    t.index ["account_server_id"], name: "index_accounts_on_account_server_id"
     t.index ["customer_id"], name: "index_accounts_on_customer_id"
     t.index ["store_id"], name: "index_accounts_on_store_id"
   end
@@ -493,6 +501,8 @@ ActiveRecord::Schema.define(version: 2023_04_06_180114) do
     t.datetime "closed_at"
     t.integer "deal_id"
     t.integer "ticket_deal"
+    t.decimal "mfe"
+    t.decimal "mae"
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"

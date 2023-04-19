@@ -7,7 +7,9 @@ module API
         prefix "api"
         version "v2", using: :path
         default_format :json
-        format :json
+        # format :json
+        # formatter :json, 
+        #      Grape::Formatter::ActiveModelSerializers
 
         helpers do
           def permitted_params
@@ -18,6 +20,12 @@ module API
           def logger
             Rails.logger
           end
+
+          def meta_version_accept
+            yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))
+            yaml[params['expert_name']][params['expert_version']].present? ? true : false
+          end
+
         end
 
         rescue_from ActiveRecord::RecordNotFound do |e|

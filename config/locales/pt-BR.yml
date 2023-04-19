@@ -152,7 +152,7 @@ pt-BR:
       trace:
         id: #ID
         name: Nome
-        name_id: Magic Number
+        name_id: Magic Number Portfólio
         active: Ativo
         kind: Tipo
         take_profit_limit: Limite TakeProfit

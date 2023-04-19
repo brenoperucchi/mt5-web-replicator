@@ -16,20 +16,18 @@ class Account < ApplicationRecord
   scope :not_deleted,  -> { where(deleted_at:nil) }
   scope :control_store, ->(store) { where(store: store )}
 
-
-
-  enum state: {disable: 0, enable: 1}
-  enum kind:  {slave: 0, copy: 1}
-  enum meta_mode:         {demo: 0, real: 1}
+  enum state:             {disable: 0, enable: 1}
+  enum kind:              {slave: 0,   copy: 1}
+  enum meta_mode:         {demo: 0,    real: 1}
   enum meta_margin_mode:  {netting: 0, hedging: 1}
-  enum stock_kind:  {b3: 0, forex: 1, usa:2, others:4}
+  enum stock_kind:        {b3: 0,      forex: 1, usa:2, others:4}
 
   store :settings, accessors: [:magics_accept, :instrument_control]
 
   belongs_to :store
   belongs_to :customer
-  
-  # has_one  :plan_usage,  as: :resourceable
+  belongs_to :account_server, optional: true
+
   has_many :plan_usages, as: :resourceable
 
   has_many :permissions, dependent: :destroy
@@ -45,7 +43,7 @@ class Account < ApplicationRecord
                            through: :orders, source: :slaves,         dependent: :destroy
 
   validates_presence_of :name
-  validates_uniqueness_of :name
+  validates_uniqueness_of :name, scope: :account_server_id, if: Proc.new { |b| b.account_server_id.present? }
 
   # def register_resource_plan
   #   store.register_resource_plan(self, self.kind)

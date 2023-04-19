@@ -1,0 +1,2 @@
+class AccountServersController < ApplicationController
+end
