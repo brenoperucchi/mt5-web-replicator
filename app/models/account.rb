@@ -123,7 +123,7 @@ class Account < ApplicationRecord
   
   def masters_filter(scoped)
     if self.search_date_begin and self.search_date_end
-      scoped.where(created_at: search_date_begin..search_date_end.end_of_day)
+      scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
     else
       scoped
     end
@@ -172,7 +172,7 @@ class Account < ApplicationRecord
   end
 
   def drawdown(type = :slaves, trace)
-    scoped = slaves_scope(type, :closed, trace).order(created_at: :desc)
+    scoped = slaves_scope(type, :closed, trace).order(closed_at: :desc)
     AlgoStatistic.drawdown(scoped)
   end
 

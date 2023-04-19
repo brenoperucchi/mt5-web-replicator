@@ -161,7 +161,7 @@ class Trace < ApplicationRecord
 
   def masters_filter(scoped)
     if self.search_date_begin and self.search_date_end
-      scoped.where(created_at: search_date_begin..search_date_end.end_of_day)
+      scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
     else
       scoped
     end
@@ -210,12 +210,12 @@ class Trace < ApplicationRecord
   end
 
   def drawdown(type = :masters)
-    scoped = masters_scope(:masters, :closed).order(created_at: :asc)
+    scoped = masters_scope(:masters, :closed).order(closed_at: :asc)
     AlgoStatistic.drawdown(scoped)
   end
 
   def drawdown_dates(type = :masters)
-    scoped = masters_scope(:masters, :closed).order(created_at: :asc)
+    scoped = masters_scope(:masters, :closed).order(closed_at: :asc)
     AlgoStatistic.drawdown_dates(scoped)
   end
 
@@ -227,12 +227,12 @@ class Trace < ApplicationRecord
 
   def dashboard_capital_accumulated
     amount_total = 0
-    collection = masters_scope(:masters, :closed).order(created_at: :asc)
+    collection = masters_scope(:masters, :closed).order(closed_at: :asc)
     collection_array = []
     if collection.present?
-      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
-      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
-        profit = collection.where(created_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
+      collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
+      (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
+        profit = collection.where(closed_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
         amount_total = profit + amount_total
         profit_value = profit <= 0 ? 0 : profit
         loss_value = profit >= 0 ? 0 : profit
@@ -244,12 +244,12 @@ class Trace < ApplicationRecord
 
   def dashboard_drawdown
     amount_total = 0
-    collection = masters_scope(:masters, :closed).order(created_at: :asc)
+    collection = masters_scope(:masters, :closed).order(closed_at: :asc)
     collection_array = []
     if collection.present?
-      collection_array = [{day:(collection.first.created_at - 1.day).strftime("%Y-%m-%d"), drawdown: 0}]
-      (collection.first.created_at.to_datetime..collection.last.created_at.to_datetime).each do |date|
-        records = collection.where(created_at: date.beginning_of_day..date.end_of_day)
+      collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), drawdown: 0}]
+      (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
+        records = collection.where(closed_at: date.beginning_of_day..date.end_of_day)
         drawdown = AlgoStatistic.drawdown(records)
         collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
       end
@@ -263,7 +263,7 @@ class Trace < ApplicationRecord
     capital = ['capital']
     profit  = ['profit']
     array = []
-    self.transactions.closed.order('created_at asc').group_by{|x| x.created_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
+    self.transactions.closed.order('closed_at asc').group_by{|x| x.closed_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
       amount_total = v.sum(&:profit) + amount_total
       {date:k, capital: amount_total, profit: v.sum(&:profit)} 
     end
@@ -271,7 +271,7 @@ class Trace < ApplicationRecord
 
 
   # def drawdown_days(type = :masters)
-  #   scoped = masters_scope(:masters, :closed).order(created_at: :asc)
+  #   scoped = masters_scope(:masters, :closed).order(closed_at: :asc)
   #   AlgoStatistic.drawdown_days(scoped)
   # end
 
