@@ -151,7 +151,7 @@ class Trace < ApplicationRecord
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
         resource.erro!
       end
     end
@@ -161,7 +161,11 @@ class Trace < ApplicationRecord
 
   def masters_filter(scoped)
     if self.search_date_begin and self.search_date_end
-      scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
+      if closed_at.present?
+        scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
+      else
+        scoped.where(created_at: search_date_begin..search_date_end.end_of_day)
+      end
     else
       scoped
     end
