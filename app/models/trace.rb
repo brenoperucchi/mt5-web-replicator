@@ -224,56 +224,6 @@ class Trace < ApplicationRecord
     scoped.sum(&:profit) / scoped.size
   end
 
-  def dashboard_capital_accumulated
-    amount_total = 0
-    collection = masters_scope(:masters, :closed).order(closed_at: :asc)
-    collection_array = []
-    if collection.present?
-      collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
-      (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
-        profit = collection.where(closed_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
-        amount_total = profit + amount_total
-        profit_value = profit <= 0 ? 0 : profit
-        loss_value = profit >= 0 ? 0 : profit
-        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value.to_f, loss:loss_value.to_f})
-      end
-    end
-    collection_array
-  end
-
-  def dashboard_drawdown
-    amount_total = 0
-    collection = masters_scope(:masters, :closed).order(closed_at: :asc)
-    collection_array = []
-    if collection.present?
-      collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), drawdown: 0}]
-      (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
-        records = collection.where(closed_at: date.beginning_of_day..date.end_of_day)
-        drawdown = AlgoStatistic.drawdown(records)
-        collection_array.push({day:date.strftime("%Y-%m-%d"), drawdown: drawdown})
-      end
-    end
-    collection_array
-  end
-
-  def dashboard_monthy_amount
-    amount_total = 0
-    date    = ['date']
-    capital = ['capital']
-    profit  = ['profit']
-    array = []
-    self.transactions.closed.where.not(closed_at:nil).order('closed_at asc').group_by{|x| x.closed_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
-      amount_total = v.sum(&:profit) + amount_total
-      {date:k, capital: amount_total, profit: v.sum(&:profit)} 
-    end
-  end
-
-
-  # def drawdown_days(type = :masters)
-  #   scoped = masters_scope(:masters, :closed).order(closed_at: :asc)
-  #   AlgoStatistic.drawdown_days(scoped)
-  # end
-
   # def test_drawdown
   #   self.search_date_begin = DateTime.parse("12 Mar 2023 00:00:00 -0300")
   #   self.search_date_end   = DateTime.parse("12 Abr 2023 00:00:00 -0300")
