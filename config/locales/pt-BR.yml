@@ -29,6 +29,10 @@ pt-BR:
           zero: ""
           one: "1 dia"
           other: "%{count} dias"
+        months:
+          zero: ""
+          one: "1 mês"
+          other: "%{count} meses"
         drawdown_days: 
           zero: ""
           one: "1 dia de drawdown"
