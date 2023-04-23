@@ -22,6 +22,7 @@ class Transaction < ApplicationRecord
   scope :finish,      ->{where(state: ['closed', 'error'])}
   scope :executed,    ->{where(state: 'executed')}
   scope :error,    ->{where(state: 'error')}
+  scope :not_error,    ->{where.not(state: 'error')}
   scope :closed_error,  ->{where(state: ['closed', 'error'])}
   scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
   scope :buy,   ->{where(ordertype: 0)}

@@ -161,14 +161,9 @@ class Trace < ApplicationRecord
 
   def masters_filter(scoped)
     if self.search_date_begin and self.search_date_end
-      if closed_at.present?
-        scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
-      else
-        scoped.where(created_at: search_date_begin..search_date_end.end_of_day)
-      end
-    else
-      scoped
+      scoped = scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
     end
+    scoped
   end
 
   def profit_trade(type = :masters)

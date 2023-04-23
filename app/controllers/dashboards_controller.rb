@@ -28,7 +28,6 @@ class DashboardsController < ApplicationController
 				@traces = @current_store.traces.active
 			end
 		else
-			binding.pry
 			redirect_to root_path, notice: "Dashboard not found"
 		end
 	end
@@ -75,34 +74,20 @@ class DashboardsController < ApplicationController
 
 	private
 
-	# def set_locale
-	# 	if current_store.nil?
-	# 		I18n.locale = 'pt-BR'
-	# 	else
-	# 		I18n.locale = current_store.language
-	# 	end
-	# end
-
-
 	def set_trace
 		@trace = Trace.find_by(id:params[:id])
 		unless @trace.nil?
 		else
 			redirect_to root_path, notice: "Dashboard Not found"
 		end
-
-
-
 	end
 
 	def set_account
-		# binding.pry
 		if current_store == Store.first
 			@account = Account.find(params[:id])
 		else
 			@account = current_store.accounts.find(params[:id])
-		end
-		
+		end	
 	end
 
 	def filters

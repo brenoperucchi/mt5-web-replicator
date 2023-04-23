@@ -79,7 +79,7 @@ Rails.application.configure do
   # config.hosts << "benincasouza.tplinkdns.com"
   # config.hosts << "store1.imentore.com.br"
   config.hosts.clear
-  config.action_dispatch.tld_length = 1
+  config.action_dispatch.tld_length = 2
 
 
   config.action_mailer.delivery_method = :smtp
