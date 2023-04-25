@@ -37,7 +37,6 @@ pt-BR:
           zero: ""
           one: "1 dia de drawdown"
           other: "%{count} dias drawdowns"
-        months: "%{month}"
         drawdown: Drawdown
         dates: "%{date1} à %{date2}"
         orders_open: Ordens Abertas

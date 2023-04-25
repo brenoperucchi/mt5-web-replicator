@@ -205,7 +205,7 @@
                   h5
                     = I18n.t :capital_amount, scope:'helpers.dashboards.show'
                     = " - "
-                    = I18n.t :month, scope:'helpers.dashboards.show', count: @trace.dashboard_monthy_amount.size
+                    = I18n.t :months, scope:'helpers.dashboards.show', count: @trace.dashboard_monthy_amount.size
                     / = I18n.t :drawdown_days, scope:'helpers.dashboards.show', count: dates.try(:size)
               / .col-lg-6.col-md-6.text-right
               /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
