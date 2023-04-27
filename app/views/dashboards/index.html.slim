@@ -1,10 +1,10 @@
 = render "filter"
 
 .row
-  - @traces.each do |trace|                   
+  - @traces.reverse.each do |value, id|                   
+    - trace = Trace.find(id)
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
-    - trace.dashboard_magic_number = session[:dashboard_magic_number]
     .col-md-6.col-xl-6
       = link_to dashboard_path(trace, params:request.query_parameters) do
         .card.widget-card-user

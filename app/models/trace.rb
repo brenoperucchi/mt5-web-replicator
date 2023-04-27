@@ -3,7 +3,7 @@ require 'algo_statistic'
 
 class Trace < ApplicationRecord
 
-  attr_accessor :search_date_begin, :search_date_end, :dashboard_magic_number
+  attr_accessor :search_date_begin, :search_date_end#, :dashboard_magic_number
 
   ENUMS = %w(kind)
 
@@ -76,6 +76,10 @@ class Trace < ApplicationRecord
   #   masters_filter(masters)
   # end
 
+  def magic_number_restrict?
+    Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
+  end
+
   def create_orders(order_params, account, message, symbol)
     ticket = order_params['ticket_id']
     instrument = check_instrument(account, symbol)
@@ -131,14 +135,12 @@ class Trace < ApplicationRecord
       data = data.send(scope) if data.respond_to?(scope)
     end
 
-    if self.try(:dashboard_magic_number)
-      magics   = Order.magic_numbers_split(self.magics_accept)
+    if magic_number_restrict?
+      magics = Order.magic_numbers_split(self.magics_accept)
       magics ||= Order.magic_numbers_split(accounts.copy.map(&:magics_accept))
-
-      if magics.present?
-        magics = magics.map(&:to_i)
-        data = data.where(magic_number:[magics])
-      end
+      
+      magics = magics.map(&:to_i)
+      data = data.where(magic_number:[magics])
     end
 
     data
@@ -157,6 +159,11 @@ class Trace < ApplicationRecord
     end
     resource.error?
   end  
+
+  def profit_masters
+    @profit_masters = masters_scope(:masters, :closed).to_a.sum(&:profit)
+    @profit_masters
+  end
 
 
   def masters_filter(scoped)

@@ -83,7 +83,6 @@ class AccountDashboard < Administrate::BaseDashboard
   traces
   store
   account_server
-  orders
   instruments
   deleted_at
   ].freeze

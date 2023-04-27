@@ -2,8 +2,8 @@ class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	before_action :set_account, only:[:account]
 	before_action :set_trace, except: [:index, :account]
-	before_action :dashboard_restrict
 	before_action :filters#, except: :index
+	before_action :dashboard_restrict
 
 	# before_action :authenticate_user
 	# layout 'stisla'
@@ -25,7 +25,15 @@ class DashboardsController < ApplicationController
 				sign_out current_user
 				redirect_to user_session_path, notice: "Dashboard restrict. You must be logged"
 			else
-				@traces = @current_store.traces.active
+				@traces = @current_store.traces.active.map do |trace| 
+					trace.search_date_begin 				= session[:date_begin].strip().to_datetime.change(offset: @timezone) 
+					trace.search_date_end 					= session[:date_end].strip().to_datetime.change(offset: @timezone) 
+					# trace.dashboard_magic_number 	  = trace.magic_number_restrict?
+
+
+					[trace.profit_masters.to_f, trace.id]
+				end
+				@traces = @traces.sort
 			end
 		else
 			redirect_to root_path, notice: "Dashboard not found"
@@ -41,7 +49,7 @@ class DashboardsController < ApplicationController
 	def show
 		@trace.search_date_begin 				= session[:date_begin].strip().to_datetime.change(offset: @timezone) 
 		@trace.search_date_end 					= session[:date_end].strip().to_datetime.change(offset: @timezone) 
-		@trace.dashboard_magic_number 	= session[:dashboard_magic_number]
+		# @trace.dashboard_magic_number 	= session[:dashboard_magic_number]
 
 		respond_to do |wants|
 			wants.html do
@@ -92,7 +100,7 @@ class DashboardsController < ApplicationController
 
 	def filters
 		# if params[:datefilter].present?
-		session[:dashboard_magic_number] = params[:dashboard_magic_number].present? ? true : false
+		# session[:dashboard_magic_number] = params[:dashboard_magic_number].present? ? true : false
 
 		date_today = Date.today
 		# dates = "#{date_today} - #{date_today}"
