@@ -1,7 +1,7 @@
 = render "filter"
 
 .row
-  - @traces.reverse.each do |value, id|                   
+  - @traces.reverse.each do |amount_profit, id|                   
     - trace = Trace.find(id)
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
@@ -18,13 +18,13 @@
                   h4.p-t-10.p-b-10.m-t-0
                     = trace.name
                   h2.f-40.m-b-20.p-l-20
-                    - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
+                    / - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
                     - if amount_profit.to_f >= 0
                       strong.text-left
-                        = number_with_precision amount_profit
+                        = number_with_precision amount_profit, precision:2
                     - else
-                      strong.text-left
-                        = number_with_precision amount_profit
+                      .text-left.text-muted
+                        = number_with_precision amount_profit, precision:2
                   / p.text-muted.p-t-10.p-b-10.m-0
                     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.
                 .col-md-6.p-t-20.p-b-20
