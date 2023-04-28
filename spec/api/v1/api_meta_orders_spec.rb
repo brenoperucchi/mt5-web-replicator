@@ -119,7 +119,6 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(orders.error.count).to be == 2
         expect(orders.executed.count).to be == 0
         expect(orders.closed.count).to be == 14
-        trace.dashboard_magic_number = true
         trace.save
         expect(orders.sum(&:profit_copy).to_f).to be == 800.00
         expect(trace.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 200.00

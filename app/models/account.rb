@@ -4,7 +4,7 @@ class Account < ApplicationRecord
 
   ENUMS = %w(state kind meta_mode meta_margin_mode stock_kind)
 
-  include Balance::Base
+  # include Balance::Base
   include LibEnums
   include LibControl
   
@@ -13,6 +13,7 @@ class Account < ApplicationRecord
 
   # default_scope { where(deleted_at: nil) }
 
+  scope :deleted,      -> { where.not(deleted_at:nil) }
   scope :not_deleted,  -> { where(deleted_at:nil) }
   scope :control_store, ->(store) { where(store: store )}
 
@@ -43,7 +44,7 @@ class Account < ApplicationRecord
                            through: :orders, source: :slaves,         dependent: :destroy
 
   validates_presence_of :name
-  validates_uniqueness_of :name, scope: :account_server_id, if: Proc.new { |b| b.account_server_id.present? }
+  validates_uniqueness_of :name, scope: :account_server_id#, if: Proc.new { |b| b.account_server_id.present? }
 
   # def register_resource_plan
   #   store.register_resource_plan(self, self.kind)

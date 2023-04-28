@@ -3,7 +3,7 @@ require 'algo_statistic'
 
 class Trace < ApplicationRecord
 
-  attr_accessor :search_date_begin, :search_date_end#, :dashboard_magic_number
+  attr_accessor :search_date_begin, :search_date_end
 
   ENUMS = %w(kind)
 
