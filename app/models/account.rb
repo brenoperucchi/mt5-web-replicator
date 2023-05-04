@@ -44,7 +44,10 @@ class Account < ApplicationRecord
                            through: :orders, source: :slaves,         dependent: :destroy
 
   validates_presence_of :name
+  validates :name, format: { with: /\A\d+\z/} #, message: "Integer only. No sign allowed." }
   validates_uniqueness_of :name, scope: :account_server_id#, if: Proc.new { |b| b.account_server_id.present? }
+
+  accepts_nested_attributes_for :customer
 
   # def register_resource_plan
   #   store.register_resource_plan(self, self.kind)

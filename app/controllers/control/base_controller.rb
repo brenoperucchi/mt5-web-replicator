@@ -12,7 +12,8 @@ module Control
       resource = current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new, (resource_params))
       authorize_resource(resource)
 
-      resource_deleted = resource.class.deleted.where(name: resource.name, store_id: current_user.store).take
+      resource_deleted = resource.class.deleted.where(name: resource.name, store_id: current_user.store).take if resource.class.respond_to?(:deleted)
+
       if resource_deleted and resource.respond_to?(:soft_destroy)
         if resource_deleted.update_columns(deleted_at:nil) 
           redirect_to(

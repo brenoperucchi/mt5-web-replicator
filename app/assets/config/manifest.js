@@ -3,3 +3,4 @@
 
 //= link administrate/application.css
 //= link administrate/application.js//= link_tree ../builds
+//= link administrate-field-tinymce/application.js

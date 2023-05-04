@@ -70,7 +70,7 @@ end
 group :development do
   gem "better_errors"
   gem "binding_of_caller"
-  gem 'pry', '~> 0.14.1'
+  gem 'pry', '~> 0.14.1'  
   gem 'pry-byebug'
   # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
   # gem 'pry-byebug'
@@ -82,12 +82,16 @@ end
 
 gem 'eventmachine'
 gem 'slim'
+gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
+
+#ADMINISTRATE
 gem "administrate",         git: 'https://github.com/brenoperucchi/administrate.git', branch: 'main_imentore'
-# gem "administrate",         path: "vendor/administrate"
 gem 'administrate-field-image'
 gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 gem "administrate-field-nested_has_many"
 gem 'administrate_ransack'#, path: "vendor/administrate_ransack"
+gem "administrate-field-tinymce", git: 'https://github.com/smedrick/administrate-field-tinymce.git'
+# gem "administrate",         path: "vendor/administrate"
 # gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
 # gem "administrate", path: "vendor/administrate"
 # gem 'administrate-field-scoped_has_many', path: "vendor/administrate-field-scoped_has_many"

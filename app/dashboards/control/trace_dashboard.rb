@@ -31,6 +31,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     instruments:              Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     orders:                   Fields::HasManyScopeField.with_options(associated: :trace, dashboard:'control', direction: :desc, sort_by: :created_at),
     accounts:                 Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
+    description:              Field::Tinymce,
     created_at:               Field::DateTime,
     updated_at:               Field::DateTime,
   }.freeze
@@ -59,6 +60,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   take_profit_limit
   accounts
   orders
+  description
   created_at
   updated_at
   ].freeze
@@ -74,6 +76,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   name_id
   magics_accept
   store_id
+  description
   take_profit_limit
   accounts
   ].freeze

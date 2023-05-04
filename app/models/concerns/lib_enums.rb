@@ -5,14 +5,14 @@ module LibEnums
 		validate do
 	    self.class::ENUMS.each do |e|
 	      if instance_variable_get("@not_valid_#{e}")
-	        errors.add(e.to_sym, "must be #{self.class.send("#{e}s").keys.join(' or ')}")
+	        errors.add(e.to_sym, "must be #{self.class.send("#{e.pluralize}").keys.join(' or ')}")
 	      end
 	    end
 	  end
 
 		self::ENUMS.each do |e| 
 		  self.define_method("#{e}=") do |value|
-		    if !self.class.send("#{e}s").keys.include?(value)
+		    if !self.class.send("#{e.pluralize}").keys.include?(value)
 		      instance_variable_set("@not_valid_#{e}", true)
 		    else
 		      super value

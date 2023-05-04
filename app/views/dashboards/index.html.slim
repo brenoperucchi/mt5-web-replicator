@@ -6,9 +6,9 @@
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
     .col-md-6.col-xl-6
-      = link_to dashboard_path(trace, params:request.query_parameters) do
-        .card.widget-card-user
-          .card-body.p-b-0
+      .card.widget-card-user
+        .card-body.p-b-0
+          = link_to dashboard_path(trace, params:request.query_parameters) do
             .card-user
               .row
                 .col-md-6
@@ -19,38 +19,40 @@
                     = trace.name
                   h2.f-40.m-b-20.p-l-20
                     / - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
-                    - if amount_profit.to_f >= 0
-                      strong.text-left
+                  - if amount_profit.to_f >= 0
+                    h4.f-40.m-b-20.p-l-20.text-left.text-primary
                         = number_with_precision amount_profit, precision:2
-                    - else
-                      .text-left.text-muted
-                        = number_with_precision amount_profit, precision:2
+                  - else
+                    h4.f-30.m-b-20.p-l-20.text-left.text-danger
+                      = number_with_precision amount_profit, precision:2
                   / p.text-muted.p-t-10.p-b-10.m-0
                     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.
                 .col-md-6.p-t-20.p-b-20
                   - values = trace.masters_scope(:masters, :closed).to_a.map{|x| x.profit.to_f}.reverse[..10]
                   - values = values.map(&:to_i).delete_if{|x| x == 0} if values
                   #power-card-chart1[height='75' style="margin-top:0px;margin-right:40px;" data-chart="#{values.compact}"]
-          .card-footer.border-top.bg-light
-            .row
-              .col-sm-3.footer-menu.text-center.border-right
-                p.text-muted.f-w-400.m-0.f-16
-                  = I18n.t :profit_trade, scope:'helpers.dashboards.show'
-                span.f-18.f-w-400
-                  = "#{trace.profit_trade(:masters)} %"
-              .col-sm-3.footer-menu.text-center.border-right
-                p.text-muted.f-w-400.m-0.f-16
-                  = I18n.t :profit_factor, scope:'helpers.dashboards.show'
-                span.f-18.f-w-400
-                  = number_with_precision trace.profit_factor(:masters).round(2), precision:2
-              .col-sm-3.footer-menu.text-center.border-right
-                p.text-muted.f-w-400.m-0.f-16
-                  = I18n.t :pay_off, scope:'helpers.dashboards.show'
-                span.f-18.f-w-400
-                  = number_with_precision trace.pay_off, precision:2
-              .col-sm-3.footer-menu.text-center
-                button.btn.btn-primary.btn-lg[type="button"]
-                  | Contratar 
+        .card-footer.border-top.bg-light
+          .row
+            .col-sm-3.footer-menu.text-center.border-right
+              p.text-muted.f-w-400.m-0.f-16
+                = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+              span.f-18.f-w-400
+                = "#{trace.profit_trade(:masters)} %"
+            .col-sm-3.footer-menu.text-center.border-right
+              p.text-muted.f-w-400.m-0.f-16
+                = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
+              span.f-18.f-w-400
+                = number_with_precision trace.profit_factor(:masters).round(2), precision:2
+            .col-sm-3.footer-menu.text-center.border-right
+              p.text-muted.f-w-400.m-0.f-16
+                = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
+              span.f-18.f-w-400
+                = number_with_precision trace.pay_off, precision:2
+            .col-sm-3.footer-menu.text-center
+              = link_to contract_dashboard_path(trace), class: 'btn btn-info btn-lg' do
+                = I18n.t :contract, scope:'helpers.dashboards'
+              / = form_for trace, url: contract_dashboard_path(trace), method: :get do |f| 
+                = f.button :submit, class: 'button btn btn-primary btn-lg'
 / .row
 /   - @traces.each do |trace|                   
 /     - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)

@@ -61,6 +61,10 @@ class Store < ApplicationRecord
   #   self.state
   # #   # self.state == "enable" ? "1" : "0"
   # end
+
+  def customer_owner_name
+    customers.owner.first.name
+  end
   
   def customer_plan
     customer_plans.active.try(:first)

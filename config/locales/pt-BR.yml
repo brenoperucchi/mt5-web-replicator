@@ -13,39 +13,49 @@ pt-BR:
       admin: Administrador
       filter: Filtro
       site: imentore.com.br
-      show:
-        profit_factor: Fator de Lucro
-        oper_gain: Operações positivas
-        oper_loss: Operações negativas
-        profit_trade: Taxa de acerto
-        profit_drawdown: Lucro / Max DD
-        profit_net: Lucro Líquido
-        pay_off: Payoff 
-        max_dd: Max DD
-        curve_capital: Curva de capital
-        average_gain: Média de Ganho por operações
-        average_loss: Média de Perda por operações 
-        days:
-          zero: ""
-          one: "1 dia"
-          other: "%{count} dias"
-        months:
-          zero: ""
-          one: "1 mês"
-          other: "%{count} meses"
-        drawdown_days: 
-          zero: ""
-          one: "1 dia de drawdown"
-          other: "%{count} dias drawdowns"
-        drawdown: Drawdown
-        dates: "%{date1} à %{date2}"
-        orders_open: Ordens Abertas
-        orders_errors: Ordens Errors
-        orders_closed: Ordens Fechadas
-        buy: Compras
-        sell: Vendas
-        capital_amount: Evolução do capital
-        total: Total
+      contract: Contratar
+      finish: Finalizar
+      more_information: Mais informações
+      description: Descrição 
+      pages:
+        finish:
+          title: "Your registration has been completed successfully. Please wait for contact from your integrator %{name}.
+                             Otherwise, you can contact us through official channels or by email: %{email}"
+        contract:
+          form_title: "Formulário para contratação do Portfolio %{name}"
+        show:
+          profit_factor: Fator de Lucro
+          oper_gain: Operações positivas
+          oper_loss: Operações negativas
+          profit_trade: Taxa de acerto
+          profit_drawdown: Lucro / Max DD
+          profit_net: Lucro Líquido
+          pay_off: Payoff 
+          max_dd: Max DD
+          curve_capital: Curva de capital
+          average_gain: Média de Ganho por operações
+          average_loss: Média de Perda por operações 
+          days:
+            zero: ""
+            one: "1 dia"
+            other: "%{count} dias"
+          months:
+            zero: ""
+            one: "1 mês"
+            other: "%{count} meses"
+          drawdown_days: 
+            zero: ""
+            one: "1 dia de drawdown"
+            other: "%{count} dias drawdowns"
+          drawdown: Drawdown
+          dates: "%{date1} à %{date2}"
+          orders_open: Ordens Abertas
+          orders_errors: Ordens Errors
+          orders_closed: Ordens Fechadas
+          buy: Compras
+          sell: Vendas
+          capital_amount: Evolução do capital
+          total: Total
     site:
       signup_demo:
         title: Gerenciador de Copy para Robos, entradas manuais e sinais
@@ -551,6 +561,9 @@ pt-BR:
       update:
         success: "%{resource} foi atualizado com sucesso."
         failure: "%{resource} com error ao atualizar."
+      restore:
+        success: "%{resource} foi restaurado com sucesso."
+        failure: "%{resource} com error ao restaurar."
     fields:
       has_many:
         more: "Exibindo %{count} de %{total_count}"

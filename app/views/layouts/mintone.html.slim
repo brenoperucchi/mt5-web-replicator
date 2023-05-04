@@ -57,17 +57,19 @@ html[lang="en"]
                         / a href="/dashboards" 
                     = yield(:breadcrumb)
                   /! [ breadcrumb ] started
-
-                .col-lg-6.text-right
-                  button#filter.btn.btn-primary.disabled.m-r-5[type="button"]
-                    i.feather.icon-plus
-                    = I18n.t :filter, scope:'helpers.dashboards'
+                - unless action_name == "contract" or action_name == "finish_contract"
+                  .col-lg-6.text-right
+                    button#filter.btn.btn-primary.disabled.m-r-5[type="button"]
+                      i.feather.icon-plus
+                      = I18n.t :filter, scope:'helpers.dashboards'
           = content_for?(:content) ? yield(:content) : yield
     = yield :footer
     
 javascript:
   $(document).ready(function(){
     $(function() {
+      if($('input[name="datefilter"]').length){
+
         var start = moment($('input[name="datefilter"]').val().split(" - ")[0], "DD/MM/YYYY");
         var end =   moment($('input[name="datefilter"]').val().split(" - ")[1], "DD/MM/YYYY");
 
@@ -104,6 +106,7 @@ javascript:
         });
 
         cb(start, end);
+      }
     });
   });
   $(document).ready(function(){

@@ -13,8 +13,11 @@ Rails.application.routes.draw do
 
     resources :customers
     resources :stores
-    resources :dashboards, only: [:index, :show] do
-      get 'account/:id/:trace_id', to: 'dashboards#account', on: :collection, as: 'account'
+    resources :dashboards, only: [:index, :show, :create] do
+      get 'account/:id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
+      get '/contract',                   to: 'dashboards#contract',        on: :member, as: 'contract'
+      post '/contract',                  to: 'dashboards#create',          on: :member
+      get 'finish_contract/:account_id', to: 'dashboards#finish_contract', on: :member
     end
     devise_for :users, controllers: {
       sessions: 'users/sessions',
@@ -79,11 +82,10 @@ Rails.application.routes.draw do
 
   # get ':page' => 'signs#show', as: 'signs'
   post "create_store",      to:"site#create_store"
-  get "support",      to:"site#support"
-  get "demo_request", to:"site#demo_request"
-  get "robos", to:"site#robos"
+  get  "support",           to:"site#support"
+  get  "demo_request",      to:"site#demo_request"
+  get  "robos",             to:"site#robos"
 
-  get 'dashboards', :to => "dashboards#index" 
   root :to => "site#index" 
   # root 'admin/orders#index'
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html

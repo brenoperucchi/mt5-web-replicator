@@ -13,6 +13,12 @@ en:
       admin: Administrator
       filter: Filter
       site: imentore.com
+      contract: Contract
+      finish: Finish
+      more_information: More information
+      description: Descrição 
+      contract:
+        form_title: "Form for contracting the Portfolio %{name}"
       show:
         profit_factor: Profit Factor
         oper_gain: Gain

@@ -17,6 +17,37 @@ class DashboardsController < ApplicationController
 			
 	# end
 
+	def finish_contract
+		@account = Account.find(params[:account_id])
+		render :finish_contract
+	end
+
+	def contract
+		respond_to do |wants|
+			wants.html do  
+				@account = @trace.accounts.new
+			end
+		end
+	end
+
+	def create
+		sign_out if user_signed_in?
+		password = Devise.friendly_token.first(6)
+		@account = @trace.accounts.new(account_params)
+		@account.state = "enable"
+		@account.customer.store = current_store
+		@account.customer.role = "customer"
+		@account.customer.role_control = "user"
+		@account.customer.user.password = password
+		@account.traces << @trace
+		if @account.save
+			# @customer.create_user(email: @customer.user_email, password: password)
+			redirect_to finish_contract_dashboard_path(@trace, @account)
+		else
+			render :contract
+		end
+	end
+
 	def dashboard_restrict
 		unless @trace.nil? and current_store.nil?
 			@current_store = @trace.try(:store)
@@ -81,6 +112,11 @@ class DashboardsController < ApplicationController
 	end
 
 	private
+
+	def account_params
+	  params.require(:account).permit(:name, :url, :password, :email, :kind, :meta_margin_mode, :meta_mode, :store_id,
+	  						customer_attributes:[:name, :customer_plan_id, :user_email, :store_id, user_attributes:[:email, :store_id]]) 
+	end
 
 	def set_trace
 		@trace = Trace.find_by(id:params[:id])

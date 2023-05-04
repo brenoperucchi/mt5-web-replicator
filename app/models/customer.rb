@@ -1,5 +1,7 @@
 class Customer < ApplicationRecord
 
+  # attr_accessor :user_email
+
   CONTROL_ROLE = %w(admin user)
   ENUMS = %w(role role_control)
 
@@ -19,13 +21,16 @@ class Customer < ApplicationRecord
   belongs_to :store
   belongs_to :customer_plan, optional: true
   
-  has_one  :user, as: :userable
+  has_one  :user, as: :userable, dependent: :destroy
   # has_one :plan_usage, as: :usageable, :dependent => :destroy
-  has_many :plan_usages, as: :resourceable
+  has_many :plan_usages, as: :resourceable, dependent: :destroy
   
-  has_many :accounts, dependent: :nullify
+  has_many :accounts, dependent: :destroy
+  has_many :traces, :through => :accounts, :source => :traces
+  
+  # has_many :accounts, dependent: :nullify
   # has_many :customer_plans, dependent: :nullify
-  has_many :invoices, as: :invoiceable#, dependent: :destroy
+  has_many :invoices, as: :invoiceable, dependent: :destroy
 
   delegate :email, to: :user, allow_nil: true
 
