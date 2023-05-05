@@ -50,6 +50,7 @@ class AccountDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   state
+  name
   customer
   kind
   meta_mode
@@ -73,6 +74,7 @@ class AccountDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   id
   state
+  name
   customer
   kind
   meta_mode

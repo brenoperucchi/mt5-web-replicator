@@ -16,42 +16,46 @@ en:
       contract: Contract
       finish: Finish
       more_information: More information
-      description: Descrição 
-      contract:
-        form_title: "Form for contracting the Portfolio %{name}"
-      show:
-        profit_factor: Profit Factor
-        oper_gain: Gain
-        oper_loss: Loss
-        profit_trade: Success rate
-        profit_drawdown: Profit / Max DD
-        profit_net: Net Profit
-        pay_off: Payoff 
-        max_dd: Max DD
-        curve_capital: Capital Curve
-        average_gain: Average Gain by ordens
-        average_loss: Average Loss by ordens
-        days:
-          zero: ""
-          one: "1 day"
-          other: "%{count} days"
-        months:
-          zero: ""
-          one: "1 month"
-          other: "%{count} months"
-        drawdown_days: 
-          zero: ""
-          one: "1 drawdown day"
-          other: "%{count} drawdowns days"
-        drawdown: Drawdown
-        dates: "%{date1} to %{date2}"
-        orders_open: Open Orders
-        orders_errors: Errors Orders
-        orders_closed: Orders Closed 
-        buy: Buy
-        sell: Sell
-        capital_amount: Evolution of capital
-        total: Total
+      description: Descrição
+      pages: 
+        finish:
+          title: "Your registration has been completed successfully. Please wait for contact from your integrator %{name}.
+                             Otherwise, you can contact us through official channels or by email: %{email}"
+        contract:
+          form_title: "Form for contracting the Portfolio %{name}"
+        show:
+          profit_factor: Profit Factor
+          oper_gain: Gain
+          oper_loss: Loss
+          profit_trade: Success rate
+          profit_drawdown: Profit / Max DD
+          profit_net: Net Profit
+          pay_off: Payoff 
+          max_dd: Max DD
+          curve_capital: Capital Curve
+          average_gain: Average Gain by ordens
+          average_loss: Average Loss by ordens
+          days:
+            zero: ""
+            one: "1 day"
+            other: "%{count} days"
+          months:
+            zero: ""
+            one: "1 month"
+            other: "%{count} months"
+          drawdown_days: 
+            zero: ""
+            one: "1 drawdown day"
+            other: "%{count} drawdowns days"
+          drawdown: Drawdown
+          dates: "%{date1} to %{date2}"
+          orders_open: Open Orders
+          orders_errors: Errors Orders
+          orders_closed: Orders Closed 
+          buy: Buy
+          sell: Sell
+          capital_amount: Evolution of capital
+          total: Total
     site:
       signup_demo:
         title: Better business planning for any kind of brand
