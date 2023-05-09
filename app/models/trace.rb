@@ -98,7 +98,7 @@ class Trace < ApplicationRecord
     end
 
     api_transaction = SerializerAPITransaction.new(order_params)
-    transaction.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader) unless api_transaction.time_trader.nil?
+    transaction.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader) 
 
     # CREATE ORDER -> TRANSACTION -> SLAVES
     if order.valid?

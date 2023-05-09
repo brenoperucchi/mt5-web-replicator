@@ -25,7 +25,7 @@ FactoryBot.define do
     end
     trait :slave4 do
       name {202001} 
-      kind {'slave'} 
+      kind {'slave'}  # 'slave' or 'copy'
       meta_mode { 'demo' }
       meta_margin_mode { 'hedging' }
       trace_ids { 2 } 
