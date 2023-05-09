@@ -32,6 +32,9 @@ pt-BR:
           profit_net: Lucro Líquido
           pay_off: Payoff 
           max_dd: Max DD
+          mfe_mae: MFE & MAE
+          mfe_max: Max MFE
+          mae_min: Min MAE
           curve_capital: Curva de capital
           average_gain: Média de Ganho por operações
           average_loss: Média de Perda por operações 
@@ -286,8 +289,8 @@ pt-BR:
         created_at: criado
     models:
       customer_plan:
-        one: Plano (cliente)
-        other: Planos (clientes)
+        one: Plano
+        other: Planos
       customer:
         one: Cliente
         other: Clientes

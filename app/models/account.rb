@@ -53,6 +53,20 @@ class Account < ApplicationRecord
   #   store.register_resource_plan(self, self.kind)
   # end
 
+
+  def register_plan_update
+    # if self.trace_ids.include?()
+    # if tr_changed? or self.plan_usages.empty?
+      # store.register_resource_plan_customer(self, self.class.name.capitalize) if Current.user.try(:userable).try(:role) == "customer"
+    # end
+  end
+
+  def register_plan_create
+    plan = CustomerPlan.find_by(id:self.customer_plan_id)
+    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+  end
+
+
   def self.account_search(current_user)
     if current_user.userable.administrator?
       self.all.map{|x| [x.name, x.id]}   

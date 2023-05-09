@@ -14,6 +14,9 @@ class SerializerAPITransaction < ActiveModel::Serializer
       comment: obj['comment'],
       ticket_deal: obj['ticket_deal'],
       profit: obj['profit'],
+      # time_trader: time_trader,
+      # mae: mae,
+      # mfe: mfe,
     }
   end
 
@@ -55,6 +58,18 @@ class SerializerAPITransaction < ActiveModel::Serializer
 
   def ticket
     obj['ticket_id']
+  end
+
+  def mfe
+    obj['mfe']
+  end
+
+  def mae
+    obj['mae']
+  end
+
+  def time_trader
+    time_zone(obj['time_gmt'], obj['time_trader'], obj['time_trader']) unless obj['time_trader'].nil?
   end
 
   def open_at

@@ -47,6 +47,7 @@ class Message::Metatrader < Message::Message
         
         # orders = self.trace.orders.where(content_id: ticket, state: :executed)
         self.traces.active.not_deleted.each do |trace|
+          api_transaction = SerializerAPITransaction.new(order_params)
           orders = trace.orders.where(content_id: ticket)
           if not order_params['state_meta'].present?
             unless orders.present?
@@ -54,11 +55,17 @@ class Message::Metatrader < Message::Message
             end
           elsif order_params['state_meta'] == "modify"
             orders.each do |order| 
-              order.transactions.map{|t| t.set_lot_sl_tp(order_params) }
+              order.transactions.each do|t| 
+                t.set_lot_sl_tp(order_params) 
+                t.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader)
+              end
             end
           elsif order_params['state_meta'] == "modify_profit"
             orders.each do |order| 
-              order.transactions.map{|t| t.set_profit(order_params['profit']) }
+              order.transactions.each do |t| 
+                t.set_profit(order_params['profit'])
+                t.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader)
+              end
             end
           end
         end

@@ -14,6 +14,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     name:                     Field::String,
     name_id:                  Field::String,
     telegram_option:          Field::String.with_options(searchable: false),
+    customer_amount:          Field::String,
     telegram_image:           Field::Boolean,
     instrument_control:       Field::Boolean,
     telegram_api_id:          Field::String.with_options(searchable: false),
@@ -56,6 +57,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   instrument_control
   name
   name_id
+  customer_amount
   magics_accept
   take_profit_limit
   accounts
@@ -74,6 +76,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   kind
   name
   name_id
+  customer_amount
   magics_accept
   store_id
   description

@@ -4,6 +4,7 @@ imentore_copy:
   '2_08': OK
   '2_09': OK
   '2_10': OK
+  '2_11': OK
   disable_msg: 'A versao |version| do Imentore Copy esta desabilitado em nosso sistema. Atualize seu expert. '
 imentore_slave:
   '2_07': OK

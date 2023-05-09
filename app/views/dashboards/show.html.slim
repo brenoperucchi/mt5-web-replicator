@@ -122,20 +122,20 @@
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
-              = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
-            .row
+              = I18n.t :mfe_mae, scope:'helpers.dashboards.pages.show'
+            / strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
+            /   = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+            .row.m-b-40.m-t-30
               .col-6.text-center
                 p.text-muted.m-b-0
-                  = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+                  = I18n.t :mfe_max, scope:'helpers.dashboards.pages.show'
                 span.text-c-green
-                  = @trace.masters_scope(:masters, [:executed, :buy]).count
+                  = @trace.mfe.try(:amount)
               .col-6.text-center
                 p.text-muted.m-b-0
-                  = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+                  = I18n.t :mae_min, scope:'helpers.dashboards.pages.show'
                 span.text-c-red
-                  = @trace.masters_scope(:masters, [:executed, :sell]).count
+                  = @trace.mae.try(:amount)
                   
     .row
       .col-sm-8
@@ -160,23 +160,40 @@
             #morris-area-chart-dashboard_drawdown[data-chart="#{@trace.dashboard_drawdown.to_json}"]
             .clearfix
       .col-sm-4
-        .card.profile-view[style="margin-bottom: 15px;"]
+        .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
-              = I18n.t :orders_errors, scope:'helpers.dashboards.pages.show'
+              = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision:2
+              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :buy, scope:'helpers.dashboards.pages.show'
                 span.text-c-green
-                  = @trace.masters_scope(:masters, [:error, :buy]).count
+                  = @trace.masters_scope(:masters, [:executed, :buy]).count
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :sell, scope:'helpers.dashboards.pages.show'
                 span.text-c-red
-                  = @trace.masters_scope(:masters, [:error, :sell]).count
+                  = @trace.masters_scope(:masters, [:executed, :sell]).count
+        / .card.profile-view[style="margin-bottom: 15px;"]
+        /   .card-body
+        /     h5
+        /       = I18n.t :orders_errors, scope:'helpers.dashboards.pages.show'
+        /     strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
+        /       = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision:2
+        /     .row
+        /       .col-6.text-center
+        /         p.text-muted.m-b-0
+        /           = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+        /         span.text-c-green
+        /           = @trace.masters_scope(:masters, [:error, :buy]).count
+        /       .col-6.text-center
+        /         p.text-muted.m-b-0
+        /           = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+        /         span.text-c-red
+        /           = @trace.masters_scope(:masters, [:error, :sell]).count
         .card.profile-view[style="margin-bottom: 15px;"]
           .card-body
             h5

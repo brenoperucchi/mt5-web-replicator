@@ -35,8 +35,8 @@ class AccountDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   id
-  state
   name
+  state
   customer
   kind
   meta_mode
@@ -49,8 +49,8 @@ class AccountDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  state
   name
+  state
   customer
   kind
   meta_mode

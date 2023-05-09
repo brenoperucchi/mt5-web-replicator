@@ -2,6 +2,8 @@ require 'telegram/bot'
 class Transaction < ApplicationRecord
   include Telegram::Util
 
+  # attr_accessor :mfe, :mae, :time_trader
+
   has_paper_trail 
   # versions: {
   #   class_name: 'Track'
@@ -16,6 +18,8 @@ class Transaction < ApplicationRecord
   has_many :loggings, as: :loggerable, dependent: :destroy
   has_many :slaves,   through: :order,    source: :slaves
   has_many :accounts, through: :order,    source: :accounts
+
+  has_many :statistics, as: :statisticable, dependent: :destroy
 
   scope :closed,      ->{where(state: 'closed')}
   scope :closed_info,      ->{where(state: 'closed_info')}
@@ -46,6 +50,27 @@ class Transaction < ApplicationRecord
   def self.profit_search(value)
     self.where(profit:0..value.to_f)
   end
+
+  def set_mfe_mae(mfe, mae, time_trader)
+    unless time_trader.nil?
+      # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
+      statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
+      
+      statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
+      statistic.update(amount: mfe.to_f) if mfe > statistic.amount.to_f 
+
+      statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mae)
+      statistic.update(amount: mae.to_f) if mae < statistic.amount.to_f 
+    end
+  end  
+
+  # def mae=(value)
+  #   # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
+  #   statistic_name = "mae_#{time_trader.to_date.strftime("%Y-%m-%d")}"
+    
+  #   statistic = self.statistics.find_or_initialize_by(name: statistic_name)
+  #   statistic.update(amount: value) if value < statistic.amount.to_f
+  # end
 
   state_machine :initial => :pending do
     after_transition :pending => :executed,                    :do => :update_state

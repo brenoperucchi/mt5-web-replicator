@@ -16,11 +16,12 @@ class Trace < ApplicationRecord
   store :settings, accessors: [
                                 :telegram_option, :telegram_image, :take_profit_limit, 
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
-                                :instrument_control, :restrict_control_instrument, :magics_accept, :description
+                                :instrument_control, :restrict_control_instrument, :magics_accept, :description, :customer_amount
                               ]
 
   has_many :orders
   has_many :transactions
+  has_many :statitics, through: :transactions, source: :statistics
   has_many :masters, :through => :orders, :source => :transactions
   has_many :slaves,  :through => :orders, :source => :slaves
 
@@ -96,6 +97,9 @@ class Trace < ApplicationRecord
       transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(ticket: ticket, trace:self)
     end
 
+    api_transaction = SerializerAPITransaction.new(order_params)
+    transaction.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader) unless api_transaction.time_trader.nil?
+
     # CREATE ORDER -> TRANSACTION -> SLAVES
     if order.valid?
       order.execute
@@ -159,6 +163,25 @@ class Trace < ApplicationRecord
     end
     resource.error?
   end  
+
+
+  def mfe
+    self.statitics.mfe_max(self.search_date_begin..self.search_date_end.end_of_day)
+    # if self.search_date_begin and self.search_date_end
+    #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
+    # else
+    #   self.statitics.group_day_amount(:mfe)
+    # end
+  end
+
+  def mae    
+    self.statitics.mae_min(self.search_date_begin..self.search_date_end.end_of_day)
+    # if self.search_date_begin and self.search_date_end
+    #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
+    # else
+    #   self.statitics.group_day_amount(:mfe)
+    # end
+  end
 
   def profit_masters
     @profit_masters = masters_scope(:masters, :closed).to_a.sum(&:profit)
