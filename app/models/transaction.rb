@@ -52,7 +52,7 @@ class Transaction < ApplicationRecord
   end
 
   def set_mfe_mae(mfe, mae, time_trader)
-    unless time_trader.nil?
+    unless time_trader.nil? or mae.nil? or mfe.nil?
       # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
       statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
       
