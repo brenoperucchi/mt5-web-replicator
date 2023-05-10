@@ -131,8 +131,41 @@ class Trace < ApplicationRecord
     instrument || symbol
   end
 
+
+  def restrict_magic_number(resource)
+    unless self.magics_accept.blank?
+      trace_magic_number = self.try(:trace).try(:name_id)
+      magic_numbers = Order.magic_numbers_split(self.magics_accept)
+      changeset = resource.try(:versions).try(:last).try(:changeset)
+      version = resource.try(:version)
+      unless magic_numbers.detect{|x| x == resource.magic_number}
+        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.erro!
+      end
+    end
+    resource.error?
+  end  
+
+  def mfe
+    self.statitics.mfe_max(self.search_date_begin..self.search_date_end.end_of_day)
+    # if self.search_date_begin and self.search_date_end
+    #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
+    # else
+    #   self.statitics.group_day_amount(:mfe)
+    # end
+  end
+
+  def mae    
+    self.statitics.mae_min(self.search_date_begin.beginning_of_day..self.search_date_end.end_of_day)
+    # if self.search_date_begin and self.search_date_end
+    #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
+    # else
+    #   self.statitics.group_day_amount(:mfe)
+    # end
+  end
+
   def masters_scope(type = :masters, scope = :all)
-    data = masters_filter(self.send(type))
+    data = masters_filter(self.send(type), scope)
     if scope.is_a?(Array)
       data = data.send(:instance_eval, "#{scope.join(".").to_s}")
     else
@@ -150,69 +183,42 @@ class Trace < ApplicationRecord
     data
   end
 
-  def restrict_magic_number(resource)
-    unless self.magics_accept.blank?
-      trace_magic_number = self.try(:trace).try(:name_id)
-      magic_numbers = Order.magic_numbers_split(self.magics_accept)
-      changeset = resource.try(:versions).try(:last).try(:changeset)
-      version = resource.try(:version)
-      unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
-        resource.erro!
-      end
-    end
-    resource.error?
-  end  
-
-
-  def mfe
-    self.statitics.mfe_max(self.search_date_begin..self.search_date_end.end_of_day)
-    # if self.search_date_begin and self.search_date_end
-    #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
-    # else
-    #   self.statitics.group_day_amount(:mfe)
-    # end
-  end
-
-  def mae    
-    self.statitics.mae_min(self.search_date_begin..self.search_date_end.end_of_day)
-    # if self.search_date_begin and self.search_date_end
-    #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
-    # else
-    #   self.statitics.group_day_amount(:mfe)
-    # end
-  end
-
   def profit_masters
     @profit_masters = masters_scope(:masters, :closed).to_a.sum(&:profit)
     @profit_masters
   end
 
 
-  def masters_filter(scoped)
+  def masters_filter(data, scope = nil)
     if self.search_date_begin and self.search_date_end
-      scoped = scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
+      # binding.pry
+      if scope == :executed or (scope.is_a?(Array) and scope.include?(:executed))
+        query = {:created_at => search_date_begin..search_date_end.end_of_day}
+      else
+        query = {:closed_at => search_date_begin..search_date_end.end_of_day}
+      end
+      data = data.where(query)
     end
-    scoped
+    data
   end
 
   def profit_trade(type = :masters)
-    trades = masters_scope(:masters, :closed).try(:count).to_f
-    gain_trades = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
+    trades = masters_scope(type, :closed).try(:count).to_f
+    gain_trades = masters_scope(type, :closed).try(:gain).try(:count).to_f
     AlgoStatistic.profit_trade(trades, gain_trades)
   end
 
   def loss_trade(type = :masters)
-    trades = masters_scope(:masters, :closed).try(:count).to_f
-    loss_trades = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
+    trades = masters_scope(type, :closed).try(:count).to_f
+    loss_trades = masters_scope(type, :closed).try(:loss).try(:count).to_f
     AlgoStatistic.loss_trade(trades, loss_trades)
   end
 
   def pay_off(type = :masters)
-    gain = masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit).abs
-    gain_operation = masters_scope(:masters, :closed).try(:gain).try(:count).to_f
-    loss = masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit).abs
-    loss_operation = masters_scope(:masters, :closed).try(:loss).try(:count).to_f
+    gain = masters_scope(type, :closed).try(:gain).to_a.sum(&:profit).abs
+    gain_operation = masters_scope(type, :closed).try(:gain).try(:count).to_f
+    loss = masters_scope(type, :closed).try(:loss).to_a.sum(&:profit).abs
+    loss_operation = masters_scope(type, :closed).try(:loss).try(:count).to_f
     AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
   end
 
@@ -232,19 +238,19 @@ class Trace < ApplicationRecord
   end
 
   def profit_drawdown(type = :masters)
-    gain = self.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit).abs
-    loss = self.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit).abs
+    gain = self.masters_scope(type, :closed).try(:gain).to_a.sum(&:profit).abs
+    loss = self.masters_scope(type, :closed).try(:loss).to_a.sum(&:profit).abs
     profit = gain - loss
     AlgoStatistic.profit_drawdown(profit, drawdown).abs
   end
 
   def drawdown(type = :masters)
-    scoped = masters_scope(:masters, :closed).order(closed_at: :asc)
+    scoped = masters_scope(type, :closed).order(closed_at: :asc)
     AlgoStatistic.drawdown(scoped)
   end
 
   def drawdown_dates(type = :masters)
-    scoped = masters_scope(:masters, :closed).order(closed_at: :asc)
+    scoped = masters_scope(type, :closed).order(closed_at: :asc)
     AlgoStatistic.drawdown_dates(scoped)
   end
 

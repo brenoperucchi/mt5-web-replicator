@@ -9,7 +9,7 @@ class Statistic < ApplicationRecord
       # send(kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}
     else
       # where(created_at: range, kind: kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}
-      where(created_at: range, kind: :mfe).max{|x| x.amount}
+      where(created_at: range, kind: :mfe).max{|a,b| a.amount <=> b.amount}
     end
   end
 
@@ -19,7 +19,7 @@ class Statistic < ApplicationRecord
       # send(kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}
     else
       # where(created_at: range, kind: kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}
-      where(created_at: range, kind: :mae).min{|x| x.amount}
+      where(created_at: range, kind: :mae).min{|a,b| a.amount <=> b.amount}
     end
   end
 end
