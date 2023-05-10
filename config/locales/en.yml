@@ -32,6 +32,9 @@ en:
           profit_net: Net Profit
           pay_off: Payoff 
           max_dd: Max DD
+          mfe_mae: MFE & MAE
+          mfe_max: Max MFE
+          mae_min: Min MAE
           curve_capital: Capital Curve
           average_gain: Average Gain by ordens
           average_loss: Average Loss by ordens
