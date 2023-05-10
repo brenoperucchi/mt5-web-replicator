@@ -165,8 +165,7 @@
             h5
               = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              
-              / = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
