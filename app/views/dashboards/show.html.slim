@@ -17,18 +17,18 @@
             h5
               = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.profit_factor(:masters).round(2), precision:2
+              = number_with_precision @trace.profit_factor(:masters).round(2), precision: 2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
                 span.text-c-green
-                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision:2
+                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision: 2
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
                 span.text-c-red
-                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision:2 
+                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision: 2 
       .col-sm-4
         .card.profile-view
           .card-body
@@ -54,18 +54,18 @@
               = I18n.t :profit_drawdown, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block
               / - profit = @trace.profit_trade - @trace.loss_trade
-              = number_with_precision @trace.profit_drawdown, precision:2
+              = number_with_precision @trace.profit_drawdown, precision: 2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :profit_net, scope:'helpers.dashboards.pages.show'
                 span.text-c-green
-                  = number_with_precision(@trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
+                  = number_with_precision(@trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2)
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :max_dd, scope:'helpers.dashboards.pages.show'
                 span.text-c-red
-                  = number_with_precision @trace.drawdown, precision:2
+                  = number_with_precision @trace.drawdown, precision: 2
             .row[style="margin-top:3px;"]
               .col-12.text-center
                 h6.text-muted
@@ -106,36 +106,36 @@
               = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
               / - profit = @trace.profit_trade - @trace.loss_trade
-              = number_with_precision @trace.pay_off, precision:2
+              = number_with_precision @trace.pay_off, precision: 2
             .row.m-t-0
               .col-6.text-center
                 p.text-muted.m-b-0
                   = (I18n.t :average_gain, scope:'helpers.dashboards.pages.show').capitalize
                 span.text-c-green
-                  = number_with_precision @trace.average(:masters, [:closed, :gain]), precision:2
+                  = number_with_precision @trace.average(:masters, [:closed, :gain]), precision: 2
               .col-6.text-center
                 p.text-muted.m-b-0
                   = (I18n.t :average_loss, scope:'helpers.dashboards.pages.show').capitalize
                 span.text-c-red
-                  = number_with_precision @trace.average(:masters, [:closed, :loss]), precision:2
+                  = number_with_precision @trace.average(:masters, [:closed, :loss]), precision: 2
 
         .card.profile-view[style="margin-bottom: 17px;"]
           .card-body
             h5
               = I18n.t :mfe_mae, scope:'helpers.dashboards.pages.show'
             / strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-            /   = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+            /   = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
             .row.m-b-40.m-t-30
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :mfe_max, scope:'helpers.dashboards.pages.show'
                 span.text-c-green
-                  = @trace.mfe.try(:amount)
+                  = number_with_precision @trace.mfe.try(:amount), precision: 2
               .col-6.text-center
                 p.text-muted.m-b-0
                   = I18n.t :mae_min, scope:'helpers.dashboards.pages.show'
                 span.text-c-red
-                  = @trace.mae.try(:amount)
+                  = number_with_precision @trace.mae.try(:amount), precision: 2
                   
     .row
       .col-sm-8
@@ -165,7 +165,7 @@
             h5
               = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+              = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
@@ -182,7 +182,7 @@
         /     h5
         /       = I18n.t :orders_errors, scope:'helpers.dashboards.pages.show'
         /     strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-        /       = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision:2
+        /       = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision: 2
         /     .row
         /       .col-6.text-center
         /         p.text-muted.m-b-0
@@ -199,7 +199,7 @@
             h5
               = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
+              = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2
             .row
               .col-6.text-center
                 p.text-muted.m-b-0
@@ -241,7 +241,7 @@
             h5
               = I18n.t :total, scope:'helpers.dashboards.pages.show'
             strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              = number_with_precision @trace.masters_scope(:masters).to_a.sum(&:profit), precision:2
+              = number_with_precision @trace.masters_scope(:masters).to_a.sum(&:profit), precision: 2
             .row
               .col-4.text-center
                 p.text-muted.m-b-0
@@ -319,16 +319,16 @@
                   - type = account.slave? ? :slaves : :transactions
                   td = "#{account.name} - #{account.kind}"
                   td
-                  td = number_with_precision account.profit_factor(type, @trace).round(2), precision:2
+                  td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
                   td = account.profit_trade(type, @trace)
-                  td = number_with_precision account.profit_drawdown(type, @trace), precision:2
+                  td = number_with_precision account.profit_drawdown(type, @trace), precision: 2
                   td 
-                  td = number_with_precision account.slaves_scope(type, :executed, @trace).to_a.sum(&:profit), precision:2
-                  td = number_with_precision account.slaves_scope(type, :closed, @trace).to_a.sum(&:profit), precision:2
-                  td = number_with_precision account.slaves_scope(type, :error, @trace).to_a.sum(&:profit), precision:2
+                  td = number_with_precision account.slaves_scope(type, :executed, @trace).to_a.sum(&:profit), precision: 2
+                  td = number_with_precision account.slaves_scope(type, :closed, @trace).to_a.sum(&:profit), precision: 2
+                  td = number_with_precision account.slaves_scope(type, :error, @trace).to_a.sum(&:profit), precision: 2
                   td 
                   td = account.slaves_scope(type, :all, @trace).count
-                  td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision:2       
+                  td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
 
 - content_for :footer do
   javascript:

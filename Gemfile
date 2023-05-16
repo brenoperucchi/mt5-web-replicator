@@ -109,6 +109,14 @@ gem 'grape_on_rails_routes'
 gem 'rack-cors' 
 
 group :development do
+  # gem 'annotate'
+
+  gem 'ruby-debug-ide'
+  gem 'debase'
+  gem 'rubocop'
+end
+
+group :development do
   gem 'foreman'
   gem 'capistrano', '~> 3.6'
   gem 'capistrano-rails'

@@ -8,6 +8,17 @@ module API
       include API::V2::Defaults
 
       resource :transactions do 
+        ##Copy Version >= 2.12 
+        get "/copy/request/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
+          account = Account.find_by(name: params[:account_id], kind: :copy)
+          if account
+            map = account.transactions.api_request_attributes(:closed_info)
+          end
+          content_type 'text/plain'
+          body map
+        end        
+
+        ##Copy Version <= 2.11
         get "/copy/trasmit/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id], kind: :copy)
           if account
@@ -57,11 +68,11 @@ module API
                 
                 # TODO - Colocar uma trava se account estiver desabilitado
                 if message.execute
-                  if account.transactions.closed_info.present?
-                    body account.transactions.api_request_attributes(:closed_info)
-                  else  
+                  # if account.transactions.closed_info.present?
+                  #   body account.transactions.api_request_attributes(:closed_info)
+                  # else  
                     body "OK|OK|OK"
-                  end
+                  # end
                 else
                   content_error = "Message::Metatrader ##{message.try(:id)} cannot executed - Account Name #{account.try(:name)}"
                   account.loggings.create(content:content_error, state: "ERROR", changeset: message.try(:errors).try(:full_messages))

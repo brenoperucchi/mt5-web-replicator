@@ -156,7 +156,7 @@ class Trace < ApplicationRecord
   end
 
   def mae    
-    self.statitics.mae_min(self.search_date_begin.beginning_of_day..self.search_date_end.end_of_day)
+    self.statitics.mae_min(self.search_date_begin..self.search_date_end.end_of_day)
     # if self.search_date_begin and self.search_date_end
     #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
     # else
