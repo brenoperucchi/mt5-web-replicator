@@ -51,27 +51,6 @@ class Transaction < ApplicationRecord
     self.where(profit:0..value.to_f)
   end
 
-  def set_mfe_mae(mfe, mae, time_trader)
-    unless time_trader.nil? or mae.nil? or mfe.nil?
-      # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
-      statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
-      
-      statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
-      statistic.update(amount: mfe.to_f) if mfe > statistic.amount.to_f 
-
-      statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mae)
-      statistic.update(amount: mae.to_f) if mae < statistic.amount.to_f 
-    end
-  end  
-
-  # def mae=(value)
-  #   # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
-  #   statistic_name = "mae_#{time_trader.to_date.strftime("%Y-%m-%d")}"
-    
-  #   statistic = self.statistics.find_or_initialize_by(name: statistic_name)
-  #   statistic.update(amount: value) if value < statistic.amount.to_f
-  # end
-
   state_machine :initial => :pending do
     after_transition :pending => :executed,                    :do => :update_state
     after_transition [:pending, :executed] => :closed,         :do => :update_state
@@ -137,8 +116,7 @@ class Transaction < ApplicationRecord
   def set_lot_sl_tp(order_params)
     attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f, profit:order_params["profit"]}
     # attributes = {lot:lot, take_profit:take_profit, stop_loss:stop_loss}.compact
-    self.attributes = attributes
-
+    self.attributes = attributes 
     if self.changes.present?
       chat_id = self.trace.store.telegram_bot_chat_id
       if chat_id.present?
@@ -155,6 +133,28 @@ class Transaction < ApplicationRecord
       set_slaves_attributes(lot, take_profit, stop_loss)
     end
   end
+
+  def set_mfe_mae(mfe, mae, time_trader)
+    unless time_trader.nil? or mae.nil? or mfe.nil?
+      # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
+      statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
+      
+      statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
+      statistic.update(amount: mfe.to_f) if mfe > statistic.amount.to_f 
+
+      statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mae)
+      statistic.update(amount: mae.to_f) if mae < statistic.amount.to_f 
+    end
+  end  
+
+  # def mae=(value)
+  #   # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
+  #   statistic_name = "mae_#{time_trader.to_date.strftime("%Y-%m-%d")}"
+    
+  #   statistic = self.statistics.find_or_initialize_by(name: statistic_name)
+  #   statistic.update(amount: value) if value < statistic.amount.to_f
+  # end
+
 
   def meta_ordertype
     # "OP_" + ordertype.upcase

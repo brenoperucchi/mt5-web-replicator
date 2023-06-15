@@ -8,8 +8,7 @@ class Statistic < ApplicationRecord
       send(kind.to_s).max{|x| x.amount}
       # send(kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}
     else
-      # where(created_at: range, kind: kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}
-      where(created_at: range, kind: :mfe).max{|a,b| a.amount <=> b.amount}
+      # where(created_at: range, kind: kind.to_s).group_by{|x| x.created_at.strftime("%Y %m %d")}900       where(created_at: range, kind: :mfe).max{|a,b| a.amount <=> b.amount}
     end
   end
 

@@ -81,24 +81,29 @@ class Trace < ApplicationRecord
     Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
   end
 
-  def create_orders(order_params, account, message, symbol)
+  def create_orders(order_params, account, message, symbol, api_version)
+
+    apiCopySerializerClass = "API::#{api_version.try(:upcase)}::APICopySerializer".classify.constantize
+
     ticket = order_params['ticket_id']
     instrument = check_instrument(account, symbol)
-    api_transaction_attributes = SerializerAPITransaction.new(order_params).api_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
+    
+    open_order_attributes = apiCopySerializerClass.new(order_params).open_order_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
+
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
       if order.nil?
         order = account.orders.create(message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
       end
       transaction = order.transactions.find_by(symbol: instrument, account: account)
-      transaction ||= order.transactions.create(api_transaction_attributes.merge(account:account))
+      transaction ||= order.transactions.create(open_order_attributes.merge(account:account))
     elsif account.hedging?
       order = account.orders.create_with(trace: self, message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket, trace:self)
-      transaction = order.transactions.create_with(api_transaction_attributes).find_or_create_by(ticket: ticket, trace:self)
+      transaction = order.transactions.create_with(open_order_attributes).find_or_create_by(ticket: ticket, trace:self)
     end
 
-    api_transaction = SerializerAPITransaction.new(order_params)
-    transaction.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader) 
+    # api_transaction = apiCopySerializerClass.new(order_params)
+    transaction.set_mfe_mae(open_order_attributes[:mfe], open_order_attributes[:mae], open_order_attributes[:time_trader]) 
 
     # CREATE ORDER -> TRANSACTION -> SLAVES
     if order.valid?
@@ -121,6 +126,8 @@ class Trace < ApplicationRecord
 
       end
     end
+
+    return order.executed? && transaction.executed?
   end
 
   def check_instrument(account, symbol, account_slave=nil)

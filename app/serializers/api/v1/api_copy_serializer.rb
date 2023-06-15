@@ -1,22 +1,23 @@
-class SerializerAPITransactionSlave < ActiveModel::Serializer
+class SerializerAPITransaction < ActiveModel::Serializer
   
   def api_attributes
     {
-      # symbol: symbol,
       ordertype: ordertype,
       lot: lot,
       price_open: price_open,
-      price_closed: price_closed,
+      # price_closed: price_closed,
       magic_number: magic_number,
       stop_loss: stop_loss,
       take_profit: take_profit,
-      profit: obj['profit'],
-      ticket_master: ticket_master,
-      ticket_slave: ticket_slave,
+      ticket: ticket,
       open_at: open_at,
+      comment: obj['comment'],
       ticket_deal: obj['ticket_deal'],
-      comment: obj['comment']
-    }.compact
+      profit: obj['profit'],
+      # time_trader: time_trader,
+      # mae: mae,
+      # mfe: mfe,
+    }
   end
 
   def obj
@@ -36,15 +37,15 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   end
 
   def price_open
-    obj['price_open']
+    obj['open_price']
   end
 
-  def price_closed
-    obj['price_close'].to_f == 0 ? nil : obj['price_close']
-  end
+  # def price_closed
+  #   obj['close_price']
+  # end
 
   def magic_number
-    obj['magic_number']
+    obj['magicnumber']
   end
 
   def stop_loss
@@ -55,17 +56,21 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
     obj['take_profit'].to_f
   end
 
-  def ticket_master
+  def ticket
     obj['ticket_id']
   end
 
-  def ticket_slave
-    obj['ticket_slave_id']
+  def mfe
+    obj['mfe']
   end
 
-  # def ticket_deal
-  #   obj['deal_ticket']
-  # end
+  def mae
+    obj['mae']
+  end
+
+  def time_trader
+    time_zone(obj['time_gmt'], obj['time_trader'], obj['time_trader']) unless obj['time_trader'].nil?
+  end
 
   def open_at
     time = obj['open_at']
@@ -93,5 +98,6 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
     time_gmt = DateTime.parse(time_open + time_zone.to_sign) 
     time_gmt.in_time_zone
   end
+
 
 end
