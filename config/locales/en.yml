@@ -15,6 +15,7 @@ en:
       site: imentore.com
       contract: Contract
       finish: Finish
+      pay: Pay
       more_information: More information
       description: Descrição
       pages: 
@@ -22,6 +23,8 @@ en:
           title: "Your registration has been completed successfully. Please wait for contact from your integrator %{name}.
                              Otherwise, you can contact us through official channels or by email: %{email}"
         contract:
+          fixed: Fixed
+          percent: Percent
           form_title: "Form for contracting the Portfolio %{name}"
         show:
           profit_factor: Profit Factor
@@ -311,7 +314,7 @@ en:
         other: Copy
       invoice:
         one: Invoice
-        other: Inovices
+        other: Invoices
       user:
         one: User
         other: Users

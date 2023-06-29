@@ -70,6 +70,9 @@
                     = @account.id
 
     .row.text-center
+      .col-sm-3.footer-menu.text-center
+        = link_to @invoice.payment_link, class: 'btn btn-info btn-lg' do
+          = I18n.t :PAGAR, scope:'helpers.dashboards'
       .col-sm-12.invoice-btn-group.text-center
         button.btn.waves-effect.waves-light.btn-primary.btn-print-invoice.m-b-10[type="button"]
           | Print

@@ -16,7 +16,7 @@ class Trace < ApplicationRecord
   store :settings, accessors: [
                                 :telegram_option, :telegram_image, :take_profit_limit, 
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
-                                :instrument_control, :restrict_control_instrument, :magics_accept, :description, :customer_amount
+                                :instrument_control, :restrict_control_instrument, :magics_accept, :description, :capital_recomendation
                               ]
 
   has_many :orders
@@ -35,11 +35,18 @@ class Trace < ApplicationRecord
   scope :not_deleted,  -> { where(deleted_at:nil) }
   # scope :telegram, ->{ where(kind:'telegram')}
 
-  has_many :permissions, dependent: :destroy
+  has_many :permissions#, dependent: :destroy
   has_many :accounts, :through => :permissions#, :source => :slave
+  has_many :customer_plans, :through => :permissions#, :source => :slave
+
+  
+  has_one :permission#, dependent: :destroy
+  has_one  :customer_plan, :through => :permission, :source => :customer_plan
 
   validates_presence_of   [:name, :name_id]
   validates_uniqueness_of [:name, :name_id], scope: :store_id
+  validate :associated_with_customer_plan_and_amount_greater_than_zero, on: :update
+
 
   def soft_destroy_custom
     self.update_column(:active_at, nil)
@@ -58,8 +65,6 @@ class Trace < ApplicationRecord
   end
 
   alias_method :active?, :active
-
-
 
   # def off 
   #   self.update_column(:active_at, nil)
@@ -88,7 +93,7 @@ class Trace < ApplicationRecord
     ticket = order_params['ticket_id']
     instrument = check_instrument(account, symbol)
     
-    open_order_attributes = apiCopySerializerClass.new(order_params).open_order_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
+    copy_attributes = apiCopySerializerClass.new(order_params).copy_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
 
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
@@ -96,14 +101,14 @@ class Trace < ApplicationRecord
         order = account.orders.create(message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
       end
       transaction = order.transactions.find_by(symbol: instrument, account: account)
-      transaction ||= order.transactions.create(open_order_attributes.merge(account:account))
+      transaction ||= order.transactions.create(copy_attributes.merge(account:account))
     elsif account.hedging?
       order = account.orders.create_with(trace: self, message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket, trace:self)
-      transaction = order.transactions.create_with(open_order_attributes).find_or_create_by(ticket: ticket, trace:self)
+      transaction = order.transactions.create_with(copy_attributes).find_or_create_by(ticket: ticket, trace:self)
     end
 
     # api_transaction = apiCopySerializerClass.new(order_params)
-    transaction.set_mfe_mae(open_order_attributes[:mfe], open_order_attributes[:mae], open_order_attributes[:time_trader]) 
+    transaction.set_mfe_mae(copy_attributes[:mfe], copy_attributes[:mae], copy_attributes[:time_trader]) 
 
     # CREATE ORDER -> TRANSACTION -> SLAVES
     if order.valid?
@@ -266,6 +271,28 @@ class Trace < ApplicationRecord
     return 0 if scoped.size == 0
     scoped.sum(&:profit) / scoped.size
   end
+
+  def next_charged
+    days = DateTime.now.day > 15 ? 15 : 0
+    (DateTime.now + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
+  end
+
+
+  private 
+
+  def associated_with_customer_plan_and_amount_greater_than_zero
+    # customer_plans = self.customer_plans).flatten
+
+    if self.customer_plan.nil?
+      errors.add(:base, 'Trace must be associated with a CustomerPlan')
+    # elsif customer_plans.any? { |cp| cp.amount <= 0 }
+    elsif customer_plan.amount <= 0 || customer_plan.amount.nil?
+      errors.add(:base, 'Associated CustomerPlan must have an amount greater than 0')
+    end
+  end
+
+
+
 
   # def test_drawdown
   #   self.search_date_begin = DateTime.parse("12 Mar 2023 00:00:00 -0300")

@@ -16,10 +16,19 @@ class DashboardsController < ApplicationController
 	# 	redirect_to new_user_session_path if !user_signed_in?
 			
 	# end
+	def finish_external_payment
+		
+	end
 
 	def finish_contract
 		@account = Account.find(params[:account_id])
-		render :finish_contract
+		
+		invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+		@account.customer.create_invoice_customer(invoice_name)
+		@invoice = @account.customer.invoices.first
+		@invoice.invoice_send
+		redirect_to @invoice.payment_link
+		# render :finish_contract
 	end
 
 	def contract
@@ -33,22 +42,29 @@ class DashboardsController < ApplicationController
 	def create
 		sign_out if user_signed_in?
 		password = Devise.friendly_token.first(6)
-		@account = @trace.accounts.new(account_params)
-		@account.state = "enable"
-		@account.customer.store = current_store
-		@account.customer.role = "customer"
-		@account.customer.role_control = "user"
-		@account.customer.user.password = password
-		@account.traces << @trace
-		if @account.save
+		customer_plan_id = params[:customer_plan_id]
+		account = @trace.accounts.new(account_params)
+		account.state = "enable"
+		# account.customer.store = current_store
+		account.customer.role = "customer"
+		account.customer.role_control = "user"
+		account.customer.user.password = password
+		account.traces << @trace
+		if @trace.valid? and account.save
+			# invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+			account.register_customer_plan_create(@trace, customer_plan_id)
+			# account.customer.create_invoice_customer(invoice_name)
 			# @customer.create_user(email: @customer.user_email, password: password)
-			redirect_to finish_contract_dashboard_path(@trace, @account)
+			redirect_to finish_dashboard_path(@trace, account)
 		else
+			@account = account
+			flash[:notice] = "Error na contração de Portfolio"
 			render :contract
 		end
 	end
 
 	def dashboard_restrict
+		flash[:notice] = nil
 		unless @trace.nil? and current_store.nil?
 			@current_store = @trace.try(:store)
 			@current_store ||= current_store

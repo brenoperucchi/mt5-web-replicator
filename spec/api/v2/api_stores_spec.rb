@@ -57,10 +57,11 @@ RSpec.describe API::V2::APIStore do
         expect(AccountServer.all.size).to be == 2
       end
 
-      it 'Create AccountServer Name same STORE with different customer' do 
+      it 'Create AccountServer Name same STORE with different customer' do
         account_server = AccountServer.find_by(name: "xpdemo")
-        @account_copy2 = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2])
+        # binding.pry
         post "/api/v2/stores/config/imentore_copy/2_10/DarwinexDemo/5647753/HEDGING", params: {'EnvironmentLocal':'1'}
+        @account_copy2 = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2])
         post "/api/v2/stores/config/imentore_copy/2_10/XPDEMO/5647753/HEDGING", params: {'EnvironmentLocal':'1'}
         expect(response).to have_http_status 201
         expect(Account.all.size).to be == 2

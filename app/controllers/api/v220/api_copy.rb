@@ -46,7 +46,7 @@ module API
             @orders_json["orders_closed"].each_with_index do |(ticket, copy_params), index|
               Transaction.where(ticket: ticket).each do |transaction|
                 if transaction and not transaction.closed?
-                  transaction.attributes = {price_closed:  copy_params["close_price"], profit: copy_params["profit"], closed_at:copy_params["close_at"]}
+                  transaction.attributes = {price_closed:  copy_params["price_closed"], profit: copy_params["profit"], closed_at:copy_params["close_at"]}
                   transaction.save
                   transaction.loggings.create(content:content_json, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset))
                   transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
@@ -94,24 +94,25 @@ module API
                     state_meta = copy_params["state_meta"]
                     traces.active.not_deleted.each do |trace|
                       orders = trace.orders.where(content_id: ticket)
-                      if not orders.present?
+                      unless orders.present?
                         unless trace.create_orders(copy_params, account_copy, message, copy_params["symbol"], version) 
                           changed ||= false
                         end
-
-                      elsif state_meta.try(:include?, "SLTPLOT")
-                        @orders_json.each do |order| 
-                          order.transactions.each do|t| 
-                            t.set_lot_sl_tp(copy_params) 
-                            t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+                      else
+                        if orders.present? and state_meta.try(:include?, "SLTPLOT")
+                          orders.each do |order| 
+                            order.transactions.each do|t| 
+                              t.set_lot_sl_tp(copy_params) 
+                              t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+                            end
                           end
                         end
-
-                      elsif state_meta.try(:include?, "SLTPLOT")
-                        @orders_json.each do |order| 
-                          order.transactions.each do |t| 
-                            t.set_profit(order_params["profit"])
-                            t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+                        if orders.present? and state_meta.try(:include?, "PROFIT")
+                          orders.each do |order| 
+                            order.transactions.each do |t| 
+                              t.set_profit(copy_params)
+                              t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+                            end
                           end
                         end
                       end
@@ -124,7 +125,7 @@ module API
                   else
                     status 401
                   end
-                  
+
                 else
                   content_error = "Message::Metatrader ##{message.try(:id)} cannot executed - Account Name #{account.try(:name)}"
                   account.loggings.create(content:content_error, state: "ERROR", changeset: message.try(:errors).try(:full_messages))

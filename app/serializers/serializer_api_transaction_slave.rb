@@ -44,7 +44,7 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   end
 
   def magic_number
-    obj['magic_number']
+    obj['magic_number'] || obj['magicnumber']
   end
 
   def stop_loss

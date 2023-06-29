@@ -3,7 +3,7 @@ include ActiveModel::Serialization
 require 'json'
 module API
   module V2
-    class APITransactionsSlave < Grape::API
+    class APISlave < Grape::API
       include API::V2::Defaults
       include ActiveModel::Serialization
 

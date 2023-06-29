@@ -9,28 +9,30 @@ class TraceDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:                  Field::Number.with_options(searchable: true),
-    name:                Field::String,
-    name_id:             Field::String,
-    telegram_option:     Field::String.with_options(searchable: false),
-    telegram_image:      Field::Boolean,
-    telegram_api_id:     Field::String.with_options(searchable: false),
-    telegram_api_hash:   Field::String.with_options(searchable: false),
-    telegram_api_number: Field::String.with_options(searchable: false),
-    active:              Field::Boolean.with_options(searchable: false),
-    instrument_control:  Field::Boolean,
-    created_at:          Field::DateTime,
-    updated_at:          Field::DateTime,
-    store:               Field::BelongsTo,
-    meta_host:           Field::String,
-    kind:                Field::String,
-    response:            Field::String,
-    take_profit_limit:   Field::String.with_options(searchable: false),
-    magics_accept:        Field::String.with_options(searchable: false),
-    # volumes:           Field::ActsAsTaggable,
-    messages:            Field::HasMany.with_options(direction: :desc, limit: 5),
-    instruments:         Field::HasMany,
-    accounts:            Field::HasMany
+    id:                    Field::Number.with_options(searchable: true),
+    name:                  Field::String,
+    name_id:               Field::String,
+    telegram_option:       Field::String.with_options(searchable: false),
+    telegram_image:        Field::Boolean,
+    telegram_api_id:       Field::String.with_options(searchable: false),
+    telegram_api_hash:     Field::String.with_options(searchable: false),
+    telegram_api_number:   Field::String.with_options(searchable: false),
+    active:                Field::Boolean.with_options(searchable: false),
+    instrument_control:    Field::Boolean,
+    store:                 Field::BelongsTo,
+    meta_host:             Field::String,
+    kind:                  Field::String,
+    response:              Field::String,
+    capital_recomendation: Field::String.with_options(searchable: false),
+    take_profit_limit:     Field::String.with_options(searchable: false),
+    magics_accept:         Field::String.with_options(searchable: false),
+    # volumes:             Field::ActsAsTaggable,
+    messages:              Field::HasMany.with_options(direction: :desc, limit: 5),
+    instruments:           Field::HasMany,
+    accounts:              Field::HasMany,
+    description:           Field::Tinymce,
+    created_at:            Field::DateTime,
+    updated_at:            Field::DateTime,
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -53,23 +55,24 @@ class TraceDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   active
+  instrument_control
   name
   name_id
   kind
   magics_accept
-  instrument_control
-  take_profit_limit
-  telegram_option
-  telegram_image
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
+  capital_recomendation
   accounts
   messages
   instruments
   created_at
   updated_at
   ].freeze
+  # take_profit_limit
+  # telegram_option
+  # telegram_image
+  # telegram_api_id
+  # telegram_api_hash
+  # telegram_api_number
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
@@ -80,17 +83,18 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   kind
-  store
   magics_accept
-  take_profit_limit
-  telegram_option
-  telegram_image
-  telegram_api_id
-  telegram_api_hash
-  telegram_api_number
+  capital_recomendation
+  store
   accounts
   ].freeze
 
+  # take_profit_limit
+  # telegram_option
+  # telegram_image
+  # telegram_api_id
+  # telegram_api_hash
+  # telegram_api_number
   # COLLECTION_FILTERS
   # a hash that defines filters that can be used while searching via the search
   # field of the dashboard.

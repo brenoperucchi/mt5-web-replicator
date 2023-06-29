@@ -8,14 +8,20 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    amount: Field::String.with_options(searchable: false),
-    kind: CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
-    name: Field::String,
-    store: Field::BelongsTo,
-    customers: Field::HasMany,
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    id:                 Field::Number,
+    name:               Field::String,
+    amount:             Field::String,
+    kind:               CheckboxField.with_options(object:"customer", collection_key: CustomerPlan.kinds.keys, default: :fixed),
+    charge_recurrence:  CheckboxField.with_options(object:"customer", collection_key: CustomerPlan.charge_recurrences.keys, default: :monthly),
+    meta_margin_mode:   CheckboxField.with_options(object:"customer", collection_key: (Account.meta_margin_modes.keys + ["both"]), default: :monthly),
+    meta_mode:          CheckboxField.with_options(object:"customer", collection_key: (Account.meta_modes.keys + ["both"]), default: :monthly),
+    store:              Field::BelongsTo,
+    customers:          Field::HasMany,
+    accounts:           Field::HasMany,
+    traces:             Field::HasMany,
+    customers:          Field::HasMany,
+    created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -25,8 +31,8 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     name
-    kind
     amount
+    kind
     customers
     store
   ].freeze
@@ -38,8 +44,13 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     name
     amount
     kind
-    customers
+    charge_recurrence
+    meta_margin_mode
+    meta_mode
     store
+    customers
+    accounts
+    traces
     created_at
     updated_at
   ].freeze
@@ -49,10 +60,15 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
     name
-    amount
+    amount 
     kind
+    charge_recurrence
+    meta_margin_mode
+    meta_mode
     store
     customers
+    accounts
+    traces
   ].freeze
 
   # COLLECTION_FILTERS

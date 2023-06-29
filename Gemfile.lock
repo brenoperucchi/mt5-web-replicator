@@ -342,6 +342,8 @@ GEM
     mustermann-grape (1.0.2)
       mustermann (>= 1.0.0)
     nenv (0.3.0)
+    net-http (0.3.2)
+      uri
     net-http-persistent (4.0.2)
       connection_pool (~> 2.2)
     net-imap (0.3.4)
@@ -590,6 +592,7 @@ GEM
       unf_ext
     unf_ext (0.0.8.2)
     unicode-display_width (2.4.2)
+    uri (0.12.2)
     video_info (4.0.0)
       iso8601 (~> 0.13.0)
       net_http_timeout_errors (~> 1.0.0)
@@ -666,6 +669,7 @@ DEPENDENCIES
   listen (>= 3.0.5, < 3.2)
   lucky_case
   minitest
+  net-http
   newrelic_rpm
   next_rails
   paper_trail (= 13.0.0)

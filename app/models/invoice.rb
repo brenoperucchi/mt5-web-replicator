@@ -3,6 +3,9 @@ class Invoice < ApplicationRecord
   ENUMS = %w(state)
 
   include LibEnums
+  include ActionView::Helpers::NumberHelper
+
+  has_paper_trail 
 
   delegate :stripe_product_id, :stripe_customer_id, to: :store
   delegate :email, to: :invoiceable, allow_nil: true
@@ -15,6 +18,7 @@ class Invoice < ApplicationRecord
   belongs_to :store
   belongs_to :invoiceable, polymorphic: true, optional:true
   has_many :items, :class_name => "InvoiceItem", :foreign_key => "invoice_id", dependent: :destroy
+  has_many :loggings,      as: :loggerable, dependent: :destroy
 
   accepts_nested_attributes_for :items, reject_if: :all_blank, allow_destroy: true
 
@@ -27,11 +31,6 @@ class Invoice < ApplicationRecord
     return false if self.state != 'pending'
     changes = false;
 
-    # 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
-
-    # Stripe.api_key = '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'
-    # Stripe.api_key = 'sk_test_51KXd9MFpK6wHohcRpF1nOLi6bp25UqS4h4lhfDsi9EWCc38ynCH0rfFabkYsz48YO6Xtg6vwUioki1qzmbtly8aZ00ObLPplFN'
-
     Stripe.api_key = self.try(:invoiceable).try(:store).try(:stripe_api_secret)
 
     if invoiceable.stripe_product_id.blank?
@@ -42,7 +41,7 @@ class Invoice < ApplicationRecord
 
     price = Stripe::Price.create(
       product: invoiceable.stripe_product_id,
-      unit_amount: self.amount.to_s.gsub(".","").gsub(",",""),
+      unit_amount: number_with_precision(self.amount, precision: 2).to_s.gsub(/[.,]/,""),
       currency: 'brl',
     )
 
@@ -67,7 +66,6 @@ class Invoice < ApplicationRecord
       collection_method: 'send_invoice',
       days_until_due: 10,
       payment_settings: {
-            payment_method_types: ['card'],
           },
     )
 

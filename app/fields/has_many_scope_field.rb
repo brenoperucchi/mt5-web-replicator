@@ -23,8 +23,8 @@ module Fields
     end
 
 
-    def associated_resource_options
-      candidate_resources.map do |resource|
+    def associated_resource_options(current_store = nil)
+      candidate_resources(current_store).map do |resource|
         [display_candidate_resource(resource), resource.send(primary_key)]
       end
     end
@@ -59,10 +59,11 @@ module Fields
       associated_dashboard.collection_includes
     end
 
-    def candidate_resources
+    def candidate_resources(current_store =nil)
       if options.key?(:associated) 
         if resource.respond_to?(options[:associated])
-          data = resource.send(options[:associated]).send(attribute.to_s.pluralize)
+          data = current_store.send(attribute.to_s.pluralize)
+          # data = resource.send(options[:associated]).send(attribute.to_s.pluralize)
         else
           data = resource.send(attribute.to_s.pluralize)
         end

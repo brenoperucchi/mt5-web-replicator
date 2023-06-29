@@ -27,7 +27,7 @@ and is augmented with [Selectize].
 </div>
 <div class="field-unit__field">
   <%= f.select(field.attribute_key, nil, {}, multiple: true) do %>
-    <%= options_for_select(field.associated_resource_options, field.selected_options) %>
+    <%= options_for_select(field.associated_resource_options(current_user.store), field.selected_options) %>
   <% end %>
 </div>
 

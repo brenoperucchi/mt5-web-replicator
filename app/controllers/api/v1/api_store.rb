@@ -9,8 +9,29 @@ module API
       
 
 
+
       resource :stores do
         desc "Return all signs"
+        get "/ddns/update" do
+
+          # #################### CHANGE THE FOLLOWING VARIABLES ####################
+          # TOKEN="dop_v1_a92aca07ea5626dfb9ff2aae559c2e08ef89121b1b948c1af5e78085b0875058"
+          # DOMAIN="imentore.com.br"
+          # RECORD_ID="327101812"
+          # LOG_FILE="ips.txt"
+          # ########################################################################
+
+          # CURRENT_IPV4="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+          # LAST_IPV4="$(tail -1 $LOG_FILE | awk -F, '{print $2}')"
+
+          # if [ "$CURRENT_IPV4" = "$LAST_IPV4" ]; then
+          #     echo "IP has not changed ($CURRENT_IPV4)"
+          # else
+          #     echo "IP has changed: $CURRENT_IPV4"
+          #     echo "$(date),$CURRENT_IPV4" >> "$LOG_FILE"
+          #     curl -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"data":"'"$CURRENT_IPV4"'"}' "https://api.digitalocean.com/v2/domains/$DOMAIN/records/$RECORD_ID"
+          status 200
+        end      
         get "/telegram/python" do
           Store.enable
         end      

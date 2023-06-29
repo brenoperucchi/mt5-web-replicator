@@ -4,7 +4,7 @@
 require 'json'
 module API
   module V2
-    class APITransactionsCopy < Grape::API
+    class APICopy < Grape::API
       include API::V2::Defaults
 
       resource :transactions do 

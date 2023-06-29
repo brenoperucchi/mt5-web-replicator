@@ -15,6 +15,7 @@ pt-BR:
       site: imentore.com.br
       contract: Contratar
       finish: Finalizar
+      pay: Comprar
       more_information: Mais informações
       description: Descrição 
       pages:
@@ -22,7 +23,15 @@ pt-BR:
           title: "Your registration has been completed successfully. Please wait for contact from your integrator %{name}.
                              Otherwise, you can contact us through official channels or by email: %{email}"
         contract:
+          fixed: Fixo
+          percent: Percentual
           form_title: "Formulário para contratação do Portfolio %{name}"
+          customer_plan:
+            charge_recurrence:
+              monthly: Mensal
+              semester: Semestral
+              annual: Anual
+
         show:
           profit_factor: Fator de Lucro
           oper_gain: Operações positivas
@@ -536,6 +545,7 @@ pt-BR:
       long: "%d de %B de %Y, %H:%M"
       short: "%d de %B, %H:%M"
       short2: "%d %b %H:%M:%S"
+      short3: "%d de %b %Y"
     pm: ''
 
   administrate_ransack:

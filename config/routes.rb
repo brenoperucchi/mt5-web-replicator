@@ -4,12 +4,12 @@ Rails.application.routes.draw do
     resources :invoice_items
     # post "create_checkout", to: "charge#checkout"
     # get "checkout",       to: "charge#index"
-    post "stripe/webhook",  to: "charge#webhook"
-    get "checkout",         as:'checkout_charge',      to: "charge#checkout"
+    post "stripe/webhook",  to: "stripe#webhook"
+    get  "stripe/checkout", to: "stripe#checkout", as:'checkout_stripe'      
     
     # get "checkout", to: "pay#checkout"
     get "subscription", to: "pay#subscription"
-    get "billing", to: "pay#billing"
+    get "billing",      to: "pay#billing"
 
     resources :customers
     resources :stores
@@ -17,7 +17,8 @@ Rails.application.routes.draw do
       get 'account/:id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
       get '/contract',                   to: 'dashboards#contract',        on: :member, as: 'contract'
       post '/contract',                  to: 'dashboards#create',          on: :member
-      get 'finish_contract/:account_id', to: 'dashboards#finish_contract', on: :member
+      get 'finish_contract/:account_id', to: 'dashboards#finish_contract', on: :member, as: 'finish'
+      get 'finish',                      to: 'dashboards#finish_external_payment',          on: :collection
     end
     devise_for :users, controllers: {
       sessions: 'users/sessions',

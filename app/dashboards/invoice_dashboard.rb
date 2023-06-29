@@ -10,15 +10,16 @@ class InvoiceDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:                   Field::Number,
     state:                DisableTextField,
-    name:                 Field::String,
     email:                DisableTextField,
+    name:                 Field::String,
     payment_link:         Field::String.with_options(searchable: false),
-    stripe_product_id:    Field::String.with_options(searchable: false),  
-    stripe_customer_id:   Field::String.with_options(searchable: false),  
+    # stripe_product_id:    Field::String.with_options(searchable: false),  
+    # stripe_customer_id:   Field::String.with_options(searchable: false),  
     stripe_invoice_id:    Field::String.with_options(searchable: false),  
     amount:               Field::Number,
     # items:                Field::NestedHasMany.with_options(class_name: 'InvoiceItem'),
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
+    loggings:             Field::HasMany,
     invoiceable:          Field::Polymorphic,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -42,16 +43,15 @@ class InvoiceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  name
   state
+  name
+  invoiceable
   email
   payment_link
-  stripe_product_id
-  stripe_customer_id
   stripe_invoice_id
   amount
+  loggings
   items
-  invoiceable
   created_at
   updated_at
   ].freeze

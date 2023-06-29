@@ -62,6 +62,11 @@ html[lang="en"]
                     button#filter.btn.btn-primary.disabled.m-r-5[type="button"]
                       i.feather.icon-plus
                       = I18n.t :filter, scope:'helpers.dashboards'
+          - if flash[:notice].present? or flash[:recaptcha_error].present?
+            .row.justify-content-center
+              .col-md-6.col-lg-5.col-xl-4
+              .alert.alert-danger[role="alert"]
+                == flash[:notice]
           = content_for?(:content) ? yield(:content) : yield
     = yield :footer
     

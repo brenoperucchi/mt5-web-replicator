@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class MainDashboard < Administrate::BaseDashboard
+class PermissionDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,9 +8,9 @@ class MainDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    created_at: Field::DateTime,
-    updated_at: Field::DateTime,
+    name:                 Field::String,
+    created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -19,15 +19,13 @@ class MainDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  id
-  created_at
-  updated_at
+  name
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  id
+  name
   created_at
   updated_at
   ].freeze
@@ -36,7 +34,7 @@ class MainDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-
+  name
   ].freeze
 
   # COLLECTION_FILTERS
@@ -47,14 +45,18 @@ class MainDashboard < Administrate::BaseDashboard
   # in the search field:
   #
   #   COLLECTION_FILTERS = {
-  #     open: ->(resources) { where(open: true) }
+  #     open: ->(resources) { resources.where(open: true) }
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how mains are displayed
+  # Overwrite this method to customize how signs are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(main)
-  #   "Main ##{main.id}"
+  # def display_resource(sign)
+  #   "Sign ##{sign.id}"
   # end
+
+   def display_resource(resource)
+    "Trace ##{resource.trace.name} - Account ##{resource.account.try(:name)}"
+  end
 end

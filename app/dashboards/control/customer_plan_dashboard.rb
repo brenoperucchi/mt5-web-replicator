@@ -13,10 +13,15 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:         Field::Number,
     name:       Field::String,
-    amount:     Field::String.with_options(searchable: false),
+    amount:       Field::String,
     store_id:   DisableAssociation.with_options(attribute: :store),
+    kind:               CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
+    charge_recurrence:  CheckboxField.with_options(object:"customer", collection_key: CustomerPlan.charge_recurrences.keys, default: :monthly),
+    meta_margin_mode:   CheckboxField.with_options(object:"customer", collection_key: (Account.meta_margin_modes.keys + ["both"]), default: :monthly),
+    meta_mode:          CheckboxField.with_options(object:"customer", collection_key: (Account.meta_modes.keys + ["both"]), default: :monthly),
     customers:  Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
-    kind:       CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
+    accounts:   Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
+    traces:     Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -28,8 +33,8 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
     name
-    kind
     amount
+    kind
     customers
     created_at
   ].freeze
@@ -39,9 +44,14 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
     id
     name
-    kind
     amount
+    kind
+    charge_recurrence
+    meta_margin_mode
+    meta_mode
     customers
+    accounts
+    traces
     store_id
     created_at
     updated_at
@@ -52,10 +62,15 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
     name
-    kind
     amount
+    kind
+    charge_recurrence
+    meta_margin_mode
+    meta_mode
     store_id
     customers
+    accounts
+    traces
   ].freeze
 
   # COLLECTION_FILTERS

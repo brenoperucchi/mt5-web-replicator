@@ -105,8 +105,10 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def set_profit(profit)
-    self.update_columns(profit: profit)
+  def set_profit(order_params)
+    if self.update(profit: profit)
+      loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
+    end
   end
 
   def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)

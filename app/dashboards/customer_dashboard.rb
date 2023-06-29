@@ -16,7 +16,8 @@ class CustomerDashboard < Administrate::BaseDashboard
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     store:                Field::BelongsTo,
     user:                 Field::HasOne,
-    customer_plan:        Field::BelongsTo,
+    # customer_plan:        Field::BelongsTo,
+    customer_plans:             Field::HasMany,
     accounts:             Field::HasMany,
     invoices:             Field::HasMany,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -48,7 +49,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   stripe_product_id
   store
   user
-  customer_plan
+  customer_plans
   accounts
   invoices
   created_at
@@ -66,7 +67,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   stripe_product_id
   store
   user
-  customer_plan
+  customer_plans
   accounts
   invoices
   ].freeze

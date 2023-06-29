@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_05_08_193823) do
+ActiveRecord::Schema.define(version: 2023_06_28_163924) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -99,6 +99,7 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "active_at"
     t.integer "kind", default: 0
+    t.integer "charge_recurrence", default: 1
     t.index ["store_id"], name: "index_customer_plans_on_store_id"
   end
 
@@ -109,11 +110,9 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "settings"
     t.bigint "store_id"
-    t.bigint "customer_plan_id"
     t.integer "role", default: 0
     t.integer "role_control", default: 0
     t.datetime "deleted_at"
-    t.index ["customer_plan_id"], name: "index_customers_on_customer_plan_id"
     t.index ["deleted_at"], name: "index_customers_on_deleted_at"
     t.index ["store_id"], name: "index_customers_on_store_id"
   end
@@ -332,8 +331,21 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.bigint "trace_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "plan_usage_id"
+    t.bigint "customer_plan_id"
     t.index ["account_id"], name: "index_permissions_on_account_id"
+    t.index ["customer_plan_id"], name: "index_permissions_on_customer_plan_id"
+    t.index ["plan_usage_id"], name: "index_permissions_on_plan_usage_id"
     t.index ["trace_id"], name: "index_permissions_on_trace_id"
+  end
+
+  create_table "plan_customers", force: :cascade do |t|
+    t.bigint "customer_id", null: false
+    t.bigint "customer_plan_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["customer_id"], name: "index_plan_customers_on_customer_id"
+    t.index ["customer_plan_id"], name: "index_plan_customers_on_customer_plan_id"
   end
 
   create_table "plan_items", force: :cascade do |t|
@@ -372,6 +384,7 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.bigint "resourceable_id"
     t.string "handle"
     t.datetime "disable_at"
+    t.text "plan_serializer"
     t.index ["resourceable_type", "resourceable_id"], name: "index_plan_usages_on_resourceable"
     t.index ["store_id"], name: "index_plan_usages_on_store_id"
   end
@@ -450,6 +463,7 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.text "symbol_list"
     t.integer "kind", default: 0
     t.datetime "deleted_at"
+    t.bigint "customer_plan_id"
   end
 
   create_table "transaction_slaves", force: :cascade do |t|
@@ -511,8 +525,6 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.datetime "closed_at"
     t.integer "deal_id"
     t.integer "ticket_deal"
-    t.decimal "mfe"
-    t.decimal "mae"
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"
@@ -549,7 +561,6 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
     t.index ["logging_id"], name: "index_versions_on_logging_id"
   end
 
-  add_foreign_key "accounts", "customers"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "customer_plans", "stores"
@@ -563,11 +574,14 @@ ActiveRecord::Schema.define(version: 2023_05_08_193823) do
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
+  add_foreign_key "plan_customers", "customer_plans"
+  add_foreign_key "plan_customers", "customers"
   add_foreign_key "plan_stores", "plan_items"
   add_foreign_key "plan_stores", "stores"
   add_foreign_key "plan_usages", "stores"
   add_foreign_key "stores", "plans"
   add_foreign_key "taggings", "tags"
+  add_foreign_key "traces", "customer_plans"
   add_foreign_key "transactions", "traces"
   add_foreign_key "versions", "loggings"
 end

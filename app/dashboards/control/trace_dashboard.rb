@@ -14,7 +14,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     name:                     Field::String,
     name_id:                  Field::String,
     telegram_option:          Field::String.with_options(searchable: false),
-    customer_amount:          Field::String,
     telegram_image:           Field::Boolean,
     instrument_control:       Field::Boolean,
     telegram_api_id:          Field::String.with_options(searchable: false),
@@ -23,6 +22,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     magics_accept:            Field::String.with_options(searchable: false),
     meta_host:                Field::String,
     response:                 Field::String,
+    capital_recomendation:    Field::String.with_options(searchable: false),
     active:                   Field::Boolean,
     kind:                     DisableTextField.with_options(value:"copy", type:'hide'),
     # volumes:                Field::ActsAsTaggable,
@@ -32,6 +32,8 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     instruments:              Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     orders:                   Fields::HasManyScopeField.with_options(associated: :trace, dashboard:'control', direction: :desc, sort_by: :created_at),
     accounts:                 Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
+    # customer_plan:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    customer_plans:           Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     description:              Field::Tinymce,
     created_at:               Field::DateTime,
     updated_at:               Field::DateTime,
@@ -57,9 +59,9 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   instrument_control
   name
   name_id
-  customer_amount
   magics_accept
-  take_profit_limit
+  capital_recomendation
+  customer_plans
   accounts
   orders
   description
@@ -76,12 +78,12 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   kind
   name
   name_id
-  customer_amount
   magics_accept
+  capital_recomendation
+  customer_plans
+  accounts
   store_id
   description
-  take_profit_limit
-  accounts
   ].freeze
 
   # COLLECTION_FILTERS

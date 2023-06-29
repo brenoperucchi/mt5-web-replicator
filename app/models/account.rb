@@ -29,10 +29,11 @@ class Account < ApplicationRecord
   belongs_to :customer
   belongs_to :account_server, optional: true
 
-  has_many :plan_usages, as: :resourceable
+  has_many :plan_usages, as: :resourceable, dependent: :destroy
 
   has_many :permissions, dependent: :destroy
-  has_many :traces,       through: :permissions#, source: :trace 
+  has_many :traces,       through: :permissions, source: :trace 
+  # has_many :plan_usages,  through: :permissions, source: :plan_usage 
 
   has_many :instruments,                    dependent: :destroy
   has_many :loggings,      as: :loggerable, dependent: :destroy
@@ -61,9 +62,23 @@ class Account < ApplicationRecord
     # end
   end
 
-  def register_plan_create
-    plan = CustomerPlan.find_by(id:self.customer_plan_id)
-    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+  # def register_plan_create
+  #   plan = CustomerPlan.find_by(id:self.customer_plan_id)
+  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+  # end
+
+  def register_customer_plan_create(trace, customer_plan_id)
+    permission = Permission.where(trace: trace, customer_plan_id: customer_plan_id).last
+
+    plan = permission.customer_plan || store.customer_plans.first
+    plan.customers << self.customer
+    plan.accounts  << self
+    # attributes = {name: "Plan Trace##{trace.id}-#{trace.name}", amount: trace.customer_plan_amount.to_f, kind: "fixed", store: self.store}#, trace_ids: [trace.id], account_ids: [self.id]}
+    # plan = customer.customer_plans.create(attributes)
+    planUsage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes)
+    unless planUsage.errors.any?
+      permission.update(plan_usage: planUsage, customer_plan: plan)
+    end
   end
 
 

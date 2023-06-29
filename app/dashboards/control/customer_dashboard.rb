@@ -19,6 +19,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     store_id:             DisableTextField.with_options(default: :current_store),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
     invoices:             DisableAssociation.with_options(type: 'has_many', association: :invoices),
+    customer_plans:       DisableAssociation.with_options(type: 'has_many', association: :invoices),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -41,9 +42,9 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   name
   email
   role_control
-  customer_plan
   store_id
   accounts
+  customer_plans
   invoices
   created_at
   updated_at
@@ -56,7 +57,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   name
   user
   store_id
-  customer_plan
+  customer_plans
   role
   role_control
   accounts

@@ -30,39 +30,45 @@
           tbody
             tr
               td
-                = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
+                / = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
+                | Valor
               td.text-right
                 span.float-right
                   a.text-secondary[href="#!"]
-                    = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision:2
+                    = number_to_currency (@trace.customer_plan.try(:amount) || 0)
             tr
               td
-                = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+                | Recorrência de Cobrança
               td.text-right
-                 = "#{@trace.profit_trade(:masters)} %"
+                 = I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
             tr
               td
-                = I18n.t :profit_drawdown, scope:'helpers.dashboards.pages.show'
+                | Proxíma cobrança
               td.text-right
-                = number_with_precision @trace.profit_drawdown, precision:2
+                 = I18n.l @trace.next_charged, format: :short3
             tr
               td
-                = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
+                | Tipo (fixo/percentual)
+              td.text-right
+                = I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
+            tr
+              td
+                | Capital Recomendado
               td.text-right
                 .btn-group
-                  = number_with_precision @trace.pay_off, precision:2
+                  = number_to_currency @trace.capital_recomendation
                   / a.text-secondary[href="#!"]
-            tr
-              td
-                = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
-              td.text-right
-                = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
-            tr
-              td
-                = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
-              td.text-right
-                a.text-secondary[href="#!"]
-                  = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
+            / tr
+            /   td
+            /     = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
+            /   td.text-right
+            /     = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
+            / tr
+            /   td
+            /     = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
+            /   td.text-right
+            /     a.text-secondary[href="#!"]
+            /       = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
         .row
           .col-xl-12
             = link_to dashboard_path(@trace), class: 'btn btn-primary col-lg-12 text-uppercase' do
@@ -84,11 +90,12 @@
             = I18n.t :form_title, scope:'helpers.dashboards.pages.contract', name: @trace.name
             / = "Formulário para contratação do Portfolio: #{@trace.name}"
           button.btn.waves-effect.waves-light.btn-info.float-right
-            i.far.fa-check-square.m-r-5
-            span.text-uppercase= I18n.t :finish, scope:'helpers.dashboards'
+            i.far.fa-credit-card.m-r-5
+            span.text-uppercase= I18n.t :pay, scope:'helpers.dashboards'
         .card-body
           .m-b-20
             = hidden_field_tag 'id', @trace.id
+            = hidden_field_tag 'customer_plan_id', @trace.customer_plan.try(:id)
             = f.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
             = f.input :name
             = f.input :kind, input_html: {value: "slave"}, as: :hidden
@@ -103,14 +110,20 @@
               / = f.simple_fields_for :settings do |ff| 
               .row
                 .col-sm-12
-                  = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
+                  / = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
                   / = ff.input :plan_id, collection: current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
             .row
               .col-sm-12
-                = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
+                - if @trace.customer_plan.meta_margin_mode == "both"
+                  = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
+                - elsif not @trace.customer_plan.meta_margin_mode == "none"
+                  = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :string, disabled:true
             .row
               .col-sm-12
-                = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
+                - if @trace.customer_plan.meta_mode == "both"
+                  = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
+                - elsif not @trace.customer_plan.meta_mode == "none"
+                  = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
 
 
   

@@ -6,7 +6,7 @@ module API
         obj[m.to_s]
       end
       
-      def open_order_attributes
+      def copy_attributes
         {
           symbol: obj['symbol'],
           ticket: obj['ticket_id'],
