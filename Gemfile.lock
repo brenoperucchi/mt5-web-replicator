@@ -640,7 +640,7 @@ DEPENDENCIES
   better_errors
   binding_of_caller
   bootsnap (>= 1.6.0)
-  bundler (= 2.4.1)
+  bundler (= 2.4.14)
   capistrano (~> 3.6)
   capistrano-bundler
   capistrano-rails
@@ -715,4 +715,4 @@ RUBY VERSION
    ruby 2.7.7p221
 
 BUNDLED WITH
-   2.4.1
+   2.4.14
