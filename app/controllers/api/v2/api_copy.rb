@@ -74,6 +74,7 @@ module API
                     body "OK|OK|OK"
                   # end
                 else
+                  binding.pry
                   content_error = "Message::Metatrader ##{message.try(:id)} cannot executed - Account Name #{account.try(:name)}"
                   account.loggings.create(content:content_error, state: "ERROR", changeset: message.try(:errors).try(:full_messages))
                   body :NONE
