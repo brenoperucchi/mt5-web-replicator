@@ -88,7 +88,7 @@ class Trace < ApplicationRecord
 
   def create_orders(order_params, account, message, symbol, api_version)
 
-    apiCopySerializerClass = "API::#{api_version.try(:upcase)}::APICopySerializer".classify.constantize
+    apiCopySerializerClass = Class.const_get("API::#{api_version.try(:upcase)}::APICopySerializer")
 
     ticket = order_params['ticket_id']
     instrument = check_instrument(account, symbol)
