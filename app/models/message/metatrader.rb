@@ -26,7 +26,7 @@ class Message::Metatrader < Message::Message
         end
       else
         trace.masters.where(account:account_copy).pending_executed.each do |transaction|
-          unless yaml_content['orders'].flatten.detect{|x| x['ticket_id'] == transaction.ticket}
+          unless yaml_content['orders'].flatten.detect{|x| x['ticket_id'].to_i == transaction.ticket.to_i}
             transaction.close
             transaction.close_info
             transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))

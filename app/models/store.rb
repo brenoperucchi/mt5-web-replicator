@@ -166,6 +166,21 @@ class Store < ApplicationRecord
     end
   end
 
+  def self.customer_plan_trace_fixing
+    Store.all.each do |store|
+      attributes = {name: 'Fist Plan', amount: 100, kind:"fixed", charge_recurrence: "monthly", meta_margin_mode: "heding", meta_mode: 'demo'}
+      if store.customer_plans.empty?
+        customer_plan = store.customer_plans.create(attributes)
+      else
+        customer_plan = store.customer_plans.first
+        customer_plan.attributes = attributes
+        customer_plan.save
+      end
+      customer_plan.trace_ids = store.traces.ids
+      customer_plan.save
+    end
+  end
+
   private
   
   def create_invoice_item(invoice, usage, date_today, amount=nil)
