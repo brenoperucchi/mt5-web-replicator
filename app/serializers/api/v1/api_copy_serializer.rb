@@ -1,5 +1,5 @@
 module API
-  module V2
+  module V1
     class APICopySerializer < ActiveModel::Serializer
   
       def copy_attributes

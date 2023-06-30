@@ -47,7 +47,7 @@ module API
       # end
 
       def magic_number
-        obj['magicnumber']
+        obj['magicnumber'] || obj['magic_number']
       end
 
       def stop_loss
