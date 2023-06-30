@@ -26,6 +26,11 @@ en:
           fixed: Fixed
           percent: Percent
           form_title: "Form for contracting the Portfolio %{name}"
+          customer_plan:
+            charge_recurrence:
+              monthly: Monthly
+              semester: Semester
+              annual: Annual
         show:
           profit_factor: Profit Factor
           oper_gain: Gain
@@ -321,7 +326,6 @@ en:
       order:
         one: Order
         other: Orders
-
     errors:
       models:
         store:
@@ -532,8 +536,8 @@ en:
       long: "%B %d, %Y %H:%M"
       short: "%d %b %H:%M"
       short2: "%d %b %H:%M:%S"
+      short3: "%d de %b %Y"
     pm: pm
-
     
   administrate:
     namespace_alternate: control

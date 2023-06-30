@@ -203,7 +203,6 @@ class Trace < ApplicationRecord
 
   def masters_filter(data, scope = nil)
     if self.search_date_begin and self.search_date_end
-      # binding.pry
       if scope == :executed or (scope.is_a?(Array) and scope.include?(:executed))
         query = {:created_at => search_date_begin..search_date_end.end_of_day}
       else

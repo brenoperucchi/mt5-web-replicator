@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_06_28_163924) do
+ActiveRecord::Schema.define(version: 2023_06_29_194522) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -228,7 +228,7 @@ ActiveRecord::Schema.define(version: 2023_06_28_163924) do
     t.string "state"
     t.string "response"
     t.string "content"
-    t.string "content_id"
+    t.integer "content_id"
     t.datetime "active_at"
     t.datetime "ready_at"
     t.datetime "execute_at"
@@ -242,6 +242,7 @@ ActiveRecord::Schema.define(version: 2023_06_28_163924) do
     t.bigint "store_id"
     t.bigint "deal_id"
     t.index ["account_id"], name: "index_orders_on_account_id"
+    t.index ["content_id"], name: "index_orders_on_content_id"
     t.index ["deal_id"], name: "index_orders_on_deal_id"
     t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["store_id"], name: "index_orders_on_store_id"
@@ -467,7 +468,7 @@ ActiveRecord::Schema.define(version: 2023_06_28_163924) do
   end
 
   create_table "transaction_slaves", force: :cascade do |t|
-    t.string "ticket_master"
+    t.bigint "ticket_master"
     t.decimal "profit", default: "0.0"
     t.string "ordertype"
     t.string "symbol"
@@ -499,7 +500,7 @@ ActiveRecord::Schema.define(version: 2023_06_28_163924) do
 
   create_table "transactions", force: :cascade do |t|
     t.string "state"
-    t.string "ticket"
+    t.bigint "ticket"
     t.decimal "profit", default: "0.0"
     t.bigint "order_id"
     t.string "ordertype"

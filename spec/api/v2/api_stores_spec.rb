@@ -59,7 +59,6 @@ RSpec.describe API::V2::APIStore do
 
       it 'Create AccountServer Name same STORE with different customer' do
         account_server = AccountServer.find_by(name: "xpdemo")
-        # binding.pry
         post "/api/v2/stores/config/imentore_copy/2_10/DarwinexDemo/5647753/HEDGING", params: {'EnvironmentLocal':'1'}
         @account_copy2 = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2])
         post "/api/v2/stores/config/imentore_copy/2_10/XPDEMO/5647753/HEDGING", params: {'EnvironmentLocal':'1'}
