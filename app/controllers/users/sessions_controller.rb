@@ -59,9 +59,9 @@ class Users::SessionsController < Devise::SessionsController
   private
 
   def check_captcha
-    if Rails.env.production?
-      alert_recaptcha unless verify_recaptcha 
-    end
+    # if Rails.env.production?
+    #   alert_recaptcha unless verify_recaptcha 
+    # end
   end
 
   def alert_recaptcha
