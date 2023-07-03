@@ -27,7 +27,7 @@ FactoryBot.define do
       telegram_api_number {'5548984222627'} 
 
       after(:create) do |store, evaluator|
-        store.customer_plans.create(name: :plan1, kind:0, amount:100)
+        store.customer_plans.create(name: :plan1, kind:0, amount:100, amount_discount:30)
       end
     end
   end

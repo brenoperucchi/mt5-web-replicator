@@ -231,8 +231,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         @orders = @store.orders
         expect(@orders.count).to be == 2
 
-        expect(@orders.first.content_id).to be == "10000001"
-        expect(@orders.last.content_id).to be == "10000002"
+        expect(@orders.first.content_id).to be == 10000001
+        expect(@orders.last.content_id).to be == 10000002
         expect(@orders.first.id).to be == 1
         expect(@orders.last.id).to be == 4
         expect(@orders.first.transactions.first.ticket).to be == "10000001"

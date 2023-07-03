@@ -10,7 +10,7 @@ class PlanUsage < ApplicationRecord
 
   def calculate_usage(date_today=nil, amount_use=nil)
     changes = false
-    amount_use ||= plan_serializer["amount"].to_f || usageable.amount
+    amount_use ||= usageable.amount_use || usageable.amount || plan_serializer["amount"].to_f
     date_today ||= DateTime.now
     days_month = Time.days_in_month(date_today.month)
     month_seconds = days_month * 24 * 3600

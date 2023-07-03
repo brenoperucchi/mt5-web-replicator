@@ -215,7 +215,7 @@ RSpec.describe API::V1::APITransactionsCopy do
           {\"ticket_id\":10001,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
         order = Order.find_by(content_id: 10001)          
         expect(order.trace.instrument_control).to be == true
-        expect(order.content_id).to be == "10001"
+        expect(order.content_id).to be == 10001
         expect(order.state).to be == "executed"
         expect(order.symbol).not_to be == "GBPCAD"
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
@@ -227,7 +227,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         params: {"orders"=>"
           {\"ticket_id\":10002,\"open_price\":1.16541000,\"volume\":0.54000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":57396925,\"symbol\":\"GBPUSD\",\"comment\":\"57396925\",\"open_at\":1668133849,\"timezone\":-4,\"state_meta\":null}", "expert_name"=>"signal_copy", "expert_version"=>"2_00", "action"=>"orders", "account_id"=>"925370", "account_mode"=>"HEDGING"}
         order = Order.find_by(content_id: 10002)          
-        expect(order.content_id).to be == "10002"
+        expect(order.content_id).to be == 10002
         expect(order.state).to be == "executed"
         expect(order.symbol).to be == "GBPUSD"
         expect(order.transactions.first.symbol).to be == "GBPUSD"

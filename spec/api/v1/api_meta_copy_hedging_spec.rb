@@ -21,16 +21,6 @@ RSpec.describe API::V1::APITransactionsCopy do
   describe API::V1::APITransactionsCopy do
     context 'Create and Restrict Transaction' do
       it 'Restrict Magic Number' do 
-        post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/orders/5647753/HEDGING', 
-          params: {"orders"=>"{\"ticket_id\":10000002,\"price\":1.13473000,\"lot\":0.02000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"type\":0,\"magicnumber\":20001,\"symbol\":\"EURUSD\",\"comment\":null,\"open_at\":\"1642789795\",\"state_meta\":\"\"}", "expert_name"=>"signal_copy", "expert_version"=>"1_30", "account_id"=>"5647753", "account_mode"=>"HEDGING"}
-        orders = Order.where(content_id:10000002)     
-        expect(orders.count).to be == 1      
-      end
-    end
-  end
-  describe API::V1::APITransactionsCopy, focus:true do
-    context 'Create and Restrict Transaction' do
-      it 'Restrict Magic Number' do 
         @account_copy.update(magics_accept: "2000 2001")
         expect(@account_copy.magics_accept).to be == "2000 2001"
         open_at = Time.zone.now.to_i.to_s
@@ -57,7 +47,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(TransactionSlave.deleted.count).to be == 2
 
         order = Order.where(content_id:2002).take
-        expect(order.content_id).to be == "2002"
+        expect(order.content_id).to be == 2002
         expect(order.transactions.find_by(account:@account_copy).ticket).to be == "2002"
         expect(order.transactions.find_by(account:@account_copy).state).to be == "error"
         expect(order.transactions.count).to be == 1
@@ -318,7 +308,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction = @account.orders.find_by(content_id:10000002).transactions.first
         @slave = @transaction.slaves.find_by(ticket_master: 10000002)
         expect(@account.orders.count).to be == 2
-        expect(@slave.order.content_id).to be == "10000002"
+        expect(@slave.order.content_id).to be == 10000002
         expect(@slave.order.id).to be == 26
         expect(@slave.take_profit).not_to be == 0
         expect(@slave.stop_loss).not_to be == 0

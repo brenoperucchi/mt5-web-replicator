@@ -2,8 +2,9 @@ class CustomerPlan < ApplicationRecord
   attr_accessor :active
   enum kind: {fixed: 0, percent: 1}#, _scopes:false
   enum charge_recurrence: {monthly: 1, bimester: 2, semester: 6, annual:12}
+  ENUM_discount_behavior = %w(none promition_page always)
 
-  store :settings, accessors: [:meta_margin_mode, :meta_mode]
+  store :settings, accessors: [:meta_margin_mode, :meta_mode, :amount_discount, :discount_behavior, :promotion_use]
 
   belongs_to :store, optional:true
   has_many :plan_usages, as: :usageable#, dependent: :destroy
@@ -25,6 +26,21 @@ class CustomerPlan < ApplicationRecord
 
   def validate_active_at
     self.active == false and self.class.active.present? and self.id == self.class.active.try(:first).try(:id)
+  end
+
+
+  def amount_use
+    # binding.pry
+    if self.discount_behavior == "always" || (self.discount_behavior == "promition_page" && self.promotion_use) 
+
+      if self.amount_discount.to_s.include?("%")
+        self.amount * (self.amount_discount.to_f / 100)
+      else
+        self.amount - self.amount_discount.to_f
+      end
+    else
+      self.amount.to_f
+    end
   end
 
 

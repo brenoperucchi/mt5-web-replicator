@@ -79,6 +79,7 @@ class Account < ApplicationRecord
     unless planUsage.errors.any?
       permission.update(plan_usage: planUsage, customer_plan: plan)
     end
+    return planUsage
   end
 
 

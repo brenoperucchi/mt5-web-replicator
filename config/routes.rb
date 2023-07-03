@@ -14,11 +14,12 @@ Rails.application.routes.draw do
     resources :customers
     resources :stores
     resources :dashboards, only: [:index, :show, :create] do
-      get 'account/:id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
-      get '/contract',                   to: 'dashboards#contract',        on: :member, as: 'contract'
-      post '/contract',                  to: 'dashboards#create',          on: :member
-      get 'finish_contract/:account_id', to: 'dashboards#finish_contract', on: :member, as: 'finish'
-      get 'finish',                      to: 'dashboards#finish_external_payment',          on: :collection
+      get  'account/:id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
+      get  '/contract/:promotion',         to: 'dashboards#contract',        on: :member#, as: 'account'
+      get  '/contract',                   to: 'dashboards#contract',        on: :member, as: 'contract'
+      post '/contract',                   to: 'dashboards#create',          on: :member
+      get  'finish_contract/:account_id', to: 'dashboards#finish_contract', on: :member, as: 'finish'
+      get  'finish',                      to: 'dashboards#finish_external_payment',          on: :collection
     end
     devise_for :users, controllers: {
       sessions: 'users/sessions',

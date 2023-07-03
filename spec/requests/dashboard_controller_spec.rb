@@ -44,39 +44,209 @@ RSpec.describe 'Store Controller', type: :request do
     {}
   end
 
-  describe "POST create /stores/create" do #, focus:true do
+  describe "Contract Trace on dashboards" do
     describe "with valid params" do
-      it "creates a new Order" do
-       @customer_plan = @store.customer_plans.first
-       @customer_plan.traces << @trace
-       unfreeze_time
-       travel_to Date.parse("2023-06-15").beginning_of_day
-       freeze_time
+      it "Promition_page and promotion_use TRUE" do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.discount_behavior = "promition_page"
+        @customer_plan.amount_discount = "30%"
+        @customer_plan.promotion_use = true
+        @customer_plan.save
+        @customer_plan.traces << @trace
+        unfreeze_time
+        travel_to Date.parse("2023-06-01").beginning_of_month
+        freeze_time
 
         expect {
           post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
-       expect(response).to have_http_status 302
-       expect(Invoice.all.count).to be == 0
+        expect(response).to have_http_status 302
+        expect(Invoice.all.count).to be == 0
+
+        account = Account.find_by_name("12345678")
+        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        account.customer.create_invoice_customer(invoice_name)
+        expect(Invoice.all.count).to be == 1
+
+        expect(Invoice.first.name).to be == invoice_name
+        expect(Invoice.first.amount.to_f).to be == 30.0
 
 
-       account = Account.find_by_name("12345678")
-       invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-       account.customer.create_invoice_customer(invoice_name)
-       expect(Invoice.all.count).to be == 1
-       expect(Invoice.first.name).to be == invoice_name
-       expect(Invoice.first.amount.to_f).to be == 53.33
-
-
-       expect(account.name).to be == "12345678"
-       permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
-       expect(permission).not_to be_nil
-       expect(permission.plan_usage).not_to be_nil
-       expect(permission.plan_usage.usageable.amount).to be == 100.00
-       expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+        expect(account.name).to be == "12345678"
+        permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
+        expect(permission).not_to be_nil
+        expect(permission.plan_usage).not_to be_nil
+        expect(permission.plan_usage.usageable.amount).to be == 100.00
+        expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
       end
 
-      it "creates a new Order" do
+      it "Promition_page and promotion_use False" do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.discount_behavior = "promition_page"
+        @customer_plan.amount_discount = "10"
+        @customer_plan.promotion_use = false
+        @customer_plan.save
+        @customer_plan.traces << @trace
+        unfreeze_time
+        travel_to Date.parse("2023-06-15").beginning_of_month
+        freeze_time
+
+        expect {
+          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+        }.to change(Account, :count).by(1)
+        expect(response).to have_http_status 302
+        expect(Invoice.all.count).to be == 0
+
+        account = Account.find_by_name("12345678")
+        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        account.customer.create_invoice_customer(invoice_name)
+        expect(Invoice.all.count).to be == 1
+        expect(Invoice.first.name).to be == invoice_name
+        expect(Invoice.first.amount.to_f).to be == 100.0
+
+
+        expect(account.name).to be == "12345678"
+        permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
+        expect(permission).not_to be_nil
+        expect(permission.plan_usage).not_to be_nil
+        expect(permission.plan_usage.usageable.amount).to be == 100.00
+        expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      end
+
+      it "Always and promotion_use False" do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.discount_behavior = "always"
+        @customer_plan.amount_discount = "50"
+        @customer_plan.promotion_use = false
+        @customer_plan.save
+        @customer_plan.traces << @trace
+        unfreeze_time
+        travel_to Date.parse("2023-06-15").beginning_of_month
+        freeze_time
+
+        expect {
+          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+        }.to change(Account, :count).by(1)
+        expect(response).to have_http_status 302
+        expect(Invoice.all.count).to be == 0
+
+        account = Account.find_by_name("12345678")
+        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        account.customer.create_invoice_customer(invoice_name)
+        expect(Invoice.all.count).to be == 1
+        expect(Invoice.first.name).to be == invoice_name
+        expect(Invoice.first.amount.to_f).to be == 50.0
+
+
+        expect(account.name).to be == "12345678"
+        permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
+        expect(permission).not_to be_nil
+        expect(permission.plan_usage).not_to be_nil
+        expect(permission.plan_usage.usageable.amount).to be == 100.00
+        expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      end
+
+      it "None Promotion_use TRUE" do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.discount_behavior = "none"
+        @customer_plan.amount_discount = "50"
+        @customer_plan.promotion_use = true
+        @customer_plan.save
+        @customer_plan.traces << @trace
+        unfreeze_time
+        travel_to Date.parse("2023-06-15").beginning_of_month
+        freeze_time
+
+        expect {
+          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+        }.to change(Account, :count).by(1)
+        expect(response).to have_http_status 302
+        expect(Invoice.all.count).to be == 0
+
+        account = Account.find_by_name("12345678")
+        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        account.customer.create_invoice_customer(invoice_name)
+        expect(Invoice.all.count).to be == 1
+        expect(Invoice.first.name).to be == invoice_name
+        expect(Invoice.first.amount.to_f).to be == 100.0
+
+
+        expect(account.name).to be == "12345678"
+        permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
+        expect(permission).not_to be_nil
+        expect(permission.plan_usage).not_to be_nil
+        expect(permission.plan_usage.usageable.amount).to be == 100.00
+        expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      end
+    end
+  end
+  describe "Contract Trace on dashboards" do
+    describe "with valid params" do
+      it "Store 1 with date Proportional" do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.traces << @trace
+        unfreeze_time
+        travel_to Date.parse("2023-06-15").beginning_of_day
+        freeze_time
+
+        expect {
+          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+        }.to change(Account, :count).by(1)
+        expect(response).to have_http_status 302
+        expect(Invoice.all.count).to be == 0
+
+        account = Account.find_by_name("12345678")
+        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        account.customer.create_invoice_customer(invoice_name)
+        expect(Invoice.all.count).to be == 1
+        expect(Invoice.first.name).to be == invoice_name
+        expect(Invoice.first.amount.to_f).to be == 53.33
+
+
+        expect(account.name).to be == "12345678"
+        permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
+        expect(permission).not_to be_nil
+        expect(permission.plan_usage).not_to be_nil
+        expect(permission.plan_usage.usageable.amount).to be == 100.00
+        expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      end
+
+      it "Store 2 with date Proportional" do
+        @plan2 = create(:plan, :plan2)
+        @store2 = create(:store, :store2, plan_id: @plan2.id)
+        @trace2 = create(:trace, :copy2, store: @store2, instrument_control: true)
+        customer_plan = @store2.customer_plans.last
+        customer_plan.discount_behavior = "always"
+        customer_plan.save
+        customer_plan.traces << @trace2
+        unfreeze_time
+        travel_to Date.parse("2023-06-15").beginning_of_day
+        freeze_time
+
+        expect {
+          post "/dashboards/#{@trace2.id}/contract" , params: {id: @trace2.id, customer_plan_id: customer_plan.id, :account => valid_attributes} #, valid_session
+        }.to change(Account, :count).by(1)
+        expect(response).to have_http_status 302
+        expect(Invoice.all.count).to be == 0
+
+
+        account = Account.find_by_name("12345678")
+        invoice_name = "Trace##{@trace2.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        account.customer.create_invoice_customer(invoice_name)
+        expect(Invoice.all.count).to be == 1
+        expect(Invoice.first.name).to be == invoice_name
+        expect(Invoice.first.amount.to_f).to be == 37.33
+
+
+        expect(account.name).to be == "12345678"
+        permission = Permission.where(trace: @trace2, customer_plan:customer_plan).last
+        expect(permission).not_to be_nil
+        expect(permission.plan_usage).not_to be_nil
+        expect(permission.plan_usage.usageable.amount).to be == 100.00
+        expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      end
+
+      it "Semester" do
 
        @customer_plan = @store.customer_plans.first
        @customer_plan.trace_ids = [@trace.id]

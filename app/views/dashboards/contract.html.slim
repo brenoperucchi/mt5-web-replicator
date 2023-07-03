@@ -35,7 +35,7 @@
               td.text-right
                 span.float-right
                   a.text-secondary[href="#!"]
-                    = number_to_currency (@trace.customer_plan.try(:amount) || 0)
+                    = number_to_currency (@trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount) || 0)
             tr
               td
                 | Recorrência de Cobrança

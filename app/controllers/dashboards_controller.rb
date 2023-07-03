@@ -32,6 +32,7 @@ class DashboardsController < ApplicationController
 	end
 
 	def contract
+		@trace.customer_plan.promotion_use = true if params[:promotion] == "promotion"
 		respond_to do |wants|
 			wants.html do  
 				@account = @trace.accounts.new
@@ -52,7 +53,10 @@ class DashboardsController < ApplicationController
 		account.traces << @trace
 		if @trace.valid? and account.save
 			# invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-			account.register_customer_plan_create(@trace, customer_plan_id)
+			plan_usage = account.register_customer_plan_create(@trace, customer_plan_id)
+			customer_plan = plan_usage.usageable
+			customer_plan.promotion_use = true if params[:promotion] == "promotion"
+			customer_plan.save
 			# account.customer.create_invoice_customer(invoice_name)
 			# @customer.create_user(email: @customer.user_email, password: password)
 			redirect_to finish_dashboard_path(@trace, account)

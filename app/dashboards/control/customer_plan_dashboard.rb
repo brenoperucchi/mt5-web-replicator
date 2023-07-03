@@ -11,19 +11,21 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:         Field::Number,
-    name:       Field::String,
-    amount:       Field::String,
-    store_id:   DisableAssociation.with_options(attribute: :store),
+    id:                 Field::Number,
+    name:               Field::String,
+    amount:             Field::String,
+    amount_discount:    Field::String,
+    store_id:           DisableAssociation.with_options(attribute: :store),
     kind:               CheckboxField.with_options(object:"customer", collection_key: [:fixed, :percent], default: :fixed),
     charge_recurrence:  CheckboxField.with_options(object:"customer", collection_key: CustomerPlan.charge_recurrences.keys, default: :monthly),
-    meta_margin_mode:   CheckboxField.with_options(object:"customer", collection_key: (Account.meta_margin_modes.keys + ["both"]), default: :monthly),
-    meta_mode:          CheckboxField.with_options(object:"customer", collection_key: (Account.meta_modes.keys + ["both"]), default: :monthly),
-    customers:  Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
-    accounts:   Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
-    traces:     Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    meta_margin_mode:   CheckboxField.with_options(object:"customer", collection_key: (Account.meta_margin_modes.keys + ["both"]), default: :hedging),
+    meta_mode:          CheckboxField.with_options(object:"customer", collection_key: (Account.meta_modes.keys + ["both"]), default: :demo),
+    discount_behavior:  CheckboxField.with_options(object:"customer", collection_key: CustomerPlan::ENUM_discount_behavior, default: :always),
+    customers:          Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
+    accounts:           Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
+    traces:             Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
+    created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -46,6 +48,8 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     name
     amount
     kind
+    amount_discount
+    discount_behavior
     charge_recurrence
     meta_margin_mode
     meta_mode
@@ -64,13 +68,15 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     name
     amount
     kind
+    amount_discount
+    discount_behavior
     charge_recurrence
     meta_margin_mode
     meta_mode
-    store_id
     customers
     accounts
     traces
+    store_id
   ].freeze
 
   # COLLECTION_FILTERS

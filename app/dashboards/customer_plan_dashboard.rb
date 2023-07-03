@@ -11,10 +11,12 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     id:                 Field::Number,
     name:               Field::String,
     amount:             Field::String,
+    amount_discount:    Field::String,
     kind:               CheckboxField.with_options(object:"customer", collection_key: CustomerPlan.kinds.keys, default: :fixed),
     charge_recurrence:  CheckboxField.with_options(object:"customer", collection_key: CustomerPlan.charge_recurrences.keys, default: :monthly),
-    meta_margin_mode:   CheckboxField.with_options(object:"customer", collection_key: (Account.meta_margin_modes.keys + ["both"]), default: :monthly),
-    meta_mode:          CheckboxField.with_options(object:"customer", collection_key: (Account.meta_modes.keys + ["both"]), default: :monthly),
+    meta_margin_mode:   CheckboxField.with_options(object:"customer", collection_key: (Account.meta_margin_modes.keys + ["both"]), default: :hedging),
+    meta_mode:          CheckboxField.with_options(object:"customer", collection_key: (Account.meta_modes.keys + ["both"]), default: :demo),
+    discount_behavior:  CheckboxField.with_options(object:"customer", collection_key: CustomerPlan::ENUM_discount_behavior, default: :always),
     store:              Field::BelongsTo,
     customers:          Field::HasMany,
     accounts:           Field::HasMany,
@@ -44,6 +46,8 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     name
     amount
     kind
+    amount_discount
+    discount_behavior
     charge_recurrence
     meta_margin_mode
     meta_mode
@@ -60,15 +64,17 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
     name
-    amount 
+    amount
     kind
-    charge_recurrence
-    meta_margin_mode
-    meta_mode
+    amount_discount 
+    discount_behavior
     store
     customers
     accounts
     traces
+    charge_recurrence
+    meta_margin_mode
+    meta_mode
   ].freeze
 
   # COLLECTION_FILTERS
