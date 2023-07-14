@@ -27,10 +27,12 @@ class StoresController < ApplicationController
 		@store.url = url_name
 		@store.name = url_name
 		@store.plan = Plan.first
+		@store.payment = Store.first.payments.first
 
 		respond_to do |format|
 		  if @store.save
-		  	customer_plan = @store.customer_plans.create(name: :example, amount:10.00, kind:'fixed', store:@store)
+		  	PaymentMethod.all.each{|payment| payment.stores << @store}
+		  	customer_plan = @store.customer_plans.create(name: :example, amount:10.00, kind:'fixed', store:@store, payment: @store.payments.first)
 		  	customer = @store.customers.new(name:url_name, customer_plans:[customer_plan], role:'customer', role_control:'owner', store:@store)
 		  	user = @store.users.create(email:store_params[:email], password:password, userable:customer)
 		  	if customer.save and user.valid?
@@ -40,6 +42,7 @@ class StoresController < ApplicationController
 			    format.html { redirect_to control_accounts_path }
 		    	format.json { render :show, status: :created, location: @store }
 			  else
+			  	binding.pry
 					@store.errors.add(:base, :problem_on_create)
 					format.html { render :new }
 					format.json { render json: @store.errors, status: :unprocessable_entity }

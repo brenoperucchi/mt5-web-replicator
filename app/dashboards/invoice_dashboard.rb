@@ -18,6 +18,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
     stripe_invoice_id:    Field::String.with_options(searchable: false),  
     amount:               Field::Number,
     # items:                Field::NestedHasMany.with_options(class_name: 'InvoiceItem'),
+    payment:              Field::BelongsTo,
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
     loggings:             Field::HasMany,
     invoiceable:          Field::Polymorphic,
@@ -36,6 +37,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   email
   amount
   items
+  payment
   invoiceable
   ].freeze
 
@@ -52,6 +54,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   amount
   loggings
   items
+  payment
   created_at
   updated_at
   ].freeze
@@ -62,10 +65,11 @@ class InvoiceDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   state
-  items
+  amount
   email
   stripe_invoice_id
-  amount
+  items
+  payment
   ].freeze
 
   # COLLECTION_FILTERS

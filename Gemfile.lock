@@ -329,6 +329,9 @@ GEM
       net-smtp
     marcel (1.0.2)
     matrix (0.4.2)
+    mercadopago-sdk (2.1.0)
+      json (~> 2.5)
+      rest-client (~> 2.1)
     method_source (1.0.0)
     mime-types (3.4.1)
       mime-types-data (~> 3.2015)
@@ -668,6 +671,7 @@ DEPENDENCIES
   link_thumbnailer
   listen (>= 3.0.5, < 3.2)
   lucky_case
+  mercadopago-sdk
   minitest
   net-http
   newrelic_rpm

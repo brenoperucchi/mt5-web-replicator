@@ -560,6 +560,9 @@ en:
         success: "%{resource} was successfully updated."
         failure: "%{resource} failure on update."
     fields:
+      nested_has_many:
+          remove: Remove
+          Add: Add
       has_many:
         more: Showing %{count} of %{total_count}
         none: None

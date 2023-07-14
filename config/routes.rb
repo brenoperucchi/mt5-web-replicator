@@ -1,30 +1,36 @@
 require 'sidekiq/web'
 Rails.application.routes.draw do
+  resources :delivery_payments
   constraints subdomain: /.*/ do
-    resources :invoice_items
-    # post "create_checkout", to: "charge#checkout"
-    # get "checkout",       to: "charge#index"
-    post "stripe/webhook",  to: "stripe#webhook"
-    get  "stripe/checkout", to: "stripe#checkout", as:'checkout_stripe'      
     
-    # get "checkout", to: "pay#checkout"
+    get  "stripe/checkout",      to: "stripe#checkout", as:'checkout_stripe'      
+    get  "stripe/webhook/:id/:payment_id",       to: "stripe#webhook"
+    post "stripe/webhook/:id/:payment_id",       to: "stripe#webhook"
+
+    get  "mercadopago/webhook/:id/:payment_id",  to: "mercadopago#webhook"
+    post "mercadopago/webhook/:id/:payment_id",  to: "mercadopago#webhook"
+    post "mercadopago/ipn/:id/:payment_id",          to: "mercadopago#ipn"
+    
     get "subscription", to: "pay#subscription"
     get "billing",      to: "pay#billing"
 
+    resources :invoice_items
     resources :customers
     resources :stores
     resources :dashboards, only: [:index, :show, :create] do
-      get  'account/:id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
+      get  'account/:id/:payment_id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
       get  '/contract/:promotion',         to: 'dashboards#contract',        on: :member#, as: 'account'
       get  '/contract',                   to: 'dashboards#contract',        on: :member, as: 'contract'
       post '/contract',                   to: 'dashboards#create',          on: :member
-      get  'finish_contract/:account_id', to: 'dashboards#finish_contract', on: :member, as: 'finish'
-      get  'finish',                      to: 'dashboards#finish_external_payment',          on: :collection
+      get  'finish/:account_id',          to: 'dashboards#finish', on: :member, as: 'finish'
+      # get  'finish',                      to: 'dashboards#finish_external_payment',          on: :collection
     end
+    
     devise_for :users, controllers: {
       sessions: 'users/sessions',
       registrations: 'users/registrations'
     }
+    
     resources :clients
     mount Sidekiq::Web => '/sidekiq'
     mount API::Base, at: "/"
@@ -53,18 +59,20 @@ Rails.application.routes.draw do
       resources :customers
       resources :plans
       resources :plan_items
+      resources :customer_plans
       resources :invoices do
          get :invoice_send, on: :member
-      end      
-     
+      end           
       resources :invoice_items
-      resources :customer_plans
-    	resources :transaction_slaves
-      resources :transactions
+      
       resources :loggings
       resources :instruments
+      resources :payment_methods
+      resources :payments
 
       resources :orders#, except:[:edit]
+      resources :transactions
+    	resources :transaction_slaves
       # resources :deals
       # resources :messages, as: :message_metatrader #, only: [:index]
       # resources :message_metatrader, controller: :messages, type:'Message::Metatrader'

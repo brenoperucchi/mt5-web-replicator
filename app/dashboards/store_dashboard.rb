@@ -23,15 +23,17 @@ class StoreDashboard < Administrate::BaseDashboard
     telegram_bot_token:     Field::String,
     stripe_webhook_secret:  Field::String,
     stripe_api_secret:      Field::String,
-    plan:       Field::BelongsTo,
-    plan_items: Field::HasMany,
-    accounts:   Field::HasMany.with_options(limit:5),
-    customers:  Field::HasMany,
-    users:      Field::HasMany,
-    traces:     Field::HasMany.with_options(limit:5),
-    tag_list:   Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    plan:             Field::BelongsTo,
+    payment:          Field::BelongsTo,
+    plan_items:       Field::HasMany,
+    accounts:         Field::HasMany.with_options(limit:5),
+    customers:        Field::HasMany,
+    payment_methods:  Field::HasMany,
+    users:            Field::HasMany,
+    traces:           Field::HasMany.with_options(limit:5),
+    tag_list:         Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
+    created_at:       Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:       Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -72,7 +74,8 @@ class StoreDashboard < Administrate::BaseDashboard
   traces
   customers
   users
-
+  payment
+  payment_methods
   created_at
   updated_at
   ].freeze
@@ -94,6 +97,8 @@ class StoreDashboard < Administrate::BaseDashboard
   plan
   plan_items
   accounts
+  payment
+  payment_methods
   volume_default
   stripe_api_secret
   stripe_webhook_secret

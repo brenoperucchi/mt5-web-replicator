@@ -33,7 +33,6 @@ module API
           map = String.new
           message = params[:body]
           content = YAML.load(message)
-
           if not content.blank? and content.is_a?(Hash)
             action = content['meta_state']
             account = Account.find_by(name: params[:account_id])

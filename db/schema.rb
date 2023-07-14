@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_06_29_193406) do
+ActiveRecord::Schema.define(version: 2023_07_14_145838) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -100,6 +100,8 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.datetime "active_at"
     t.integer "kind", default: 0
     t.integer "charge_recurrence", default: 1
+    t.bigint "payment_id"
+    t.index ["payment_id"], name: "index_customer_plans_on_payment_id"
     t.index ["store_id"], name: "index_customer_plans_on_store_id"
   end
 
@@ -110,9 +112,11 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "settings"
     t.bigint "store_id"
+    t.bigint "customer_plan_id"
     t.integer "role", default: 0
     t.integer "role_control", default: 0
     t.datetime "deleted_at"
+    t.index ["customer_plan_id"], name: "index_customers_on_customer_plan_id"
     t.index ["deleted_at"], name: "index_customers_on_deleted_at"
     t.index ["store_id"], name: "index_customers_on_store_id"
   end
@@ -167,7 +171,12 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.datetime "updated_at", precision: 6, null: false
     t.string "stripe_invoice_id"
     t.bigint "store_id"
+    t.bigint "payment_id"
+    t.bigint "plan_usage_id"
+    t.text "response"
     t.index ["invoiceable_type", "invoiceable_id"], name: "index_invoices_on_invoiceable"
+    t.index ["payment_id"], name: "index_invoices_on_payment_id"
+    t.index ["plan_usage_id"], name: "index_invoices_on_plan_usage_id"
     t.index ["store_id"], name: "index_invoices_on_store_id"
   end
 
@@ -327,13 +336,31 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "payment_methods", force: :cascade do |t|
+    t.string "name"
+    t.string "handle"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.bigint "payment_method_id"
+    t.bigint "store_id"
+    t.string "api_token"
+    t.string "webhook_token"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["payment_method_id"], name: "index_payments_on_payment_method_id"
+    t.index ["store_id"], name: "index_payments_on_store_id"
+  end
+
   create_table "permissions", force: :cascade do |t|
     t.bigint "account_id"
     t.bigint "trace_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "plan_usage_id"
     t.bigint "customer_plan_id"
+    t.bigint "plan_usage_id"
     t.index ["account_id"], name: "index_permissions_on_account_id"
     t.index ["customer_plan_id"], name: "index_permissions_on_customer_plan_id"
     t.index ["plan_usage_id"], name: "index_permissions_on_plan_usage_id"
@@ -421,6 +448,8 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.integer "telegram_bot_chat_id"
     t.bigint "plan_id"
     t.string "email"
+    t.bigint "payment_id"
+    t.index ["payment_id"], name: "index_stores_on_payment_id"
     t.index ["plan_id"], name: "index_stores_on_plan_id"
   end
 
@@ -451,6 +480,19 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.index ["name"], name: "index_tags_on_name", unique: true
   end
 
+  create_table "tokens", force: :cascade do |t|
+    t.string "resourceable_type"
+    t.bigint "resourceable_id"
+    t.string "tokenable_type"
+    t.bigint "tokenable_id"
+    t.string "name"
+    t.text "settings"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["resourceable_type", "resourceable_id"], name: "index_tokens_on_resourceable"
+    t.index ["tokenable_type", "tokenable_id"], name: "index_tokens_on_tokenable"
+  end
+
   create_table "traces", force: :cascade do |t|
     t.string "name"
     t.string "name_id"
@@ -464,11 +506,10 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
     t.text "symbol_list"
     t.integer "kind", default: 0
     t.datetime "deleted_at"
-    t.bigint "customer_plan_id"
   end
 
   create_table "transaction_slaves", force: :cascade do |t|
-    t.string "ticket_master"
+    t.bigint "ticket_master"
     t.decimal "profit", default: "0.0"
     t.string "ordertype"
     t.string "symbol"
@@ -500,7 +541,7 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
 
   create_table "transactions", force: :cascade do |t|
     t.string "state"
-    t.string "ticket"
+    t.bigint "ticket"
     t.decimal "profit", default: "0.0"
     t.bigint "order_id"
     t.string "ordertype"
@@ -567,7 +608,6 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
   add_foreign_key "customer_plans", "stores"
   add_foreign_key "instruments", "accounts"
   add_foreign_key "instruments", "stores"
-  add_foreign_key "invoice_items", "invoices"
   add_foreign_key "invoices", "stores"
   add_foreign_key "messages_traces", "messages"
   add_foreign_key "messages_traces", "traces"
@@ -582,7 +622,6 @@ ActiveRecord::Schema.define(version: 2023_06_29_193406) do
   add_foreign_key "plan_usages", "stores"
   add_foreign_key "stores", "plans"
   add_foreign_key "taggings", "tags"
-  add_foreign_key "traces", "customer_plans"
   add_foreign_key "transactions", "traces"
   add_foreign_key "versions", "loggings"
 end

@@ -61,6 +61,7 @@ class TraceDashboard < Administrate::BaseDashboard
   kind
   magics_accept
   capital_recomendation
+  store
   accounts
   messages
   instruments

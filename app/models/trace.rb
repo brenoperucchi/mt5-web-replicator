@@ -43,6 +43,11 @@ class Trace < ApplicationRecord
   has_one :permission#, dependent: :destroy
   has_one  :customer_plan, :through => :permission, :source => :customer_plan
 
+  has_one :payment
+  has_one :payment_method, through: :payment, source: :payment_method
+
+  # accepts_nested_attributes_for :payment
+
   validates_presence_of   [:name, :name_id]
   validates_uniqueness_of [:name, :name_id], scope: :store_id
   validate :associated_with_customer_plan_and_amount_greater_than_zero, on: :update

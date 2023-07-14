@@ -38,6 +38,8 @@ class Customer < ApplicationRecord
   # has_many :customer_plans, dependent: :nullify
   has_many :invoices, as: :invoiceable, dependent: :destroy
 
+  has_many :tokens, as: :tokenable, dependent: :destroy
+
   delegate :email, to: :user, allow_nil: true
 
   pay_customer
@@ -60,9 +62,12 @@ class Customer < ApplicationRecord
 
   def create_invoice_customer(name = nil)
     name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
-    @invoice = invoices.find_or_create_by(name: name, store:store)
+    @invoice = invoices.find_or_initialize_by(name: name, store:store)
     customer_plans.each do |customer_plan|
       plan_usage = customer_plan.plan_usages.where(handle: "AccountTracePlan").each do |plan_usage|
+        @invoice.payment = customer_plan.payment
+        @invoice.plan_usage = plan_usage
+
         if customer_plan.fixed? and customer_plan.monthly?
           plan_usage.calculate_usage
           amount = plan_usage.amount
@@ -70,7 +75,11 @@ class Customer < ApplicationRecord
           amount = customer_plan.amount
         end
         description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable.name} \r\n"
-        plan_usage.update_next_charged if @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
+        
+        if @invoice.save and @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
+          plan_usage.update_next_charged
+        end
+
         # if customer_plan.try(:fixed?)
         #   @name = :customer_monthly_payment
         #   @amount_total += plan_usage.amount

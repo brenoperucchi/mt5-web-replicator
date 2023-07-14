@@ -22,6 +22,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     accounts:           Field::HasMany,
     traces:             Field::HasMany,
     customers:          Field::HasMany,
+    payment:            Field::BelongsTo,
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -55,6 +56,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     customers
     accounts
     traces
+    payment
     created_at
     updated_at
   ].freeze
@@ -68,13 +70,14 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     kind
     amount_discount 
     discount_behavior
+    charge_recurrence
+    meta_margin_mode
+    meta_mode
     store
     customers
     accounts
     traces
-    charge_recurrence
-    meta_margin_mode
-    meta_mode
+    payment
   ].freeze
 
   # COLLECTION_FILTERS
@@ -92,7 +95,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # Overwrite this method to customize how customer plans are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(customer_plan)
-  #   "CustomerPlan ##{customer_plan.id}"
-  # end
+  def display_resource(customer_plan)
+    customer_plan.try(:name).try(:capitalize)
+  end
 end

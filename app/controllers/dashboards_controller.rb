@@ -16,19 +16,19 @@ class DashboardsController < ApplicationController
 	# 	redirect_to new_user_session_path if !user_signed_in?
 			
 	# end
-	def finish_external_payment
-		
-	end
 
-	def finish_contract
+	def finish
 		@account = Account.find(params[:account_id])
 		
 		invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
 		@account.customer.create_invoice_customer(invoice_name)
 		@invoice = @account.customer.invoices.first
-		@invoice.invoice_send
-		redirect_to @invoice.payment_link
-		# render :finish_contract
+		@payment = @invoice.invoice_send
+		if @payment.redirect_url
+			redirect_to @payment.redirect_url
+		else
+			render :finish
+		end
 	end
 
 	def contract

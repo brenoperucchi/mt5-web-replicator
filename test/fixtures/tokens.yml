@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  resourceable: one
+  tokenable: one
+  name: MyString
+  settings: MyText
+
+two:
+  resourceable: two
+  tokenable: two
+  name: MyString
+  settings: MyText

@@ -20,7 +20,11 @@ require 'rails_helper'
 
 RSpec.describe 'Store Controller', type: :request do
 	before(:context) do
-	  @plan1 = create(:plan, :plan1)
+	  @plan1  = create(:plan, :plan1)
+    @store  = create(:store, plan: @plan1)
+    # @stripe = create(:payment_method, :stripe)
+
+    # @stripe = create(:payment_method, :mercadopago)
 	end
 
   # This should return the minimal set of attributes required to create a valid
@@ -42,8 +46,14 @@ RSpec.describe 'Store Controller', type: :request do
       it "creates a new Order" do
         expect {
           post '/stores' , params: {:store => valid_attributes} #, valid_session
+          @store.reload
         }.to change(Store, :count).by(1)
        expect(response).to have_http_status 302
+       expect(Store.all.count).to eq(2)
+       expect(Store.first.name).to eq('Store 1')
+       expect(Store.first.payment_id).to eq(1)
+       expect(Store.last.payment_id).to eq(1)
+
       end
       it "creates a new Order" do
         expect {

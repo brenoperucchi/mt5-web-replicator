@@ -18,27 +18,34 @@ class Store < ApplicationRecord
   before_update :register_plan_update
   after_create :register_plan_create
 
-
   belongs_to :plan
-  has_many :accounts, :class_name => "Account", :foreign_key => "store_id", dependent: :destroy
-  has_many :traces, :class_name => "Trace", :foreign_key => "store_id", dependent: :destroy
-  has_many :orders#, :through => :traces, :source => :orders, dependent: :destroy
-  has_many :messages, :class_name => "Message", :foreign_key => "store_id"
-  has_many :users, dependent: :destroy
+  belongs_to :payment, optional: true
+
+  has_many :accounts, dependent: :destroy
+  has_many :traces,   dependent: :destroy
+  has_many :messages, dependent: :destroy
+  has_many :users,    dependent: :destroy
+  has_many :orders,   dependent: :destroy 
 
   has_many :transactions,-> { distinct }, :through => :accounts, :source => :transactions, dependent: :destroy
-  has_many :customers,    :through => :users, source: :userable, source_type: 'Customer'
-  has_many :invoices, dependent: :destroy#, as: :invoiceable#, dependent: :destroy
-  has_many :customer_plans, dependent: :destroy
-  has_many :instruments, dependent: :destroy
+  has_many :customers,                    :through => :users, source: :userable, source_type: 'Customer'
+  has_many :customer_plans,             dependent: :destroy
+  has_many :instruments,                dependent: :destroy
+  
+  has_many :invoices, as: :invoiceable, dependent: :destroy
 
   # has_many :plan_items#, dependent: :destroy
   has_many :plan_usages, dependent: :destroy
 
+  has_many :payments, dependent: :destroy
+  has_many :payment_methods, through: :payments, source: :payment_method
+
+  has_many :loggings,   as: :loggerable,    dependent: :destroy
+  has_many :tokens,     as: :resourceable,  dependent: :destroy
+
   # has_many :plan_items, dependent: :destroy
   # has_many :plans, -> { distinct }, through: :plan_items, source: :plan
   # has_many :plan_lines, -> { distinct }, through: :plan_items, source: :plan_line
-
 
   has_many :plan_stores, dependent: :destroy
   has_many :plan_items, through: :plan_stores, source: :plan_item, dependent: :destroy
@@ -147,7 +154,7 @@ class Store < ApplicationRecord
     #date_today = DateTime.now
     #date_today = DateTime.now + 1.month
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
-    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self)
+    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: self.payment)
 
     usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|
@@ -181,6 +188,14 @@ class Store < ApplicationRecord
     end
   end
 
+  def domain_url
+    if Rails.env.production?
+      "signal.imentore.com.br"
+    else
+      "signallocal.imentore.com.br"
+    end
+  end
+  
   private
   
   def create_invoice_item(invoice, usage, date_today, amount=nil)
@@ -191,10 +206,11 @@ class Store < ApplicationRecord
       end
     end
     if usage.calculate_usage(date_today, amount)
-      invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount, description: usage.description) 
+      item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount, description: usage.description) 
       usage.update(charged_at: date_today)
       invoice.balance_update
     end   
   end
+
 
 end

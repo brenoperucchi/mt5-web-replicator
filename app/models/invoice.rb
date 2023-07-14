@@ -14,9 +14,14 @@ class Invoice < ApplicationRecord
   
   store :settings, accessors: [:email, :payment_link]
 
+  serialize :response
+
   # belongs_to :ownerable, polymorphic: true
   belongs_to :store
+  belongs_to :payment
+  belongs_to :plan_usage, optional:true
   belongs_to :invoiceable, polymorphic: true, optional:true
+
   has_many :items, :class_name => "InvoiceItem", :foreign_key => "invoice_id", dependent: :destroy
   has_many :loggings,      as: :loggerable, dependent: :destroy
 
@@ -27,59 +32,12 @@ class Invoice < ApplicationRecord
     self.update(amount: items.to_a.sum(&:amount))  
   end
 
+
   def invoice_send
-    return false if self.state != 'pending'
-    changes = false;
-
-    Stripe.api_key = self.try(:invoiceable).try(:store).try(:stripe_api_secret)
-
-    if invoiceable.stripe_product_id.blank?
-      product = Stripe::Product.create(name: "#{self.name} - Monthly Payment - #{invoiceable.email}")
-      invoiceable.update(stripe_product_id: product[:id])
-      changes = true
-    end
-
-    price = Stripe::Price.create(
-      product: invoiceable.stripe_product_id,
-      unit_amount: number_with_precision(self.amount, precision: 2).to_s.gsub(/[.,]/,""),
-      currency: 'brl',
-    )
-
-
-    if invoiceable.stripe_customer_id.blank?
-      customer = Stripe::Customer.create(
-        name: invoiceable.name,
-        email: invoiceable.email,
-        description: 'My first customer',
-      )
-      invoiceable.update(stripe_customer_id: customer[:id])
-      changes = true
-    end
-
-    invoice_item = Stripe::InvoiceItem.create(
-      customer: invoiceable.stripe_customer_id,
-      price: price[:id],
-    )
-
-    invoice = Stripe::Invoice.create(
-      customer: invoiceable.stripe_customer_id,
-      collection_method: 'send_invoice',
-      days_until_due: 10,
-      payment_settings: {
-          },
-    )
-
-    if invoice[:id]
-      self.update(stripe_invoice_id: invoice[:id]) 
-      Stripe::Invoice.finalize_invoice(invoice[:id])
-      invoice = Stripe::Invoice.send_invoice(invoice[:id])
-      self.update(payment_link: invoice[:hosted_invoice_url])
-    else
-      self.update(state: :error)
-      return false
-    end
-    
-    return true
+    payment_method = self.payment.payment_method.provider(self, self.payment)
+    payment_method.checkout
+    self.update(payment_link: payment_method.redirect_url)
+    return payment_method
   end
 
 end

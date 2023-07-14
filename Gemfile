@@ -150,6 +150,7 @@ gem 'pay', '~> 3.0'
 
 # To use Stripe, also include:
 gem 'stripe', '>= 2.8', '< 6.0'
+gem 'mercadopago-sdk'
 gem 'dotenv'
 
 # # To use Braintree + PayPal, also include:

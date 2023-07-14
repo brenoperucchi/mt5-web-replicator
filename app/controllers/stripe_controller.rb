@@ -31,9 +31,12 @@ class StripeController < ApplicationController
 	end
 
 	def webhook
-		invoice = Invoice.find_by(stripe_invoice_id: params[:data][:object][:id])
+		store = Store.find(params[:id])
+		
+		invoice = Invoice.try(:find_by, stripe_invoice_id: params.dig(:data, :object, :id))
 		endpoint_secret = invoice.try(:invoiceable).try(:store).try(:stripe_webhook_secret)
-		if endpoint_secret
+		
+		if invoice or endpoint_secret
 			payload = request.body.read
 			  event = nil
 		  begin
@@ -57,27 +60,37 @@ class StripeController < ApplicationController
 		      puts "⚠️  Webhook signature verification failed. #{e.message})"
 		      head 400
 		    end
-			  end
+			end
+		  
 		  # Handle the event
 		  case event.type
 		  when 'invoice.payment_failed'
 		    # invoice = event.data.object # contains a Stripe::Invoice
 		    # Then define and call a method to handle the failed payment of an Invoice.
 		    # handle_failed_invoice(invoice);
+		  	head 200
 		  when 'invoice.finalized'
 		  	invoice.update(state: 'open')
+		  	head 200
 		  when 'payment_intent.succeeded'
-		      payment_intent = event.data.object
-		  		puts "🔔  Payment succeeded! (#{payment_intent.id}) - #{payment_intent.status}"
+		    payment_intent = event.data.object
+		  	puts "🔔  Payment succeeded! (#{payment_intent.id}) - #{payment_intent.status}"
+		  	head 200
 		  when 'invoice.payment_succeeded'
 		  	invoice.update(state: 'paid')
+		  	head 200
 		  else
 		    puts "Unhandled event type: #{event.type}"
+			  head 400
 		  end
-			invoice.loggings.create(content:event, state: event.type.upcase, changeset: invoice.try(:versions).try(:last).try(:changeset))
-		  head 200
+			invoice.loggings.create(content:params, state: event.type.upcase, changeset: invoice.try(:versions).try(:last).try(:changeset))
 		else
-			invoice.loggings.create(content:"NOT FIND", state: params)
+			if invoice.nil?
+				store.loggings.create(state:"INVOICE NOTFIND", content: params)
+			else
+				invoice.loggings.create(state:"INVOICE NOTFIND", content: params)
+			end
+			
 			puts "⚠️  Not find stripe invoice id: #{params[:data][:object][:id]})"
 			head 400
 		end

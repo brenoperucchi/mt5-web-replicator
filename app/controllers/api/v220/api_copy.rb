@@ -30,9 +30,11 @@ module API
 
         post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
+          binding.pry
 
           account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
           return if account.nil?
+
 
           request_json = params[:imentore_copy]
           @orders_json = YAML.load(request_json) if request_json
@@ -72,13 +74,14 @@ module API
             end
           end
           
+
           if @orders_json["orders_open"].present?
             # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
             account = Account.find_by(name: params[:account_id], kind: :copy)
             if account
               content_json = {imentore_copy: {orders_open: @orders_json["orders_open"]}}.merge(params_hash).to_json
               
-              traces = account.traces.copy
+              traces = account.traces.copy.active
               if traces.present? #and not content.blank? and content.is_a?(Hash)
                 message = Message::Metatrader.create(content: @orders_json, content_at: Time.zone.now, store: account.store, traces:traces)
                 # TODO - Colocar uma trava se account estiver desabilitado

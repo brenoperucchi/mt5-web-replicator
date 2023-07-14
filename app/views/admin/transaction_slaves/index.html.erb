@@ -68,7 +68,7 @@
 
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
-            <% attribute_types_custom = { ticket_master: Administrate::Field::String, ticket_slave: Administrate::Field::String  } %>
+            <% attribute_types_custom = { ticket_master: Administrate::Field::Number, ticket_slave: Administrate::Field::Number  } %>
             <% states = resource_class.states.map{|x,y| [x, y]} %>
             <% attribute_labels = { profit_search: 'Profit' } %>
 

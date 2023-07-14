@@ -297,8 +297,8 @@ pt-BR:
         created_at: criado
     models:
       customer_plan:
-        one: Plano
-        other: Planos
+        one: Plano Cliente
+        other: Planos Clientes
       customer:
         one: Cliente
         other: Clientes
@@ -577,6 +577,9 @@ pt-BR:
         success: "%{resource} foi restaurado com sucesso."
         failure: "%{resource} com error ao restaurar."
     fields:
+      nested_has_many:
+          remove: Remover
+          add: Adicionar
       has_many:
         more: "Exibindo %{count} de %{total_count}"
         none: Nenhum
