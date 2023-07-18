@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_07_14_145838) do
+ActiveRecord::Schema.define(version: 2023_07_18_191115) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -359,8 +359,8 @@ ActiveRecord::Schema.define(version: 2023_07_14_145838) do
     t.bigint "trace_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "plan_usage_id"
     t.bigint "customer_plan_id"
+    t.bigint "plan_usage_id"
     t.index ["account_id"], name: "index_permissions_on_account_id"
     t.index ["customer_plan_id"], name: "index_permissions_on_customer_plan_id"
     t.index ["plan_usage_id"], name: "index_permissions_on_plan_usage_id"
@@ -615,8 +615,6 @@ ActiveRecord::Schema.define(version: 2023_07_14_145838) do
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
-  add_foreign_key "plan_customers", "customer_plans"
-  add_foreign_key "plan_customers", "customers"
   add_foreign_key "plan_stores", "plan_items"
   add_foreign_key "plan_stores", "stores"
   add_foreign_key "plan_usages", "stores"
