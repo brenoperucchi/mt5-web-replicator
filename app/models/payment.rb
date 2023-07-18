@@ -12,9 +12,9 @@ class Payment < ApplicationRecord
 
   def webook_url
     if Rails.env.production?
-      "https://#{Store.first.domain_url}:8443/#{self.payment_method.handle.classify.downcase}/webhook/#{store.id}/#{self.id}"
-    else
       "https://#{Store.first.domain_url}/#{self.payment_method.handle.classify.downcase}/webhook/#{store.id}/#{self.id}"
+    else
+      "https://#{Store.first.domain_url}:8443/#{self.payment_method.handle.classify.downcase}/webhook/#{store.id}/#{self.id}"
     end
   end
 end

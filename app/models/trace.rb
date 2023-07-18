@@ -41,10 +41,7 @@ class Trace < ApplicationRecord
 
   
   has_one :permission#, dependent: :destroy
-  has_one  :customer_plan, :through => :permission, :source => :customer_plan
-
-  has_one :payment
-  has_one :payment_method, through: :payment, source: :payment_method
+  has_one :customer_plan, :through => :permission, :source => :customer_plan
 
   # accepts_nested_attributes_for :payment
 

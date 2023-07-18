@@ -175,7 +175,7 @@ class Store < ApplicationRecord
 
   def self.customer_plan_trace_fixing
     Store.all.each do |store|
-      attributes = {name: 'Fist Plan', amount: 100, kind:"fixed", charge_recurrence: "monthly", meta_margin_mode: "heding", meta_mode: 'demo'}
+      attributes = {name: 'Fist Plan', amount: 100, kind:"fixed", charge_recurrence: "monthly", meta_margin_mode: "hedging", meta_mode: 'demo'}
       if store.customer_plans.empty?
         customer_plan = store.customer_plans.create(attributes)
       else

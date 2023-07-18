@@ -315,7 +315,7 @@
               - @trace.accounts.order('kind desc').each do |account|
                 - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
                 - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
-                tr[data-href="#{account_dashboards_url(account, @trace, datefilter:params[:datefilter])}"]
+                tr[data-href="#{account_dashboards_url(account, @trace, @trace.customer_plan.payment,  datefilter:params[:datefilter])}"]
                   - type = account.slave? ? :slaves : :transactions
                   td = "#{account.name} - #{account.kind}"
                   td
