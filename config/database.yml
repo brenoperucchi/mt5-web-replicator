@@ -52,4 +52,4 @@ production:
   database: signalforex
   username: signalforex
   password: <%= Rails.application.credentials[:secret_database] %>
-  host: 10.0.0.1
+  host: 85.239.248.170
