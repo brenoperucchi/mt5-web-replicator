@@ -21,7 +21,6 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     customers:          Field::HasMany,
     accounts:           Field::HasMany,
     traces:             Field::HasMany,
-    customers:          Field::HasMany,
     payment:            Field::BelongsTo,
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

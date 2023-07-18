@@ -43,6 +43,7 @@ Rails.application.routes.draw do
       resources :loggings, only:[:show]
       resources :transaction_slaves, only:[:show]
       resources :invoices, except:[:new]
+      resources :payments
       resources :customers
       resources :customer_plans
       resources :stores
