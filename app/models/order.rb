@@ -27,8 +27,12 @@ class Order < ApplicationRecord
 
   class << self
     def ransackable_scopes(_auth_object = nil)
-      %i[profit_search]
+      %i[profit_search ticket_search]
     end
+  end
+
+  def self.ticket_search(value)
+    self.where("CAST(content_id as TEXT) ILIKE ?", "%#{value}%")
   end
 
   def self.profit_search(value)

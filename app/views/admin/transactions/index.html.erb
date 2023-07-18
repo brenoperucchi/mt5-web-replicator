@@ -69,16 +69,14 @@
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
 
-            <% attribute_types_custom = { ticket: Administrate::Field::Number } %>
+            <% attribute_types_custom = { ticket_search: Administrate::Field::String } %>
             <% states = [ ['pending', 'pending'], ['executed', 'executed'], ['error', 'error'], ['closed', 'closed'], ['closed_info', 'closed_info'] ] %>
-            <% attribute_labels = { profit_search: 'Profit' } %>
+            <% attribute_labels = { profit_search: 'Profit', ticket_search: 'Ticket', } %>
 
             <%= render "admin/application/sidebar_search", states:states,  attribute_labels:attribute_labels, attribute_types_custom:attribute_types_custom %>
 
-
             <div id="content" class="">
               <section class="main-content__body main-content__body--flush">
-
 
                 <%= render(
                   "collection",
@@ -95,6 +93,7 @@
               </div>
             </div>
           </div>
+
 <% content_for :javascript do %>
 <script>
     (function($) {

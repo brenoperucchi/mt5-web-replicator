@@ -47,7 +47,7 @@ class TransactionSlave < ApplicationRecord
 
   class << self
     def ransackable_scopes(_auth_object = nil)
-      %i[profit_search]
+      %i[profit_search ticker_master_search ticket_slave_search]
     end
   end
 
@@ -55,6 +55,13 @@ class TransactionSlave < ApplicationRecord
     self.where(profit:0..value.to_f)
   end
 
+  def self.ticket_slave_search(value)
+    self.where("CAST(ticket_slave as TEXT) ILIKE ?", "%#{value}%")
+  end
+
+  def self.ticker_master_search(value)
+    self.where("CAST(ticket_master as TEXT) ILIKE ?", "%#{value}%")
+  end
 
   def profit
     read_attribute(:profit).nil? ? 0 : read_attribute(:profit)

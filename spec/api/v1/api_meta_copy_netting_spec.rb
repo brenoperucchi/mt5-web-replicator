@@ -27,8 +27,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         @slave = order.slaves.find_by(ticket_master: 10000001, account:account)
         expect(@account1.state).to be == "enable"
         expect(@account1.kind).to be == "slave"
-        expect(@transaction.ticket).to be == "10000001" 
-        expect(@slave.ticket_master).to be == "10000001" 
+        expect(@transaction.ticket).to be == 10000001 
+        expect(@slave.ticket_master).to be == 10000001 
         expect(@transaction.state).to be == "executed"
         expect(@transaction.trace.name_id).to be == "20001"
         expect(@slave.state).to be == "pending"
@@ -46,8 +46,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@account2.state).to be == "enable"
         expect(@account2.kind).to be == "slave"
 
-        expect(@transaction.ticket).to be == "10000001" 
-        expect(@slave.ticket_master).to be == "10000001" 
+        expect(@transaction.ticket).to be == 10000001 
+        expect(@slave.ticket_master).to be == 10000001 
         expect(@transaction.state).to be== "executed"
         expect(@slave.state).to be == "pending"
         @slave.execute
@@ -134,8 +134,8 @@ RSpec.describe API::V1::APITransactionsCopy do
 
         expect(@slave21.id).to be == 3
         expect(@slave22.id).to be == 4
-        expect(@slave21.ticket_master).to be == "10000002"
-        expect(@slave22.ticket_master).to be == "10000002"
+        expect(@slave21.ticket_master).to be == 10000002
+        expect(@slave22.ticket_master).to be == 10000002
         expect(@slave21.seconds_ago).to be <= 30
         expect(@slave21.seconds_ago).to be >= 0
 
@@ -143,8 +143,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@order2.state).to be == "executed"
         expect(@slave11.account.name).to be == "5634787"
         expect(@slave12.account.name).to be == "5634788"
-        expect(@slave11.ticket_master).to be == "10000001"
-        expect(@slave12.ticket_master).to be == "10000001"
+        expect(@slave11.ticket_master).to be == 10000001
+        expect(@slave12.ticket_master).to be == 10000001
         expect(@slave11.state).to be == "deleted"
         expect(@slave12.state).to be == "remove"
         expect(@slave21.state).to be == "pending"
@@ -158,8 +158,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@slave21.state).to be == "executed"
         expect(@slave22.state).not_to be == "executed"
         
-        expect(@slave21.ticket_master).to be == "10000002"
-        expect(@slave22.ticket_master).to be == "10000002"
+        expect(@slave21.ticket_master).to be == 10000002
+        expect(@slave22.ticket_master).to be == 10000002
         expect(@slave21.state).to be == "executed"
 
 
@@ -235,8 +235,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@orders.last.content_id).to be == 10000002
         expect(@orders.first.id).to be == 1
         expect(@orders.last.id).to be == 4
-        expect(@orders.first.transactions.first.ticket).to be == "10000001"
-        expect(@orders.first.transactions.last.ticket).to be == "10000001"
+        expect(@orders.first.transactions.first.ticket).to be == 10000001
+        expect(@orders.first.transactions.last.ticket).to be == 10000001
         expect(account.orders.count).to be == 2
         expect(account.slaves.count).to be == 2
         expect(account.slaves.count).not_to be == 1
@@ -294,8 +294,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         slave1 = transaction1.slaves.find_by(ticket_master: 10000001)
         slave2 = transaction3.slaves.find_by(ticket_master: 10000003)
         expect(transaction2).to be nil
-        expect(slave1.ticket_master).to be == "10000001"
-        expect(slave2.ticket_master).to be == "10000003"
+        expect(slave1.ticket_master).to be == 10000001
+        expect(slave2.ticket_master).to be == 10000003
         expect(transaction1.slaves.count).to be == 2
         expect(transaction1.slaves.count).to be == 2
         expect(transaction3.slaves.count).to be == 2
@@ -331,7 +331,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         transaction.close
         expect(transaction.state).to be == "closed"
         
-        @order = Account.find_by(name: 5634787).orders.find_by(content_id: "10000001")
+        @order = Account.find_by(name: 5634787).orders.find_by(content_id: 10000001)
         expect(@order.state).to be == "closed"
       end
 

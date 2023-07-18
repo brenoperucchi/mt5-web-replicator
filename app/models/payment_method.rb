@@ -1,7 +1,6 @@
 class PaymentMethod < ApplicationRecord
   # belongs_to :store
 
-  
   has_many :invoices
   has_many :customer_plans
 

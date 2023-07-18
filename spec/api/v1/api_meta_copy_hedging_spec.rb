@@ -48,7 +48,7 @@ RSpec.describe API::V1::APITransactionsCopy do
 
         order = Order.where(content_id:2002).take
         expect(order.content_id).to be == 2002
-        expect(order.transactions.find_by(account:@account_copy).ticket).to be == "2002"
+        expect(order.transactions.find_by(account:@account_copy).ticket).to be == 2002
         expect(order.transactions.find_by(account:@account_copy).state).to be == "error"
         expect(order.transactions.count).to be == 1
         expect(order.slaves.count).to be == 0
@@ -178,8 +178,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@account1.state).to be == "enable"
         expect(@account1.kind).to be == "slave"
-        expect(@transaction.ticket).to be == "10000001" 
-        expect(@slave.ticket_master).to be == "10000001" 
+        expect(@transaction.ticket).to be == 10000001
+        expect(@slave.ticket_master).to be == 10000001
         expect(@transaction.state).to be == "executed"
         expect(@slave.state).to be == "pending"
         expect(@slave.seconds_ago).to be <= 30
@@ -197,8 +197,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@account2.state).to be == "enable"
         expect(@account2.kind).to be == "slave"
 
-        expect(@transaction.ticket).to be == "10000001" 
-        expect(@slave.ticket_master).to be == "10000001" 
+        expect(@transaction.ticket).to be == 10000001
+        expect(@slave.ticket_master).to be == 10000001
         expect(@transaction.state).to be== "executed"
         expect(@slave.state).to be == "pending"
         @slave.execute
@@ -334,16 +334,16 @@ RSpec.describe API::V1::APITransactionsCopy do
         @transaction2 = @account2.transactions.find_by(ticket:10000001)
         @slave2 = @order2.slaves.find_by(ticket_master: 10000001, account: @account2)
 
-        expect(@slave.ticket_master).to be == "10000001"
-        expect(@transaction.ticket).to be == "10000001"
+        expect(@slave.ticket_master).to be == 10000001
+        expect(@transaction.ticket).to be == 10000001
         expect(@slave.state).to be == "remove"
         expect(@slave.master.state).to be == "closed_info"
         expect(@order1.id).to be == 1
         expect(@order1.state).to be == "closed"
 
 
-        expect(@slave2.ticket_master).to be == "10000001"
-        expect(@transaction2.ticket).to be == "10000001"
+        expect(@slave2.ticket_master).to be == 10000001
+        expect(@transaction2.ticket).to be == 10000001
         expect(@slave2.state).to be == "deleted"
         expect(@slave2.master.state).to be == "closed_info"
         expect(@order2.id).to be == 1

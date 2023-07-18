@@ -30,7 +30,7 @@ module API
 
         post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
-          binding.pry
+          # binding.pry
 
           account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
           return if account.nil?

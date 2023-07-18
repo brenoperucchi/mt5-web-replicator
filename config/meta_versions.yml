@@ -14,6 +14,7 @@ imentore_slave:
   '2_10': OK
   '2_11': OK
   '2_12': OK
+  '2_20': OK
   disable_msg: 'A versao |version| do Imentore Slave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_slave:
   '1_54': disable

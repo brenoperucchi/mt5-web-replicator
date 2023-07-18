@@ -359,8 +359,8 @@ ActiveRecord::Schema.define(version: 2023_07_14_145838) do
     t.bigint "trace_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "customer_plan_id"
     t.bigint "plan_usage_id"
+    t.bigint "customer_plan_id"
     t.index ["account_id"], name: "index_permissions_on_account_id"
     t.index ["customer_plan_id"], name: "index_permissions_on_customer_plan_id"
     t.index ["plan_usage_id"], name: "index_permissions_on_plan_usage_id"
@@ -529,7 +529,7 @@ ActiveRecord::Schema.define(version: 2023_07_14_145838) do
     t.integer "state", default: 0
     t.string "ticket_deal"
     t.bigint "account_id"
-    t.string "ticket_slave"
+    t.bigint "ticket_slave"
     t.datetime "closed_at"
     t.string "price_closed"
     t.integer "deal_id"

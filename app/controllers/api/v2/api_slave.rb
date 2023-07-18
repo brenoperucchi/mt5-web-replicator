@@ -38,6 +38,8 @@ module API
             account = Account.find_by(name: params[:account_id])
             if account
               slave = account.slaves.find_by(comment: content['comment'])
+                
+
               if slave.nil?
                 Logging.create(content:message, state: action)
               else

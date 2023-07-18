@@ -43,13 +43,18 @@ class Transaction < ApplicationRecord
 
   class << self
     def ransackable_scopes(_auth_object = nil)
-      %i[profit_search]
+      %i[profit_search ticket_search]
     end
   end
 
   def self.profit_search(value)
     self.where(profit:0..value.to_f)
   end
+
+  def self.ticket_search(value)
+    self.where("CAST(ticket as TEXT) ILIKE ?", "%#{value}%")
+  end
+
 
   state_machine :initial => :pending do
     after_transition :pending => :executed,                    :do => :update_state

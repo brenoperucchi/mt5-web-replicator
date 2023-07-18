@@ -75,8 +75,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         order = Order.where(content_id:2001).take
         expect(order.content_id).to be == 2001
         expect(order.transactions.find_by(ticket:"2001").state).to be == "executed"
-        expect(order.slaves.find_by(account:@account1).ticket_master).to be == "2001"
-        expect(order.slaves.find_by(account:@account2).ticket_master).to be == "2001"
+        expect(order.slaves.find_by(account:@account1).ticket_master).to be == 2001
+        expect(order.slaves.find_by(account:@account2).ticket_master).to be == 2001
         expect(order.slaves.find_by(account:@account1).state).to be == "error"
         expect(order.slaves.find_by(account:@account2).state).to be == "pending"
         expect(order.slaves.find_by(account:@account1).account.magics_accept).to be == "2000"
