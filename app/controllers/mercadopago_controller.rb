@@ -34,7 +34,7 @@ class MercadopagoController < ApplicationController
 
       if invoice.nil?
         store.loggings.create(state:"INVOICE NOTFIND", content: params)
-        head 400
+        head 201
         return
       else
         head 201

@@ -11,6 +11,7 @@ class PaymentDashboard < Administrate::BaseDashboard
     id:             Field::Number,
     api_token:      Field::String,
     webook_url:     Field::String,
+    store:          Field::BelongsTo,
     payment_method: Field::BelongsTo,
     customer_plans: Field::HasMany,
     invoices:       Field::HasMany,
@@ -28,6 +29,7 @@ class PaymentDashboard < Administrate::BaseDashboard
     payment_method
     api_token
     customer_plans
+    store
     invoices
   ].freeze
 
@@ -40,6 +42,7 @@ class PaymentDashboard < Administrate::BaseDashboard
     webhook_token
     webook_url
     customer_plans
+    store
     invoices
     created_at
     updated_at
@@ -71,6 +74,6 @@ class PaymentDashboard < Administrate::BaseDashboard
   # across all pages of the admin dashboard.
   #
   def display_resource(payment)
-    payment.payment_method.name
+    "#{payment.payment_method.name} - Store ##{payment.try(:store).try(:id)}"
   end
 end
