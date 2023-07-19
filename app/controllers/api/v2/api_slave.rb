@@ -38,8 +38,6 @@ module API
             account = Account.find_by(name: params[:account_id])
             if account
               slave = account.slaves.find_by(comment: content['comment'])
-                
-
               if slave.nil?
                 Logging.create(content:message, state: action)
               else
@@ -50,14 +48,18 @@ module API
                   slave.execute
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
-                when "CLOSED", "DELETED"
+                when "CLOSED", "DELETED", "HASCLOSED"
                   api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
                   slave.attributes = api_attributes
                   if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
                     slave.state = :executed
                     slave.master.state = :executed
                   end
-                  action == "CLOSED" ? slave.close : slave.deleted
+                  if action == "CLOSED" or action == "HASCLOSED"
+                    slave.close
+                  else
+                    slave.deleted
+                  end
                   @version = slave.versions.last(2).try(:first)
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "MODIFY"

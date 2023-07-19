@@ -317,6 +317,9 @@ en:
       transaction:
         one: Copy
         other: Copy
+      transaction_slave:
+        one: Slave
+        other: Slaves
       invoice:
         one: Invoice
         other: Invoices
@@ -326,6 +329,9 @@ en:
       order:
         one: Order
         other: Orders
+      payment:
+        one: Payment
+        other: Payments
     errors:
       models:
         store:

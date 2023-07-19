@@ -53,8 +53,6 @@ module Control
     FORM_ATTRIBUTES = %i[
       api_token
       webhook_token
-      customer_plans
-      invoices
     ].freeze
 
     # COLLECTION_FILTERS

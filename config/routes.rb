@@ -35,17 +35,17 @@ Rails.application.routes.draw do
     mount Sidekiq::Web => '/sidekiq'
     mount API::Base, at: "/"
     namespace :control do
+      resources :instruments
       resources :accounts
       resources :traces
       resources :orders, except:[:edit, :new, :destroy, :update]
-      resources :instruments
       resources :transactions, only:[:show]
-      resources :loggings, only:[:show]
       resources :transaction_slaves, only:[:show]
-      resources :invoices, except:[:new]
-      resources :payments
       resources :customers
       resources :customer_plans
+      resources :payments
+      resources :invoices, except:[:new]
+      resources :loggings, only:[:show]
       resources :stores
     end
 

@@ -317,6 +317,9 @@ pt-BR:
       transaction:
         one: Copy
         other: Copy
+      transaction_slave:
+        one: Slave
+        other: Slaves
       invoice:
         one: Fatura
         other: Faturas
@@ -326,6 +329,10 @@ pt-BR:
       order:
         one: Ordem
         other: Ordens
+      payment:
+        one: Método Pagamento
+        other: Método Pagamentos
+
     errors:
       models:
         store:
