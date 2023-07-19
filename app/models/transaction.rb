@@ -66,17 +66,17 @@ class Transaction < ApplicationRecord
     event :execute do
       transition :pending => :executed
     end
+    event :erro do
+      transition [:pending, :executed, :closed] => :error
+    end
     event :close do
-      transition [:pending, :executed, :closed_info] => :closed
+      transition [:pending, :error, :executed, :closed_info] => :closed
     end
     event :close_info do
       transition [:closed] => :closed_info
     end
     event :restart do
       transition [:executed, :error, :closed] => :pending
-    end
-    event :erro do
-      transition [:pending, :executed, :closed] => :error
     end
     
     state :error do
