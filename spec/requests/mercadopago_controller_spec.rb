@@ -91,7 +91,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
           params: {"api_version"=>"v1", "data"=>{"id"=>"131382533"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1313825330", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1313825330"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
       }.not_to change(invoice, :state).from("pending")
-      expect(response).to have_http_status 400
+      expect(response).to have_http_status 201
     end
 
     it "IPN" do
@@ -111,7 +111,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
           params: {"resource"=>"https://api.mercadolibre.com/merchant_orders/10395616659", "topic"=>"merchant_order", "id"=>"1", "payment_id"=>"1", "mercadopago"=>{"resource"=>"https://api.mercadolibre.com/merchant_orders/10400150087", "topic"=>"merchant_order"}}
         invoice.reload
       }.not_to change(invoice, :state).from("pending")
-      expect(response).to have_http_status 400
+      expect(response).to have_http_status 201
     end
     it "IPN" do
       # unfreeze_time
