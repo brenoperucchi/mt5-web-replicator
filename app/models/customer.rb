@@ -74,7 +74,7 @@ class Customer < ApplicationRecord
         else
           amount = customer_plan.amount
         end
-        description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable.name} \r\n"
+        description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable_id} \r\n"
         
         if @invoice.save and @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
           plan_usage.update_next_charged
