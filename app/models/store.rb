@@ -33,6 +33,8 @@ class Store < ApplicationRecord
   has_many :instruments,                dependent: :destroy
   
   has_many :invoices, as: :invoiceable, dependent: :destroy
+  has_many :invoice_stores, class_name: :Invoice, foreign_key: :store_id, dependent: :destroy
+
 
   # has_many :plan_items#, dependent: :destroy
   has_many :plan_usages, dependent: :destroy
