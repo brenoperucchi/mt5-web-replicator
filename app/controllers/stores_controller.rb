@@ -42,7 +42,6 @@ class StoresController < ApplicationController
 			    format.html { redirect_to control_accounts_path }
 		    	format.json { render :show, status: :created, location: @store }
 			  else
-			  	binding.pry
 					@store.errors.add(:base, :problem_on_create)
 					format.html { render :new }
 					format.json { render json: @store.errors, status: :unprocessable_entity }

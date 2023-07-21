@@ -30,112 +30,28 @@ module API
 
         post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
-          # binding.pry
-
-          account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
-          return if account.nil?
 
 
-          request_json = params[:imentore_copy]
-          @orders_json = YAML.load(request_json) if request_json
-          params_hash  = params.except(:imentore_copy)  
+          account = Account.find_by(name: params[:account_id], kind: :copy)
 
-          if @orders_json["orders_closed"].present?
-            content_json = {imentore_copy: {orders_closed: @orders_json["orders_closed"]}}.merge(params_hash).to_json
-            account.loggings.create(content:content_json, state: "ORDERS_CLOSED", changeset: account.name)
-            
-            changed = true;
-            @orders_json["orders_closed"].each_with_index do |(ticket, copy_params), index|
-              Transaction.where(ticket: ticket).each do |transaction|
-                if transaction and not transaction.closed?
-                  transaction.attributes = {price_closed:  copy_params["price_closed"], profit: copy_params["profit"], closed_at:copy_params["close_at"]}
-                  transaction.save
-                  transaction.loggings.create(content:content_json, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset))
-                  transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
-                  
-                  # if transaction.can_close?
-                    if transaction.close 
-                      
-                      transaction.slaves.each do |slave|
-                        slave.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:account, changeset: transaction.try(:versions).try(:last).try(:changeset))
-                      end
-                    else
-                      changed = false
-                    end
-                  # end
-                end
-              end
-            end
-            if changed
-              body "OK|OK|OK"
-              status 201
-            else
-              status 401
-            end
-          end
-          
 
-          if @orders_json["orders_open"].present?
-            # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
-            account = Account.find_by(name: params[:account_id], kind: :copy)
-            if account
-              content_json = {imentore_copy: {orders_open: @orders_json["orders_open"]}}.merge(params_hash).to_json
-              
-              traces = account.traces.copy.active
-              if traces.present? #and not content.blank? and content.is_a?(Hash)
-                message = Message::Metatrader.create(content: @orders_json, content_at: Time.zone.now, store: account.store, traces:traces)
-                # TODO - Colocar uma trava se account estiver desabilitado
-                if not message.error? and @orders_json["orders_open"].try(:present?)
-                  # content = YAML.load(self.content)
-                  account_mode = params[:account_mode]
-                  account_copy = Account.find_by(name: params[:account_id])
-                  account.loggings.create(content:content_json, state: "ORDERS_OPEN", changeset: account.name)
-                  changed = true
+          # request_json = params[:imentore_copy]
+          # @orders_json = YAML.load(request_json) if request_json
+          # params_hash  = params.except(:imentore_copy)  
 
-                  @orders_json["orders_open"].each_with_index do |(ticket, copy_params), index|
-                    # copy_attributes = API::V220::APICopySerializer.new(copy_params).api_attributes
-                    state_meta = copy_params["state_meta"]
-                    traces.active.not_deleted.each do |trace|
-                      orders = trace.orders.where(content_id: ticket)
-                      unless orders.present?
-                        unless trace.create_orders(copy_params, account_copy, message, copy_params["symbol"], version) 
-                          changed ||= false
-                        end
-                      else
-                        if orders.present? and state_meta.try(:include?, "SLTPLOT")
-                          orders.each do |order| 
-                            order.transactions.each do|t| 
-                              t.set_lot_sl_tp(copy_params) 
-                              t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
-                            end
-                          end
-                        end
-                        if orders.present? and state_meta.try(:include?, "PROFIT")
-                          orders.each do |order| 
-                            order.transactions.each do |t| 
-                              t.set_profit(copy_params)
-                              t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
-                            end
-                          end
-                        end
-                      end
-                    end
-                  end
 
-                  if changed
-                    body "OK|OK|OK"
-                    status 201
-                  else
-                    status 401
-                  end
+          # api_version = (version == "v2") ? "V220" : "V2"
+          # klass_metatrader = "Message::#{api_version}::Metatrader".classify.safe_constantize
 
-                else
-                  content_error = "Message::Metatrader ##{message.try(:id)} cannot executed - Account Name #{account.try(:name)}"
-                  account.loggings.create(content:content_error, state: "ERROR", changeset: message.try(:errors).try(:full_messages))
-                  body :NONE
-                end
-              end
-            end
+          # hash_params = {imentore_copy:params["imentore_copy"]}.merge(params.except("imentore_copy"))
+
+          # message = klass_metatrader.create(content: hash_params , content_at: Time.zone.now, store: account.try(:store))
+
+          if not klass_metatrader.nil? and message.execute
+            body "OK|OK|OK"
+            status 201
+          else
+            status 401
           end
         end
       end

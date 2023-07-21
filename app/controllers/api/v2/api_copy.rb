@@ -7,9 +7,9 @@ module API
     class APICopy < Grape::API
       include API::V2::Defaults
 
-      resource :transactions do 
+      resource :copy do 
         ##Copy Version >= 2.12 
-        get "/copy/request/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
+        get "/get/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id], kind: :copy)
           if account
             map = account.transactions.api_request_attributes(:closed_info)
@@ -19,7 +19,7 @@ module API
         end        
 
         ##Copy Version <= 2.11
-        get "/copy/trasmit/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
+        get "/get/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id], kind: :copy)
           if account
             map = account.transactions.api_request_attributes(:closed_info)
@@ -28,58 +28,36 @@ module API
           body map
         end
 
-        post "/copy/trasmit/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
+        post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
-          action = params[:action]
-          if action == "closed"
-            parameters = eval(params[:body].encode("UTF-8", "Windows-1252"))
-            serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body].encode("UTF-8", "Windows-1252")))
-            # transaction = Transaction.find_by(ticket: parameters[:deal_ticket])
-            # Transaction.executed.where(ticket: parameters[:deal_ticket]).each do |transaction|
-            Transaction.where(ticket: parameters[:ticket_id]).each do |transaction|
-              
-              transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
-              transaction.save
-              transaction.loggings.create(content:params, state: action.try(:upcase), changeset: transaction.try(:versions).try(:last).try(:changeset))
-              
-              if transaction.can_close?
-                if transaction.close 
-                  transaction.slaves.each do |slave|
-                    slave.loggings.create(content: "Remove automatically by API Transaction Copy Action Closed ##{transaction.id}", state: "REMOVE")
-                  end
-                end
-              end
-            end
-            body "OK|OK|OK"
-          elsif action == "orders"    
-            # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
-            account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
-            if account
-              account.loggings.create(content:params, state: action.try(:upcase), changeset: account.name)
-              traces = account.traces.copy.ids
 
-              if traces.present? #and not content.blank? and content.is_a?(Hash)
-                orders = {orders:[]}
-                params['orders'].encode("UTF-8", "Windows-1252").split("//").each do |order| 
-                  orders[:orders] << [YAML.load(order)]
-                end
-                orders[:params] = params.except('orders')
-                message = Message::Metatrader.create(content: orders.to_json, content_at: Time.zone.now, store: account.store, trace_ids:traces)
-                
-                # TODO - Colocar uma trava se account estiver desabilitado
-                if message.execute
-                  # if account.transactions.closed_info.present?
-                  #   body account.transactions.api_request_attributes(:closed_info)
-                  # else  
-                    body "OK|OK|OK"
-                  # end
-                else
-                  content_error = "Message::Metatrader ##{message.try(:id)} cannot executed - Account Name #{account.try(:name)}"
-                  account.loggings.create(content:content_error, state: "ERROR", changeset: message.try(:errors).try(:full_messages))
-                  body :NONE
-                end
-              end
-            end
+
+          # Logging.create(content:params, state: "COPY")
+          account = Account.find_by(name: params[:account_id], kind: :copy)
+          
+          logging = Logging.create(content:params, state: "COPY", changeset: account.name, account: account)
+
+
+          # request_json = params[:imentore_copy]
+          # @orders_json = YAML.load(request_json) if request_json
+          # params_hash  = params.except(:imentore_copy)  
+
+
+          # api_version = (version == "v2") ? "V2" : "V2"
+          klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
+
+          # hash_params = {imentore_copy:"#{YAML.load(params["imentore_copy"]).merge(params.except("imentore_copy"))}"}
+          # hash_params = {imentore_copy:"#{YAML.load(params["imentore_copy"])}", params: params.except("imentore_copy")}
+          hash_params = {imentore_copy:params["imentore_copy"], request_url: request.url}.merge(params.except("imentore_copy"))
+
+          message = klass_metatrader.create(content: hash_params, content_at: Time.zone.now, store: account.try(:store))
+          logging.update(loggerable:message)
+
+          if(not klass_metatrader.nil? and message.try(:execute))
+            body "OK|OK|OK"
+            status 201
+          else
+            status 401
           end
         end
       end

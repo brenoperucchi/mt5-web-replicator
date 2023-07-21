@@ -10,12 +10,12 @@ class Transaction < ApplicationRecord
   # }
 
   belongs_to :order, optional:true
-  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id, optional:true
+  belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id, optional:true
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
   belongs_to :deal, optional:true
 
-  has_many :loggings, as: :loggerable, dependent: :destroy
+  has_many :loggings, as: :resourceable, dependent: :destroy
   has_many :slaves,   through: :order,    source: :slaves
   has_many :accounts, through: :order,    source: :accounts
 
@@ -114,6 +114,7 @@ class Transaction < ApplicationRecord
     if self.update(profit: profit)
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
     end
+    return self
   end
 
   def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)
@@ -139,6 +140,7 @@ class Transaction < ApplicationRecord
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
       set_slaves_attributes(lot, take_profit, stop_loss)
     end
+    return self
   end
 
   def set_mfe_mae(mfe, mae, time_trader)

@@ -91,7 +91,7 @@ class Trace < ApplicationRecord
     Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
   end
 
-  def create_orders(order_params, account, message, symbol, api_version)
+  def create_order(order_params, account, message, symbol, api_version)
 
     apiCopySerializerClass = Class.const_get("API::#{api_version.try(:upcase)}::APICopySerializer")
 
@@ -121,7 +121,7 @@ class Trace < ApplicationRecord
     end
 
     if order and not order.error?
-      transaction.loggings.new(content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN")
+      transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: order.message.loggings.first)
       transaction.execute
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 
@@ -156,7 +156,7 @@ class Trace < ApplicationRecord
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:order.message.loggings.first)
         resource.erro!
       end
     end

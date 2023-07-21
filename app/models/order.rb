@@ -5,9 +5,13 @@ class Order < ApplicationRecord
   belongs_to :trace
   belongs_to :store
   belongs_to :account
-  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id#, dependent: :destroy
+  belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id#, dependent: :destroy
 
   has_many :transactions, dependent: :destroy
+  
+  # has_many :loggings,     through: :transactions, source: :loggings
+  has_many :loggings, as: :resourceable, dependent: :destroy
+
   has_many :slaves,       class_name: 'TransactionSlave', dependent: :destroy, foreign_key: :order_id
 
   has_many :balances, dependent: :destroy, autosave: true
@@ -146,7 +150,7 @@ class Order < ApplicationRecord
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
         resource.erro!
       end
     end

@@ -13,8 +13,10 @@ module Message
       content_id: Field::String,
       state: Field::String,
       response: Field::String,
+      request_url: Field::String,
       orders: Field::HasMany,
       traces: Field::HasMany,
+      all_loggings: Field::HasMany.with_options(class_name: 'Logging'),
       # message: Field::HasOne,
       updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -41,11 +43,11 @@ module Message
     # an array of attributes that will be displayed on the model's show page.
     SHOW_PAGE_ATTRIBUTES = %i[
     state
-    content_id
     content
+    request_url
+    all_loggings
     traces
     orders
-    response
     content_at
     created_at
     ].freeze
@@ -56,9 +58,7 @@ module Message
     FORM_ATTRIBUTES = %i[
     state
     traces
-    content_id
     content
-    response
     ].freeze
 
     # COLLECTION_FILTERS
