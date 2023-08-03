@@ -60,17 +60,21 @@ class Message::Metatrader < Message::Message
               trace.create_order(order_params, account_copy, self, symbol, "v2")
             end
           elsif order_params['state_meta'] == "modify"
-            orders.each do |order| 
-              order.transactions.each do|t| 
-                t.set_lot_sl_tp(order_params) 
-                t.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader)
+            orders.each do |order|
+              unless order.error? 
+                order.transactions.each do|t| 
+                  t.set_lot_sl_tp(order_params) 
+                  t.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader)
+                end
               end
             end
           elsif order_params['state_meta'] == "modify_profit"
             orders.each do |order| 
-              order.transactions.each do |t| 
-                t.set_profit(order_params['profit'])
-                t.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader)
+              unless order.error? 
+                order.transactions.each do |t| 
+                  t.set_profit(order_params['profit'])
+                  t.set_mfe_mae(api_transaction.mfe, api_transaction.mae, api_transaction.time_trader)
+                end
               end
             end
           end

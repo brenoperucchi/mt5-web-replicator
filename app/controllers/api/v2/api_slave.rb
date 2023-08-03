@@ -103,7 +103,7 @@ module API
                 end
                 logging_content = nil
                 # message << params.except("body").to_s.delete('\\"')
-                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last, created_at:date_today.beginning_of_day..date_today.end_of_day)
+                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last)
 
               end
             else
