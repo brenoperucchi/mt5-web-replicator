@@ -15,6 +15,7 @@ module Message
       state:        Field::String,
       kind:         Field::String,
       response:     Field::String,
+      account:      Field::BelongsTo,
       traces:       Field::HasMany,
       orders:       Field::HasMany,
       slaves:       Field::HasMany.with_options(class_name: 'TransactionSlave'),
@@ -38,7 +39,7 @@ module Message
     all_loggings
     traces
     orders
-    slaves
+    account
     created_at
     updated_at
 
@@ -49,6 +50,7 @@ module Message
     SHOW_PAGE_ATTRIBUTES = %i[
     state
     all_loggings
+    account
     traces
     orders
     slaves

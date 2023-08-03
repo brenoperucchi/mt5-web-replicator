@@ -16,7 +16,8 @@ class Message::Message < ApplicationRecord
   
   has_many :loggings, as: :loggerable, dependent: :destroy
 
-  belongs_to :store, optional: true
+  belongs_to :store,   optional: true
+  belongs_to :account, optional: true
   # belongs_to :trace, optional: true
 
 

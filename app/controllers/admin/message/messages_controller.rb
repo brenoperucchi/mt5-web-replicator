@@ -1,5 +1,6 @@
 module Admin
 	class Message::MessagesController < Admin::BaseController
+    prepend AdministrateRansack::Searchable
 		def resource_name
 			::Message::Message
 		end

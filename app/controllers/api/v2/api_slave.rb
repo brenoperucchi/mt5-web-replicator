@@ -78,11 +78,11 @@ module API
                   date_today = DateTime.now
                   logging_count  = slave.loggings.where(state: action, ancestry: slave.loggings.last.ancestry, account_id: slave.account.id, created_at:date_today.beginning_of_day..date_today.end_of_day).count
                   if logging_count >= 2
+                    action = "NOSLTP"
                     api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
                     slave.attributes = api_attributes
                     slave.save
                     @version = slave.versions.last
-                    action = "NOSLTP"
                   end
                 when "NOTFIND"
                   slave.erro

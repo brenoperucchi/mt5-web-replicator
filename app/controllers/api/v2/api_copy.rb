@@ -37,7 +37,7 @@ module API
           
 
           klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
-          attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store)}
+          attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store), account:account}
 
           # Message Open
           message_open = klass_metatrader.new(attributes)
