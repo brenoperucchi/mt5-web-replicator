@@ -1,3 +1,27 @@
+require "json"
+
+module Ext
+  module Hash
+    module ClassMethods
+      # Build a new object from string representation.
+      #
+      #   from_string('{"name"=>"Joe"}')
+      #
+      # @param s [String]
+      # @return [Hash]
+      def from_string(s)
+        s.gsub!(/(?<!\\)"=>nil/, '":null')
+        s.gsub!(/(?<!\\)"=>/, '":')
+        JSON.parse(s)
+      end
+    end
+  end
+end
+
+class Hash    #:nodoc:
+  extend Ext::Hash::ClassMethods
+end
+
 class Numeric
   def to_sign
     if self > 0
@@ -50,6 +74,8 @@ class String
   rescue NameError
       false
   end
+
+
 
   def underscore
     self.gsub(/::/, '/').

@@ -37,12 +37,15 @@ module API
             action = content['meta_state']
             account = Account.find_by(name: params[:account_id])
             if account
-              slave = account.slaves.find_by(comment: content['comment'])
+              # TransactionSlave.check_duplicate(content['comment'], account)
+              slave = account.slaves.where(comment: content['comment']).not_deleted.first
+              order = Order.find_by(content: content['comment'])  
+
               if slave.nil?
-                Logging.create(content:message, state: action)
+                Logging.create(content:message, state: action, parent: order.try(:message).loggings.first, account: account)
               else
                 case action
-                when "OPEN"
+                when "OPEN", "OPENED"
                   api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
                   slave.attributes = api_attributes
                   slave.execute
@@ -51,13 +54,15 @@ module API
                 when "CLOSED", "DELETED", "HASCLOSED"
                   api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
                   slave.attributes = api_attributes
+                  
                   if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
                     slave.state = :executed
                     slave.master.state = :executed
-                  end
+                  end                  
+                  # action == "CLOSED" ? slave.close : slave.deleted
                   if action == "CLOSED" or action == "HASCLOSED"
-                    slave.close
-                  else
+                    slave.close 
+                  else 
                     slave.deleted
                   end
                   @version = slave.versions.last(2).try(:first)
@@ -72,8 +77,8 @@ module API
                 when "NOTFIND"
                   slave.erro
                   @version = slave.versions.last
-                when "NOSLTP","ERRORDEAL","TIMEMAX"
-                  if action == "NOSLTP"
+                when "NOSLTP","ERRORDEAL","TIMEMAX", "NOTCLOSED"
+                  if action == "NOSLTP" or action == "NOTCLOSED"
                     api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
                     slave.attributes = api_attributes
                     slave.save
@@ -88,7 +93,7 @@ module API
                 end
                 logging_content = nil
                 message << params.except("body").to_s.delete('\\"')
-                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action)
+                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.last, account: slave.account, loggerable: slave.order.messages.last)
               end
             else
               Logging.create(content:message, state: action)

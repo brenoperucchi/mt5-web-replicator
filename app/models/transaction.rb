@@ -1,3 +1,6 @@
+# 5015776594
+# 0wnwehat
+
 require 'telegram/bot'
 class Transaction < ApplicationRecord
   include Telegram::Util
@@ -10,12 +13,12 @@ class Transaction < ApplicationRecord
   # }
 
   belongs_to :order, optional:true
-  belongs_to :message, class_name: 'Message::Metatrader', foreign_key: :message_id, optional:true
+  belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id, optional:true
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
   belongs_to :deal, optional:true
 
-  has_many :loggings, as: :loggerable, dependent: :destroy
+  has_many :loggings, as: :resourceable, dependent: :destroy
   has_many :slaves,   through: :order,    source: :slaves
   has_many :accounts, through: :order,    source: :accounts
 
@@ -96,7 +99,7 @@ class Transaction < ApplicationRecord
       def update_state(state)
         self.telegram_message(:CLOSED)
         self.try(:order).try(:close)
-        self.slaves.map(&:remove)
+        self.slaves.not_deleted.map(&:remove)
         return true
       end
     end
@@ -114,6 +117,7 @@ class Transaction < ApplicationRecord
     if self.update(profit: profit)
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
     end
+    return self
   end
 
   def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)
@@ -139,6 +143,7 @@ class Transaction < ApplicationRecord
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
       set_slaves_attributes(lot, take_profit, stop_loss)
     end
+    return self
   end
 
   def set_mfe_mae(mfe, mae, time_trader)
@@ -147,10 +152,10 @@ class Transaction < ApplicationRecord
       statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
       
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
-      statistic.update(amount: mfe.to_f) if mfe > statistic.amount.to_f 
+      statistic.update(amount: mfe.to_f) if mfe.to_f > statistic.amount.to_f 
 
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mae)
-      statistic.update(amount: mae.to_f) if mae < statistic.amount.to_f 
+      statistic.update(amount: mae.to_f) if mae.to_f < statistic.amount.to_f 
     end
   end  
 

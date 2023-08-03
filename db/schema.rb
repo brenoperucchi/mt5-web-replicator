@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_07_18_191115) do
+ActiveRecord::Schema.define(version: 2023_07_31_232550) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -192,13 +192,17 @@ ActiveRecord::Schema.define(version: 2023_07_18_191115) do
     t.string "state"
     t.string "resourceable_type"
     t.bigint "resourceable_id"
+    t.bigint "account_id"
+    t.string "ancestry", collation: "C"
+    t.index ["account_id"], name: "index_loggings_on_account_id"
+    t.index ["ancestry"], name: "index_loggings_on_ancestry"
     t.index ["loggerable_type", "loggerable_id"], name: "index_loggings_on_loggerable_type_and_loggerable_id"
     t.index ["resourceable_type", "resourceable_id"], name: "index_loggings_on_resourceable"
     t.index ["user_id"], name: "index_loggings_on_user_id"
   end
 
   create_table "messages", force: :cascade do |t|
-    t.string "content"
+    t.text "content"
     t.string "content_id"
     t.string "state"
     t.bigint "store_id"
@@ -211,10 +215,17 @@ ActiveRecord::Schema.define(version: 2023_07_18_191115) do
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "account_id"
     t.string "type"
+    t.string "state_meta"
+    t.text "params"
     t.index ["account_id"], name: "index_messages_on_account_id"
     t.index ["ancestry"], name: "index_messages_on_ancestry"
     t.index ["store_id"], name: "index_messages_on_store_id"
     t.index ["trace_id"], name: "index_messages_on_trace_id"
+  end
+
+  create_table "messages_orders", id: false, force: :cascade do |t|
+    t.bigint "message_id", null: false
+    t.bigint "order_id", null: false
   end
 
   create_table "messages_traces", force: :cascade do |t|
@@ -536,6 +547,7 @@ ActiveRecord::Schema.define(version: 2023_07_18_191115) do
     t.integer "trace_id"
     t.integer "order_id"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
+    t.index ["ticket_master", "account_id"], name: "index_transaction_slaves_on_ticket_master_and_account_id", unique: true
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
 

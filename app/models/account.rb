@@ -35,8 +35,10 @@ class Account < ApplicationRecord
   has_many :traces,       through: :permissions, source: :trace 
   # has_many :plan_usages,  through: :permissions, source: :plan_usage 
 
-  has_many :instruments,                    dependent: :destroy
-  has_many :loggings,      as: :loggerable, dependent: :destroy
+  has_many :loggings,     dependent: :destroy
+  # has_many :loggings,      as: :loggerable, dependent: :destroy
+
+  has_many :instruments,  dependent: :destroy
 
   has_many :balances,     dependent: :destroy, autosave: true
   has_many :orders,       through: :balances, source: :order,         dependent: :destroy, autosave: true

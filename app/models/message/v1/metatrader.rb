@@ -1,4 +1,4 @@
-class Message::Metatrader < Message::Message
+class Message::V1::Metatrader < Message::Message
   self.table_name = "messages"
   self.inheritance_column = :_type_disabled
 
@@ -13,10 +13,6 @@ class Message::Metatrader < Message::Message
       transition [:pending, :executed] => :error
     end    
   end
-
-  #   def all_loggings
-  #   loggings.or(Logging.where(id:logging_orders))
-  # end
 
   def close_orders
     yaml_content = YAML.load(self.content)

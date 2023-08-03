@@ -51,8 +51,6 @@ class PaymentMethod::MercadoPago
 
 		# This value replaces the String "<%= @preference_id %>" in your HTML
 
-		# binding.pry
-
 		# customer_request = {
 		#   email: @invoice.invoiceable.email
 		# }

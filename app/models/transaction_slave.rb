@@ -17,7 +17,7 @@ class TransactionSlave < ApplicationRecord
   belongs_to :order
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
-  has_many :loggings, as: :loggerable, dependent: :destroy  
+  has_many :loggings, as: :resourceable, dependent: :destroy  
   has_many :transactions, through: :order,    source: :slaves
   has_many :accounts,     through: :order,    source: :slaves
   
@@ -42,7 +42,7 @@ class TransactionSlave < ApplicationRecord
                             if: Proc.new { account.try(:hedging?) }
   # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
-  after_create :restrict_magic_number?
+  after_create :restrict_magic_number?#, :check_duplicate
 
 
   class << self
@@ -50,6 +50,7 @@ class TransactionSlave < ApplicationRecord
       %i[profit_search ticker_master_search ticket_slave_search]
     end
   end
+
 
   def self.profit_search(value)
     self.where(profit:0..value.to_f)
@@ -63,6 +64,23 @@ class TransactionSlave < ApplicationRecord
     self.where("CAST(ticket_master as TEXT) ILIKE ?", "%#{value}%")
   end
 
+
+  # def check_duplicate
+  #   self.class.check_duplicate(self.ticket_master, self.account)
+  # end
+
+  # def self.check_duplicate(ticket, account)
+  #   slaves = self.where(ticket_master: ticket, account: account)
+  #   # execute_slaves = self.where(ticket_master: ticket, account: account, state: [:closed, :executed]).where.not(ticket_slave: nil)
+  #       # binding.pry
+  #   if slaves.count > 1 and slaves.pending.count > 0
+  #       slave = slaves.pending.last
+  #       slave.deleted
+  #       slave.loggings.create(content:"Slave ID #{slave.id} - Account #{account.name} Duplicate", changeset: slave.try(:versions).try(:last).try(:changeset), version:slave.versions.last, state: 'ERROR', loggerable: slave.order.message, parent:slave.master.loggings.first.parent)
+  #       slave.order.erro
+  #   end
+  # end
+
   def profit
     read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
   end
@@ -74,7 +92,7 @@ class TransactionSlave < ApplicationRecord
     # after_transition [:pending, :remove, :executed]   => :error,   :do => :update_state
 
     event :execute do
-      transition :pending => :executed
+      transition [:error, :pending] => :executed
     end
     event :remove do
       transition [:error, :pending, :executed] => :remove
@@ -83,7 +101,7 @@ class TransactionSlave < ApplicationRecord
       transition [:remove, :executed] => :closed
     end  
     event :deleted do
-      transition [:pending, :remove, :executed] => :deleted
+      transition [:pending, :remove, :executed, :closed] => :deleted
     end
     event :erro do
       transition [:pending, :remove, :executed, :closed] => :error

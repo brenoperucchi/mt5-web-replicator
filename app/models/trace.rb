@@ -88,7 +88,7 @@ class Trace < ApplicationRecord
     Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
   end
 
-  def create_orders(order_params, account, message, symbol, api_version)
+  def create_order(order_params, account, message, symbol, api_version)
 
     apiCopySerializerClass = Class.const_get("API::#{api_version.try(:upcase)}::APICopySerializer")
 
@@ -100,12 +100,12 @@ class Trace < ApplicationRecord
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
       if order.nil?
-        order = account.orders.create(message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
+        order = account.orders.create(messages: [message.id], message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
       end
       transaction = order.transactions.find_by(symbol: instrument, account: account)
       transaction ||= order.transactions.create(copy_attributes.merge(account:account))
     elsif account.hedging?
-      order = account.orders.create_with(trace: self, message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket, trace:self)
+      order = account.orders.create_with(trace: self, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket, trace:self)
       transaction = order.transactions.create_with(copy_attributes).find_or_create_by(ticket: ticket, trace:self)
     end
 
@@ -118,16 +118,22 @@ class Trace < ApplicationRecord
     end
 
     if order and not order.error?
-      transaction.loggings.new(content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN")
+      transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account)
       transaction.execute
       if transaction and not transaction.error?
         return true if account.netting? and order.slaves.count > 0 
         self.accounts.slave.enable.each do |account_slave|
           
           instrument = check_instrument(account, symbol, account_slave)
-          api_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:nil, account:account_slave, price_open:nil, comment: ticket)
-          if order.slaves.create(api_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self))
+          slave_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:0, account:account_slave, price_open:0, comment: ticket)
+          slave_attributes = slave_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self)
+          # slave_present = TransactionSlave.where(ticket_master: ticket, account: account_slave, state: "pending").take
+          slave = order.slaves.new(slave_attributes)
+          if slave.save
             order.accounts << account_slave
+            slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
+          else
+            message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order)
           end
         end
 
@@ -153,7 +159,7 @@ class Trace < ApplicationRecord
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR')
+        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and trace: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:resource.order.message.loggings.first)
         resource.erro!
       end
     end
