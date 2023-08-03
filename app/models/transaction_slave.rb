@@ -72,7 +72,6 @@ class TransactionSlave < ApplicationRecord
   # def self.check_duplicate(ticket, account)
   #   slaves = self.where(ticket_master: ticket, account: account)
   #   # execute_slaves = self.where(ticket_master: ticket, account: account, state: [:closed, :executed]).where.not(ticket_slave: nil)
-  #       # binding.pry
   #   if slaves.count > 1 and slaves.pending.count > 0
   #       slave = slaves.pending.last
   #       slave.deleted

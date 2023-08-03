@@ -74,6 +74,16 @@ module API
                 when "MODIFY_VOLUME"
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"                  
+                when "NOTMODIFY"
+                  date_today = DateTime.now
+                  logging_count  = slave.loggings.where(state: action, ancestry: slave.loggings.last.ancestry, account_id: slave.account.id, created_at:date_today.beginning_of_day..date_today.end_of_day).count
+                  if logging_count >= 2
+                    api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
+                    slave.attributes = api_attributes
+                    slave.save
+                    @version = slave.versions.last
+                    action = "NOSLTP"
+                  end
                 when "NOTFIND"
                   slave.erro
                   @version = slave.versions.last
@@ -92,8 +102,9 @@ module API
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 end
                 logging_content = nil
-                message << params.except("body").to_s.delete('\\"')
-                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.last, account: slave.account, loggerable: slave.order.messages.last)
+                # message << params.except("body").to_s.delete('\\"')
+                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last, created_at:date_today.beginning_of_day..date_today.end_of_day)
+
               end
             else
               Logging.create(content:message, state: action)

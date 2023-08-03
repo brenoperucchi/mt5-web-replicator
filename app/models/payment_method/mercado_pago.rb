@@ -63,8 +63,6 @@ class PaymentMethod::MercadoPago
 
 		# cards_response = sdk.card.list(token.name)
 		# cards = cards_response[:response]
-		# binding.pry
-
 
 		# payment_methods_response = sdk.payment_methods.get()
 		# payment_methods = payment_methods_response[:response]

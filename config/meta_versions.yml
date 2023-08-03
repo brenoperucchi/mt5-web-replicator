@@ -3,19 +3,19 @@ imentore_copy:
   '2_07': disable
   '2_08': disable
   '2_09': disable
-  '2_10': OK
-  '2_11': OK
-  '2_12': OK
-  '2_13': OK
-  '2_20': OK
+  '2_10': disable
+  '2_11': disable
+  '2_12': disable
+  '2_13': disable
+  '2_20': disable
   '2_21': OK
   disable_msg: 'A versao |version| do Imentore Copy esta desabilitado em nosso sistema. Atualize seu expert. '
 imentore_slave:
   '2_07': disable
-  '2_10': OK
-  '2_11': OK
-  '2_12': OK
-  '2_20': OK
+  '2_10': disable
+  '2_11': disable
+  '2_12': disable
+  '2_20': disable
   '2_21': OK
   disable_msg: 'A versao |version| do Imentore Slave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_slave:

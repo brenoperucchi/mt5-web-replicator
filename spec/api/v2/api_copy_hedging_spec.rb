@@ -39,7 +39,6 @@ RSpec.describe API::V2::APICopy do
 
         transaction.reload
         expect(transaction.stop_loss).to be == "1.1"
-        # binding.pry
       end
     end
   end

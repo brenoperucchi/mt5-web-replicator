@@ -192,6 +192,9 @@ GEM
     debase (0.2.4.1)
       debase-ruby_core_source (>= 0.10.2)
     debase-ruby_core_source (3.2.0)
+    debug (1.8.0)
+      irb (>= 1.5.0)
+      reline (>= 0.3.1)
     debug_inspector (1.1.0)
     devise (4.9.2)
       bcrypt (~> 3.0)
@@ -283,6 +286,9 @@ GEM
       typhoeus (~> 1.0)
     image_size (2.1.2)
     imgix (4.1.0)
+    io-console (0.6.0)
+    irb (1.7.4)
+      reline (>= 0.3.6)
     iso8601 (0.13.0)
     jbuilder (2.11.5)
       actionview (>= 5.0.0)
@@ -456,6 +462,8 @@ GEM
     redis-client (0.14.1)
       connection_pool
     regexp_parser (2.8.0)
+    reline (0.3.7)
+      io-console (~> 0.5)
     rename (1.0.8)
       activesupport
       rails (>= 3.0.0)
@@ -654,6 +662,7 @@ DEPENDENCIES
   capybara (>= 2.15)
   database_cleaner
   debase
+  debug (>= 1.0.0)
   devise
   dotenv
   ed25519 (~> 1.2)

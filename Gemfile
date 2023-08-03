@@ -72,6 +72,7 @@ group :development do
   gem "binding_of_caller"
   gem 'pry', '~> 0.14.1'  
   gem 'pry-byebug'
+  gem "debug", ">= 1.0.0"
   # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
   # gem 'pry-byebug'
   # gem 'pry-nav'
