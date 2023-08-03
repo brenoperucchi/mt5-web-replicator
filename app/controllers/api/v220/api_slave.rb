@@ -64,7 +64,7 @@ module API
                   @version = slave.versions.last(2).try(:first)
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "MODIFY"
-                  slave.set_sl_and_tp_order(nil, content['take_profit'].to_f, content['stop_loss'].to_f)
+                  slave.set_sl_and_tp_order(nil, content['take_profit'], content['stop_loss'])
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "MODIFY_VOLUME"

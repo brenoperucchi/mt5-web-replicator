@@ -100,7 +100,7 @@ class Trace < ApplicationRecord
     if account.netting?
       order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
       if order.nil?
-        order = account.orders.create(messages: [message.id], message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
+        order = account.orders.create(messages: [message], message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
       end
       transaction = order.transactions.find_by(symbol: instrument, account: account)
       transaction ||= order.transactions.create(copy_attributes.merge(account:account))

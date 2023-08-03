@@ -49,11 +49,11 @@ class SerializerAPITransaction < ActiveModel::Serializer
   end
 
   def stop_loss
-    obj['stop_loss'].to_f
+    obj['stop_loss']
   end
 
   def take_profit
-    obj['take_profit'].to_f
+    obj['take_profit']
   end
 
   def ticket

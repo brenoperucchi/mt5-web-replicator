@@ -125,7 +125,7 @@ class Transaction < ApplicationRecord
   end
 
   def set_lot_sl_tp(order_params)
-    attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'].to_f, stop_loss:order_params['stop_loss'].to_f, profit:order_params["profit"]}
+    attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'], stop_loss:order_params['stop_loss'], profit:order_params["profit"]}
     # attributes = {lot:lot, take_profit:take_profit, stop_loss:stop_loss}.compact
     self.attributes = attributes 
     if self.changes.present?
