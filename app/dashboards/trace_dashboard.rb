@@ -30,6 +30,7 @@ class TraceDashboard < Administrate::BaseDashboard
     messages:              Field::HasMany.with_options(direction: :desc, limit: 5),
     instruments:           Field::HasMany,
     accounts:              Field::HasMany,
+    customer_plans:        Field::HasMany,
     description:           Field::Tinymce,
     created_at:            Field::DateTime,
     updated_at:            Field::DateTime,
@@ -63,6 +64,7 @@ class TraceDashboard < Administrate::BaseDashboard
   capital_recomendation
   store
   accounts
+  customer_plans
   messages
   instruments
   created_at
@@ -88,6 +90,7 @@ class TraceDashboard < Administrate::BaseDashboard
   capital_recomendation
   store
   accounts
+  customer_plans
   ].freeze
 
   # take_profit_limit

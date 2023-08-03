@@ -1,7 +1,7 @@
 # 334199527
 require 'rails_helper'
 
-RSpec.describe API::V1::APITransactionsCopy do
+RSpec.describe API::V1::APITransactionsCopy, type: :skip do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)

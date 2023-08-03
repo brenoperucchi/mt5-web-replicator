@@ -13,29 +13,33 @@ RSpec.describe API::V2::APICopy do
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @ticket_master = 10000001
     
-    post '/api/v2/copy/post/imentore_copy/2_20/ActivTradesCorpServer/5647753/HEDGING', 
-      params:  {"imentore_copy"=>"{\"orders_open\":{\"10001\":{\"symbol\":\"EURAUD\",\"ticket_id\":10001,\"ticket_deal\":20001,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64838000,\"price_closed\":1.64810000,\"profit\":-0.38000000,\"fees\":-0.12000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 07:01:26\",\"close_at\":\"2023.07.18 07:01:58\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"magic_number\":0,\"comment\":null},\"10002\":{\"symbol\":\"EURAUD\",\"ticket_id\":10002,\"ticket_deal\":20002,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64840000,\"price_closed\":1.64825000,\"profit\":-0.20000000,\"fees\":-0.12000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 06:59:48\",\"close_at\":\"2023.07.18 06:59:53\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"magic_number\":0,\"comment\":null},\"10003\":{\"symbol\":\"EURAUD\",\"ticket_id\":10003,\"ticket_deal\":20003,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64836000,\"price_closed\":1.64825000,\"profit\":-0.15000000,\"fees\":-0.12000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 06:59:40\",\"close_at\":\"2023.07.18 06:59:53\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"magic_number\":0,\"comment\":null},\"10004\":{\"symbol\":\"EURAUD\",\"ticket_id\":10004,\"ticket_deal\":20003,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64836000,\"price_closed\":1.64825000,\"profit\":-0.15000000,\"fees\":-0.12000000,\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 06:59:37\",\"close_at\":\"2023.07.18 06:59:53\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"magic_number\":0,\"comment\":null}}}"}
+    post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+      params: {"imentore_copy"=>"{\"orders_open\":{
+                \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000,\"profit\":\"-0.15\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":0,\"state_meta\":null,\"comment\":null},
+              }}"}
+
   end
 
   describe API::V2::APICopy do 
     context 'Create and Restrict Transaction' do
-      it 'Restrict Magic Number', focus:true do
+      it 'Restrict Magic Number' do
         @account_copy.update(magics_accept: "2000 2001")
         expect(@account_copy.magics_accept).to be == "2000 2001"
         open_at = Time.zone.now.to_i.to_s
         open_at = open_at + ".00000000"
-        transaction = Transaction.find_by(ticket: 10001)
+        transaction = Transaction.find_by(ticket: 10000001)
         expect(transaction.stop_loss).to be == "0.0"
-        post '/api/v2/copy/post/imentore_copy/2_20/ActivTradesCorpServer/5647753/HEDGING', 
-        params: {"imentore_copy"=>"{\"orders_open\":{
-                  \"10001\":{\"symbol\":\"EURAUD\",\"ticket_id\":10001,\"ticket_deal\":20001,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64838000,\"price_closed\":1.64810000,\"profit\":-0.38000000,\"fees\":-0.12000000,\"stop_loss\":1.5,\"take_profit\":1.6,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 07:01:26\",\"close_at\":\"2023.07.18 07:01:58\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"state_meta\":\"PROFIT/SLTPLOT\",\"magic_number\":0,\"comment\":null},
-                  \"10002\":{\"symbol\":\"EURAUD\",\"ticket_id\":10002,\"ticket_deal\":20002,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64840000,\"price_closed\":1.64825000,\"profit\":-0.20000000,\"fees\":-0.12000000,\"stop_loss\":1.5,\"take_profit\":1.6,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 06:59:48\",\"close_at\":\"2023.07.18 06:59:53\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"state_meta\":\"PROFIT/SLTPLOT\",\"magic_number\":0,\"comment\":null},
-                  \"10003\":{\"symbol\":\"EURAUD\",\"ticket_id\":10003,\"ticket_deal\":20003,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64836000,\"price_closed\":1.64825000,\"profit\":-0.15000000,\"fees\":-0.12000000,\"stop_loss\":1.5,\"take_profit\":1.6,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 06:59:40\",\"close_at\":\"2023.07.18 06:59:53\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"state_meta\":\"PROFIT/SLTPLOT\",\"magic_number\":0,\"comment\":null},
-                  \"10004\":{\"symbol\":\"EURAUD\",\"ticket_id\":10004,\"ticket_deal\":20003,\"type\":0,\"volume\":0.02000000,\"price_open\":1.64836000,\"price_closed\":1.64825000,\"profit\":-0.15000000,\"fees\":-0.12000000,\"stop_loss\":1.5,\"take_profit\":1.6,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.07.18 06:59:37\",\"close_at\":\"2023.07.18 06:59:53\",\"time_gmt\":\"2023.07.19 18:02:56\",\"time_trader\":\"2023.07.19 21:02:56\",\"timezone\":-6,\"state_meta\":\"PROFIT/SLTPLOT\",\"magic_number\":0,\"comment\":null},
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{
+                \"orders_open\":{
+                    \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.10000000,\"take_profit\":1.20000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"state_meta\":\"PROFIT\\/SLTPLOT\",\"comment\":null},
+                    \"10000002\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000021,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.10000000,\"take_profit\":1.20000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"state_meta\":\"PROFIT\\/SLTPLOT\",\"comment\":null}}
                 }}"}
+
         transaction.reload
-        expect(transaction.stop_loss).to be == "1.5"
-        binding.pry
+        expect(transaction.stop_loss).to be == "1.1"
+        # binding.pry
       end
     end
   end

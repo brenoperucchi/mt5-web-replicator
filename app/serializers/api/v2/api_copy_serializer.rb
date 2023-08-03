@@ -39,7 +39,7 @@ module API
       end
 
       def price_open
-        obj['open_price']
+        obj['price_open'].to_f
       end
 
       # def price_closed

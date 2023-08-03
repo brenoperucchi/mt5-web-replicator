@@ -35,30 +35,39 @@ module API
           # Logging.create(content:params, state: "COPY")
           account = Account.find_by(name: params[:account_id], kind: :copy)
           
-          logging = Logging.create(content:params, state: "COPY", changeset: account.name, account: account)
 
-
-          # request_json = params[:imentore_copy]
-          # @orders_json = YAML.load(request_json) if request_json
-          # params_hash  = params.except(:imentore_copy)  
-
-
-          # api_version = (version == "v2") ? "V2" : "V2"
           klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
+          attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store)}
 
-          # hash_params = {imentore_copy:"#{YAML.load(params["imentore_copy"]).merge(params.except("imentore_copy"))}"}
-          # hash_params = {imentore_copy:"#{YAML.load(params["imentore_copy"])}", params: params.except("imentore_copy")}
-          hash_params = {imentore_copy:params["imentore_copy"], request_url: request.url}.merge(params.except("imentore_copy"))
-
-          message = klass_metatrader.create(content: hash_params, content_at: Time.zone.now, store: account.try(:store))
-          logging.update(loggerable:message)
-
-          if(not klass_metatrader.nil? and message.try(:execute))
-            body "OK|OK|OK"
-            status 201
-          else
-            status 401
+          # Message Open
+          message_open = klass_metatrader.new(attributes)
+          if(message_open.save)
+            logging = message_open.loggings.create(content:params, state: "COPY/OPEN", changeset: account.name, account: account)
+            message_open.execute if message_open.create_orders(logging)
           end
+
+          # Message Close
+          message_close = klass_metatrader.new(attributes)
+          if(message_close.save)
+            logging = message_close.loggings.create(content:params, state: "COPY/CLOSE", changeset: account.name, account: account)
+            message_close.execute if message_close.close_orders(logging)
+          end
+
+          message_open.executed? and message_close.executed?
+
+          if not message_open.traces.exists? and not message_open.orders.exists? and not message_open.slaves.exists?
+            message_open.destroy
+          end
+          if not message_close.traces.exists? and not message_close.orders.exists? and not message_close.slaves.exists?
+            message_close.destroy
+          end
+        
+          # if(message_open.executed? and message_close.executed?)
+          # else
+          #   status 401
+          # end
+          body "OK|OK|OK"
+          status 201
         end
       end
     end

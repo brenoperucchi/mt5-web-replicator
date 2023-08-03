@@ -1,3 +1,6 @@
+# 5015776594
+# 0wnwehat
+
 require 'telegram/bot'
 class Transaction < ApplicationRecord
   include Telegram::Util
@@ -96,7 +99,7 @@ class Transaction < ApplicationRecord
       def update_state(state)
         self.telegram_message(:CLOSED)
         self.try(:order).try(:close)
-        self.slaves.map(&:remove)
+        self.slaves.not_deleted.map(&:remove)
         return true
       end
     end
@@ -149,10 +152,10 @@ class Transaction < ApplicationRecord
       statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
       
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
-      statistic.update(amount: mfe.to_f) if mfe > statistic.amount.to_f 
+      statistic.update(amount: mfe.to_f) if mfe.to_f > statistic.amount.to_f 
 
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mae)
-      statistic.update(amount: mae.to_f) if mae < statistic.amount.to_f 
+      statistic.update(amount: mae.to_f) if mae.to_f < statistic.amount.to_f 
     end
   end  
 

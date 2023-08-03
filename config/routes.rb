@@ -51,7 +51,8 @@ Rails.application.routes.draw do
     namespace :admin do
       namespace :message do
         # resources :messages
-        resources :metatraders
+        # resources :metatraders
+        resources :messages
       end
       namespace :paper_trail do
         resources :versions

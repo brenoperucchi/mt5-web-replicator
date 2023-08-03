@@ -23,6 +23,7 @@ class OrderDashboard < Administrate::BaseDashboard
     store:        Field::BelongsTo,
     transactions: Field::HasMany,
     slaves:       Field::HasMany,
+    messages:      Field::HasMany,
     created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     ready_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -56,6 +57,7 @@ class OrderDashboard < Administrate::BaseDashboard
   trace
   account
   message
+  messages
   profit_copy
   profit_slave
   ordertype

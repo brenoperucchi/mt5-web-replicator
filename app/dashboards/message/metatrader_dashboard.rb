@@ -16,7 +16,7 @@ module Message
       request_url: Field::String,
       orders: Field::HasMany,
       traces: Field::HasMany,
-      all_loggings: Field::HasMany.with_options(class_name: 'Logging'),
+      all_loggings: Field::HasMany.with_options(class_name: 'Logging', limit:20),
       # message: Field::HasOne,
       updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

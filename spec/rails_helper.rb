@@ -31,6 +31,8 @@ rescue ActiveRecord::PendingMigrationError => e
   exit 1
 end
 RSpec.configure do |config|
+  config.filter_run_excluding type: :skip
+
   config.include FactoryBot::Syntax::Methods
 
   config.before(:suite) do

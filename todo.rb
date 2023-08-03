@@ -8,3 +8,12 @@
 # - SHUTDOWN EXPERTS IF ACCOUNT IS DISABLE WITHOUT NEED RESTART ON EXPERT
 # - MQL - MODE ACCOUNT MUST BE VERIFY 
 # - ONLY EXPERT VERSION XXX SHOULD WORKS 
+
+
+## TODO
+
+- Separar Message por tipo de acao Open/Close
+- Message Close verificar Orders
+
+- SL e TP devem ser ajustar SymbolDigit no Copy 
+	-> Verificar as possiveis alteracoes no Slave

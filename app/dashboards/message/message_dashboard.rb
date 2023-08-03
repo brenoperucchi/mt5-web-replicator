@@ -8,20 +8,22 @@ module Message
     # which determines how the attribute is displayed
     # on pages throughout the dashboard.
     ATTRIBUTE_TYPES = {
-      id: Field::Number,
-      content: Field::Text.with_options(searchable: true),
-      content_id: Field::String,
-      state: Field::String,
-      response: Field::String,
-      orders: Field::HasMany,
-      traces: Field::HasMany,
+      id:           Field::Number,
+      content:      Field::Text.with_options(searchable: true),
+      params:       Field::Text.with_options(searchable: true),
+      content_id:   Field::String,
+      state:        Field::String,
+      kind:         Field::String,
+      response:     Field::String,
+      traces:       Field::HasMany,
+      orders:       Field::HasMany,
+      slaves:       Field::HasMany.with_options(class_name: 'TransactionSlave'),
+      all_loggings: Field::HasMany.with_options(class_name: 'Logging', limit:30),
       # message: Field::HasOne,
-      updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      content_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      prepare_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-      # descendants: Field::HasMany.with_options(class_name: 'Message'), 
-      # ancestors: Field::HasMany.with_options(class_name: 'Message'), 
+      updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+      created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+      content_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+      prepare_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     }.freeze
 
     # COLLECTION_ATTRIBUTES
@@ -32,10 +34,13 @@ module Message
     COLLECTION_ATTRIBUTES = %i[
     id
     state
-    content
+    kind
+    all_loggings
     traces
     orders
+    slaves
     created_at
+    updated_at
 
     ].freeze
 
@@ -43,11 +48,12 @@ module Message
     # an array of attributes that will be displayed on the model's show page.
     SHOW_PAGE_ATTRIBUTES = %i[
     state
-    content_id
-    content
+    all_loggings
     traces
     orders
-    response
+    slaves
+    params
+    content
     content_at
     created_at
     ].freeze
@@ -58,9 +64,7 @@ module Message
     FORM_ATTRIBUTES = %i[
     state
     traces
-    content_id
     content
-    response
     ].freeze
 
     # COLLECTION_FILTERS

@@ -7,6 +7,8 @@ class Order < ApplicationRecord
   belongs_to :account
   belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id#, dependent: :destroy
 
+  has_and_belongs_to_many :messages, class_name: 'Message::Message'
+
   has_many :transactions, dependent: :destroy
   
   # has_many :loggings,     through: :transactions, source: :loggings
@@ -25,7 +27,7 @@ class Order < ApplicationRecord
   scope :pending, ->{ where(state: 'pending')}
 
 
-  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], on: :create, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], on: :create#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 
   has_one_attached :image
 
@@ -165,11 +167,19 @@ class Order < ApplicationRecord
     master_id  = resource.try(:master).try(:id) || 0
     deal_ticket = resource.try(:ticket_deal).blank? ? 0 : resource.ticket_deal
     seconds_ago = resource.try(:seconds_ago) || 0
-    openprice = (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
+    openprice = price_open(resource)
     order_trace = self.trace_id
     openat = Rails.env.test? ? 0 : resource.open_at.to_i
     comment = resource.try(:comment).to_s.gsub(/[^0-9A-Za-z]/, '_')
     "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{magicnumber}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
+  end
+
+  def price_open(resource)
+    if resource.pending?
+      (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
+    else
+      resource.price_open
+    end
   end
 
   def order_pending?

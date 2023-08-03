@@ -55,6 +55,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   profit
   open_at
   closed_at
+  updated_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -72,6 +73,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   account
   versions
   loggings
+  lot
   profit
   ordertype
   price_request
@@ -79,9 +81,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   price_closed
   stop_loss
   take_profit
-  comment
-  lot
   magic_number
+  comment
   open_at
   closed_at
   created_at
