@@ -37,7 +37,7 @@ class Message::V2::Metatrader < Message::Message
               if transaction.close 
                 
                 transaction.slaves.each do |slave|
-                  slave.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)
+                  slave.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)
                 end
               # else
               #   changed = false
