@@ -33,6 +33,9 @@ module API
           map = String.new
           message = params[:body]
           content = YAML.load(message)
+          date_today = DateTime.now
+          skip_logging = false;
+
           if not content.blank? and content.is_a?(Hash)
             action = content['meta_state']
             account = Account.find_by(name: params[:account_id])
@@ -42,7 +45,7 @@ module API
               order = Order.find_by(content: content['comment'])  
 
               if slave.nil?
-                Logging.create(content:message, state: action, parent: order.try(:message).loggings.first, account: account)
+                Logging.create(content:message, state: action, parent: order.try(:message).try(:loggings).try(:first), account: account)
               else
                 case action
                 when "OPEN", "OPENED"
@@ -75,13 +78,13 @@ module API
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"                  
                 when "NOTMODIFY"
-                  date_today = DateTime.now
                   logging_count  = slave.loggings.where(state: action, ancestry: slave.loggings.last.ancestry, account_id: slave.account.id, created_at:date_today.beginning_of_day..date_today.end_of_day).count
                   if logging_count >= 2
                     action = "NOSLTP"
-                    api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
-                    slave.attributes = api_attributes
-                    slave.save
+                    skip_logging = true if slave.loggings.where(state: action, created_at:date_today.beginning_of_day..date_today.end_of_day).present?                    
+                    # api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
+                    # slave.attributes = api_attributes
+                    # slave.save
                     @version = slave.versions.last
                   end
                 when "NOTFIND"
@@ -89,9 +92,10 @@ module API
                   @version = slave.versions.last
                 when "NOSLTP","ERRORDEAL","TIMEMAX", "NOTCLOSED"
                   if action == "NOSLTP" or action == "NOTCLOSED"
-                    api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
-                    slave.attributes = api_attributes
-                    slave.save
+                    skip_logging = true if slave.loggings.where(state: action, created_at:date_today.beginning_of_day..date_today.end_of_day).present?
+                    # api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
+                    # slave.attributes = api_attributes
+                    # slave.save
                     @version = slave.versions.last
                   else
                     api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
@@ -103,7 +107,7 @@ module API
                 end
                 logging_content = nil
                 # message << params.except("body").to_s.delete('\\"')
-                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last)
+                slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last) unless skip_logging
 
               end
             else

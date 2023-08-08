@@ -18,6 +18,7 @@ Rails.application.config.assets.precompile += ['application.js', 'controllers/in
 	'foundation_emails/foundation_emails.css', 'controllers/hello_controller.js' , 'jquery.session.js']
 Rails.application.config.assets.precompile += %w( saasley/theme.bundle.js mintone_chart.js mintone/morris.css  mintone/chart/apexcharts.min.js)
 Rails.application.config.assets.precompile += %w( mintone/select2.min.css mintone/select2.full.min.js)
+Rails.application.config.assets.precompile += %w( modernize.css modernize.js)
 
 
 # Add node_modules folder to the asset load path.

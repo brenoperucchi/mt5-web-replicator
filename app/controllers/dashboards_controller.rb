@@ -7,7 +7,7 @@ class DashboardsController < ApplicationController
 
 	# before_action :authenticate_user
 	# layout 'stisla'
-  layout 'mintone'
+  layout 'modernize'
 
 	# before_action :sign_up!
 

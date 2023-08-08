@@ -378,6 +378,8 @@ en:
       default: "%Y-%m-%d"
       long: "%B %d, %Y"
       short: "%b %d"
+      short2: "%d %b %H:%M:%S"
+      short3: "%d de %b %Y"
     month_names:
     - 
     - January

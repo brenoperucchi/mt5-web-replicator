@@ -31,11 +31,9 @@ module API
         post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
 
-
           # Logging.create(content:params, state: "COPY")
           account = Account.find_by(name: params[:account_id], kind: :copy)
           
-
           klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
           attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store), account:account}
 
