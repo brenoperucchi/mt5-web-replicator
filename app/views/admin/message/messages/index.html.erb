@@ -70,10 +70,11 @@
               </div>
               <div class="search">
                 <% 
+                  accounts = current_user.userable.administrator? ? Account.all.map{|t| [t.name, t.id]} : current_user.store.accounts.map{|t| [t.name, t.id]}
                   namespace = local_assigns[:namespace] || :admin 
                   attribute_types = {
                   state: Administrate::Field::Select.with_options(collection: states),
-                  account_id: Administrate::Field::Select.with_options(collection: Account.account_search(current_user)), 
+                  account_id: Administrate::Field::Select.with_options(collection: accounts), 
                   # kind: Administrate::Field::Select.with_options(collection: kind)
                 } %>
 

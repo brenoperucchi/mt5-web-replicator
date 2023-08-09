@@ -17,3 +17,6 @@
 
 - SL e TP devem ser ajustar SymbolDigit no Copy 
 	-> Verificar as possiveis alteracoes no Slave
+
+- COPY
+	-> Adicionar novamente ao opção Remove('closed_info') para resgatar info de order fechadas. 

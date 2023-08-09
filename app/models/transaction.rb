@@ -73,7 +73,7 @@ class Transaction < ApplicationRecord
       transition [:pending, :executed, :closed] => :error
     end
     event :close do
-      transition [:pending, :error, :executed, :closed_info] => :closed
+      transition [:pending, :executed, :closed_info] => :closed
     end
     event :close_info do
       transition [:closed] => :closed_info
@@ -84,7 +84,7 @@ class Transaction < ApplicationRecord
     
     state :error do
       def update_state(state)
-        self.order.erro
+        self.try(:order).try(:erro)
       end
     end
     state :executed do
@@ -114,7 +114,7 @@ class Transaction < ApplicationRecord
   end
 
   def set_profit(order_params)
-    if self.update(profit: profit)
+    if not self.error? and self.update(profit: profit)
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
     end
     return self
@@ -139,7 +139,7 @@ class Transaction < ApplicationRecord
       # BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
     end
     
-    if self.save
+    if not self.error? and self.save
       loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
       set_slaves_attributes(lot, take_profit, stop_loss)
     end

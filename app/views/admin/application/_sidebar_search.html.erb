@@ -4,12 +4,17 @@
     </button>
   </div>
   <div class="search">
+
     <% 
+      traces   = current_user.userable.administrator? ? Trace.all.map{  |t| [t.name, t.id]} : current_user.store.traces.map{  |t| [t.name, t.id]}
+      accounts = current_user.userable.administrator? ? Account.all.map{|t| [t.name, t.id]} : current_user.store.accounts.map{|t| [t.name, t.id]}
+
       namespace = local_assigns[:namespace] || :admin 
       attribute_types = {
       symbol: Administrate::Field::String,
       profit_search: Administrate::Field::String,
-      account_id: Administrate::Field::Select.with_options(collection: Account.account_search(current_user)), 
+      account_id: Administrate::Field::Select.with_options(collection: accounts), 
+      trace_id: Administrate::Field::Select.with_options(collection: traces), 
       state: Administrate::Field::Select.with_options(collection: states)
     } %>
 

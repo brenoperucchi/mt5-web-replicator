@@ -25,25 +25,26 @@ class Message::V2::Metatrader < Message::Message
       
       params_copy("orders_closed").each_with_index do |(ticket, copy_params), index|
         Transaction.where(ticket: ticket).each do |transaction|
+          
           if transaction and not transaction.closed?
-            transaction.order.messages << self
-            transaction.trace.messages << self
-            transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
-            transaction.save
-            transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
-            transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
+            if not transaction.error?
+              transaction.order.messages << self
+              transaction.trace.messages << self
+              transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
+              transaction.save
+              transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
+              transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
             
-            # if transaction.can_close?
               if transaction.close 
-                
                 transaction.slaves.each do |slave|
-                  slave.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)
+                  slave.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)
                 end
-              # else
-              #   changed = false
               end
-            # end
+            else
+              transaction.slaves.executed.map(&:remove)
+            end
           end
+
         end
       end
     end
