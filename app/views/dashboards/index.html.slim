@@ -1,1363 +1,348 @@
-#main-wrapper.page-wrapper[data-layout="vertical" data-sidebartype="full" data-navbarbg="skin6" data-sidebar-position="fixed" data-header-position="fixed"]
-  <!-- Sidebar Start -->
-  / = render "layouts/modernize/sidebar"
-  .body-wrapper
-    <!-- Header Start -->
-    / = render "layouts/modernize/header"
+.container-fluid.pt-3
+  .card
+    .card-body
+      ul.breadcrumb
+        - if user_signed_in? and not current_user.try(:userable).try(:user?)
+          li.breadcrumb-item
+            a href="/admin" 
+              i.feather.icon-home
+              '
+              = I18n.t :admin, scope:'helpers.dashboards'
+        - else
+          li.breadcrumb-item
+            a href="/" 
+              i.feather.icon-home
+              '
+              = I18n.t :site, scope:'helpers.dashboards'
+        - if current_store
+          li.breadcrumb-item
+            = link_to dashboards_path(params: request.query_parameters) do
+              = I18n.t :dashboards, scope:'helpers.dashboards'
+            / a href="/dashboards" 
+        = yield(:breadcrumb)
+      /! [ breadcrumb ] started
 
-    .container-fluid
-      .row
-        - @traces.reverse.each do |amount_profit, id|                   
-          - trace = Trace.find(id)
-          - next if params[:kind] != 'all' and trace.capital_recomendation.nil?
-          - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-          - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
-          .col-lg-8.d-flex.align-items-strech
-              .card.w-100
-                .card-body
-                  = link_to dashboard_path(trace, params:request.query_parameters) do
-                    .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
-                      .mb-3.mb-sm-0
-                        h5.card-title.fw-semibold
-                          = trace.name
-                        p.card-subtitle.mb-0
-                          | Overview of Profit
-                      div
-                        select.form-select
-                          option[value="1"]
-                            | March 2023
-                          option[value="2"]
-                            | April 2023
-                          option[value="3"]
-                            | May 2023
-                          option[value="4"]
-                            | June 2023
-                  .row.align-items-center
-                    .col-lg-8.col-md-8
-                      #chart[style="min-height: 335px;"]
-                        #apexchartsps56b7q9.apexcharts-canvas.apexchartsps56b7q9.apexcharts-theme-light[style="width: 459px; height: 320px;"]
-                          svg#SvgjsSvg1374.apexcharts-svg[width="459" height="320" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev" xmlns:data="ApexChartsNS" transform="translate(0, 0)" style="background: transparent;"]
-                            g#SvgjsG1376.apexcharts-inner.apexcharts-graphical[transform="translate(50.609375, 30)"]
-                              defs#SvgjsDefs1375
-                                lineargradient#SvgjsLinearGradient1380[x1="0" y1="0" x2="0" y2="1"]
-                                  stop#SvgjsStop1381[stop-opacity="0.4" stop-color="rgba(216,227,240,0.4)" offset="0"]
-                                  stop#SvgjsStop1382[stop-opacity="0.5" stop-color="rgba(190,209,230,0.5)" offset="1"]
-                                  stop#SvgjsStop1383[stop-opacity="0.5" stop-color="rgba(190,209,230,0.5)" offset="1"]
-                                clippath#gridRectMaskps56b7q9
-                                  rect#SvgjsRect1385[width="402.390625" height="250.73000000000002" x="-2" y="0" rx="0" ry="0" opacity="1" stroke-width="0" stroke="none" stroke-dasharray="0" fill="#fff"]
-                                clippath#forecastMaskps56b7q9
-                                clippath#nonForecastMaskps56b7q9
-                                clippath#gridRectMarkerMaskps56b7q9
-                                  rect#SvgjsRect1386[width="402.390625" height="254.73000000000002" x="-2" y="-2" rx="0" ry="0" opacity="1" stroke-width="0" stroke="none" stroke-dasharray="0" fill="#fff"]
-                              rect#SvgjsRect1384.apexcharts-xcrosshairs[width="13.2796875" height="250.73000000000002" x="0" y="0" rx="0" ry="0" opacity="1" stroke-width="0" stroke-dasharray="3" fill="url(#SvgjsLinearGradient1380)" y2="250.73000000000002" filter="none" fill-opacity="0.9"]
-                              g#SvgjsG1404.apexcharts-xaxis[transform="translate(0, 0)"]
-                                g#SvgjsG1405.apexcharts-xaxis-texts-g[transform="translate(0, -4)"]
-                                  text#SvgjsText1407.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="33.19921875" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1408
-                                      | 16/08
-                                    title
-                                      | 16/08
-                                  text#SvgjsText1410.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="99.59765625" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1411
-                                      | 17/08
-                                    title
-                                      | 17/08
-                                  text#SvgjsText1413.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="165.99609375" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1414
-                                      | 18/08
-                                    title
-                                      | 18/08
-                                  text#SvgjsText1416.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="232.39453125" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1417
-                                      | 19/08
-                                    title
-                                      | 19/08
-                                  text#SvgjsText1419.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="298.79296875" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1420
-                                      | 20/08
-                                    title
-                                      | 20/08
-                                  text#SvgjsText1422.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="365.19140625" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1423
-                                      | 21/08
-                                    title
-                                      | 21/08
-                                  text#SvgjsText1425.apexcharts-text.apexcharts-xaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="431.58984375" y="279.73" text-anchor="middle" dominant-baseline="auto" font-size="12px" font-weight="400" fill="#adb0bb"]
-                                    tspan#SvgjsTspan1426
-                                      | 22/08
-                                    title
-                                      | 22/08
-                              g#SvgjsG1439.apexcharts-grid
-                                g#SvgjsG1440.apexcharts-gridlines-horizontal
-                                  line#SvgjsLine1450.apexcharts-gridline[x1="0" y1="0" x2="398.390625" y2="0" stroke="rgba(0,0,0,0.1)" stroke-dasharray="3" stroke-linecap="butt"]
-                                  line#SvgjsLine1451.apexcharts-gridline[x1="0" y1="62.682500000000005" x2="398.390625" y2="62.682500000000005" stroke="rgba(0,0,0,0.1)" stroke-dasharray="3" stroke-linecap="butt"]
-                                  line#SvgjsLine1452.apexcharts-gridline[x1="0" y1="125.36500000000001" x2="398.390625" y2="125.36500000000001" stroke="rgba(0,0,0,0.1)" stroke-dasharray="3" stroke-linecap="butt"]
-                                  line#SvgjsLine1453.apexcharts-gridline[x1="0" y1="188.0475" x2="398.390625" y2="188.0475" stroke="rgba(0,0,0,0.1)" stroke-dasharray="3" stroke-linecap="butt"]
-                                  line#SvgjsLine1454.apexcharts-gridline[x1="0" y1="250.73000000000002" x2="398.390625" y2="250.73000000000002" stroke="rgba(0,0,0,0.1)" stroke-dasharray="3" stroke-linecap="butt"]
-                                g#SvgjsG1441.apexcharts-gridlines-vertical
-                                line#SvgjsLine1442.apexcharts-xaxis-tick[x1="0" y1="251.73000000000002" x2="0" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1443.apexcharts-xaxis-tick[x1="56.91294642857143" y1="251.73000000000002" x2="56.91294642857143" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1444.apexcharts-xaxis-tick[x1="113.82589285714286" y1="251.73000000000002" x2="113.82589285714286" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1445.apexcharts-xaxis-tick[x1="170.73883928571428" y1="251.73000000000002" x2="170.73883928571428" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1446.apexcharts-xaxis-tick[x1="227.65178571428572" y1="251.73000000000002" x2="227.65178571428572" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1447.apexcharts-xaxis-tick[x1="284.56473214285717" y1="251.73000000000002" x2="284.56473214285717" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1448.apexcharts-xaxis-tick[x1="341.4776785714286" y1="251.73000000000002" x2="341.4776785714286" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1449.apexcharts-xaxis-tick[x1="398.39062500000006" y1="251.73000000000002" x2="398.39062500000006" y2="257.73" stroke="#e0e0e0" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1456[x1="0" y1="250.73000000000002" x2="398.390625" y2="250.73000000000002" stroke="transparent" stroke-dasharray="0" stroke-linecap="butt"]
-                                line#SvgjsLine1455[x1="0" y1="1" x2="0" y2="250.73000000000002" stroke="transparent" stroke-dasharray="0" stroke-linecap="butt"]
-                              g#SvgjsG1387.apexcharts-bar-series.apexcharts-plot-series
-                                g#SvgjsG1388.apexcharts-series[seriesname="Eaningsxthisxmonth" rel="1" data:realindex="0"]
-                                  path#SvgjsPath1390.apexcharts-bar-area[d="M 26.559375 125.36500000000002L 26.559375 84.35312500000003Q 26.559375 78.35312500000003 32.559375 78.35312500000003L 33.8390625 78.35312500000003Q 39.8390625 78.35312500000003 39.8390625 84.35312500000003L 39.8390625 84.35312500000003L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002z" fill="var(--bs-primary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="0" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 26.559375 125.36500000000002L 26.559375 84.35312500000003Q 26.559375 78.35312500000003 32.559375 78.35312500000003L 33.8390625 78.35312500000003Q 39.8390625 78.35312500000003 39.8390625 84.35312500000003L 39.8390625 84.35312500000003L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002z" pathfrom="M 26.559375 125.36500000000002L 26.559375 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 26.559375 125.36500000000002" cy="78.35312500000003" cx="92.9578125" j="0" val="1.5" barheight="47.011874999999996" barwidth="13.2796875"]
-                                  path#SvgjsPath1391.apexcharts-bar-area[d="M 92.9578125 125.36500000000002L 92.9578125 46.74362500000002Q 92.9578125 40.74362500000002 98.9578125 40.74362500000002L 100.2375 40.74362500000002Q 106.2375 40.74362500000002 106.2375 46.74362500000002L 106.2375 46.74362500000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002z" fill="var(--bs-primary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="0" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 92.9578125 125.36500000000002L 92.9578125 46.74362500000002Q 92.9578125 40.74362500000002 98.9578125 40.74362500000002L 100.2375 40.74362500000002Q 106.2375 40.74362500000002 106.2375 46.74362500000002L 106.2375 46.74362500000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002z" pathfrom="M 92.9578125 125.36500000000002L 92.9578125 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 92.9578125 125.36500000000002" cy="40.74362500000002" cx="159.35625" j="1" val="2.7" barheight="84.621375" barwidth="13.2796875"]
-                                  path#SvgjsPath1392.apexcharts-bar-area[d="M 159.35625 125.36500000000002L 159.35625 62.414250000000024Q 159.35625 56.414250000000024 165.35625 56.414250000000024L 166.63593749999998 56.414250000000024Q 172.63593749999998 56.414250000000024 172.63593749999998 62.414250000000024L 172.63593749999998 62.414250000000024L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002z" fill="var(--bs-primary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="0" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 159.35625 125.36500000000002L 159.35625 62.414250000000024Q 159.35625 56.414250000000024 165.35625 56.414250000000024L 166.63593749999998 56.414250000000024Q 172.63593749999998 56.414250000000024 172.63593749999998 62.414250000000024L 172.63593749999998 62.414250000000024L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002z" pathfrom="M 159.35625 125.36500000000002L 159.35625 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 159.35625 125.36500000000002" cy="56.414250000000024" cx="225.7546875" j="2" val="2.2" barheight="68.95075" barwidth="13.2796875"]
-                                  path#SvgjsPath1393.apexcharts-bar-area[d="M 225.7546875 125.36500000000002L 225.7546875 18.536500000000018Q 225.7546875 12.536500000000018 231.7546875 12.536500000000018L 233.03437499999998 12.536500000000018Q 239.03437499999998 12.536500000000018 239.03437499999998 18.536500000000018L 239.03437499999998 18.536500000000018L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002z" fill="var(--bs-primary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="0" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 225.7546875 125.36500000000002L 225.7546875 18.536500000000018Q 225.7546875 12.536500000000018 231.7546875 12.536500000000018L 233.03437499999998 12.536500000000018Q 239.03437499999998 12.536500000000018 239.03437499999998 18.536500000000018L 239.03437499999998 18.536500000000018L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002z" pathfrom="M 225.7546875 125.36500000000002L 225.7546875 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 225.7546875 125.36500000000002" cy="12.536500000000018" cx="292.153125" j="3" val="3.6" barheight="112.8285" barwidth="13.2796875"]
-                                  path#SvgjsPath1394.apexcharts-bar-area[d="M 292.153125 125.36500000000002L 292.153125 84.35312500000003Q 292.153125 78.35312500000003 298.153125 78.35312500000003L 299.4328125 78.35312500000003Q 305.4328125 78.35312500000003 305.4328125 84.35312500000003L 305.4328125 84.35312500000003L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002z" fill="var(--bs-primary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="0" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 292.153125 125.36500000000002L 292.153125 84.35312500000003Q 292.153125 78.35312500000003 298.153125 78.35312500000003L 299.4328125 78.35312500000003Q 305.4328125 78.35312500000003 305.4328125 84.35312500000003L 305.4328125 84.35312500000003L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002z" pathfrom="M 292.153125 125.36500000000002L 292.153125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 292.153125 125.36500000000002" cy="78.35312500000003" cx="358.5515625" j="4" val="1.5" barheight="47.011874999999996" barwidth="13.2796875"]
-                                  path#SvgjsPath1395.apexcharts-bar-area[d="M 358.5515625 125.36500000000002L 358.5515625 100.02375000000002Q 358.5515625 94.02375000000002 364.5515625 94.02375000000002L 365.83125 94.02375000000002Q 371.83125 94.02375000000002 371.83125 100.02375000000002L 371.83125 100.02375000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002z" fill="var(--bs-primary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="0" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 358.5515625 125.36500000000002L 358.5515625 100.02375000000002Q 358.5515625 94.02375000000002 364.5515625 94.02375000000002L 365.83125 94.02375000000002Q 371.83125 94.02375000000002 371.83125 100.02375000000002L 371.83125 100.02375000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002z" pathfrom="M 358.5515625 125.36500000000002L 358.5515625 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 358.5515625 125.36500000000002" cy="94.02375000000002" cx="424.95" j="5" val="1" barheight="31.34125" barwidth="13.2796875"]
-                                g#SvgjsG1396.apexcharts-series[seriesname="Expensexthisxmonth" rel="2" data:realindex="1"]
-                                  path#SvgjsPath1398.apexcharts-bar-area[d="M 26.559375 125.36500000000002L 26.559375 175.77925000000002Q 26.559375 181.77925000000002 32.559375 181.77925000000002L 33.8390625 181.77925000000002Q 39.8390625 181.77925000000002 39.8390625 175.77925000000002L 39.8390625 175.77925000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002z" fill="var(--bs-secondary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="1" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 26.559375 125.36500000000002L 26.559375 175.77925000000002Q 26.559375 181.77925000000002 32.559375 181.77925000000002L 33.8390625 181.77925000000002Q 39.8390625 181.77925000000002 39.8390625 175.77925000000002L 39.8390625 175.77925000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002z" pathfrom="M 26.559375 125.36500000000002L 26.559375 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 39.8390625 125.36500000000002L 26.559375 125.36500000000002" cy="181.77925000000002" cx="92.9578125" j="0" val="-1.8" barheight="-56.41425" barwidth="13.2796875"]
-                                  path#SvgjsPath1399.apexcharts-bar-area[d="M 92.9578125 125.36500000000002L 92.9578125 153.84037500000002Q 92.9578125 159.84037500000002 98.9578125 159.84037500000002L 100.2375 159.84037500000002Q 106.2375 159.84037500000002 106.2375 153.84037500000002L 106.2375 153.84037500000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002z" fill="var(--bs-secondary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="1" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 92.9578125 125.36500000000002L 92.9578125 153.84037500000002Q 92.9578125 159.84037500000002 98.9578125 159.84037500000002L 100.2375 159.84037500000002Q 106.2375 159.84037500000002 106.2375 153.84037500000002L 106.2375 153.84037500000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002z" pathfrom="M 92.9578125 125.36500000000002L 92.9578125 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 106.2375 125.36500000000002L 92.9578125 125.36500000000002" cy="159.84037500000002" cx="159.35625" j="1" val="-1.1" barheight="-34.475375" barwidth="13.2796875"]
-                                  path#SvgjsPath1400.apexcharts-bar-area[d="M 159.35625 125.36500000000002L 159.35625 197.71812500000004Q 159.35625 203.71812500000004 165.35625 203.71812500000004L 166.63593749999998 203.71812500000004Q 172.63593749999998 203.71812500000004 172.63593749999998 197.71812500000004L 172.63593749999998 197.71812500000004L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002z" fill="var(--bs-secondary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="1" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 159.35625 125.36500000000002L 159.35625 197.71812500000004Q 159.35625 203.71812500000004 165.35625 203.71812500000004L 166.63593749999998 203.71812500000004Q 172.63593749999998 203.71812500000004 172.63593749999998 197.71812500000004L 172.63593749999998 197.71812500000004L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002z" pathfrom="M 159.35625 125.36500000000002L 159.35625 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 172.63593749999998 125.36500000000002L 159.35625 125.36500000000002" cy="203.71812500000004" cx="225.7546875" j="2" val="-2.5" barheight="-78.353125" barwidth="13.2796875"]
-                                  path#SvgjsPath1401.apexcharts-bar-area[d="M 225.7546875 125.36500000000002L 225.7546875 166.376875Q 225.7546875 172.376875 231.7546875 172.376875L 233.03437499999998 172.376875Q 239.03437499999998 172.376875 239.03437499999998 166.376875L 239.03437499999998 166.376875L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002z" fill="var(--bs-secondary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="1" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 225.7546875 125.36500000000002L 225.7546875 166.376875Q 225.7546875 172.376875 231.7546875 172.376875L 233.03437499999998 172.376875Q 239.03437499999998 172.376875 239.03437499999998 166.376875L 239.03437499999998 166.376875L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002z" pathfrom="M 225.7546875 125.36500000000002L 225.7546875 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 239.03437499999998 125.36500000000002L 225.7546875 125.36500000000002" cy="172.376875" cx="292.153125" j="3" val="-1.5" barheight="-47.011874999999996" barwidth="13.2796875"]
-                                  path#SvgjsPath1402.apexcharts-bar-area[d="M 292.153125 125.36500000000002L 292.153125 138.16975000000002Q 292.153125 144.16975000000002 298.153125 144.16975000000002L 299.4328125 144.16975000000002Q 305.4328125 144.16975000000002 305.4328125 138.16975000000002L 305.4328125 138.16975000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002z" fill="var(--bs-secondary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="1" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 292.153125 125.36500000000002L 292.153125 138.16975000000002Q 292.153125 144.16975000000002 298.153125 144.16975000000002L 299.4328125 144.16975000000002Q 305.4328125 144.16975000000002 305.4328125 138.16975000000002L 305.4328125 138.16975000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002z" pathfrom="M 292.153125 125.36500000000002L 292.153125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 305.4328125 125.36500000000002L 292.153125 125.36500000000002" cy="144.16975000000002" cx="358.5515625" j="4" val="-0.6" barheight="-18.80475" barwidth="13.2796875"]
-                                  path#SvgjsPath1403.apexcharts-bar-area[d="M 358.5515625 125.36500000000002L 358.5515625 175.77925000000002Q 358.5515625 181.77925000000002 364.5515625 181.77925000000002L 365.83125 181.77925000000002Q 371.83125 181.77925000000002 371.83125 175.77925000000002L 371.83125 175.77925000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002z" fill="var(--bs-secondary)" fill-opacity="1" stroke-opacity="1" stroke-linecap="round" stroke-width="0" stroke-dasharray="0" index="1" clip-path="url(#gridRectMaskps56b7q9)" pathto="M 358.5515625 125.36500000000002L 358.5515625 175.77925000000002Q 358.5515625 181.77925000000002 364.5515625 181.77925000000002L 365.83125 181.77925000000002Q 371.83125 181.77925000000002 371.83125 175.77925000000002L 371.83125 175.77925000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002z" pathfrom="M 358.5515625 125.36500000000002L 358.5515625 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 371.83125 125.36500000000002L 358.5515625 125.36500000000002" cy="181.77925000000002" cx="424.95" j="5" val="-1.8" barheight="-56.41425" barwidth="13.2796875"]
-                                g#SvgjsG1389.apexcharts-datalabels[data:realindex="0"]
-                                g#SvgjsG1397.apexcharts-datalabels[data:realindex="1"]
-                              line#SvgjsLine1457.apexcharts-ycrosshairs[x1="0" y1="0" x2="398.390625" y2="0" stroke="#b6b6b6" stroke-dasharray="0" stroke-width="1" stroke-linecap="butt"]
-                              line#SvgjsLine1458.apexcharts-ycrosshairs-hidden[x1="0" y1="0" x2="398.390625" y2="0" stroke-dasharray="0" stroke-width="0" stroke-linecap="butt"]
-                              g#SvgjsG1459.apexcharts-yaxis-annotations
-                              g#SvgjsG1460.apexcharts-xaxis-annotations
-                              g#SvgjsG1461.apexcharts-point-annotations
-                            g#SvgjsG1427.apexcharts-yaxis[rel="0" transform="translate(20.609375, 0)"]
-                              g#SvgjsG1428.apexcharts-yaxis-texts-g
-                                text#SvgjsText1429.apexcharts-text.apexcharts-yaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="20" y="31.4" text-anchor="end" dominant-baseline="auto" font-size="11px" font-weight="400" fill="#adb0bb"]
-                                  tspan#SvgjsTspan1430
-                                    | 4.0
-                                  title
-                                    | 4.0
-                                text#SvgjsText1431.apexcharts-text.apexcharts-yaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="20" y="94.08250000000001" text-anchor="end" dominant-baseline="auto" font-size="11px" font-weight="400" fill="#adb0bb"]
-                                  tspan#SvgjsTspan1432
-                                    | 2.0
-                                  title
-                                    | 2.0
-                                text#SvgjsText1433.apexcharts-text.apexcharts-yaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="20" y="156.76500000000001" text-anchor="end" dominant-baseline="auto" font-size="11px" font-weight="400" fill="#adb0bb"]
-                                  tspan#SvgjsTspan1434
-                                    | 0.0
-                                  title
-                                    | 0.0
-                                text#SvgjsText1435.apexcharts-text.apexcharts-yaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="20" y="219.44750000000002" text-anchor="end" dominant-baseline="auto" font-size="11px" font-weight="400" fill="#adb0bb"]
-                                  tspan#SvgjsTspan1436
-                                    | -2.0
-                                  title
-                                    | -2.0
-                                text#SvgjsText1437.apexcharts-text.apexcharts-yaxis-label[font-family="Plus Jakarta Sans', sans-serif" x="20" y="282.13" text-anchor="end" dominant-baseline="auto" font-size="11px" font-weight="400" fill="#adb0bb"]
-                                  tspan#SvgjsTspan1438
-                                    | -4.0
-                                  title
-                                    | -4.0
-                            g#SvgjsG1377.apexcharts-annotations
-                          .apexcharts-legend[style="max-height: 160px;"]
-                          .apexcharts-tooltip.apexcharts-theme-dark
-                            .apexcharts-tooltip-title[style="font-size: 12px;"]
-                            .apexcharts-tooltip-series-group[style="order: 1;"]
-                              span.apexcharts-tooltip-marker[style="background-color: var(--bs-primary);"]
-                              .apexcharts-tooltip-text[style="font-size: 12px;"]
-                                .apexcharts-tooltip-y-group
-                                  span.apexcharts-tooltip-text-y-label
-                                  span.apexcharts-tooltip-text-y-value
-                                .apexcharts-tooltip-goals-group
-                                  span.apexcharts-tooltip-text-goals-label
-                                  span.apexcharts-tooltip-text-goals-value
-                                .apexcharts-tooltip-z-group
-                                  span.apexcharts-tooltip-text-z-label
-                                  span.apexcharts-tooltip-text-z-value
-                            .apexcharts-tooltip-series-group[style="order: 2;"]
-                              span.apexcharts-tooltip-marker[style="background-color: var(--bs-secondary);"]
-                              .apexcharts-tooltip-text[style="font-size: 12px;"]
-                                .apexcharts-tooltip-y-group
-                                  span.apexcharts-tooltip-text-y-label
-                                  span.apexcharts-tooltip-text-y-value
-                                .apexcharts-tooltip-goals-group
-                                  span.apexcharts-tooltip-text-goals-label
-                                  span.apexcharts-tooltip-text-goals-value
-                                .apexcharts-tooltip-z-group
-                                  span.apexcharts-tooltip-text-z-label
-                                  span.apexcharts-tooltip-text-z-value
-                          .apexcharts-yaxistooltip.apexcharts-yaxistooltip-0.apexcharts-yaxistooltip-left.apexcharts-theme-dark
-                            .apexcharts-yaxistooltip-text
-                    .col-lg-4.col-md-4
-                      .d-flex.align-items-center.mb-4.pb-1
-                        / .p-8.bg-light-primary.rounded-1.me-3.d-flex.align-items-center.justify-content-center
-                          / i.ti.ti-grid-dots.text-primary.fs-6
-                        div
-                          h4.mb-0.fs-7.fw-semibold
-                            = number_with_precision amount_profit, precision:2
-                          p.fs-3.mb-0
-                            = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
-                      div
-                        .d-flex.align-items-baseline.mb-4
-                          span.round-8.bg-primary.rounded-circle.me-6
-                          div
-                            p.fs-3.mb-1
-                              = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
-                            h6.fs-5.fw-semibold.mb-0
-                              = number_with_precision trace.profit_factor(:masters).round(2), precision:2
-                        .d-flex.align-items-baseline.mb-4.pb-1
-                          span.round-8.bg-secondary.rounded-circle.me-6
-                          div
-                            p.fs-3.mb-1
-                              = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
-                            h6.fs-5.fw-semibold.mb-0
-                              = number_with_precision trace.pay_off, precision:2
-                        div
-                          / button.btn.btn-primary.w-100
-                          = link_to contract_dashboard_path(trace), class: 'btn btn-primary w-100' do
-                            = I18n.t :contract, scope:'helpers.dashboards'
-      / .row
-        .col-12
-          - @traces.reverse.each do |amount_profit, id|                   
-            - trace = Trace.find(id)
-            - next if params[:kind] != 'all' and trace.capital_recomendation.nil?
-            - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-            - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)            
-            .card
+  = render "filter"
+
+  .row
+    - @traces.reverse.each do |amount_profit, id|                   
+      - trace = Trace.find(id)
+      - next if not @all_records and trace.capital_recomendation.nil?
+      - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+      - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
+      .col-lg-12.d-flex.align-items-strech
+          .card.w-100
+            .card-body
               = link_to dashboard_path(trace, params:request.query_parameters) do
-                .card-body
-                  .row.pb-4
-                    .col-lg-4.d-flex.align-items-stretch
-                      .d-flex.flex-column.align-items-start.w-100
-                        .text-start
-                          h5.card-title.fw-semibold
-                            = trace.name
-                          span
-                            = "#{I18n.l trace.search_date_begin, format: :short2} - #{I18n.l trace.search_date_end, format: :short2}"
-                        .mt-lg-auto.mt-4.mb-4
-                          span.text-dark
-                            | Total Revenue 
-                            span.text-success
-                              |  9.78%
-                          h2.mt-2.fw-bold
-                            = number_with_precision amount_profit, precision:2
-                          span
-                            | Increased 15% from last month
-                    .col-lg-8.d-flex.align-items-stretch
-                      .w-100
-                        .mt-4
-                          #financial
-                .border-top
-                  .row.gx-0
-                    .col-md-4.border-end
-                      .p-4.py-3.py-md-4
-                        p.fs-4.text-danger.mb-0
-                          span.text-danger
-                            span.round-8.bg-danger.rounded-circle.d-inline-block.me-1
-                          = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
-                        h3.mt-2.mb-0
-                          = "#{trace.profit_trade(:masters)} %"
-                    .col-md-4.border-end
-                      .p-4.py-3.py-md-4
-                        p.fs-4.text-primary.mb-0
-                          span.text-primary
-                            span.round-8.bg-primary.rounded-circle.d-inline-block.me-1
+                .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
+                  .mb-3.mb-sm-0
+                    h5.card-title.fw-semibold
+                      = trace.name
+                    p.card-subtitle.mb-0
+                      | Overview of Profit
+                  / div
+                  /   select.form-select
+                  /     option[value="1"]
+                  /       | March 2023
+                  /     option[value="2"]
+                  /       | April 2023
+                  /     option[value="3"]
+                  /       | May 2023
+                  /     option[value="4"]
+                  /       | June 2023
+              .row.align-items-center
+                .col-lg-8.col-md-8
+                  / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
+                  / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
+                  - chart_values =  trace.dashboard_capital_accumulated.reverse[..5].reverse
+                  #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
+                .col-lg-4.col-md-4
+                  .d-flex.align-items-center.mb-4.pb-1
+                    span.round-8.bg-secondary.rounded-circle.me-6
+                    div
+                      h4.mb-0.fs-7.fw-semibold
+                        = number_with_precision amount_profit, precision:2
+                      p.fs-3.mb-0
+                        = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+                  div
+                    .d-flex.align-items-baseline.mb-4
+                      span.round-8.bg-primary.rounded-circle.me-6
+                      div
+                        p.fs-3.mb-1
                           = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
-                        h3.mt-2.mb-0
+                        h6.fs-5.fw-semibold.mb-0
                           = number_with_precision trace.profit_factor(:masters).round(2), precision:2
-                    .col-md-4
-                      .p-4.py-3.py-md-4
-                        p.fs-4.text-info.mb-0
-                          span.text-info
-                            span.round-8.bg-info.rounded-circle.d-inline-block.me-1
+                    .d-flex.align-items-baseline.mb-4.pb-1
+                      span.round-8.bg-secondary.rounded-circle.me-6
+                      div
+                        p.fs-3.mb-1
                           = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
-                        h3.mt-2.mb-0
+                        h6.fs-5.fw-semibold.mb-0
                           = number_with_precision trace.pay_off, precision:2
-        .col-lg-5.d-flex.align-items-stretch
-          .card.w-100
-            .card-body
-              h5.card-title.fw-semibold
-                | Upcoming Activity
-              p.card-subtitle
-                | Preparation for the Upcoming Activity
-              .mt-9.py-6.d-flex.align-items-center
-                .flex-shrink-0.bg-light-primary.rounded-circle.round.d-flex.align-items-center.justify-content-center
-                  i.ti.ti-map-pin.text-primary.fs-6
-                .ms-3
-                  h6.mb-0.fw-semibold
-                    | Trip to Singapore
-                  span.fs-3
-                    | working on
-                .ms-auto
-                  span.fs-2
-                    | 12:00 AM
-              .py-6.d-flex.align-items-center
-                .flex-shrink-0.bg-light-danger.rounded-circle.round.d-flex.align-items-center.justify-content-center
-                  i.ti.ti-bookmark.fs-6.text-danger
-                .ms-3
-                  h6.mb-0.fw-semibold
-                    | Archived Data
-                  span.fs-3
-                    | working on
-                .ms-auto
-                  span.fs-2
-                    | 3:52 PM
-              .py-6.d-flex.align-items-center
-                .flex-shrink-0.bg-light-success.rounded-circle.round.d-flex.align-items-center.justify-content-center
-                  i.ti.ti-microphone.fs-6.text-success
-                .ms-3
-                  h6.mb-0.fw-semibold
-                    | Meeting with Client
-                  span.fs-3
-                    | working on
-                .ms-auto
-                  span.fs-2
-                    | 4:50 PM
-              .py-6.d-flex.align-items-center
-                .flex-shrink-0.bg-light-warning.rounded-circle.round.d-flex.align-items-center.justify-content-center
-                  i.ti.ti-cast.text-warning.fs-6
-                .ms-3
-                  h6.mb-0.fw-semibold
-                    | Screening Task Team
-                  span.fs-3
-                    | working on
-                .ms-auto
-                  span.fs-2
-                    | 5:10 PM
-              .pt-6.d-flex.align-items-center
-                .flex-shrink-0.bg-light-info.rounded-circle.round.d-flex.align-items-center.justify-content-center
-                  i.ti.ti-mail.text-info.fs-6
-                .ms-3
-                  h6.mb-0.fw-semibold
-                    | Send envelope to John
-                  span.fs-3
-                    | working on
-                .ms-auto
-                  span.fs-2
-                    | 6:00 PM
-        .col-lg-7.d-flex.align-items-stretch
-          .card.w-100.bg-light-primary.overflow-hidden
-            .card-body
-              .d-flex.align-items-center
-                div
-                  h5.card-title.fw-semibold
-                    | Sales Hourly
-                  .d-flex.gap-2
-                    span
-                      span.round-8.bg-primary.rounded-circle.d-inline-block
-                    span
-                      | Your data updates every 3 hours
-                .ms-auto.d-flex.align-items-stretch.gap-2
-                  a.btn.btn-primary[href="javascript:void(0)"]
-                    i.ti.ti-download.fs-6
-            #activity-status
-        .col-lg-12
-          .card
-            .card-body
-              .d-md-flex.align-items-center.mb-9
-                div
-                  h5.card-title.fw-semibold
-                    | Order Status
-                  p.card-subtitle
-                    | How to Check Your Order Status Online
-                .ms-auto.mt-4.mt-md-0
-                  ul.nav.nav-tabs[role="tablist"]
-                    li.nav-item
-                      a.nav-link.active[data-bs-toggle="tab" href="#home" role="tab"]
-                        span
-                          | Checkout
-                    li.nav-item
-                      a.nav-link[data-bs-toggle="tab" href="#profile" role="tab"]
-                        span
-                          | Paid
-                    li.nav-item
-                      a.nav-link[data-bs-toggle="tab" href="#messages" role="tab"]
-                        span
-                          | Packed
-              .tab-content.mt-3
-                #home.tab-pane.active[role="tabpanel"]
-                  .table-responsive
-                    table.table.align-middle.mb-0.text-nowrap
-                      tbody
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-1.jpg" alt="p1" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Irpun Wicaksono
-                                span.fs-2
-                                  | irpun@gmail.com
-                          td.ps-0
-                            span
-                              | React Js - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $50.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-warning.text-warning.rounded-pill
-                              span.round-8.bg-warning.rounded-circle.d-inline-block.me-1
-                              | progress 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-2.jpg" alt="p2" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Oyhan Ruhiyan
-                                span.fs-2
-                                  | oyhan@gmail.com
-                          td.ps-0
-                            span
-                              | Frontend Dev - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $49.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-success.text-success.rounded-pill
-                              span.round-8.bg-success.rounded-circle.d-inline-block.me-1
-                              | delivered 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-3.jpg" alt="p3" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Dayat Santoso
-                                span.fs-2
-                                  | dayat@gmail.com
-                          td.ps-0
-                            span
-                              | UX Research - Power Courses
-                          td.ps-0
-                            h6.mb-0
-                              | $79.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-danger.text-danger.rounded-pill
-                              span.round-8.bg-danger.rounded-circle.d-inline-block.me-1
-                              | cancel 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-4.jpg" alt="p4" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Irpun Wicaksono
-                                span.fs-2
-                                  | irpun@gmail.com
-                          td.ps-0
-                            span
-                              | React Js - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $50.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-success.text-success.rounded-pill
-                              span.round-8.bg-success.rounded-circle.d-inline-block.me-1
-                              | delivered 
-                #profile.tab-pane[role="tabpanel"]
-                  .table-responsive
-                    table.table.table-hover.align-middle.mb-0.text-nowrap
-                      tbody
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-2.jpg" alt="p2" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Oyhan Ruhiyan
-                                span.fs-2
-                                  | oyhan@gmail.com
-                          td.ps-0
-                            span
-                              | Frontend Dev - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $49.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-success.text-success.rounded-pill
-                              span.round-8.bg-success.rounded-circle.d-inline-block.me-1
-                              | delivered 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-1.jpg" alt="p1" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Irpun Wicaksono
-                                span.fs-2
-                                  | irpun@gmail.com
-                          td.ps-0
-                            span
-                              | React Js - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $50.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-warning.text-warning.rounded-pill
-                              span.round-8.bg-warning.rounded-circle.d-inline-block.me-1
-                              | progress 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-3.jpg" alt="p3" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Dayat Santoso
-                                span.fs-2
-                                  | dayat@gmail.com
-                          td.ps-0
-                            span
-                              | UX Research - Power Courses
-                          td.ps-0
-                            h6.mb-0
-                              | $79.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-danger.text-danger.rounded-pill
-                              span.round-8.bg-danger.rounded-circle.d-inline-block.me-1
-                              | cancel 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-4.jpg" alt="p4" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Irpun Wicaksono
-                                span.fs-2
-                                  | irpun@gmail.com
-                          td.ps-0
-                            span
-                              | React Js - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $50.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-success.text-success.rounded-pill
-                              span.round-8.bg-success.rounded-circle.d-inline-block.me-1
-                              | delivered 
-                #messages.tab-pane[role="tabpanel"]
-                  .table-responsive
-                    table.table.table-hover.align-middle.mb-0.text-nowrap
-                      tbody
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-4.jpg" alt="p4" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Irpun Wicaksono
-                                span.fs-2
-                                  | irpun@gmail.com
-                          td.ps-0
-                            span
-                              | React Js - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $50.00
-                          td.text-end.ps-0
-                            a.badge.bg-light-success.text-success.rounded-pill[href="javascript:void(0)"]
-                              span.round-8.bg-success.rounded-circle.d-inline-block.me-1
-                              | delivered 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-1.jpg" alt="p1" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Irpun Wicaksono
-                                span.fs-2
-                                  | irpun@gmail.com
-                          td.ps-0
-                            span
-                              | React Js - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $50.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-warning.text-warning.rounded-pill
-                              span.round-8.bg-warning.rounded-circle.d-inline-block.me-1
-                              | progress 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-2.jpg" alt="p2" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Oyhan Ruhiyan
-                                span.fs-2
-                                  | oyhan@gmail.com
-                          td.ps-0
-                            span
-                              | Frontend Dev - Online Classes
-                          td.ps-0
-                            h6.mb-0
-                              | $49.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-success.text-success.rounded-pill
-                              span.round-8.bg-success.rounded-circle.d-inline-block.me-1
-                              | delivered 
-                        tr
-                          td.ps-0
-                            .d-flex.align-items-center.gap-3
-                              .flex-shrink-0
-                                img.rounded[src="/images/modernize/products/product-3.jpg" alt="p3" width="80"]
-                              div
-                                h6.mb-0.fw-semibold
-                                  | Dayat Santoso
-                                span.fs-2
-                                  | dayat@gmail.com
-                          td.ps-0
-                            span
-                              | UX Research - Power Courses
-                          td.ps-0
-                            h6.mb-0
-                              | $79.00
-                          td.text-end.ps-0
-                            span.badge.bg-light-danger.text-danger.rounded-pill
-                              span.round-8.bg-danger.rounded-circle.d-inline-block.me-1
-                              | cancel 
-        .col-lg-5.d-flex.align-items-stretch
-          .card.w-100
-            .card-body
-              h5.card-title.fw-semibold
-                | Tasks
-              p.card-subtitle
-                | The Power of Prioritizing Your Tasks
-              .mt-4.pb-3.border-bottom
-                .d-flex.align-items-center
-                  span.bg-light-primary.text-primary.badge
-                    | Inprogress
-                  span.fs-3.ms-auto
-                    | 8 March 2020
-                h6.mt-3
-                  | NFT Landing Page
-                span.fs-3.lh-sm
-                  | Designing an NFT-themed website with a creative concept so th...
-                .hstack.gap-3.mt-3
-                  a.fs-3.text-bodycolor.d-flex.align-items-center.text-decoration-none[href="#"]
-                    i.ti.ti-clipboard.fs-6.text-primary.me-2.d-flex
-                    |  2 Tasks 
-                  a.fs-3.text-bodycolor.d-flex.align-items-center.text-decoration-none[href="#"]
-                    i.ti.ti-message-dots.fs-6.text-primary.me-2.d-flex
-                    |  13 Commets 
-              .py-3.border-bottom
-                .d-flex.align-items-center
-                  span.bg-light-danger.text-danger.badge
-                    | Inpending
-                  span.fs-3.ms-auto
-                    | 8 Jan 2023
-                h6.mt-3
-                  | Dashboard Finanace Management
-                span.fs-3.lh-sm
-                  | Designing an NFT-themed website with a creative concept so th...
-                .hstack.gap-3.mt-3
-                  a.fs-3.text-bodycolor.d-flex.align-items-center.text-decoration-none[href="#"]
-                    i.ti.ti-clipboard.fs-6.text-primary.me-2.d-flex
-                    |  4 Tasks 
-                  a.fs-3.text-bodycolor.d-flex.align-items-center.text-decoration-none[href="#"]
-                    i.ti.ti-message-dots.fs-6.text-primary.me-2.d-flex
-                    |  50 Commets 
-              .pt-3
-                .d-flex.align-items-center
-                  span.bg-light-success.text-success.badge
-                    | Completed
-                  span.fs-3.ms-auto
-                    | 8 Feb 2023
-                h6.mt-3
-                  | Logo Branding
-                span.fs-3.lh-sm
-                  | Designing an NFT-themed website with a creative concept so th...
-                .hstack.gap-3.mt-3
-                  a.fs-3.text-bodycolor.d-flex.align-items-center.text-decoration-none[href="#"]
-                    i.ti.ti-clipboard.fs-6.text-primary.me-2.d-flex
-                    |  1 Task 
-                  a.fs-3.text-bodycolor.d-flex.align-items-center.text-decoration-none[href="#"]
-                    i.ti.ti-message-dots.fs-6.text-primary.me-2.d-flex
-                    |  12 Commets 
-        .col-lg-7.d-flex.align-items-stretch
-          .card.w-100
-            .card-body.border-bottom
-              .d-md-flex.align-items-center
-                div
-                  h5.card-title.fw-semibold
-                    | Team Performance
-                  p.card-subtitle
-                    | How to Measure Team Performance
-                .ms-auto.mt-4.mt-md-0
-                  .hstack
-                    a[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="John Deo"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-1.jpg" width="35" alt="u1"]
-                    a.ms-n2[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark Smith"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-2.jpg" width="35" alt="u2"]
-                    a.ms-n2[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="Jonthan Leo"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-3.jpg" width="35" alt="u3"]
-              .row.mt-4
-                .col-md-6
-                  .hstack.p-3.border.rounded.mb-3.mb-md-0
-                    a[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="John Deo"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-1.jpg" width="30" alt="u4"]
-                    a.ms-n2[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark Smith"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-2.jpg" width="30" alt="u2"]
-                    .ms-3
-                      h6.mb-0.fs-3
-                        | Monster Dashboard
-                      span.fs-2
-                        | 46%
-                      span.fs-2.ms-4
-                        | Due in 3 days
-                .col-md-6
-                  .hstack.p-3.border.rounded
-                    a[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="John Deo"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-3.jpg" width="30" alt="u3"]
-                    a.ms-n2[href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="Mark Smith"]
-                      img.rounded-circle.border.border-2.border-white[src="/images/modernize/profile/user-4.jpg" width="30" alt="u4"]
-                    .ms-3
-                      h6.mb-0.fs-3
-                        | Xtreme Dashboard
-                      span.fs-2
-                        | 87%
-                      span.fs-2.ms-4
-                        | Due in 7 days
-              .mt-4
-                #team-performance
-              .text-center
-                span.d-block
-                  | Your team performance is 5% better this week.
-                a.btn.btn-primary.mt-4[href="javascript:void(0)"]
-                  | View Details
-            .p-3
-              .hstack.gap-3.justify-content-center
-                div
-                  span
-                    span.round-8.bg-primary.rounded-circle.d-inline-block.me-2
-                  span.fs-3.text-dark
-                    | Completed 124
-                div
-                  span
-                    span.round-8.bg-danger.rounded-circle.d-inline-block.me-2
-                  span.fs-3.text-dark
-                    | Percentage 86%
+                    div.d-flex.align-items-baseline.mb-4
+                      / button.btn.btn-primary.w-100
+                      = link_to contract_dashboard_path(trace), class: 'btn btn-light w-100' do
+                        = I18n.t :more_information, scope:'helpers.dashboards'
 
-    <!--  Shopping Cart -->
-    <div class="offcanvas offcanvas-end shopping-cart" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-      <div class="offcanvas-header py-4">
-        <h5 class="offcanvas-title fs-5 fw-semibold" id="offcanvasRightLabel">Shopping Cart</h5>
-        <span class="badge bg-primary rounded-4 px-3 py-1 lh-sm">5 new</span>
-      </div>
-      <div class="offcanvas-body h-100 px-4 pt-0" data-simplebar>
-        <ul class="mb-0">
-          <li class="pb-7">
-            <div class="d-flex align-items-center">
-              <img src="/images/modernize/products/product-1.jpg" width="95" height="75" class="rounded-1 me-9 flex-shrink-0" alt="" />
-              <div>
-                <h6 class="mb-1">Supreme toys cooker</h6>
-                <p class="mb-0 text-muted fs-2">Kitchenware Item</p>
-                <div class="d-flex align-items-center justify-content-between mt-2">
-                  <h6 class="fs-2 fw-semibold mb-0 text-muted">$250</h6>
-                  <div class="input-group input-group-sm w-50">
-                    <button class="btn border-0 round-20 minus p-0 bg-light-success text-success " type="button" id="add1"> - </button>
-                    <input type="text" class="form-control round-20 bg-transparent text-muted fs-2 border-0  text-center qty" placeholder="" aria-label="Example text with button addon" aria-describedby="add1" value="1" />
-                    <button class="btn text-success bg-light-success  p-0 round-20 border-0 add" type="button" id="addo2"> + </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-          <li class="pb-7">
-            <div class="d-flex align-items-center">
-              <img src="/images/modernize/products/product-2.jpg" width="95" height="75" class="rounded-1 me-9 flex-shrink-0" alt="" />
-              <div>
-                <h6 class="mb-1">Supreme toys cooker</h6>
-                <p class="mb-0 text-muted fs-2">Kitchenware Item</p>
-                <div class="d-flex align-items-center justify-content-between mt-2">
-                  <h6 class="fs-2 fw-semibold mb-0 text-muted">$250</h6>
-                  <div class="input-group input-group-sm w-50">
-                    <button class="btn border-0 round-20 minus p-0 bg-light-success text-success " type="button" id="add2"> - </button>
-                    <input type="text" class="form-control round-20 bg-transparent text-muted fs-2 border-0  text-center qty" placeholder="" aria-label="Example text with button addon" aria-describedby="add2" value="1" />
-                    <button class="btn text-success bg-light-success  p-0 round-20 border-0 add" type="button" id="addon34"> + </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-          <li class="pb-7">
-            <div class="d-flex align-items-center">
-              <img src="/images/modernize/products/product-3.jpg" width="95" height="75" class="rounded-1 me-9 flex-shrink-0" alt="" />
-              <div>
-                <h6 class="mb-1">Supreme toys cooker</h6>
-                <p class="mb-0 text-muted fs-2">Kitchenware Item</p>
-                <div class="d-flex align-items-center justify-content-between mt-2">
-                  <h6 class="fs-2 fw-semibold mb-0 text-muted">$250</h6>
-                  <div class="input-group input-group-sm w-50">
-                    <button class="btn border-0 round-20 minus p-0 bg-light-success text-success " type="button" id="add3"> - </button>
-                    <input type="text" class="form-control round-20 bg-transparent text-muted fs-2 border-0  text-center qty" placeholder="" aria-label="Example text with button addon" aria-describedby="add3" value="1" />
-                    <button class="btn text-success bg-light-success  p-0 round-20 border-0 add" type="button" id="addon3"> + </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-        </ul>
-        <div class="align-bottom">
-          <div class="d-flex align-items-center pb-7">
-            <span class="text-dark fs-3">Sub Total</span>
-            <div class="ms-auto">
-              <span class="text-dark fw-semibold fs-3">$2530</span>
-            </div>
-          </div>
-          <div class="d-flex align-items-center pb-7">
-            <span class="text-dark fs-3">Total</span>
-            <div class="ms-auto">
-              <span class="text-dark fw-semibold fs-3">$6830</span>
-            </div>
-          </div>
-          <a href="./eco-checkout.html" class="btn btn-outline-primary w-100">Go to shopping cart</a>
-        </div>
-      </div>
-    </div>
-    <!--  Mobilenavbar -->
-    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="mobilenavbar" aria-labelledby="offcanvasWithBothOptionsLabel">
-      <nav class="sidebar-nav scroll-sidebar">
-        <div class="offcanvas-header justify-content-between">
-          <img src="/images/modernize/logos/favicon.png" alt="" class="img-fluid">
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body profile-dropdown mobile-navbar" data-simplebar=""  data-simplebar>
-          <ul id="sidebarnav">
-            <li class="sidebar-item">
-              <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
-                <span>
-                  <i class="ti ti-apps"></i>
-                </span>
-                <span class="hide-menu">Apps</span>
-              </a>
-              <ul aria-expanded="false" class="collapse first-level my-3">
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-chat.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Chat Application</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">New messages arrived</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-invoice.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Invoice App</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">Get latest invoice</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-mobile.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Contact Application</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">2 Unsaved Contacts</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-message-box.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Email App</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">Get new emails</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-cart.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">User Profile</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">learn more information</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-date.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Calendar App</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">Get dates</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-lifebuoy.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Contact List Table</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">Add new contact</span>
-                    </div>
-                  </a>
-                </li>
-                <li class="sidebar-item py-2">
-                  <a href="#" class="d-flex align-items-center">
-                    <div class="bg-light rounded-1 me-3 p-6 d-flex align-items-center justify-content-center">
-                      <img src="/images/modernize/svgs/icon-dd-application.svg" alt="" class="img-fluid" width="24" height="24">
-                    </div>
-                    <div class="d-inline-block">
-                      <h6 class="mb-1 bg-hover-primary">Notes Application</h6>
-                      <span class="fs-2 d-block fw-normal text-muted">To-do and Daily tasks</span>
-                    </div>
-                  </a>
-                </li>
-                <ul class="px-8 mt-7 mb-4">
-                  <li class="sidebar-item mb-3">
-                    <h5 class="fs-5 fw-semibold">Quick Links</h5>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">Pricing Page</a>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">Authentication Design</a>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">Register Now</a>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">404 Error Page</a>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">Notes App</a>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">User Application</a>
-                  </li>
-                  <li class="sidebar-item py-2">
-                    <a class="fw-semibold text-dark" href="#">Account Settings</a>
-                  </li>
-                </ul>
-              </ul>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="app-chat.html" aria-expanded="false">
-                <span>
-                  <i class="ti ti-message-dots"></i>
-                </span>
-                <span class="hide-menu">Chat</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="app-calendar.html" aria-expanded="false">
-                <span>
-                  <i class="ti ti-calendar"></i>
-                </span>
-                <span class="hide-menu">Calendar</span>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="app-email.html" aria-expanded="false">
-                <span>
-                  <i class="ti ti-mail"></i>
-                </span>
-                <span class="hide-menu">Email</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </div>
-    <!-- Search Bar -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content rounded-1">
-          <div class="modal-header border-bottom">
-            <input type="search" class="form-control fs-3" placeholder="Search here" id="search" />
-            <span data-bs-dismiss="modal" class="lh-1 cursor-pointer">
-              <i class="ti ti-x fs-5 ms-3"></i>
-            </span>
-          </div>
-          <div class="modal-body message-body" data-simplebar="">
-            <h5 class="mb-0 fs-5 p-1">Quick Page Links</h5>
-            <ul class="list mb-0 py-2">
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Modern</span>
-                  <span class="fs-3 text-muted d-block">/dashboards/dashboard1</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Dashboard</span>
-                  <span class="fs-3 text-muted d-block">/dashboards/dashboard2</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Contacts</span>
-                  <span class="fs-3 text-muted d-block">/apps/contacts</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Posts</span>
-                  <span class="fs-3 text-muted d-block">/apps/blog/posts</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Detail</span>
-                  <span class="fs-3 text-muted d-block">/apps/blog/detail/streaming-video-way-before-it-was-cool-go-dark-tomorrow</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Shop</span>
-                  <span class="fs-3 text-muted d-block">/apps/ecommerce/shop</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Modern</span>
-                  <span class="fs-3 text-muted d-block">/dashboards/dashboard1</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Dashboard</span>
-                  <span class="fs-3 text-muted d-block">/dashboards/dashboard2</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Contacts</span>
-                  <span class="fs-3 text-muted d-block">/apps/contacts</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Posts</span>
-                  <span class="fs-3 text-muted d-block">/apps/blog/posts</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Detail</span>
-                  <span class="fs-3 text-muted d-block">/apps/blog/detail/streaming-video-way-before-it-was-cool-go-dark-tomorrow</span>
-                </a>
-              </li>
-              <li class="p-1 mb-1 bg-hover-light-black">
-                <a href="#">
-                  <span class="fs-3 text-black fw-normal d-block">Shop</span>
-                  <span class="fs-3 text-muted d-block">/apps/ecommerce/shop</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Customizer -->
-    <button class="btn btn-primary p-3 rounded-circle d-flex align-items-center justify-content-center customizer-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
-    <i class="ti ti-settings fs-7" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Settings"></i>
-    </button>
-    <div class="offcanvas offcanvas-end customizer" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel" data-simplebar="">
-      <div class="d-flex align-items-center justify-content-between p-3 border-bottom">
-        <h4 class="offcanvas-title fw-semibold" id="offcanvasExampleLabel">Settings</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body p-4">
-        <div class="theme-option pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Theme Option</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <a href="javascript:void(0)"  onclick="toggleTheme('../../dist/css/style.min.css')"  class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 light-theme text-dark">
-              <i class="ti ti-brightness-up fs-7 text-primary"></i>
-              <span class="text-dark">Light</span>
-            </a>
-            <a href="javascript:void(0)" onclick="toggleTheme('../../dist/css/style-dark.min.css')" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 dark-theme text-dark">
-              <i class="ti ti-moon fs-7 "></i>
-              <span class="text-dark">Dark</span>
-            </a>
-          </div>
-        </div>
-        <div class="theme-direction pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Theme Direction</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <a href="./index.html" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2">
-              <i class="ti ti-text-direction-ltr fs-6 text-primary"></i>
-              <span class="text-dark">LTR</span>
-            </a>
-            <a href="../rtl/index.html" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2">
-              <i class="ti ti-text-direction-rtl fs-6 text-dark"></i>
-              <span class="text-dark">RTL</span>
-            </a>
-          </div>
-        </div>
-        <div class="theme-colors pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Theme Colors</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <ul class="list-unstyled mb-0 d-flex gap-3 flex-wrap change-colors">
-              <li class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center justify-content-center">
-                <a href="javascript:void(0)" class="rounded-circle position-relative d-block customizer-bgcolor skin1-bluetheme-primary active-theme " onclick="toggleTheme('../../dist/css/style.min.css')"  data-color="blue_theme" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="BLUE_THEME"><i class="ti ti-check text-white d-flex align-items-center justify-content-center fs-5"></i></a>
-              </li>
-              <li class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center justify-content-center">
-                <a href="javascript:void(0)"  class="rounded-circle position-relative d-block customizer-bgcolor skin2-aquatheme-primary " onclick="toggleTheme('../../dist/css/style-aqua.min.css')"  data-color="aqua_theme" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="AQUA_THEME"><i class="ti ti-check  text-white d-flex align-items-center justify-content-center fs-5"></i></a>
-              </li>
-              <li class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center justify-content-center">
-                <a href="javascript:void(0)" class="rounded-circle position-relative d-block customizer-bgcolor skin3-purpletheme-primary" onclick="toggleTheme('../../dist/css/style-purple.min.css')"  data-color="purple_theme" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="PURPLE_THEME"><i class="ti ti-check  text-white d-flex align-items-center justify-content-center fs-5"></i></a>
-              </li>
-              <li class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center justify-content-center">
-                <a href="javascript:void(0)" class="rounded-circle position-relative d-block customizer-bgcolor skin4-greentheme-primary" onclick="toggleTheme('../../dist/css/style-green.min.css')"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="GREEN_THEME"><i class="ti ti-check  text-white d-flex align-items-center justify-content-center fs-5"></i></a>
-              </li>
-              <li class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center justify-content-center">
-                <a href="javascript:void(0)" class="rounded-circle position-relative d-block customizer-bgcolor skin5-cyantheme-primary" onclick="toggleTheme('../../dist/css/style-cyan.min.css')"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="CYAN_THEME"><i class="ti ti-check  text-white d-flex align-items-center justify-content-center fs-5"></i></a>
-              </li>
-              <li class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center justify-content-center">
-                <a href="javascript:void(0)" class="rounded-circle position-relative d-block customizer-bgcolor skin6-orangetheme-primary" onclick="toggleTheme('../../dist/css/style-orange.min.css')"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="ORANGE_THEME"><i class="ti ti-check  text-white d-flex align-items-center justify-content-center fs-5"></i></a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="layout-type pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Layout Type</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <a href="./index.html" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2">              
-              <i class="ti ti-layout-sidebar fs-6 text-primary"></i>
-              <span class="text-dark">Vertical</span>
-            </a>
-            <a href="../horizontal/index.html" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2">
-              <i class="ti ti-layout-navbar fs-6 text-dark"></i>
-              <span class="text-dark">Horizontal</span>
-            </a>
-          </div>
-        </div>
-        <div class="container-option pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Container Option</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <a href="javascript:void(0)" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 boxed-width text-dark">              
-              <i class="ti ti-layout-distribute-vertical fs-7 text-primary"></i>
-              <span class="text-dark">Boxed</span>
-            </a>
-            <a href="javascript:void(0)" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 full-width text-dark">
-              <i class="ti ti-layout-distribute-horizontal fs-7"></i>
-              <span class="text-dark">Full</span>
-            </a>
-          </div>
-        </div>
-        <div class="sidebar-type pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Sidebar Type</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <a  href="javascript:void(0)" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 fullsidebar">              
-              <i class="ti ti-layout-sidebar-right fs-7"></i>
-              <span class="text-dark">Full</span>
-            </a>
-            <a  href="javascript:void(0)" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center text-dark sidebartoggler gap-2">
-              <i class="ti ti-layout-sidebar fs-7"></i>
-              <span class="text-dark">Collapse</span>
-            </a>
-          </div>
-        </div>
-        <div class="card-with pb-4">
-          <h6 class="fw-semibold fs-4 mb-1">Card With</h6>
-          <div class="d-flex align-items-center gap-3 my-3">
-            <a href="javascript:void(0)" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 text-dark cardborder">              
-              <i class="ti ti-border-outer fs-7"></i>
-              <span class="text-dark">Border</span>
-            </a>
-            <a href="javascript:void(0)" class="rounded-2 p-9 customizer-box hover-img d-flex align-items-center gap-2 cardshadow">
-              <i class="ti ti-border-none fs-7"></i>
-              <span class="text-dark">Shadow</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Customizer -->
+                    div
+                      / button.btn.btn-primary.w-100
+                      = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
+                        = I18n.t :contract, scope:'helpers.dashboards'
 
-    / = render "filter"
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){ 
 
-    / .row
-    /   - @traces.reverse.each do |amount_profit, id|                   
-    /     - trace = Trace.find(id)
-    /     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-    /     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
-    /     .col-md-6.col-xl-6
-    /       .card.widget-card-user
-    /         .card-body.p-b-0
-    /           = link_to dashboard_path(trace, params:request.query_parameters) do
-    /             .card-user
-    /               .row
-    /                 .col-md-6
-    /                   / span.badge.badge-success.float-right
-    /                   /   | NEW
-    /                   / img.img-radius.wid-80[src="assets/images/user/avatar-2.jpg" alt=""]
-    /                   h4.p-t-10.p-b-10.m-t-0
-    /                     = trace.name
-    /                   h2.f-40.m-b-20.p-l-20
-    /                     / - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
-    /                   - if amount_profit.to_f >= 0
-    /                     h4.f-40.m-b-20.p-l-20.text-left.text-primary
-    /                         = number_with_precision amount_profit, precision:2
-    /                   - else
-    /                     h4.f-30.m-b-20.p-l-20.text-left.text-danger
-    /                       = number_with_precision amount_profit, precision:2
-    /                   / p.text-muted.p-t-10.p-b-10.m-0
-    /                     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.
-    /                 .col-md-6.p-t-20.p-b-20
-    /                   - values = trace.masters_scope(:masters, :closed).to_a.map{|x| x.profit.to_f}.reverse[..10]
-    /                   - values = values.map(&:to_i).delete_if{|x| x == 0} if values
-    /                   #power-card-chart1[height='75' style="margin-top:0px;margin-right:40px;" data-chart="#{values.compact}"]
-    /         .card-footer.border-top.bg-light
-    /           .row
-    /             .col-sm-3.footer-menu.text-center.border-right
-    /               p.text-muted.f-w-400.m-0.f-16
-    /                 = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
-    /               span.f-18.f-w-400
-    /                 = "#{trace.profit_trade(:masters)} %"
-    /             .col-sm-3.footer-menu.text-center.border-right
-    /               p.text-muted.f-w-400.m-0.f-16
-    /                 = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
-    /               span.f-18.f-w-400
-    /                 = number_with_precision trace.profit_factor(:masters).round(2), precision:2
-    /             .col-sm-3.footer-menu.text-center.border-right
-    /               p.text-muted.f-w-400.m-0.f-16
-    /                 = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
-    /               span.f-18.f-w-400
-    /                 = number_with_precision trace.pay_off, precision:2
-    /             .col-sm-3.footer-menu.text-center
-    /               = link_to contract_dashboard_path(trace), class: 'btn btn-info btn-lg' do
-    /                 = I18n.t :contract, scope:'helpers.dashboards'
-    /               / = form_for trace, url: contract_dashboard_path(trace), method: :get do |f| 
-    /                 = f.button :submit, class: 'button btn btn-primary btn-lg'
-    / / .row
-    / /   - @traces.each do |trace|                   
-    / /     - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-    / /     - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
+      $("[id='chart']").each(function(index, value) {
+        // =====================================
+        // Profit
+        // =====================================
+        var chart = {
+          series: [
+            {
+              name: "Eanings this month",
+              data: $(this).data("chart-gain"),
+            },
+            {
+              name: "Expense this month",
+              data: $(this).data("chart-loss"),
+            },
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },
+            type: "bar",
+            fontFamily: "Plus Jakarta Sans', sans-serif",
+            foreColor: "#adb0bb",
+            height: 320,
+            stacked: true,
+          },
+          colors: ["var(--bs-primary)", "var(--bs-secondary)"],
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              barHeight: "60%",
+              columnWidth: "20%",
+              borderRadius: [6],
+              borderRadiusApplication: 'end',
+              borderRadiusWhenStacked: 'all'
+            },
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          legend: {
+            show: false,
+          },
+          grid: {
+            borderColor: "rgba(0,0,0,0.1)",
+            strokeDashArray: 3,
+            xaxis: {
+              lines: {
+                show: false,
+              },
+            },
+          },
+          yaxis: {
+            min: -5,
+            max: 5,
+            title: {
+              // text: 'Age',
+            },
+          },
+          xaxis: {
+            axisBorder: {
+              show: false,
+            },
+            categories: $(this).data("chart-dates"),
 
-    / /     .col-md-6.col-lg-4
-    / /       = link_to dashboard_path(trace) do
-    / /         .card
-    / /           .card-header
-    / /             .card-header-left
-    / /               h5 = trace.name
-    / /             .card-header-right
-    / /               i.icofont.icofont-spinner-alt-5
-    / /           .card-body.p-b-30
-    / /             h2= "R$ #{number_with_precision trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2}"
-    / /             p.text-muted.m-b-10 Lucro
-    / /             .row
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
-    / /                 span.text-muted Lucro %
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
-    / /                 span.text-muted Perda %
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision trace.pay_off(:masters).round(2), precision:2
-    / /                 span.text-muted PayOff
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-blue.f-16.m-0.f-w-400= number_with_precision trace.profit_factor(:masters).round(2), precision:2
-    / /                 span.text-muted Fator de Lucro
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision trace.drawdown(:masters).round(2), precision:2
-    / /                 span.text-muted Drawdown
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
-    / /                 span.text-muted Account Slaves
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :buy]).count
-    / /                 span.text-muted Operações Compra
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :sell]).count
-    / /                 span.text-muted Operações Venda
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :gain]).count
-    / /                 span.text-muted Operações Ganho
-    / /               .col-sm-6.col-xs-12
-    / /                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
-    / /                 span.text-muted Operações Perda
-    / - content_for :footer do
-    /   = javascript_include_tag "mintone/chart/apexcharts.min.js"
-    /   javascript:
-    /     $(document).ready(function(){ 
+          },
+          yaxis: {
+            tickAmount: 4,
+          },
+          tooltip: {
+            theme: "dark",
+          },
+        };
 
-    /       $("[id='power-card-chart1']").each(function(index, value) {
+        var chart = new ApexCharts(value, chart);
+        chart.render();
 
-    /           var options = {
-    /               chart: {
-    /                   type: 'bar',
-    /                   height: 100,
-    /                   sparkline: {
-    /                       enabled: true
-    /                   }
-    /               },
-    /               dataLabels: {
-    /                   enabled: false
-    /               },
-    /               series: [{
-    /                   name: 'series1',
-    /                   data: $(this).data("chart"),
-    /               }],
-    /               plotOptions: {
-    /                 bar: {
-    /                   colors: {
-    /                     ranges: [{
-    /                       from: -9999999,
-    /                       to: -1,
-    /                       color: '#F15B46'
-    /                     }, {
-    /                       from: 1,
-    /                       to: 9999999,
-    /                       color: '#4886ff'
-    /                     }]
-    /                   },
-    /                 }
-    /               },
-    /               yaxis: {
-    /                   min: -100,
-    /                   max: 100,
-    /               },
-    /               tooltip: {
-    /                   theme: 'dark',
-    /                   fixed: {
-    /                       enabled: false
-    /                   },
-    /                   x: {
-    /                       show: false,
-    /                   },
-    /                   y: {
-    /                       title: {
-    /                           formatter: function(seriesName) {
-    /                               return 'Profit'
-    /                           }
-    /                       }
-    /                   },
-    /                   marker: {
-    /                       show: false
-    /                   }
-    /               }
-    /           };
-    /           var chart = new ApexCharts(value, options);
-    /           chart.render();
-    /       });     
-    /       $(document).on("click", "table.table tr", function() {
-    /         var link  = $(this).data("href")
-    /             document.location.href=link;
-    /       });
-    /     });
+      }
+    )});
+
+
+
+/ = render "filter"
+
+/ .row
+/   - @traces.reverse.each do |amount_profit, id|                   
+/     - trace = Trace.find(id)
+/     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+/     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
+/     .col-md-6.col-xl-6
+/       .card.widget-card-user
+/         .card-body.p-b-0
+/           = link_to dashboard_path(trace, params:request.query_parameters) do
+/             .card-user
+/               .row
+/                 .col-md-6
+/                   / span.badge.badge-success.float-right
+/                   /   | NEW
+/                   / img.img-radius.wid-80[src="assets/images/user/avatar-2.jpg" alt=""]
+/                   h4.p-t-10.p-b-10.m-t-0
+/                     = trace.name
+/                   h2.f-40.m-b-20.p-l-20
+/                     / - amount_profit = number_with_precision(trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2)
+/                   - if amount_profit.to_f >= 0
+/                     h4.f-40.m-b-20.p-l-20.text-left.text-primary
+/                         = number_with_precision amount_profit, precision:2
+/                   - else
+/                     h4.f-30.m-b-20.p-l-20.text-left.text-danger
+/                       = number_with_precision amount_profit, precision:2
+/                   / p.text-muted.p-t-10.p-b-10.m-0
+/                     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy.
+/                 .col-md-6.p-t-20.p-b-20
+/                   - values = trace.masters_scope(:masters, :closed).to_a.map{|x| x.profit.to_f}.reverse[..10]
+/                   - values = values.map(&:to_i).delete_if{|x| x == 0} if values
+/                   #power-card-chart1[height='75' style="margin-top:0px;margin-right:40px;" data-chart="#{values.compact}"]
+/         .card-footer.border-top.bg-light
+/           .row
+/             .col-sm-3.footer-menu.text-center.border-right
+/               p.text-muted.f-w-400.m-0.f-16
+/                 = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+/               span.f-18.f-w-400
+/                 = "#{trace.profit_trade(:masters)} %"
+/             .col-sm-3.footer-menu.text-center.border-right
+/               p.text-muted.f-w-400.m-0.f-16
+/                 = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
+/               span.f-18.f-w-400
+/                 = number_with_precision trace.profit_factor(:masters).round(2), precision:2
+/             .col-sm-3.footer-menu.text-center.border-right
+/               p.text-muted.f-w-400.m-0.f-16
+/                 = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
+/               span.f-18.f-w-400
+/                 = number_with_precision trace.pay_off, precision:2
+/             .col-sm-3.footer-menu.text-center
+/               = link_to contract_dashboard_path(trace), class: 'btn btn-info btn-lg' do
+/                 = I18n.t :contract, scope:'helpers.dashboards'
+/               / = form_for trace, url: contract_dashboard_path(trace), method: :get do |f| 
+/                 = f.button :submit, class: 'button btn btn-primary btn-lg'
+/ / .row
+/ /   - @traces.each do |trace|                   
+/ /     - trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+/ /     - trace.search_date_end   = session[:date_end].strip().to_datetime.change(offset: @timezone)
+
+/ /     .col-md-6.col-lg-4
+/ /       = link_to dashboard_path(trace) do
+/ /         .card
+/ /           .card-header
+/ /             .card-header-left
+/ /               h5 = trace.name
+/ /             .card-header-right
+/ /               i.icofont.icofont-spinner-alt-5
+/ /           .card-body.p-b-30
+/ /             h2= "R$ #{number_with_precision trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2}"
+/ /             p.text-muted.m-b-10 Lucro
+/ /             .row
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-green.f-16.m-0.f-w-400= "#{trace.profit_trade(:masters)} %"
+/ /                 span.text-muted Lucro %
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.loss_trade(:masters)} %"
+/ /                 span.text-muted Perda %
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision trace.pay_off(:masters).round(2), precision:2
+/ /                 span.text-muted PayOff
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-blue.f-16.m-0.f-w-400= number_with_precision trace.profit_factor(:masters).round(2), precision:2
+/ /                 span.text-muted Fator de Lucro
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-green.f-16.m-0.f-w-400= number_with_precision trace.drawdown(:masters).round(2), precision:2
+/ /                 span.text-muted Drawdown
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-blue.f-16.m-0.f-w-400= "#{trace.accounts.slave.count}"
+/ /                 span.text-muted Account Slaves
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :buy]).count
+/ /                 span.text-muted Operações Compra
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :sell]).count
+/ /                 span.text-muted Operações Venda
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-green.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :gain]).count
+/ /                 span.text-muted Operações Ganho
+/ /               .col-sm-6.col-xs-12
+/ /                 p.text-c-blue.f-16.m-0.f-w-400= trace.masters_scope(:masters, [:closed, :loss]).count
+/ /                 span.text-muted Operações Perda
+/ - content_for :footer do
+/   javascript:
+/     $(document).ready(function(){ 
+
+/       $("[id='power-card-chart1']").each(function(index, value) {
+
+/           var options = {
+/               chart: {
+/                   type: 'bar',
+/                   height: 100,
+/                   sparkline: {
+/                       enabled: true
+/                   }
+/               },
+/               dataLabels: {
+/                   enabled: false
+/               },
+/               series: [{
+/                   name: 'series1',
+/                   data: $(this).data("chart"),
+/               }],
+/               plotOptions: {
+/                 bar: {
+/                   colors: {
+/                     ranges: [{
+/                       from: -9999999,
+/                       to: -1,
+/                       color: '#F15B46'
+/                     }, {
+/                       from: 1,
+/                       to: 9999999,
+/                       color: '#4886ff'
+/                     }]
+/                   },
+/                 }
+/               },
+/               yaxis: {
+/                   min: -100,
+/                   max: 100,
+/               },
+/               tooltip: {
+/                   theme: 'dark',
+/                   fixed: {
+/                       enabled: false
+/                   },
+/                   x: {
+/                       show: false,
+/                   },
+/                   y: {
+/                       title: {
+/                           formatter: function(seriesName) {
+/                               return 'Profit'
+/                           }
+/                       }
+/                   },
+/                   marker: {
+/                       show: false
+/                   }
+/               }
+/           };
+/           var chart = new ApexCharts(value, options);
+/           chart.render();
+/       });     
+/       $(document).on("click", "table.table tr", function() {
+/         var link  = $(this).data("href")
+/             document.location.href=link;
+/       });
+/     });

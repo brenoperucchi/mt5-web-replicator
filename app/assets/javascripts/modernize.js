@@ -23,3 +23,5 @@
 //= require modernize/custom.js
 //= require modernize/apexcharts.min.js
 //= require modernize/dashboard5.js
+//= require modernize/moment.js
+//= require modernize/daterangepicker.js

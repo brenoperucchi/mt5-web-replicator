@@ -4,7 +4,7 @@ module AlgoStatistic
 	included do
 		def dashboard_capital_accumulated
 		  amount_total = 0
-		  collection = masters_scope(:masters, :closed).order(closed_at: :asc)
+		  collection = masters_scope(:masters, :closed).order(closed_at: :asc).where.not(closed_at: nil, profit:0.0)
 		  collection_array = []
 		  if collection.present?
 		    collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
@@ -13,6 +13,7 @@ module AlgoStatistic
 		      amount_total = profit + amount_total
 		      profit_value = profit <= 0 ? 0 : profit
 		      loss_value = profit >= 0 ? 0 : profit
+		      next if profit_value == 0 and loss_value == 0
 		      collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value.to_f, loss:loss_value.to_f})
 		    end
 		  end

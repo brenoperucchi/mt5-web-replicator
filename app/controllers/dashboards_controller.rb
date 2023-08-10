@@ -8,6 +8,7 @@ class DashboardsController < ApplicationController
 	# before_action :authenticate_user
 	# layout 'stisla'
   layout 'modernize'
+  # layout 'mintone'
 
 	# before_action :sign_up!
 
@@ -92,6 +93,7 @@ class DashboardsController < ApplicationController
 	end
 
 	def index
+		@all_records = request.fullpath.include?("all") ? true : false
 		respond_to do |wants|
 			wants.html { render :index}
 		end

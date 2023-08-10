@@ -18,7 +18,7 @@ Rails.application.routes.draw do
     resources :customers
     resources :stores
     resources :dashboards, only: [:index, :show, :create] do
-      get  ':kind',                                   to: 'dashboards#index',           on: :collection
+      get  'all',                                     to: 'dashboards#index',           on: :collection
       get  'account/:id/:payment_id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
       get  '/contract/:promotion',                    to: 'dashboards#contract',        on: :member#, as: 'account'
       get  '/contract',                               to: 'dashboards#contract',        on: :member, as: 'contract'
