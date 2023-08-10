@@ -1,95 +1,71 @@
-.container-fluid.pt-3
-  .card
-    .card-body
-      ul.breadcrumb
-        - if user_signed_in? and not current_user.try(:userable).try(:user?)
-          li.breadcrumb-item
-            a href="/admin" 
-              i.feather.icon-home
-              '
-              = I18n.t :admin, scope:'helpers.dashboards'
-        - else
-          li.breadcrumb-item
-            a href="/" 
-              i.feather.icon-home
-              '
-              = I18n.t :site, scope:'helpers.dashboards'
-        - if current_store
-          li.breadcrumb-item
-            = link_to dashboards_path(params: request.query_parameters) do
-              = I18n.t :dashboards, scope:'helpers.dashboards'
-            / a href="/dashboards" 
-        = yield(:breadcrumb)
-      /! [ breadcrumb ] started
+= render "filter"
 
-  = render "filter"
-
-  .row
-    - @traces.reverse.each do |amount_profit, id|                   
-      - trace = Trace.find(id)
-      - next if not @all_records and trace.capital_recomendation.nil?
-      - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-      - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
-      .col-lg-12.d-flex.align-items-strech
-          .card.w-100
-            .card-body
-              = link_to dashboard_path(trace, params:request.query_parameters) do
-                .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
-                  .mb-3.mb-sm-0
-                    h5.card-title.fw-semibold
-                      = trace.name
-                    p.card-subtitle.mb-0
-                      | Overview of Profit
-                  / div
-                  /   select.form-select
-                  /     option[value="1"]
-                  /       | March 2023
-                  /     option[value="2"]
-                  /       | April 2023
-                  /     option[value="3"]
-                  /       | May 2023
-                  /     option[value="4"]
-                  /       | June 2023
-              .row.align-items-center
-                .col-lg-8.col-md-8
-                  / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
-                  / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
-                  / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
-                  / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-                  - chart_values =  trace.dashboard_capital_accumulated.reverse[..5].reverse
-                  #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
-                .col-lg-4.col-md-4
-                  .d-flex.align-items-center.mb-4.pb-1
-                    span.round-8.bg-secondary.rounded-circle.me-6
-                    div
-                      h4.mb-0.fs-7.fw-semibold
-                        = number_with_precision amount_profit, precision:2
-                      p.fs-3.mb-0
-                        = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+.row
+  - @traces.reverse.each do |amount_profit, id|                   
+    - trace = Trace.find(id)
+    - next if not @all_records and trace.capital_recomendation.nil?
+    - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+    - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
+    .col-lg-12.d-flex.align-items-strech
+        .card.w-100
+          .card-body
+            = link_to dashboard_path(trace, params:request.query_parameters) do
+              .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
+                .mb-3.mb-sm-0
+                  h5.card-title.fw-semibold
+                    = trace.name
+                  p.card-subtitle.mb-0
+                    | Overview of Profit
+                / div
+                /   select.form-select
+                /     option[value="1"]
+                /       | March 2023
+                /     option[value="2"]
+                /       | April 2023
+                /     option[value="3"]
+                /       | May 2023
+                /     option[value="4"]
+                /       | June 2023
+            .row.align-items-center
+              .col-lg-8.col-md-8
+                / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
+                / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
+                - chart_values =  trace.dashboard_capital_accumulated.reverse[..10]
+                #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
+              .col-lg-4.col-md-4
+                .d-flex.align-items-center.mb-4.pb-1
+                  span.round-8.bg-dark.rounded-circle.me-6
                   div
-                    .d-flex.align-items-baseline.mb-4
-                      span.round-8.bg-primary.rounded-circle.me-6
-                      div
-                        p.fs-3.mb-1
-                          = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
-                        h6.fs-5.fw-semibold.mb-0
-                          = number_with_precision trace.profit_factor(:masters).round(2), precision:2
-                    .d-flex.align-items-baseline.mb-4.pb-1
-                      span.round-8.bg-secondary.rounded-circle.me-6
-                      div
-                        p.fs-3.mb-1
-                          = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
-                        h6.fs-5.fw-semibold.mb-0
-                          = number_with_precision trace.pay_off, precision:2
-                    div.d-flex.align-items-baseline.mb-4
-                      / button.btn.btn-primary.w-100
-                      = link_to contract_dashboard_path(trace), class: 'btn btn-light w-100' do
-                        = I18n.t :more_information, scope:'helpers.dashboards'
-
+                    h4.mb-0.fs-7.fw-semibold
+                      = number_with_precision amount_profit, precision:2
+                    p.fs-3.mb-0
+                      = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+                div
+                  .d-flex.align-items-baseline.mb-4
+                    span.round-8.bg-dark.rounded-circle.me-6
                     div
-                      / button.btn.btn-primary.w-100
-                      = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
-                        = I18n.t :contract, scope:'helpers.dashboards'
+                      p.fs-3.mb-1
+                        = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
+                      h6.fs-5.fw-semibold.mb-0
+                        = number_with_precision trace.profit_factor(:masters).round(2), precision:2
+                  .d-flex.align-items-baseline.mb-4.pb-1
+                    span.round-8.bg-dark.rounded-circle.me-6
+                    div
+                      p.fs-3.mb-1
+                        = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
+                      h6.fs-5.fw-semibold.mb-0
+                        = number_with_precision trace.pay_off, precision:2
+                  div.d-flex.align-items-baseline.mb-4
+                    / button.btn.btn-primary.w-100
+                    = link_to dashboard_path(trace, params:request.query_parameters), class: 'btn btn-light w-100' do
+                      = I18n.t :more_information, scope:'helpers.dashboards'
+
+                  div
+                    / button.btn.btn-primary.w-100
+                    = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
+                      = I18n.t :contract, scope:'helpers.dashboards'
 
 - content_for :footer do
   javascript:
@@ -102,11 +78,11 @@
         var chart = {
           series: [
             {
-              name: "Eanings this month",
+              name: "Profit",
               data: $(this).data("chart-gain"),
             },
             {
-              name: "Expense this month",
+              name: "Loss",
               data: $(this).data("chart-loss"),
             },
           ],

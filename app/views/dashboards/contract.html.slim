@@ -18,163 +18,159 @@
 
 / = render "filter"
 
-
-.row
-  .col-xl-4.col-lg-12.task-detail-right
-    .card
-      .card-header
-        h5
-          | Detalhes 
-      .card-body.task-details
-        table.table
-          tbody
-            tr
-              td
-                / = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
-                | Valor
-              td.text-right
-                span.float-right
-                  a.text-secondary[href="#!"]
-                    = number_to_currency (@trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount) || 0)
-            tr
-              td
-                | Recorrência de Cobrança
-              td.text-right
-                 = I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
-            tr
-              td
-                | Proxíma cobrança
-              td.text-right
-                 = I18n.l @trace.next_charged, format: :short3
-            tr
-              td
-                | Tipo (fixo/percentual)
-              td.text-right
-                = I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
-            tr
-              td
-                | Capital Recomendado
-              td.text-right
-                .btn-group
-                  = number_to_currency @trace.capital_recomendation
-                  / a.text-secondary[href="#!"]
-            / tr
-            /   td
-            /     = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
-            /   td.text-right
-            /     = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision:2
-            / tr
-            /   td
-            /     = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
-            /   td.text-right
-            /     a.text-secondary[href="#!"]
-            /       = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision:2
-        .row
-          .col-xl-12
-            = link_to dashboard_path(@trace), class: 'btn btn-primary col-lg-12 text-uppercase' do
-              = I18n.t :more_information, scope:'helpers.dashboards'
-
-  .col-xl-8.col-lg-12
-    .card
-      .card-header
-        h5.mb-3
-          / i.fas.fa-ticket-alt.m-r-5
-          = I18n.t :description, scope:'helpers.dashboards'
-      .card-body
-        == @trace.description
-    .card
-      = simple_form_for @account, url: dashboards_path, method: :post do |f|
-        .card-header
-          h5.mb-3
-            / i.fas.fa-ticket-alt.m-r-5
-            = I18n.t :form_title, scope:'helpers.dashboards.pages.contract', name: @trace.name
-            / = "Formulário para contratação do Portfolio: #{@trace.name}"
-          button.btn.waves-effect.waves-light.btn-info.float-right
-            i.far.fa-credit-card.m-r-5
-            span.text-uppercase= I18n.t :pay, scope:'helpers.dashboards'
+                  div
+                    / button.btn.btn-primary.w-100
+                    = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
+                      = I18n.t :contract, scope:'helpers.dashboards'
+= simple_form_for @account, url: dashboards_path, wrapper: :vertical_form_modernize, method: :post do |f|                      
+  .row
+    .col-lg-4.align-items-stretch
+      .card.w-100
         .card-body
-          .m-b-20
-            = hidden_field_tag 'id', @trace.id
-            = hidden_field_tag 'customer_plan_id', @trace.customer_plan.try(:id)
-            = f.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
-            = f.input :name
-            = f.input :kind, input_html: {value: "slave"}, as: :hidden
-            - f.object.build_customer if f.object.customer.nil? 
-            = f.simple_fields_for :customer do |ff| 
-              = ff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
-              = ff.input :name
-              - ff.object.build_user if ff.object.user.nil? 
-              = ff.simple_fields_for :user do |fff| 
-                = fff.input :email
-                = fff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
-              / = f.simple_fields_for :settings do |ff| 
+          h5.card-title
+            | Detalhes
+          .mt-9.py-6.d-flex.align-items-center
+            span.round-8.bg-dark.rounded-circle.me-6  
+            .ms-3
+              h5.mb-0.fw-semibold
+                | Valor
+            .ms-auto
+              span.fs-2
+                h5= number_to_currency (@trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount) || 0)
+          .py-6.d-flex.align-items-center
+            span.round-8.bg-dark.rounded-circle.me-6  
+            .ms-3
+              h5.mb-0.fw-semibold
+                | Recorrência de cobrança
+            .ms-auto
+              span.fs-2
+                h5= I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
+          .py-6.d-flex.align-items-center
+            span.round-8.bg-dark.rounded-circle.me-6  
+            .ms-3
+              h5.mb-0.fw-semibold
+                | Proxíma cobrança
+            .ms-auto
+              span.fs-2
+                h5= I18n.l @trace.next_charged, format: :short3
+          .py-6.d-flex.align-items-center
+            span.round-8.bg-dark.rounded-circle.me-6  
+            .ms-3
+              h5.mb-0.fw-semibold
+                | Tipo (fixo/percentual)
+            .ms-auto
+              span.fs-2
+                h5= I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
+          .pt-6.d-flex.align-items-center
+            span.round-8.bg-dark.rounded-circle.me-6  
+            .ms-3
+              h5.mb-0.fw-semibold
+                | Capital Recomendado
+            .ms-auto
+              span.fs-2
+                h5= number_to_currency @trace.capital_recomendation
+            / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
+          div.d-flex.align-items-baseline.mt-4.mb-4
+            / button.btn.btn-primary.w-100
+            = link_to dashboard_path(@trace, params:request.query_parameters), class: 'btn btn-light w-100' do
+              = I18n.t :more_information, scope:'helpers.dashboards'
+          div
+            button.btn.btn-dark.w-100
+              = I18n.t :contract, scope:'helpers.dashboards'
+    
+
+    .col-lg-8
+      .row
+        .card
+          .card-body
+            .row
+              .col-lg-12.col-md-12
+                .d-flex.m-b-10.no-block
+                  h5
+                    = I18n.t :capital_amount, scope:'helpers.dashboards.pages.show'
+                    = " - "
+                    = I18n.t :months, scope:'helpers.dashboards.pages.show', count: @trace.dashboard_monthy_amount.size
+                    / = I18n.t :drawdown_days, scope:'helpers.dashboards.pages.show', count: dates.try(:size)
+              / .col-lg-6.col-md-6.text-right
+              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+              /     li
+              /       | Last week
+              /     li
+              /       | Last month
+              /     li
+              /       i.flaticon-calendar.text-primary.f-16
+            .clearfix
+            #morris-area-chart-dashboard_monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
+            .clearfix
+      .row
+        .card.w-100.position-relative.overflow-hidden.mb-3
+          .card-body.p-4
+            h5.card-title.fw-semibold
+              = I18n.t :description, scope:'helpers.dashboards'
+            
+            == @trace.description
+        .card.w-100.position-relative.overflow-hidden.mb-0
+          .card-body
+            .m-b-20
+              = hidden_field_tag 'id', @trace.id
+              = hidden_field_tag 'customer_plan_id', @trace.customer_plan.try(:id)
+              = f.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+              = f.input :name
+              = f.input :kind, input_html: {value: "slave"}, as: :hidden
+              - f.object.build_customer if f.object.customer.nil? 
+              = f.simple_fields_for :customer do |ff| 
+                = ff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                = ff.input :name
+                - ff.object.build_user if ff.object.user.nil? 
+                = ff.simple_fields_for :user do |fff| 
+                  = fff.input :email
+                  = fff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                / = f.simple_fields_for :settings do |ff| 
+                .row
+                  .col-sm-12
+                    / = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
+                    / = ff.input :plan_id, collection: current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
               .row
                 .col-sm-12
-                  / = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
-                  / = ff.input :plan_id, collection: current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
-            .row
-              .col-sm-12
-                - if @trace.customer_plan.meta_margin_mode == "both"
-                  = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
-                - elsif not @trace.customer_plan.meta_margin_mode == "none"
-                  = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :string, disabled:true
-            .row
-              .col-sm-12
-                - if @trace.customer_plan.meta_mode == "both"
-                  = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
-                - elsif not @trace.customer_plan.meta_mode == "none"
-                  = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
+                  - if @trace.customer_plan.meta_margin_mode == "both"
+                    = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
+                  - elsif not @trace.customer_plan.meta_margin_mode == "none"
+                    = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :string, disabled:true
+              .row
+                .col-sm-12
+                  - if @trace.customer_plan.meta_mode == "both"
+                    = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
+                  - elsif not @trace.customer_plan.meta_mode == "none"
+                    = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
 
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){
+      
+      $(document).on("click", "table.table tr", function() {
+        var link  = $(this).data("href")
+            document.location.href=link;
+      });
+      var data_chart = $("#morris-area-chart-dashboard_monthy_amount").data('chart');
+      Morris.Bar({
+          element: 'morris-area-chart-dashboard_monthy_amount',
+          data: data_chart,
+          xkey: 'date',
+          ykeys: ['profit', 'capital'],
+          labels: ['Profit', 'Capital'],
+          pointSize: 2,
+          fillOpacity: 0,
 
-  
-  .col-xl-4.col-lg-12.task-detail-right
+          pointStrokeColors: ['#ffb74e', '#3580B8', '4886ff'],
+          behaveLikeLine: true,
+          gridLineColor: '#e0e0e0',
+          lineWidth: 2,
+          hideHover: 'auto',
+          barColors: ['#ffb74e', '#3580B8', '#4886ff'],
+          resize: true
 
-        /   h6
-        /     | Overview
-        /   hr
-        /   p
-        /     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.
-        / .m-b-20
-        /   h6
-        /     | What we need
-        /   hr
-        /   p
-        /     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-        / .m-b-20.col-sm-12
-        /   .row
-        /     .col-md-12.col-lg-6
-        /       .text-primary.f-14.m-b-10
-        /         |  1. The standard Lorem Ipsum passage 
-        /       p
-        /         | Lorem Ipsum is simply dummy text of the printing and typesetting industry
-        /     .col-md-12.col-lg-6
-        /       .text-primary.f-14.m-b-10
-        /         |  2. The standard Lorem Ipsum passage 
-        /       p
-        /         | Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-        / .m-b-20
-        /   h6
-        /     | Requirements
-        /   hr
-        /   p
-        /     | Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-        /   .table-responsive.m-t-20
-        /     table.table.m-b-0.f-14.b-solid.requid-table
-        /       thead
-        /         tr.text-uppercase
-        /           th
-        /             | #
-        /           th
-        /             | Task
-        /           th
-        /             | Due Date
-        /           th
-        /             | Description
-        /       tbody.text-muted
-        /         tr
-        /           td
-        /             | 1
-        /           td
-        /             | Design mockup
-        /           td.text-danger
-        /             i.far.fa-calendar-alt
+      });
+
+    });
+
+  = javascript_include_tag "mintone_chart"

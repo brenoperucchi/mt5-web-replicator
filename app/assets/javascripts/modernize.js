@@ -15,13 +15,15 @@
 //= require turbolinks
 
 //= require modernize/simplebar.min.js
-//= require modernize/bootstrap.bundle.min.js
+// require modernize/bootstrap.min.js
+// require modernize/bootstrap.bundle.min.js
+//= require mintone/bootstrap.min.js
 //= require modernize/app.min.js
 //= require modernize/app.init.js
 //= require modernize/app-style-switcher.js
 //= require modernize/sidebarmenu.js
 //= require modernize/custom.js
+//= require mintone/jquery.session.js
 //= require modernize/apexcharts.min.js
-//= require modernize/dashboard5.js
 //= require modernize/moment.js
 //= require modernize/daterangepicker.js

@@ -11,61 +11,72 @@
 .row
   .col-xl-12.col-md-12
     .row
-      .col-sm-4
-        .card.profile-view
+      .col-md-6.col-lg-4.d-flex.align-items-stretch
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+            h2.text-center.fw-semibold
               = number_with_precision @trace.profit_factor(:masters).round(2), precision: 2
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision: 2
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = number_with_precision @trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision: 2 
-      .col-sm-4
-        .card.profile-view
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.masters_scope(:masters, :closed).try(:gain).to_a.sum(&:profit), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.masters_scope(:masters, :closed).try(:loss).to_a.sum(&:profit), precision: 2 
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
+      .col-md-6.col-lg-4.d-flex.align-items-stretch
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-40.p-b-30.m-0.f-40.f-w-400.d-block
+            h2.text-center.fw-semibold
               = "#{@trace.profit_trade(:masters)} %"
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = @trace.masters_scope(:masters, :closed).try(:gain).to_a.count
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = @trace.masters_scope(:masters, :closed).try(:loss).to_a.count
-      .col-sm-4
-        .card.profile-view
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, :closed).try(:gain).to_a.count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, :closed).try(:loss).to_a.count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
+      .col-md-6.col-lg-4.d-flex.align-items-stretch
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :profit_drawdown, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-20.p-b-20.m-0.f-40.f-w-400.d-block
-              / - profit = @trace.profit_trade - @trace.loss_trade
+            h2.text-center.fw-semibold
               = number_with_precision @trace.profit_drawdown, precision: 2
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :profit_net, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = number_with_precision(@trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2)
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :max_dd, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = number_with_precision @trace.drawdown, precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision(@trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2)
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :profit_net, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.drawdown, precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :max_dd, scope:'helpers.dashboards.pages.show'
             .row[style="margin-top:3px;"]
               .col-12.text-center
                 h6.text-muted
@@ -99,44 +110,51 @@
             .clearfix
             #morris-area-chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
             .clearfix
-      .col-sm-4
-        .card.profile-view[style="margin-bottom: 17px;"]
+      .col-md-6.col-lg-4.align-items-stretch
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-              / - profit = @trace.profit_trade - @trace.loss_trade
+            h2.text-center.fw-semibold
               = number_with_precision @trace.pay_off, precision: 2
-            .row.m-t-0
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = (I18n.t :average_gain, scope:'helpers.dashboards.pages.show').capitalize
-                span.text-c-green
-                  = number_with_precision @trace.average(:masters, [:closed, :gain]), precision: 2
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = (I18n.t :average_loss, scope:'helpers.dashboards.pages.show').capitalize
-                span.text-c-red
-                  = number_with_precision @trace.average(:masters, [:closed, :loss]), precision: 2
-
-        .card.profile-view[style="margin-bottom: 17px;"]
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.average(:masters, [:closed, :gain]), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = (I18n.t :average_gain, scope:'helpers.dashboards.pages.show').capitalize
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.average(:masters, [:closed, :loss]), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = (I18n.t :average_loss, scope:'helpers.dashboards.pages.show').capitalize
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :mfe_mae, scope:'helpers.dashboards.pages.show'
-            / strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-            /   = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
-            .row.m-b-40.m-t-30
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :mfe_max, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = number_with_precision @trace.mfe.try(:amount), precision: 2
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :mae_min, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = number_with_precision @trace.mae.try(:amount), precision: 2
-                  
+            / h2.text-center.fw-semibold
+            /   = number_with_precision @trace.pay_off, precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.mfe.try(:amount), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :mfe_mae, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.mae.try(:amount), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :mae_min, scope:'helpers.dashboards.pages.show'
+
+
     .row
       .col-sm-8
         .card
@@ -159,59 +177,49 @@
             .clearfix
             #morris-area-chart-dashboard_drawdown[data-chart="#{@trace.dashboard_drawdown.to_json}"]
             .clearfix
-      .col-sm-4
-        .card.profile-view[style="margin-bottom: 17px;"]
+      .col-md-6.col-lg-4.align-items-stretch
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
+            h2.text-center.fw-semibold
               = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :buy, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = @trace.masters_scope(:masters, [:executed, :buy]).count
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :sell, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = @trace.masters_scope(:masters, [:executed, :sell]).count
-        / .card.profile-view[style="margin-bottom: 15px;"]
-        /   .card-body
-        /     h5
-        /       = I18n.t :orders_errors, scope:'helpers.dashboards.pages.show'
-        /     strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
-        /       = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision: 2
-        /     .row
-        /       .col-6.text-center
-        /         p.text-muted.m-b-0
-        /           = I18n.t :buy, scope:'helpers.dashboards.pages.show'
-        /         span.text-c-green
-        /           = @trace.masters_scope(:masters, [:error, :buy]).count
-        /       .col-6.text-center
-        /         p.text-muted.m-b-0
-        /           = I18n.t :sell, scope:'helpers.dashboards.pages.show'
-        /         span.text-c-red
-        /           = @trace.masters_scope(:masters, [:error, :sell]).count
-        .card.profile-view[style="margin-bottom: 15px;"]
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, [:executed, :buy]).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, [:executed, :sell]).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
+            h2.text-center.fw-semibold
               = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2
-            .row
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :buy, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = @trace.masters_scope(:masters, [:closed, :buy]).count
-              .col-6.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :sell, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = @trace.masters_scope(:masters, [:closed, :sell]).count
-
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, [:closed, :buy]).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, [:closed, :sell]).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
     .row
       .col-lg-8
         .card
@@ -235,29 +243,35 @@
             .clearfix
             #morris-area-chart-dashboard_monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
             .clearfix
-      .col-lg-4
-        .card.profile-view[style="margin-bottom: 15px;"]
+      .col-md-6.col-lg-4.align-items-stretch
+        .card.w-100
           .card-body
-            h5
+            h5.card-title.fw-semibold.text-center
               = I18n.t :total, scope:'helpers.dashboards.pages.show'
-            strong.text-center.p-t-10.p-b-10.m-0.f-40.f-w-400.d-block
+            h2.text-center.fw-semibold
               = number_with_precision @trace.masters_scope(:masters).to_a.sum(&:profit), precision: 2
-            .row
-              .col-4.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :buy, scope:'helpers.dashboards.pages.show'
-                span.text-c-green
-                  = @trace.masters_scope(:masters, :buy).count
-              .col-4.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :sell, scope:'helpers.dashboards.pages.show'
-                span.text-c-red
-                  = @trace.masters_scope(:masters, :sell).count
-              .col-4.text-center
-                p.text-muted.m-b-0
-                  = I18n.t :total, scope:'helpers.dashboards.pages.show'
-                span
-                  = @trace.masters_scope(:masters).count
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, [:closed, :buy]).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters, :sell).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.masters_scope(:masters).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :total, scope:'helpers.dashboards.pages.show'
 
 
 .row
@@ -331,6 +345,7 @@
                   td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
 
 - content_for :footer do
+  = javascript_include_tag "mintone_chart"
   javascript:
     $(document).ready(function(){
       $(document).on("click", "table.table tr", function() {
@@ -338,4 +353,67 @@
             document.location.href=link;
       });
     });
-  = javascript_include_tag "mintone_chart"
+    $(function() {
+        "use strict";
+        var data_chart = $('#morris-area-chart-dashboard_capital_accumulated').data('chart');
+        Morris.Line({
+            element: 'morris-area-chart-dashboard_capital_accumulated',
+            data: data_chart,
+            xkey: 'day',
+            ykeys: ['portfolio', 'profit', 'loss'],
+            labels: ['Portfolio', 'Profit', 'Loss'],
+            pointSize: 2,
+            fillOpacity: 0,
+
+            pointStrokeColors: [ '#3580B8', '#ffb74e', '#94313e'],
+            behaveLikeLine: true,
+            gridLineColor: '#e0e0e0',
+            lineWidth: 2,
+            hideHover: 'auto',
+            lineColors: [ '#3580B8', '#ffb74e', '#94313e'],
+            resize: true
+
+        });
+        var data_chart = $('#morris-area-chart-dashboard_drawdown').data('chart');
+        Morris.Bar({
+            element: 'morris-area-chart-dashboard_drawdown',
+            data: data_chart,
+            xkey: 'day',
+            ykeys: ['drawdown'],
+            labels: ['Drawdown'],
+            pointSize: 2,
+            fillOpacity: 0,
+
+            pointStrokeColors: ['#3580B8', '#ffb74e', '#4886ff'],
+            behaveLikeLine: true,
+            gridLineColor: '#e0e0e0',
+            lineWidth: 2,
+            hideHover: 'auto',
+            lineColors: ['#3580B8', '#ffb74e', '#4886ff'],
+            resize: true
+
+        });
+        var data_chart = $("#morris-area-chart-dashboard_monthy_amount").data('chart');
+        Morris.Bar({
+            element: 'morris-area-chart-dashboard_monthy_amount',
+            data: data_chart,
+            xkey: 'date',
+            ykeys: ['profit', 'capital'],
+            labels: ['Profit', 'Capital'],
+            pointSize: 2,
+            fillOpacity: 0,
+
+            pointStrokeColors: ['#ffb74e', '#3580B8', '4886ff'],
+            behaveLikeLine: true,
+            gridLineColor: '#e0e0e0',
+            lineWidth: 2,
+            hideHover: 'auto',
+            barColors: ['#ffb74e', '#3580B8', '#4886ff'],
+            resize: true
+
+        });
+    });
+
+
+
+

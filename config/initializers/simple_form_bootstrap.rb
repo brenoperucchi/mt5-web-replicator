@@ -410,6 +410,21 @@ SimpleForm.setup do |config|
   end
 
 
+  config.wrappers :vertical_form_modernize, tag: 'div', class: 'form-group', error_class: 'form-group-invalid', valid_class: 'form-group-valid' do |b|
+    b.use :html5
+    b.use :placeholder
+    b.optional :maxlength
+    b.optional :minlength
+    b.optional :pattern
+    b.optional :min_max
+    b.optional :readonly
+    b.use :label, class: 'form-label fw-semi-bold'
+    b.use :input, class: 'form-control', error_class: 'is-invalid', valid_class: 'is-valid'
+    b.use :full_error, wrap_with: { tag: 'div', class: 'invalid-feedback' }
+    b.use :hint, wrap_with: { tag: 'small', class: 'form-text text-muted' }
+  end
+
+
   # The default wrapper to be used by the FormBuilder.
   config.default_wrapper = :vertical_form
 

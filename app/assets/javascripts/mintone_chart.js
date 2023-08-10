@@ -9,4 +9,3 @@
 //= require mintone/chart/jquery.sparkline.min.js
 //= require mintone/chart/raphael-min.js
 //= require mintone/chart/morris.js
-//= require mintone/chart/dashboard-projects1.js

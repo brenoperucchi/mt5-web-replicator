@@ -15,7 +15,7 @@ html[lang="en"]
     / link#themeColors[rel="stylesheet" href="../../dist/css/style.min.css"]
     = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
     = javascript_include_tag "modernize"
-    = yield(:head)
+    = yield(:header)
     script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
     script
       | window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
@@ -24,9 +24,39 @@ html[lang="en"]
       <!-- Sidebar Start -->
       / = render "layouts/modernize/sidebar"
       .body-wrapper
-        <!-- Header Start -->
         / = render "layouts/modernize/header"
-        = yield
+        .container-fluid.pt-3.mw-60
+          .card
+            .card-body
+              ul.breadcrumb
+                - if user_signed_in? and not current_user.try(:userable).try(:user?)
+                  li.breadcrumb-item
+                    a href="/admin" 
+                      i.feather.icon-home
+                      '
+                      = I18n.t :admin, scope:'helpers.dashboards'
+                - else
+                  li.breadcrumb-item
+                    a href="/" 
+                      i.feather.icon-home
+                      '
+                      = I18n.t :site, scope:'helpers.dashboards'
+                - if current_store
+                  li.breadcrumb-item
+                    = link_to dashboards_path(params: request.query_parameters) do
+                      = I18n.t :dashboards, scope:'helpers.dashboards'
+                    / a href="/dashboards" 
+                = yield(:breadcrumb)
+              /! [ breadcrumb ] started
+              - unless action_name == "contract" or action_name == "finish_contract"
+                .col-lg-6.text-right
+                  button#filter.btn.btn-light.m-r-5[type="button"]
+                    i.feather.icon-plus
+                    = I18n.t :filter, scope:'helpers.dashboards'
+
+          <!-- Yield Start -->
+          = yield
+
     = yield(:footer)
     javascript:
       $(document).ready(function(){
@@ -71,4 +101,24 @@ html[lang="en"]
             cb(start, end);
           }
         });
+
+        $(".btn#filter").click(function(){
+          console.log("teste");
+          // $.session.set("filterCollapse",true);
+          if($('.row.collapse').hasClass('show')){
+            $.session.set("filterCollapse",false);
+          } else{
+           $.session.set("filterCollapse",true);
+          }
+          $(".collapse").collapse('toggle');
+        });
+      
       });
+        (function($) {
+        "use strict";
+
+        if(($.session.get("filterCollapse")) == 'true'){
+          $(".collapse").collapse('show');
+        }
+
+      })(jQuery);

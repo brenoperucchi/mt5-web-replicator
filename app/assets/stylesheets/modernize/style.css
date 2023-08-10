@@ -9028,6 +9028,18 @@ textarea.form-control-lg {
   width: auto !important;
 }
 
+.mw-60 {
+  max-width: 60% !important;
+}
+.mw-70 {
+  max-width: 70% !important;
+}
+.mw-80 {
+  max-width: 80% !important;
+}
+.mw-90 {
+  max-width: 90% !important;
+}
 .mw-100 {
   max-width: 100% !important;
 }
@@ -22690,7 +22702,7 @@ html[dir=rtl] .timeline-widget .timeline-item .timeline-time {
     width: calc(100% - 270px);
   }
   #main-wrapper[data-layout=vertical][data-sidebartype=full] .body-wrapper {
-    margin-left: 270px;
+    margin-left: 0px;
   }
   #main-wrapper[data-layout=vertical][data-sidebartype=mini-sidebar] .body-wrapper {
     margin-left: 87px;
