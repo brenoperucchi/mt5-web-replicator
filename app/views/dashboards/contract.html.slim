@@ -1,13 +1,3 @@
-- content_for :header do
-  = stylesheet_link_tag "mintone/morris.css"
-  = stylesheet_link_tag "mintone/select2.min.css"
-- content_for :footer do
-  = javascript_include_tag "mintone/select2.full.min.js"
-  javascript:
-    $(document).ready(function() {
-      // [ Single Select ]
-      $(".select2").select2();
-    })
 - content_for :breadcrumb do
   li.breadcrumb-item
     a href="#{dashboard_url(@trace.id)}" 
@@ -144,9 +134,16 @@
                   - elsif not @trace.customer_plan.meta_mode == "none"
                     = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
 
+= stylesheet_link_tag "mintone/morris.css"
+- content_for :header do
+  = stylesheet_link_tag "mintone/morris.css"
+
 - content_for :footer do
+  
   javascript:
-    $(document).ready(function(){
+    $(document).ready(function() {
+      // [ Single Select ]
+      $(".select2").select2();
       
       $(document).on("click", "table.table tr", function() {
         var link  = $(this).data("href")

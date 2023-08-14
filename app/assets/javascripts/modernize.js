@@ -27,3 +27,4 @@
 //= require modernize/apexcharts.min.js
 //= require modernize/moment.js
 //= require modernize/daterangepicker.js
+//= require mintone/select2.full.min.js

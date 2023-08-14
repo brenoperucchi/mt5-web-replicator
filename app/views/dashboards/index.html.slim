@@ -1,3 +1,4 @@
+
 = render "filter"
 
 .row
@@ -66,6 +67,13 @@
                     / button.btn.btn-primary.w-100
                     = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
                       = I18n.t :contract, scope:'helpers.dashboards'
+
+- content_for :header do
+  = stylesheet_link_tag "modernize/apexcharts.css"
+  = javascript_include_tag "mintone/chart/jquery.sparkline.min.js"
+  = javascript_include_tag "mintone/chart/raphael-min.js"
+  = javascript_include_tag "mintone/chart/morris.js"
+
 
 - content_for :footer do
   javascript:

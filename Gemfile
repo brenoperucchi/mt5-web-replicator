@@ -134,6 +134,7 @@ group :development do
   gem "rename"
   gem 'bcrypt_pbkdf', '~> 1'
   gem 'ed25519', '~> 1.2'
+  gem "lol_dba"
 end
 
 gem 'pg', '1.4.5'
@@ -177,6 +178,8 @@ gem 'recaptcha'
 gem 'link_thumbnailer'
 gem 'imgix'
 gem "net-http"
+
+
 
 
 

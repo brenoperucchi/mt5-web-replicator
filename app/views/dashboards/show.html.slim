@@ -1,5 +1,3 @@
-- content_for :header do
-  = stylesheet_link_tag "mintone/morris.css"
 
 - content_for :breadcrumb do
   li.breadcrumb-item
@@ -343,17 +341,19 @@
                   td 
                   td = account.slaves_scope(type, :all, @trace).count
                   td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
+- content_for :header do
+  = stylesheet_link_tag "mintone/morris.css"  
+  = javascript_include_tag "mintone/chart/jquery.sparkline.min.js"
+  = javascript_include_tag "mintone/chart/raphael-min.js"
+  = javascript_include_tag "mintone/chart/morris.js"
 
 - content_for :footer do
-  = javascript_include_tag "mintone_chart"
   javascript:
     $(document).ready(function(){
       $(document).on("click", "table.table tr", function() {
         var link  = $(this).data("href")
             document.location.href=link;
       });
-    });
-    $(function() {
         "use strict";
         var data_chart = $('#morris-area-chart-dashboard_capital_accumulated').data('chart');
         Morris.Line({
