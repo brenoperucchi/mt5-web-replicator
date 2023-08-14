@@ -1,7 +1,5 @@
-# 5015776594
-# 0wnwehat
-
 require 'telegram/bot'
+
 class Transaction < ApplicationRecord
   include Telegram::Util
 
@@ -239,6 +237,5 @@ class Transaction < ApplicationRecord
   #       self.erro!
   #     end
   # end
-
 
 end

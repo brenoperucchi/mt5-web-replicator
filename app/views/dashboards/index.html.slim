@@ -3,7 +3,7 @@
 .row
   - @traces.reverse.each do |amount_profit, id|                   
     - trace = Trace.find(id)
-    - next if not @all_records and trace.capital_recomendation.nil?
+    - next if not @all_records and trace.capital_recomendation.blank?
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
     .col-lg-12.d-flex.align-items-strech

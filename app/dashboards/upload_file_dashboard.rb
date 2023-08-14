@@ -1,6 +1,6 @@
 require "administrate/base_dashboard"
 
-class CustomerDashboard < Administrate::BaseDashboard
+class UploadFileDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
   # a hash that describes the type of each of the model's fields.
   #
@@ -8,20 +8,12 @@ class CustomerDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    name:                 Field::String,
-    email:                Field::String,
-    stripe_customer_id:   Field::String,
-    stripe_product_id:    Field::String,
-    role:                 Field::String,
-    role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
-    store:                Field::BelongsTo,
-    user:                 Field::HasOne,
-    # customer_plan:      Field::BelongsTo,
-    customer_plans:       Field::HasMany,
-    accounts:             Field::HasMany,
-    invoices:             Field::HasMany,
-    created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    id:              Field::Number,
+    file:            Field::ActiveStorage,
+    kind:            Field::Select.with_options(collection: [:none, :import]),
+    store:           Field::BelongsTo,
+    trace:           Field::BelongsTo,
+
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -30,46 +22,31 @@ class CustomerDashboard < Administrate::BaseDashboard
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
-  name
-  email
-  role
-  role_control
-  accounts
-  user
+  id
+  store
+  trace
+  kind
+  file
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
-  name
-  email
-  role
-  role_control
-  stripe_customer_id
-  stripe_product_id
+  id
   store
-  user
-  customer_plans
-  accounts
-  invoices
-  created_at
-  updated_at
+  trace
+  kind
+  file
   ].freeze
 
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  name
-  role
-  role_control
-  stripe_customer_id
-  stripe_product_id
   store
-  user
-  customer_plans
-  accounts
-  invoices
+  trace
+  kind
+  file
   ].freeze
 
   # COLLECTION_FILTERS
@@ -84,14 +61,10 @@ class CustomerDashboard < Administrate::BaseDashboard
   #   }.freeze
   COLLECTION_FILTERS = {}.freeze
 
-  # Overwrite this method to customize how signs are displayed
+  # Overwrite this method to customize how transactions are displayed
   # across all pages of the admin dashboard.
   #
-  # def display_resource(sign)
-  #   "Sign ##{sign.id}"
+  # def display_resource(transaction)
+  #   "Transaction ##{transaction.id}"
   # end
-
-   def display_resource(resource)
-    resource.name
-  end
 end

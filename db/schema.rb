@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_07_31_232550) do
+ActiveRecord::Schema.define(version: 2023_08_14_043311) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -370,8 +370,8 @@ ActiveRecord::Schema.define(version: 2023_07_31_232550) do
     t.bigint "trace_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.bigint "customer_plan_id"
     t.bigint "plan_usage_id"
+    t.bigint "customer_plan_id"
     t.index ["account_id"], name: "index_permissions_on_account_id"
     t.index ["customer_plan_id"], name: "index_permissions_on_customer_plan_id"
     t.index ["plan_usage_id"], name: "index_permissions_on_plan_usage_id"
@@ -571,7 +571,6 @@ ActiveRecord::Schema.define(version: 2023_07_31_232550) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "meta_order_generate"
-    t.datetime "close_at"
     t.bigint "message_id"
     t.bigint "account_id"
     t.bigint "trace_id"
@@ -583,6 +582,18 @@ ActiveRecord::Schema.define(version: 2023_07_31_232550) do
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"
     t.index ["trace_id"], name: "index_transactions_on_trace_id"
+  end
+
+  create_table "upload_files", force: :cascade do |t|
+    t.string "uploadable_type"
+    t.bigint "uploadable_id"
+    t.string "kind"
+    t.bigint "store_id"
+    t.bigint "trace_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["store_id"], name: "index_upload_files_on_store_id"
+    t.index ["trace_id"], name: "index_upload_files_on_trace_id"
   end
 
   create_table "users", force: :cascade do |t|

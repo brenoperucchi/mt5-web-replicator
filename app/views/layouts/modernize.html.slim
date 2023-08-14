@@ -15,7 +15,8 @@ html[lang="en"]
     / link#themeColors[rel="stylesheet" href="../../dist/css/style.min.css"]
     = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
     = javascript_include_tag "modernize"
-    = yield(:header)
+    = javascript_include_tag "mintone_chart"
+    = content_for :header
     script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
     script
       | window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
@@ -46,7 +47,7 @@ html[lang="en"]
                     = link_to dashboards_path(params: request.query_parameters) do
                       = I18n.t :dashboards, scope:'helpers.dashboards'
                     / a href="/dashboards" 
-                = yield(:breadcrumb)
+                = content_for :breadcrumb
               /! [ breadcrumb ] started
               - unless action_name == "contract" or action_name == "finish_contract"
                 .col-lg-6.text-right
@@ -57,7 +58,7 @@ html[lang="en"]
           <!-- Yield Start -->
           = yield
 
-    = yield(:footer)
+    = content_for :footer
     javascript:
       $(document).ready(function(){
         $(function() {
@@ -80,11 +81,11 @@ html[lang="en"]
                 },
                 ranges: {
                    'Today': [moment(), moment()],
-                   'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                   'This Month': [moment().startOf('month'), moment().endOf('month')],
-                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                   'This Year': [moment().startOf('year'), moment().endOf('month')],
+                   'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().endOf('month')],
+                   'Two Year': [moment().subtract(2, 'year').startOf('year'), moment().endOf('month')],
                 }
             }, cb);
 

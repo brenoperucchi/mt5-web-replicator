@@ -92,6 +92,8 @@ gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrat
 gem "administrate-field-nested_has_many"
 gem 'administrate_ransack'#, path: "vendor/administrate_ransack"
 gem "administrate-field-tinymce", git: 'https://github.com/smedrick/administrate-field-tinymce.git'
+gem 'administrate-field-active_storage'
+gem "image_processing"
 
 # gem "administrate",         path: "vendor/administrate"
 # gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'

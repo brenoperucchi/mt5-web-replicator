@@ -27,7 +27,7 @@ class Order < ApplicationRecord
   scope :pending, ->{ where(state: 'pending')}
 
 
-  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], on: :create#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], on: :create, if: Proc.new { content_id != -1 }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 
   has_one_attached :image
 
