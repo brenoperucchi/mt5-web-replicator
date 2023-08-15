@@ -13,7 +13,7 @@ class Message::Message < ApplicationRecord
   has_and_belongs_to_many :traces 
 
   has_many :transactions,   through: :orders, source: :transactions
-  has_many :slaves,   through: :orders, source: :slave
+  has_many :slaves,         through: :orders, source: :slaves
   
   has_many :loggings, as: :loggerable, dependent: :destroy
 
