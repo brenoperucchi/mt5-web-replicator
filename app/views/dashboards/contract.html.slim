@@ -134,7 +134,6 @@
                   - elsif not @trace.customer_plan.meta_mode == "none"
                     = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
 
-= stylesheet_link_tag "mintone/morris.css"
 - content_for :header do
   = stylesheet_link_tag "mintone/morris.css"
 

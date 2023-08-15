@@ -21,8 +21,6 @@ class StoreDashboard < Administrate::BaseDashboard
     telegram_bot_chat_id:   Field::String,
     telegram_bot_status:    Field::String,
     telegram_bot_token:     Field::String,
-    stripe_webhook_secret:  Field::String,
-    stripe_api_secret:      Field::String,
     plan:             Field::BelongsTo,
     payment:          Field::BelongsTo,
     plan_items:       Field::HasMany,
@@ -66,8 +64,6 @@ class StoreDashboard < Administrate::BaseDashboard
   telegram_bot_token
   tag_list
   volume_default
-  stripe_api_secret
-  stripe_webhook_secret
   plan
   plan_items
   accounts
@@ -100,8 +96,6 @@ class StoreDashboard < Administrate::BaseDashboard
   payment
   payment_methods
   volume_default
-  stripe_api_secret
-  stripe_webhook_secret
   ].freeze
 
   # COLLECTION_FILTERS

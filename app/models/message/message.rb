@@ -6,13 +6,14 @@ class Message::Message < ApplicationRecord
 
   serialize :content
   serialize :params
+
   
   # has_many :orders
-  has_and_belongs_to_many :orders 
+  has_and_belongs_to_many :orders
   has_and_belongs_to_many :traces 
 
   has_many :transactions,   through: :orders, source: :transactions
-  has_many :slaves,   through: :orders, source: :slaves
+  has_many :slaves,   through: :orders, source: :slave
   
   has_many :loggings, as: :loggerable, dependent: :destroy
 
@@ -20,7 +21,7 @@ class Message::Message < ApplicationRecord
   belongs_to :account, optional: true
   # belongs_to :trace, optional: true
 
-
+  before_destroy { Order.where(id:[order_ids]).destroy_all }
 
   def kind
     loggings.try(:first).try(:state)

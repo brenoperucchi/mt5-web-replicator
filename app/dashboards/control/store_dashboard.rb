@@ -21,8 +21,6 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     telegram_bot_chat_id:   Field::String.with_options(searchable: false),
     telegram_bot_status:    Field::String.with_options(searchable: false),
     telegram_bot_token:     Field::String.with_options(searchable: false),
-    stripe_webhook_secret:  Field::String.with_options(searchable: false),
-    stripe_api_secret:      Field::String.with_options(searchable: false),
     resource_system:        Field::Text,
     tag_list:               Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -39,8 +37,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   name
   plan
   url
-  telegram_bot_chat_id
-  telegram_bot_status
+  email
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -54,8 +51,6 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   plan
   url
   language
-  stripe_api_secret
-  stripe_webhook_secret
   ].freeze
 
 
@@ -70,8 +65,6 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   url
   plan
   language
-  stripe_api_secret
-  stripe_webhook_secret
   ].freeze
 
   # COLLECTION_FILTERS
