@@ -9,23 +9,19 @@ class Order < ApplicationRecord
 
   has_and_belongs_to_many :messages, class_name: 'Message::Message'
 
-  has_many :transactions, dependent: :destroy
-  
-  # has_many :loggings,     through: :transactions, source: :loggings
-  has_many :loggings, as: :resourceable, dependent: :destroy
-
   has_many :slaves,       class_name: 'TransactionSlave', dependent: :destroy, foreign_key: :order_id
 
-  has_many :balances, dependent: :destroy, autosave: true
-  has_many :accounts, through: :balances, source: :account, autosave: true
+  has_many :loggings, as: :resourceable,  dependent: :destroy
+  has_many :transactions,                 dependent: :destroy
+  has_many :balances,                     dependent: :destroy, autosave: true
+  has_many :accounts, through: :balances, source: :account,    autosave: true
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
-  scope :ready, ->{ where(state: 'prepared').where.not(state:'error') }
-  scope :error, ->{ where(state: 'error')}
-  scope :executed, ->{ where(state: 'executed')}
-  scope :closed, ->{ where(state: 'closed')}
-  scope :pending, ->{ where(state: 'pending')}
-
+  scope :ready,     ->{ where(state: 'prepared').where.not(state:'error')}
+  scope :error,     ->{ where(state: 'error')}
+  scope :executed,  ->{ where(state: 'executed')}
+  scope :closed,    ->{ where(state: 'closed')}
+  scope :pending,   ->{ where(state: 'pending')}
 
   validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], on: :create, if: Proc.new { content_id != -1 }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 

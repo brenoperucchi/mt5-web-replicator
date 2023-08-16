@@ -16,60 +16,41 @@ class Store < ApplicationRecord
   acts_as_taggable_on :tags
   
   before_update :register_plan_update
-  after_create :register_plan_create
+  after_create  :register_plan_create
 
   belongs_to :plan
   belongs_to :payment, optional: true
 
   has_many :accounts, dependent: :destroy
   has_many :traces,   dependent: :destroy
-  has_many :messages, dependent: :destroy
   has_many :users,    dependent: :destroy
   has_many :orders,   dependent: :destroy 
 
-  has_many :transactions,-> { distinct }, :through => :accounts, :source => :transactions, dependent: :destroy
-  has_many :customers,                    :through => :users, source: :userable, source_type: 'Customer'
-  has_many :customer_plans,             dependent: :destroy
-  has_many :instruments,                dependent: :destroy
+  has_many :transactions,-> { distinct }, :through => :accounts, :source => :transactions,                dependent: :destroy
+  has_many :customers,                    :through => :users, source: :userable, source_type: 'Customer', dependent: :destroy
   
-  has_many :invoices, as: :invoiceable, dependent: :destroy
+  has_many :messages, :class_name => "Message::Message",                  dependent: :destroy
+  has_many :customer_plans,                                               dependent: :destroy
+  has_many :instruments,                                                  dependent: :destroy
+  
+  has_many :invoices, as: :invoiceable,                                   dependent: :destroy
   has_many :invoice_stores, class_name: :Invoice, foreign_key: :store_id, dependent: :destroy
 
-
-  # has_many :plan_items#, dependent: :destroy
   has_many :plan_usages, dependent: :destroy
-
-  has_many :payments, dependent: :destroy
+  has_many :payments,    dependent: :destroy
   has_many :payment_methods, through: :payments, source: :payment_method
 
   has_many :loggings,   as: :loggerable,    dependent: :destroy
   has_many :tokens,     as: :resourceable,  dependent: :destroy
 
-  # has_many :plan_items, dependent: :destroy
-  # has_many :plans, -> { distinct }, through: :plan_items, source: :plan
-  # has_many :plan_lines, -> { distinct }, through: :plan_items, source: :plan_line
-
   has_many :plan_stores, dependent: :destroy
   has_many :plan_items, through: :plan_stores, source: :plan_item, dependent: :destroy
-  # has_many :plans,      through: :plan_stores, source: :plan, dependent: :destroy
-  # has_many :plan_lines, through: :plans, source: :plan_lines, dependent: :destroy
 
   validates_presence_of :plan, :on => :create
   validates_presence_of :name, :email, :url
   validates_uniqueness_of :url, :email
 
   accepts_nested_attributes_for :customers, :users
-
-  # scope :active, ->{ where.not(active_at:nil)}
-
-  # def status=(attribute)
-  #   self.state = attribute.blank? ? 0 : attribute.to_i
-  # end
-
-  # def status
-  #   self.state
-  # #   # self.state == "enable" ? "1" : "0"
-  # end
 
   def customer_owner_name
     customers.owner.first.name
