@@ -79,12 +79,12 @@ html[lang="en"]
                       cancelLabel: 'Clear'
                   },
                   ranges: {
-                     'Today': [moment(), moment()],
-                     'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                     'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                     'This Year': [moment().startOf('year'), moment().endOf('month')],
-                     'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().endOf('month')],
-                     'Two Year': [moment().subtract(2, 'year').startOf('year'), moment().endOf('month')],
+                     'Today':         [moment(), moment()],
+                     'This Week':     [moment().startOf('week') , moment()],
+                     'This Month':    [moment().startOf('month'), moment()],
+                     'Three Months':  [moment().subtract(3, 'month').startOf('month'), , moment()],
+                     'This Year':     [moment().startOf('year') , moment()],
+                     'Two Years':     [moment().subtract(1, 'year').startOf('year'), , moment()],
                   }
               }, cb);
 

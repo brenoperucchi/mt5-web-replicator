@@ -53,12 +53,12 @@ module API
 
           message_open.executed? and message_close.executed?
 
-          if not message_open.traces.exists? and not message_open.orders.exists? and not message_open.slaves.exists?
-            message_open.destroy
-          end
-          if not message_close.traces.exists? and not message_close.orders.exists? and not message_close.slaves.exists?
-            message_close.destroy
-          end
+          # if not message_open.traces.exists? and not message_open.orders.exists? and not message_open.slaves.exists?
+          #   message_open.destroy
+          # end
+          # if not message_close.traces.exists? and not message_close.orders.exists? and not message_close.slaves.exists?
+          #   message_close.destroy
+          # end
         
           # if(message_open.executed? and message_close.executed?)
           # else

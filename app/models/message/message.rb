@@ -15,7 +15,7 @@ class Message::Message < ApplicationRecord
   has_many :transactions,   through: :orders, source: :transactions
   has_many :slaves,         through: :orders, source: :slaves
   
-  has_many :loggings, as: :loggerable, dependent: :destroy
+  has_many :loggings, as: :loggerable#, dependent: :destroy
 
   belongs_to :store,   optional: true
   belongs_to :account, optional: true

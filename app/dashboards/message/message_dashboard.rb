@@ -13,7 +13,7 @@ module Message
       params:       Field::Text.with_options(searchable: true),
       content_id:   Field::String,
       state:        Field::String,
-      kind:         Field::String,
+      kind:         Field::String.with_options(searchable: false),
       response:     Field::String,
       account:      Field::BelongsTo,
       traces:       Field::HasMany,
