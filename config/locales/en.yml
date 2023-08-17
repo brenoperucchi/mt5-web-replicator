@@ -332,6 +332,7 @@ en:
       payment:
         one: Payment
         other: Payments
+
     errors:
       models:
         store:
@@ -380,6 +381,8 @@ en:
       short: "%b %d"
       short2: "%d %b %H:%M:%S"
       short3: "%d de %b %Y"
+      short4: "%d %b %Y"
+
     month_names:
     - 
     - January
@@ -545,6 +548,7 @@ en:
       short: "%d %b %H:%M"
       short2: "%d %b %H:%M:%S"
       short3: "%d de %b %Y"
+      short4: "%d %b %Y"
     pm: pm
     
   administrate:

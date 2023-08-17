@@ -1,4 +1,11 @@
 - content_for :breadcrumb do
+  css:
+    .card-body.details {
+        display: flex; /* Habilita flexbox */
+        flex-direction: column; /* Direção da flexbox */
+        min-height: 10vh; /* Altura mínima para preencher a tela */
+        justify-content: space-between; /* Distribui o espaço entre os itens */
+    }
   li.breadcrumb-item
     a href="#{dashboard_url(@trace.id)}" 
       = @trace.name
@@ -15,94 +22,99 @@
                       = I18n.t :contract, scope:'helpers.dashboards'
 = simple_form_for @account, url: dashboards_path, wrapper: :vertical_form_modernize, method: :post do |f|                      
   .row
-    .col-lg-4.align-items-stretch
-      .card.w-100
-        .card-body
-          h5.card-title
-            | Detalhes
-          .mt-9.py-6.d-flex.align-items-center
-            span.round-8.bg-dark.rounded-circle.me-6  
-            .ms-3
-              h5.mb-0.fw-semibold
-                | Valor
-            .ms-auto
-              span.fs-2
-                h5= number_to_currency (@trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount) || 0)
-          .py-6.d-flex.align-items-center
-            span.round-8.bg-dark.rounded-circle.me-6  
-            .ms-3
-              h5.mb-0.fw-semibold
-                | Recorrência de cobrança
-            .ms-auto
-              span.fs-2
-                h5= I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
-          .py-6.d-flex.align-items-center
-            span.round-8.bg-dark.rounded-circle.me-6  
-            .ms-3
-              h5.mb-0.fw-semibold
-                | Proxíma cobrança
-            .ms-auto
-              span.fs-2
-                h5= I18n.l @trace.next_charged, format: :short3
-          .py-6.d-flex.align-items-center
-            span.round-8.bg-dark.rounded-circle.me-6  
-            .ms-3
-              h5.mb-0.fw-semibold
-                | Tipo (fixo/percentual)
-            .ms-auto
-              span.fs-2
-                h5= I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
-          .pt-6.d-flex.align-items-center
-            span.round-8.bg-dark.rounded-circle.me-6  
-            .ms-3
-              h5.mb-0.fw-semibold
-                | Capital Recomendado
-            .ms-auto
-              span.fs-2
-                h5= number_to_currency @trace.capital_recomendation
-            / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
-          div.d-flex.align-items-baseline.mt-4.mb-4
-            / button.btn.btn-primary.w-100
-            = link_to dashboard_path(@trace, params:request.query_parameters), class: 'btn btn-light w-100' do
-              = I18n.t :more_information, scope:'helpers.dashboards'
-          div
-            button.btn.btn-dark.w-100
-              = I18n.t :contract, scope:'helpers.dashboards'
+
     
 
-    .col-lg-8
+    .col-lg-12
       .row
-        .card
-          .card-body
-            .row
-              .col-lg-12.col-md-12
-                .d-flex.m-b-10.no-block
-                  h5
-                    = I18n.t :capital_amount, scope:'helpers.dashboards.pages.show'
-                    = " - "
-                    = I18n.t :months, scope:'helpers.dashboards.pages.show', count: @trace.dashboard_monthy_amount.size
-                    / = I18n.t :drawdown_days, scope:'helpers.dashboards.pages.show', count: dates.try(:size)
-              / .col-lg-6.col-md-6.text-right
-              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
-              /     li
-              /       | Last week
-              /     li
-              /       | Last month
-              /     li
-              /       i.flaticon-calendar.text-primary.f-16
-            .clearfix
-            #morris-area-chart-dashboard_monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
-            .clearfix
+        .col-lg-12.d-flex.align-items-strech
+          .card.w-100.position-relative.overflow-hidden.mb-3
+            .card-body.p-4
+              == @trace.description
       .row
-        .card.w-100.position-relative.overflow-hidden.mb-3
-          .card-body.p-4
-            h5.card-title.fw-semibold
-              = I18n.t :description, scope:'helpers.dashboards'
-            
-            == @trace.description
-        .card.w-100.position-relative.overflow-hidden.mb-0
-          .card-body
-            .m-b-20
+        .col-lg-3.d-flex.align-items-strech
+          .card.w-100
+            .card-body.details
+              h5.card-title
+                | Detalhes
+              .mt-9.py-6.d-flex
+                / span.round-8.bg-dark.rounded-circle.me-6  
+                .ms-0.text-center
+                  h6.mb-0
+                    | Valor
+                    '
+                    = I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
+                .ms-auto
+                  span.fs-2
+                    h6= number_to_currency (@trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount) || 0)
+              .py-6.d-flex
+                / span.round-8.bg-dark.rounded-circle.me-6  
+                .ms-0
+                  h6.mb-0
+                    | Valor proporcional
+                .ms-auto
+                  span.fs-2
+                    h6= number_to_currency @trace.customer_plan.calculate_amount
+              .py-6.d-flex
+                / span.round-8.bg-dark.rounded-circle.me-6  
+                .ms-0
+                  h6.mb-0
+                    | Proxíma cobrança
+                .ms-auto
+                  span.fs-2
+                    h6= I18n.l @trace.next_charged, format: :short4
+              .py-6.d-flex
+                / span.round-8.bg-dark.rounded-circle.me-6  
+                .ms-0
+                  h6.mb-0
+                    | Tipo (fixo/percentual)
+                .ms-auto
+                  span.fs-2
+                    h6= I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
+              .pt-6.d-flex
+                / span.round-8.bg-dark.rounded-circle.me-6  
+                .ms-0
+                  h6.mb-0
+                    | Capital Recomendado
+                .ms-auto
+                  span.fs-2
+                    h6= number_to_currency @trace.capital_recomendation
+                / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
+              div.mt-4
+                / button.btn.btn-primary.w-100
+                = link_to dashboard_path(@trace, params:request.query_parameters), class: 'btn btn-light w-100' do
+                  = I18n.t :more_information, scope:'helpers.dashboards'
+
+        .col-lg-6.d-flex.align-items-strech
+          .card.w-100
+            .card-body
+              .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
+                .mb-3.mb-sm-0
+                  h5.card-title.fw-semibold
+                    = @trace.name
+                  p.card-subtitle.mb-0
+                    | Overview of Profit
+                / div
+                /   select.form-select
+                /     option[value="1"]
+                /       | March 2023
+                /     option[value="2"]
+                /       | April 2023
+                /     option[value="3"]
+                /       | May 2023
+                /     option[value="4"]
+                /       | June 2023
+              .row.align-items-center
+                .col-lg-12.col-md-12
+                  / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
+                  / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
+                  - chart_values =  @trace.dashboard_capital_accumulated.reverse[..10]
+                  #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
+        .col-lg-3.d-flex.align-items-strech
+          .card
+            .card-body
               = hidden_field_tag 'id', @trace.id
               = hidden_field_tag 'customer_plan_id', @trace.customer_plan.try(:id)
               = f.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
@@ -133,41 +145,98 @@
                     = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
                   - elsif not @trace.customer_plan.meta_mode == "none"
                     = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
+              div.mt-4
+                button.btn.btn-dark.w-100
+                  = I18n.t :contract, scope:'helpers.dashboards'
 
 - content_for :header do
-  = stylesheet_link_tag "mintone/morris.css"
+  = stylesheet_link_tag "modernize/apexcharts.css"
+  = javascript_include_tag "mintone/chart/jquery.sparkline.min.js"
+  = javascript_include_tag "mintone/chart/raphael-min.js"
+  = javascript_include_tag "mintone/chart/morris.js"
+
+/ - content_for :header do
+/   = stylesheet_link_tag "mintone/morris.css"
 
 - content_for :footer do
-  
   javascript:
-    $(document).ready(function() {
-      // [ Single Select ]
-      $(".select2").select2();
-      
-      $(document).on("click", "table.table tr", function() {
-        var link  = $(this).data("href")
-            document.location.href=link;
-      });
-      var data_chart = $("#morris-area-chart-dashboard_monthy_amount").data('chart');
-      Morris.Bar({
-          element: 'morris-area-chart-dashboard_monthy_amount',
-          data: data_chart,
-          xkey: 'date',
-          ykeys: ['profit', 'capital'],
-          labels: ['Profit', 'Capital'],
-          pointSize: 2,
-          fillOpacity: 0,
+    $(document).ready(function(){ 
 
-          pointStrokeColors: ['#ffb74e', '#3580B8', '4886ff'],
-          behaveLikeLine: true,
-          gridLineColor: '#e0e0e0',
-          lineWidth: 2,
-          hideHover: 'auto',
-          barColors: ['#ffb74e', '#3580B8', '#4886ff'],
-          resize: true
+      $("[id='chart']").each(function(index, value) {
+        // =====================================
+        // Profit
+        // =====================================
+        var chart = {
+          series: [
+            {
+              name: "Profit",
+              data: $(this).data("chart-gain"),
+            },
+            {
+              name: "Loss",
+              data: $(this).data("chart-loss"),
+            },
+          ],
+          chart: {
+            toolbar: {
+              show: false,
+            },
+            type: "bar",
+            fontFamily: "Plus Jakarta Sans', sans-serif",
+            foreColor: "#adb0bb",
+            height: 320,
+            stacked: true,
+          },
+          colors: ["var(--bs-primary)", "var(--bs-secondary)"],
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              barHeight: "60%",
+              columnWidth: "20%",
+              borderRadius: [6],
+              borderRadiusApplication: 'end',
+              borderRadiusWhenStacked: 'all'
+            },
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          legend: {
+            show: false,
+          },
+          grid: {
+            borderColor: "rgba(0,0,0,0.1)",
+            strokeDashArray: 3,
+            xaxis: {
+              lines: {
+                show: false,
+              },
+            },
+          },
+          yaxis: {
+            min: -5,
+            max: 5,
+            title: {
+              // text: 'Age',
+            },
+          },
+          xaxis: {
+            axisBorder: {
+              show: false,
+            },
+            categories: $(this).data("chart-dates"),
 
-      });
+          },
+          yaxis: {
+            tickAmount: 4,
+          },
+          tooltip: {
+            theme: "dark",
+          },
+        };
 
-    });
+        var chart = new ApexCharts(value, chart);
+        chart.render();
 
-  = javascript_include_tag "mintone_chart"
+      }
+    )});  

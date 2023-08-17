@@ -11,9 +11,14 @@ class PlanUsage < ApplicationRecord
   def calculate_usage(date_today=nil, amount_use=nil)
     changes = false
     amount_use ||= usageable.amount_use || usageable.amount || plan_serializer["amount"].to_f
+    
+    datetime_reference = date_today.nil? ? self.created_at.to_time : date_today
+    
     date_today ||= DateTime.now
+
     days_month = Time.days_in_month(date_today.month)
     month_seconds = days_month * 24 * 3600
+
     if self.disable_at.present?
       if active_at.month != date_today.month or active_at.year != date_today.year
         usage_seconds = (self.disable_at.to_time - date_today.beginning_of_month.to_time)
@@ -21,8 +26,9 @@ class PlanUsage < ApplicationRecord
         usage_seconds = (self.disable_at.to_time - self.active_at.to_time)
       end
     else
-      usage_seconds ||= (date_today.end_of_month.to_time - self.created_at.to_time)
+      usage_seconds ||= (date_today.end_of_month.to_time - datetime_reference.to_time)
     end
+    
     if usage_seconds < month_seconds
       self.proportional = (usage_seconds / month_seconds)
       self.amount = amount_use * proportional

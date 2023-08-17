@@ -381,6 +381,7 @@ pt-BR:
       short: "%d de %B"
       short2: "%d %b %H:%M:%S"
       short3: "%d de %b %Y"
+      short4: "%d %b %Y"
 
     month_names:
     - 
@@ -555,6 +556,7 @@ pt-BR:
       short: "%d de %B, %H:%M"
       short2: "%d %b %H:%M:%S"
       short3: "%d de %b %Y"
+      short4: "%d %b %Y"
     pm: ''
 
   administrate_ransack:

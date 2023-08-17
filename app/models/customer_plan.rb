@@ -48,4 +48,11 @@ class CustomerPlan < ApplicationRecord
   end
 
 
+  def calculate_amount
+    plan_usage = plan_usages.find_by(handle: "AccountTracePlan")
+    plan_usage.calculate_usage(DateTime.now) unless plan_usage.nil?
+    plan_usage.try(:amount) || customer_plan.amount
+    
+  end
+
 end
