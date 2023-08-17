@@ -1,4 +1,7 @@
-- content_for :breadcrumb do
+- content_for :title do
+  | Contratar Portfólio
+
+- content_for :header do
   css:
     .card-body.details {
         display: flex; /* Habilita flexbox */
@@ -6,6 +9,7 @@
         min-height: 10vh; /* Altura mínima para preencher a tela */
         justify-content: space-between; /* Distribui o espaço entre os itens */
     }
+- content_for :breadcrumb do
   li.breadcrumb-item
     a href="#{dashboard_url(@trace.id)}" 
       = @trace.name

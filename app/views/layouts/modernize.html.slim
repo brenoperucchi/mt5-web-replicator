@@ -1,8 +1,8 @@
 doctype html
-html[lang="en"]
+html[lang="#{current_store.try(:language) || "pt-br"}"]
   head
     title
-      | Mordenize
+      = content_for?(:title) ? yield(:title) : "Copy MetaTrader"
     meta[http-equiv="Content-Type" content="text/html; charset=UTF-8"]
     meta[name="viewport" content="width=device-width, initial-scale=1"]
     meta[name="handheldfriendly" content="true"]
