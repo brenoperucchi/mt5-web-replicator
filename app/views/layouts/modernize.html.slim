@@ -28,31 +28,33 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
         .container-fluid.pt-3
           .card
             .card-body
-              ul.breadcrumb
-                - if user_signed_in? and not current_user.try(:userable).try(:user?)
-                  li.breadcrumb-item
-                    a href="/admin" 
-                      i.feather.icon-home
-                      '
-                      = I18n.t :admin, scope:'helpers.dashboards'
-                - else
-                  li.breadcrumb-item
-                    a href="/" 
-                      i.feather.icon-home
-                      '
-                      = I18n.t :site, scope:'helpers.dashboards'
-                - if current_store
-                  li.breadcrumb-item
-                    = link_to dashboards_path(params: request.query_parameters) do
-                      = I18n.t :dashboards, scope:'helpers.dashboards'
-                    / a href="/dashboards" 
-                = content_for :breadcrumb
-              /! [ breadcrumb ] started
-              - unless action_name == "contract" or action_name == "finish_contract"
-                .col-lg-6.text-right
-                  button#filter.btn.btn-light.m-r-5[type="button"]
-                    i.feather.icon-plus
-                    = I18n.t :filter, scope:'helpers.dashboards'
+              .row
+                .col-lg-10.text-left
+                  ul.breadcrumb
+                    - if user_signed_in? and not current_user.try(:userable).try(:user?)
+                      li.breadcrumb-item
+                        a href="/admin" 
+                          i.feather.icon-home
+                          '
+                          = I18n.t :admin, scope:'helpers.dashboards'
+                    - else
+                      li.breadcrumb-item
+                        a href="/" 
+                          i.feather.icon-home
+                          '
+                          = I18n.t :site, scope:'helpers.dashboards'
+                    - if current_store
+                      li.breadcrumb-item
+                        = link_to dashboards_path(params: request.query_parameters) do
+                          = I18n.t :dashboards, scope:'helpers.dashboards'
+                        / a href="/dashboards" 
+                    = content_for :breadcrumb
+                  /! [ breadcrumb ] started
+                .col-lg-2.text-right
+                  - unless action_name == "contract" or action_name == "finish_contract"
+                      button#filter.btn.btn-light.m-r-5[type="button"]
+                        i.feather.icon-plus
+                        = I18n.t :filters, scope:'helpers.dashboards'
 
           <!-- Yield Start -->
           = yield
