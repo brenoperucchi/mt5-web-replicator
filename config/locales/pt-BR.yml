@@ -168,8 +168,8 @@ pt-BR:
         state: Status
         kind: Tipo de conta (copy/slave)
         customer_id: Cliente
-        meta_mode: MetaTrader Modo (demo/real)
-        meta_margin_mode: Meta Margem (netting/hedging)
+        meta_mode: MetaTrader Modo
+        meta_margin_mode: Meta Margem
         magics_accept: Magic Number Aceito
         instrument_control: Controle de Ativo
         traces: Portfólio

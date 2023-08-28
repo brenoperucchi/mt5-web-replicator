@@ -16,7 +16,8 @@ class Trace < ApplicationRecord
   store :settings, accessors: [
                                 :telegram_option, :telegram_image, :take_profit_limit, 
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
-                                :instrument_control, :restrict_control_instrument, :magics_accept, :description, :capital_recomendation
+                                :instrument_control, :restrict_control_instrument, :magics_accept, :description, :capital_recomendation, :contract_volume_max,
+                                :stock_kind, :capital_multiplier
                               ]
 
   has_many :orders
@@ -46,8 +47,16 @@ class Trace < ApplicationRecord
   # accepts_nested_attributes_for :payment
 
   validates_presence_of   [:name, :name_id]
-  validates_uniqueness_of [:name, :name_id], scope: :store_id
-  validate :associated_with_customer_plan_and_amount_greater_than_zero, on: :update
+  validates_presence_of   [:contract_volume_max, :customer_plans]
+  validates_uniqueness_of [:name_id], scope: :store_id
+  validates :capital_recomendation, format: { with: /\A\d+([.,]\d{3})*([.,]\d+)?\z/, message: 'must be a number' }, allow_blank: true
+
+  validate  :associated_with_customer_plan_and_amount_greater_than_zero, on: :update
+
+  def capital_recomedation=(value)
+    value = value.to_s.gsub(".", "").gsub(",", ".")
+    self.settings['capital_recomendation'] = value
+  end
 
 
   def soft_destroy_custom
@@ -83,6 +92,27 @@ class Trace < ApplicationRecord
   # def masters_total
   #   masters_filter(masters)
   # end
+
+  def dashboard_capital_accumulated
+    amount_total = 0
+    collection = masters_scope(:masters, :closed).order(closed_at: :asc).where.not(closed_at: nil, profit:0.0)
+    # binding.pry
+    collection_array = []
+    if collection.present?
+      collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
+      # binding.pry
+      (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
+        profit = collection.where(closed_at: date.beginning_of_day..date.end_of_day).map.sum(&:profit)
+        amount_total = profit + amount_total
+        profit_value = profit <= 0 ? 0 : profit
+        loss_value = profit >= 0 ? 0 : profit
+        next if profit_value == 0 and loss_value == 0
+        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value.to_f, loss:loss_value.to_f})
+      end
+    end
+    collection_array
+  end
+
 
   def magic_number_restrict?
     Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
@@ -129,6 +159,8 @@ class Trace < ApplicationRecord
           slave_attributes = slave_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self)
           # slave_present = TransactionSlave.where(ticket_master: ticket, account: account_slave, state: "pending").take
           slave = order.slaves.new(slave_attributes)
+          # binding.pry if ticket == 10000017
+          slave.lot = slave.check_account_contract_volume
           if slave.save
             order.accounts << account_slave
             slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
@@ -293,7 +325,7 @@ class Trace < ApplicationRecord
     if self.customer_plan.nil?
       errors.add(:base, 'Trace must be associated with a CustomerPlan')
     # elsif customer_plans.any? { |cp| cp.amount <= 0 }
-    elsif customer_plan.amount <= 0 || customer_plan.amount.nil?
+    elsif customer_plan.amount_use <= 0 || customer_plan.amount.nil?
       errors.add(:base, 'Associated CustomerPlan must have an amount greater than 0')
     end
   end

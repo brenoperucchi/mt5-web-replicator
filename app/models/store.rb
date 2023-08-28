@@ -88,6 +88,11 @@ class Store < ApplicationRecord
   #   users.first.email    
   # end
 
+  def disable_store
+    plan_older = self.plan_usages.where.not(active_at:nil).where(resourceable:self)
+    plan_older.update_all(disable_at:DateTime.now) if plan_older.present?
+  end
+
   def register_plan_update
     if plan_id_changed? or self.plan_usages.empty?
       plan_older = self.plan_usages.where.not(active_at:nil).where(resourceable:self)
@@ -137,7 +142,7 @@ class Store < ApplicationRecord
     #date_today = DateTime.now
     #date_today = DateTime.now + 1.month
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
-    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: self.payment)
+    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: (self.payment || self.payments.first))
 
     usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|

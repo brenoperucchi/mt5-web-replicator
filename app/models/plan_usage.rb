@@ -8,17 +8,18 @@ class PlanUsage < ApplicationRecord
   belongs_to :store
 
 
-  def calculate_usage(date_today=nil, amount_use=nil)
+  def calculate_usage(date_today=nil, amount_use=nil, month_proporcional=false)
     changes = false
-    amount_use ||= usageable.amount_use || usageable.amount || plan_serializer["amount"].to_f
-    
-    datetime_reference = date_today.nil? ? self.created_at.to_time : date_today
     
     date_today ||= DateTime.now
+    
+    amount_use ||= usageable.amount_use || plan_serializer["amount"].to_f
+
+    datetime_reference = month_proporcional ? DateTime.now : self.created_at
 
     days_month = Time.days_in_month(date_today.month)
     month_seconds = days_month * 24 * 3600
-
+    
     if self.disable_at.present?
       if active_at.month != date_today.month or active_at.year != date_today.year
         usage_seconds = (self.disable_at.to_time - date_today.beginning_of_month.to_time)
@@ -28,7 +29,7 @@ class PlanUsage < ApplicationRecord
     else
       usage_seconds ||= (date_today.end_of_month.to_time - datetime_reference.to_time)
     end
-    
+
     if usage_seconds < month_seconds
       self.proportional = (usage_seconds / month_seconds)
       self.amount = amount_use * proportional
@@ -38,10 +39,15 @@ class PlanUsage < ApplicationRecord
       self.amount = amount_use * proportional
       changes = true
     end
+
+    # self.amount = 0 if self.amount < 0.0
+    
     if changes
       self.description = "#{usageable.class.name} ID ##{usageable.id} - #{self.resourceable_type} ##{self.resourceable_id} - PlanUsage ID ##{self.id}\r\n"
-      self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{self.proportional} - amount: #{self.amount} - seconds: #{usage_seconds}\r\n"
+      self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{number_with_precision self.proportional} - amount: #{number_with_precision self.amount} - seconds: #{number_with_precision usage_seconds, precision:0}\r\n"
+      # puts self.description
     end
+    
     return changes
   end
 

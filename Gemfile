@@ -178,6 +178,7 @@ gem 'recaptcha'
 gem 'link_thumbnailer'
 gem 'imgix'
 gem "net-http"
+gem 'money-rails', '~> 1.12'
 
 
 

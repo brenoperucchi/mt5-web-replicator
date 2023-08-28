@@ -23,7 +23,7 @@ class Account < ApplicationRecord
   enum meta_margin_mode:  {netting: 0, hedging: 1}
   enum stock_kind:        {b3: 0,      forex: 1, usa:2, others:4}
 
-  store :settings, accessors: [:magics_accept, :instrument_control]
+  store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume]
 
   belongs_to :store
   belongs_to :customer
@@ -48,7 +48,8 @@ class Account < ApplicationRecord
 
   validates_presence_of :name
   validates :name, format: { with: /\A\d+\z/} #, message: "Integer only. No sign allowed." }
-  validates_uniqueness_of :name, scope: :account_server_id#, if: Proc.new { |b| b.account_server_id.present? }
+  validates_uniqueness_of :name, scope: [:store_id, :account_server_id], if: Proc.new { |b| b.store_id.present? }
+  # validates_uniqueness_of :name, scope: :store_id, if: Proc.new { |b| b.account_server_id.present? }
 
   accepts_nested_attributes_for :customer
 
@@ -68,6 +69,41 @@ class Account < ApplicationRecord
   #   plan = CustomerPlan.find_by(id:self.customer_plan_id)
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   # end
+
+  def create_invoice_account(trace, name = nil, month_proporcional = false)
+    name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
+    @invoice = customer.invoices.find_or_initialize_by(name: name, store:store)
+    customer.customer_plans.each do |customer_plan|
+      plan_usage = trace.customer_plan.plan_usages.where(handle: "AccountTracePlan").last #.each do |plan_usage|
+        @invoice.payment = trace.customer_plan.payment
+        @invoice.plan_usage = plan_usage
+
+        if trace.customer_plan.fixed? and trace.customer_plan.monthly?
+          plan_usage.calculate_usage(DateTime.now, trace.customer_plan.amount_use, month_proporcional)
+          amount = plan_usage.amount * (self.contract_volume.try(:to_f) || 1)
+        else
+          amount = trace.customer_plan.amount_use * (self.contract_volume.try(:to_f) || 1)
+        end
+        description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable_id} \r\n"
+        
+        if @invoice.save and @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
+          plan_usage.update_next_charged
+        end
+
+        # if trace.customer_plan.try(:fixed?)
+        #   @name = :customer_monthly_payment
+        #   @amount_total += plan_usage.amount
+        # end
+      # end
+    end
+    @invoice.balance_update
+
+    # invoices.find_or_create_by(name: name) do |invoice| 
+    #   # invoice.amount = amount
+    #   invoice.email = email
+    # end
+    return @invoice
+  end
 
   def register_customer_plan_create(trace, customer_plan_id)
     permission = Permission.where(trace: trace, customer_plan_id: customer_plan_id).last
@@ -105,7 +141,7 @@ class Account < ApplicationRecord
   # def soft_restore
   #   self.update(deleted_at: nil)
   # end
-  
+
   def api_server_hostname(params)
     if params[:EnvironmentLocal] == "0"
       'signalforex.imentore.com.br'

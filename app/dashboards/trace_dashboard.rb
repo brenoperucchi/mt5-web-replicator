@@ -24,6 +24,9 @@ class TraceDashboard < Administrate::BaseDashboard
     kind:                  Field::String,
     response:              Field::String,
     capital_recomendation: Field::String.with_options(searchable: false),
+    capital_multiplier:    Field::String.with_options(searchable: false),
+    contract_volume_max:   Field::String.with_options(searchable: false),
+    # stock_kind:            CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3),
     take_profit_limit:     Field::String.with_options(searchable: false),
     magics_accept:         Field::String.with_options(searchable: false),
     # volumes:             Field::ActsAsTaggable,
@@ -62,6 +65,8 @@ class TraceDashboard < Administrate::BaseDashboard
   kind
   magics_accept
   capital_recomendation
+  capital_multiplier
+  contract_volume_max
   store
   accounts
   customer_plans
@@ -88,6 +93,8 @@ class TraceDashboard < Administrate::BaseDashboard
   kind
   magics_accept
   capital_recomendation
+  capital_multiplier
+  contract_volume_max
   store
   accounts
   customer_plans

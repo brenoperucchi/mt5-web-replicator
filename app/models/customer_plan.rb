@@ -35,10 +35,9 @@ class CustomerPlan < ApplicationRecord
   end
 
   def amount_use
-    if self.discount_behavior == "always" || (self.discount_behavior == "promition_page" && self.promotion_use) 
-
+    if(self.discount_behavior == "always" || (self.discount_behavior == "promition_page" && self.promotion_use))
       if self.amount_discount.to_s.include?("%")
-        self.amount * (self.amount_discount.to_f / 100)
+        self.amount * (1 - self.amount_discount.to_f / 100)
       else
         self.amount - self.amount_discount.to_f
       end
@@ -49,9 +48,9 @@ class CustomerPlan < ApplicationRecord
 
 
   def calculate_amount
-    plan_usage = plan_usages.find_by(handle: "AccountTracePlan")
-    plan_usage.calculate_usage(DateTime.now) unless plan_usage.nil?
-    plan_usage.try(:amount) || customer_plan.amount
+    plan_usage = plan_usages.first
+    plan_usage.calculate_usage(DateTime.now, self.amount_use, true) unless plan_usage.nil?
+    plan_usage.try(:amount) || 0
     
   end
 

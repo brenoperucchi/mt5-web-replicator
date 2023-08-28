@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :account do
     state { 'enable' }
+    contract_volume { '1' }
 
     trait :slave1 do
       # name {5634787} 

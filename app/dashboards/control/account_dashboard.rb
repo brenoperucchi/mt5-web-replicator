@@ -16,6 +16,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     kind:                 Field::String,
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
+    # stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3, searchable: false),
     traces:               Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
     orders:               Fields::HasManyScopeField.with_options(dashboard:'control', direction: :desc, sort_by: :created_at),
     instruments:          Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
@@ -66,6 +67,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   state
   instrument_control
+  # stock_kind
   name
   customer
   kind

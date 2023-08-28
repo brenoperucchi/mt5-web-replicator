@@ -185,7 +185,7 @@ class Transaction < ApplicationRecord
   end
 
   def profit
-    read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
+    read_attribute(:profit).nil? ? 0 : read_attribute(:profit).to_f
   end
 
   def set_symbol

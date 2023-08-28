@@ -56,6 +56,7 @@ RSpec.describe 'Store Controller', type: :request do
         unfreeze_time
         travel_to Date.parse("2023-06-01").beginning_of_month
         freeze_time
+        expect(@customer_plan.amount.to_f).to be == 100
 
         expect {
           post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
@@ -69,7 +70,7 @@ RSpec.describe 'Store Controller', type: :request do
         expect(Invoice.all.count).to be == 1
 
         expect(Invoice.first.name).to be == invoice_name
-        expect(Invoice.first.amount.to_f).to be == 30.0
+        expect(Invoice.first.amount.to_f).to be == 70.0
 
 
         expect(account.name).to be == "12345678"

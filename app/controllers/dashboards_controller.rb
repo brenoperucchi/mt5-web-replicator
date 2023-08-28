@@ -19,11 +19,12 @@ class DashboardsController < ApplicationController
 	# end
 
 	def finish
-		@account = Account.find(params[:account_id])
+		trace 	 = Trace.find(params[:id])
+		account = Account.find(params[:account_id])
 		
-		invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-		@account.customer.create_invoice_customer(invoice_name)
-		@invoice = @account.customer.invoices.first
+		invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+		account.create_invoice_account(@trace, invoice_name, true)
+		@invoice = account.customer.invoices.first
 		@payment = @invoice.invoice_send
 		if @payment.redirect_url
 			redirect_to @payment.redirect_url
@@ -33,8 +34,10 @@ class DashboardsController < ApplicationController
 	end
 
 	def contract
+		# @contract_volume = params.dig([:account][:settings][:contract_volume]) || 1
 		@trace.customer_plan.promotion_use = true if params[:promotion] == "promotion"
 		respond_to do |wants|
+			wants.js { render layout: false }
 			wants.html do  
 				@account = @trace.accounts.new
 			end
@@ -95,6 +98,7 @@ class DashboardsController < ApplicationController
 	def index
 		@all_records = request.fullpath.include?("all") ? true : false
 		respond_to do |wants|
+			
 			wants.html { render :index}
 		end
 	end
@@ -136,7 +140,7 @@ class DashboardsController < ApplicationController
 	private
 
 	def account_params
-	  params.require(:account).permit(:name, :url, :password, :email, :kind, :meta_margin_mode, :meta_mode, :store_id,
+	  params.require(:account).permit(:name, :url, :password, :email, :kind, :meta_margin_mode, :meta_mode, :store_id, settings:[:contract_volume],
 	  						customer_attributes:[:name, :customer_plan_id, :user_email, :store_id, user_attributes:[:email, :store_id]]) 
 	end
 

@@ -167,7 +167,8 @@ class Order < ApplicationRecord
     order_trace = self.trace_id
     openat = Rails.env.test? ? 0 : resource.open_at.to_i
     comment = resource.try(:comment).to_s.gsub(/[^0-9A-Za-z]/, '_')
-    "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{magicnumber}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
+    contract_volume = resource.try(:account).try(:contract_volume).present? ? resource.try(:account).try(:contract_volume) : 1
+    "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{magicnumber}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}|#{contract_volume}"
   end
 
   def price_open(resource)

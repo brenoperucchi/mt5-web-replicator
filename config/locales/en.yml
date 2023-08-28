@@ -168,8 +168,8 @@ en:
         state: State
         customer_id: Customer
         kind: Account Kind (copy/slave)
-        meta_mode: MetaTrader Mode (demo/real)
-        meta_margin_mode: Meta Margem (netting/hedging)
+        meta_mode: MetaTrader Mode
+        meta_margin_mode: Meta Margem
         magics_accept: Accept Magic Number 
         instrument_control: Instrument control
         traces: Portfolio

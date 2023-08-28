@@ -36,5 +36,21 @@ module ResetDatabase
 
 	end
 
+
+	def self.reset_trace(trace_id, account_id, store_id)
+		trace = Trace.find(trace_id)
+		account = Account.find(account_id)
+		store = Store.find(store_id)
+
+		new_trace = Trace.new(name: "Migrate Trace #{trace.name} ##{trace.id} - Account #{account.name} ID ##{account_id}", name_id: DateTime.now.to_i, kind:"copy", customer_plans: [Store.first.customer_plans.first], active: false, contract_volume_max:1, store:store)
+
+		Trace.find(trace_id).masters.where(account_id: account_id).each do |t|
+			# binding.pry
+			t.order.slaves.update_all(trace_id: new_trace.id)
+			t.order.update(trace:new_trace)
+			t.update(trace: new_trace)
+		end
+	end
+
 end
 

@@ -70,8 +70,7 @@ class Message::V2::Metatrader < Message::Message
           changed = true
 
           params_copy("orders_open").each_with_index do |(ticket, copy_params), index|
-
-
+            next if copy_params.empty?
 
             # copy_attributes = API::V220::APICopySerializer.new(copy_params).api_attributes
             state_meta = copy_params["state_meta"]

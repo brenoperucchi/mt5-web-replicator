@@ -2,12 +2,12 @@ module AlgoStatistic
 	extend ActiveSupport::Concern
 
 	included do
-		def dashboard_capital_accumulated
+		def dashboard_capital_accumulated(heading = false)
 		  amount_total = 0
 		  collection = masters_scope(:masters, :closed).order(closed_at: :asc).where.not(closed_at: nil, profit:0.0)
 		  collection_array = []
 		  if collection.present?
-		    collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
+		    collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}] if heading
 		    (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
 		      profit = collection.where(closed_at: date.beginning_of_day..date.end_of_day).sum(&:profit)
 		      amount_total = profit + amount_total

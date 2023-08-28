@@ -12,9 +12,11 @@ class AccountDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     state:                Field::String,
     kind:                 Field::String,
-    stock_kind:           Field::String,
+    # stock_kind:           Field::String,
+    stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3),
     meta_mode:            Field::String,
     meta_margin_mode:     Field::String,
+    contract_volume:      Field::String.with_options(searchable: false),
     traces:               Field::HasMany,
     orders:               Field::HasMany,
     instruments:          Field::HasMany,
@@ -55,7 +57,7 @@ class AccountDashboard < Administrate::BaseDashboard
   kind
   meta_mode
   meta_margin_mode
-  stock_kind
+  contract_volume
   magics_accept
   instrument_control
   traces
@@ -78,7 +80,7 @@ class AccountDashboard < Administrate::BaseDashboard
   kind
   meta_mode
   meta_margin_mode
-  stock_kind
+  contract_volume
   magics_accept
   instrument_control
   traces

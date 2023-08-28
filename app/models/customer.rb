@@ -60,7 +60,7 @@ class Customer < ApplicationRecord
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   # end
 
-  def create_invoice_customer(name = nil)
+  def create_invoice_customer(name = nil, month_proporcional = false)
     name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
     @invoice = invoices.find_or_initialize_by(name: name, store:store)
     customer_plans.each do |customer_plan|
@@ -69,10 +69,10 @@ class Customer < ApplicationRecord
         @invoice.plan_usage = plan_usage
 
         if customer_plan.fixed? and customer_plan.monthly?
-          plan_usage.calculate_usage
-          amount = plan_usage.amount
+          plan_usage.calculate_usage(DateTime.now, customer_plan.amount_use, month_proporcional)
+          amount = plan_usage.amount * (plan_usage.resourceable.contract_volume.try(:to_f) || 1)
         else
-          amount = customer_plan.amount
+          amount = customer_plan.amount_use * (plan_usage.resourceable.contract_volume.try(:to_f) || 1)
         end
         description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable_id} \r\n"
         
@@ -100,10 +100,10 @@ class Customer < ApplicationRecord
     name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
     invoice = invoices.find_or_create_by(name: name, store:store)
     if customer_plan.try(:fixed?)
-      invoice.items.find_or_create_by(name: :customer_monthly_payment, amount: customer_plan.amount)
+      invoice.items.find_or_create_by(name: :customer_monthly_payment, amount: customer_plan.amount_use)
     else
       amount = self.accounts.slave.sum(&:balance_month)
-      amount_total = (amount.to_f * (customer_plan.try(:amount).to_f / 100))
+      amount_total = (amount.to_f * (customer_plan.try(:amount_use).to_f / 100))
       
       description = "Invoice #{name}\r\n\n"
       self.accounts.slave.map do |account|
@@ -113,7 +113,7 @@ class Customer < ApplicationRecord
       end
 
       description << "Slaves closed count: #{self.accounts.slave.sum(&:balance_month_count)}\r\n"
-      description << "Amount:#{amount.to_f} * Plan Percent:#{customer_plan.try(:amount).to_f / 100} = #{amount_total}\r\n"
+      description << "Amount:#{amount.to_f} * Plan Percent:#{customer_plan.try(:amount_use).to_f / 100} = #{amount_total}\r\n"
       invoice.items.find_or_create_by(name: :profit_percent,  amount: amount_total, description: description) 
     end
 

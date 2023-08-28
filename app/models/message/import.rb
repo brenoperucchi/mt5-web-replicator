@@ -71,7 +71,7 @@ class Message::Import < Message::Message
   def create_transaction(order_data, trace)
     dates = order_data[:created_at] - 1.minute..order_data[:created_at] + 1.minute
     transactions = Transaction.where(symbol: order_data[:symbol], profit: order_data[:profit], lot: order_data[:volume], ordertype: order_data[:type]).where("comment LIKE ?", "%#{order_data[:magic_number]}%").where.not(state: :pending)
-    binding.pry if transactions.exists?
+    # binding.pry if transactions.exists?
     return if transactions.exists?
 
     account_copy = trace.accounts.copy.first
@@ -135,8 +135,7 @@ class Message::Import < Message::Message
   #     # Order.create("")
   #     transactions =  Transaction.where(symbol: symbol, profit: profit, lot: volume, ordertype: type).where("comment LIKE ?", "%#{magic_number}%")
   #     # transactions = Transaction.where(symbol: symbol, magic_number: magic_number, profit: profit, ordertype: type)
-  #     # binding.pry unless transactions.blank?
-  #     binding.pry unless transactions.blank?
+
   #     next unless transactions.blank?
 
   #     account_copy = trace.accounts.copy.first

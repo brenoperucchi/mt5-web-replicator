@@ -1,3 +1,5 @@
+- contract_volume_max = @trace.contract_volume_max.present? ? @trace.contract_volume_max.to_i : 1 
+
 - content_for :title do
   | Contratar Portfólio
 
@@ -26,9 +28,6 @@
                       = I18n.t :contract, scope:'helpers.dashboards'
 = simple_form_for @account, url: dashboards_path, wrapper: :vertical_form_modernize, method: :post do |f|                      
   .row
-
-    
-
     .col-lg-12
       .row
         .col-lg-12.d-flex.align-items-strech
@@ -36,59 +35,8 @@
             .card-body.p-4
               == @trace.description
       .row
-        .col-lg-3.d-flex.align-items-strech
-          .card.w-100
-            .card-body.details
-              h5.card-title
-                | Detalhes
-              .mt-9.py-6.d-flex
-                / span.round-8.bg-dark.rounded-circle.me-6  
-                .ms-0.text-center
-                  h6.mb-0
-                    | Valor
-                    '
-                    = I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
-                .ms-auto
-                  span.fs-2
-                    h6= number_to_currency (@trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount) || 0)
-              .py-6.d-flex
-                / span.round-8.bg-dark.rounded-circle.me-6  
-                .ms-0
-                  h6.mb-0
-                    | Valor proporcional
-                .ms-auto
-                  span.fs-2
-                    h6= number_to_currency @trace.customer_plan.calculate_amount
-              .py-6.d-flex
-                / span.round-8.bg-dark.rounded-circle.me-6  
-                .ms-0
-                  h6.mb-0
-                    | Proxíma cobrança
-                .ms-auto
-                  span.fs-2
-                    h6= I18n.l @trace.next_charged, format: :short4
-              .py-6.d-flex
-                / span.round-8.bg-dark.rounded-circle.me-6  
-                .ms-0
-                  h6.mb-0
-                    | Tipo (fixo/percentual)
-                .ms-auto
-                  span.fs-2
-                    h6= I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
-              .pt-6.d-flex
-                / span.round-8.bg-dark.rounded-circle.me-6  
-                .ms-0
-                  h6.mb-0
-                    | Capital Recomendado
-                .ms-auto
-                  span.fs-2
-                    h6= number_to_currency @trace.capital_recomendation
-                / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
-              div.mt-4
-                / button.btn.btn-primary.w-100
-                = link_to dashboard_path(@trace, params:request.query_parameters), class: 'btn btn-light w-100' do
-                  = I18n.t :more_information, scope:'helpers.dashboards'
-
+        .col-lg-3.d-flex.align-items-strech#ajax-container
+          = render "sidebar_left"
         .col-lg-6.d-flex.align-items-strech
           .card.w-100
             .card-body
@@ -133,6 +81,9 @@
                   = fff.input :email
                   = fff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
                 / = f.simple_fields_for :settings do |ff| 
+              - f.object.contract_volume ||= 1
+              = f.simple_fields_for :settings do |ff| 
+                = ff.input :contract_volume, as: :select, collection: 1..contract_volume_max, selected: f.object.contract_volume.to_i, input_html:{ id: 'ajax' }
                 .row
                   .col-sm-12
                     / = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
@@ -165,6 +116,22 @@
 - content_for :footer do
   javascript:
     $(document).ready(function(){ 
+      $('#ajax').change(function() {
+          let url = "#{contract_dashboard_path(@trace)}";
+          let contract_volume = $(this).val();
+          $.ajax({
+              url: url,
+              type: "get",
+              data: {'contract_volume': contract_volume},
+              dataType: "script",
+              success: function(data) {
+                  console.log('success')
+              },
+              error: function() {
+                  console.log('failure')
+              }
+          });
+      })
 
       $("[id='chart']").each(function(index, value) {
         // =====================================

@@ -92,6 +92,26 @@ RSpec.describe API::V2::APIStore do
         expect(Account.where(name: 10200, account_server_id:3, store_id:2).last.account_server.name).to be == "darwinexdemo"
         expect(Account.where(name: 10200, account_server_id:3).last.store_id).to be == 2
       end
+
+
+      it 'Account duplicate same Store' do
+        account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging') 
+        expect(account1.account_server).to be_nil
+        account_dup = build(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')    
+        expect(account_dup.account_server).to be_nil
+        expect(account_dup).to_not be_valid
+        expect(account_dup.errors.attribute_names).to be == [:name]
+        
+        post "/api/v2/stores/config/imentore_slave/2_22/DarwinexDemo/20100/HEDGING", params: {'EnvironmentLocal':'1'}
+        account1.reload
+        expect(account1).to be_valid
+        expect(account1.account_server.name).to be == "darwinexdemo"
+        
+        account_dup = build(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')    
+        expect(account_dup.account_server).to be_nil
+        account_dup.valid?
+      end
+    
     end
   end
 

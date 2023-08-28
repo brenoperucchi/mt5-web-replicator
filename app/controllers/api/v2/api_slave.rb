@@ -38,7 +38,8 @@ module API
 
           if not content.blank? and content.is_a?(Hash)
             action = content['meta_state']
-            account = Account.find_by(name: params[:account_id])
+            account_server = AccountServer.find_or_create_by(name: params[:account_server_name].try(:downcase))
+            account = Account.find_by(name: params[:account_id], account_server: account_server, state: :enable, kind: :slave)
             if account
               # TransactionSlave.check_duplicate(content['comment'], account)
               slave = account.slaves.where(comment: content['comment']).not_deleted.first

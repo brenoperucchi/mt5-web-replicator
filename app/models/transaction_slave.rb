@@ -160,6 +160,7 @@ class TransactionSlave < ApplicationRecord
   end
 
   def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil)
+    lot = nil if account.hedging?
     attributes = {lot: lot, take_profit:take_profit, stop_loss:stop_loss}.compact
     self.update(attributes)
   end
@@ -178,6 +179,22 @@ class TransactionSlave < ApplicationRecord
     difference = difference > 1 ? difference : 0
     seconds_ago = (self.master.open_at - Time.zone.now + difference).to_i.abs
     Rails.env.test? ? 0 : seconds_ago
+  end
+
+  def check_account_contract_volume(value = nil)
+    number = value || self.lot
+    contract_volume = account.contract_volume 
+    # binding.pry
+    return self.lot if not contract_volume.present? or contract_volume.to_f <= 0.0
+    # binding.pry if contract_volume == "0"
+
+    if number.include?(".")
+      decimal_part = number.split(".").last
+      new_number = "0." + ("0" * (decimal_part.length-1).abs) + (1 * contract_volume.to_i).to_s
+      return new_number
+    else
+      return contract_volume
+    end
   end
 
 
