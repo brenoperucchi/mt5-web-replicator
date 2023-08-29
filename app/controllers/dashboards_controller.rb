@@ -169,7 +169,7 @@ class DashboardsController < ApplicationController
 		@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
 		# session[:dates] = params[:datefilter]
 		if params[:datefilter].blank?# and session[:date_begin].nil? and session[:date_end].nil?
-			dates = "#{(date_today.beginning_of_year).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+			dates = "#{(date_today.beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 			session[:dates] = dates
 			session[:date_begin] = dates.split("-")[0]
 			session[:date_end] = dates.split("-")[1]					

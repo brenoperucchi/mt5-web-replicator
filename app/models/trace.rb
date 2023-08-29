@@ -93,27 +93,6 @@ class Trace < ApplicationRecord
   #   masters_filter(masters)
   # end
 
-  def dashboard_capital_accumulated
-    amount_total = 0
-    collection = masters_scope(:masters, :closed).order(closed_at: :asc).where.not(closed_at: nil, profit:0.0)
-    # binding.pry
-    collection_array = []
-    if collection.present?
-      collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}]
-      # binding.pry
-      (collection.first.closed_at.to_datetime..collection.last.closed_at.to_datetime).each do |date|
-        profit = collection.where(closed_at: date.beginning_of_day..date.end_of_day).map.sum(&:profit)
-        amount_total = profit + amount_total
-        profit_value = profit <= 0 ? 0 : profit
-        loss_value = profit >= 0 ? 0 : profit
-        next if profit_value == 0 and loss_value == 0
-        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value.to_f, loss:loss_value.to_f})
-      end
-    end
-    collection_array
-  end
-
-
   def magic_number_restrict?
     Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
   end
@@ -159,7 +138,6 @@ class Trace < ApplicationRecord
           slave_attributes = slave_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self)
           # slave_present = TransactionSlave.where(ticket_master: ticket, account: account_slave, state: "pending").take
           slave = order.slaves.new(slave_attributes)
-          # binding.pry if ticket == 10000017
           slave.lot = slave.check_account_contract_volume
           if slave.save
             order.accounts << account_slave
@@ -242,6 +220,8 @@ class Trace < ApplicationRecord
 
 
   def masters_filter(data, scope = nil)
+    # self.search_date_begin = Date.parse("2023-08-15").to_date 
+    # self.search_date_end   = DateTime.now
     if self.search_date_begin and self.search_date_end
       if scope == :executed or (scope.is_a?(Array) and scope.include?(:executed))
         query = {:created_at => search_date_begin..search_date_end.end_of_day}

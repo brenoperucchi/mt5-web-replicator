@@ -184,9 +184,7 @@ class TransactionSlave < ApplicationRecord
   def check_account_contract_volume(value = nil)
     number = value || self.lot
     contract_volume = account.contract_volume 
-    # binding.pry
     return self.lot if not contract_volume.present? or contract_volume.to_f <= 0.0
-    # binding.pry if contract_volume == "0"
 
     if number.include?(".")
       decimal_part = number.split(".").last

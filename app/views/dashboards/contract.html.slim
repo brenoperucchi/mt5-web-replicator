@@ -1,4 +1,7 @@
 - contract_volume_max = @trace.contract_volume_max.present? ? @trace.contract_volume_max.to_i : 1 
+- @trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+- @trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)     
+- chart_values =  @trace.dashboard_capital_accumulated
 
 - content_for :title do
   | Contratar Portfólio
@@ -62,7 +65,6 @@
                   / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
                   / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
                   / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-                  - chart_values =  @trace.dashboard_capital_accumulated.reverse[..10]
                   #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
         .col-lg-3.d-flex.align-items-strech
           .card

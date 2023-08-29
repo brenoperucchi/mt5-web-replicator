@@ -7,6 +7,7 @@
     - next if not @all_records and trace.capital_recomendation.blank?
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
+    - chart_values =  trace.dashboard_capital_accumulated
     .col-lg-12.d-flex.align-items-strech
       .card.w-100
         .card-body
@@ -15,8 +16,8 @@
               .mb-3.mb-sm-0
                 h5.card-title.fw-semibold
                   = trace.name
-                p.card-subtitle.mb-0
-                  | Overview of Profit
+                / p.card-subtitle.mb-0
+                /   | Overview of Profit
               / div
               /   select.form-select
               /     option[value="1"]
@@ -33,7 +34,6 @@
               / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
               / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
               / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-              - chart_values =  trace.dashboard_capital_accumulated[..10].reverse
               #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
             .col-lg-4.col-md-4
               .d-flex.align-items-center.mb-4.pb-1
