@@ -42,13 +42,19 @@ module ResetDatabase
 		account = Account.find(account_id)
 		store = Store.find(store_id)
 
-		new_trace = Trace.new(name: "Migrate Trace #{trace.name} ##{trace.id} - Account #{account.name} ID ##{account_id}", name_id: DateTime.now.to_i, kind:"copy", customer_plans: [Store.first.customer_plans.first], active: false, contract_volume_max:1, store:store)
-
-		Trace.find(trace_id).masters.where(account_id: account_id).each do |t|
-			t.order.slaves.update_all(trace_id: new_trace.id)
-			t.order.update(trace:new_trace)
-			t.update(trace: new_trace)
+		new_trace = Trace.create(name: "Migrate Trace #{trace.name} ##{trace.id} - Account #{account.name} ID ##{account_id}", name_id: DateTime.now.to_i, kind:"copy", customer_plans: [Store.first.customer_plans.first], active: false, contract_volume_max:1, store:store)
+		Order.where(account_id: account_id, trace_id: trace_id).each do |o|
+			o.update(trace: new_trace)
+			o.transactions.update_all(trace_id: new_trace.id)
+			o.slaves.update_all(trace_id: new_trace.id)
 		end
+
+
+		# Trace.find(trace_id).masters.where(account_id: account_id).each do |t|
+		# 	t.order.slaves.update_all(trace_id: new_trace.id)
+		# 	t.order.update(trace:new_trace)
+		# 	t.update(trace: new_trace)
+		# end
 	end
 
 end

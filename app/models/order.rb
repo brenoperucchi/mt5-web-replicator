@@ -5,7 +5,7 @@ class Order < ApplicationRecord
   belongs_to :trace
   belongs_to :store
   belongs_to :account
-  belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id#, dependent: :destroy
+  belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id, optional: true#, dependent: :destroy
 
   has_and_belongs_to_many :messages, class_name: 'Message::Message'
 

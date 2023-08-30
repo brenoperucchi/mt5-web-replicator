@@ -34,6 +34,7 @@ class TraceDashboard < Administrate::BaseDashboard
     instruments:           Field::HasMany,
     accounts:              Field::HasMany,
     customer_plans:        Field::HasMany,
+    transactions:          Field::HasMany,
     description:           Field::Tinymce,
     created_at:            Field::DateTime,
     updated_at:            Field::DateTime,
@@ -52,6 +53,7 @@ class TraceDashboard < Administrate::BaseDashboard
   kind
   store
   accounts
+  transactions
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -72,6 +74,7 @@ class TraceDashboard < Administrate::BaseDashboard
   customer_plans
   messages
   instruments
+  transactions
   created_at
   updated_at
   ].freeze
