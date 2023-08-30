@@ -36,9 +36,6 @@ class DashboardsController < ApplicationController
 	def contract
 		# @contract_volume = params.dig([:account][:settings][:contract_volume]) || 1
 		@trace.customer_plan.promotion_use = true if params[:promotion] == "promotion"
-		@trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-		@trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)     
-
 		respond_to do |wants|
 			wants.js { render layout: false }
 			wants.html do  
@@ -68,8 +65,6 @@ class DashboardsController < ApplicationController
 			# @customer.create_user(email: @customer.user_email, password: password)
 			redirect_to finish_dashboard_path(@trace, account)
 		else
-			@trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-			@trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)     
 			@account = account
 			flash[:notice] = "Error na contração de Portfolio"
 			render :contract
@@ -178,6 +173,7 @@ class DashboardsController < ApplicationController
 			session[:dates] = dates
 			session[:date_begin] = dates.split("-")[0]
 			session[:date_end] = dates.split("-")[1]					
+
 		else
 			if params[:datefilter].present? 
 				dates = params[:datefilter].split("-")
