@@ -1,6 +1,4 @@
 - contract_volume_max = @trace.contract_volume_max.present? ? @trace.contract_volume_max.to_i : 1 
-- @trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-- @trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)     
 - chart_values =  @trace.dashboard_capital_accumulated
 
 - content_for :title do
@@ -29,7 +27,7 @@
                     / button.btn.btn-primary.w-100
                     = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
                       = I18n.t :contract, scope:'helpers.dashboards'
-= simple_form_for @account, url: dashboards_path, wrapper: :vertical_form_modernize, method: :post do |f|                      
+= simple_form_for @account, url: dashboard_path(@trace.name), wrapper: :vertical_form_modernize, method: :post do |f|                      
   .row
     .col-lg-12
       .row

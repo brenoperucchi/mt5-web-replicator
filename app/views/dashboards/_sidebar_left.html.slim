@@ -58,5 +58,5 @@
       / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
     div.mt-4
       / button.btn.btn-primary.w-100
-      = link_to dashboard_path(@trace, params:request.query_parameters), class: 'btn btn-light w-100' do
+      = link_to dashboard_path(@trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
         = I18n.t :more_information, scope:'helpers.dashboards'

@@ -17,8 +17,9 @@ Rails.application.routes.draw do
     resources :invoice_items
     resources :customers
     resources :stores
-    resources :dashboards, only: [:index, :show, :create] do
-      get  'all',                                     to: 'dashboards#index',           on: :collection
+    resources :dashboards, only: [:index]
+    resource :dashboard, only: [:show, :create], path:"dashboard/:name" do
+      # get  'all',                                     to: 'dashboards#index',           on: :collection, path: 
       get  'account/:id/:payment_id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
       get  '/contract/:promotion',                    to: 'dashboards#contract',        on: :member#, as: 'account'
       get  '/contract',                               to: 'dashboards#contract',        on: :member, as: 'contract'
@@ -26,6 +27,13 @@ Rails.application.routes.draw do
       get  'finish/:account_id',                      to: 'dashboards#finish',          on: :member, as: 'finish'
       # get  'finish',                                to: 'dashboards#finish_external_payment',          on: :collection
     end
+
+    # get  '/dashboards/:name/contract',                to: 'dashboards#contract',       as: 'contract_dashboards'
+
+    constraints(name: /[A-Z][A-Z][0-9]+/) do
+      resource :robos, controller: 'dashboards', path:"robos/:name"
+    end
+
     
     devise_for :users, controllers: {
       sessions: 'users/sessions',

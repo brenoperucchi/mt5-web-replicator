@@ -19,7 +19,7 @@ class DashboardsController < ApplicationController
 	# end
 
 	def finish
-		trace 	 = Trace.find(params[:id])
+		trace 	 = Trace.find_by(name: params[:name])
 		account = Account.find(params[:account_id])
 		
 		invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
@@ -36,6 +36,9 @@ class DashboardsController < ApplicationController
 	def contract
 		# @contract_volume = params.dig([:account][:settings][:contract_volume]) || 1
 		@trace.customer_plan.promotion_use = true if params[:promotion] == "promotion"
+		@trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+		@trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)     
+
 		respond_to do |wants|
 			wants.js { render layout: false }
 			wants.html do  
@@ -65,6 +68,8 @@ class DashboardsController < ApplicationController
 			# @customer.create_user(email: @customer.user_email, password: password)
 			redirect_to finish_dashboard_path(@trace, account)
 		else
+			@trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+			@trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)     
 			@account = account
 			flash[:notice] = "Error na contração de Portfolio"
 			render :contract
@@ -113,14 +118,14 @@ class DashboardsController < ApplicationController
 				if @trace
 					render action: :show
 				else
-					redirect_to dashboards_path
+					redirect_to dashboards_path, layout: 'modernize'
 				end
 			end
 		end
 	end
 
 	def account
-		@trace = Trace.find_by(id:params[:trace_id])
+		@trace = Trace.find_by(name: params[:name])
 		# @account = current_store.accounts.find(params[:id])
     @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
     @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
@@ -145,7 +150,7 @@ class DashboardsController < ApplicationController
 	end
 
 	def set_trace
-		@trace = Trace.find_by(id:params[:id])
+		@trace = Trace.find_by(name: params[:name])
 		unless @trace.nil?
 		else
 			redirect_to root_path, notice: "Dashboard Not found"
@@ -173,7 +178,6 @@ class DashboardsController < ApplicationController
 			session[:dates] = dates
 			session[:date_begin] = dates.split("-")[0]
 			session[:date_end] = dates.split("-")[1]					
-
 		else
 			if params[:datefilter].present? 
 				dates = params[:datefilter].split("-")
