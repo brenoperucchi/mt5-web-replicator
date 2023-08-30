@@ -63,7 +63,7 @@ class DashboardsController < ApplicationController
 			customer_plan.save
 			# account.customer.create_invoice_customer(invoice_name)
 			# @customer.create_user(email: @customer.user_email, password: password)
-			redirect_to finish_dashboard_path(@trace, account)
+			redirect_to finish_dashboard_path(@trace.name, account)
 		else
 			@account = account
 			flash[:notice] = "Error na contração de Portfolio"
