@@ -34,6 +34,13 @@ FactoryBot.define do
       meta_margin_mode { 'hedging' }
       trace_ids { 2 } 
     end
+    trait :slave_netting do
+      name {30010} 
+      kind {'slave'}  # 'slave' or 'copy'
+      meta_mode { 'demo' }
+      meta_margin_mode { 'netting' }
+      # trace_ids { 2 } 
+    end
     trait :copy do
       # name {5647753} 
       name {10100} 
@@ -47,6 +54,13 @@ FactoryBot.define do
       kind {'copy'} 
       meta_margin_mode { 'hedging' }
       trace_ids { 1 }
+    end
+
+    trait :copy_netting do
+      # name {201002}
+      name {30100} 
+      kind {'copy'} 
+      meta_margin_mode { 'netting' }
     end
   end
 end

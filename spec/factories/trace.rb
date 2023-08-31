@@ -31,5 +31,13 @@ FactoryBot.define do
       kind {'copy'}
       customer_plan_ids { 1 }
     end
+
+    trait :copy_netting do
+      name { 'CopyNetting' }
+      name_id { '30001' }
+      take_profit_limit {2} 
+      kind {'copy'}
+      customer_plan_ids { 1 }
+    end
   end
 end

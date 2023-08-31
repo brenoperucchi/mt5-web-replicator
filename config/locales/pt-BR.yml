@@ -38,7 +38,7 @@ pt-BR:
           oper_loss: Operações negativas
           profit_trade: Taxa de acerto
           profit_drawdown: Lucro / Max DD
-          profit_net: Lucro Líquido
+          profit_net: Lucro
           pay_off: Payoff 
           max_dd: Max DD
           mfe_mae: MFE & MAE

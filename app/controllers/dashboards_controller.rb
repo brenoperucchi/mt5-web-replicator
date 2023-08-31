@@ -57,7 +57,7 @@ class DashboardsController < ApplicationController
 		account.traces << @trace
 		if @trace.valid? and account.save
 			# invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-			plan_usage = account.register_customer_plan_create(@trace, customer_plan_id)
+			plan_usage = account.add_account_trace_to_planusage(@trace, customer_plan_id)
 			customer_plan = plan_usage.usageable
 			customer_plan.promotion_use = true if params[:promotion] == "promotion"
 			customer_plan.save

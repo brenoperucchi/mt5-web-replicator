@@ -49,7 +49,7 @@ class CustomerPlan < ApplicationRecord
 
   def calculate_amount
     plan_usage = plan_usages.first
-    plan_usage.calculate_usage(DateTime.now, self.amount_use, true) unless plan_usage.nil?
+    plan_usage.calculate_usage(DateTime.now, self.amount_use, false) unless plan_usage.nil?
     plan_usage.try(:amount) || 0
     
   end

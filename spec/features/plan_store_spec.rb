@@ -1,7 +1,7 @@
 # 334199527
 require 'rails_helper'
 
-RSpec.describe "PLanStore" do
+RSpec.describe "PLanStore" do#, focus:true do
   before(:context) do
     travel_to Date.parse("2022-11-01")
     freeze_time
@@ -142,11 +142,11 @@ RSpec.describe "PLanStore" do
         travel_to Date.parse("2022-12-15")
         freeze_time
         @account3 = create(:account, :slave3, store: @store, customer:@customer, meta_margin_mode: 'hedging')    
-        @store.create_invoice_month
+        @store.create_invoice_month(true, nil)
         @invoice = @store.invoices.first
         expect(@invoice.name).to be == "1-2022-12"
         expect(@invoice.items.count).to be == 5
-        expect(@invoice.amount.to_f).to be == 156.45
+        expect(@invoice.amount.to_f).to be == 93.22
         @store.accounts.find(3).soft_destroy
         travel_to Date.parse("2023-01-01")
         freeze_time
@@ -166,12 +166,12 @@ RSpec.describe "PLanStore" do
         travel_to Date.parse("2022-12-15")
         freeze_time
         @account3 = create(:account, :slave3, store: @store, customer:@customer, meta_margin_mode: 'hedging')    
-        @store.create_invoice_month
+        @store.create_invoice_month(true, nil)
         @invoice = @store.invoices.first
 
         expect(@invoice.name).to be == "1-2022-12"
         expect(@invoice.items.count).to be == 5
-        expect(@invoice.amount.to_f).to be == 156.45
+        expect(@invoice.amount.to_f).to be == 93.22
         @store.accounts.find(3).soft_destroy
         travel_to Date.parse("2023-01-01")
         freeze_time

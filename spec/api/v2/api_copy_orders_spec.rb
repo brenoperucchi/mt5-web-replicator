@@ -23,6 +23,116 @@ RSpec.describe API::V1::APITransactionsCopy do
 
   describe API::V1::APITransactionsCopy do
 
+    context 'POST' do
+      it 'Account Hedging to Hedging - Contract 1 and Change Stop Loss and Take Profit' do
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
+                  }}"}  
+        account = Account.find_by(name: 10100)
+        order = account.orders.find_by(content_id:10000019)
+        expect(order.accounts.count).to be == 3
+        transaction = order.transactions.first
+        expect(transaction.state).to be == "executed"
+        expect(transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
+        expect(order.transactions.first.stop_loss).to be == "0.0"
+        expect(order.transactions.first.take_profit).to be == "0.0"
+        expect(order.transactions.first.lot).to be == "0.02"
+        expect(order.slaves.last.stop_loss).to be == "0.0"
+        expect(order.slaves.last.take_profit).to be == "0.0"
+        expect(order.slaves.last.lot).to be == "0.01"
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87000\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.2000,\"take_profit\":2.0000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null,\"state_meta\":\"PROFIT\\/SLTPLOT\"}
+                  }}"}  
+        order.reload
+        expect(order.transactions.first.stop_loss).to be == "1.2"
+        expect(order.transactions.first.take_profit).to be == "2.0"
+        expect(order.transactions.first.lot).to be == "0.04"
+        expect(order.slaves.last.stop_loss).to be == "1.2"
+        expect(order.slaves.last.take_profit).to be == "2.0"
+        expect(order.slaves.last.lot).to be == "0.01"
+      end
+    end
+
+    context 'POST' do
+      it 'Account Hedging to Netting - Contract 1 and Change Stop Loss and Take Profit' do
+        @account_netting = create(:account, :slave_netting, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [@trace.id])
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
+                  }}"}  
+        account = Account.find_by(name: 10100)
+        order = account.orders.find_by(content_id:10000019)
+        expect(order.accounts.count).to be == 4
+        transaction = order.transactions.first
+        expect(transaction.state).to be == "executed"
+        expect(transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
+        expect(order.transactions.first.stop_loss).to be == "0.0"
+        expect(order.transactions.first.take_profit).to be == "0.0"
+        expect(order.transactions.first.lot).to be == "0.02"
+        expect(order.slaves.last.stop_loss).to be == "0.0"
+        expect(order.slaves.last.take_profit).to be == "0.0"
+        expect(order.slaves.last.lot).to be == "0.01"
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87000\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.2000,\"take_profit\":2.0000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null,\"state_meta\":\"PROFIT\\/SLTPLOT\"}
+                  }}"}  
+        order.reload
+        expect(order.transactions.first.stop_loss).to be == "1.2"
+        expect(order.transactions.first.take_profit).to be == "2.0"
+        expect(order.transactions.first.lot).to be == "0.04"
+        expect(order.slaves.last.stop_loss).to be == "1.2"
+        expect(order.slaves.last.take_profit).to be == "2.0"
+        expect(order.slaves.last.lot).to be == "0.01"
+      end
+    end
+
+    context 'POST' do
+      it 'Account Netting to Netting - Contract 1 and Change Stop Loss and Take Profit' do
+        trace2 = create(:trace, :copy_netting, store: @store)
+        account_copy = create(:account, :copy_netting, store: @store, customer:@customer, trace_ids: [trace2.id], instrument_control:true)
+        account_netting = create(:account, :slave_netting, store: @store, customer:@customer, trace_ids: [trace2.id])
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/30100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
+                  }}"}  
+        account = Account.find_by(name: 30100)
+        order = account.orders.find_by(content_id:10000019)
+        expect(order.accounts.count).to be == 2
+        transaction = order.transactions.first
+        expect(transaction.state).to be == "executed"
+        expect(transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
+        expect(order.transactions.first.stop_loss).to be == "0.0"
+        expect(order.transactions.first.take_profit).to be == "0.0"
+        expect(order.transactions.first.lot).to be == "0.02"
+        expect(order.slaves.last.stop_loss).to be == "0.0"
+        expect(order.slaves.last.take_profit).to be == "0.0"
+        expect(order.slaves.last.lot).to be == "0.01"
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/30100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87000\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.2000,\"take_profit\":2.0000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null,\"state_meta\":\"PROFIT\\/SLTPLOT\"}
+                  }}"}  
+        order.reload
+        expect(order.transactions.first.stop_loss).to be == "1.2"
+        expect(order.transactions.first.take_profit).to be == "2.0"
+        expect(order.transactions.first.lot).to be == "0.04"
+        expect(order.slaves.last.stop_loss).to be == "1.2"
+        expect(order.slaves.last.take_profit).to be == "2.0"
+        expect(order.slaves.last.lot).to be == "0.04"
+      end
+    end
+
+
     context 'Trace - masters_scope'do 
       it 'With out restrict_magic on trace' do
         # @account_copy.trace_ids = 1
@@ -149,11 +259,11 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be == 2
         
 
-        expect(Order.where(content_id: 10000001).first.id).to be                                            == 9
+        expect(Order.where(content_id: 10000001).first.id).to be                                            == 14
         expect(Order.where(content_id: 10000001).first.slaves.where(state:'pending').count).to be           == 2
         expect(Order.where(content_id: 10000001).first.slaves.count).to be                                  == 2
 
-        expect(Order.where(content_id: 10000001).last.id).to be                                            == 10
+        expect(Order.where(content_id: 10000001).last.id).to be                                            == 15
         expect(Order.where(content_id: 10000001).last.slaves.where(state:'pending').count).to be           == 1
         expect(Order.where(content_id: 10000001).last.slaves.count).to be                                  == 1
         
@@ -314,8 +424,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.count).to be == 2
         slave1 = order.slaves.first
         slave2 = order.slaves.last
-        expect(slave1.id).to be == 46
-        expect(slave2.id).to be == 47
+        expect(slave1.id).to be == 54
+        expect(slave2.id).to be == 55
         expect(slave1.state).to be == "pending"
         expect(slave2.state).to be == "pending"
         transaction.close

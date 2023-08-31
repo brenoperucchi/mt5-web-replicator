@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_08_15_041552) do
+ActiveRecord::Schema.define(version: 2023_08_30_192319) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -424,8 +424,10 @@ ActiveRecord::Schema.define(version: 2023_08_15_041552) do
     t.string "handle"
     t.datetime "disable_at"
     t.text "plan_serializer"
+    t.bigint "trace_id"
     t.index ["resourceable_type", "resourceable_id"], name: "index_plan_usages_on_resourceable"
     t.index ["store_id"], name: "index_plan_usages_on_store_id"
+    t.index ["trace_id"], name: "index_plan_usages_on_trace_id"
   end
 
   create_table "plans", force: :cascade do |t|

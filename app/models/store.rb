@@ -136,8 +136,8 @@ class Store < ApplicationRecord
     response << "Slave: #{account_slave_total} is amount #{account_slave_total * plan_value.to_f}\r\n"
   end
 
-  def create_invoice_month(month=nil)
-    date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
+  def create_invoice_month(proporcional=false, month=nil)
+    date_today = month.nil? ? DateTime.now.beginning_of_month : (DateTime.now + eval("#{month}.month")).beginning_of_month
     # date_today = DateTime.now - 1.month
     #date_today = DateTime.now
     #date_today = DateTime.now + 1.month
@@ -146,7 +146,7 @@ class Store < ApplicationRecord
 
     usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|
-      create_invoice_item(invoice, usage, date_today, usage.usageable.amount_discount)
+      create_invoice_item(invoice, usage, date_today, usage.usageable.amount_discount, proporcional)
     end
 
     %w(Trace Copy Slave).each do |item|
@@ -156,7 +156,7 @@ class Store < ApplicationRecord
         else
           amount = usage.usageable.amount
         end
-        create_invoice_item(invoice, usage, date_today, amount)      
+        create_invoice_item(invoice, usage, date_today, amount, proporcional)      
       end
     end
   end
@@ -186,14 +186,14 @@ class Store < ApplicationRecord
   
   private
   
-  def create_invoice_item(invoice, usage, date_today, amount=nil)
+  def create_invoice_item(invoice, usage, date_today, amount=nil, proporcional)
     if usage.disable_at.present?
       return unless usage.active_at.to_date.month <= date_today.month and usage.active_at.to_date.year <= date_today.year
       if usage.disable_at
         return unless usage.disable_at.month >= date_today.month and usage.disable_at.year >= date_today.year 
       end
     end
-    if usage.calculate_usage(date_today, amount)
+    if usage.calculate_usage(date_today, amount, proporcional)
       item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount, description: usage.description) 
       usage.update(charged_at: date_today)
       invoice.balance_update

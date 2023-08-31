@@ -59,13 +59,13 @@ RSpec.describe 'Store Controller', type: :request do
         expect(@customer_plan.amount.to_f).to be == 100
 
         expect {
-          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
 
         account = Account.find_by_name("12345678")
-        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        invoice_name = "Trace##{@trace.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
         account.customer.create_invoice_customer(invoice_name)
         expect(Invoice.all.count).to be == 1
 
@@ -93,13 +93,13 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
 
         account = Account.find_by_name("12345678")
-        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        invoice_name = "Trace##{@trace.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
         account.customer.create_invoice_customer(invoice_name)
         expect(Invoice.all.count).to be == 1
         expect(Invoice.first.name).to be == invoice_name
@@ -126,13 +126,13 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
 
         account = Account.find_by_name("12345678")
-        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        invoice_name = "Trace##{@trace.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
         account.customer.create_invoice_customer(invoice_name)
         expect(Invoice.all.count).to be == 1
         expect(Invoice.first.name).to be == invoice_name
@@ -159,13 +159,13 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
 
         account = Account.find_by_name("12345678")
-        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        invoice_name = "Trace##{@trace.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
         account.customer.create_invoice_customer(invoice_name)
         expect(Invoice.all.count).to be == 1
         expect(Invoice.first.name).to be == invoice_name
@@ -191,13 +191,13 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
 
         account = Account.find_by_name("12345678")
-        invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        invoice_name = "Trace##{@trace.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
         account.customer.create_invoice_customer(invoice_name)
         expect(Invoice.all.count).to be == 1
         expect(Invoice.first.name).to be == invoice_name
@@ -225,14 +225,14 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboards/#{@trace2.id}/contract" , params: {id: @trace2.id, customer_plan_id: customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
 
 
         account = Account.find_by_name("12345678")
-        invoice_name = "Trace##{@trace2.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+        invoice_name = "Trace##{@trace2.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
         account.customer.create_invoice_customer(invoice_name)
         expect(Invoice.all.count).to be == 1
         expect(Invoice.first.name).to be == invoice_name
@@ -258,14 +258,14 @@ RSpec.describe 'Store Controller', type: :request do
        freeze_time
 
         expect {
-          post "/dashboards/#{@trace.id}/contract" , params: {id: @trace.id, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
        expect(response).to have_http_status 302
        expect(Invoice.all.count).to be == 0
 
 
        account = Account.find_by_name("12345678")
-       invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+       invoice_name = "Trace##{@trace.name}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
        account.customer.create_invoice_customer(invoice_name)
        expect(Invoice.all.count).to be == 1
        expect(Invoice.first.name).to be == invoice_name

@@ -33,25 +33,27 @@ module API
 
           # Logging.create(content:params, state: "COPY")
           account = Account.find_by(name: params[:account_id], kind: :copy)
+          if account
           
-          klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
-          attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store), account:account}
+            klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
+            attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store), account:account}
 
-          # Message Open
-          message_open = klass_metatrader.new(attributes)
-          if(message_open.save)
-            logging = message_open.loggings.create(content:params, state: "COPY/OPEN", changeset: account.name, account: account)
-            message_open.execute if message_open.create_orders(logging)
+            # Message Open
+            message_open = klass_metatrader.new(attributes)
+            if(message_open.save)
+              logging = message_open.loggings.create(content:params, state: "COPY/OPEN", changeset: account.name, account: account)
+              message_open.execute if message_open.create_orders(logging)
+            end
+
+            # Message Close
+            message_close = klass_metatrader.new(attributes)
+            if(message_close.save)
+              logging = message_close.loggings.create(content:params, state: "COPY/CLOSE", changeset: account.name, account: account)
+              message_close.execute if message_close.close_orders(logging)
+            end
+
+            message_open.executed? and message_close.executed?
           end
-
-          # Message Close
-          message_close = klass_metatrader.new(attributes)
-          if(message_close.save)
-            logging = message_close.loggings.create(content:params, state: "COPY/CLOSE", changeset: account.name, account: account)
-            message_close.execute if message_close.close_orders(logging)
-          end
-
-          message_open.executed? and message_close.executed?
 
           # if not message_open.traces.exists? and not message_open.orders.exists? and not message_open.slaves.exists?
           #   message_open.destroy

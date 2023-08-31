@@ -160,7 +160,7 @@ class TransactionSlave < ApplicationRecord
   end
 
   def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil)
-    lot = nil if account.hedging?
+    lot = nil if account.hedging? or master.account.hedging?
     attributes = {lot: lot, take_profit:take_profit, stop_loss:stop_loss}.compact
     self.update(attributes)
   end

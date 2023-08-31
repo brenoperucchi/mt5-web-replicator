@@ -5,20 +5,21 @@ class PlanUsage < ApplicationRecord
 
   belongs_to :usageable,    polymorphic: true
   belongs_to :resourceable, polymorphic: true
+  belongs_to :trace,        optional: true
   belongs_to :store
 
 
-  def calculate_usage(date_today=nil, amount_use=nil, month_proporcional=false)
+  def calculate_usage(date_today=nil, amount_use=nil, proporcional=false)
     changes = false
     
     date_today ||= DateTime.now
     
     amount_use ||= usageable.amount_use || plan_serializer["amount"].to_f
 
-    datetime_reference = month_proporcional ? DateTime.now : self.created_at
+    datetime_reference = proporcional ? DateTime.now : date_today
 
     days_month = Time.days_in_month(date_today.month)
-    month_seconds = days_month * 24 * 3600
+    month_seconds = (days_month * 24 * 3600).to_f
     
     if self.disable_at.present?
       if active_at.month != date_today.month or active_at.year != date_today.year
@@ -30,11 +31,12 @@ class PlanUsage < ApplicationRecord
       usage_seconds ||= (date_today.end_of_month.to_time - datetime_reference.to_time)
     end
 
+    usage_seconds = usage_seconds.round
     if usage_seconds < month_seconds
-      self.proportional = (usage_seconds / month_seconds)
+      self.proportional = (usage_seconds / month_seconds).abs
       self.amount = amount_use * proportional
       changes = true
-    elsif usage_seconds > month_seconds
+    elsif usage_seconds >= month_seconds
       self.proportional = 1
       self.amount = amount_use * proportional
       changes = true

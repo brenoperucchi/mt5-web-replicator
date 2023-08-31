@@ -59,7 +59,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.register_customer_plan_create(@trace, @customer.customer_plans.first)
+      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
       invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
@@ -79,7 +79,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.register_customer_plan_create(@trace, @customer.customer_plans.first)
+      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
       invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
@@ -99,7 +99,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.register_customer_plan_create(@trace, @customer.customer_plans.first)
+      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
       invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
@@ -118,7 +118,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.register_customer_plan_create(@trace, @customer.customer_plans.first)
+      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
       invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)

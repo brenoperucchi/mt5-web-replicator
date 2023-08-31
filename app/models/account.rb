@@ -70,21 +70,25 @@ class Account < ApplicationRecord
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   # end
 
-  def create_invoice_account(trace, name = nil, month_proporcional = false)
-    name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
+  def create_invoice_account(trace, proporcional = false, month=nil)
+    date_today = month.nil? ? DateTime.now.beginning_of_month : (DateTime.now + eval("#{month}.month")).beginning_of_month
+    name = name.blank? ? "#{self.id}-#{date_today.strftime("%Y-%m")}" : name 
+    @contract_volume = self.contract_volume.try(:to_f) || 1
+
     @invoice = customer.invoices.find_or_initialize_by(name: name, store:store)
     customer.customer_plans.each do |customer_plan|
       plan_usage = trace.customer_plan.plan_usages.where(handle: "AccountTracePlan").last #.each do |plan_usage|
         @invoice.payment = trace.customer_plan.payment
         @invoice.plan_usage = plan_usage
-
+        # binding.pry
         if trace.customer_plan.fixed? and trace.customer_plan.monthly?
-          plan_usage.calculate_usage(DateTime.now, trace.customer_plan.amount_use, month_proporcional)
-          amount = plan_usage.amount * (self.contract_volume.try(:to_f) || 1)
+          plan_usage.calculate_usage(date_today, trace.customer_plan.amount_use, proporcional)
+          amount = plan_usage.amount * @contract_volume
         else
-          amount = trace.customer_plan.amount_use * (self.contract_volume.try(:to_f) || 1)
+          amount = trace.customer_plan.amount_use * @contract_volume
         end
-        description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable_id} \r\n"
+        description = "Contratos: #{@contract_volume} * Amount #{plan_usage.amount} - Total #{amount} \r\n"
+        description << "#{plan_usage.resourceable_type} #{plan_usage.resourceable_id} - Trace #{trace.id}\r\n"
         
         if @invoice.save and @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
           plan_usage.update_next_charged
@@ -105,7 +109,7 @@ class Account < ApplicationRecord
     return @invoice
   end
 
-  def register_customer_plan_create(trace, customer_plan_id)
+  def add_account_trace_to_planusage(trace, customer_plan_id)
     permission = Permission.where(trace: trace, customer_plan_id: customer_plan_id).last
 
     plan = permission.customer_plan || store.customer_plans.first
@@ -113,7 +117,7 @@ class Account < ApplicationRecord
     plan.accounts  << self
     # attributes = {name: "Plan Trace##{trace.id}-#{trace.name}", amount: trace.customer_plan_amount.to_f, kind: "fixed", store: self.store}#, trace_ids: [trace.id], account_ids: [self.id]}
     # plan = customer.customer_plans.create(attributes)
-    planUsage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes)
+    planUsage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
     unless planUsage.errors.any?
       permission.update(plan_usage: planUsage, customer_plan: plan)
     end
