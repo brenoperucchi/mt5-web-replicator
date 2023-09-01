@@ -177,8 +177,11 @@ class Trace < ApplicationRecord
   end  
 
   def mfe
-    self.statitics.mfe_max(self.search_date_begin..self.search_date_end.end_of_day)
-    # if self.search_date_begin and self.search_date_end
+    if self.search_date_begin and self.search_date_end
+      self.statitics.mfe_max(self.search_date_begin..self.search_date_end.try(:end_of_day))
+    else
+      self.statitics.mfe_max
+    end
     #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
     # else
     #   self.statitics.group_day_amount(:mfe)
@@ -186,7 +189,11 @@ class Trace < ApplicationRecord
   end
 
   def mae    
-    self.statitics.mae_min(self.search_date_begin..self.search_date_end.end_of_day)
+    if self.search_date_begin and self.search_date_end
+      self.statitics.mae_min(self.search_date_begin..self.search_date_end.try(:end_of_day))
+    else
+      self.statitics.mae_min
+    end
     # if self.search_date_begin and self.search_date_end
     #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
     # else

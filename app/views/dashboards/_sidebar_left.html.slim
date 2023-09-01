@@ -1,7 +1,7 @@
-/ - binding.pry
 - capital_multiplier = @trace.capital_multiplier.present? ? @trace.capital_multiplier.to_i : 1
 - contract_volume = params.dig(:account, :settings, :contract_volume).try(:to_i) || params["contract_volume"].try(:to_i) || 1
 - capital_recomendation = (@trace.capital_recomendation.to_money('USD') * contract_volume * capital_multiplier).to_f
+
 .card.w-100
   .card-body.details
     h5.card-title
@@ -53,7 +53,6 @@
           | Capital Recomendado
       .ms-auto
         span.fs-2
-          / - binding.pry
           h6= number_with_precision(capital_recomendation, precision:2, significant:true)
       / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
     div.mt-4

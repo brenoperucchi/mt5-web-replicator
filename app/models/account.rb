@@ -80,7 +80,6 @@ class Account < ApplicationRecord
       plan_usage = trace.customer_plan.plan_usages.where(handle: "AccountTracePlan").last #.each do |plan_usage|
         @invoice.payment = trace.customer_plan.payment
         @invoice.plan_usage = plan_usage
-        # binding.pry
         if trace.customer_plan.fixed? and trace.customer_plan.monthly?
           plan_usage.calculate_usage(date_today, trace.customer_plan.amount_use, proporcional)
           amount = plan_usage.amount * @contract_volume
