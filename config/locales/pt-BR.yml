@@ -182,6 +182,10 @@ pt-BR:
         kind: Tipo
         take_profit_limit: Limite TakeProfit
         instrument_control: Controle de Ativo
+        capital_recomendation: Capital Recomendado
+        capital_multiplier: Multiplicador de Capital
+        contract_volume_max: Contrato Volume Max
+        customer_plans: Plano do Portfolio
         accounts: Conta
         orders: Ordens
         messages: Mensagem

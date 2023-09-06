@@ -102,6 +102,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   symbol
   price_request
   price_open
+  price_closed
   stop_loss
   take_profit
   comment

@@ -182,6 +182,10 @@ en:
         kind: kind
         take_profit_limit: Take Profit limit
         instrument_control: Instrument Control
+        capital_recomendation: Capital Recomendation
+        capital_multiplier: Capital Multiplier
+        contract_volume_max: Volume Max
+        customer_plans: Portfolio's Plans
         accounts: Accounts
         orders: Orders
         messages: messages

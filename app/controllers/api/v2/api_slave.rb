@@ -56,7 +56,7 @@ module API
                   @version = slave.versions.last
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "CLOSED", "DELETED", "HASCLOSED"
-                  api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
+                  api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit'])
                   slave.attributes = api_attributes
                   
                   if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
