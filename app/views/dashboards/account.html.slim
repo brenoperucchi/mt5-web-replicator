@@ -3,7 +3,7 @@
     a href="#{dashboard_url(@trace.id)}" 
       = @trace.name
   li.breadcrumb-item
-    a href="#{account_dashboards_path(@account.id)}" 
+    a href="#{account_dashboard_path(@account.id)}" 
       = @account.name
 
 = render "filter"
@@ -35,6 +35,8 @@
                 th OrderType
                 th Price Open
                 th Price Closed
+                th Max MFE
+                th Min MAE
                 th Volume
                 th Open At
                 th Closet At
@@ -52,7 +54,7 @@
                 td -
               - @account.slaves_scope(type, :all, @trace).order(open_at: 'DESC').each do |slave|
                 tr
-                  td = slave.id
+                  td = slave.id 
                   - if @account.copy?
                     td = slave.ticket
                   - else
@@ -63,6 +65,9 @@
                   td = number_with_precision slave.profit, precision:2
                   td = slave.ordertype
                   td = slave.price_open
+                  td = slave.price_closed
+                  td = slave.statistics.mfe_max.amount.to_f
+                  td = slave.statistics.mae_min.amount.to_f
                   td = slave.price_closed
                   td = slave.lot.to_f.round(3)
                   td = l(slave.open_at, format: :short2)

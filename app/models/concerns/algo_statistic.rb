@@ -7,7 +7,7 @@ module AlgoStatistic
 			(collection.first.closed_at.beginning_of_day.to_datetime..collection.last.closed_at.end_of_day.to_datetime)
 		end
 
-		def dashboard_capital_accumulated(heading = false)
+		def dashboard_capital_accumulated(   n = false)
 		  amount_total = 0
 		  collection = masters_scope(:masters, :closed).order(closed_at: :asc).where.not(closed_at: nil, profit:0.0)
 		  collection_array = []
