@@ -89,10 +89,6 @@ class Trace < ApplicationRecord
     masters_scope(:masters)
   end
 
-  # def masters_total
-  #   masters_filter(masters)
-  # end
-
   def magic_number_restrict?
     Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
   end
@@ -227,7 +223,7 @@ class Trace < ApplicationRecord
 
 
   def masters_filter(data, scope = nil)
-    # self.search_date_begin = Date.parse("2023-08-15").to_date 
+    # self.search_date_begin = Date.parse("2023-09-01").to_date 
     # self.search_date_end   = DateTime.now
     if self.search_date_begin and self.search_date_end
       if scope == :executed or (scope.is_a?(Array) and scope.include?(:executed))
