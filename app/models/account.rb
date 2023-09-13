@@ -196,12 +196,18 @@ class Account < ApplicationRecord
     masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id))
   end
   
-  def masters_filter(scoped)
+  def masters_filter(data, scope = nil)
+    # self.search_date_begin = Date.parse("2023-09-01").to_date 
+    # self.search_date_end   = DateTime.now
     if self.search_date_begin and self.search_date_end
-      scoped.where(closed_at: search_date_begin..search_date_end.end_of_day)
-    else
-      scoped
+      if scope == :executed or (scope.is_a?(Array) and scope.include?(:executed))
+        query = {:created_at => search_date_begin..search_date_end.end_of_day}
+      else
+        query = {:closed_at => search_date_begin..search_date_end.end_of_day}
+      end
+      data = data.where(query)
     end
+    data
   end
 
   def profit_trade(type = :slaves, trace)

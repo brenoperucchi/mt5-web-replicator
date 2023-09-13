@@ -17,38 +17,57 @@ class Message::V2::Metatrader < Message::Message
   end
 
   def close_orders(logging)
+    account = Account.find_by(name: params_url("account_id"), kind: :copy)
     if params_copy("orders_closed").try(:present?)
       # params_copy = {imentore_copy: {orders_closed: params_copy("orders_closed")}}.merge(params_hash).to_json
 
-      account = Account.find_by(name: params_url("account_id"), kind: :copy)
       loggings.create(content:params_copy("orders_closed"), state: "ORDERS_CLOSED", changeset: account.name, account: account, parent:logging, resourceable: account)
-      
-      params_copy("orders_closed").each_with_index do |(ticket, copy_params), index|
-        Transaction.where(ticket: ticket).each do |transaction|
-          
-          if transaction and not transaction.closed?
-            if not transaction.error?
-              transaction.order.messages << self
-              transaction.trace.messages << self
-              transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
-              transaction.save
-              transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
-              transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
-            
-              if transaction.close 
-                transaction.slaves.each do |slave|
-                  slave.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)
-                end
-              end
-            else
-              transaction.slaves.executed.map(&:remove)
-            end
-          end
 
+      params_copy("orders_closed").each_with_index do |(ticket, copy_params), index|
+        Transaction.where(ticket: ticket).each do |transaction|          
+          transaction_closed(transaction, copy_params, logging, :orders_closed)
         end
       end
     end
+    # logging = self.loggings.last
+    if params_copy("orders_open").try(:present?)
+      account.transactions.executed.each do |transaction|
+        ticket_id = transaction.ticket.to_s
+        unless params_copy("orders_open").include?(ticket_id)
+          transaction_closed(transaction, params_copy("orders_closed")[ticket_id], logging, :orders_open) if params_copy("orders_closed").present? and params_copy("orders_closed")[ticket_id].present?
+        end
+      end        
+    else
+      account.transactions.executed.each do |transaction|
+        ticket_id = transaction.ticket.to_s
+        transaction_closed(transaction, params_copy("orders_closed")[ticket_id], logging, :orders_open) if params_copy("orders_closed").present? and params_copy("orders_closed")[ticket_id].present?
+      end
+
+    end
+
     return true
+  end
+
+  def transaction_closed(transaction, copy_params, logging, kind)
+    if transaction and not transaction.closed?
+      if not transaction.error?
+        transaction.order.messages << self
+        transaction.trace.messages << self
+        transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
+        transaction.save
+        transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
+        transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
+      
+        if transaction.close 
+          transaction.slaves.each do |slave|
+            slave.loggings.create(content: "Automatically remove by close_orders: #{kind} - #{transaction.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)
+          end
+        end
+      else
+        transaction.slaves.executed.map(&:remove)
+      end
+    end
+
   end
 
   def create_orders(logging)    
@@ -85,32 +104,21 @@ class Message::V2::Metatrader < Message::Message
                 rescue ActiveRecord::RecordNotUnique
                   self.loggings.create(content:"Duplicate Slave Ticket #{ticket} - Trace #{trace.id} #{trace.name} - Account #{account.name}", state: 'ERROR', resourceable: account, parent:self.loggings.last)
                 end
-              else
-                if orders.present? and state_meta.try(:include?, "SLTPLOT")
+              else             
+                if orders.present?
                   self.loggings.first.update(state: "COPY/MODIFY")
                   orders.each do |order|
                     self.orders << order unless self.order_ids.include?(order.id)
                     self.traces << trace unless self.trace_ids.include?(trace.id)
-                    order.transactions.each do|t| 
-                      t.set_lot_sl_tp(copy_params) 
-                      t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
-                    end
-                  end
-                end
-                if orders.present? and state_meta.try(:include?, "PROFIT")
-                  self.loggings.first.update(state: "COPY/MODIFY")
-                  orders.each do |order|
-                  self.orders << order unless self.order_ids.include?(order.id)
-                  self.traces << trace unless self.trace_ids.include?(trace.id)
-                    order.transactions.each do |t| 
-                      t.set_profit(copy_params)
+                    order.transactions.each do|t|     
+                      t.set_lot_sl_tp(copy_params) if state_meta.try(:include?, "SLTPLOT")
+                      t.set_profit(copy_params) if state_meta.try(:include?, "PROFIT")
                       t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
                     end
                   end
                 end
               end
             end
-
           end
         end
         return true

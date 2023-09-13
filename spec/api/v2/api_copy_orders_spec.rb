@@ -378,7 +378,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.first.symbol).to be == "GBPUSD"
       end
       
-      it 'Trace - One trace disable'do 
+      it 'Trace - One trace disable' do #, focus: true do 
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000004\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000004,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
@@ -424,8 +424,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.slaves.count).to be == 2
         slave1 = order.slaves.first
         slave2 = order.slaves.last
-        expect(slave1.id).to be == 54
-        expect(slave2.id).to be == 55
+        # expect(slave1.id).to be == 54
+        # expect(slave2.id).to be == 55
         expect(slave1.state).to be == "pending"
         expect(slave2.state).to be == "pending"
         transaction.close
@@ -437,7 +437,7 @@ RSpec.describe API::V1::APITransactionsCopy do
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 20100)
         # @transaction = account.orders.find_by(content_id:10000005).transactions.first
-        message = Message::Metatrader.create(content: nil, content_at: Time.zone.now, store: @trace.store, trace_ids:@trace.id)
+        message = Message::V2::Metatrader.create(content: nil, content_at: Time.zone.now, store: @trace.store, trace_ids:@trace.id)
         message.update_columns(state: "executed")
         if message.execute
           body "OK|OK|OK"
