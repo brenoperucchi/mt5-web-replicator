@@ -42,7 +42,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.first.lot).to be == "0.02"
         expect(order.slaves.last.stop_loss).to be == "0.0"
         expect(order.slaves.last.take_profit).to be == "0.0"
-        expect(order.slaves.last.lot).to be == "0.01"
+        expect(order.slaves.last.lot).to be == "0.02"
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
@@ -54,7 +54,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.first.lot).to be == "0.04"
         expect(order.slaves.last.stop_loss).to be == "1.2"
         expect(order.slaves.last.take_profit).to be == "2.0"
-        expect(order.slaves.last.lot).to be == "0.01"
+        expect(order.slaves.last.lot).to be == "0.02"
       end
     end
 
@@ -78,7 +78,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.first.lot).to be == "0.02"
         expect(order.slaves.last.stop_loss).to be == "0.0"
         expect(order.slaves.last.take_profit).to be == "0.0"
-        expect(order.slaves.last.lot).to be == "0.01"
+        expect(order.slaves.last.lot).to be == "0.02"
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
@@ -90,7 +90,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.first.lot).to be == "0.04"
         expect(order.slaves.last.stop_loss).to be == "1.2"
         expect(order.slaves.last.take_profit).to be == "2.0"
-        expect(order.slaves.last.lot).to be == "0.01"
+        expect(order.slaves.last.lot).to be == "0.02"
       end
     end
 
@@ -116,7 +116,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(order.transactions.first.lot).to be == "0.02"
         expect(order.slaves.last.stop_loss).to be == "0.0"
         expect(order.slaves.last.take_profit).to be == "0.0"
-        expect(order.slaves.last.lot).to be == "0.01"
+        expect(order.slaves.last.lot).to be == "0.02"
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/30100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{

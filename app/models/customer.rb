@@ -68,11 +68,13 @@ class Customer < ApplicationRecord
         @invoice.payment = customer_plan.payment
         @invoice.plan_usage = plan_usage
 
+        contract_volume = (plan_usage.resourceable.contract_volume.try(:to_f) == 0)? 1 : plan_usage.resourceable.contract_volume.try(:to_f)
+
         if customer_plan.fixed? and customer_plan.monthly?
           plan_usage.calculate_usage(DateTime.now, customer_plan.amount_use, month_proporcional)
-          amount = plan_usage.amount * (plan_usage.resourceable.contract_volume.try(:to_f) || 1)
+          amount = plan_usage.amount * contract_volume
         else
-          amount = customer_plan.amount_use * (plan_usage.resourceable.contract_volume.try(:to_f) || 1)
+          amount = customer_plan.amount_use * contract_volume
         end
         description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable_id} \r\n"
         

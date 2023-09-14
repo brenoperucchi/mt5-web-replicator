@@ -34,7 +34,8 @@ class Message::Message < ApplicationRecord
   def params_copy(key = nil)
     if self.content.is_a?(String)
       begin
-        YAML.load(content)[key.to_s]
+        json = clean_malformed_json(content)
+        YAML.load(json)[key.to_s]
       rescue
         return Hash.new
       end
@@ -55,6 +56,12 @@ class Message::Message < ApplicationRecord
 
   def request_url
     YAML.load(params)[:request_url] || nil
+  end
+
+  def clean_malformed_json(json_str)
+    # Procura por ocorrências de vírgulas extras após '{' dentro de "orders_open"
+    cleaned_str = json_str.gsub(/("orders_open":\{),+/, '"orders_open":{')
+    cleaned_str
   end
 
 

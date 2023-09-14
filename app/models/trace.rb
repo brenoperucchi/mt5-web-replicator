@@ -134,7 +134,6 @@ class Trace < ApplicationRecord
           slave_attributes = slave_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self)
           # slave_present = TransactionSlave.where(ticket_master: ticket, account: account_slave, state: "pending").take
           slave = order.slaves.new(slave_attributes)
-          slave.lot = slave.check_account_contract_volume
           if slave.save
             order.accounts << account_slave
             slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)

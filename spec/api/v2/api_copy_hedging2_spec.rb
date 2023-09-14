@@ -83,9 +83,37 @@ RSpec.describe API::V1::APITransactionsCopy do
     context 'POST' do
       it 'Hedging - Contract Max Set 3 - order volume decimal' do
         account = Account.find_by(name: 20100)
+        account.update(contract_volume: nil)
+        account.reload
+        expect(account.contract_volume).to be == "0"
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000017\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000017,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.10\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                  }}"}
+        order = Order.find_by(content_id:10000017)
+        expect(order.transactions.first.lot).to be == "0.10"
+        expect(order.slaves.first.lot).to be == "0.10"
+
+        account.update(contract_volume: "3")
+        account.reload
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000018\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000018,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.10\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                  }}"}
+        order = Order.find_by(content_id:10000018)
+        expect(account.contract_volume).to be == "3"
+        expect(order.transactions.first.lot).to be == "0.10"
+        expect(order.slaves.first.lot).to be == "0.10"
+      end
+    end
+    context 'POST' do
+      it 'Hedging - Contract Max Set 3 - order volume decimal' do
+        account = Account.find_by(name: 20100)
         order = account.orders.find_by(content_id:10000001)
         expect(account.contract_volume).to be == "1"
-        expect(order.slaves.first.lot).to be == "0.01"
+        expect(order.slaves.first.lot).to be == "0.02"
         expect(order.transactions.first.lot).to be == "0.02"
         account.update(contract_volume: "3")
         account.reload
@@ -96,9 +124,10 @@ RSpec.describe API::V1::APITransactionsCopy do
                     \"10000017\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000017,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
                   }}"}
         order = Order.find_by(content_id:10000017)
-        expect(order.slaves.first.lot).to be == "0.03"
+        expect(order.slaves.first.lot).to be == "0.02"
       end
-
+    end
+    context 'POST' do
       it 'Hedging - Contract Max Set 3 - order volume decimal and higher then contract_volume' do
         account = Account.find_by(name: 20100)
         order = account.orders.find_by(content_id:10000001)
@@ -112,7 +141,7 @@ RSpec.describe API::V1::APITransactionsCopy do
                     \"10000017\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000017,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
                   }}"}
         order = Order.find_by(content_id:10000017)
-        expect(order.slaves.first.lot).to be == "0.03"
+        expect(order.slaves.first.lot).to be == "0.04"
       end
 
       it 'Hedging - Contract Max Set 3 - order volume integer' do
@@ -142,7 +171,7 @@ RSpec.describe API::V1::APITransactionsCopy do
                     \"10000017\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000017,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"1\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
                   }}"}
         order = Order.find_by(content_id:10000017)
-        expect(order.slaves.first.lot).to be == "3"
+        expect(order.slaves.first.lot).to be == "1"
       end
 
       it 'Hedging - Contract Max Set nil or 0 - slave lot must be copy lot' do
@@ -160,7 +189,7 @@ RSpec.describe API::V1::APITransactionsCopy do
 
         account.update(contract_volume: "")
         account.reload
-        expect(account.contract_volume).to be == ""
+        expect(account.contract_volume).to be == "0"
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{

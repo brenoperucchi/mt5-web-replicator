@@ -72,7 +72,6 @@ RSpec.describe 'Store Controller', type: :request do
         expect(Invoice.first.name).to be == invoice_name
         expect(Invoice.first.amount.to_f).to be == 70.0
 
-
         expect(account.name).to be == "12345678"
         permission = Permission.where(trace: @trace, customer_plan:@customer_plan).last
         expect(permission).not_to be_nil

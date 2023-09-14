@@ -57,6 +57,10 @@ class Account < ApplicationRecord
   #   store.register_resource_plan(self, self.kind)
   # end
 
+  def contract_volume
+    self.settings[:contract_volume].present? ? self.settings[:contract_volume] : "0"
+  end
+
 
   def register_plan_update
     # if self.trace_ids.include?()
@@ -256,5 +260,16 @@ class Account < ApplicationRecord
     scoped = slaves_scope(type, :closed, trace).order(closed_at: :desc)
     AlgoStatistic.drawdown(scoped)
   end
+
+  # def slave_contract_volume(value = nil)
+  #   contract_volume = self.contract_volume 
+    
+  #   # return self.lot if not contract_volume.present? or contract_volume.to_f <= 0.0
+  #   if not contract_volume.present? or contract_volume.to_f <= 0.0
+  #     value.to_s
+  #   else
+  #     contract_volume.to_s
+  #   end
+  # end
 
 end

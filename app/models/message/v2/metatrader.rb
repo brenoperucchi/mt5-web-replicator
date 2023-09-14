@@ -30,20 +30,21 @@ class Message::V2::Metatrader < Message::Message
       end
     end
     # logging = self.loggings.last
-    if params_copy("orders_open").try(:present?)
-      account.transactions.executed.each do |transaction|
-        ticket_id = transaction.ticket.to_s
-        unless params_copy("orders_open").include?(ticket_id)
-          transaction_closed(transaction, params_copy("orders_closed")[ticket_id], logging, :orders_open) if params_copy("orders_closed").present? and params_copy("orders_closed")[ticket_id].present?
-        end
-      end        
-    else
+      
+      if params_copy("orders_open").present?    
+        account.transactions.executed.each do |transaction|
+          ticket_id = transaction.ticket.to_s
+          unless params_copy("orders_open").include?(ticket_id) 
+            transaction_closed(transaction, params_copy("orders_closed")[ticket_id], logging, :orders_open) if params_copy("orders_closed").present? and params_copy("orders_closed")[ticket_id].present?
+          end
+        end        
+      end
+
       account.transactions.executed.each do |transaction|
         ticket_id = transaction.ticket.to_s
         transaction_closed(transaction, params_copy("orders_closed")[ticket_id], logging, :orders_open) if params_copy("orders_closed").present? and params_copy("orders_closed")[ticket_id].present?
       end
 
-    end
 
     return true
   end
