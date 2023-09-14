@@ -48,7 +48,7 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
           <!-- Yield Start -->
           = yield
     .footer
-      = content_for :footer
+      
       javascript:
         $(document).ready(function(){
           $(function() {
@@ -113,3 +113,5 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
           }
 
         })(jQuery);
+
+      = content_for :footer
