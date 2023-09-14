@@ -40,10 +40,10 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                     = content_for :breadcrumb
                   /! [ breadcrumb ] started
                 .col-lg-2.text-right
-                  - unless action_name == "contract" or action_name == "finish_contract"
-                      button#filter.btn.btn-light.m-r-5[type="button"]
-                        i.feather.icon-plus
-                        = I18n.t :filters, scope:'helpers.dashboards'
+                  / - unless action_name == "contract" or action_name == "finish_contract"
+                  button#filter.btn.btn-light.m-r-5[type="button"]
+                    i.feather.icon-plus
+                    = I18n.t :filters, scope:'helpers.dashboards'
 
           <!-- Yield Start -->
           = yield
