@@ -22,49 +22,50 @@
                 th Symbol
                 th State
                 th Profit
+                th Volume
                 th OrderType
                 th Price Open
                 th Price Closed
                 th Max MFE
                 th Min MAE
-                th Volume
-                th Open At
                 th Closet At
             tbody
               tr
+                td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"
                 td - 
-                td - 
-                td OPERATIONS
-                td = @account.slaves_scope(:transactions, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
+                td= number_with_precision @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
+                td - 
                 td - 
                 td - 
                 td -
                 td -
-              / - binding.pry
-              - @account.slaves_scope(:transactions, :all, @trace).order(open_at: 'DESC').each do |copy|
+                td -
+                td -
+              - @account.slaves_scope(:transactions, :all, @trace).order(closed_at: 'DESC').each do |copy|
                 tr
                   td = copy.id 
                   td = copy.ticket
                   td = copy.symbol
                   td = copy.state
                   td = number_with_precision copy.profit, precision:2
+                  td = copy.lot.to_f.round(3)
                   td = copy.ordertype
                   td = copy.price_open
                   td = copy.price_closed
                   td = copy.statistics.mfe_max.try(:amount).to_f
                   td = copy.statistics.mae_min.try(:amount).to_f
-                  td = copy.lot.to_f.round(3)
-                  td = l(copy.open_at, format: :short2)
+                  / td = l(copy.open_at, format: :short2)
                   td = l(copy.closed_at, format: :short2) if copy.closed_at.present?
               tr
+                td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"
                 td - 
                 td - 
-                td OPERATIONS
-                td = @account.slaves_scope(:transactions, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
+                td= number_with_precision @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
+                td - 
+                td - 
+                td - 
                 td - 
                 td - 
                 td -

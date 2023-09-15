@@ -51,14 +51,14 @@ class Message::V2::Metatrader < Message::Message
 
   def transaction_closed(transaction, copy_params, logging, kind)
     if transaction and not transaction.closed?
-      if not transaction.error?
-        transaction.order.messages << self
-        transaction.trace.messages << self
-        transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
-        transaction.save
-        transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
-        transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
+      transaction.order.messages << self
+      transaction.trace.messages << self
+      transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
+      transaction.save
+      transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
+      transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
       
+      if not transaction.error?
         if transaction.close 
           transaction.slaves.each do |slave|
             slave.loggings.create(content: "Automatically remove by close_orders: #{kind} - #{transaction.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:logging, loggerable: slave.order.messages.last)

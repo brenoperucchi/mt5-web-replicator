@@ -225,12 +225,12 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(orders.error.count).to be == 1
         expect(orders.executed.count).to be == 0
         expect(orders.closed.count).to be == 3
-        expect(orders.sum(&:profit_copy).to_f).to be == 3
+        expect(orders.error.first.profit_copy.to_f).to be == 1.0
+        expect(orders.sum(&:profit_copy).to_f).to be == 4.0
         expect(Transaction.closed_info.count).to be == 0
         expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
 
-        trace.save
-        expect(orders.sum(&:profit_copy).to_f).to be == 3.0
+        expect(orders.sum(&:profit_copy).to_f).to be == 4.0
         expect(trace.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
         expect(Transaction.closed_info.count).to be == 0
       end
