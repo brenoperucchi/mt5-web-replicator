@@ -21,6 +21,15 @@ GIT
       selectize-rails (~> 0.6)
 
 GIT
+  remote: https://github.com/brenoperucchi/administrate_ransack.git
+  revision: 3c2a732c9aada3e8cc793c868f122353bab01f48
+  branch: master
+  specs:
+    administrate_ransack (0.4.1)
+      administrate (~> 0.14)
+      ransack (~> 2.3)
+
+GIT
   remote: https://github.com/d-a-l-l/terminal-notifier.git
   revision: 3ba9ce569e234062d09c8fd01c4be11e56a9fd1b
   specs:
@@ -40,13 +49,6 @@ GIT
       administrate (< 1.0.0)
       rails (>= 4.1)
       tinymce-rails (>= 4.4.3)
-
-PATH
-  remote: vendor/administrate_ransack
-  specs:
-    administrate_ransack (0.4.1)
-      administrate (~> 0.14)
-      ransack (~> 2.3)
 
 GEM
   remote: https://rubygems.org/

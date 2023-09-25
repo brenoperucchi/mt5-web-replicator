@@ -44,7 +44,7 @@ class Transaction < ApplicationRecord
 
   class << self
     def ransackable_scopes(_auth_object = nil)
-      %i[profit_search ticket_search]
+      %i[profit_search ticket_search state_search]
     end
   end
 
@@ -54,6 +54,13 @@ class Transaction < ApplicationRecord
 
   def self.ticket_search(value)
     self.where("CAST(ticket as TEXT) ILIKE ?", "%#{value}%")
+  end
+
+  def self.state_search(*attrs)
+    attrs.reject!{|item| item.empty?}
+    return true unless attrs.present?
+    self.where(state:attrs)
+    
   end
 
 

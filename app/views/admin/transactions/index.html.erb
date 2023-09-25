@@ -69,11 +69,17 @@
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
 
-            <% attribute_types_custom = { ticket_search: Administrate::Field::String } %>
-            <% states = [ ['pending', 'pending'], ['executed', 'executed'], ['error', 'error'], ['closed', 'closed'], ['closed_info', 'closed_info'] ] %>
-            <% attribute_labels = { profit_search: 'Profit', ticket_search: 'Ticket', } %>
+            <% attribute_types_custom =
+              { 
+                state_search: "Administrate::Field::Scope",
+                ticket_search: Administrate::Field::String,
+              } 
+              states = [ ['pending', 'pending'], ['executed', 'executed'], ['error', 'error'], ['closed', 'closed'] ]
+              attribute_labels = { profit_search: 'Profit Copy', ticket_search:'Ticket' , state_search: 'States'}
+            %>
 
             <%= render "admin/application/sidebar_search", states:states,  attribute_labels:attribute_labels, attribute_types_custom:attribute_types_custom %>
+
 
             <div id="content" class="">
               <section class="main-content__body main-content__body--flush">
