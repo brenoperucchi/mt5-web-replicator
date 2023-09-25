@@ -13,7 +13,7 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
     id:         Field::Number,
     symbol:     Field::String,
     name:       Field::String,
-    volumes:    Field::String.with_options(searchable: false),
+    # volumes:    Field::String.with_options(searchable: false),
     store_id:   DisableTextField.with_options(default: :current_store, type: 'hide'),
     trace:      Fields::BelongsToField.with_options(associated: :store),
     account:    Fields::BelongsToField.with_options(associated: :store),
@@ -40,7 +40,6 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   symbol
   name
   account
-  volumes
   created_at
   updated_at
   ].freeze
@@ -53,7 +52,6 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
   name
   account
   store_id
-  volumes
   ].freeze
 
   # COLLECTION_FILTERS

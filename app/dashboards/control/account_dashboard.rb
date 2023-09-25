@@ -13,9 +13,11 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     id:                   Field::Number.with_options(searchable: true),
     name:                 Field::String,
     state:                Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
-    kind:                 Field::String,
-    meta_mode:            Field::String,
-    meta_margin_mode:     Field::String,
+
+    kind:                 CheckboxField.with_options(object:"customer", collection_key: Account.kinds.keys, default: :fixed),
+    meta_margin_mode:     CheckboxField.with_options(object:"customer", collection_key: Account.meta_margin_modes.keys, default: :hedging),
+    meta_mode:            CheckboxField.with_options(object:"customer", collection_key: Account.meta_modes.keys, default: :demo),
+
     contract_volume:      Field::String.with_options(searchable: false),
     # stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3, searchable: false),
     traces:               Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
@@ -23,6 +25,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     instruments:          Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     store:                Field::BelongsTo,
     customer:             Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    account_server:       Field::BelongsTo,
     magics_accept:        Field::String.with_options(searchable: false),
     instrument_control:   Field::Boolean,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -47,17 +50,19 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
+  name
   state
+  instrument_control
   kind
   meta_mode
   meta_margin_mode
   contract_volume
   magics_accept
+  account_server
   customer
   store
   traces
   orders
-  instrument_control
   instruments
   created_at
   updated_at
@@ -69,13 +74,14 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   state
   instrument_control
-  name
-  customer
   kind
   meta_mode
   meta_margin_mode
+  name
   contract_volume
   magics_accept
+  account_server
+  customer
   traces
   ].freeze
 

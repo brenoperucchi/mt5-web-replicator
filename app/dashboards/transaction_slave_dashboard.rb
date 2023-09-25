@@ -93,21 +93,23 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  account
+  symbol
+  state
   ticket_master
   ticket_slave
   ticket_deal
-  state
-  profit
   ordertype
-  symbol
+  lot
+  profit
   price_request
   price_open
   price_closed
   stop_loss
   take_profit
   comment
-  lot
   magic_number
+  account
   open_at
   created_at
   updated_at

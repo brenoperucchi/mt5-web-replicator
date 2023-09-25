@@ -10,12 +10,11 @@ class AccountDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:                   Field::Number.with_options(searchable: true),
     name:                 Field::String,
-    state:                Field::String,
-    kind:                 Field::String,
-    # stock_kind:           Field::String,
+    state:                Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3),
-    meta_mode:            Field::String,
-    meta_margin_mode:     Field::String,
+    kind:                 CheckboxField.with_options(object:"customer", collection_key: Account.kinds.keys, default: :fixed),
+    meta_margin_mode:     CheckboxField.with_options(object:"customer", collection_key: Account.meta_margin_modes.keys, default: :hedging),
+    meta_mode:            CheckboxField.with_options(object:"customer", collection_key: Account.meta_modes.keys, default: :demo),
     contract_volume:      Field::String.with_options(searchable: false),
     traces:               Field::HasMany,
     orders:               Field::HasMany,
@@ -52,14 +51,14 @@ class AccountDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   name
-  state
   customer
+  state
+  instrument_control
   kind
   meta_mode
   meta_margin_mode
   contract_volume
   magics_accept
-  instrument_control
   traces
   store
   account_server
@@ -75,14 +74,14 @@ class AccountDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
-  state
   customer
+  state
+  instrument_control
   kind
   meta_mode
   meta_margin_mode
   contract_volume
   magics_accept
-  instrument_control
   traces
   store
   account_server

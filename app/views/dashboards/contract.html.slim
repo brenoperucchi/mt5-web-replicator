@@ -44,39 +44,12 @@
   .row
     .col-lg-12
       .row
-        .col-lg-12.d-flex.align-items-strech
+        .col-lg-6.d-flex.align-items-strech
           .card.w-100.position-relative.overflow-hidden.mb-3
             .card-body.p-4
               == @trace.description
-      .row
         .col-lg-3.d-flex.align-items-strech#ajax-container
           = render "sidebar_left"
-        .col-lg-6.d-flex.align-items-strech
-          .card.w-100
-            .card-body
-              .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
-                .mb-3.mb-sm-0
-                  h5.card-title.fw-semibold
-                    = @trace.name
-                  / p.card-subtitle.mb-0
-                  /   | Overview of Profit
-                / div
-                /   select.form-select
-                /     option[value="1"]
-                /       | March 2023
-                /     option[value="2"]
-                /       | April 2023
-                /     option[value="3"]
-                /       | May 2023
-                /     option[value="4"]
-                /       | June 2023
-              .row.align-items-center
-                .col-lg-12.col-md-12
-                  / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
-                  / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
-                  / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
-                  / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-                  #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
         .col-lg-3.d-flex.align-items-strech
           .card
             .card-body
@@ -116,6 +89,33 @@
               div.mt-4
                 button.btn.btn-dark.w-100
                   = I18n.t :contract, scope:'helpers.dashboards'
+      .row
+        .col-lg-12.d-flex.align-items-strech
+          .card.w-100
+            .card-body
+              .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
+                .mb-3.mb-sm-0
+                  h5.card-title.fw-semibold
+                    = @trace.name
+                  / p.card-subtitle.mb-0
+                  /   | Overview of Profit
+                / div
+                /   select.form-select
+                /     option[value="1"]
+                /       | March 2023
+                /     option[value="2"]
+                /       | April 2023
+                /     option[value="3"]
+                /       | May 2023
+                /     option[value="4"]
+                /       | June 2023
+              .row.align-items-center
+                .col-lg-12.col-md-12
+                  / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
+                  / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                  / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
+                  #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
 
 - content_for :header do
   = stylesheet_link_tag "modernize/apexcharts.css"

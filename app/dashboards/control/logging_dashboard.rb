@@ -14,7 +14,7 @@ module Control
       loggerable:Field::Polymorphic,
       resourceable:Field::Polymorphic,
       # user:Field::BelongsTo,
-      account: Field::String.with_options(searchable: false),
+      account: Field::BelongsTo.with_options(searchable: false),
       changeset: Field::String.with_options(searchable: true),
       state: Field::String.with_options(searchable: false),
       created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

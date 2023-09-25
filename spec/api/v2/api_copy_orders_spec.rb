@@ -199,6 +199,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(orders.error.count).to be == 1
         expect(orders.executed.count).to be == 1
         expect(orders.closed.count).to be == 2
+        expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
+        expect(Trace.find(2).transactions.executed.find_by_ticket(10000002).profit.to_f).to be == 0.0
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
@@ -225,7 +227,8 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(orders.error.count).to be == 1
         expect(orders.executed.count).to be == 0
         expect(orders.closed.count).to be == 3
-        expect(orders.error.first.profit_copy.to_f).to be == 1.0
+        expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 1.0
+        expect(Trace.find(2).transactions.closed.find_by_ticket(10000002).profit.to_f).to be == 1.0
         expect(orders.sum(&:profit_copy).to_f).to be == 4.0
         expect(Transaction.closed_info.count).to be == 0
         expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
@@ -332,7 +335,7 @@ RSpec.describe API::V1::APITransactionsCopy do
         # end
       end
     end
-    context 'Control Instrument'do 
+    context 'Control Instrument' do 
       it 'Hedging - Change instruments on copy to slaves' do
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "10100"

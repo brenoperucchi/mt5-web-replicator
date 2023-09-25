@@ -66,6 +66,7 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   order
   slaves
   ordertype
+  lot
   profit
   price_request
   price_open
@@ -74,7 +75,6 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   take_profit
   magic_number
   comment
-  lot
   open_at
   created_at
   updated_at
@@ -87,16 +87,16 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   ticket
   state
-  profit
   ordertype
   symbol
+  lot
+  profit
   price_request
   price_open
   price_closed
   stop_loss
   take_profit
   comment
-  lot
   magic_number
   open_at
   ].freeze

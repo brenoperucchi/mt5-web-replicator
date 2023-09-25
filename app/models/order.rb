@@ -29,7 +29,7 @@ class Order < ApplicationRecord
 
   class << self
     def ransackable_scopes(_auth_object = nil)
-      %i[profit_search ticket_search]
+      %i[profit_search ticket_search state_search]
     end
   end
 
@@ -39,6 +39,13 @@ class Order < ApplicationRecord
 
   def self.profit_search(value)
     self.joins(:transactions).where(transactions:{profit:0..value.to_f})
+  end
+
+  def self.state_search(*attrs)
+    attrs.reject!{|item| item.empty?}
+    return true unless attrs.present?
+    self.where(state:attrs)
+    
   end
 
 

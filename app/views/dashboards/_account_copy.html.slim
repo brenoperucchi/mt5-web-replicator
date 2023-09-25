@@ -60,7 +60,6 @@
               tr
                 td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"
                 td - 
-                td - 
                 td TOTAL PROFIT
                 td= number_with_precision @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
                 td - 
@@ -68,5 +67,5 @@
                 td - 
                 td - 
                 td - 
-                td -
+                td - 
                 td -

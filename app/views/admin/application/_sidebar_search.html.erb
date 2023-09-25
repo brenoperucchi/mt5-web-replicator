@@ -15,12 +15,12 @@
       profit_search: Administrate::Field::String,
       account_id: Administrate::Field::Select.with_options(collection: accounts), 
       trace_id: Administrate::Field::Select.with_options(collection: traces), 
-      state: Administrate::Field::Select.with_options(collection: states)
     } %>
 
     <% if defined?(attribute_types_custom) %>
-      <% attribute_types = attribute_types_custom.merge(attribute_types.merge) %>
+      <% attribute_types = attribute_types.merge(attribute_types_custom) %>
     <% end %>
-    <%= render('administrate_ransack/filters', attribute_labels: attribute_labels, attribute_types: attribute_types, options: { tags: 'select' }, namespace: namespace ) %>
+    <%= render('administrate_ransack/filters', attribute_labels: attribute_labels, attribute_types: attribute_types, options: { tags: 'select', states: states }, namespace: namespace )
+    %>
   </div>
 </nav>
