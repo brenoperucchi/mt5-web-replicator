@@ -48,6 +48,10 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
           <!-- Yield Start -->
           = yield
     .footer
+      css:
+        .container-fluid{
+          min-width: 55%!important;
+        }
       
       javascript:
         $(document).ready(function(){

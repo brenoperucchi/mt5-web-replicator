@@ -14,14 +14,16 @@
             thead
               tr
                 th ID
-                - if @account.copy?
-                  th Ticket
-                - else
-                  th Ticket Master
-                  th Ticket Slave
+                / - if @account.copy?
+                /   th Ticket
+                / - else
+                /   th Ticket Master
+                /   th Ticket Slave
+                th Ticket Slave
                 th Symbol
                 th State
-                th Profit
+                th Profit Slave
+                th Profit Copy
                 th OrderType
                 th Price Open
                 th Price Closed
@@ -31,11 +33,11 @@
             tbody
               tr
                 td - 
-                td - 
                 td OPERATIONS
                 td = @account.slaves_scope(type, :all, @trace).count
                 td TOTAL PROFIT
                 td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
+                td - 
                 td - 
                 td - 
                 td -
@@ -43,14 +45,11 @@
               - @account.slaves_scope(type, :all, @trace).order(open_at: 'DESC').each do |slave|
                 tr
                   td = slave.id 
-                  - if @account.copy?
-                    td = slave.ticket
-                  - else
-                    td = slave.ticket_master
-                    td = slave.ticket_slave
+                  td = slave.ticket_slave
                   td = slave.symbol
                   td = slave.state
                   td = number_with_precision slave.profit, precision:2
+                  td = number_with_precision slave.master.profit, precision:2
                   td = slave.ordertype
                   td = slave.price_open
                   td = slave.price_closed
@@ -59,11 +58,11 @@
                   td = l(slave.closed_at, format: :short2) if slave.closed_at.present?
               tr
                 td - 
-                td - 
                 td OPERATIONS
                 td = @account.slaves_scope(type, :all, @trace).count
                 td TOTAL PROFIT
                 td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
+                td - 
                 td - 
                 td - 
                 td -
