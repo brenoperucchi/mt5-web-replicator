@@ -37,7 +37,7 @@
                 td = @account.slaves_scope(type, :all, @trace).count
                 td TOTAL PROFIT
                 td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
-                td - 
+                td= @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
                 td - 
                 td - 
                 td -
@@ -62,7 +62,7 @@
                 td = @account.slaves_scope(type, :all, @trace).count
                 td TOTAL PROFIT
                 td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
-                td - 
+                td= @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
                 td - 
                 td - 
                 td -
