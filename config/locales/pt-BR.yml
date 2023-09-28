@@ -562,6 +562,7 @@ pt-BR:
       short2: "%d %b %H:%M:%S"
       short3: "%d de %b %Y"
       short4: "%d %b %Y"
+      short5: "%d %b %H:%M:%S"
     pm: ''
 
   administrate_ransack:

@@ -552,8 +552,9 @@ en:
       long: "%B %d, %Y %H:%M"
       short: "%d %b %H:%M"
       short2: "%d %b %H:%M:%S"
-      short3: "%d de %b %Y"
+      short3: "%d of %b %Y"
       short4: "%d %b %Y"
+      short5: "%b %d %H:%M:%S"
     pm: pm
     
   administrate:

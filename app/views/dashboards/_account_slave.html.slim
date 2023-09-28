@@ -13,7 +13,6 @@
             - type = @account.slave? ? :slaves : :transactions
             thead
               tr
-                th ID
                 / - if @account.copy?
                 /   th Ticket
                 / - else
@@ -25,11 +24,12 @@
                 th Profit Slave
                 th Profit Copy
                 th OrderType
-                th Price Open
+                / th Price Open
                 th Price Closed
                 th Volume
-                th Open At
-                th Closet At
+                th OpenAt Slave
+                th OpenAt Copy
+                th ClosetAt
             tbody
               tr
                 td - 
@@ -44,18 +44,18 @@
                 td -
               - @account.slaves_scope(type, :all, @trace).order(open_at: 'DESC').each do |slave|
                 tr
-                  td = slave.id 
                   td = slave.ticket_slave
                   td = slave.symbol
                   td = slave.state
                   td = number_with_precision slave.profit, precision:2
                   td = number_with_precision slave.master.profit, precision:2
                   td = slave.ordertype
-                  td = slave.price_open
+                  / td = slave.price_open
                   td = slave.price_closed
                   td = slave.lot.to_f.round(3)
-                  td = l(slave.open_at, format: :short2)
-                  td = l(slave.closed_at, format: :short2) if slave.closed_at.present?
+                  td = l(slave.open_at, format: :short5)
+                  td = l(slave.master.open_at, format: :short5)
+                  td = l(slave.closed_at, format: :short5) if slave.closed_at.present?
               tr
                 td - 
                 td OPERATIONS
