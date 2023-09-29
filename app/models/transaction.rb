@@ -118,40 +118,47 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def set_profit(order_params)
-    if not self.error? and self.update(profit: profit)
-      loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
+  def update_order_and_log(copy_params)
+    attributes = {
+      lot: copy_params["volume"],
+      take_profit: copy_params['take_profit'],
+      stop_loss: copy_params['stop_loss'],
+      profit: copy_params["profit"]
+    }
+
+    # Atribuir os novos valores aos atributos, mas não salve ainda
+    self.assign_attributes(attributes)
+
+    # Efetuar outras ações se o objeto não estiver em estado de erro
+    if not self.error?
+      # Se houver mudanças, prosseguir com o salvamento e outras ações
+      if self.changed?
+        chat_id = self.trace.store.telegram_bot_chat_id
+        if chat_id.present?
+          content = self.telegram_message_prepare(:MODIFY)
+          TelegramJob.perform_async(chat_id, content)
+        end
+
+        if self.save
+          # Crie o log apenas se o salvamento foi bem-sucedido
+          loggings.create(content: copy_params, changeset: versions.last.changeset, version: version, state: 'MODIFY')
+          update_attributes_slaves(lot, take_profit, stop_loss)
+        end
+      end
     end
+
+    # Atualizar as estatísticas MFE e MAE independentemente das mudanças em outros atributos
+    update_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+
     return self
   end
 
-  def set_slaves_attributes(lot=nil, take_profit=nil, stop_loss=nil)
+
+  def update_attributes_slaves(lot=nil, take_profit=nil, stop_loss=nil)
     self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss)}
   end
 
-  def set_lot_sl_tp(order_params)
-    attributes = {lot: order_params["volume"], take_profit: order_params['take_profit'], stop_loss:order_params['stop_loss'], profit:order_params["profit"]}
-    # attributes = {lot:lot, take_profit:take_profit, stop_loss:stop_loss}.compact
-    self.attributes = attributes 
-    if self.changes.present?
-      chat_id = self.trace.store.telegram_bot_chat_id
-      if chat_id.present?
-        content = self.telegram_message_prepare(:MODIFY)
-        TelegramJob.perform_async(chat_id, content)
-      end
-
-      # content = self.telegram_message_prepare(:MODIFY)
-      # BotTelegram.send_message(self.trace.store.telegram_bot_chat_id, content)
-    end
-    
-    if not self.error? and self.save
-      loggings.create(content:order_params, changeset: versions.last.changeset, version:version, state: 'MODIFY')
-      set_slaves_attributes(lot, take_profit, stop_loss)
-    end
-    return self
-  end
-
-  def set_mfe_mae(mfe, mae, time_trader)
+  def update_mfe_mae(mfe, mae, time_trader)
     unless time_trader.nil? or mae.nil? or mfe.nil?
       # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
       statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
@@ -163,15 +170,6 @@ class Transaction < ApplicationRecord
       statistic.update(amount: mae.to_f) if mae.to_f < statistic.amount.to_f 
     end
   end  
-
-  # def mae=(value)
-  #   # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
-  #   statistic_name = "mae_#{time_trader.to_date.strftime("%Y-%m-%d")}"
-    
-  #   statistic = self.statistics.find_or_initialize_by(name: statistic_name)
-  #   statistic.update(amount: value) if value < statistic.amount.to_f
-  # end
-
 
   def meta_ordertype
     # "OP_" + ordertype.upcase
@@ -206,19 +204,12 @@ class Transaction < ApplicationRecord
 
   def restrict_magic_number?
     order.restrict_magic_number(self) or trace.restrict_magic_number(self)
-    # unless self.account.magics_accept.blank?
-    #   unless account.magics_accept.try(:split).try(:include?, magic_number)
-    #     loggings.create(content:"Account #{account.name} Magic Number Restrict ##{magic_number}", changeset: versions.last.changeset, version:version, state: 'ERROR')
-    #     self.erro!
-    #   end
-    # end
   end
 
   def validate_restriction
     # restrict_nil_instrument? 
     # restrict_symbol?
   end
-
 
   def api_request_attributes
     order.api_request_attributes(self)
@@ -228,21 +219,5 @@ class Transaction < ApplicationRecord
     return if scope.nil?
     self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 60.days)).collect{|t| t.api_request_attributes}.join('/')
   end
-
-  # def restrict_nil_instrument?
-  #   if symbol.nil?
-  #       self.response = "Restrict Instrument"
-  #       # errors.add(:symbol, "instrument nil")
-  #       self.erro!
-  #     end   
-  # end
-
-  # def restrict_symbol?
-  #   if message.store.tag_list.map(&:downcase).include?(symbol.try(:downcase))
-  #       self.response = "Restrict Symbol"
-  #       # errors.add(:symbol, "store restrict symbol")
-  #       self.erro!
-  #     end
-  # end
 
 end

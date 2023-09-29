@@ -56,7 +56,7 @@ class Message::V2::Metatrader < Message::Message
       transaction.attributes = {price_closed:  copy_params["price_closed"].to_f, profit: copy_params["profit"].to_f, closed_at:copy_params["close_at"]}
       transaction.save
       transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
-      transaction.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
+      transaction.update_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
       
       if not transaction.error?
         if transaction.close 
@@ -112,9 +112,7 @@ class Message::V2::Metatrader < Message::Message
                     self.orders << order unless self.order_ids.include?(order.id)
                     self.traces << trace unless self.trace_ids.include?(trace.id)
                     order.transactions.each do|t|     
-                      t.set_lot_sl_tp(copy_params) if state_meta.try(:include?, "SLTPLOT")
-                      t.set_profit(copy_params) if state_meta.try(:include?, "PROFIT")
-                      t.set_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+                      t.update_order_and_log(copy_params) if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
                     end
                   end
                 end
