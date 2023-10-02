@@ -44,7 +44,7 @@
                 td -
                 td -
               - @account.slaves_scope(type, :all, @trace).order(open_at: 'DESC').each do |slave|
-                - open_at_slave = slave.loggings.where(state:["OPEN", "OPENED"]).try(:first).try(:created_at)
+                / - open_at_slave = slave.loggings.where(state:["OPEN", "OPENED"]).try(:first).try(:created_at)
                 tr
                   td = slave.ticket_slave
                   td = slave.symbol
@@ -55,8 +55,8 @@
                   / td = slave.price_open
                   td = slave.price_closed
                   td = slave.lot.to_f.round(3)
-                  td = l(open_at_slave, format: :short5)
-                  td = l(slave.master.open_at, format: :short5)
+                  td = l(slave.open_at, format: :short5) if slave.open_at.present?
+                  td = l(slave.master.open_at, format: :short5) if slave.master.open_at.present?
                   td = l(slave.closed_at, format: :short5) if slave.closed_at.present?
               tr
                 td OPERATIONS
