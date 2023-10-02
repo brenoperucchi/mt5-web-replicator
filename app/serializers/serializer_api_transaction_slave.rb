@@ -3,19 +3,44 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   def api_attributes
     {
       # symbol: symbol,
+      ticket_master: ticket_master,
+      ticket_slave: ticket_slave,
+      ticket_deal: obj['ticket_deal'],
       ordertype: ordertype,
       lot: lot,
       price_open: price_open,
       price_closed: price_closed,
-      magic_number: magic_number,
       stop_loss: stop_loss,
       take_profit: take_profit,
       profit: obj['profit'],
+      comment: obj['comment'],
+      magic_number: magic_number,
+      open_at: open_at,
+      closed_at: closed_at,
+    }.compact
+  end
+
+  def trace_attributes(instrument, account_slave, master, trace)
+    {
+      symbol: instrument,
       ticket_master: ticket_master,
       ticket_slave: ticket_slave,
-      open_at: open_at,
       ticket_deal: obj['ticket_deal'],
-      comment: obj['comment']
+      ordertype: ordertype,
+      lot: lot,
+      price_open: 0,
+      price_closed: price_closed,
+      price_request: obj['price'],
+      stop_loss: stop_loss,
+      take_profit: take_profit,
+      profit: 0,
+      comment: ticket_master,
+      magic_number: magic_number,
+      account: account_slave,
+      master: master,
+      trace: trace,
+      open_at: nil,
+      closed_at: nil,
     }.compact
   end
 
@@ -67,15 +92,24 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
   #   obj['deal_ticket']
   # end
 
+  def closed_at
+    update_time_zone((obj['closed_at'] || obj['close_at']))
+  end
+
   def open_at
-    time = obj['open_at']
+    update_time_zone(obj['open_at'])
+  end
+
+  def update_time_zone(time_at)
+    return nil if time_at.nil? or time_at.empty?
+    time = time_at
     time = time.to_s.include?(".") ? time.split(".").try(:first).to_i : time.to_i
     zone = obj['timezone'].try(:to_i)
 
     unless obj.key?("time_trader")
       set_time_zone(time, zone)
     else
-      time_zone(obj['time_gmt'], obj['time_trader'], obj['open_at'])
+      time_zone(obj['time_gmt'], obj['time_trader'], time_at)
     end
   end
 
@@ -88,9 +122,9 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
     end
   end
 
-  def time_zone(time_gmt, time_trader, time_open)
+  def time_zone(time_gmt, time_trader, time_at)
     time_zone = ((DateTime.parse(time_trader).to_i - DateTime.parse(time_gmt).to_i).to_f/3600).round
-    time_gmt = DateTime.parse(time_open + time_zone.to_sign) 
+    time_gmt = DateTime.parse(time_at + time_zone.to_sign) 
     time_gmt.in_time_zone
   end
 

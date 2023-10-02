@@ -14,6 +14,8 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
     ticket:             Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
+    mfe_max:            Field::String.with_options(searchable: false),
+    mae_min:            Field::String.with_options(searchable: false),
     ordertype:          Field::String,
     symbol:             Field::String,
     price_request:      Field::String,
@@ -68,6 +70,8 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   ordertype
   lot
   profit
+  mfe_max
+  mae_min
   price_request
   price_open
   price_closed

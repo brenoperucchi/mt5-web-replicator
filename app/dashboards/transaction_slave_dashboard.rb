@@ -34,7 +34,9 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     loggings:           Fields::HasManyScopeField.with_options(associated: :store),
     master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     open_at:            Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    open_at_master:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    closed_at_master:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     }.freeze
@@ -84,7 +86,9 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   magic_number
   comment
   open_at
+  open_at_master
   closed_at
+  closed_at_master
   created_at
   updated_at
   ].freeze

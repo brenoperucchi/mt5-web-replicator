@@ -130,9 +130,7 @@ class Trace < ApplicationRecord
         self.accounts.slave.enable.each do |account_slave|
           
           instrument = check_instrument(account, symbol, account_slave)
-          slave_attributes = SerializerAPITransactionSlave.new(order_params).api_attributes.merge(symbol: instrument, price_request:order_params['price'], profit:0, account:account_slave, price_open:0, comment: ticket)
-          slave_attributes = slave_attributes.merge(symbol:instrument, comment: ticket, account:account_slave, master:transaction, trace: self)
-          # slave_present = TransactionSlave.where(ticket_master: ticket, account: account_slave, state: "pending").take
+          slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self)
           slave = order.slaves.new(slave_attributes)
           if slave.save
             order.accounts << account_slave

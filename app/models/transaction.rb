@@ -220,4 +220,12 @@ class Transaction < ApplicationRecord
     self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 60.days)).collect{|t| t.api_request_attributes}.join('/')
   end
 
+  def mfe_max
+     self.statistics.mfe_max.try(:amount).to_f
+  end
+  
+  def mae_min
+     self.statistics.mae_min.try(:amount).to_f
+  end
+
 end
