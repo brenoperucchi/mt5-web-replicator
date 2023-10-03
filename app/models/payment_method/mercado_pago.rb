@@ -50,8 +50,6 @@ class PaymentMethod::MercadoPago
 		preference_data = {
 		  # the purpose: 'wallet_purchase', allows only logged payments
 		  # to allow guest payments you can omit this property
-		  # purpose: 'wallet_purchase',
-
 		  back_urls: {
 									success:"#{Store.domain_url}/mercadopago/back_urls/success/#{@invoice.id}",
 									failure:"#{Store.domain_url}/mercadopago/back_urls/failure/#{@invoice.id}",
@@ -66,7 +64,6 @@ class PaymentMethod::MercadoPago
 		      ],
 		      installments: 12
 		    },
-		  binary_mode: true,  
 		  items: [
 		    {
 		    	id: @invoice.id,
