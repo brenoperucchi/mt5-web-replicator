@@ -1,0 +1,104 @@
+- contract_volume_max = @trace.contract_volume_max.present? ? @trace.contract_volume_max.to_i : 1 
+- @trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+- @trace.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
+
+- chart_values =  @trace.dashboard_capital_accumulated
+
+#ajax_contract_form
+  = simple_form_for @account, url: dashboard_path(@trace.name), wrapper: :vertical_form_modernize, method: :post, remote:true, authenticity_token: true do |f|                      
+    .row
+      .col-lg-12
+        .row
+          .col-lg-6.d-flex.align-items-strech
+            .card.w-100.position-relative.overflow-hidden.mb-3
+              .card-body.p-4
+                == @trace.description
+          .col-lg-3.d-flex.align-items-strech#ajax-container
+            = render "sidebar_left"
+          .col-lg-3.d-flex.align-items-strech
+            .card
+              .card-body
+                = hidden_field_tag 'resource_persisted', @account.persisted?
+                = hidden_field_tag 'name', @trace.name
+                = hidden_field_tag 'customer_plan_id', @trace.customer_plan.try(:id)
+                = f.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                = f.input :name
+                = f.input :kind, input_html: {value: "slave"}, as: :hidden
+                - f.object.build_customer if f.object.customer.nil? 
+                = f.simple_fields_for :customer do |ff| 
+                  = ff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                  = ff.input :name
+                  - ff.object.build_user if ff.object.user.nil? 
+                  = ff.simple_fields_for :user do |fff| 
+                    = fff.input :email
+                    = fff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                  / = f.simple_fields_for :settings do |ff| 
+                - f.object.contract_volume ||= 1
+                = f.simple_fields_for :settings do |ff| 
+                  = ff.input :contract_volume, as: :select, collection: 1..contract_volume_max, selected: f.object.contract_volume.to_i, input_html:{ id: 'ajax' }
+                  .row
+                    .col-sm-12
+                      / = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
+                      / = ff.input :plan_id, collection: current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
+                .row
+                  .col-sm-12
+                    - if @trace.customer_plan.meta_margin_mode == "both"
+                      = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
+                    - elsif not @trace.customer_plan.meta_margin_mode == "none"
+                      = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :string, disabled:true
+                .row
+                  .col-sm-12
+                    - if @trace.customer_plan.meta_mode == "both"
+                      = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
+                    - elsif not @trace.customer_plan.meta_mode == "none"
+                      = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
+                div.mt-4
+                  button.btn.btn-dark.w-100
+                    = I18n.t :contract, scope:'helpers.dashboards'
+        .row
+          .col-lg-12.d-flex.align-items-strech
+            .card.w-100
+              .card-body
+                .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
+                  .mb-3.mb-sm-0
+                    h5.card-title.fw-semibold
+                      = @trace.name
+                    / p.card-subtitle.mb-0
+                    /   | Overview of Profit
+                  / div
+                  /   select.form-select
+                  /     option[value="1"]
+                  /       | March 2023
+                  /     option[value="2"]
+                  /       | April 2023
+                  /     option[value="3"]
+                  /       | May 2023
+                  /     option[value="4"]
+                  /       | June 2023
+                .row.align-items-center
+                  .col-lg-12.col-md-12
+                    / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                    / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
+                    / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
+                    / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
+                    #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| x[:profit]}}" data-chart-loss="#{chart_values.map{|x| x[:loss] }}"]
+javascript:
+  $(document).ready(function(){ 
+    $('#ajax').change(function() {
+        let url = "#{contract_dashboard_path(@trace.name)}";
+        let contract_volume = $(this).val();
+        $.ajax({
+            url: url,
+            type: "get",
+            data: {'contract_volume': contract_volume},
+            dataType: "script",
+            success: function(data) {
+                console.log('success')
+            },
+            error: function() {
+                console.log('failure')
+            }
+        });
+    })
+  })
+  

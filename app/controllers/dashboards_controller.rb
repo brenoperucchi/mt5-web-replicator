@@ -44,6 +44,60 @@ class DashboardsController < ApplicationController
 		end
 	end
 
+	# def create
+	# 	resource_persisted = params[:resource_persisted]
+	# 	customer = Customer.find_by(id: params[:account][:customer_attributes][:id])
+	# 	if resource_persisted.to_b and customer
+	# 		@account = customer.accounts.first
+	# 		@invoice = customer.invoices.first
+	# 		@payment = @invoice.payment_method
+	# 		respond_to do |wants|
+	# 			wants.js { render :create_success, layout: false }
+	# 			wants.html { render "mercado_pago" }
+	# 		end
+	# 		return true
+	# 	end
+
+	# 	sign_out if user_signed_in?
+	# 	password = Devise.friendly_token.first(6)
+	# 	customer_plan_id = params[:customer_plan_id]
+	# 	account = @trace.accounts.new(account_params)
+	# 	account.state = "enable"
+	# 	# account.customer.store = current_store
+	# 	account.customer.role = "customer"
+	# 	account.customer.role_control = "user"
+	# 	account.customer.user.password = password
+	# 	account.traces << @trace		
+
+	# 	if @trace.valid? and account.save
+	# 		plan_usage = account.add_account_trace_to_planusage(@trace, customer_plan_id)
+	# 		customer_plan = plan_usage.usageable
+	# 		customer_plan.promotion_use = true if params[:promotion] == "promotion"
+	# 		customer_plan.save
+	# 		invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+	# 		account.customer.create_invoice_customer(invoice_name)
+	# 		@customer.create_user(email: @customer.user_email, password: password)
+	# 		redirect_to finish_dashboard_path(@trace.name, account)
+
+	# 		# invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+	# 		# account.create_invoice_account(@trace, invoice_name, nil)
+	# 		# @invoice = account.customer.invoices.first
+	# 		# # @payment = @invoice.invoice_send
+	# 		# @account = account
+	# 		# respond_to do |wants|
+	# 		# 	wants.js { render :create_success, layout: false }
+	# 		# 	wants.html { render "mercado_pago" }
+	# 		# end
+	# 	else
+	# 		@account = account
+	# 		flash[:notice] = "Error na contração de Portfolio"
+	# 		respond_to do |wants|
+	# 			wants.js { render :create_failure, layout: false }
+	# 			wants.html {render :contract }
+	# 		end
+	# 	end
+	# end
+
 	def create
 		sign_out if user_signed_in?
 		password = Devise.friendly_token.first(6)

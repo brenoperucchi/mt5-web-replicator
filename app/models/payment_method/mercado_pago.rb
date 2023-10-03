@@ -11,7 +11,8 @@ class PaymentMethod::MercadoPago
 	end
 
 	def redirect_url
-		@payment_response["init_point"] || false
+		# false
+		@invoice.response[:preference]["init_point"] || false
 	end
 
 	def payment_id
@@ -22,32 +23,93 @@ class PaymentMethod::MercadoPago
 		@payment.webhook_token
 	end
 
-	def checkout
-		sdk = Mercadopago::SDK.new(@payment.api_token)
+	def sdk
+		Mercadopago::SDK.new(@payment.api_token)
+	end
+
+	def response
+		@invoice.response || {}
+	end
+
+	def payment(payment_data)
+		payment_response = sdk.payment.create(payment_data)
+		payment = payment_response[:response]
+		@invoice.update(response: @invoice.response.merge(payment:payment))
+		payment
+	end
+
+
+	def preference
+		# Create a preference object
 
 		if @invoice.invoiceable_type == "Customer"
 			title = "Inscrição #{@invoice.plan_usage.usageable.name}"
 		else
 			title = "Plano Imentore - #{@invoice.items.first.name}"
 		end
-
 		preference_data = {
+		  # the purpose: 'wallet_purchase', allows only logged payments
+		  # to allow guest payments you can omit this property
+		  # purpose: 'wallet_purchase',
 
-			back_urls: {failure:"https://signallocal.imentore.com.br:8443/mercadopago/webhook/#{@payment.store.id}"},
-			external_reference: @invoice.id,
+		  back_urls: {
+									success:"#{Store.domain_url}/mercadopago/back_urls/success/#{@invoice.id}",
+									failure:"#{Store.domain_url}/mercadopago/back_urls/failure/#{@invoice.id}",
+									pending:"#{Store.domain_url}/mercadopago/back_urls/pending/#{@invoice.id}",
+		  					 },
+			auto_return: 'approved',		  					 
+		  external_reference: @invoice.id,
+		  payment_methods: {
+		      excluded_payment_types: [
+		        { id: 'ticket' },
+		        { id: 'atm' },
+		      ],
+		      installments: 12
+		    },
+		  binary_mode: true,  
 		  items: [
 		    {
 		    	id: @invoice.id,
 		      title: title,
-		      unit_price: number_with_precision(@invoice.amount, precision: 2, locale: :en).to_f,
-		      quantity: 1
+		      unit_price: @invoice.amount.to_f,
+		      quantity: 1,
 		    }
 		  ]
 		}
 		preference_response = sdk.preference.create(preference_data)
-		@invoice.update(response: preference_response)
+		preference = preference_response[:response]	
 
-		@payment_response = preference_response[:response]
+		# This value is the preferenceId you will use in the HTML on Brick startup
+		@invoice.update(response: @invoice.response.merge(preference:preference))
+		preference
+	end
+
+	def checkout
+		@invoice.response[:preference] || preference
+
+		# if @invoice.invoiceable_type == "Customer"
+		# 	title = "Inscrição #{@invoice.plan_usage.usageable.name}"
+		# else
+		# 	title = "Plano Imentore - #{@invoice.items.first.name}"
+		# end
+
+		# preference_data = {
+
+		# 	back_urls: {failure:"https://signallocal.imentore.com.br:8443/mercadopago/webhook/#{@payment.store.id}"},
+		# 	external_reference: @invoice.id,
+		#   items: [
+		#     {
+		#     	id: @invoice.id,
+		#       title: title,
+		#       unit_price: number_with_precision(@invoice.amount, precision: 2, locale: :en).to_f,
+		#       quantity: 1
+		#     }
+		#   ]
+		# }
+		# preference_response = sdk.preference.create(preference_data)
+		# @invoice.update(response: @invoice.response.merge(checkout:preference_response))
+
+		# @payment_response = preference_response[:response]
 
 		# This value replaces the String "<%= @preference_id %>" in your HTML
 

@@ -1,0 +1,93 @@
+/ #wallet_container
+
+/ javascript:
+/ 	$(document).ready(function(){ 
+/ 		const mp = new MercadoPago("#{@payment.public_key}");
+/ 		const bricksBuilder = mp.bricks();
+/ 		mp.bricks().create("wallet", "wallet_container", {
+/    		initialization: {
+/        preferenceId: "#{@invoice.payment_method.preference["id"]}",
+/    		},
+/ 		});
+/ 	})
+/ 	// $(document).ready(function(){ 
+/ 	// 	let url = "/mercadopago/process_payment/#{@invoice.try(:id)}";
+/ 	//   const mp = new MercadoPago('TEST-ea4aec5d-82ed-42c8-8c8a-abdd14b3690a', {
+/ 	//   locale: 'pt-BR'
+/ 	//   });
+/ 	//   const bricksBuilder = mp.bricks();
+/ 	//     const renderPaymentBrick = async (bricksBuilder) => {
+/ 	//       const settings = {
+/ 	//         initialization: {
+/ 	//           /*
+/ 	//             "amout" is the total sum to be paid from all payment methods but Mercado Pago Wallet and Parcels without credit card which have their processing value determined on the backend via "preferenceId"
+/ 	//           */
+/ 	//           amount: "#{ @invoice.amount.to_f }",
+/ 	//           preferenceId: "#{ @invoice.payment_method.preference["id"] }",
+/ 	//           redirectMode: "self",
+/ 	//           payer: {
+/ 	//             firstName: "#{@invoice.customer.name}",
+/ 	//             email: "#{@invoice.email}",
+/ 	//           },
+/ 	//         },
+/ 	//         customization: {
+/ 	//           visual: {
+/ 	//             style: {
+/ 	//               theme: "bootstrap",
+/ 	//             },
+/ 	//           },
+/ 	//           paymentMethods: {
+/ 	//             creditCard: "all",
+/ 	//   									atm: "all",
+/ 	//   									mercadoPago: "all",
+/ 	//   									onboarding_credits: "all",
+/ 	//   									wallet_purchase: "all",
+/ 	//   									debitCard: "all",
+/ 	//             maxInstallments: 12
+/ 	//           },
+/ 	//         },
+/ 	//         callbacks: {
+/ 	//           onReady: () => {
+/ 	//             /*
+/ 	//              Callback called when Brick is ready.
+/ 	//              Here, you may omit loadings from your website, for instance.
+/ 	//             */
+/ 	//           },
+/ 	//           onSubmit: ({ selectedPaymentMethod, formData }) => {
+/ 	//             // callback when sending data button is clicked
+/ 	//             console.log("teste1");
+/ 	//             return new Promise((resolve, reject) => {
+/ 	//               fetch(url, {
+/ 	//                 method: "POST",
+/ 	//                 headers: {
+/ 	//                   "Content-Type": "application/json",
+/ 	//                 },
+/ 	//                 body: JSON.stringify(formData),
+/ 	//               })
+/ 	//                 .then((response) => response.json())
+/ 	//                 .then((response) => {
+/ 	//                   // receive payment result
+/ 	//                   resolve();
+/ 	//                 })
+/ 	//                 .catch((error) => {
+/ 	//                   // manage the error answer when trying to create a payment
+/ 	//                   reject();
+/ 	//                 });
+/ 	//                 console.log("teste1");=
+/ 	//                 console.log(response.json());
+/ 	//             });
+/ 	//           },
+/ 	//           onError: (error) => {
+/ 	//             // callback called to all error cases related to the Brick
+/ 	//             console.error(error);
+/ 	//           },
+/ 	//         },
+/ 	//       };
+/ 	//       window.paymentBrickController = await bricksBuilder.create(
+/ 	//         "payment",
+/ 	//         "paymentBrick_container",
+/ 	//         settings
+/ 	//       );
+/ 	//     };
+/ 	//     renderPaymentBrick(bricksBuilder);
+/ 	//   })

@@ -1,0 +1,11 @@
+$('#offcanvasRight').offcanvas('show');
+$('#ajax_contract_form').html("<%= j (render partial: 'contract_form', trace: @trace, account:@account) %>")
+// const mp = new MercadoPago('TEST-ea4aec5d-82ed-42c8-8c8a-abdd14b3690a');
+// const bricksBuilder = mp.bricks().create("wallet", "wallet_container", {
+//    initialization: {
+//        preferenceId: "<%= @invoice.payment_method.preference["id"] %>",
+//    },
+// });
+// $('#offcanvasRight').html("<%= escape_javascript(render template: 'dashboards/mercado_pago', locals:{ trace: @trace, account:@account, invoice:@invoice}) %>");
+// $('#paymentBrick_container').html("<%= escape_javascript(render template: 'dashboards/mercado_pago', locals:{ trace: @trace, account:@account, invoice:@invoice}) %>");
+

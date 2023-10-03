@@ -1,0 +1,47 @@
+.row
+  .col-lg-12
+    .row
+      .col-lg-6.d-flex.align-items-strech
+        .card.w-100.position-relative.overflow-hidden.mb-3
+          .card-body.p-4
+            == @invoice.plan_usage.trace.description
+      .col-lg-6
+        .card.w-100.position-relative.overflow-hidden.mb-3
+          .card-body.p-4
+            #statusScreenBrick_container
+
+javascript:
+  const mp = new MercadoPago('#{@invoice.payment.webhook_token}', { // Add your public key credential
+    locale: 'pt-BR'
+  });
+  const bricksBuilder = mp.bricks();
+  const renderStatusScreenBrick = async (bricksBuilder) => {
+    const settings = {
+      initialization: {
+        paymentId: '#{params[:payment_id]}', // Payment identifier, from which the status will be checked
+      },
+      customization: {
+        visual: {
+          hideStatusDetails: false,
+          hideTransactionDate: false,
+          style: {
+            theme: 'bootstrap', // 'default' | 'dark' | 'bootstrap' | 'flat'
+          }
+        },
+        backUrls: {
+          'error': 'https://www.imentore.com.br',
+          'return': 'https://www.imentore.com.br'
+        }
+      },
+      callbacks: {
+        onReady: () => {
+          // Callback called when Brick is ready
+        },
+        onError: (error) => {
+          // Callback called for all Brick error cases
+        },
+      },
+    };
+    window.statusScreenBrickController = await bricksBuilder.create('statusScreen', 'statusScreenBrick_container', settings);
+  };
+  renderStatusScreenBrick(bricksBuilder);

@@ -40,4 +40,18 @@ class Invoice < ApplicationRecord
     return payment_method
   end
 
+  def customer
+    self.invoiceable if respond_to?(:invoiceable) and self.invoiceable.is_a?(Customer)
+  end
+
+
+  def payment_method
+    self.payment.payment_method.provider(self, self.payment)
+  end
+
+  def response
+    read_attribute(:response) || {}
+  end
+
+
 end

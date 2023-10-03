@@ -10,21 +10,22 @@
 // Read Sprockets README (https://github.com/rails/sprockets#sprockets-directives) for details
 // about supported directives.
 //
-//= require jquery
-//= require jquery_ujs
-//= require turbolinks
 
-//= require modernize/simplebar.min.js
-// require modernize/bootstrap.min.js
-// require modernize/bootstrap.bundle.min.js
-//= require mintone/bootstrap.min.js
-//= require modernize/app.min.js
-//= require modernize/app.init.js
-//= require modernize/app-style-switcher.js
-//= require modernize/sidebarmenu.js
-//= require modernize/custom.js
-//= require mintone/jquery.session.js
-//= require modernize/apexcharts.min.js
-//= require modernize/moment.js
-//= require modernize/daterangepicker.js
-//= require mintone/select2.full.min.js
+//= require stisla/popper.js
+//= require stisla/tooltip.js
+//= require stisla/bootstrap.min.js
+//= require stisla/jquery.nicescroll.min.js
+//= require stisla/moment.min.js
+//= require stisla/stisla.js
+
+
+//= require stisla/jquery.sparkline.min.js
+//= require stisla/chart.min.js
+//= require stisla/owl.carousel.min.js
+//= require stisla/summernote-bs4.min.js
+//= require stisla/jquery.chocolat.min.js
+
+
+// require stisla/page/index.js
+//= require stisla/scripts.js
+//= require stisla/custom.js

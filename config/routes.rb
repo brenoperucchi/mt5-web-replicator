@@ -3,13 +3,16 @@ Rails.application.routes.draw do
   resources :delivery_payments
   constraints subdomain: /.*/ do
     
-    get  "stripe/checkout",      to: "stripe#checkout", as:'checkout_stripe'      
-    get  "stripe/webhook/:id/:payment_id",       to: "stripe#webhook"
-    post "stripe/webhook/:id/:payment_id",       to: "stripe#webhook"
+    get  "stripe/checkout",                           to: "stripe#checkout", as:'checkout_stripe'      
+    get  "stripe/webhook/:id/:payment_id",            to: "stripe#webhook"
+    post "stripe/webhook/:id/:payment_id",            to: "stripe#webhook"
 
-    get  "mercadopago/webhook/:id/:payment_id",  to: "mercadopago#webhook"
-    post "mercadopago/webhook/:id/:payment_id",  to: "mercadopago#webhook"
-    post "mercadopago/ipn/:id/:payment_id",          to: "mercadopago#ipn"
+    get  "mercadopago/webhook/:id/:payment_id",       to: "mercadopago#webhook"
+    post "mercadopago/webhook/:id/:payment_id",       to: "mercadopago#webhook"
+    post "mercadopago/ipn/:id/:payment_id",           to: "mercadopago#ipn"
+    post "mercadopago/process_payment/:invoice_id",   to: "mercadopago#process_payment"
+    get  "mercadopago/finish/:invoice_id",            to: "mercadopago#finish",    as: 'finish_mercadopago'
+    get  "mercadopago/back_urls/:state/:invoice_id",  to: "mercadopago#back_urls"
     
     get "subscription", to: "pay#subscription"
     get "billing",      to: "pay#billing"

@@ -176,11 +176,11 @@ class Store < ApplicationRecord
     end
   end
 
-  def domain_url
+  def self.domain_url
     if Rails.env.production?
       "www.imentore.com.br"
     else
-      "signallocal.imentore.com.br"
+      "signallocal.imentore.com.br:8443"
     end
   end
   

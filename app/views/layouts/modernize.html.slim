@@ -3,13 +3,19 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
   head
     = render 'layouts/meta'
     = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
-    = javascript_include_tag "modernize"
+    = javascript_include_tag "application", 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "https://sdk.mercadopago.com/js/v2"
     = content_for :header
     script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
     script
       | window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
   body
-    #main-wrapper.page-wrapper[data-layout="vertical" data-sidebartype="full" data-navbarbg="skin6" data-sidebar-position="fixed" data-header-position="fixed"]
+    section
+      #offcanvasRight.offcanvas.offcanvas-end[tabindex="-1" aria-labelledby="offcanvasRightLabel"]
+        #wallet_container
+        / #paymentBrick_container
+        / #statusScreenBrick_container
+    #main-wrapper.page-wrapper[data-layout="vertical" data-sidebartype="full" data-navbarbg="fixed" data-sidebar-position="fixed" data-header-position="fixed"]
       <!-- Sidebar Start -->
       / = render "layouts/modernize/sidebar"
       .body-wrapper
@@ -48,74 +54,90 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
           <!-- Yield Start -->
           = yield
     .footer
+      = yield :footer
       css:
         .container-fluid{
           min-width: 55%!important;
         }
       
-      javascript:
-        $(document).ready(function(){
-          $(function() {
-            if($('input[name="datefilter"]').length){
+= javascript_include_tag "js_modernize"
+/ = javascript_include_tag "modernize/simplebar.min.js"
+/ = javascript_include_tag "modernize/bootstrap.bundle.min.js"
+/ = javascript_include_tag "mintone/bootstrap.min.js"
+/ = javascript_include_tag "modernize/app.min.js"
+/ = javascript_include_tag "modernize/app.init.js"
+/ = javascript_include_tag "modernize/app-style-switcher.js"
+/ = javascript_include_tag "modernize/sidebarmenu.js"
+/ = javascript_include_tag "modernize/custom.js"
+/ = javascript_include_tag "mintone/jquery.session.js"
+/ = javascript_include_tag "modernize/apexcharts.min.js"
+/ = javascript_include_tag "modernize/moment.js"
+/ = javascript_include_tag "modernize/daterangepicker.js"
+/ = javascript_include_tag "mintone/select2.full.min.js"
 
-              var start = moment($('input[name="datefilter"]').val().split(" - ")[0], "DD/MM/YYYY");
-              var end =   moment($('input[name="datefilter"]').val().split(" - ")[1], "DD/MM/YYYY");
+= yield(:javascript)
+javascript:
+  $(document).ready(function(){
+    $(function() {
+      if($('input[name="datefilter"]').length){
 
-              function cb(start, end) {
-                  $('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
-              }
+        var start = moment($('input[name="datefilter"]').val().split(" - ")[0], "DD/MM/YYYY");
+        var end =   moment($('input[name="datefilter"]').val().split(" - ")[1], "DD/MM/YYYY");
 
-              $('#reportrange').daterangepicker({
-                  startDate: start,
-                  endDate: end,
-                  autoUpdateInput: false,
-                  locale: {
-                      format: 'DD/MM/YYYY',
-                      cancelLabel: 'Clear'
-                  },
-                  ranges: {
-                     'Today':         [moment(), moment()],
-                     'This Week':     [moment().startOf('week') , moment()],
-                     'This Month':    [moment().startOf('month'), moment()],
-                     'Three Months':  [moment().subtract(3, 'month').startOf('month'), , moment()],
-                     'This Year':     [moment().startOf('year') , moment()],
-                     'Two Years':     [moment().subtract(1, 'year').startOf('year'), , moment()],
-                  }
-              }, cb);
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+        }
 
-              $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
-                $('input[name="datefilter"]').val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-
-              });
-
-              $('#reportrange').on('cancel.daterangepicker', function(ev, picker) {
-                $('input[name="datefilter"]').val('');
-                $('#reportrange span').html('');
-              });
-
-              cb(start, end);
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            autoUpdateInput: false,
+            locale: {
+                format: 'DD/MM/YYYY',
+                cancelLabel: 'Clear'
+            },
+            ranges: {
+               'Today':         [moment(), moment()],
+               'This Week':     [moment().startOf('week') , moment()],
+               'This Month':    [moment().startOf('month'), moment()],
+               'Three Months':  [moment().subtract(3, 'month').startOf('month'), , moment()],
+               'This Year':     [moment().startOf('year') , moment()],
+               'Two Years':     [moment().subtract(1, 'year').startOf('year'), , moment()],
             }
-          });
+        }, cb);
 
-          $(".btn#filter").click(function(){
-            console.log("teste");
-            // $.session.set("filterCollapse",true);
-            if($('.row.collapse').hasClass('show')){
-              $.session.set("filterCollapse",false);
-            } else{
-             $.session.set("filterCollapse",true);
-            }
-            $(".collapse").collapse('toggle');
-          });
-        
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+          $('input[name="datefilter"]').val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+
         });
-          (function($) {
-          "use strict";
 
-          if(($.session.get("filterCollapse")) == 'true'){
-            $(".collapse").collapse('show');
-          }
+        $('#reportrange').on('cancel.daterangepicker', function(ev, picker) {
+          $('input[name="datefilter"]').val('');
+          $('#reportrange span').html('');
+        });
 
-        })(jQuery);
+        cb(start, end);
+      }
+    });
 
-      = content_for :footer
+    $(".btn#filter").click(function(){
+      // $.session.set("filterCollapse",true);
+      if($('.row.collapse').hasClass('show')){
+        $.session.set("filterCollapse",false);
+      } else{
+       $.session.set("filterCollapse",true);
+      }
+      $(".collapse").collapse('toggle');
+    });
+  
+  });
+    (function($) {
+    "use strict";
+
+    if(($.session.get("filterCollapse")) == 'true'){
+      $(".collapse").collapse('show');
+    }
+
+  })(jQuery);
+
+

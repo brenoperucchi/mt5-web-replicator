@@ -1,0 +1,3 @@
+$('#offcanvasRight').offcanvas('show');
+$('#paymentBrick_container').html("");
+$('#statusScreenBrick_container').html("<%= escape_javascript(render partial: 'mercadopago/mercadopago_status', locals:{ invoice:@invoice}) %>");
