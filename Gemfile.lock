@@ -718,7 +718,7 @@ DEPENDENCIES
   newrelic_rpm
   next_rails
   paper_trail (= 13.0.0)
-  pay (~> 6.8.1)
+  pay
   pg (= 1.4.5)
   pry (~> 0.14.1)
   pry-byebug
