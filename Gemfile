@@ -152,7 +152,7 @@ gem "rest-client"
 # gem 'stisla-rails'
 
 
-gem 'pay', '~> 3.0'
+gem 'pay', '~> 6.8.1'
 
 # To use Stripe, also include:
 gem 'stripe', '>= 2.8', '< 6.0'
