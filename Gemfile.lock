@@ -607,7 +607,7 @@ GEM
       net-ssh (>= 2.8.0)
     sshkit-sudo (0.1.0)
       sshkit (~> 1.8)
-    stripe (5.55.0)
+    stripe (9.3.0)
     telegram-bot-ruby (1.0.0)
       dry-struct (~> 1.6)
       faraday (~> 2.0)
@@ -746,7 +746,7 @@ DEPENDENCIES
   sqlite3 (~> 1.4)
   sshkit-sudo
   state_machine!
-  stripe
+  stripe (>= 8)
   telegram-bot-ruby
   terminal-notifier!
   tinymce-rails (~> 4.4, >= 4.4.3)

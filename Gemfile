@@ -155,7 +155,7 @@ gem "rest-client"
 gem 'pay'
 
 # To use Stripe, also include:
-gem 'stripe'#, '>= 2.8', '< 6.0'
+gem 'stripe', '>= 8'
 gem 'mercadopago-sdk'
 gem 'dotenv'
 
