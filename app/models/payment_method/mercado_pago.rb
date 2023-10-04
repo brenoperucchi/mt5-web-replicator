@@ -64,7 +64,6 @@ class PaymentMethod::MercadoPago
 		      ],
 		      installments: 12
 		    },
-		  binary_mode: true,  
 		  items: [
 		    {
 		    	id: @invoice.id,
