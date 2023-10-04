@@ -16,11 +16,11 @@ module SentientStore
 			# end
 
 			def current_store
-				  subdomain = request.subdomain.split('.').try(:first)
-				  @current_store = Store.find_by(url: subdomain) unless subdomain.nil? 
-				  @current_store ||= current_user.try(:store)
-				  # session[:store_id] ||= Store.first
-				end
+			  subdomain = request.subdomain.split('.').try(:first)
+			  @current_store = Store.find_by(url: subdomain) unless subdomain.nil? 
+			  @current_store ||= current_user.try(:store)
+			  # session[:store_id] ||= Store.first
+			end
 
 		end
 	end

@@ -30,7 +30,6 @@ class PlanUsage < ApplicationRecord
     else
       usage_seconds ||= (date_today.end_of_month.to_time - datetime_reference.to_time)
     end
-
     usage_seconds = usage_seconds.round
     if usage_seconds < month_seconds
       self.proportional = (usage_seconds / month_seconds).abs
@@ -42,15 +41,15 @@ class PlanUsage < ApplicationRecord
       changes = true
     end
 
-    # self.amount = 0 if self.amount < 0.0
     
-    if changes
+    self.amount = 5.00 if self.amount < 5.00
+    
+    if changes and not usageable_type.nil?
       self.description = "#{usageable.class.name} ID ##{usageable.id} - #{self.resourceable_type} ##{self.resourceable_id} - PlanUsage ID ##{self.id}\r\n"
       self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{number_with_precision self.proportional} - amount: #{number_with_precision self.amount} - seconds: #{number_with_precision usage_seconds, precision:0}\r\n"
-      # puts self.description
     end
     
-    return changes
+    return self
   end
 
   def update_next_charged

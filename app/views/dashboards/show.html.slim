@@ -1,7 +1,7 @@
 
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_url(@trace.id)}" 
+    a href="#{dashboard_url(@trace.name)}" 
       = @trace.name
 
 = render "filter"
