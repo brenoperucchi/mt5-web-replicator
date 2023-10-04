@@ -746,7 +746,7 @@ DEPENDENCIES
   sqlite3 (~> 1.4)
   sshkit-sudo
   state_machine!
-  stripe (>= 2.8, < 6.0)
+  stripe
   telegram-bot-ruby
   terminal-notifier!
   tinymce-rails (~> 4.4, >= 4.4.3)
