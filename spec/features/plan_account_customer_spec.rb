@@ -79,18 +79,19 @@ RSpec.describe "PlanAccountCustomer" do
       expect(invoice.amount.to_f).to be == 50.00
     end
     
-    describe "with valid params" do
-      it "Store 2 with date Proportional", focus:true do
+    describe "Contract with Min Amount" do
+      it "Customer Plan Amount > Min Amount - should be proportional amount" do
+        travel_to Date.parse("2022-11-01")
         @customer_plan = @store.customer_plans.first
-        @customer_plan.update(amount: 4)
+        @customer_plan.update(amount: 16)
         @customer_plan.payment.update(min_amount: 5)
         @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
         @account1.create_invoice_account(@trace, true)
         # expect(@trace.customer_plan.amount.to_f).to be == 5
-        # binding.pry
-        expect(@customer_plan.calculate_amount).to be == 5
+        travel_to Date.parse("2022-11-17")
+        expect(number_with_precision @customer_plan.calculate_amount).to be == "7.47"
       end
-      it "Store 2 with date Proportional", focus:true do
+      it "Customer Plan Amount < Min Amount" do
         @customer_plan = @store.customer_plans.first
         @customer_plan.update(amount: 4)
         @customer_plan.payment.update(min_amount: 5)
@@ -98,7 +99,6 @@ RSpec.describe "PlanAccountCustomer" do
         @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
         @account1.create_invoice_account(@trace, true)
         # expect(@trace.customer_plan.amount.to_f).to be == 5
-        # binding.pry
         expect(@customer_plan.calculate_amount).to be == 5
       end
     end

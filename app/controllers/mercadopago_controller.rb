@@ -26,9 +26,9 @@ class MercadopagoController < ApplicationController
         response_status = response.dig(:response, "status")
         invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))     
           if invoice and invoice.pending?
-            invoice.update(state: 'paid') if response_status == "approved"
+            invoice.update(state: response_status)
             invoice.loggings.create(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset))
-            # invoice.update(state: 'open') if response_status == "pending"
+            # invoice.update(state: 'reject') if response_status == "pending"
           end
       end
 

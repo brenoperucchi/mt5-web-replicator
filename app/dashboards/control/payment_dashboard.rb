@@ -29,6 +29,7 @@ module Control
     COLLECTION_ATTRIBUTES = %i[
       payment_method
       api_token
+      min_amount
       customer_plans
       invoices
     ].freeze
@@ -41,10 +42,10 @@ module Control
       api_token
       webhook_token
       webook_url
+      min_amount
       customer_plans
       store
       invoices
-      min_amount
       created_at
       updated_at
     ].freeze

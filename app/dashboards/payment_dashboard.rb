@@ -29,6 +29,7 @@ class PaymentDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
     payment_method
     api_token
+    min_amount
     customer_plans
     store
     invoices
@@ -42,10 +43,10 @@ class PaymentDashboard < Administrate::BaseDashboard
     api_token
     webhook_token
     webook_url
+    min_amount
     customer_plans
     store
     invoices
-    min_amount
     created_at
     updated_at
   ].freeze
@@ -56,9 +57,9 @@ class PaymentDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
     api_token
     webhook_token
+    min_amount
     customer_plans
     invoices
-    min_amount
   ].freeze
 
   # COLLECTION_FILTERS
