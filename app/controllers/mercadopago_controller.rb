@@ -7,6 +7,7 @@ class MercadopagoController < ApplicationController
     # render :nothing => false, :status => 200, :content_type => 'text/html'
     store = Store.find(params[:id])
     payment = Payment.find_by(id: params[:payment_id])
+    logging = Logging.create(content:params, state: "WEBHOOK PENDING", loggerable:store)
     if payment
       sdk = Mercadopago::SDK.new(payment.api_token)
       if params[:topic] == "merchant_order"       #ipn payment
@@ -16,7 +17,7 @@ class MercadopagoController < ApplicationController
         invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))
 
         if invoice and invoice.pending?
-          invoice.update(state: 'paid') if response_status == "approved"
+          invoice.update(state: response_status)
             invoice.loggings.create(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset))
           # invoice.update(state: 'open') if response_status == "pending"
         end
@@ -26,14 +27,14 @@ class MercadopagoController < ApplicationController
         response_status = response.dig(:response, "status")
         invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))     
           if invoice and invoice.pending?
-            invoice.update(state: response_status)
-            invoice.loggings.create(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset))
-            # invoice.update(state: 'reject') if response_status == "pending"
+            invoice.update(state: 'paid') if response_status == "approved"
+            invoice.update(state: 'reject') if response_status == "reject"
+            logging.update(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset))
           end
       end
 
       if invoice.nil?
-        store.loggings.create(state:"INVOICE NOTFIND", content: params)
+        logging.update(state:"INVOICE NOTFIND", content: params)
         head 201
         return
       else
@@ -42,7 +43,7 @@ class MercadopagoController < ApplicationController
       end
     end
 
-    store.loggings.create(state:"PAYMENT NOTFIND", content: params)    
+    logging.update(state:"PAYMENT NOTFIND", content: params)    
     head 400
   end
 
