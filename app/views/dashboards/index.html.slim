@@ -64,7 +64,7 @@
 
                 div
                   / button.btn.btn-primary.w-100
-                  = link_to contract_dashboard_path(name: trace.name), class: 'btn btn-dark w-100' do
+                  = link_to contract_dashboard_url(name: trace.name, host:Store.domain_url), class: 'btn btn-dark w-100' do
                     = I18n.t :contract, scope:'helpers.dashboards'
 
 - content_for :header do

@@ -5,7 +5,7 @@
 - chart_values =  @trace.dashboard_capital_accumulated
 
 #ajax_contract_form
-  = simple_form_for @account, url: dashboard_path(@trace.name), wrapper: :vertical_form_modernize, method: :post, remote:true, authenticity_token: true do |f|                      
+  = simple_form_for @account, url: dashboard_path(@trace.name), wrapper: :vertical_form_modernize, method: :post do |f|                      
     .row
       .col-lg-12
         .row
@@ -21,25 +21,25 @@
                 = hidden_field_tag 'resource_persisted', @account.persisted?
                 = hidden_field_tag 'name', @trace.name
                 = hidden_field_tag 'customer_plan_id', @trace.customer_plan.try(:id)
-                = f.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                = f.input :store_id, input_html:{value:@current_store.try(:id)}, as: :hidden
                 = f.input :name
                 = f.input :kind, input_html: {value: "slave"}, as: :hidden
                 - f.object.build_customer if f.object.customer.nil? 
                 = f.simple_fields_for :customer do |ff| 
-                  = ff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                  = ff.input :store_id, input_html:{value:@current_store.try(:id)}, as: :hidden
                   = ff.input :name
                   - ff.object.build_user if ff.object.user.nil? 
                   = ff.simple_fields_for :user do |fff| 
                     = fff.input :email
-                    = fff.input :store_id, input_html:{value:current_store.try(:id)}, as: :hidden
+                    = fff.input :store_id, input_html:{value:@current_store.try(:id)}, as: :hidden
                   / = f.simple_fields_for :settings do |ff| 
                 - f.object.contract_volume ||= 1
                 = f.simple_fields_for :settings do |ff| 
                   = ff.input :contract_volume, as: :select, collection: 1..contract_volume_max, selected: f.object.contract_volume.to_i, input_html:{ id: 'ajax' }
                   .row
                     .col-sm-12
-                      / = ff.input :customer_plan_id, input_html: {value: current_store.customer_plans.try(:first).try(:id)}, as: :hidden
-                      / = ff.input :plan_id, collection: current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
+                      / = ff.input :customer_plan_id, input_html: {value: @current_store.customer_plans.try(:first).try(:id)}, as: :hidden
+                      / = ff.input :plan_id, collection: @current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
                 .row
                   .col-sm-12
                     - if @trace.customer_plan.meta_margin_mode == "both"

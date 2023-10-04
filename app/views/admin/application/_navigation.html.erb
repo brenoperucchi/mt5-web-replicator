@@ -12,7 +12,7 @@ as defined by the routes in the `admin/` namespace
 
   <%= link_to(t("administrate.navigation.sign_off"),   destroy_user_session_url, method: :delete, class: "button button--alt button--nav") if defined?(destroy_user_session_url) %>
 
-  <%= link_to(t("administrate.navigation.dashboard"), dashboards_url, class: "navigation__link navigation__link--inactive") if defined?(root_url) %>
+  <%= link_to(t("administrate.navigation.dashboard"), dashboards_url(store_name: current_user.store.url), class: "navigation__link navigation__link--inactive") if defined?(root_url) %>
   <% Administrate::Namespace.new(namespace).resources_with_index_route.each do |resource| %>
     <%= link_to(
       display_resource_name(resource).capitalize,

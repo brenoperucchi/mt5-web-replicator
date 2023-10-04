@@ -38,9 +38,9 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                           i.feather.icon-home
                           '
                           = I18n.t :site, scope:'helpers.dashboards'
-                    - if current_store
+                    - if @current_store
                       li.breadcrumb-item
-                        = link_to dashboards_path(params: request.query_parameters) do
+                        = link_to dashboards_path(store_name: @current_store.url, params: request.query_parameters) do
                           = I18n.t :dashboards, scope:'helpers.dashboards'
                         / a href="/dashboards" 
                     = content_for :breadcrumb
