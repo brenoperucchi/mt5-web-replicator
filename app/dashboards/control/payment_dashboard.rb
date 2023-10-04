@@ -16,6 +16,7 @@ module Control
       customer_plans: Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
       invoices:       Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
       webhook_token:  Field::String,
+      min_amount:     Field::Number,
       created_at:     Field::DateTime,
       updated_at:     Field::DateTime,
     }.freeze
@@ -43,6 +44,7 @@ module Control
       customer_plans
       store
       invoices
+      min_amount
       created_at
       updated_at
     ].freeze
@@ -53,6 +55,7 @@ module Control
     FORM_ATTRIBUTES = %i[
       api_token
       webhook_token
+      min_amount
     ].freeze
 
     # COLLECTION_FILTERS

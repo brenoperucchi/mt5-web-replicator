@@ -16,6 +16,7 @@ class PaymentDashboard < Administrate::BaseDashboard
     customer_plans: Field::HasMany,
     invoices:       Field::HasMany,
     webhook_token:  Field::String,
+    min_amount:     Field::Number,
     created_at:     Field::DateTime,
     updated_at:     Field::DateTime,
   }.freeze
@@ -44,6 +45,7 @@ class PaymentDashboard < Administrate::BaseDashboard
     customer_plans
     store
     invoices
+    min_amount
     created_at
     updated_at
   ].freeze
@@ -56,6 +58,7 @@ class PaymentDashboard < Administrate::BaseDashboard
     webhook_token
     customer_plans
     invoices
+    min_amount
   ].freeze
 
   # COLLECTION_FILTERS

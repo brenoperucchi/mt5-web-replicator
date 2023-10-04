@@ -47,8 +47,8 @@ class CustomerPlan < ApplicationRecord
   end
 
 
-  def calculate_amount
-    plan_usage = plan_usages.new.calculate_usage(DateTime.now, self.amount_use, false)
+  def calculate_amount(contract_volume=nil)
+    plan_usage = plan_usages.new.calculate_usage(DateTime.now, self.amount_use, false, contract_volume)
     plan_usage.try(:amount) || 0
   end
 

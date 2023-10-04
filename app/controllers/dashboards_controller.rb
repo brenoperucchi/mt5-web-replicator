@@ -119,6 +119,7 @@ class DashboardsController < ApplicationController
 			# @customer.create_user(email: @customer.user_email, password: password)
 			redirect_to finish_dashboard_path(@trace.name, account)
 		else
+			filters
 			@account = account
 			flash[:notice] = "Error na contração de Portfolio"
 			render :contract
@@ -130,7 +131,7 @@ class DashboardsController < ApplicationController
 		@current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
 		@current_store ||= @trace.try(:store)
 		@current_store ||= current_store
-		
+
 		unless @current_store.nil?
 			if @current_store.dashboard_restrict == "enable" and (not user_signed_in? or @current_store.users.find_by(id:current_user.try(:id)).nil?)
 				sign_out current_user

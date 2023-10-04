@@ -78,7 +78,31 @@ RSpec.describe "PlanAccountCustomer" do
       expect(invoice.name).to be == "2-2022-11"
       expect(invoice.amount.to_f).to be == 50.00
     end
+    
+    describe "with valid params" do
+      it "Store 2 with date Proportional", focus:true do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.update(amount: 4)
+        @customer_plan.payment.update(min_amount: 5)
+        @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
+        @account1.create_invoice_account(@trace, true)
+        # expect(@trace.customer_plan.amount.to_f).to be == 5
+        # binding.pry
+        expect(@customer_plan.calculate_amount).to be == 5
+      end
+      it "Store 2 with date Proportional", focus:true do
+        @customer_plan = @store.customer_plans.first
+        @customer_plan.update(amount: 4)
+        @customer_plan.payment.update(min_amount: 5)
+        @account1.update(contract_volume: 2)
+        @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
+        @account1.create_invoice_account(@trace, true)
+        # expect(@trace.customer_plan.amount.to_f).to be == 5
+        # binding.pry
+        expect(@customer_plan.calculate_amount).to be == 5
+      end
+    end
 
   end
-
 end
+

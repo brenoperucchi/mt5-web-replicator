@@ -84,13 +84,13 @@ class Account < ApplicationRecord
       plan_usage = trace.customer_plan.plan_usages.where(handle: "AccountTracePlan").last #.each do |plan_usage|
         @invoice.payment = trace.customer_plan.payment
         @invoice.plan_usage = plan_usage
+        plan_usage.calculate_usage(date_today, trace.customer_plan.amount_use, proporcional)
         if trace.customer_plan.fixed? and trace.customer_plan.monthly?
-          plan_usage.calculate_usage(date_today, trace.customer_plan.amount_use, proporcional)
-          amount = plan_usage.amount * @contract_volume
+          amount = plan_usage.amount 
         else
-          amount = trace.customer_plan.amount_use * @contract_volume
+          amount = trace.customer_plan.amount_use 
         end
-        description = "Contratos: #{@contract_volume} * Amount #{plan_usage.amount} - Total #{amount} \r\n"
+        description = "Contratos: #{@contract_volume} * Amount #{number_with_precision plan_usage.amount_proportional} - Total #{number_with_precision amount} \r\n"
         description << "#{plan_usage.resourceable_type} #{plan_usage.resourceable_id} - Trace #{trace.id}\r\n"
         
         if @invoice.save and @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)

@@ -1,5 +1,5 @@
 class PlanUsage < ApplicationRecord
-  attr_accessor :amount, :proportional, :usage_seconds, :description
+  attr_accessor :amount, :proportional, :usage_seconds, :description, :amount_proportional
 
   serialize :plan_serializer, JSON
 
@@ -9,12 +9,11 @@ class PlanUsage < ApplicationRecord
   belongs_to :store
 
 
-  def calculate_usage(date_today=nil, amount_use=nil, proporcional=false)
+  def calculate_usage(date_today=nil, amount_use=nil, proporcional=false, contract_volume=nil)
     changes = false
-    
-    date_today ||= DateTime.now
-    
-    amount_use ||= usageable.amount_use || plan_serializer["amount"].to_f
+    date_today      ||= DateTime.now
+    contract_volume ||= (resourceable.try(:contract_volume) == "0" or resourceable.try(:contract_volume).nil?) ? 1 : resourceable.try(:contract_volume).to_f
+    amount_use      ||= usageable.amount_use || plan_serializer["amount"].to_f
 
     datetime_reference = proporcional ? DateTime.now : date_today
 
@@ -41,8 +40,13 @@ class PlanUsage < ApplicationRecord
       changes = true
     end
 
-    
-    self.amount = 5.00 if self.amount < 5.00
+    self.amount_proportional = self.amount
+    self.amount = self.amount * contract_volume
+
+    if self.amount < (usageable.try(:payment).try(:min_amount) || 0)
+      self.amount = usageable.try(:payment).try(:min_amount) 
+      self.amount_proportional = (self.amount / contract_volume)
+    end
     
     if changes and not usageable_type.nil?
       self.description = "#{usageable.class.name} ID ##{usageable.id} - #{self.resourceable_type} ##{self.resourceable_id} - PlanUsage ID ##{self.id}\r\n"
