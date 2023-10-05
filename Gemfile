@@ -170,7 +170,7 @@ gem 'receipts', '~> 2'
 
 gem 'next_rails'
 gem 'telegram-bot-ruby'
-gem 'sidekiq', '7.0.1'
+gem 'sidekiq', '7.1.3'
 gem 'pundit'
 gem 'simple_form'
 gem 'sd_notify'
