@@ -19,20 +19,19 @@ class MercadopagoController < ApplicationController
         if invoice and invoice.pending?
           invoice.update(state: response_status)
           logging.update(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
-          invoice.update(state: 'paid') if response_status == "approved"
-          invoice.update(state: 'reject') if response_status == "reject"
-
+          payment_status(invoice, response_status)
         end
-      else                                        #webhook payment
+      else                                         #webhook payment
         responde_id = params.dig(:data, :id)
-        response = sdk.payment.get(responde_id)
-        response_status = response.dig(:response, "status")
-        invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))     
+        if responde_id
+          response = sdk.payment.get(responde_id)
+          response_status = response.dig(:response, "status")
+          invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))     
           if invoice and invoice.pending?
-            invoice.update(state: 'paid') if response_status == "approved"
-            invoice.update(state: 'reject') if response_status == "reject"
+            payment_status(invoice, response_status)
             logging.update(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
           end
+        end
       end
 
       if invoice.nil?
@@ -73,7 +72,6 @@ class MercadopagoController < ApplicationController
 
 
   def process_payment
-
     @invoice = Invoice.find(params[:invoice_id])
 
     payment_data = {
@@ -98,9 +96,15 @@ class MercadopagoController < ApplicationController
     # @invoice.response["payment"].to_json
     # puts @invoice.response["payment"]
 
-    # redirect_to finish_mercadopago_path(@invoice)
+    # redirect_to finish_mercadopago_path(@invoice) 
+  end
 
-    
+  private
+
+  def payment_status(invoice, response_status)
+    invoice.update(state: 'paid') if response_status == "approved"
+    invoice.update(state: 'denied') if response_status == "rejected"
+    invoice.update(state: 'refunded') if response_status == "refunded" or response_status == "charged_back" 
   end
 
 end
