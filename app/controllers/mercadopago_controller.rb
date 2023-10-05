@@ -18,8 +18,10 @@ class MercadopagoController < ApplicationController
 
         if invoice and invoice.pending?
           invoice.update(state: response_status)
-            invoice.loggings.create(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset))
-          # invoice.update(state: 'open') if response_status == "pending"
+          logging.update(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), invoiceable:invoice)
+          invoice.update(state: 'paid') if response_status == "approved"
+          invoice.update(state: 'reject') if response_status == "reject"
+
         end
       else                                        #webhook payment
         responde_id = params.dig(:data, :id)
@@ -29,7 +31,7 @@ class MercadopagoController < ApplicationController
           if invoice and invoice.pending?
             invoice.update(state: 'paid') if response_status == "approved"
             invoice.update(state: 'reject') if response_status == "reject"
-            logging.update(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset))
+            logging.update(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), invoiceable:invoice)
           end
       end
 
