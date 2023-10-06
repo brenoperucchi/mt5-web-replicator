@@ -24,7 +24,7 @@ gem 'jbuilder', '~> 2.7'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-gem 'bundler', '2.4.14'
+gem 'bundler', '2.4.20'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
@@ -104,7 +104,10 @@ gem "image_processing"
 
 # gem 'ocr_space', path: "vendor/ocr_space"
 gem 'rtesseract'  
+# gem 'state_machine', git: 'https://github.com/Edfinity/state_machine.git'
 gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
+# gem 'state_machine',   git: 'https://github.com/brenoperucchi/state_machine'
+# gem 'state_machine', path: 'vendor/state_machine3'
 gem 'lucky_case'
 
 #API
@@ -117,7 +120,7 @@ group :development do
   # gem 'annotate'
 
   gem 'ruby-debug-ide'
-  gem 'debase'
+  gem 'debase',' >= 0.2.5.beta2'
   gem 'rubocop'
 end
 

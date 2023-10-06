@@ -22,7 +22,7 @@ class MercadopagoController < ApplicationController
           payment_status(invoice, response_status)
         end
       else                                         #webhook payment
-        responde_id = params.dig(:data, :id)
+        responde_id = params.dig("data.id")
         if responde_id
           response = sdk.payment.get(responde_id)
           response_status = response.dig(:response, "status")
