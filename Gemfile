@@ -86,13 +86,13 @@ gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 
 # ADMINISTRATE
-gem "administrate",         git: 'https://github.com/brenoperucchi/administrate.git', branch: 'main_imentore'
+gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
 gem 'administrate-field-image'
-gem 'administrate-field-tag', git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
+gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 gem "administrate-field-nested_has_many"
-gem 'administrate_ransack', git: "https://github.com/brenoperucchi/administrate_ransack.git", branch: 'master'
+gem 'administrate_ransack',         git: "https://github.com/brenoperucchi/administrate_ransack.git", branch: 'master'
 # gem 'administrate_ransack', path: "vendor/administrate_ransack"
-gem "administrate-field-tinymce", git: 'https://github.com/smedrick/administrate-field-tinymce.git'
+gem "administrate-field-tinymce",   git: 'https://github.com/smedrick/administrate-field-tinymce.git'
 gem 'administrate-field-active_storage'
 gem "image_processing"
 

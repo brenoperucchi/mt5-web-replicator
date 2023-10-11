@@ -9,7 +9,7 @@ GIT
 GIT
   remote: https://github.com/brenoperucchi/administrate.git
   revision: 7faa5ce1f949b65fa7af0ab1d0c72cc3158cbae0
-  branch: main_imentore
+  branch: 0.18.0
   specs:
     administrate (0.18.2)
       actionpack (>= 5.0)
@@ -36,6 +36,12 @@ GIT
     terminal-notifier (2.0.0)
 
 GIT
+  remote: https://github.com/shopperplus/state_machine.git
+  revision: f770babf2152da074b399a0f68af3710b99f73f7
+  specs:
+    state_machine (1.2.0)
+
+GIT
   remote: https://github.com/smedrick/administrate-field-tinymce.git
   revision: a6103e59c6294030347e9bdd681f6c089ceb6b8c
   specs:
@@ -43,11 +49,6 @@ GIT
       administrate (< 1.0.0)
       rails (>= 4.1)
       tinymce-rails (>= 4.4.3)
-
-PATH
-  remote: vendor/state_machine3
-  specs:
-    state_machine (1.2.0)
 
 GEM
   remote: https://rubygems.org/
