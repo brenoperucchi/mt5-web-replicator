@@ -6,7 +6,7 @@
     - next if not @all_records and trace.capital_recomendation.blank?
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
-    - chart_values =  trace.dashboard_capital_accumulated
+    - chart_values =  trace.dashboard_capital_accumulated(true)
     .col-lg-12.d-flex.align-items-strech
       .card.w-100
         .card-body
@@ -33,7 +33,7 @@
               / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
               / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
               / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-              #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| number_with_precision(x[:profit], precision:2, locale: :en)}}" data-chart-loss="#{chart_values.map{|x| number_with_precision(x[:loss], precision:2, locale: :en) }}"]
+              #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_i*100), x[:portfolio]] }}"]
             .col-lg-4.col-md-4
               .d-flex.align-items-center.mb-4.pb-1
                 span.round-8.bg-dark.rounded-circle.me-6
@@ -82,76 +82,81 @@
         // =====================================
         // Profit
         // =====================================
-        var chart = {
+        // Basic Area Chart -------> AREA CHART
+        var options_area = {
           series: [
             {
-              name: "Profit",
-              data: $(this).data("chart-gain"),
-            },
-            {
-              name: "Loss",
-              data: $(this).data("chart-loss"),
+              name: "Portfolio",
+              data: $(this).data("chart-data"),
             },
           ],
           chart: {
+            fontFamily: "DM Sans,sans-serif",
+            type: "area",
+            height: 350,
+            zoom: {
+              enabled: false,
+            },
             toolbar: {
               show: false,
             },
-            type: "bar",
-            fontFamily: "Plus Jakarta Sans', sans-serif",
-            foreColor: "#adb0bb",
-            height: 320,
-            stacked: true,
           },
-          colors: ["var(--bs-primary)", "var(--bs-secondary)"],
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              barHeight: "60%",
-              columnWidth: "20%",
-              borderRadius: [6],
-              borderRadiusApplication: 'end',
-              borderRadiusWhenStacked: 'all'
-            },
+          grid: {
+            show: false,
           },
+          colors: ["#615dff"],
           dataLabels: {
             enabled: false,
           },
-          legend: {
-            show: false,
+          stroke: {
+            curve: "straight",
           },
-          grid: {
-            borderColor: "rgba(0,0,0,0.1)",
-            strokeDashArray: 3,
-            xaxis: {
-              lines: {
-                show: false,
+          xaxis: {
+            type: "datetime",
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
               },
             },
           },
           yaxis: {
-            min: -5,
-            max: 5,
-            title: {
-              // text: 'Age',
+            opposite: true,
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
             },
-          },
-          xaxis: {
-            axisBorder: {
-              show: false,
-            },
-            categories: $(this).data("chart-dates"),
-
-          },
-          yaxis: {
-            tickAmount: 4,
           },
           tooltip: {
             theme: "dark",
           },
+          legend: {
+            horizontalAlign: "left",
+          },
         };
 
-        var chart = new ApexCharts(value, chart);
+        // var chart_area_basic = new ApexCharts(
+        //   document.querySelector("#chart-area-basic"),
+        //   options_area
+        // );
+        // chart_area_basic.render();
+        var chart = new ApexCharts(value, options_area);
         chart.render();
 
       }

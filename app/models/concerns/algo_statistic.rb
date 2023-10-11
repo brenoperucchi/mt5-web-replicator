@@ -19,7 +19,7 @@ module AlgoStatistic
 		      profit_value = profit <= 0 ? 0 : profit
 		      loss_value = profit >= 0 ? 0 : profit
 		      if profit_value != 0 or loss_value != 0
-		        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.to_f, profit: profit_value, loss: loss_value})
+		        collection_array.push({day:date.strftime("%Y-%m-%d"), portfolio: amount_total.round(2), profit: profit_value.round(2), loss: loss_value.round(2)})
 		      end
 		    end
 		  end

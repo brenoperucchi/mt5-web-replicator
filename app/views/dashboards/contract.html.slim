@@ -24,6 +24,7 @@
   li.breadcrumb-item
     a href="#{dashboard_path(@trace.name)}" 
       = @trace.name
+
   li.breadcrumb-item
     = I18n.t :contract, scope:'helpers.dashboards'
     / a href="#{account_dashboards_path(@account.id)}" 
@@ -53,77 +54,152 @@
         // =====================================
         // Profit
         // =====================================
-        var chart = {
+        // Basic Area Chart -------> AREA CHART
+        var options_area = {
           series: [
             {
-              name: "Profit",
-              data: $(this).data("chart-gain"),
-            },
-            {
-              name: "Loss",
-              data: $(this).data("chart-loss"),
+              name: "Portfolio",
+              data: $(this).data("chart-data"),
             },
           ],
           chart: {
+            fontFamily: "DM Sans,sans-serif",
+            type: "area",
+            height: 350,
+            zoom: {
+              enabled: false,
+            },
             toolbar: {
               show: false,
             },
-            type: "bar",
-            fontFamily: "Plus Jakarta Sans', sans-serif",
-            foreColor: "#adb0bb",
-            height: 320,
-            stacked: true,
           },
-          colors: ["var(--bs-primary)", "var(--bs-secondary)"],
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              barHeight: "60%",
-              columnWidth: "20%",
-              borderRadius: [6],
-              borderRadiusApplication: 'end',
-              borderRadiusWhenStacked: 'all'
-            },
+          grid: {
+            show: false,
           },
+          colors: ["#615dff"],
           dataLabels: {
             enabled: false,
           },
-          legend: {
-            show: false,
+          stroke: {
+            curve: "straight",
           },
-          grid: {
-            borderColor: "rgba(0,0,0,0.1)",
-            strokeDashArray: 3,
-            xaxis: {
-              lines: {
-                show: false,
+          xaxis: {
+            type: "datetime",
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
               },
             },
           },
           yaxis: {
-            min: -5,
-            max: 5,
-            title: {
-              // text: 'Age',
+            opposite: true,
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
             },
-          },
-          xaxis: {
-            axisBorder: {
-              show: false,
-            },
-            categories: $(this).data("chart-dates"),
-
-          },
-          yaxis: {
-            tickAmount: 4,
           },
           tooltip: {
             theme: "dark",
           },
+          legend: {
+            horizontalAlign: "left",
+          },
         };
 
-        var chart = new ApexCharts(value, chart);
+        var chart = new ApexCharts(value, options_area);
         chart.render();
+      // $("[id='chart']").each(function(index, value) {
+      //   // =====================================
+      //   // Profit
+      //   // =====================================
+      //   var chart = {
+      //     series: [
+      //       {
+      //         name: "Profit",
+      //         data: $(this).data("chart-gain"),
+      //       },
+      //       {
+      //         name: "Loss",
+      //         data: $(this).data("chart-loss"),
+      //       },
+      //     ],
+      //     chart: {
+      //       toolbar: {
+      //         show: false,
+      //       },
+      //       type: "bar",
+      //       fontFamily: "Plus Jakarta Sans', sans-serif",
+      //       foreColor: "#adb0bb",
+      //       height: 320,
+      //       stacked: true,
+      //     },
+      //     colors: ["var(--bs-primary)", "var(--bs-secondary)"],
+      //     plotOptions: {
+      //       bar: {
+      //         horizontal: false,
+      //         barHeight: "60%",
+      //         columnWidth: "20%",
+      //         borderRadius: [6],
+      //         borderRadiusApplication: 'end',
+      //         borderRadiusWhenStacked: 'all'
+      //       },
+      //     },
+      //     dataLabels: {
+      //       enabled: false,
+      //     },
+      //     legend: {
+      //       show: false,
+      //     },
+      //     grid: {
+      //       borderColor: "rgba(0,0,0,0.1)",
+      //       strokeDashArray: 3,
+      //       xaxis: {
+      //         lines: {
+      //           show: false,
+      //         },
+      //       },
+      //     },
+      //     yaxis: {
+      //       min: -5,
+      //       max: 5,
+      //       title: {
+      //         // text: 'Age',
+      //       },
+      //     },
+      //     xaxis: {
+      //       axisBorder: {
+      //         show: false,
+      //       },
+      //       categories: $(this).data("chart-dates"),
+
+      //     },
+      //     yaxis: {
+      //       tickAmount: 4,
+      //     },
+      //     tooltip: {
+      //       theme: "dark",
+      //     },
+      //   };
+
+      //   var chart = new ApexCharts(value, chart);
+      //   chart.render();
 
       }
     )});  

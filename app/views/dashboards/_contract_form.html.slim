@@ -2,7 +2,7 @@
 - @trace.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
 - @trace.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
 
-- chart_values =  @trace.dashboard_capital_accumulated
+- chart_values =  @trace.dashboard_capital_accumulated(true)
 
 #ajax_contract_form
   = simple_form_for @account, url: dashboard_path(@trace.name), wrapper: :vertical_form_modernize, method: :post do |f|                      
@@ -81,7 +81,8 @@
                     / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
                     / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
                     / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-                    #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| number_with_precision(x[:profit], precision:2, locale: :en)}}" data-chart-loss="#{chart_values.map{|x| number_with_precision(x[:loss], precision:2, locale: :en) }}"]
+                    #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_i *100), x[:portfolio]] }}"]
+                    / #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-gain="#{chart_values.map{|x| number_with_precision(x[:profit], precision:2, locale: :en)}}" data-chart-loss="#{chart_values.map{|x| number_with_precision(x[:loss], precision:2, locale: :en) }}"]
 javascript:
   $(document).ready(function(){ 
     $('#ajax').change(function() {
