@@ -18,7 +18,8 @@ class TraceDashboard < Administrate::BaseDashboard
     telegram_api_hash:     Field::String.with_options(searchable: false),
     telegram_api_number:   Field::String.with_options(searchable: false),
     active:                Field::Boolean.with_options(searchable: false),
-    instrument_control:    Field::Boolean,
+    instrument_control:    Field::Boolean.with_options(searchable: false),
+    magic_same:            Field::Boolean.with_options(searchable: false),
     store:                 Field::BelongsTo,
     meta_host:             Field::String,
     kind:                  Field::String,
@@ -61,6 +62,7 @@ class TraceDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   active
+  magic_same
   instrument_control
   name
   name_id
@@ -90,6 +92,7 @@ class TraceDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   active
+  magic_same
   instrument_control
   name
   name_id

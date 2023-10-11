@@ -17,7 +17,7 @@ class Trace < ApplicationRecord
                                 :telegram_option, :telegram_image, :take_profit_limit, 
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
                                 :instrument_control, :restrict_control_instrument, :magics_accept, :description, :capital_recomendation, :contract_volume_max,
-                                :stock_kind, :capital_multiplier
+                                :stock_kind, :capital_multiplier, :magic_same
                               ]
 
   has_many :orders
@@ -132,6 +132,7 @@ class Trace < ApplicationRecord
           instrument = check_instrument(account, symbol, account_slave)
           slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self)
           slave = order.slaves.new(slave_attributes)
+          slave.magic_number = check_magic_number(self.name_id)
           if slave.save
             order.accounts << account_slave
             slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
@@ -144,6 +145,10 @@ class Trace < ApplicationRecord
     end
 
     return order.executed? && transaction.executed?
+  end
+
+  def check_magic_number(magic_number)
+    self.magic_same.to_b ? self.name_id : magic_number
   end
 
   def check_instrument(account, symbol, account_slave=nil)

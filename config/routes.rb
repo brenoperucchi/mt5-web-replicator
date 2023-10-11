@@ -64,6 +64,8 @@ Rails.application.routes.draw do
       resources :invoices, except:[:new]
       resources :loggings, only:[:show]
       resources :stores
+
+      root "orders#index"
     end
 
     namespace :admin do

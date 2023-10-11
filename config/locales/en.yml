@@ -179,6 +179,8 @@ en:
         name: Name
         name_id: Magic Number Portfolio
         active: Active
+        magic_same: Slaves same MagicNumber
+        magics_accept: Magic Number Aceito
         kind: kind
         take_profit_limit: Take Profit limit
         instrument_control: Instrument Control
@@ -555,6 +557,7 @@ en:
       short3: "%d of %b %Y"
       short4: "%d %b %Y"
       short5: "%b %d %H:%M:%S"
+      short6: "%m/%d/%Y"
     pm: pm
     
   administrate:

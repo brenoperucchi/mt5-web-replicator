@@ -132,7 +132,7 @@ pt-BR:
           month: Por mês
         management: 
           title: Gestão & Portfólios 
-          resume: Gestão por Portfólios, Restrição por magic number, Controle de Ativos e muitos mais
+          resume: Gestão por Portfólios, Restrição por Magic Number, Controle de Ativos e muitos mais
           resume2: 
       session:
         dont_have_account: "Ainda não tem uma conta?"
@@ -179,6 +179,8 @@ pt-BR:
         name: Nome
         name_id: Magic Number Portfólio
         active: Ativo
+        magic_same: Slaves mesmo Magic Number
+        magics_accept: Magic Number Aceito
         kind: Tipo
         take_profit_limit: Limite TakeProfit
         instrument_control: Controle de Ativo
@@ -563,6 +565,7 @@ pt-BR:
       short3: "%d de %b %Y"
       short4: "%d %b %Y"
       short5: "%d %b %H:%M:%S"
+      short6: "%m/%d/%Y"
     pm: ''
 
   administrate_ransack:

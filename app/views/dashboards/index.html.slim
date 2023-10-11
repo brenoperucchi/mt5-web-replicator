@@ -28,13 +28,15 @@
               /     option[value="4"]
               /       | June 2023
           .row.align-items-center
-            .col-lg-8.col-md-8
+            .col-lg-9.col-md-9
               / - values_profit = trace.masters_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
               / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
               / - values_loss = trace.masters_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
               / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
-              #chart[style="min-height: 335px;" data-chart-dates="#{chart_values.map{|x| x[:day][-5,5].split('-').reverse.join('/')}}" data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_i*100), x[:portfolio]] }}"]
-            .col-lg-4.col-md-4
+              #chart[style="min-height: 335px;" 
+                data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
+                data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}"]
+            .col-lg-3.col-md-3
               .d-flex.align-items-center.mb-4.pb-1
                 span.round-8.bg-dark.rounded-circle.me-6
                 div
@@ -64,7 +66,7 @@
 
                 div
                   / button.btn.btn-primary.w-100
-                  = link_to contract_dashboard_url(name: trace.name, host:Store.domain_url), class: 'btn btn-dark w-100' do
+                  = link_to contract_dashboard_url(name: trace.name, host:Store.domain_url), class: 'btn btn-lg btn-dark w-100' do
                     = I18n.t :contract, scope:'helpers.dashboards'
 
 - content_for :header do
@@ -88,7 +90,13 @@
             {
               name: "Portfolio",
               data: $(this).data("chart-data"),
+              // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
             },
+            // {
+            //   name: "Profit",
+            //   data: $(this).data("chart-profit"),
+            //   // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
+            // },
           ],
           chart: {
             fontFamily: "DM Sans,sans-serif",
@@ -102,14 +110,14 @@
             },
           },
           grid: {
-            show: false,
+            show: true,
           },
-          colors: ["#615dff"],
+          colors: ["#615dff", "#3dd9eb"],
           dataLabels: {
             enabled: false,
           },
           stroke: {
-            curve: "straight",
+            curve: "smooth",
           },
           xaxis: {
             type: "datetime",
@@ -147,6 +155,7 @@
             theme: "dark",
           },
           legend: {
+            show: false,
             horizontalAlign: "left",
           },
         };

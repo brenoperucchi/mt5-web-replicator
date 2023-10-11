@@ -24,7 +24,7 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
           .card
             .card-body
               .row
-                .col-lg-10.text-left
+                .col-lg-9.text-start
                   ul.breadcrumb
                     - if user_signed_in? and not current_user.try(:userable).try(:user?)
                       li.breadcrumb-item
@@ -44,13 +44,15 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                           = I18n.t :dashboards, scope:'helpers.dashboards'
                         / a href="/dashboards" 
                     = content_for :breadcrumb
-                  /! [ breadcrumb ] started
-                .col-lg-2.text-right
-                  / - unless action_name == "contract" or action_name == "finish_contract"
-                  button#filter.btn.btn-light.m-r-5[type="button"]
-                    i.feather.icon-plus
-                    = I18n.t :filters, scope:'helpers.dashboards'
-
+                .col-lg-3.text-end
+                  .button.list-inline-item
+                    button#filter.btn.btn-light[type="button"]
+                      i.feather.icon-plus
+                      = I18n.t :filters, scope:'helpers.dashboards'
+                  - if action_name != "contract" and not @trace.nil?
+                    .button.list-inline-item
+                      = link_to contract_dashboard_url(name: @trace.name, host:Store.domain_url), class: 'btn btn-lg btn-dark w-100' do
+                        = I18n.t :contract, scope:'helpers.dashboards'
           <!-- Yield Start -->
           = yield
     .footer
@@ -98,11 +100,11 @@ javascript:
             },
             ranges: {
                'Today':         [moment(), moment()],
-               'This Week':     [moment().startOf('week') , moment()],
-               'This Month':    [moment().startOf('month'), moment()],
-               'Three Months':  [moment().subtract(3, 'month').startOf('month'), , moment()],
-               'This Year':     [moment().startOf('year') , moment()],
-               'Two Years':     [moment().subtract(1, 'year').startOf('year'), , moment()],
+               'This Week':     [moment().startOf('week') , moment().endOf('week')],
+               'This Month':    [moment().startOf('month'), moment().endOf('month')],
+               'Last Month':    [moment().subtract(1, 'month').startOf('month'), moment().endOf('month')],
+               'This Year':     [moment().startOf('year') , moment().endOf('month')],
+               'Two Years':     [moment().subtract(1, 'year').startOf('year'), , moment().endOf('month')],
             }
         }, cb);
 

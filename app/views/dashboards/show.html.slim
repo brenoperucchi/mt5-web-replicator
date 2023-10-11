@@ -1,4 +1,4 @@
-
+- chart_values =  @trace.dashboard_capital_accumulated(true)
 - content_for :breadcrumb do
   li.breadcrumb-item
     a href="#{dashboard_url(@trace.name)}" 
@@ -106,7 +106,11 @@
               /     li
               /       i.flaticon-calendar.text-primary.f-16
             .clearfix
-            #morris-area-chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
+            / #chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
+            #chart-dashboard_capital_accumulated[style="min-height: 335px;" 
+              data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
+              data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}"]
+
             .clearfix
       .col-md-6.col-lg-4.align-items-stretch
         .card.w-100
@@ -355,25 +359,107 @@
             document.location.href=link;
       });
         "use strict";
-        var data_chart = $('#morris-area-chart-dashboard_capital_accumulated').data('chart');
-        Morris.Line({
-            element: 'morris-area-chart-dashboard_capital_accumulated',
-            data: data_chart,
-            xkey: 'day',
-            ykeys: ['portfolio', 'profit', 'loss'],
-            labels: ['Portfolio', 'Profit', 'Loss'],
-            pointSize: 2,
-            fillOpacity: 0,
+        var options_area = {
+          series: [
+            {
+              name: "Portfolio",
+              data: $('#chart-dashboard_capital_accumulated').data("chart-data"),
+              // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
+            },
+            {
+              name: "Profit",
+              data: $('#chart-dashboard_capital_accumulated').data("chart-profit"),
+            },
+          ],
+          chart: {
+            fontFamily: "DM Sans,sans-serif",
+            type: "area",
+            height: 350,
+            zoom: {
+              enabled: false,
+            },
+            toolbar: {
+              show: false,
+            },
+          },
+          grid: {
+            show: true,
+          },
+          colors: ["#615dff", "#3dd9eb"],
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+            curve: "smooth",
+          },
+          xaxis: {
+            type: "datetime",
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
+            },
+          },
+          yaxis: {
+            opposite: true,
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
+            },
+          },
+          tooltip: {
+            theme: "dark",
+          },
+          legend: {
+            show: true,
+            horizontalAlign: "left",
+          },
+        };
 
-            pointStrokeColors: [ '#3580B8', '#ffb74e', '#94313e'],
-            behaveLikeLine: true,
-            gridLineColor: '#e0e0e0',
-            lineWidth: 2,
-            hideHover: 'auto',
-            lineColors: [ '#3580B8', '#ffb74e', '#94313e'],
-            resize: true
+        // var chart_area_basic = new ApexCharts(
+        //   document.querySelector("#chart-area-basic"),
+        //   options_area
+        // );
+        // chart_area_basic.render();
+        var chart = new ApexCharts(
+           document.querySelector("#chart-dashboard_capital_accumulated"), options_area);
+        chart.render();
+        // var data_chart = $('#morris-area-chart-dashboard_capital_accumulated').data('chart');
+        // Morris.Line({
+        //     element: 'morris-area-chart-dashboard_capital_accumulated',
+        //     data: data_chart,
+        //     xkey: 'day',
+        //     ykeys: ['portfolio', 'profit', 'loss'],
+        //     labels: ['Portfolio', 'Profit', 'Loss'],
+        //     pointSize: 2,
+        //     fillOpacity: 0,
 
-        });
+        //     pointStrokeColors: [ '#3580B8', '#ffb74e', '#94313e'],
+        //     behaveLikeLine: true,
+        //     gridLineColor: '#e0e0e0',
+        //     lineWidth: 2,
+        //     hideHover: 'auto',
+        //     lineColors: [ '#3580B8', '#ffb74e', '#94313e'],
+        //     resize: true
+
+        // });
         var data_chart = $('#morris-area-chart-dashboard_drawdown').data('chart');
         Morris.Bar({
             element: 'morris-area-chart-dashboard_drawdown',

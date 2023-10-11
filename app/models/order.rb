@@ -164,7 +164,6 @@ class Order < ApplicationRecord
 
 
   def api_request_attributes(resource)
-    magicnumber = resource.try(:trace).try(:name_id)
     ticket_master = resource.try(:ticket) || resource.try(:ticket_master)
     ticket_slave = resource.try(:ticket_slave) || 0
     master_id  = resource.try(:master).try(:id) || 0
