@@ -1,7 +1,7 @@
 class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	before_action :set_account, only:[:account]
-	before_action :set_trace, except: [:index, :account]
+	before_action :set_trace, except: [:index]
 	before_action :filters#, except: :index
 	before_action :dashboard_restrict
 
@@ -132,6 +132,7 @@ class DashboardsController < ApplicationController
 		@current_store ||= @trace.try(:store)
 		@current_store ||= current_store
 
+
 		unless @current_store.nil?
 			if @current_store.dashboard_restrict == "enable" and (not user_signed_in? or @current_store.users.find_by(id:current_user.try(:id)).nil?)
 				sign_out current_user
@@ -203,14 +204,13 @@ class DashboardsController < ApplicationController
 
 	def set_trace
 		@trace = Trace.find_by(name: params[:name])
-		unless @trace.nil?
-		else
+		if @trace.nil?
 			redirect_to root_path, notice: "Dashboard Not found"
 		end
 	end
 
 	def set_account
-		if current_store == Store.first
+		if current_store == Store.first or current_store.nil?
 			@account = Account.find(params[:id])
 		else
 			@account = current_store.accounts.find(params[:id])
