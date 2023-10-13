@@ -40,7 +40,7 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                           = I18n.t :site, scope:'helpers.dashboards'
                     - if @current_store
                       li.breadcrumb-item
-                        = link_to dashboards_path(store_name: @current_store.url, params: request.query_parameters) do
+                        = link_to dashboards_path(@current_store.url, params: request.query_parameters) do
                           = I18n.t :dashboards, scope:'helpers.dashboards'
                         / a href="/dashboards" 
                     = content_for :breadcrumb
@@ -51,7 +51,7 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                       = I18n.t :filters, scope:'helpers.dashboards'
                   - if action_name != "contract" and not @trace.nil?
                     .button.list-inline-item
-                      = link_to contract_dashboard_url(name: @trace.name, host:Store.domain_url), class: 'btn btn-lg btn-dark w-100' do
+                      = link_to contract_dashboard_path(@trace.store.url, @trace.name), class: 'btn btn-lg btn-dark w-100' do
                         = I18n.t :contract, scope:'helpers.dashboards'
           <!-- Yield Start -->
           = yield

@@ -36,7 +36,8 @@ class TraceDashboard < Administrate::BaseDashboard
     accounts:              Field::HasMany,
     customer_plans:        Field::HasMany,
     transactions:          Field::HasMany,
-    description:           Field::Tinymce,
+    desc_contract:           Field::Tinymce,
+    desc_finish:           Field::Tinymce,
     created_at:            Field::DateTime,
     updated_at:            Field::DateTime,
   }.freeze
@@ -104,6 +105,8 @@ class TraceDashboard < Administrate::BaseDashboard
   store
   accounts
   customer_plans
+  desc_contract
+  desc_finish
   ].freeze
 
   # take_profit_limit

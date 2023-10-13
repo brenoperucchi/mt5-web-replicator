@@ -20,18 +20,23 @@ Rails.application.routes.draw do
     resources :invoice_items
     resources :customers
     resources :stores
-    resources :dashboards, only: [:index], path:"dashboards/:store_name" do
-      get  '/all',                                     to: 'dashboards#index',           on: :collection 
-    end
+    # "/:store_name/dashboards/"
+    #   get  '/all',                      to: 'dashboards#index',           on: :collection 
+    #   get  '/:name',                    to: 'dashboards#show',            on: :collection, as: 'show'
+    # end
 
-    resources :dashboards, only: [:index] do
-      get  '/all',                                     to: 'dashboards#index',           on: :collection 
-    end
-    resource :dashboard, only: [:show, :create], path:"dashboard/:name" do
+    # resources :dashboards, only: [:index]
+    get  '/dashboards/',                     to: 'dashboards#index'#, as: 'index_dasboards'
+    get  '/dashboards/all',                  to: 'dashboards#index'#, as: 'index_dasboards'
+    get  '/dashboards/:store_name',          to: 'dashboards#index'#
+    get  '/dashboards/:store_name/all',      to: 'dashboards#index'#
+    
+
+    resource :dashboard, only: [:show, :create], path:"dashboard/:store_name/:name" do
       get  'account/:id/:payment_id/:trace_id',       to: 'dashboards#account',         on: :collection, as: 'account'
-      get  'contract/:promotion',                    to: 'dashboards#contract',        on: :member#, as: 'account'
-      get  'contract',                               to: 'dashboards#contract',        on: :member, as: 'contract'
-      post 'contract',                               to: 'dashboards#create',          on: :member
+      get  'contract/:promotion',                     to: 'dashboards#contract',        on: :member#, as: 'account'
+      get  'contract',                                to: 'dashboards#contract',        on: :member, as: 'contract'
+      post 'contract',                                to: 'dashboards#create',          on: :member
       get  'finish/:account_id',                      to: 'dashboards#finish',          on: :member, as: 'finish'
       # get  'finish',                                to: 'dashboards#finish_external_payment',          on: :collection
     end
@@ -99,6 +104,7 @@ Rails.application.routes.draw do
       resources :customers
       resources :plans
       resources :plan_items
+      resources :plan_usages, except: [:index]
       resources :customer_plans
       resources :invoices do
          get :invoice_send, on: :member

@@ -2,9 +2,10 @@
   .col-lg-12
     .row
       .col-lg-6.d-flex.align-items-strech
-        .card.w-100.position-relative.overflow-hidden.mb-3
-          .card-body.p-4
-            == @invoice.plan_usage.trace.description
+        - if @invoice.plan_usage.trace.desc_finish.present?  
+          == @invoice.plan_usage.trace.desc_finish
+        - else
+          = render "description_finish"
       .col-lg-6
         .card.w-100.position-relative.overflow-hidden.mb-3
           .card-body.p-4

@@ -16,8 +16,8 @@ class Trace < ApplicationRecord
   store :settings, accessors: [
                                 :telegram_option, :telegram_image, :take_profit_limit, 
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
-                                :instrument_control, :restrict_control_instrument, :magics_accept, :description, :capital_recomendation, :contract_volume_max,
-                                :stock_kind, :capital_multiplier, :magic_same
+                                :instrument_control, :restrict_control_instrument, :magics_accept, :desc_contract, :capital_recomendation, :contract_volume_max,
+                                :stock_kind, :capital_multiplier, :magic_same, :desc_finish
                               ]
 
   has_many :orders

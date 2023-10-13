@@ -22,20 +22,14 @@
     }
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_path(@trace.name)}" 
+    a href="#{dashboard_path(@trace.store.url, @trace.name)}" 
       = @trace.name
 
   li.breadcrumb-item
     = I18n.t :contract, scope:'helpers.dashboards'
-    / a href="#{account_dashboards_path(@account.id)}" 
-    /   = @account.name
 
 = render "filter"
 
-                  / div
-                  /   / button.btn.btn-primary.w-100
-                  /   = link_to contract_dashboard_path(trace), class: 'btn btn-dark w-100' do
-                  /     = I18n.t :contract, scope:'helpers.dashboards'
 = render "contract_form"
 
 - content_for :header do

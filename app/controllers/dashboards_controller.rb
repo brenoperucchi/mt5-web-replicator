@@ -22,8 +22,8 @@ class DashboardsController < ApplicationController
 		trace 	 = Trace.find_by(name: params[:name])
 		account = Account.find(params[:account_id])
 		
-		invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-		account.create_invoice_account(@trace, invoice_name, nil)
+		# invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+		account.create_invoice_account(@trace, nil, nil)
 		@invoice = account.customer.invoices.first
 		@payment = @invoice.invoice_send
 		if @payment.redirect_url
@@ -117,7 +117,7 @@ class DashboardsController < ApplicationController
 			customer_plan.save
 			# account.customer.create_invoice_customer(invoice_name)
 			# @customer.create_user(email: @customer.user_email, password: password)
-			redirect_to finish_dashboard_path(@trace.name, account)
+			redirect_to finish_dashboard_path(@trace.store.url, @trace.name, account)
 		else
 			filters
 			@account = account
@@ -226,7 +226,7 @@ class DashboardsController < ApplicationController
 		@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
 		# session[:dates] = params[:datefilter]
 		if params[:datefilter].blank?# and session[:date_begin].nil? and session[:date_end].nil?
-			dates = "#{((date_today - 6.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+			dates = "#{((date_today - 3.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 			session[:dates] = dates
 			session[:date_begin] = dates.split("-")[0]
 			session[:date_end] = dates.split("-")[1]					

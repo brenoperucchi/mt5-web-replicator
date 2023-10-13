@@ -38,7 +38,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     accounts:                 Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
     # customer_plan:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
     customer_plans:           Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
-    description:              Field::Tinymce,
+    desc_contract:              Field::Tinymce,
     created_at:               Field::DateTime,
     updated_at:               Field::DateTime,
   }.freeze
@@ -71,7 +71,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   customer_plans
   accounts
   orders
-  description
+  desc_contract
   created_at
   updated_at
   ].freeze
@@ -93,7 +93,8 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   customer_plans
   accounts
   store_id
-  description
+  desc_contract
+  desc_finish
   ].freeze
 
   # COLLECTION_FILTERS

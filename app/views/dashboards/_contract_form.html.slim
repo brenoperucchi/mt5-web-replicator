@@ -5,15 +5,15 @@
 - chart_values =  @trace.dashboard_capital_accumulated
 
 #ajax_contract_form
-  = simple_form_for @account, url: dashboard_path(@trace.name), wrapper: :vertical_form_modernize, method: :post do |f|                      
+  = simple_form_for @account, url: dashboard_path(@trace.store.url, @trace.name), wrapper: :vertical_form_modernize, method: :post do |f|                      
     .row
       .col-lg-12
         .row.d-flex.align-items-stretch
           .col-lg-6.d-flex
             .card.w-100.position-relative.overflow-hidden
               .card-body.p-4
-                == @trace.description
-          .col-lg-3.d-flex
+                == @trace.desc_contract
+          .col-lg-3.d-flex#ajax-container
             = render "contract_sidebar"
           .col-lg-3.d-flex
             .card.w-100
@@ -86,7 +86,7 @@
 javascript:
   $(document).ready(function(){ 
     $('#ajax').change(function() {
-        let url = "#{contract_dashboard_path(@trace.name)}";
+        let url = "#{contract_dashboard_path(@trace.store.url, @trace.name)}";
         let contract_volume = $(this).val();
         $.ajax({
             url: url,

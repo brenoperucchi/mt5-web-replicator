@@ -59,7 +59,7 @@ RSpec.describe 'Store Controller', type: :request do
         expect(@customer_plan.amount.to_f).to be == 100
 
         expect {
-          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
@@ -92,7 +92,7 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
@@ -125,7 +125,7 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
@@ -158,7 +158,7 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
@@ -190,7 +190,7 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
@@ -224,7 +224,7 @@ RSpec.describe 'Store Controller', type: :request do
         freeze_time
 
         expect {
-          post "/dashboard/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
         expect(response).to have_http_status 302
         expect(Invoice.all.count).to be == 0
@@ -257,7 +257,7 @@ RSpec.describe 'Store Controller', type: :request do
        freeze_time
 
         expect {
-          post "/dashboard/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
+          post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract" , params: {name: @trace.name, customer_plan_id: @customer_plan.id, :account => valid_attributes} #, valid_session
         }.to change(Account, :count).by(1)
        expect(response).to have_http_status 302
        expect(Invoice.all.count).to be == 0

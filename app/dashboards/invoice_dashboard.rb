@@ -19,6 +19,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
     amount:               Field::Number,
     # items:                Field::NestedHasMany.with_options(class_name: 'InvoiceItem'),
     payment:              Field::BelongsTo,
+    plan_usage:           Field::BelongsTo,
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
     loggings:             Field::HasMany,
     invoiceable:          Field::Polymorphic,
@@ -49,12 +50,13 @@ class InvoiceDashboard < Administrate::BaseDashboard
   name
   invoiceable
   email
+  payment
   payment_link
+  plan_usage
   stripe_invoice_id
   amount
   loggings
   items
-  payment
   created_at
   updated_at
   ].freeze
@@ -67,9 +69,10 @@ class InvoiceDashboard < Administrate::BaseDashboard
   state
   amount
   email
+  payment
+  plan_usage
   stripe_invoice_id
   items
-  payment
   ].freeze
 
   # COLLECTION_FILTERS

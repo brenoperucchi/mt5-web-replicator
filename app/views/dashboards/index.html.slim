@@ -10,7 +10,7 @@
     .col-lg-12.d-flex.align-items-strech
       .card.w-100
         .card-body
-          = link_to dashboard_path(trace.name, params:request.query_parameters) do
+          = link_to dashboard_path(trace.store.url, trace.name, params:request.query_parameters) do
             .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
               .mb-3.mb-sm-0
                 h5.card-title.fw-semibold
@@ -61,12 +61,12 @@
                       = number_with_precision trace.pay_off, precision:2
                 div.d-flex.align-items-baseline.mb-4
                   / button.btn.btn-primary.w-100
-                  = link_to dashboard_path(name: trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
+                  = link_to dashboard_path(trace.store.url, trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
                     = I18n.t :more_information, scope:'helpers.dashboards'
 
                 div
                   / button.btn.btn-primary.w-100
-                  = link_to contract_dashboard_url(name: trace.name, host:Store.domain_url), class: 'btn btn-lg btn-dark w-100' do
+                  = link_to contract_dashboard_path(trace.store.url, trace.name), class: 'btn btn-lg btn-dark w-100' do
                     = I18n.t :contract, scope:'helpers.dashboards'
 
 - content_for :header do
