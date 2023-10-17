@@ -36,7 +36,7 @@ class TraceDashboard < Administrate::BaseDashboard
     accounts:              Field::HasMany,
     customer_plans:        Field::HasMany,
     transactions:          Field::HasMany,
-    desc_contract:           Field::Tinymce,
+    desc_contract:         Field::Tinymce,
     desc_finish:           Field::Tinymce,
     created_at:            Field::DateTime,
     updated_at:            Field::DateTime,
