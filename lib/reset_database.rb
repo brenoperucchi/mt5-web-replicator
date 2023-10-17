@@ -57,5 +57,10 @@ module ResetDatabase
 		# end
 	end
 
+	def self.change_db_production_development
+		Store.all.each{|s| s.update(url: s.url + "2")}
+		
+	end
+
 end
 

@@ -28,7 +28,7 @@ Rails.application.routes.draw do
     # resources :dashboards, only: [:index]
     get  '/dashboards/',                     to: 'dashboards#index'#, as: 'index_dasboards'
     get  '/dashboards/all',                  to: 'dashboards#index'#, as: 'index_dasboards'
-    get  '/dashboards/:store_name',          to: 'dashboards#index'#
+    get  '/dashboards/:store_name',          to: 'dashboards#index',  as: 'store_name_dasboards'
     get  '/dashboards/:store_name/all',      to: 'dashboards#index'#
     
 

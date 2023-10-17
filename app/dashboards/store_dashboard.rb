@@ -17,10 +17,10 @@ class StoreDashboard < Administrate::BaseDashboard
     language:               Field::Select.with_options(collection: Store::LANGUAGE),
     state:                  Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     dashboard_restrict:     Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
-    volume_default:         Field::String,
-    telegram_bot_chat_id:   Field::String,
-    telegram_bot_status:    Field::String,
-    telegram_bot_token:     Field::String,
+    contact_whatsapp:       Field::String.with_options(searchable: false),
+    telegram_bot_chat_id:   Field::String.with_options(searchable: false),
+    telegram_bot_status:    Field::String.with_options(searchable: false),
+    telegram_bot_token:     Field::String.with_options(searchable: false),
     plan:             Field::BelongsTo,
     payment:          Field::BelongsTo,
     plan_items:       Field::HasMany,
@@ -59,11 +59,11 @@ class StoreDashboard < Administrate::BaseDashboard
   email
   url
   language
+  contact_whatsapp
   telegram_bot_chat_id
   telegram_bot_status
   telegram_bot_token
   tag_list
-  volume_default
   plan
   plan_items
   accounts
@@ -86,6 +86,7 @@ class StoreDashboard < Administrate::BaseDashboard
   email
   url
   language
+  contact_whatsapp
   telegram_bot_chat_id
   telegram_bot_status
   telegram_bot_token
@@ -95,7 +96,6 @@ class StoreDashboard < Administrate::BaseDashboard
   accounts
   payment
   payment_methods
-  volume_default
   ].freeze
 
   # COLLECTION_FILTERS

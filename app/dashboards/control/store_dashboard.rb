@@ -17,7 +17,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     plan:                   Field::BelongsTo,
     plan_items:             Field::HasMany,
     language:               Field::Select.with_options(collection: Store::LANGUAGE),
-    volume_default:         Field::String.with_options(searchable: false),
+    contact_whatsapp:       Field::String.with_options(searchable: false),
     telegram_bot_chat_id:   Field::String.with_options(searchable: false),
     telegram_bot_status:    Field::String.with_options(searchable: false),
     telegram_bot_token:     Field::String.with_options(searchable: false),
@@ -48,6 +48,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   dashboard_restrict
   name
   email
+  contact_whatsapp
   plan
   url
   language
@@ -62,6 +63,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   dashboard_restrict
   name
   email
+  contact_whatsapp
   url
   plan
   language

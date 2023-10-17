@@ -40,15 +40,16 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                           = I18n.t :site, scope:'helpers.dashboards'
                     - if @current_store
                       li.breadcrumb-item
-                        = link_to dashboards_path(@current_store.url, params: request.query_parameters) do
+                        = link_to store_name_dasboards_path(@current_store.url, params: request.query_parameters) do
                           = I18n.t :dashboards, scope:'helpers.dashboards'
                         / a href="/dashboards" 
                     = content_for :breadcrumb
                 .col-lg-3.text-end
-                  .button.list-inline-item
-                    button#filter.btn.btn-light[type="button"]
-                      i.feather.icon-plus
-                      = I18n.t :filters, scope:'helpers.dashboards'
+                  - if action_name != "back_urls"
+                    .button.list-inline-item
+                      button#filter.btn.btn-light[type="button"]
+                        i.feather.icon-plus
+                        = I18n.t :filters, scope:'helpers.dashboards'
                   - if action_name != "contract" and not @trace.nil?
                     .button.list-inline-item
                       = link_to contract_dashboard_path(@trace.store.url, @trace.name), class: 'btn btn-lg btn-dark w-100' do

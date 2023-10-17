@@ -1,3 +1,4 @@
+- contact_whatsapp = @invoice.store.contact_whatsapp.to_s.gsub(/[^0-9\-]/,"")
 .card
   .card-header
     | Olá 
@@ -9,7 +10,7 @@
       | Estamos empolgados em tê-lo conosco e estamos confiantes de que nosso sistema agregará valor ao seu negócio.
     h6
       | O que você pode esperar do nosso sistema?
-    ul
+    ol
       li
         | Replicação de ordens em tempo real
       li
@@ -18,16 +19,20 @@
         | Suporte técnico
     h6
       | Primeiros Passos:
-    ol
-      li
-        | Faça o login na sua conta
-      li
-        | Configure suas preferências
-      li
-        | Comece a replicar ordens com um único clique
+    / ol
+    /   li
+    /     | Faça o login na sua conta
+    /   li
+    /     | Configure suas preferências
+    /   li
+    /     | Comece a replicar ordens com um único clique
     p
       | Se você tiver alguma dúvida ou precisar de assistência, estamos aqui para ajudar!
-    a.btn.btn-success[href="https://api.whatsapp.com/send?phone=5561981940276&amp;text=Ol&aacute;%20Suporte.%20Estou%20iniciando%20o%20contato%20a%20partir%20da%20p&aacute;gina%20de%20contra&ccedil;&atilde;o%20de%20portf&oacute;lio." target="_blank" rel="noopener"]
-      |  Clique aqui para falar conosco no WhatsApp 
+    - if contact_whatsapp.present?
+      a.btn.btn-success.mb-2[href="https://api.whatsapp.com/send?phone=#{contact_whatsapp}&amp;text=Ol&aacute;%20Suporte.%20Estou%20iniciando%20o%20contato%20a%20partir%20da%20p&aacute;gina%20de%20contra&ccedil;&atilde;o%20de%20portf&oacute;lio." target="_blank" rel="noopener"]
+        |  Clique aqui para falar conosco no WhatsApp 
+    a.btn.btn-info[href="https://imentore.freshdesk.com/support/solutions/articles/151000020358-como-configurar-o-seu-metatrader" target="_blank" rel="noopener"]
+      | Clique aqui para saber como configurar o seu MetaTrader
   .card-footer.text-muted
-    | Obrigado por escolher o nosso sistema! Estamos ansiosos para ajudá-lo a alcançar seus objetivos.
+    | Obrigado por escolher o nosso sistema!
+    / | Estamos ansiosos para ajudá-lo a alcançar seus objetivos.
