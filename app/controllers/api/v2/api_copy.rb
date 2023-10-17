@@ -40,14 +40,23 @@ module API
 
             # Message Open
             message_open = klass_metatrader.new(attributes)
-            if(message_open.save)
+            message_close = klass_metatrader.new(attributes)
+            
+            begin
+              message_open.save
+              message_close.save
+            rescue Exception => e
+              logging = Logging.create(content:params, state: "COPY/ERROR", account: account)
+            end
+
+
+            if(message_open.valid?)
               logging = message_open.loggings.create(content:params, state: "COPY/OPEN", changeset: account.name, account: account)
               message_open.execute if message_open.create_orders(logging)
             end
 
             # Message Close
-            message_close = klass_metatrader.new(attributes)
-            if(message_close.save)
+            if(message_close.valid?)
               logging = message_close.loggings.create(content:params, state: "COPY/CLOSE", changeset: account.name, account: account)
               message_close.execute if message_close.close_orders(logging)
             end
