@@ -1,9 +1,9 @@
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_path(@trace.name)}" 
+    a href="#{dashboard_path(@trace.store.url, @trace.name, params: request.query_parameters)}" 
       = @trace.name
   li.breadcrumb-item
-    a href="#{account_dashboard_url(@trace.name, @account, @trace.customer_plan.payment, @trace.id,  datefilter:params[:datefilter])}" 
+    a href="#{account_dashboard_path(@trace.store.url, @trace.name, @account.id, params: request.query_parameters)}" 
       = @account.name
 
 = render "filter"

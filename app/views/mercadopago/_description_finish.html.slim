@@ -3,7 +3,7 @@
   .card-header
     | Olá 
     = @invoice.invoiceable.name
-  .card-body
+  .card-body.p-3
     h5.card-title
       | Seja bem-vindo ao nosso Sistema de Replicação de Ordens!
     p.card-text
@@ -19,20 +19,15 @@
         | Suporte técnico
     h6
       | Primeiros Passos:
-    / ol
-    /   li
-    /     | Faça o login na sua conta
-    /   li
-    /     | Configure suas preferências
-    /   li
-    /     | Comece a replicar ordens com um único clique
+    ul
+      li#youtube
+        iframe[width="560" height="315" src="https://www.youtube.com/embed/kYtjvGkZj2c" frameborder="0" allowfullscreen]
+        a.btn.btn-info[href="https://imentore.freshdesk.com/support/solutions/articles/151000020358-como-configurar-o-seu-metatrader" target="_blank" rel="noopener"]
+          | Segue o manual de como configurar o seu MetaTrader
     p
       | Se você tiver alguma dúvida ou precisar de assistência, estamos aqui para ajudar!
     - if contact_whatsapp.present?
-      a.btn.btn-success.mb-2[href="https://api.whatsapp.com/send?phone=#{contact_whatsapp}&amp;text=Ol&aacute;%20Suporte.%20Estou%20iniciando%20o%20contato%20a%20partir%20da%20p&aacute;gina%20de%20contra&ccedil;&atilde;o%20de%20portf&oacute;lio." target="_blank" rel="noopener"]
+      a.btn.btn-success[href="https://api.whatsapp.com/send?phone=#{contact_whatsapp}&amp;text=Ol&aacute;%20Suporte.%20Estou%20iniciando%20o%20contato%20a%20partir%20da%20p&aacute;gina%20de%20contra&ccedil;&atilde;o%20de%20portf&oacute;lio." target="_blank" rel="noopener"]
         |  Clique aqui para falar conosco no WhatsApp 
-    a.btn.btn-info[href="https://imentore.freshdesk.com/support/solutions/articles/151000020358-como-configurar-o-seu-metatrader" target="_blank" rel="noopener"]
-      | Clique aqui para saber como configurar o seu MetaTrader
   .card-footer.text-muted
     | Obrigado por escolher o nosso sistema!
-    / | Estamos ansiosos para ajudá-lo a alcançar seus objetivos.

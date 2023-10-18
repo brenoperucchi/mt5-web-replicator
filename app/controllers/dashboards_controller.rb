@@ -1,6 +1,5 @@
 class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
-	before_action :set_account, only:[:account]
 	before_action :set_trace, except: [:index]
 	before_action :filters#, except: :index
 	before_action :dashboard_restrict
@@ -178,20 +177,16 @@ class DashboardsController < ApplicationController
 	end
 
 	def account
+		@account = Account.find(params[:account_id])
+
 		@trace = Trace.find_by(name: params[:name])
 		# @account = current_store.accounts.find(params[:id])
     @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
     @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
-
-		# @trace = @account.traces.find(params[:trace_id])
-		respond_to do |wants|
-			wants.html do
-				if @account
-					render action: :account
-				else
-					redirect_to dashboards_path
-				end
-			end
+		if @account
+			render action: :account
+		else
+			redirect_to dashboards_path
 		end
 	end
 
@@ -207,14 +202,6 @@ class DashboardsController < ApplicationController
 		if @trace.nil?
 			redirect_to root_path, notice: "Dashboard Not found"
 		end
-	end
-
-	def set_account
-		if current_store == Store.first or current_store.nil?
-			@account = Account.find(params[:id])
-		else
-			@account = current_store.accounts.find(params[:id])
-		end	
 	end
 
 	def filters

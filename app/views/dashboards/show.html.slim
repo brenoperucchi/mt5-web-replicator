@@ -1,7 +1,7 @@
 - chart_values =  @trace.dashboard_capital_accumulated(true)
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_path(@trace.store.url, @trace.name)}" 
+    a href="#{dashboard_path(@trace.store.url, @trace.name, params: request.query_parameters)}" 
       = @trace.name
 
 = render "filter"
