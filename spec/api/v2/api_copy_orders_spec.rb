@@ -24,6 +24,15 @@ RSpec.describe API::V1::APITransactionsCopy do
   describe API::V1::APITransactionsCopy do
 
     context 'POST' do
+      it 'Testing if ApiCopy fixing UTF-8 problem' do
+        file_content = eval(File.read("#{Rails.root}/spec/api/v2/_params_enconding_problem.txt"))
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: file_content 
+        expect(Message::V2::Metatrader.all.count).to be == 4
+        expect(Message::V2::Metatrader.last.state).to be == "executed"
+        expect(Message::V2::Metatrader.last.orders.count).to be == 0
+      end
+
       it 'Account Hedging to Hedging - Contract 1 and Change Stop Loss and Take Profit' do
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
             params: {"imentore_copy"=>
