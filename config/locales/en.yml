@@ -116,7 +116,7 @@ en:
             business: Business
             premium: Premium
           premium:
-            title1: Exclusive server according to your demand next to the big centers (B3 or Forex).
+            title1: We have exclusive services for premium customers who require a high-demand system.
             title2: Get in touch
           title: Our plans.
           sign_in: sign
@@ -124,7 +124,7 @@ en:
           copy: "%{limit} Copy Accounts"
           slave: "%{limit} Slave Accounts"
           charge: Automatic billing for customers
-          telegram: "%{limit} Robo Telegram Bot - Alfred"
+          telegram: "Robo Telegram Bot - Alfred"
           extra: "%{amount} R$ for each extra resource"
           announce1: "All plans %{value}% off for a limited time"
           announce2: discounts valid for 1 year.

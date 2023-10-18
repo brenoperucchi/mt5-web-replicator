@@ -40,7 +40,7 @@ module API
             end
 
             klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
-            attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").merge({request_url: request.url}).to_json, content_at: Time.zone.now, store: account.try(:store), account:account}
+            attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").to_json, request_url: request.url, content_at: Time.zone.now, store: account.try(:store), account:account}
 
             # Message Open
             message_open = klass_metatrader.new(attributes)
@@ -50,7 +50,10 @@ module API
               message_open.save
               message_close.save
             rescue Exception => e
-              logging = Logging.create(content:params, state: "COPY/ERROR", account: account)
+              error_message = e.message
+              error_backtrace = e.backtrace[0..5]
+              logging = Logging.create(content: params, state: "COPY/ERROR", account: account, error_message: error_message, error_backtrace: error_backtrace)
+              binding.b
             end
 
             if(message_open.valid?)

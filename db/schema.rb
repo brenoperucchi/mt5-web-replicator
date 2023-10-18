@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_10_04_195758) do
+ActiveRecord::Schema.define(version: 2023_10_18_040032) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -194,6 +194,7 @@ ActiveRecord::Schema.define(version: 2023_10_04_195758) do
     t.bigint "resourceable_id"
     t.bigint "account_id"
     t.string "ancestry", collation: "C"
+    t.text "settings"
     t.index ["account_id"], name: "index_loggings_on_account_id"
     t.index ["ancestry"], name: "index_loggings_on_ancestry"
     t.index ["loggerable_type", "loggerable_id"], name: "index_loggings_on_loggerable_type_and_loggerable_id"
@@ -217,6 +218,7 @@ ActiveRecord::Schema.define(version: 2023_10_04_195758) do
     t.string "type"
     t.string "state_meta"
     t.text "params"
+    t.text "settings"
     t.index ["account_id"], name: "index_messages_on_account_id"
     t.index ["ancestry"], name: "index_messages_on_ancestry"
     t.index ["store_id"], name: "index_messages_on_store_id"

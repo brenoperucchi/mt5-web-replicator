@@ -2,6 +2,8 @@ class Logging < ApplicationRecord
 
   has_ancestry
 
+  store :settings, accessors:[:error_message, :error_backtrace]
+
   has_many :orders
   has_many :transactions, through: :orders, source: :transactions
 

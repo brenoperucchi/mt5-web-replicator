@@ -4,9 +4,10 @@ class Message::Message < ApplicationRecord
   self.table_name = "messages"
   has_ancestry
 
+  store :settings, accessors:[:request_url]
+
   serialize :content
   serialize :params
-
   
   # has_many :orders
   has_and_belongs_to_many :orders
@@ -51,11 +52,6 @@ class Message::Message < ApplicationRecord
         return Hash.new
       end
     end
-  end
-
-
-  def request_url
-    YAML.load(params)[:request_url] || nil
   end
 
   def clean_malformed_json(json_str)

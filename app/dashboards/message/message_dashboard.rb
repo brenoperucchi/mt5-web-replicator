@@ -14,6 +14,7 @@ module Message
       content_id:   Field::String,
       state:        Field::String,
       kind:         Field::String.with_options(searchable: false),
+      request_url:  Field::String.with_options(searchable: false),
       response:     Field::String,
       account:      Field::BelongsTo,
       traces:       Field::HasMany,
@@ -55,6 +56,7 @@ module Message
     orders
     slaves
     params
+    request_url
     content
     content_at
     created_at
