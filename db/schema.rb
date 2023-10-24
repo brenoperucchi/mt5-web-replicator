@@ -215,7 +215,6 @@ ActiveRecord::Schema.define(version: 2023_10_18_040032) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "account_id"
-    t.string "type"
     t.string "state_meta"
     t.text "params"
     t.text "settings"

@@ -31,9 +31,10 @@ class Message::Import < Message::Message
 
       order = create_order(transaction, trace)
       if order&.save
+        transaction.close
         count_orders += 1
         self.orders << order
-        self.traces << trace
+        self.traces = [trace]
       else
         transaction.destroy
       end
