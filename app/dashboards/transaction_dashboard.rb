@@ -30,7 +30,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     trace:              Field::BelongsTo,
     order:              Field::BelongsTo,
-    message:            Field::BelongsTo,
+    message:            Field::BelongsTo.with_options(class_name:'Message::Message'),
     account:            Field::BelongsTo,
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
     loggings:           Field::HasMany,

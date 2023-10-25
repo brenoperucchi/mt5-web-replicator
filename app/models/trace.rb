@@ -201,8 +201,9 @@ class Trace < ApplicationRecord
 
   def masters_scope(type = :masters, scope = :all)
     data = masters_filter(self.send(type), scope)
+    
     if scope.is_a?(Array)
-      data = data.send(:instance_eval, "#{scope.join(".").to_s}")
+      data = data.where(state: scope)
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
@@ -212,7 +213,7 @@ class Trace < ApplicationRecord
       magics ||= Order.magic_numbers_split(accounts.copy.map(&:magics_accept))
       
       magics = magics.map(&:to_i)
-      data = data.where(magic_number:[magics])
+      data = data.where(magic_number: [magics])
     end
 
     data
@@ -226,7 +227,7 @@ class Trace < ApplicationRecord
 
   def masters_filter(data, scope = nil)
     # if Rails.env.development?
-    #   self.search_date_begin = Date.parse("2023-09-01").to_date 
+    #   self.search_date_begin = Date.parse("2023-10-01").to_date 
     #   self.search_date_end   = DateTime.now
     # end
     if self.search_date_begin and self.search_date_end

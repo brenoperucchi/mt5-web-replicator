@@ -257,14 +257,14 @@
                 span.round-8.bg-dark.rounded-circle.me-6
                 div
                   h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.masters_scope(:masters, [:closed, :buy]).count
+                    = @trace.masters_scope(:masters, [:closed, :executed, :buy]).count
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :buy, scope:'helpers.dashboards.pages.show'
               .d-flex.align-items-center
                 span.round-8.bg-dark.rounded-circle.me-6
                 div
                   h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.masters_scope(:masters, :sell).count
+                    = @trace.masters_scope(:masters, [:closed, :executed, :sell]).count
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :sell, scope:'helpers.dashboards.pages.show'
               .d-flex.align-items-center
