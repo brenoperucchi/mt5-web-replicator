@@ -138,13 +138,13 @@ class TransactionSlave < ApplicationRecord
         # elsif master.slaves.count > 1 and master.slaves.first == self
     
         # NOTE - IF TP1 IS REACH THEN TPs IS MASTER OPEN PRICE
-        if master.slaves.count > 1 and master.slaves.first == self
-          master.slaves.not_closed.each do |slave|
-            slave.update(stop_loss: slave.price_open)
-          end
-        # else
-        #   master.close if master.slaves.not_closed.count == 0
-        end
+        # if master.slaves.count > 1 and master.slaves.first == self
+        #   master.slaves.not_closed.each do |slave|
+        #     slave.update(stop_loss: slave.price_open)
+        #   end
+        # # else
+        # #   master.close if master.slaves.not_closed.count == 0
+        # end
       end
     end
     
