@@ -38,13 +38,6 @@ module Signalforex
     # config.eager_load_paths << "#{Rails.root}/app/fields"
 
 
-    # /Users/brenoperucchi/Devs/signalforex/app/fields/has_many_scope_field.rb
-   	config.middleware.insert_before 0, Rack::Cors do
-   	  allow do
-   	    origins '*'
-   	    resource '*', headers: :any, methods: [:get, :post, :put, :delete, :options]
-   	  end
-   	end
     #SIDEKIQ
     config.active_job.queue_adapter = :sidekiq
   end

@@ -62,7 +62,7 @@
                   td = slave.lot.to_f.round(3)
                   td = l(slave.master.open_at, format: :short5) if slave.master.open_at.present?
                   td = l(slave.open_at, format: :short5) if slave.open_at.present?
-                  td = l(slave.master.closed_at, format: :short5) if slave.master.open_at.present?
+                  td = l(slave.master.closed_at, format: :short5) if slave.master.closed_at.present?
                   td = l(slave.closed_at, format: :short5) if slave.closed_at.present?
               tr
                 td OPERATIONS
