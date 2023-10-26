@@ -44,12 +44,12 @@ module AlgoStatistic
 		def dashboard_monthy_amount
 		  amount_total = 0
 		  date    = ['date']
-		  capital = ['capital']
 		  profit  = ['profit']
+		  capital = ['capital']
 		  array = []
 		  self.transactions.closed.where.not(closed_at:nil).order('closed_at asc').group_by{|x| x.closed_at.beginning_of_month.strftime("%b/%Y")}.map do |k,v|
 		    amount_total = v.sum(&:profit) + amount_total
-		    {date:k, capital: amount_total, profit: v.sum(&:profit)} 
+		    {date:k, profit: v.sum(&:profit), capital: amount_total} 
 		  end
 		end
 	end
