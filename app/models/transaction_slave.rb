@@ -147,29 +147,11 @@ class TransactionSlave < ApplicationRecord
         end
       end
     end
-    # state :error do
-    #   def update_state(state)
-    #     # if master.trace.copy? 
-    #       if account.hedging?
-    #         master.erro
-    #       elsif master.slaves.not_error.not_closed.count == 0
-    #         master.erro
-    #       end
-    #     # end
-    #   end    
-    # end
-
+    
   end
 
   def restrict_magic_number?
     order.restrict_magic_number(self)
-    # unless self.account.magics_accept.blank?
-    #   magic_numbers = account.magics_accept.try(:split).try(:flatten)
-    #   unless magic_numbers.try(:include?, magicnumber)
-    #     loggings.create(content:"Account #{account.name} Magic Number Restrict #{magicnumber} Account only accept #{magic_numbers}", changeset: nil, version:version, state: 'ERROR')
-    #     self.erro!
-    #   end
-    # end
   end
 
   def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil)
@@ -180,11 +162,6 @@ class TransactionSlave < ApplicationRecord
 
   def api_request_attributes
     order.api_request_attributes(self)
-    # magicnumber = self.try(:trace).try(:name_id)
-    # deal_ticket = self.ticket_deal.blank? ? 0 : self.ticket_deal
-    # openprice = (ordertype == "0" or ordertype == 1) ? "0" : price_request
-    # order_trace = self.trace_id
-    # "#{ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{self.id}|#{magicnumber}|#{master.id}|#{openprice}|#{lot}|#{stop_loss}|#{take_profit}|#{state}|#{symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}"
   end
 
   def seconds_ago

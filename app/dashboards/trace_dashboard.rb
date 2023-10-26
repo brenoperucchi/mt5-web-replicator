@@ -22,7 +22,7 @@ class TraceDashboard < Administrate::BaseDashboard
     magic_same:            Field::Boolean.with_options(searchable: false),
     store:                 Field::BelongsTo,
     meta_host:             Field::String,
-    kind:                  Field::String,
+    kind:                  CheckboxField.with_options(collection_key: Trace.kinds.keys, default: :copy),
     response:              Field::String,
     capital_recomendation: Field::String.with_options(searchable: false),
     capital_multiplier:    Field::String.with_options(searchable: false),
@@ -63,11 +63,11 @@ class TraceDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   active
-  magic_same
   instrument_control
+  kind
+  magic_same
   name
   name_id
-  kind
   magics_accept
   capital_recomendation
   capital_multiplier
@@ -92,12 +92,12 @@ class TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  active
-  magic_same
-  instrument_control
   name
-  name_id
+  active
+  instrument_control
   kind
+  magic_same
+  name_id
   magics_accept
   capital_recomendation
   capital_multiplier

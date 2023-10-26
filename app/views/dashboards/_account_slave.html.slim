@@ -18,18 +18,21 @@
                 / - else
                 /   th Ticket Master
                 /   th Ticket Slave
-                th Ticket Slave
+                th Ticket
                 th Symbol
                 th State
-                th Profit Slave
                 th Profit Copy
-                th OrderType
-                / th Price Open
-                th Price Closed
-                th Volume
-                th Open At Slave
-                th Open At Copy
-                th Closet At
+                th Profit Slave
+                th Type
+                th PriceOpen Copy
+                th PriceOpen Slave
+                th PriceClose Copy
+                th PriceClose Slave
+                th Lot
+                th Open Copy
+                th Open Slave
+                th Closet Copy
+                th Closet Slave
             tbody
               tr
                 td OPERATIONS
@@ -49,14 +52,17 @@
                   td = slave.ticket_slave
                   td = slave.symbol
                   td = slave.state
-                  td = number_with_precision slave.profit, precision:2
                   td = number_with_precision slave.master.profit, precision:2
+                  td = number_with_precision slave.profit, precision:2
                   td = slave.ordertype
-                  / td = slave.price_open
+                  td = slave.master.price_open
+                  td = slave.price_open
+                  td = slave.master.price_closed
                   td = slave.price_closed
                   td = slave.lot.to_f.round(3)
-                  td = l(slave.open_at, format: :short5) if slave.open_at.present?
                   td = l(slave.master.open_at, format: :short5) if slave.master.open_at.present?
+                  td = l(slave.open_at, format: :short5) if slave.open_at.present?
+                  td = l(slave.master.closed_at, format: :short5) if slave.master.open_at.present?
                   td = l(slave.closed_at, format: :short5) if slave.closed_at.present?
               tr
                 td OPERATIONS

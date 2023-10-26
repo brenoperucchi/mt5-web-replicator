@@ -59,11 +59,12 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # SHOW_PAGE_ATTRIBUTES
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
+  name
   id
   active
-  magic_same
   instrument_control
-  name
+  kind
+  magic_same
   name_id
   magics_accept
   capital_recomendation
@@ -81,11 +82,11 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
+  name
   active
-  magic_same
   instrument_control
   kind
-  name
+  magic_same
   name_id
   magics_accept
   capital_recomendation

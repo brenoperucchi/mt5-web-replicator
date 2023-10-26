@@ -13,7 +13,6 @@
             - type = @account.slave? ? :slaves : :transactions
             thead
               tr
-                th ID
                 - if @account.copy?
                   th Ticket
                 - else
@@ -23,12 +22,13 @@
                 th State
                 th Profit
                 th Volume
-                th OrderType
+                th Type
                 th Price Open
                 th Price Closed
                 th Max MFE
                 th Min MAE
-                th Closet At
+                th OpenAt
+                th ClosetAt
             tbody
               tr
                 td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"
@@ -44,7 +44,6 @@
                 td -
               - @account.slaves_scope(:transactions, :all, @trace).order(closed_at: 'DESC').each do |copy|
                 tr
-                  td = copy.id 
                   td = copy.ticket
                   td = copy.symbol
                   td = copy.state
@@ -55,7 +54,7 @@
                   td = copy.price_closed
                   td = copy.statistics.mfe_max.try(:amount).to_f
                   td = copy.statistics.mae_min.try(:amount).to_f
-                  / td = l(copy.open_at, format: :short2)
+                  td = l(copy.open_at, format: :short2)
                   td = l(copy.closed_at, format: :short2) if copy.closed_at.present?
               tr
                 td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"

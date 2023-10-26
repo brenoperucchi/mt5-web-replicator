@@ -147,21 +147,19 @@ class Order < ApplicationRecord
   #   end
   # end
 
-
   def restrict_magic_number(resource)
     unless resource.account.magics_accept.blank?
       trace_magic_number = self.try(:trace).try(:name_id)
-      magic_numbers = self.class.magic_numbers_split(resource.account.magics_accept)
+      magic_numbers = Order.magic_numbers_split(resource.account.magics_accept)
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
+        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
         resource.erro!
       end
     end
     resource.error?
   end  
-
 
   def api_request_attributes(resource)
     # magicnumber = resource.try(:trace).try(:name_id)
