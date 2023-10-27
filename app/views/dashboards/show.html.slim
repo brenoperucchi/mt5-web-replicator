@@ -275,7 +275,6 @@
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :total, scope:'helpers.dashboards.pages.show'
 
-
 .row
   .col-md-12
     .card.table-card.latest-activity-card
@@ -345,6 +344,9 @@
                   td 
                   td = account.slaves_scope(type, :all, @trace).count
                   td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
+
+= render "magics", trace: @trace, account: @account
+
 - content_for :header do
   = stylesheet_link_tag "mintone/morris.css"  
   = javascript_include_tag "mintone/chart/jquery.sparkline.min.js"

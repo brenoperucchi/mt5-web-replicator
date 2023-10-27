@@ -1,0 +1,57 @@
+- magics = Order.magic_numbers_split(@trace.magics_accept)
+- return if magics.blank?
+.col-md-12
+  .card.table-card.latest-activity-card
+    .card-header
+      h5
+        | Magic Numbers
+      .card-header-right
+    .card-body
+      .table-responsive
+        table.table.table-hover.table-borderless
+          thead
+            tr
+              th Magic
+              th 
+              th Fator Lucro
+              th Tx de Acerto
+              th Lucro/MaxDD
+              th 
+              th Op Open 
+              th Op Closes 
+              th Op Error
+              th 
+              th Qtd Total
+              th $ Total
+          tbody
+            - magics.each do |magic| 
+              - @trace.search_magic_number = magic
+              tr
+                td = magic
+                td
+                td = number_with_precision @trace.profit_factor(:masters).round(2), precision: 2
+                td = @trace.profit_trade(:masters)
+                td = number_with_precision @trace.profit_drawdown(:masters), precision: 2
+                td 
+                td = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
+                td = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2
+                td = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision: 2
+                td 
+                td = @trace.masters_scope(:masters, :all).count
+                td = number_with_precision @trace.masters_scope(:masters, :all).to_a.sum(&:profit), precision: 2
+
+            / - magics = @trace.masters_scope(:masters, :all).map(&:magic_number).uniq.compact
+            - @trace.search_magic_number = @trace.masters.map(&:magic_number).uniq.compact - magics
+            tr
+              td = "Others"
+              td
+              td = number_with_precision @trace.profit_factor(:masters).round(2), precision: 2
+              td = @trace.profit_trade(:masters)
+              td = number_with_precision @trace.profit_drawdown(:masters), precision: 2
+              td 
+              td = number_with_precision @trace.masters_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
+              td = number_with_precision @trace.masters_scope(:masters, :closed).to_a.sum(&:profit), precision: 2
+              td = number_with_precision @trace.masters_scope(:masters, :error).to_a.sum(&:profit), precision: 2
+              td 
+              td = @trace.masters_scope(:masters, :all).count
+              td = number_with_precision @trace.masters_scope(:masters, :all).to_a.sum(&:profit), precision: 2     

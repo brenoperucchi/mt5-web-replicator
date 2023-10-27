@@ -3,7 +3,7 @@ require 'algo_statistic'
 
 class Trace < ApplicationRecord
 
-  attr_accessor :search_date_begin, :search_date_end
+  attr_accessor :search_date_begin, :search_date_end, :search_magic_number
 
   ENUMS = %w(kind)
 
@@ -87,10 +87,6 @@ class Trace < ApplicationRecord
 
   def masters_transactions
     masters_scope(:masters)
-  end
-
-  def magic_number_restrict?
-    Order.magic_numbers_split(self.magics_accept) or Order.magic_numbers_split(accounts.copy.map(&:magics_accept)).present?
   end
 
   def create_order(order_params, account, message, symbol, api_version)
@@ -208,12 +204,12 @@ class Trace < ApplicationRecord
       data = data.send(scope) if data.respond_to?(scope)
     end
 
-    if magic_number_restrict?
-      magics = Order.magic_numbers_split(self.magics_accept)
-      magics ||= Order.magic_numbers_split(accounts.copy.map(&:magics_accept))
+    if self.search_magic_number.present?
+      # magics = Order.magic_numbers_split(self.magics_accept)
+      # magics ||= Order.magic_numbers_split(accounts.copy.map(&:magics _accept))
       
-      magics = magics.map(&:to_i)
-      data = data.where(magic_number: [magics])
+      # magics = magics.map(&:to_i)
+      data = data.where(magic_number: self.search_magic_number)
     end
 
     data
