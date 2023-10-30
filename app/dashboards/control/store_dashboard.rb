@@ -85,6 +85,6 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   # across all pages of the admin dashboard.
   #
   def display_resource(store)
-    store.url.try(:capitalize)
+    store.try(:url)
   end
 end

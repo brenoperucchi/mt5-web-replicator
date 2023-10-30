@@ -98,6 +98,6 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
   # across all pages of the admin dashboard.
   #
   def display_resource(customer_plan)
-    customer_plan.try(:name).try(:capitalize)
+    "#{customer_plan.try(:name)} - Store #{customer_plan.store.url}"
   end
 end
