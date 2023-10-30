@@ -96,7 +96,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   accounts
   store_id
   desc_contract
-  desc_finish
   ].freeze
 
   # COLLECTION_FILTERS

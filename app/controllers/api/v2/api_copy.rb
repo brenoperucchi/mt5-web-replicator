@@ -53,7 +53,6 @@ module API
               error_message = e.message
               error_backtrace = e.backtrace[0..5]
               logging = Logging.create(content: params, state: "COPY/ERROR", account: account, error_message: error_message, error_backtrace: error_backtrace)
-              binding.b
             end
 
             if(message_open.valid?)

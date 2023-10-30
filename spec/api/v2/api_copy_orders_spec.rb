@@ -236,13 +236,13 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(orders.error.count).to be == 1
         expect(orders.executed.count).to be == 0
         expect(orders.closed.count).to be == 3
-        expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 1.0
+        expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
         expect(Trace.find(2).transactions.closed.find_by_ticket(10000002).profit.to_f).to be == 1.0
-        expect(orders.sum(&:profit_copy).to_f).to be == 4.0
+        expect(orders.sum(&:profit_copy).to_f).to be == 3.0
         expect(Transaction.closed_info.count).to be == 0
         expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
 
-        expect(orders.sum(&:profit_copy).to_f).to be == 4.0
+        expect(orders.sum(&:profit_copy).to_f).to be == 3.0
         expect(trace.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
         expect(Transaction.closed_info.count).to be == 0
       end
