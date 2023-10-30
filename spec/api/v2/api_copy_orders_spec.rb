@@ -443,10 +443,11 @@ RSpec.describe API::V1::APITransactionsCopy do
         transaction.close
         expect(transaction.state).to be == "closed"
         expect(order.state).to be == "closed"
-      end      
-
+      end
+      
       it 'Hedging - Magic should be the same of Copy & Slave' do
         @trace.update(magic_same: true)
+        @trace.reload
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
@@ -454,12 +455,40 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@trace.name_id).to be == "20001"
         account = Account.find_by(name: 10100)
         account.update(magics_accept: nil)
-        order = account.orders.find_by(content_id:10000006)
+        order = account.orders.find_by(content_id:10000006, trace_id: @trace.id)
+        expect(order.trace.name_id).to be == "20001"
+        expect(order.trace.name).to be == "SignalCopy"
         expect(order.content_id).to be == 10000006
         expect(order.transactions.count).to be == 1
         expect(order.transactions.first.magic_number).to be == "10001"
         expect(order.slaves.count).to be == 2
-        expect(order.slaves.first.magic_number).to be == "20001"        
+        expect(order.slaves.first.magic_number).to be == "10001"        
+        expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3        
+        expect(TransactionSlave.where(ticket_master:10000006)[0].magic_number).to be == "10001"
+        expect(TransactionSlave.where(ticket_master:10000006)[1].magic_number).to be == "10001"
+        expect(TransactionSlave.where(ticket_master:10000006)[2].magic_number).to be == "20002"
+      end
+      it 'Hedging - Magic should be the same of Copy & Slave' do
+        @trace.update(magic_same: "1")
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+          params: {"imentore_copy"=>"{\"orders_open\":{
+                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
+                  }}"}
+        expect(@trace.name_id).to be == "20001"
+        account = Account.find_by(name: 10100)
+        account.update(magics_accept: nil)
+        order = account.orders.find_by(content_id:10000006, trace_id: @trace.id)
+        expect(order.trace.name_id).to be == "20001"
+        expect(order.trace.name).to be == "SignalCopy"
+        expect(order.content_id).to be == 10000006
+        expect(order.transactions.count).to be == 1
+        expect(order.transactions.first.magic_number).to be == "10001"
+        expect(order.slaves.count).to be == 2
+        expect(order.slaves.first.magic_number).to be == "10001"        
+        expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3        
+        expect(TransactionSlave.where(ticket_master:10000006)[0].magic_number).to be == "10001"
+        expect(TransactionSlave.where(ticket_master:10000006)[1].magic_number).to be == "10001"
+        expect(TransactionSlave.where(ticket_master:10000006)[2].magic_number).to be == "20002"
       end
 
       it 'Hedging - Magic shouldnt be the same of Copy & Slave' do
@@ -471,12 +500,18 @@ RSpec.describe API::V1::APITransactionsCopy do
         expect(@trace.name_id).to be == "20001"
         account = Account.find_by(name: 10100)
         account.update(magics_accept: nil)
-        order = account.orders.find_by(content_id:10000006)
+        order = account.orders.find_by(content_id:10000006, trace_id: @trace.id)
+        expect(order.trace.name_id).to be == "20001"
+        expect(order.trace.name).to be == "SignalCopy"
         expect(order.content_id).to be == 10000006
         expect(order.transactions.count).to be == 1
         expect(order.transactions.first.magic_number).to be == "10001"
         expect(order.slaves.count).to be == 2
-        expect(order.slaves.first.magic_number).to be == "20001"        
+        expect(order.slaves.first.magic_number).to be == "20001"                
+        expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3        
+        expect(TransactionSlave.where(ticket_master:10000006)[0].magic_number).to be == "20001"
+        expect(TransactionSlave.where(ticket_master:10000006)[1].magic_number).to be == "20001"
+        expect(TransactionSlave.where(ticket_master:10000006)[2].magic_number).to be == "20002"
       end
  
       it 'Hedging - Restrict Magic Number' do

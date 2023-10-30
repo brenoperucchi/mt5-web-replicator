@@ -128,7 +128,7 @@ class Trace < ApplicationRecord
           instrument = check_instrument(account, symbol, account_slave)
           slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self)
           slave = order.slaves.new(slave_attributes)
-          slave.magic_number = check_magic_number(self.name_id)
+          slave.magic_number = check_magic_number(slave_attributes[:magic_number])
           if slave.save
             order.accounts << account_slave
             slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
@@ -144,7 +144,7 @@ class Trace < ApplicationRecord
   end
 
   def check_magic_number(magic_number)
-    self.magic_same.to_b ? self.name_id : magic_number
+    self.magic_same.to_b ? magic_number : self.name_id
   end
 
   def check_instrument(account, symbol, account_slave=nil)
