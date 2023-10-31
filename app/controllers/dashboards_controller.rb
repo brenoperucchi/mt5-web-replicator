@@ -2,7 +2,7 @@ class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	before_action :set_trace, except: [:index]
 	before_action :filters#, except: :index
-	before_action :set_store, only: [:index, :show, :account]
+	before_action :set_store
 	before_action :dashboard_restrict
 
 	# before_action :authenticate_user
@@ -191,7 +191,7 @@ class DashboardsController < ApplicationController
 	private
 
 	def account_params
-	  params.require(:account).permit(:name, :url, :password, :email, :kind, :meta_margin_mode, :meta_mode, :store_id, settings:[:contract_volume],
+	  params.require(:account).permit(:name, :url, :password, :email, :kind, :meta_margin_mode, :meta_mode, :store_id, settings:[:contract_volume, :meta_mode, :meta_margin_mode],
 	  						customer_attributes:[:name, :customer_plan_id, :user_email, :store_id, user_attributes:[:email, :store_id]]) 
 	end
 

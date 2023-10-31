@@ -16,7 +16,7 @@ module ResetDatabase
 		Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
 		Logging.where(state: "START").delete_all
 		Logging.where(state: "MODIFY").delete_all
-		Message::Message.all.each{|x| x.orders.blank? ? x.destroy : true}
+		Message::Message.all.each{|x| (x.traces.blank? and x.orders.blank?) ? x.destroy : true}
 		date = DateTime.now - 1.year
 		Logging.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
 		Message::Message.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
@@ -58,9 +58,20 @@ module ResetDatabase
 	end
 
 	def self.change_db_production_development
-		Store.all.each{|s| s.update(url: s.url + "2")}
-		
+		Store.all.each{|s| s.update(url: s.url + "2")}		
+		payments = Payment.all.order(id: :asc)[0..1]
+		payments.update_all(api_token: 'TEST-8003379344962428-070514-132303626f6b89ba73ab9f77b2a95c9d-77964627', webhook_token:'TEST-ea4aec5d-82ed-42c8-8c8a-abdd14b3690a') if payments.present?
+	end
+
+	def self.transaction_delete_loggings_closed
+	  Transaction.all.each do |transaction|
+	    closed_logging = transaction.loggings.where(state: "CLOSED").order(created_at: :desc)
+	    if closed_logging.count > 1
+	      closed_logging[1..-1].each do |logging|
+	        logging.delete
+	      end
+	    end
+	  end
 	end
 
 end
-

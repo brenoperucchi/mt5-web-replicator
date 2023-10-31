@@ -51,9 +51,9 @@ class PaymentMethod::MercadoPago
 		  # the purpose: 'wallet_purchase', allows only logged payments
 		  # to allow guest payments you can omit this property
 		  back_urls: {
-									success:"#{Store.domain_url}/mercadopago/back_urls/success/#{@invoice.id}",
-									failure:"#{Store.domain_url}/mercadopago/back_urls/failure/#{@invoice.id}",
-									pending:"#{Store.domain_url}/mercadopago/back_urls/pending/#{@invoice.id}",
+									success:"https://#{Store.domain_url}/mercadopago/back_urls/success/#{@invoice.id}",
+									failure:"https://#{Store.domain_url}/mercadopago/back_urls/failure/#{@invoice.id}",
+									pending:"https://#{Store.domain_url}/mercadopago/back_urls/pending/#{@invoice.id}",
 		  					 },
 			auto_return: 'approved',		  					 
 		  external_reference: @invoice.id,
@@ -62,7 +62,7 @@ class PaymentMethod::MercadoPago
 		        { id: 'ticket' },
 		        { id: 'atm' },
 		      ],
-		      installments: 12
+		      installments: 1
 		    },
 		  binary_mode: true,  
 		  items: [

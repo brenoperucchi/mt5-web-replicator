@@ -40,18 +40,20 @@
                     .col-sm-12
                       / = ff.input :customer_plan_id, input_html: {value: @current_store.customer_plans.try(:first).try(:id)}, as: :hidden
                       / = ff.input :plan_id, collection: @current_store.customer_plans.pluck(:name, :id), input_html: {class: 'select2'}
-                .row
-                  .col-sm-12
-                    - if @trace.customer_plan.meta_margin_mode == "both"
-                      = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
-                    - elsif not @trace.customer_plan.meta_margin_mode == "none"
-                      = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :string, disabled:true
-                .row
-                  .col-sm-12
-                    - if @trace.customer_plan.meta_mode == "both"
-                      = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
-                    - elsif not @trace.customer_plan.meta_mode == "none"
-                      = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
+                  .row
+                    .col-sm-12
+                      - if @trace.customer_plan.meta_margin_mode == "both"
+                        = f.input :meta_margin_mode, collection: Account::meta_margin_modes.map(&:first), input_html: {class: 'select2'}, selected: "hedging"
+                      - elsif not @trace.customer_plan.meta_margin_mode == "none"
+                        = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :string, disabled:true
+                        = f.input :meta_margin_mode, input_html:{value:@trace.customer_plan.meta_margin_mode}, as: :hidden
+                  .row
+                    .col-sm-12
+                      - if @trace.customer_plan.meta_mode == "both"
+                        = f.input :meta_mode, collection: Account::meta_modes.map(&:first), input_html: {class: 'select2'}, selected: "demo"
+                      - elsif not @trace.customer_plan.meta_mode == "none"
+                        = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :string, disabled:true
+                        = f.input :meta_mode, input_html:{value:@trace.customer_plan.meta_mode}, as: :hidden
                 div.mt-4
                   button.btn.btn-dark.w-100
                     = I18n.t :contract, scope:'helpers.dashboards'
