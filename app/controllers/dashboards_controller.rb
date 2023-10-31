@@ -239,7 +239,7 @@ class DashboardsController < ApplicationController
 
 	def dashboard_date_filter_set
 		date_today = Date.today
-		case @current_store.try(:dashboard_date_filter)
+		case @trace.store.try(:dashboard_date_filter)
 		when "1_month"
 			"#{((date_today - 1.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 		when "3_months"
