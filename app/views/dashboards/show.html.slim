@@ -275,75 +275,47 @@
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :total, scope:'helpers.dashboards.pages.show'
 
-.row
-  .col-md-12
-    .card.table-card.latest-activity-card
-      .card-header
-        h5 Accounts
-        .card-header-right
-          / .btn-group.card-option
-          /   button.btn.dropdown-toggle aria-expanded="false" aria-haspopup="true" data-toggle="dropdown" type="button" 
-          /     i.feather.icon-more-horizontal
-          /   ul.list-unstyled.card-option.dropdown-menu.dropdown-menu-right
-          /     li.dropdown-item.full-card
-          /       a href="#!" 
-          /         span
-          /           i.feather.icon-maximize
-          /           | maximize
-          /         span style="display:none" 
-          /           i.feather.icon-minimize
-          /           | Restore
-          /     li.dropdown-item.minimize-card
-          /       a href="#!" 
-          /         span
-          /           i.feather.icon-minus
-          /           | collapse
-          /         span style="display:none" 
-          /           i.feather.icon-plus
-          /           | expand
-          /     li.dropdown-item.reload-card
-          /       a href="#!" 
-          /         i.feather.icon-refresh-cw
-          /         | reload
-          /     li.dropdown-item.close-card
-          /       a href="#!" 
-          /         i.feather.icon-trash
-          /         | remove
-      .card-body
-        .table-responsive
-          table.table.table-hover.table-borderless
-            thead
-              tr
-                th Account
-                th 
-                th Fator Lucro
-                th Tx de Acerto
-                th Lucro/MaxDD
-                th 
-                th Op Open 
-                th Op Closes 
-                th Op Error
-                th 
-                th Qtd Total
-                th $ Total
-            tbody
-              - @trace.accounts.order('kind desc').each do |account|
-                - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
-                - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
-                tr[data-href="#{account_dashboard_url(@trace.store.url, @trace.name, account, @trace.customer_plan.payment, @trace.id,  datefilter:params[:datefilter])}"]
-                  - type = account.slave? ? :slaves : :transactions
-                  td = "#{account.name} - #{account.kind}"
-                  td
-                  td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
-                  td = account.profit_trade(type, @trace)
-                  td = number_with_precision account.profit_drawdown(type, @trace), precision: 2
-                  td 
-                  td = number_with_precision account.slaves_scope(type, :executed, @trace).to_a.sum(&:profit), precision: 2
-                  td = number_with_precision account.slaves_scope(type, :closed, @trace).to_a.sum(&:profit), precision: 2
-                  td = number_with_precision account.slaves_scope(type, :error, @trace).to_a.sum(&:profit), precision: 2
-                  td 
-                  td = account.slaves_scope(type, :all, @trace).count
-                  td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
+- if user_signed_in?
+  .row
+    .col-md-12
+      .card.table-card.latest-activity-card
+        .card-header
+          h5 Accounts
+        .card-body
+          .table-responsive
+            table.table.table-hover.table-borderless
+              thead
+                tr
+                  th Account
+                  th 
+                  th Fator Lucro
+                  th Tx de Acerto
+                  th Lucro/MaxDD
+                  th 
+                  th Op Open 
+                  th Op Closes 
+                  th Op Error
+                  th 
+                  th Qtd Total
+                  th $ Total
+              tbody
+                - @trace.accounts.order('kind desc').each do |account|
+                  - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+                  - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
+                  tr[data-href="#{account_dashboard_url(@trace.store.url, @trace.name, account, @trace.customer_plan.payment, @trace.id,  datefilter:params[:datefilter])}"]
+                    - type = account.slave? ? :slaves : :transactions
+                    td = "#{account.name} - #{account.kind}"
+                    td
+                    td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
+                    td = account.profit_trade(type, @trace)
+                    td = number_with_precision account.profit_drawdown(type, @trace), precision: 2
+                    td 
+                    td = number_with_precision account.slaves_scope(type, :executed, @trace).to_a.sum(&:profit), precision: 2
+                    td = number_with_precision account.slaves_scope(type, :closed, @trace).to_a.sum(&:profit), precision: 2
+                    td = number_with_precision account.slaves_scope(type, :error, @trace).to_a.sum(&:profit), precision: 2
+                    td 
+                    td = account.slaves_scope(type, :all, @trace).count
+                    td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
 
 = render "magics", trace: @trace, account: @account
 

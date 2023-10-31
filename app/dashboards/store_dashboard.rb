@@ -17,6 +17,7 @@ class StoreDashboard < Administrate::BaseDashboard
     language:               Field::Select.with_options(collection: Store::LANGUAGE),
     state:                  Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     dashboard_restrict:     Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
+    dashboard_date_filter:  Field::Select.with_options(collection: %w(1_month 3_months 6_months 1_year 2_years 3_years)),
     contact_whatsapp:       Field::String.with_options(searchable: false),
     telegram_bot_chat_id:   Field::String.with_options(searchable: false),
     telegram_bot_status:    Field::String.with_options(searchable: false),
@@ -45,8 +46,7 @@ class StoreDashboard < Administrate::BaseDashboard
   url
   state
   plan
-  telegram_bot_chat_id
-  telegram_bot_status
+  dashboard_date_filter
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -55,6 +55,7 @@ class StoreDashboard < Administrate::BaseDashboard
   id
   state
   dashboard_restrict
+  dashboard_date_filter
   name
   email
   url
@@ -82,6 +83,7 @@ class StoreDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   state
   dashboard_restrict
+  dashboard_date_filter
   name
   email
   url

@@ -24,7 +24,7 @@
           - if amount_proportional.to_f > amount_min.to_f
             h6= number_to_currency amount_plan * contract_volume
           - else
-            h6= number_to_currency amount_proportional
+            h6= number_to_currency amount_proportional * contract_volume
 
     - if amount_proportional.to_f > amount_min.to_f
       .py-0.d-flex

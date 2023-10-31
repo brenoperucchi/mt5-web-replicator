@@ -8,12 +8,13 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id:            Field::Number,
-    name:          Field::String,
-    url:           Field::String,
+    id:                     Field::Number,
+    name:                   Field::String,
+    url:                    Field::String,
     state:                  Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
     dashboard_restrict:     Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
-    email:         Field::String.with_options(searchable: false),
+    dashboard_date_filter:  Field::Select.with_options(collection: %w(1_month 3_months 6_months 1_year 2_years 3_years)),
+    email:                  Field::String.with_options(searchable: false),
     plan:                   Field::BelongsTo,
     plan_items:             Field::HasMany,
     language:               Field::Select.with_options(collection: Store::LANGUAGE),
@@ -38,6 +39,8 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   plan
   url
   email
+  dashboard_restrict
+  dashboard_date_filter
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -46,6 +49,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   id
   state
   dashboard_restrict
+  dashboard_date_filter
   name
   email
   contact_whatsapp
@@ -61,6 +65,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   state
   dashboard_restrict
+  dashboard_date_filter
   name
   email
   contact_whatsapp

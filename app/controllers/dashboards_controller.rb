@@ -208,12 +208,12 @@ class DashboardsController < ApplicationController
 		# if params[:datefilter].present?
 		# session[:dashboard_magic_number] = params[:dashboard_magic_number].present? ? true : false
 
-		date_today = Date.today
+		
 		# dates = "#{date_today} - #{date_today}"
 		@timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
 		# session[:dates] = params[:datefilter]
 		if params[:datefilter].blank?# and session[:date_begin].nil? and session[:date_end].nil?
-			dates = "#{((date_today - 3.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+			dates = dashboard_date_filter_set
 			session[:dates] = dates
 			session[:date_begin] = dates.split("-")[0]
 			session[:date_end] = dates.split("-")[1]					
@@ -230,6 +230,26 @@ class DashboardsController < ApplicationController
 				session[:dates] = "#{session[:date_begin]} - #{session[:date_end]}"
 			end
 		end
+	end
+
+
+	def dashboard_date_filter_set
+		date_today = Date.today
+		case @current_store.dashboard_date_filter
+		when "1_month"
+			"#{((date_today - 1.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		when "3_months"
+			"#{((date_today - 3.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		when "6_months"
+			"#{((date_today - 6.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		when "1_year"
+			"#{((date_today - 1.year).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		when "2_years"
+			"#{((date_today - 2.years).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		when "3_years"
+			"#{((date_today - 3.years).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		end
+		
 	end
 
 

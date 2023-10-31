@@ -10,7 +10,7 @@ class Store < ApplicationRecord
 
   store :settings, accessors: [ :language, :telegram_bot_status, :telegram_bot_token, :dashboard_restrict,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, 
-                                :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id, :contact_whatsapp
+                                :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id, :contact_whatsapp, :dashboard_date_filter
                               ]
   enum state: {disable:0, enable:1}
   acts_as_taggable_on :tags
