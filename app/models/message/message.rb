@@ -22,7 +22,7 @@ class Message::Message < ApplicationRecord
   belongs_to :account, optional: true
   # belongs_to :trace, optional: true
 
-  before_destroy { Order.where(id:[order_ids]).destroy_all }
+  # before_destroy { Order.where(id:[order_ids]).destroy_all }
 
   def kind
     loggings.try(:first).try(:state)
