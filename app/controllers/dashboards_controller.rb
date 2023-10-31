@@ -2,6 +2,7 @@ class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	before_action :set_trace, except: [:index]
 	before_action :filters#, except: :index
+	before_action :set_store, only: [:index, :show, :account]
 	before_action :dashboard_restrict
 
 	# before_action :authenticate_user
@@ -127,9 +128,6 @@ class DashboardsController < ApplicationController
 
 	def dashboard_restrict
 		flash[:notice] = nil
-		@current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
-		@current_store ||= @trace.try(:store)
-		@current_store ||= current_store
 
 
 		unless @current_store.nil?
@@ -197,6 +195,12 @@ class DashboardsController < ApplicationController
 	  						customer_attributes:[:name, :customer_plan_id, :user_email, :store_id, user_attributes:[:email, :store_id]]) 
 	end
 
+	def set_store
+		@current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
+		@current_store ||= @trace.try(:store)
+		@current_store ||= current_store
+	end
+
 	def set_trace
 		@trace = Trace.find_by(name: params[:name])
 		if @trace.nil?
@@ -235,7 +239,7 @@ class DashboardsController < ApplicationController
 
 	def dashboard_date_filter_set
 		date_today = Date.today
-		case @current_store.dashboard_date_filter
+		case @current_store.try(:dashboard_date_filter)
 		when "1_month"
 			"#{((date_today - 1.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 		when "3_months"
@@ -248,6 +252,8 @@ class DashboardsController < ApplicationController
 			"#{((date_today - 2.years).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 		when "3_years"
 			"#{((date_today - 3.years).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
+		else
+			"#{((date_today - 3.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 		end
 		
 	end
