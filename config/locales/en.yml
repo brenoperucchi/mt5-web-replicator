@@ -17,8 +17,8 @@ en:
       contract: Contract
       finish: Finish
       pay: Pay
-      more_information: More information
-      info_dashboard: Dashboard Info
+      more_information: Info Blade
+      info_dashboard: Info Dashboard
       description: Descrição
       pages: 
         finish:

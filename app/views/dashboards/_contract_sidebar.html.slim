@@ -65,10 +65,10 @@
     - if @trace.id == 45
       div.mt-4
         / button.btn.btn-primary.w-100
-        = link_to "/files/lamina_portfolio_one.pdf", class: 'btn btn-dark w-100', download: 'lamina_portfolio_one.pdf' do
+        = link_to "/files/lamina_portfolio_one.pdf", class: 'btn btn-light w-100', target: "_blank" do
           = I18n.t :more_information, scope:'helpers.dashboards'
     div
       / button.btn.btn-primary.w-100
-      = link_to dashboard_path(@trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
+      = link_to dashboard_path(@trace.store.url, @trace.name, params:request.query_parameters), class: 'btn btn-dark w-100' do
         = I18n.t :info_dashboard, scope:'helpers.dashboards'
         
