@@ -198,6 +198,7 @@ class DashboardsController < ApplicationController
 	def set_store
 		@current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
 		@current_store ||= @trace.try(:store)
+		@current_store ||= Trace.find_by(name: params[:name])
 		@current_store ||= current_store
 	end
 
@@ -239,7 +240,7 @@ class DashboardsController < ApplicationController
 
 	def dashboard_date_filter_set
 		date_today = Date.today
-		case @trace.store.try(:dashboard_date_filter)
+		case @trace.try(:store).try(:dashboard_date_filter)
 		when "1_month"
 			"#{((date_today - 1.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 		when "3_months"

@@ -62,7 +62,7 @@
                 div.d-flex.align-items-baseline.mb-4
                   / button.btn.btn-primary.w-100
                   = link_to dashboard_path(trace.store.url, trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
-                    = I18n.t :more_information, scope:'helpers.dashboards'
+                    = I18n.t :info_dashboard, scope:'helpers.dashboards'
 
                 div
                   / button.btn.btn-primary.w-100
