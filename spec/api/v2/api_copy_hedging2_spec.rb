@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe API::V1::APITransactionsCopy do
+RSpec.describe API::V2::APICopy do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
@@ -34,7 +34,7 @@ RSpec.describe API::V1::APITransactionsCopy do
       
   end
 
-  describe API::V1::APITransactionsCopy do
+  describe API::V2::APICopy do
     context 'Create and Restrict Transaction' do
       it 'Restrict Magic Number' do 
         @account_copy.update(magics_accept: "2000 2001")

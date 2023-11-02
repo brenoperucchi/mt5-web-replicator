@@ -99,7 +99,7 @@ class Message::V2::Metatrader < Message::Message
               orders = trace.orders.where(content_id: ticket)
               # next if Order.where(content_id: ticket, account: account, trace: trace).take.present?
 
-              unless orders.present?
+              unless orders.present? and account.try(:enable?)
                 begin
                   self.traces << trace unless self.trace_ids.include?(trace.id)
                   trace.create_order(copy_params, account, self, copy_params["symbol"], API_VERSION) 

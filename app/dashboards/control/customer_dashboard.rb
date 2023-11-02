@@ -34,6 +34,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   email
   role_control
   accounts
+  created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES

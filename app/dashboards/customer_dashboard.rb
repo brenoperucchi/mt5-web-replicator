@@ -36,6 +36,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   role_control
   accounts
   user
+  store
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES

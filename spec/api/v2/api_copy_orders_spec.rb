@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe API::V1::APITransactionsCopy do
+RSpec.describe API::V2::APICopy do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
@@ -21,9 +21,59 @@ RSpec.describe API::V1::APITransactionsCopy do
               }}"}
   end
 
-  describe API::V1::APITransactionsCopy do
+  describe API::V2::APICopy do
 
     context 'POST' do
+      it 'Account Copy Disable' do
+        account = Account.find_by(name: 10100)
+        expect(account.kind).to be == "copy"
+        expect(account.state).to be == "enable"
+        account.update(state: 'disable')
+        account.reload
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
+                  }}"}  
+        expect(account.transactions.count).to be == 0
+        expect(account.slaves.count).to be       == 0
+        expect(@trace.masters.count).to be       == 0
+        expect(@trace.slaves.count).to be        == 0
+        expect(Transaction.all.count).to be      == 0
+        expect(TransactionSlave.all.count).to be == 0
+      end
+
+      it 'Account Copy Disable' do
+        account = Account.find_by(name: 10100)
+        expect(account.kind).to be == "copy"
+        expect(account.state).to be == "enable"
+        account.update(state: 'enable')
+        account.reload
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
+                  }}"}  
+        expect(account.transactions.count).to be == 2
+        expect(account.slaves.count).to be       == 0
+        expect(@trace.transactions.count).to be  == 1
+        expect(@trace.slaves.count).to be        == 2
+        expect(Transaction.all.count).to be      == 2
+        expect(TransactionSlave.all.count).to be == 3
+      end
+
+    end
+    context 'POST' do
+      it 'Testing if ApiCopy fixing UTF-8 problem' do
+        file_content = eval(File.read("#{Rails.root}/spec/api/v2/_params_enconding_problem.txt"))
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: file_content
+        expect(Message::V2::Metatrader.all.count).to be == 4
+        expect(Message::V2::Metatrader.last.state).to be == "executed"
+        expect(Message::V2::Metatrader.last.orders.count).to be == 0
+      end
+
+
       it 'Testing if ApiCopy fixing UTF-8 problem' do
         file_content = eval(File.read("#{Rails.root}/spec/api/v2/_params_enconding_problem.txt"))
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
@@ -267,17 +317,17 @@ RSpec.describe API::V1::APITransactionsCopy do
 
         expect(Account.find_by_name(10100).traces.first.transactions.count).to be == 2
         expect(Account.find_by_name(10100).traces.first.transactions.where(state:'closed_info').count).to be == 0
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be == 2
-        expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be == 2
+        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be    == 2
+        expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be     == 2
         
 
-        expect(Order.where(content_id: 10000001).first.id).to be                                            == 14
-        expect(Order.where(content_id: 10000001).first.slaves.where(state:'pending').count).to be           == 2
-        expect(Order.where(content_id: 10000001).first.slaves.count).to be                                  == 2
+        expect(Order.where(content_id: 10000001).first.id).to be                                             == 16
+        expect(Order.where(content_id: 10000001).first.slaves.where(state:'pending').count).to be            == 2
+        expect(Order.where(content_id: 10000001).first.slaves.count).to be                                   == 2
 
-        expect(Order.where(content_id: 10000001).last.id).to be                                            == 15
-        expect(Order.where(content_id: 10000001).last.slaves.where(state:'pending').count).to be           == 1
-        expect(Order.where(content_id: 10000001).last.slaves.count).to be                                  == 1
+        expect(Order.where(content_id: 10000001).last.id).to be                                              == 17
+        expect(Order.where(content_id: 10000001).last.slaves.where(state:'pending').count).to be             == 1
+        expect(Order.where(content_id: 10000001).last.slaves.count).to be                                    == 1
         
         expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be    == 2
         expect(Account.find_by_name(10200).traces.first.transactions.where(state:'closed_info').count).to be == 0
@@ -414,7 +464,7 @@ RSpec.describe API::V1::APITransactionsCopy do
       end
     end
   end
-  describe API::V1::APITransactionsCopy do
+  describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Restrict Magic Number' do
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 

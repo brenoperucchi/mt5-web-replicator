@@ -1,6 +1,18 @@
 class AccountSerializer < ActiveModel::Serializer
-  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname, :meta_version_accept
+  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname, :meta_version_accept, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server
 
+
+  def api_debug_mode
+    false
+  end
+
+  def api_freeze_max_time
+    4
+  end
+
+  def api_time_to_check_server
+    10
+  end
 
   def yaml
     yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))

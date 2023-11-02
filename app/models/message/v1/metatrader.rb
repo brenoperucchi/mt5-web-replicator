@@ -52,7 +52,7 @@ class Message::V1::Metatrader < Message::Message
           api_transaction = SerializerAPITransaction.new(order_params)
           orders = trace.orders.where(content_id: ticket)
           if not order_params['state_meta'].present?
-            unless orders.present?
+            unless orders.present? and account_copy.try(:enable?)
               trace.create_order(order_params, account_copy, self, symbol, "v2")
             end
           elsif order_params['state_meta'] == "modify"

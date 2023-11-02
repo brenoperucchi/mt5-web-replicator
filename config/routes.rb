@@ -74,42 +74,42 @@ Rails.application.routes.draw do
     end
 
     namespace :admin do
-      namespace :message do
-        # resources :messages
-        # resources :metatraders
-        resources :messages
-      end
-      resources :loggings
-      namespace :paper_trail do
-        resources :versions
-      end
-      resources :payment_methods
-      resources :payments
       resources :accounts
       resources :account_servers
 
-      resources :orders#, except:[:edit]
-      resources :transactions
-    	resources :transaction_slaves
       # resources :deals
       # resources :messages, as: :message_metatrader #, only: [:index]
       # resources :message_metatrader, controller: :messages, type:'Message::Metatrader'
       # get '/messages', to: 'messages#index', as: 'messages', on: :collection
       # end
       
-      resources :traces
-      resources :stores
-      resources :users
-      resources :instruments
       resources :customers
+      resources :customer_plans
+      resources :instruments
+      resources :invoice_items
+      resources :loggings
+        # resources :messages
+        # resources :metatraders
+      namespace :message do
+        resources :messages
+      end
+      namespace :paper_trail do
+        resources :versions
+      end
+      resources :orders#, except:[:edit]
+      resources :payment_methods
+      resources :payments
       resources :plans
       resources :plan_items
       resources :plan_usages, except: [:index]
-      resources :customer_plans
       resources :invoices do
          get :invoice_send, on: :member
       end           
-      resources :invoice_items
+      resources :stores
+      resources :traces
+      resources :transactions
+    	resources :transaction_slaves
+      resources :users
       resources :upload_files
       
       # resources :sign_traces

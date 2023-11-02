@@ -305,8 +305,8 @@ pt-BR:
         created_at: criado
     models:
       customer_plan:
-        one: Plano Cliente
-        other: Planos Clientes
+        one: Cliente - Plano
+        other: Clientes - Planos
       customer:
         one: Cliente
         other: Clientes
