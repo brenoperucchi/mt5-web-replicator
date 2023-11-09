@@ -1,6 +1,5 @@
 require 'lib_enums'
 class Invoice < ApplicationRecord
-  ENUMS = %w(state)
 
   include LibEnums
   include ActionView::Helpers::NumberHelper

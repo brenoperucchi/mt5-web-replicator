@@ -313,6 +313,9 @@ pt-BR:
       account:
         one: Conta
         other: Contas
+      account_server:
+        one: Conta Server
+        other: Contas Server
       trace:
         one: Portfólio
         other: Portfólios
@@ -323,11 +326,14 @@ pt-BR:
         one: Ativo
         other: Ativos
       transaction:
-        one: Copy
-        other: Copy
+        one: Transação Copy
+        other: Transações Copy
       transaction_slave:
-        one: Slave
-        other: Slaves
+        one: Transações Slave
+        other: Transações Slaves
+      invoice_item:
+        one: Fatura Item
+        other: Faturas Items
       invoice:
         one: Fatura
         other: Faturas
@@ -338,8 +344,11 @@ pt-BR:
         one: Ordem
         other: Ordens
       payment:
-        one: Método Pagamento
-        other: Método Pagamentos
+        one: Sistema Pagamento
+        other: Sistema Pagamentos
+      payment_method:
+        one: Sistema Payment
+        other: Sistema Payments
 
     errors:
       models:

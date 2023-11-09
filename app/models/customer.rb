@@ -3,7 +3,6 @@ class Customer < ApplicationRecord
   # attr_accessor :user_email
 
   CONTROL_ROLE = %w(admin user)
-  ENUMS = %w(role role_control)
 
   store :settings, accessors: [:stripe_product_id, :stripe_customer_id]#, :email, :password]
 

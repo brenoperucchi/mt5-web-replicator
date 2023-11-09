@@ -6,6 +6,7 @@ class Logging < ApplicationRecord
 
   has_many :orders
   has_many :transactions, through: :orders, source: :transactions
+  has_many :files, as: :uploadable, class_name: "UploadFile"#, dependent: :destroy
 
   belongs_to :user, optional: true
   belongs_to :account,  optional: true
@@ -19,5 +20,8 @@ class Logging < ApplicationRecord
   end
 
 
+  def file_content
+    files.first.file.download if files.present? and state == "LOGFILE"
+  end
 
 end

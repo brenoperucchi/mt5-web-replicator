@@ -59,21 +59,22 @@ Rails.application.routes.draw do
     namespace :control do
       resources :instruments
       resources :accounts
-      resources :traces
-      resources :orders, except:[:edit, :new, :destroy, :update]
-      resources :transactions, only:[:show]
-      resources :transaction_slaves, only:[:show]
       resources :customers
       resources :customer_plans
-      resources :payments
       resources :invoices, except:[:new]
       resources :loggings, only:[:show]
+      resources :orders, except:[:edit, :new, :destroy, :update]
+      resources :traces
+      resources :transactions, only:[:show]
+      resources :transaction_slaves, only:[:show]
       resources :stores
+      resources :payments
 
       root "orders#index"
     end
 
     namespace :admin do
+      resources :instruments
       resources :accounts
       resources :account_servers
 
@@ -85,7 +86,9 @@ Rails.application.routes.draw do
       
       resources :customers
       resources :customer_plans
-      resources :instruments
+      resources :invoices do
+         get :invoice_send, on: :member
+      end           
       resources :invoice_items
       resources :loggings
         # resources :messages
@@ -97,16 +100,13 @@ Rails.application.routes.draw do
         resources :versions
       end
       resources :orders#, except:[:edit]
-      resources :payment_methods
-      resources :payments
       resources :plans
       resources :plan_items
       resources :plan_usages, except: [:index]
-      resources :invoices do
-         get :invoice_send, on: :member
-      end           
-      resources :stores
       resources :traces
+      resources :stores
+      resources :payment_methods
+      resources :payments
       resources :transactions
     	resources :transaction_slaves
       resources :users

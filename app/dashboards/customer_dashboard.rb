@@ -37,6 +37,7 @@ class CustomerDashboard < Administrate::BaseDashboard
   accounts
   user
   store
+  created_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES

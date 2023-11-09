@@ -22,18 +22,19 @@ class Transaction < ApplicationRecord
 
   has_many :statistics, as: :statisticable, dependent: :destroy
 
-  scope :closed,      ->{where(state: 'closed')}
-  scope :closed_info,      ->{where(state: 'closed_info')}
-  scope :finish,      ->{where(state: ['closed', 'error'])}
-  scope :executed,    ->{where(state: 'executed')}
-  scope :error,    ->{where(state: 'error')}
-  scope :not_error,    ->{where.not(state: 'error')}
-  scope :closed_error,  ->{where(state: ['closed', 'error'])}
-  scope :not_closed,  ->{where.not(state: ['closed', 'error'])}
-  scope :buy,   ->{where(ordertype: 0)}
-  scope :sell,  ->{where(ordertype: 1)}
-  scope :gain,  ->{where('transactions.profit >= 0')}
-  scope :loss,  ->{where('transactions.profit < 0')}
+  scope :closed,                ->{where(state: :closed)}
+  scope :executed_closed,       ->{where(state: [:closed, :executed])}
+  scope :closed_info,           ->{where(state: 'closed_info')}
+  scope :finish,                ->{where(state: [:closed, 'error'])}
+  scope :executed,              ->{where(state: 'executed')}
+  scope :error,                 ->{where(state: 'error')}
+  scope :not_error,             ->{where.not(state: 'error')}
+  scope :closed_error,          ->{where(state: [:closed, 'error'])}
+  scope :not_closed,            ->{where.not(state: [:closed, 'error'])}
+  scope :buy,                   ->{where(ordertype: 0)}
+  scope :sell,                  ->{where(ordertype: 1)}
+  scope :gain,                  ->{where('transactions.profit >= 0')}
+  scope :loss,                  ->{where('transactions.profit < 0')}
 
   scope :pending_executed,  ->{where(state: [:pending, :executed])}
 

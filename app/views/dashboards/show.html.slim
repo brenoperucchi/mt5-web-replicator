@@ -257,14 +257,14 @@
                 span.round-8.bg-dark.rounded-circle.me-6
                 div
                   h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.masters_scope(:masters, [:closed, :executed, :buy]).count
+                    = @trace.masters_scope(:masters, [:executed_closed, :buy]).count
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :buy, scope:'helpers.dashboards.pages.show'
               .d-flex.align-items-center
                 span.round-8.bg-dark.rounded-circle.me-6
                 div
                   h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.masters_scope(:masters, [:closed, :executed, :sell]).count
+                    = @trace.masters_scope(:masters, [:executed_closed, :sell]).count
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :sell, scope:'helpers.dashboards.pages.show'
               .d-flex.align-items-center
@@ -275,7 +275,7 @@
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :total, scope:'helpers.dashboards.pages.show'
 
-- if user_signed_in?
+  / - if user_signed_in?
   .row
     .col-md-12
       .card.table-card.latest-activity-card
@@ -283,7 +283,7 @@
           h5 Accounts
         .card-body
           .table-responsive
-            table.table.table-hover.table-borderless
+            table.table.table-hover.table-borderless#accounts
               thead
                 tr
                   th Account
@@ -302,7 +302,7 @@
                 - @trace.accounts.order('kind desc').each do |account|
                   - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
                   - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
-                  tr[data-href="#{account_dashboard_url(@trace.store.url, @trace.name, account, @trace.customer_plan.payment, @trace.id,  datefilter:params[:datefilter])}"]
+                  tr[data-href="#{account_dashboard_path(@trace.store.url, @trace.name, account.id, datefilter:params[:datefilter])}"]
                     - type = account.slave? ? :slaves : :transactions
                     td = "#{account.name} - #{account.kind}"
                     td
@@ -314,7 +314,7 @@
                     td = number_with_precision account.slaves_scope(type, :closed, @trace).to_a.sum(&:profit), precision: 2
                     td = number_with_precision account.slaves_scope(type, :error, @trace).to_a.sum(&:profit), precision: 2
                     td 
-                    td = account.slaves_scope(type, :all, @trace).count
+                    td = account.slaves_scope(type, [:executed, :closed], @trace).count
                     td = number_with_precision account.slaves_scope(type, :all, @trace).to_a.sum(&:profit), precision: 2       
 
 = render "magics", trace: @trace, account: @account
@@ -328,7 +328,7 @@
 - content_for :footer do
   javascript:
     $(document).ready(function(){
-      $(document).on("click", "table.table tr", function() {
+      $(document).on("click", "table#accounts.table tr", function() {
         var link  = $(this).data("href")
             document.location.href=link;
       });

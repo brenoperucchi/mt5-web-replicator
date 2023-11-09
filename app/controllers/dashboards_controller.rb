@@ -177,7 +177,7 @@ class DashboardsController < ApplicationController
 	def account
 		@account = Account.find(params[:account_id])
 
-		@trace = Trace.find_by(name: params[:name])
+		# @trace = Trace.find_by(name: params[:name])
 		# @account = current_store.accounts.find(params[:id])
     @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
     @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
@@ -240,7 +240,7 @@ class DashboardsController < ApplicationController
 
 	def dashboard_date_filter_set
 		date_today = Date.today
-		case @trace.try(:store).try(:dashboard_date_filter)
+		case @current_store.try(:dashboard_date_filter)
 		when "1_month"
 			"#{((date_today - 1.month).beginning_of_month).strftime('%d/%m/%Y')} - #{date_today.end_of_month.strftime('%d/%m/%Y')}"
 		when "3_months"

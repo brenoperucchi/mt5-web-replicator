@@ -13,11 +13,9 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     id:                   Field::Number.with_options(searchable: true),
     name:                 Field::String,
     state:                Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
-
     kind:                 CheckboxField.with_options(object:"customer", collection_key: Account.kinds.keys, default: :fixed),
     meta_margin_mode:     CheckboxField.with_options(object:"customer", collection_key: Account.meta_margin_modes.keys, default: :hedging),
     meta_mode:            CheckboxField.with_options(object:"customer", collection_key: Account.meta_modes.keys, default: :demo),
-
     contract_volume:      Field::String.with_options(searchable: false),
     # stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3, searchable: false),
     traces:               Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),

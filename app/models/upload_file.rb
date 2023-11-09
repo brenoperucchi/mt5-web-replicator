@@ -19,4 +19,12 @@ class UploadFile < ApplicationRecord
     message = Message::Import.create(content: csv_content, state: "pending", store: store, state_meta: "import")
     message.create_orders(trace)
   end
+
+  def file_content
+    file.download if file.attached?
+  end
+
+  def filename
+    file.filename.to_s if file.attached?
+  end
 end
