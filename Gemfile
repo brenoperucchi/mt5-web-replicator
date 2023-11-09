@@ -86,6 +86,7 @@ gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 
 # ADMINISTRATE
+# gem "administrate",         path: "vendor/administrate"
 gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
 gem 'administrate-field-image'
 gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
@@ -96,7 +97,6 @@ gem "administrate-field-tinymce",   git: 'https://github.com/smedrick/administra
 gem 'administrate-field-active_storage'
 gem "image_processing"
 
-# gem "administrate",         path: "vendor/administrate"
 # gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
 # gem "administrate", path: "vendor/administrate"
 # gem 'administrate-field-scoped_has_many', path: "vendor/administrate-field-scoped_has_many"
@@ -177,13 +177,13 @@ gem 'sidekiq', '7.1.3'
 gem 'pundit'
 gem 'simple_form'
 gem 'sd_notify'
-gem 'newrelic_rpm'
+# gem 'newrelic_rpm'
 gem 'recaptcha'
 gem 'link_thumbnailer'
 gem 'imgix'
 gem "net-http"
 gem 'money-rails', '~> 1.12'
-
+gem 'html2slim'
 
 
 

@@ -5,8 +5,6 @@ class Trace < ApplicationRecord
 
   attr_accessor :search_date_begin, :search_date_end, :search_magic_number
 
-  ENUMS = %w(kind)
-
   include LibEnums
   include AlgoStatistic
   include LibControl
@@ -199,7 +197,9 @@ class Trace < ApplicationRecord
     data = masters_filter(self.send(type), scope)
     
     if scope.is_a?(Array)
-      data = data.where(state: scope)
+      data = scope.inject(data) {|o, a| o.send(a) }
+
+      # data = data.where(state: scope)
     else
       data = data.send(scope) if data.respond_to?(scope)
     end
@@ -223,11 +223,11 @@ class Trace < ApplicationRecord
 
   def masters_filter(data, scope = nil)
     # if Rails.env.development?
-    #   self.search_date_begin = Date.parse("2023-10-01").to_date 
+    #   self.search_date_begin = Date.parse("2023-01-01").to_date 
     #   self.search_date_end   = DateTime.now
     # end
     if self.search_date_begin and self.search_date_end
-      if scope == :executed or scope == :all or (scope.is_a?(Array) and scope.include?(:executed))
+      if scope == :executed #or scope == :all or (scope.is_a?(Array) and scope.include?(:executed))
         query = {:created_at => search_date_begin..search_date_end.end_of_day}
       else
         query = {:closed_at => search_date_begin..search_date_end.end_of_day}

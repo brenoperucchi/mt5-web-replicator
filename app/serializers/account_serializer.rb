@@ -1,18 +1,70 @@
 class AccountSerializer < ActiveModel::Serializer
-  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname, :meta_version_accept, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server
+  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :api_server_hostname, :meta_version_accept, 
+             :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_max_seconds, :api_slippage, :api_environment_local, 
+             :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, 
+             :api_mfe_mae_display
 
 
   def api_debug_mode
-    false
+    false                 # Default false
+  end
+
+  def api_debug_mode_level
+    1                     # Default 1 (SendLogFileToServer & MfeMaeDisplay - Slave: GetOrderPriceClose & GetOrderPriceOpen & GetOrderOpenAt)
+                          # Default 2 (ApiRequest & ApiTrasmit & CheckServerFreeze)
+                          # Default 3 (Print OnTick & OnTimer + Info: mt5_terminal_path/mt5_terminal_data_path/mt5_commondata_path)
   end
 
   def api_freeze_max_time
-    4
+    6                      # Default 6
   end
 
   def api_time_to_check_server
-    10
+    15                      # Default 30
   end
+
+  def api_max_seconds
+    10                      # Default 30
+  end
+
+  def api_slippage
+    30                      # Default 30
+  end
+
+
+  def api_environment_local
+    true                    # Default true
+  end
+
+  def api_store_state
+    true
+  end
+
+  def api_store_message
+    # "teste"
+  end
+
+  def api_milliseconds_timer
+    3000                    # Default 3000
+  end
+
+  def api_milliseconds_tick
+    3000                    # Default 3000
+  end
+
+  def api_event_on_timer
+    true
+  end
+
+  def api_event_on_tick
+    false
+  end 
+
+  def api_mfe_mae_display
+    false
+  end 
+
+
 
   def yaml
     yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))
@@ -20,7 +72,9 @@ class AccountSerializer < ActiveModel::Serializer
 
   def meta_version_accept
     params = instance_options[:params]
-    yaml[params['expert_name']][params['expert_version']] == "OK" ? true : false
+    @expert_name = params['expert_name']
+    @expert_version = params['expert_version'][0..3]
+    return (yaml[@expert_name].present? and yaml[@expert_name][@expert_version].present?)
   end
 
   def store_state
@@ -33,7 +87,7 @@ class AccountSerializer < ActiveModel::Serializer
 
   def store_message
     params = instance_options[:params]
-    yaml[params['expert_name']]['disable_msg'].gsub("|version|", params['expert_version'].gsub('_','.')) unless meta_version_accept
+    yaml[@expert_name]['disable_msg'].gsub("|version|", @expert_version.gsub('_','.')) unless meta_version_accept
   end
 
   def account_state

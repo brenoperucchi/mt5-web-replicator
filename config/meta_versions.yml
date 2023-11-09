@@ -12,6 +12,7 @@ imentore_copy:
   '2_22': disable
   '2_23': OK
   '2_24': OK
+  '2_30': OK
   disable_msg: 'A versao |version| do Imentore Copy esta desabilitado em nosso sistema. Atualize seu expert. '
 imentore_slave:
   '2_07': disable
@@ -23,6 +24,7 @@ imentore_slave:
   '2_22': disable
   '2_23': OK
   '2_24': OK
+  '2_30': OK
   disable_msg: 'A versao |version| do Imentore Slave esta desabilitado em nosso sistema. Atualize seu expert. '
 signal_slave:
   '1_54': disable

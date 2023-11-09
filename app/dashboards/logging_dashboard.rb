@@ -9,9 +9,11 @@ class LoggingDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id: Field::Number,
-    content: Field::Text.with_options(searchable: true),
-    loggerable:Field::Polymorphic,
-    resourceable:Field::Polymorphic,
+    content: Field::Text.with_options(searchable: false),
+    file_content: Field::Text.with_options(searchable: false),
+    loggerable: Field::Polymorphic,
+    resourceable: Field::Polymorphic,
+    files: Field::HasMany,
     # user:Field::BelongsTo,
     # account: Field::String.with_options(searchable: false),
     account: Field::BelongsTo,
@@ -45,6 +47,8 @@ class LoggingDashboard < Administrate::BaseDashboard
   resourceable
   content
   account
+  files
+  file_content
   changeset
   created_at
   updated_at

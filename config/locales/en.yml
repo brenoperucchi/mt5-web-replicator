@@ -313,6 +313,9 @@ en:
       account:
         one: Account
         other: Accounts
+      account_server:
+        one: Account Server
+        other: Accounts Server
       trace:
         one: Portfolio
         other: Portfolios
@@ -323,11 +326,11 @@ en:
         one: Instrument
         other: Instruments
       transaction:
-        one: Copy
-        other: Copy
+        one: Transaction Copy
+        other: Transactions Copy
       transaction_slave:
-        one: Slave
-        other: Slaves
+        one: Transaction Slave
+        other: Transactions Slaves
       invoice:
         one: Invoice
         other: Invoices
@@ -340,6 +343,9 @@ en:
       payment:
         one: Payment
         other: Payments
+      payment_method:
+        one: System Payment
+        other: System Payments
 
     errors:
       models:

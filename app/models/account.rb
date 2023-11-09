@@ -2,8 +2,6 @@ require 'lib_enums'
 class Account < ApplicationRecord
   attr_accessor :search_date_begin, :search_date_end
 
-  ENUMS = %w(state kind meta_mode meta_margin_mode stock_kind)
-
   # include Balance::Base
   include LibEnums
   include LibControl
@@ -196,9 +194,22 @@ class Account < ApplicationRecord
 
   def slaves_scope(type = :slaves, scope = :all, trace)
     table_name = type == :slaves ? "transaction_slaves" : "transactions"
-    # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
-    masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id), scope)
+    
+    data = masters_filter(self.send(type).where("#{table_name}.trace_id = ?", trace.id), scope)
+    if scope.is_a?(Array)
+      data = data.where(state: scope)
+    else
+      data = data.send(scope) if data.respond_to?(scope)
+    end
+
+    data
   end
+
+  # def slaves_scope(type = :slaves, scope = :all, trace)
+  #   table_name = type == :slaves ? "transaction_slaves" : "transactions"
+  #   # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
+  #   masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id), scope)
+  # end
   
   def masters_filter(data, scope = nil)
     # self.search_date_begin = Date.parse("2023-09-01").to_date 

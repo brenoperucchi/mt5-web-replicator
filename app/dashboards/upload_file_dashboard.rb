@@ -10,6 +10,8 @@ class UploadFileDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:              Field::Number,
     file:            Field::ActiveStorage,
+    file_content:    Field::Text.with_options(searchable: false),
+    filename:    Field::String.with_options(searchable: false),
     kind:            Field::Select.with_options(collection: [:none, :import]),
     store:           Field::BelongsTo,
     trace:           Field::BelongsTo,
@@ -26,7 +28,7 @@ class UploadFileDashboard < Administrate::BaseDashboard
   store
   trace
   kind
-  file
+  filename
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -35,6 +37,7 @@ class UploadFileDashboard < Administrate::BaseDashboard
   id
   store
   trace
+  file_content
   kind
   file
   ].freeze

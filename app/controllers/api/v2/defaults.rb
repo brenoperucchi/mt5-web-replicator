@@ -23,7 +23,9 @@ module API
 
           def meta_version_accept
             yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))
-            yaml[params['expert_name']][params['expert_version']].present? ? true : false
+            expert_name = params['expert_name']
+            expert_version = params['expert_version'][0..3]
+            return (yaml[expert_name].present? and yaml[expert_name][expert_version].present?)
           end
 
         end
