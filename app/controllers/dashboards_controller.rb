@@ -23,13 +23,13 @@ class DashboardsController < ApplicationController
 		account = Account.find(params[:account_id])
 		
 		# invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-		account.create_invoice_account(@trace, nil, nil)
+		account.create_invoice_account(@trace, true, nil)
 		@invoice = account.customer.invoices.first
 		@payment = @invoice.invoice_send
 		if @payment.redirect_url
 			redirect_to @payment.redirect_url
 		else
-			render :finish
+			render :finishcus
 		end
 	end
 
