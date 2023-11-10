@@ -10,7 +10,7 @@ module API
       resource :transactions do 
         desc "Example Request Transaction"
         get "/request/:state/:expert_name/:expert_version/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id])
+          account = Account.find_by(name: params[:account_id], kind: :slave)
           if account
             map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
@@ -20,7 +20,7 @@ module API
 
         desc "Request Pending Transactions"
         post "/request/:state/:expert_name/:expert_version/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id])
+          account = Account.find_by(name: params[:account_id], kind: :slave)
           if account
             map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
@@ -35,7 +35,7 @@ module API
 
           if not content.blank? and content.is_a?(Hash)
             action = content['meta_state']
-            account = Account.find_by(name: params[:account_id])
+            account = Account.find_by(name: params[:account_id], kind: :slave)
             if account
               slave = account.slaves.find_by(comment: content['comment'])
               if slave.nil?

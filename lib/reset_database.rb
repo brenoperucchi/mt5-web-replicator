@@ -59,7 +59,7 @@ module ResetDatabase
 
 	def self.change_db_production_development
 		Store.all.each{|s| s.update(url: s.url + "2")}		
-		payments = Payment.all.order(id: :asc)[0..1]
+		payments = Payment.all.order(id: :asc).limit(2)
 		payments.update_all(api_token: 'TEST-8003379344962428-070514-132303626f6b89ba73ab9f77b2a95c9d-77964627', webhook_token:'TEST-ea4aec5d-82ed-42c8-8c8a-abdd14b3690a') if payments.present?
 	end
 

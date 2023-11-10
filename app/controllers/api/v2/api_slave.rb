@@ -10,7 +10,7 @@ module API
       resource :transactions do 
         desc "TransactionSlave Get Request Transaction"
         get "/slave/get/:state/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id])
+          account = Account.find_by(name: params[:account_id], kind: :slave)
           if account
             map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end
@@ -20,7 +20,7 @@ module API
 
         desc "TransactionSlave Post Pending Transactions"
         post "/slave/post/:state/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id])
+          account = Account.find_by(name: params[:account_id], kind: :slave)
           if account
             map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 3.days)).collect{|t| t.api_request_attributes}.join('/')
           end

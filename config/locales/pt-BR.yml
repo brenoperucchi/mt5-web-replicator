@@ -71,7 +71,7 @@ pt-BR:
           total: Total
     site:
       signup_demo:
-        title: Gerenciador de Copy para Robos, entradas manuais e sinais
+        title: Nosso sistema foca na replicação exata de ordens de robôs, entradas manuais e sinais de trading, proporcionando uma gestão de trading eficiente e integrada.
         title2: Comece hoje
         title3: Não é necessário nenhum tipo de pagamento
         title4: Regras importantes para o uso do sistema
@@ -84,7 +84,7 @@ pt-BR:
         placeholder_email: Digite seu e-mail
       main:
         app_name: Imentore Copy
-        other1: Gerenciador de Copy para Robos, entradas manuais e sinais
+        other1: Nosso sistema foca na replicação exata de ordens de robôs, entradas manuais e sinais de trading, proporcionando uma gestão de trading eficiente e integrada.
         other2: 30 dias para testes
         portfolio: Compartilhe dashboards com seus clientes
         warning: Sistema em versão beta
@@ -92,21 +92,21 @@ pt-BR:
           request_support: Faça um teste
           sign_in: Acesse
         title:
-          main: Gerenciador Copy Trades
+          main: Sistema de Replicação de Ordens
           imentore: imentore copy
           pricing: preços
           support: suporte
           request_demo: Estamos em fase de testes, neste momento as serão selecionadas alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após o período de teste o cliente deverá optar por um plano com 10% de desconto na mensalidade no primeiro ano.
-        telegram: 
-          title: Telegram
-          resume: Conectando o nosso robo Alfred em seu grupo você terá acompanhamento das operações realizadas. 
-          resume2: Compartilhe as suas operações em seu grupo do Telegram com Alfred Bot
-          resume3: Alfred irá avisar quando uma ordem abrir, fechar ou mesmo modificações de operações.
+        telegram:
+          title: Telegram 
+          resume: "Incluímos no nosso serviço um bot inovador chamado Alfred, que se conecta ao seu grupo do Telegram. Alfred é projetado para monitorar de forma eficiente as operações de trading, oferecendo atualizações em tempo real e permitindo uma gestão mais dinâmica das suas atividades de trading diretamente pelo Telegram."
+          resume2: "Alfred Bot permite que você compartilhe facilmente suas operações de trading no seu grupo do Telegram. Essa funcionalidade não só promove a transparência nas operações, mas também facilita a comunicação e o compartilhamento de estratégias entre os membros do grupo."
+          resume3: "Além disso, Alfred está sempre ativo para notificar você e os membros do seu grupo sobre importantes atualizações de trading. Ele informa automaticamente quando uma ordem é aberta, fechada ou sofre alterações, garantindo que todos no grupo estejam sempre informados e atualizados sobre as últimas movimentações do mercado."
         payment:
           title: Cobrança Automática
-          resume: O sistema cobrará dos clientes de forma automática.
-          resume2: A cobrança poderá ser por um plano com valor específico ou uma porcentagem do ganho do cliente.
-          resume3: A tecnologia da empresa STRIPE fornece diversos relatórios e está totalmente integrada em nosso sistema.
+          resume: O sistema possui um mecanismo de cobrança automática, garantindo que as taxas dos serviços sejam cobradas de forma eficiente. Além disso, ele é capaz de notificar ou até mesmo desabilitar automaticamente os clientes que estiverem em situação de inadimplência, assegurando uma gestão financeira mais tranquila e automatizada.
+          resume2: "Nosso sistema oferece uma solução de cobrança automatizada altamente personalizável. Você pode configurar planos de cobrança diferenciados para atender às necessidades específicas de diferentes portfólios ou clientes. A plataforma permite a definição de cobranças tanto por um valor fixo específico quanto por uma porcentagem dos lucros obtidos pelo cliente, oferecendo flexibilidade e conveniência tanto para o gestor quanto para o cliente."
+          resume3: "Atualmente, o sistema está integrado com o Mercado Pago e a STRIPE, garantindo um processo de pagamento seguro e eficiente. Essas integrações permitem uma maior variedade de opções de pagamento, facilitando transações financeiras e aprimorando a experiência do usuário."
         copy: 
           resume1: O sistema copiará as entradas de um robô, sinais telegram, ou mesmo entradas de um Trader manual.  
           resume2: Na entradas manuais o cliente poderá continuar usando o seu sistema de trader favorito (Profit, Tryd...), basta que na mesma conta tenha acesso ao Metatrader.
@@ -133,7 +133,7 @@ pt-BR:
           month: Por mês
         management: 
           title: Gestão & Portfólios 
-          resume: Gestão por Portfólios, Restrição por Magic Number, Controle de Ativos e muitos mais
+          resume: O sistema oferece a capacidade de criar diversos portfólios usando diferentes robôs, cada um identificado por um Magic Number único. Isso permite uma organização eficiente, onde diferentes estratégias de trading podem ser implementadas e gerenciadas separadamente, atendendo às necessidades específicas de cada cliente.
           resume2: 
       session:
         dont_have_account: "Ainda não tem uma conta?"
