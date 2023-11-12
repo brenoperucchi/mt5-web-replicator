@@ -129,7 +129,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"resource"=>"https://api.mercadolibre.com/merchant_orders/10400150087", "topic"=>"merchant_order", "id"=>"1", "payment_id"=>"1", "mercadopago"=>{"resource"=>"https://api.mercadolibre.com/merchant_orders/10400150087", "topic"=>"merchant_order"}}
         invoice.reload
-      }.not_to change(invoice, :state).from("pending")
+      }.to change(invoice, :state).from("pending")
       expect(response).to have_http_status 201
     end
   end
