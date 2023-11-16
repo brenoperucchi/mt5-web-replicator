@@ -1,5 +1,5 @@
 - magics = Order.magic_numbers_split(@trace.magics_accept)
-- magics = @trace.data_scope(:masters, :all).map(&:magic_number).uniq.compact if magics.blank?
+- magics = @trace.data_scope(:masters, [:executed, :closed]).map(&:magic_number).uniq.compact if magics.blank?
 - return if magics.blank?
 - @trace_all = @trace.data_scope(:masters, :all)
 .col-md-12

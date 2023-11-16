@@ -271,7 +271,7 @@
                 span.round-8.bg-dark.rounded-circle.me-6
                 div
                   h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.data_scope(:masters).count
+                    = @trace.data_scope(:masters, [:executed, :closed]).count
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :total, scope:'helpers.dashboards.pages.show'
 

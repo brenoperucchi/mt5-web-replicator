@@ -38,8 +38,8 @@
                 td OPERATIONS
                 td = @account.data_scope(type, nil, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
-                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
+                td= number_with_precision @account.data_scope(:transactions, nil, :all, @trace).to_a.sum(&:profit), precision:2
+                td= number_with_precision @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit), precision:2
                 td - 
                 td - 
                 td - 
@@ -68,8 +68,8 @@
                 td OPERATIONS
                 td = @account.data_scope(type, nil, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
-                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
+                td= number_with_precision @account.data_scope(:transactions, nil, :all, @trace).to_a.sum(&:profit), precision: 2
+                td= number_with_precision @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit), precision: 2
                 td - 
                 td - 
                 td - 
