@@ -192,7 +192,7 @@ RSpec.describe API::V2::APICopy do
     end
 
 
-    context 'Trace - masters_scope'do 
+    context 'Trace - data_scope'do 
       it 'With out restrict_magic on trace' do
         # @account_copy.trace_ids = 1
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
@@ -215,7 +215,7 @@ RSpec.describe API::V2::APICopy do
         orders = Order.all
         expect(orders.sum(&:profit_copy).to_f).to be == 2.0
         expect(Transaction.closed_info.count).to be == 0
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
@@ -231,7 +231,7 @@ RSpec.describe API::V2::APICopy do
         expect(orders.executed.count).to be == 0
         expect(orders.closed.count).to be == 4
         expect(orders.sum(&:profit_copy).to_f).to be == 4.00
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 2.00
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 2.00
         expect(Transaction.closed_info.count).to be == 0
       end
 
@@ -290,10 +290,10 @@ RSpec.describe API::V2::APICopy do
         expect(Trace.find(2).transactions.closed.find_by_ticket(10000002).profit.to_f).to be == 1.0
         expect(orders.sum(&:profit_copy).to_f).to be == 3.0
         expect(Transaction.closed_info.count).to be == 0
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
 
         expect(orders.sum(&:profit_copy).to_f).to be == 3.0
-        expect(trace.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
+        expect(trace.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
         expect(Transaction.closed_info.count).to be == 0
       end
     end

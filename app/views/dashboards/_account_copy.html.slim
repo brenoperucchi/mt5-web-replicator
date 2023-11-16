@@ -10,7 +10,7 @@
       .card-body
         .table-responsive
           table.table.table-hover.table-borderless
-            - type = @account.slave? ? :slaves : :transactions
+            - type = @account.slave? ? :slaves : :transactions, [:executed, :closed]
             thead
               tr
                 - if @account.copy?
@@ -31,10 +31,10 @@
                 th ClosetAt
             tbody
               tr
-                td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"
+                td[colspan=2 style="text-align: right;"]= "#{@account.data_scope(:transactions, [:executed, :closed], :all, @trace).count}    OPERATIONS"
                 td - 
                 td TOTAL PROFIT
-                td= number_with_precision @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
+                td= number_with_precision @account.data_scope(:transactions, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2     
                 td - 
                 td - 
                 td - 
@@ -42,7 +42,7 @@
                 td -
                 td -
                 td -
-              - @account.slaves_scope(:transactions, :all, @trace).order(closed_at: 'DESC').each do |copy|
+              - @account.data_scope(:transactions, [:executed, :closed], :all, @trace).order(closed_at: 'DESC').each do |copy|
                 tr
                   td = copy.ticket
                   td = copy.symbol
@@ -57,10 +57,10 @@
                   td = l(copy.open_at, format: :short2)
                   td = l(copy.closed_at, format: :short2) if copy.closed_at.present?
               tr
-                td[colspan=2 style="text-align: right;"]= "#{@account.slaves_scope(:transactions, :all, @trace).count}    OPERATIONS"
+                td[colspan=2 style="text-align: right;"]= "#{@account.data_scope(:transactions, [:executed, :closed], :all, @trace).count}    OPERATIONS"
                 td - 
                 td TOTAL PROFIT
-                td= number_with_precision @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
+                td= number_with_precision @account.data_scope(:transactions, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2       
                 td - 
                 td - 
                 td - 

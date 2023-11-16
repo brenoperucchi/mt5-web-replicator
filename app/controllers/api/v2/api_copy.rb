@@ -10,7 +10,7 @@ module API
       resource :copy do 
         ##Copy Version >= 2.12 
         get "/get/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id], kind: :copy)
+          account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
           if account
             map = account.transactions.api_request_attributes(:closed_info)
           end
@@ -20,7 +20,7 @@ module API
 
         ##Copy Version <= 2.11
         get "/get/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id], kind: :copy)
+          account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
           if account
             map = account.transactions.api_request_attributes(:closed_info)
           end

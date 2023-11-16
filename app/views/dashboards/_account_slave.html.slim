@@ -36,17 +36,17 @@
             tbody
               tr
                 td OPERATIONS
-                td = @account.slaves_scope(type, :all, @trace).count
+                td = @account.data_scope(type, nil, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
-                td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
+                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
+                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
                 td - 
                 td - 
                 td - 
                 td - 
                 td -
                 td -
-              - @account.slaves_scope(type, :all, @trace).order(open_at: 'DESC').each do |slave|
+              - @account.data_scope(type, nil, :all, @trace).order(open_at: 'DESC').each do |slave|
                 / - open_at_slave = slave.loggings.where(state:["OPEN", "OPENED"]).try(:first).try(:created_at)
                 tr
                   td = slave.ticket_slave
@@ -66,10 +66,10 @@
                   td = l(slave.closed_at, format: :short5) if slave.closed_at.present?
               tr
                 td OPERATIONS
-                td = @account.slaves_scope(type, :all, @trace).count
+                td = @account.data_scope(type, nil, :all, @trace).count
                 td TOTAL PROFIT
-                td= @account.slaves_scope(:transactions, :all, @trace).to_a.sum(&:profit)
-                td= @account.slaves_scope(type, :all, @trace).to_a.sum(&:profit)
+                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
+                td= @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit)
                 td - 
                 td - 
                 td - 

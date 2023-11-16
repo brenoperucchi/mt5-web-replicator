@@ -1,4 +1,6 @@
 class TransactionSlave < ApplicationRecord
+  
+  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, closed_info:7}
 
   include LibEnums
 
@@ -9,7 +11,6 @@ class TransactionSlave < ApplicationRecord
   #   class_name: 'Track'
   # }
     
-  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, closed_info:7}
 
   belongs_to :account
   belongs_to :trace
@@ -20,8 +21,8 @@ class TransactionSlave < ApplicationRecord
   has_many :transactions, through: :order,    source: :slaves
   has_many :accounts,     through: :order,    source: :slaves
   
-  scope :to_pending,   ->{where(state: 'pending')}
-  scope :to_remove,  ->{where(state: 'remove')}
+  scope :to_pending,          ->{where(state: 'pending')}
+  scope :to_remove,           ->{where(state: 'remove')}
   scope :pending_executed,    ->{where(state: [:pending, :executed])}
   scope :closed_deleted,      ->{where(state: [:closed, :deleted])}
   scope :opened,              ->{where(state: [:pending, :executed, :remove, :closed_info])}
@@ -30,10 +31,10 @@ class TransactionSlave < ApplicationRecord
   scope :closed_error,        ->{where(state: ['closed', 'error'])}
   scope :not_error,           ->{where.not(state: ['error'])}
   scope :not_gain,            ->{where.not('transaction_slaves.profit >= 0')}
-  scope :gain,  ->{where('transaction_slaves.profit >= 0')}
-  scope :loss,  ->{where('transaction_slaves.profit < 0')}
-  scope :buy,   ->{where(ordertype: 0)}
-  scope :sell,  ->{where(ordertype: 1)}
+  scope :gain,                ->{where('transaction_slaves.profit >= 0')}
+  scope :loss,                ->{where('transaction_slaves.profit < 0')}
+  scope :buy,                 ->{where(ordertype: 0)}
+  scope :sell,                ->{where(ordertype: 1)}
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id], on: :create, if: Proc.new { account.try(:hedging?) }

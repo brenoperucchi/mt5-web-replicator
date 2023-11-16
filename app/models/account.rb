@@ -1,27 +1,31 @@
 require 'lib_enums'
 class Account < ApplicationRecord
-  attr_accessor :search_date_begin, :search_date_end
+  attr_accessor :search_date_begin, :search_date_end, :search_magic_number
 
   # include Balance::Base
   include LibEnums
   include LibControl
+  include AlgoStatistic
   
   # after_create :register_resource_plan
   # after_save :insert_instruments
+  after_create :set_advanced_attributes
 
   # default_scope { where(deleted_at: nil) }
 
-  scope :deleted,      -> { where.not(deleted_at:nil) }
-  scope :not_deleted,  -> { where(deleted_at:nil) }
+  scope :deleted,       -> { where.not(deleted_at:nil) }
+  scope :not_deleted,   -> { where(deleted_at:nil) }
   scope :control_store, ->(store) { where(store: store )}
 
-  enum state:             {disable: 0, enable: 1}
-  enum kind:              {slave: 0,   copy: 1}
-  enum meta_mode:         {demo: 0,    real: 1}
-  enum meta_margin_mode:  {netting: 0, hedging: 1}
-  enum stock_kind:        {b3: 0,      forex: 1, usa:2, others:4}
+  enum state:            {disable: 0, enable: 1}
+  enum kind:             {slave: 0,   copy: 1}
+  enum meta_mode:        {demo: 0,    real: 1}
+  enum meta_margin_mode: {netting: 0, hedging: 1}
+  enum stock_kind:       {b3: 0,      forex: 1, usa:2, others:4}
 
-  store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume]
+  store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, 
+                               :api_time_max_seconds, :api_slippage, :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, 
+                               :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display]
 
   belongs_to :store
   belongs_to :customer
@@ -54,6 +58,12 @@ class Account < ApplicationRecord
   # def register_resource_plan
   #   store.register_resource_plan(self, self.kind)
   # end
+
+  def set_advanced_attributes
+    self.update(api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 12, api_time_to_check_server: 15, api_time_max_seconds: 30, api_slippage: 30, 
+                api_environment_local: false, api_store_state: true, api_milliseconds_timer: 3000, api_milliseconds_tick: 3000, api_event_on_timer: true, 
+                api_event_on_tick: false, api_mfe_mae_display: true)
+  end
 
   def contract_volume
     self.settings[:contract_volume].present? ? self.settings[:contract_volume] : "0"
@@ -188,89 +198,89 @@ class Account < ApplicationRecord
     instrument_control.to_b ? instruments.find_by(symbol: symbol.try(:upcase)).try(:name) : symbol
   end
 
-  def slave_profit
-    masters_filter(slaves.closed).to_a.sum(&:profit)
-  end
-
-  def slaves_scope(type = :slaves, scope = :all, trace)
-    table_name = type == :slaves ? "transaction_slaves" : "transactions"
-    
-    data = masters_filter(self.send(type).where("#{table_name}.trace_id = ?", trace.id), scope)
-    if scope.is_a?(Array)
-      data = data.where(state: scope)
-    else
-      data = data.send(scope) if data.respond_to?(scope)
-    end
-
-    data
-  end
+  # def slave_profit
+  #   masters_filter(slaves.closed).to_a.sum(&:profit)
+  # end
 
   # def slaves_scope(type = :slaves, scope = :all, trace)
   #   table_name = type == :slaves ? "transaction_slaves" : "transactions"
-  #   # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
-  #   masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id), scope)
+    
+  #   data = masters_filter(self.send(type).where("#{table_name}.trace_id = ?", trace.id), scope)
+  #   if scope.is_a?(Array)
+  #     data = data.where(state: scope)
+  #   else
+  #     data = data.send(scope) if data.respond_to?(scope)
+  #   end
+
+  #   data
   # end
+
+  # # def slaves_scope(type = :slaves, scope = :all, trace)
+  # #   table_name = type == :slaves ? "transaction_slaves" : "transactions"
+  # #   # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
+  # #   masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id), scope)
+  # # end
   
-  def masters_filter(data, scope = nil)
-    # self.search_date_begin = Date.parse("2023-09-01").to_date 
-    # self.search_date_end   = DateTime.now
-    if self.search_date_begin and self.search_date_end
-      if scope == :executed or scope == :all or (scope.is_a?(Array) and scope.include?(:executed))
-        query = {:created_at => search_date_begin..search_date_end.end_of_day}
-      else
-        query = {:closed_at => search_date_begin..search_date_end.end_of_day}
-      end
-      data = data.where(query)
-    end
-    data
-  end
+  # def masters_filter(data, scope = nil)
+  #   # self.search_date_begin = Date.parse("2023-09-01").to_date 
+  #   # self.search_date_end   = DateTime.now
+  #   if self.search_date_begin and self.search_date_end
+  #     if scope == :executed or scope == :all or (scope.is_a?(Array) and scope.include?(:executed))
+  #       query = {:created_at => search_date_begin..search_date_end.end_of_day}
+  #     else
+  #       query = {:closed_at => search_date_begin..search_date_end.end_of_day}
+  #     end
+  #     data = data.where(query)
+  #   end
+  #   data
+  # end
 
-  def profit_trade(type = :slaves, trace)
-    trades = slaves_scope(type, :closed, trace).try(:size).to_f
-    gain_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-    AlgoStatistic.profit_trade(trades, gain_trades)
-  end
+  # def profit_trade(type = :slaves, trace)
+  #   trades = slaves_scope(type, :closed, trace).try(:size).to_f
+  #   gain_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
+  #   AlgoStatistic.profit_trade(trades, gain_trades)
+  # end
 
-  def loss_trade(type = :slaves, trace)
-    trades = slaves_scope(type, :closed, trace).try(:size).to_f
-    loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-    AlgoStatistic.loss_trade(trades, loss_trades)
-  end
+  # def loss_trade(type = :slaves, trace)
+  #   trades = slaves_scope(type, :closed, trace).try(:size).to_f
+  #   loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
+  #   AlgoStatistic.loss_trade(trades, loss_trades)
+  # end
 
-  def pay_off(type = :slaves, trace)
-    gain = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-    gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-    loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-    loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-    AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
-  end
+  # def pay_off(type = :slaves, trace)
+  #   gain = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+  #   gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
+  #   loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
+  #   loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
+  #   AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
+  # end
 
-  def expect_pay_off(type = :slaves, trace)
-    total_trades = slaves_scope(type, :closed, trace).try(:size)
-    profit_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-    loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-    gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-    AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
-  end
+  # def expect_pay_off(type = :slaves, trace)
+  #   total_trades = slaves_scope(type, :closed, trace).try(:size)
+  #   profit_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
+  #   loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
+  #   gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+  #   gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
+  #   AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
+  # end
 
-  def profit_factor(type = :slaves, trace)
-    gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-    gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-    AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace)).abs
-  end
+  # def profit_factor(type = :slaves, trace)
+  #   gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+  #   gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
+  #   AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace)).abs
+  # end
 
-  def profit_drawdown(type = :slaves, trace)
-    gain = self.slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-    loss = self.slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-    profit = gain - loss
-    AlgoStatistic.profit_drawdown(profit, drawdown(type, trace)).abs
-  end
+  # def profit_drawdown(type = :slaves, trace)
+  #   gain = self.slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
+  #   loss = self.slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
+  #   profit = gain - loss
+  #   AlgoStatistic.profit_drawdown(profit, drawdown(type, trace)).abs
+  # end
 
-  def drawdown(type = :slaves, trace)
-    scoped = slaves_scope(type, :closed, trace).order(closed_at: :desc)
-    AlgoStatistic.drawdown(scoped)
-  end
+  # def drawdown(type = :slaves, trace)
+  #   scoped = slaves_scope(type, :closed, trace).order(closed_at: :desc)
+  #   AlgoStatistic.drawdown(scoped)
+  # end
 
   # def slave_contract_volume(value = nil)
   #   contract_volume = self.contract_volume 

@@ -27,7 +27,7 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
 
   describe API::V1::APITransactionsCopy do
 
-    context 'Trace - masters_scope'do 
+    context 'Trace - data_scope'do 
       it 'With out restrict_magic on trace' do
         # @account_copy.trace_ids = 1
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
@@ -56,7 +56,7 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
         expect(orders.closed.count).to be == 16
         expect(orders.sum(&:profit_copy)).to be == 0
         expect(Transaction.closed_info.count).to be == 16
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit)).to be == 0
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit)).to be == 0
         request.headers['Content-Type'] = 'application/json'
         request.headers['Accept'] = 'application/json'
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10001','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
@@ -70,7 +70,7 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
         expect(orders.executed.count).to be == 0
         expect(orders.closed.count).to be == 16
         expect(orders.sum(&:profit_copy).to_f).to be == 800.00
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 400.00
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 400.00
         expect(Transaction.closed_info.count).to be == 8
       end
 
@@ -106,7 +106,7 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
         expect(orders.closed.count).to be == 14
         expect(orders.sum(&:profit_copy)).to be == 0
         expect(Transaction.closed_info.count).to be == 14
-        expect(Trace.first.masters_scope(:masters, :closed).to_a.sum(&:profit)).to be == 0
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit)).to be == 0
         request.headers['Content-Type'] = 'application/json'
         request.headers['Accept'] = 'application/json'
         post '/api/v1/transactions/copy/trasmit/signal_copy/1_42/closed/5647753/HEDGING', params: {body:{'ticket_id':'10001','account_login':'5837683', 'magic_number':'200009', 'action':'CLOSED', 'order_state':'executed', 'meta_state':'CLOSED', 'ticket_slave_id':'368529373', 'order_symbol':'UsaRus', 'order_type':'1', 'price_open':'0', 'price_close':'1786.12', 'volume':'0.5', 'stop_loss':'1786.09', 'take_profit':'1704.47', 'profit':'100', 'comment':'368529065', 'open_at':'1680616804', 'timezone':'-3', 'meta_message':'Action: CLOSED | Symbol: UsaRus | TransactionID: 216001 | Ticket Master: 368529065 | Ticket Slave: 368529373 | Type: 1 | LastError: 4754 | Result Code: 10009 | Result Comment: Manual Closed'}.to_json}
@@ -121,7 +121,7 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
         expect(orders.closed.count).to be == 14
         trace.save
         expect(orders.sum(&:profit_copy).to_f).to be == 800.00
-        expect(trace.masters_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 200.00
+        expect(trace.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 200.00
         expect(Transaction.closed_info.count).to be == 8
       end
     end

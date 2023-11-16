@@ -141,7 +141,7 @@ class DashboardsController < ApplicationController
 					# trace.dashboard_magic_number 	  = trace.magic_number_restrict?
 
 
-					[trace.profit_masters.to_f, trace.id]
+					[trace.data_profit.to_f, trace.id]
 				end
 				@traces = @traces.sort
 			end

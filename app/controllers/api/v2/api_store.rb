@@ -39,12 +39,12 @@ module API
           account_name = params[:account_id]
           account_server = AccountServer.find_or_create_by(name:account_server_name)
 
-          account = Account.where(name: account_name, state: 1, kind: kind, account_server:nil).try(:last)
+          account = Account.find_by(name: account_name, state: :enable, kind: kind, account_server:nil)
 
           if account
             account.update(account_server: account_server)
           else
-            account = Account.where(name: account_name, kind: kind, account_server:account_server).try(:last)
+            account = Account.find_by(name: account_name, state: :enable, kind: kind, account_server:account_server)
             if account.nil?
               Logging.create(content:params.to_json, state: "ACCOUNTNOTFOUND") if Logging.where(content:params.to_json, state: "ACCOUNTNOTFOUND",  created_at:date_today.beginning_of_day..date_today.end_of_day).count < 2
               status 400

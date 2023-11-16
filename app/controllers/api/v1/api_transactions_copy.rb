@@ -9,7 +9,7 @@ module API
 
       resource :transactions do 
         get "/copy/trasmit/:expert_name/:expert_version/:action/:account_id/:account_mode" do
-          account = Account.find_by(name: params[:account_id], kind: :copy)
+          account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
           if account
             map = account.transactions.api_request_attributes(:closed_info)
           end

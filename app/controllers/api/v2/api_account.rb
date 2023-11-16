@@ -54,7 +54,7 @@ module API
           content_type 'application/json'
 
           # Logging.create(content:params, state: "COPY")
-          account = Account.find_by(name: params[:account_id], kind: params[:kind])
+          account = Account.find_by(name: params[:account_id], kind: params[:kind], state: :enable)
           if account and account.enable?
 
             unless params["body"].valid_encoding?

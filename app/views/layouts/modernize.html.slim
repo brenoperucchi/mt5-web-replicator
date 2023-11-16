@@ -78,7 +78,10 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
 / = javascript_include_tag "modernize/daterangepicker.js"
 / = javascript_include_tag "mintone/select2.full.min.js"
 
+= render "layouts/google_analytics"
+
 = yield(:javascript)
+
 javascript:
   $(document).ready(function(){
     $(function() {

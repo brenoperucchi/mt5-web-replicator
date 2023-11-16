@@ -3,13 +3,138 @@ module AlgoStatistic
 
 	included do
 
+		def mfe
+		  if self.search_date_begin and self.search_date_end
+		    self.statitics.mfe_max(self.search_date_begin..self.search_date_end.try(:end_of_day))
+		  else
+		    self.statitics.mfe_max
+		  end
+		  #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
+		  # else
+		  #   self.statitics.group_day_amount(:mfe)
+		  # end
+		end
+
+		def mae    
+		  if self.search_date_begin and self.search_date_end
+		    self.statitics.mae_min(self.search_date_begin..self.search_date_end.try(:end_of_day))
+		  else
+		    self.statitics.mae_min
+		  end
+		  # if self.search_date_begin and self.search_date_end
+		  #   self.statitics.group_day_amount(:mfe, search_date_begin..search_date_end.end_of_day)
+		  # else
+		  #   self.statitics.group_day_amount(:mfe)
+		  # end
+		end
+
+		def data_scope(type=:masters, states=nil, scope=:all, trace=nil)
+		  table_name = type == :slaves ? "transaction_slaves" : "transactions"
+
+		  states = self.send(type).klass.state_machine.states.map(&:name) if states == :all or (states.is_a?(Array) and states.include?(:all))
+			if trace.nil?
+		  	data = masters_filter(self.send(type), states)
+		  else
+		  	data = masters_filter(self.send(type).where("#{table_name}.trace_id = ?", trace.id), states)
+		  end
+		  		 
+		  data = data.send(scope) if not scope.nil? and data.respond_to?(scope)
+
+		  if self.search_magic_number.present?
+		    data = data.where(magic_number: self.search_magic_number)
+		  end
+
+		  data
+		end
+
+		def data_profit
+		  @data_profit = data_scope(:masters, :closed).to_a.sum(&:profit)
+		  @data_profit
+		end
+
+
+		def masters_filter(data, states=nil)
+			# if Rails.env.development?
+			#   self.search_date_begin = Date.parse("2023-11-01").to_date 
+			#   self.search_date_end   = DateTime.now
+			# end
+		  if self.search_date_begin and self.search_date_end
+		  	query = {:closed_at => search_date_begin.beginning_of_day..search_date_end.end_of_day, state: states}.compact
+
+		    if (states != :closed or states == :all) or (states.is_a?(Array) and not states.include?(:closed))
+		      query = {:created_at => search_date_begin.beginning_of_day..search_date_end.end_of_day, state: states}.compact
+		    end
+
+		    data = data.where(query)
+		  end
+		  data
+		end
+
+		def profit_trade(type= :masters, trace=nil)
+		  trades = data_scope(type, :closed, nil, trace).to_a.try(:count).to_f
+		  gain_trades = data_scope(type, :closed, :gain, trace).to_a.try(:count).to_f
+		  AlgoStatistic.profit_trade(trades, gain_trades)
+		end
+
+		def loss_trade(type=:masters, trace=nil)
+		  trades = data_scope(type, :closed, nil, trace).to_a.try(:count).to_f
+		  loss_trades = data_scope(type, :closed, :loss, trace).to_a.try(:count).to_f
+		  AlgoStatistic.loss_trade(trades, loss_trades)
+		end
+
+		def pay_off(type=:masters, trace=nil)
+		  gain = data_scope(type, :closed, :gain, trace).to_a.sum(&:profit).abs
+		  gain_operation = data_scope(type, :closed, :gain, trace).to_a.try(:count).to_f
+		  loss = data_scope(type, :closed, :loss, trace).to_a.sum(&:profit).abs
+		  loss_operation = data_scope(type, :closed, :loss, trace).to_a.try(:count).to_f
+		  AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
+		end
+
+		def expect_pay_off(type=:masters, trace=nil)
+		  total_trades = data_scope(type, :closed, nil, trace).count
+		  profit_trades = data_scope(type, :closed, :gain, trace).count.to_f
+		  loss_trades = data_scope(type, :closed, :loss, trace).count.to_f
+		  gross_profit = data_scope(type, :closed, :gain, trace).to_a.sum(&:profit).abs
+		  gross_loss = data_scope(type, :closed, :loss, trace).to_a.sum(&:profit).abs
+		  AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
+		end
+
+		def profit_factor(type=:masters, trace=nil)
+		  gross_profit = data_scope(type, :closed, :gain, trace).to_a.sum(&:profit).abs
+		  gross_loss = data_scope(type, :closed, :loss, trace).to_a.sum(&:profit).abs
+		  AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace)).abs
+		end
+
+		def profit_drawdown(type=:masters, trace=nil)
+		  gain = self.data_scope(type, :closed, :gain, trace).to_a.sum(&:profit).abs
+		  loss = self.data_scope(type, :closed, :loss, trace).to_a.sum(&:profit).abs
+		  profit = gain - loss
+		  AlgoStatistic.profit_drawdown(profit, drawdown(type, trace)).abs
+		end
+
+		def drawdown(type=:masters, trace=nil)
+		  scoped = data_scope(type, :closed, nil, trace).order(closed_at: :asc)
+		  AlgoStatistic.drawdown(scoped)
+		end
+
+		def drawdown_dates(type=:masters, trace=nil)
+		  scoped = data_scope(type, :closed, nil, trace).order(closed_at: :asc)
+		  AlgoStatistic.drawdown_dates(scoped)
+		end
+
+		def average(type=:masters, state=nil, scope=nil, trace=nil)
+		  scoped = data_scope(type, state, scope) 
+		  return 0 if scoped.size == 0
+		  scoped.sum(&:profit) / scoped.size
+		end
+
 		def dates_dashboard(collection)
 			(collection.first.closed_at.beginning_of_day.to_datetime..collection.last.closed_at.end_of_day.to_datetime)
 		end
 
 		def dashboard_capital_accumulated(heading = false)
 		  amount_total = 0
-		  collection = masters_scope(:masters, :closed).order(closed_at: :asc).where.not("transactions.closed_at is NULL AND transactions.profit = 0.0")
+		  collection = data_scope(:masters, :closed).order(closed_at: :asc).where.not("transactions.closed_at is NULL AND transactions.profit = 0.0")
 		  collection_array = []
 		  if collection.present?
 		    collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), portfolio: 0, profit: 0, loss:0}] if heading
@@ -28,7 +153,7 @@ module AlgoStatistic
 
 		def dashboard_drawdown
 		  amount_total = 0
-		  collection = masters_scope(:masters, :closed).order(closed_at: :asc)
+		  collection = data_scope(:masters, :closed).order(closed_at: :asc)
 		  collection_array = []
 		  if collection.present?
 		    collection_array = [{day:(collection.first.closed_at - 1.day).strftime("%Y-%m-%d"), drawdown: 0}]
