@@ -86,8 +86,8 @@ gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 
 # ADMINISTRATE
-gem "administrate",         path: "vendor/administrate"
-# gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
+# gem "administrate",         path: "vendor/administrate"
+gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
 gem 'administrate-field-image'
 gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
 gem "administrate-field-nested_has_many"

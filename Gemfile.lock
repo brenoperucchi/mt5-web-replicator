@@ -7,6 +7,20 @@ GIT
       rails
 
 GIT
+  remote: https://github.com/brenoperucchi/administrate.git
+  revision: a08fd1b4d7988606b717e28f6c9f98164729d748
+  branch: 0.18.0
+  specs:
+    administrate (0.18.2)
+      actionpack (>= 5.0)
+      actionview (>= 5.0)
+      activerecord (>= 5.0)
+      jquery-rails (>= 4.0)
+      kaminari (>= 1.0)
+      sassc-rails (~> 2.1)
+      selectize-rails (~> 0.6)
+
+GIT
   remote: https://github.com/brenoperucchi/administrate_ransack.git
   revision: 3c2a732c9aada3e8cc793c868f122353bab01f48
   branch: master
@@ -35,18 +49,6 @@ GIT
       administrate (< 1.0.0)
       rails (>= 4.1)
       tinymce-rails (>= 4.4.3)
-
-PATH
-  remote: vendor/administrate
-  specs:
-    administrate (0.18.2)
-      actionpack (>= 5.0)
-      actionview (>= 5.0)
-      activerecord (>= 5.0)
-      jquery-rails (>= 4.0)
-      kaminari (>= 1.0)
-      sassc-rails (~> 2.1)
-      selectize-rails (~> 0.6)
 
 GEM
   remote: https://rubygems.org/
