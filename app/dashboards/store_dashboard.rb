@@ -33,6 +33,21 @@ class StoreDashboard < Administrate::BaseDashboard
     tag_list:               Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+
+    api_debug_mode:           Field::Boolean.with_options(searchable: false),
+    api_debug_mode_level:     Field::Number.with_options(searchable: false),
+    api_freeze_max_time:      Field::Number.with_options(searchable: false),
+    api_time_to_check_server: Field::Number.with_options(searchable: false),
+    api_time_max_seconds:          Field::Number.with_options(searchable: false),
+    api_slippage:             Field::Number.with_options(searchable: false),
+    api_environment_local:    Field::Boolean.with_options(searchable: false),
+    api_store_state:          Field::Boolean.with_options(searchable: false),
+    api_store_message:        Field::String.with_options(searchable: false),
+    api_milliseconds_timer:   Field::Number.with_options(searchable: false),
+    api_milliseconds_tick:    Field::Number.with_options(searchable: false),
+    api_event_on_timer:       Field::Boolean.with_options(searchable: false),
+    api_event_on_tick:        Field::Boolean.with_options(searchable: false),
+    api_mfe_mae_display:      Field::Boolean.with_options(searchable: false),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -99,6 +114,24 @@ class StoreDashboard < Administrate::BaseDashboard
   payment
   payment_methods
   ].freeze
+
+  FORM_ATTRIBUTES_ADVANCED = %i[
+  api_debug_mode
+  api_debug_mode_level
+  api_freeze_max_time
+  api_time_to_check_server
+  api_time_max_seconds
+  api_slippage
+  api_environment_local
+  api_store_state
+  api_store_message
+  api_milliseconds_timer
+  api_milliseconds_tick
+  api_event_on_timer
+  api_event_on_tick
+  api_mfe_mae_display
+  ].freeze
+
 
   # COLLECTION_FILTERS
   # a hash that defines filters that can be used while searching via the search

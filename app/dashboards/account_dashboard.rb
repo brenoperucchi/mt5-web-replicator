@@ -28,6 +28,7 @@ class AccountDashboard < Administrate::BaseDashboard
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     deleted_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+
     api_debug_mode:           Field::Boolean.with_options(searchable: false),
     api_debug_mode_level:     Field::Number.with_options(searchable: false),
     api_freeze_max_time:      Field::Number.with_options(searchable: false),

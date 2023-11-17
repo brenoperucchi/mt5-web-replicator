@@ -9,10 +9,13 @@ class Store < ApplicationRecord
   attr_reader :resource_system
   attr_accessor :password
 
-
+  after_initialize :api_setters
   store :settings, accessors: [ :language, :telegram_bot_status, :telegram_bot_token, :dashboard_restrict,
                                 :telegram_api_id, :telegram_api_number, :telegram_api_hash, :volume_default, 
-                                :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id, :contact_whatsapp, :dashboard_date_filter
+                                :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id, :contact_whatsapp, :dashboard_date_filter, 
+                                :api_server_hostname, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_time_max_seconds, :api_slippage, 
+                                :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
+                                :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display
                               ]
   enum state: {disable:0, enable:1}
   acts_as_taggable_on :tags
@@ -200,6 +203,33 @@ class Store < ApplicationRecord
       usage.update(charged_at: date_today)
       invoice.balance_update
     end   
+  end
+
+
+  def api_setters
+    return if self.id != 1
+    methods = {
+      api_debug_mode: false, # Valor padrão: false
+      api_debug_mode_level: 1, # Valor padrão: 1
+      api_freeze_max_time: 16, # Valor padrão: 12
+      api_time_to_check_server: 30, # Valor padrão: 30
+      api_time_max_seconds: 30, # Valor padrão: 30
+      api_slippage: 30, # Valor padrão: 30
+      api_environment_local: true, # Valor padrão: false
+      api_store_state: true, # Valor padrão: true
+      api_store_message: nil, # Valor padrão: nil
+      api_milliseconds_timer: 2500, # Valor padrão: 3000
+      api_milliseconds_tick: 2000, # Valor padrão: 3000
+      api_event_on_timer: true, # Valor padrão: true
+      api_event_on_tick: true, # Valor padrão: false
+      api_mfe_mae_display: true, # Valor padrão: true
+    }
+    methods.each do |key, value|
+      if self.settings[key.to_s].blank?
+        instance_variable_set("@#{key}", value)
+        define_singleton_method(key){value}
+      end
+    end
   end
 
 

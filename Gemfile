@@ -89,7 +89,8 @@ gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 # gem "administrate",         path: "vendor/administrate"
 gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
 gem 'administrate-field-image'
-gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git'
+# gem 'administrate-field-tag',       path: 'vendor/administrate-field-tag/'
+gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git', branch: 'main'
 gem "administrate-field-nested_has_many"
 gem 'administrate_ransack',         git: "https://github.com/brenoperucchi/administrate_ransack.git", branch: 'master'
 # gem 'administrate_ransack', path: "vendor/administrate_ransack"
@@ -158,7 +159,7 @@ gem "rest-client"
 gem 'pay'
 
 # To use Stripe, also include:
-gem 'stripe', '>= 8'
+gem 'stripe', '~> 9'
 gem 'mercadopago-sdk'
 gem 'dotenv'
 
