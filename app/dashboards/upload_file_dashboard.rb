@@ -11,7 +11,9 @@ class UploadFileDashboard < Administrate::BaseDashboard
     id:              Field::Number,
     file:            Field::ActiveStorage,
     file_content:    Field::Text.with_options(searchable: false),
-    filename:    Field::String.with_options(searchable: false),
+    uploadable:      Field::Polymorphic.with_options(searchable: false),
+    filename:        Field::String.with_options(searchable: false),
+    account:         Field::String.with_options(searchable: false),
     kind:            Field::Select.with_options(collection: [:none, :import]),
     store:           Field::BelongsTo,
     trace:           Field::BelongsTo,
@@ -27,6 +29,8 @@ class UploadFileDashboard < Administrate::BaseDashboard
   id
   store
   trace
+  account
+  uploadable
   kind
   filename
   ].freeze
@@ -37,6 +41,8 @@ class UploadFileDashboard < Administrate::BaseDashboard
   id
   store
   trace
+  account
+  uploadable
   file_content
   kind
   file

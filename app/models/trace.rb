@@ -168,13 +168,10 @@ class Trace < ApplicationRecord
     resource.error?
   end  
 
-
-
   def next_charged
     days = DateTime.now.day > 15 ? 15 : 0
     (DateTime.now + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
   end
-
 
   private 
 
@@ -188,15 +185,5 @@ class Trace < ApplicationRecord
       errors.add(:base, 'Associated CustomerPlan must have an amount greater than 0')
     end
   end
-
-
-
-
-  # def test_drawdown
-  #   self.search_date_begin = DateTime.parse("12 Mar 2023 00:00:00 -0300")
-  #   self.search_date_end   = DateTime.parse("12 Abr 2023 00:00:00 -0300")
-  #   collection = self.data_scope(:masters, :closed)
-  #   drawdown_dates(drawdown_dates)
-  # end
 
 end

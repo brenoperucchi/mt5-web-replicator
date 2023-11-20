@@ -63,7 +63,7 @@ pt-BR:
           drawdown: Drawdown
           dates: "%{date1} à %{date2}"
           orders_open: Ordens Abertas
-          orders_errors: Ordens Errors
+          orders_errors: Ordens Error
           orders_closed: Ordens Fechadas
           buy: Compras
           sell: Vendas

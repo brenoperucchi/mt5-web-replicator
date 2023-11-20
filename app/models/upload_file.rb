@@ -8,6 +8,9 @@ class UploadFile < ApplicationRecord
   has_one_attached :file
 
 
+  # delegate :account, to: :uploadable#, prefix: true, allow_nil: true
+
+
   def import_file(trace_id=nil)
 
     return if self.kind != "import"
@@ -26,5 +29,9 @@ class UploadFile < ApplicationRecord
 
   def filename
     file.filename.to_s if file.attached?
+  end
+
+  def account
+    uploadable.account.name if uploadable.present? and uploadable.respond_to?(:account)
   end
 end

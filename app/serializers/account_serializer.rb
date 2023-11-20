@@ -10,27 +10,27 @@ class AccountSerializer < ActiveModel::Serializer
   end
 
   def api_debug_mode_level
-    object.api_debug_mode_level.present? ? object.api_debug_mode_level : Store.first.api_debug_mode_level                     # Default 1 (SendLogFileToServer & MfeMaeDisplay - Slave: GetOrderPriceClose & GetOrderPriceOpen & GetOrderOpenAt)
-                          # Default 2 (ApiRequest & ApiTrasmit & CheckServerFreeze)
-                          # Default 3 (Print OnTick & OnTimer + Info: mt5_terminal_path/mt5_terminal_data_path/mt5_commondata_path)
+    object.api_debug_mode_level.present? ? object.api_debug_mode_level : Store.first.api_debug_mode_level                     
+          # Default 1 (SendLogFileToServer & MfeMaeDisplay - Slave: GetOrderPriceClose & GetOrderPriceOpen & GetOrderOpenAt)
+          # Default 2 (ApiRequest & ApiTrasmit & CheckServerFreeze)
+          # Default 3 (Print OnTick & OnTimer & CheckServerInformations + Info: mt5_terminal_path/mt5_terminal_data_path/mt5_commondata_path)
   end
 
   def api_freeze_max_time
-    object.api_freeze_max_time.present? ? object.api_freeze_max_time : Store.first.api_freeze_max_time                      # Default 12
+    object.api_freeze_max_time.present? ? object.api_freeze_max_time : Store.first.api_freeze_max_time                       # Default 12
   end
 
   def api_time_to_check_server
-    object.api_time_to_check_server.present? ? object.api_time_to_check_server : Store.first.api_time_to_check_server                      # Default 30
+    object.api_time_to_check_server.present? ? object.api_time_to_check_server : Store.first.api_time_to_check_server         # Default 30
   end
 
   def api_time_max_seconds
-    object.api_time_max_seconds.present? ? object.api_time_max_seconds : Store.first.api_time_max_seconds                      # Default 30
+    object.api_time_max_seconds.present? ? object.api_time_max_seconds : Store.first.api_time_max_seconds                     # Default 30
   end
 
   def api_slippage
     object.api_slippage.present? ? object.api_slippage : Store.first.api_slippage                      # Default 30
   end
-
 
   def api_environment_local
     object.api_environment_local.present? ? object.api_environment_local.to_b : Store.first.api_environment_local.to_b                    # Default true
@@ -63,8 +63,6 @@ class AccountSerializer < ActiveModel::Serializer
   def api_mfe_mae_display
     object.api_mfe_mae_display.present? ? object.api_mfe_mae_display.to_b : Store.first.api_mfe_mae_display.to_b
   end 
-
-
 
   def yaml
     yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))
@@ -105,17 +103,5 @@ class AccountSerializer < ActiveModel::Serializer
   def api_server_hostname
     object.api_server_hostname(instance_options[:params])
   end
-
-  # attributes :id, :name, :telegram_api_id, :telegram_api_number, :telegram_api_hash, :server_real, :state
-  # # has_many :traces
-  # attributes :traces
-
-  # def traces
-  # 	object.traces.active.map do |trace|
-  #     next unless trace.telegram?
-  #     next if trace.telegram_api_id.nil?
-  # 		TraceSerializer.new(trace)
-  # 	end.compact
-  # end
 
 end

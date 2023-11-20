@@ -33,7 +33,7 @@ class AccountDashboard < Administrate::BaseDashboard
     api_debug_mode_level:     Field::Number.with_options(searchable: false),
     api_freeze_max_time:      Field::Number.with_options(searchable: false),
     api_time_to_check_server: Field::Number.with_options(searchable: false),
-    api_time_max_seconds:          Field::Number.with_options(searchable: false),
+    api_time_max_seconds:     Field::Number.with_options(searchable: false),
     api_slippage:             Field::Number.with_options(searchable: false),
     api_environment_local:    Field::Boolean.with_options(searchable: false),
     api_store_state:          Field::Boolean.with_options(searchable: false),

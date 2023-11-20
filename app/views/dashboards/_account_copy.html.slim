@@ -31,8 +31,8 @@
                 th ClosetAt
             tbody
               tr
-                td[colspan=2 style="text-align: right;"]= "#{@account.data_scope(:transactions, [:executed, :closed], :all, @trace).count}    OPERATIONS"
-                td - 
+                td OPERATIONS
+                td = @account.data_scope(:transactions, [:executed, :closed], :all, @trace).count
                 td TOTAL PROFIT
                 td= number_with_precision @account.data_scope(:transactions, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2     
                 td - 
@@ -57,8 +57,8 @@
                   td = l(copy.open_at, format: :short2)
                   td = l(copy.closed_at, format: :short2) if copy.closed_at.present?
               tr
-                td[colspan=2 style="text-align: right;"]= "#{@account.data_scope(:transactions, [:executed, :closed], :all, @trace).count}    OPERATIONS"
-                td - 
+                td OPERATIONS
+                td = @account.data_scope(:transactions, [:executed, :closed], :all, @trace).count
                 td TOTAL PROFIT
                 td= number_with_precision @account.data_scope(:transactions, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2       
                 td - 

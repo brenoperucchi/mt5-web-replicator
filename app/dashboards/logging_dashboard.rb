@@ -10,7 +10,6 @@ class LoggingDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id: Field::Number,
     content: Field::Text.with_options(searchable: false),
-    file_content: Field::Text.with_options(searchable: false),
     loggerable: Field::Polymorphic,
     resourceable: Field::Polymorphic,
     files: Field::HasMany,
@@ -43,13 +42,12 @@ class LoggingDashboard < Administrate::BaseDashboard
   SHOW_PAGE_ATTRIBUTES = %i[
   id
   state
+  account
   loggerable
   resourceable
-  content
-  account
-  files
-  file_content
   changeset
+  content
+  files
   created_at
   updated_at
   ].freeze

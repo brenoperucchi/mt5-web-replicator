@@ -183,6 +183,27 @@
         .card.w-100
           .card-body
             h5.card-title.fw-semibold.text-center
+              = I18n.t :orders_errors, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.data_scope(:masters, [:error]).to_a.sum(&:profit), precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:error], :buy).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:error], :sell).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
               = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
             h2.text-center.fw-semibold
               = number_with_precision @trace.data_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
@@ -199,27 +220,6 @@
                 div
                   h6.fw-semibold.text-dark.fs-4.mb-0
                     = @trace.data_scope(:masters, [:executed], :sell).count
-                  p.fs-3.mb-0.fw-normal
-                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
-        .card.w-100
-          .card-body
-            h5.card-title.fw-semibold.text-center
-              = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
-            h2.text-center.fw-semibold
-              = number_with_precision @trace.data_scope(:masters, :closed).to_a.sum(&:profit), precision: 2
-            .d-flex.align-items-center.justify-content-between
-              .d-flex.align-items-center
-                span.round-8.bg-dark.rounded-circle.me-6
-                div
-                  h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.data_scope(:masters, [:closed], :buy).count
-                  p.fs-3.mb-0.fw-normal
-                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
-              .d-flex.align-items-center
-                span.round-8.bg-dark.rounded-circle.me-6
-                div
-                  h6.fw-semibold.text-dark.fs-4.mb-0
-                    = @trace.data_scope(:masters, [:closed], :sell).count
                   p.fs-3.mb-0.fw-normal
                     = I18n.t :sell, scope:'helpers.dashboards.pages.show'
     .row
@@ -249,9 +249,30 @@
         .card.w-100
           .card-body
             h5.card-title.fw-semibold.text-center
+              = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.data_scope(:masters, [:closed]).to_a.sum(&:profit), precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:closed], :buy).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:closed], :sell).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
               = I18n.t :total, scope:'helpers.dashboards.pages.show'
             h2.text-center.fw-semibold
-              = number_with_precision @trace.data_scope(:masters).to_a.sum(&:profit), precision: 2
+              = number_with_precision @trace.data_scope(:masters, [:executed, :closed]).to_a.sum(&:profit), precision: 2
             .d-flex.align-items-center.justify-content-between
               .d-flex.align-items-center
                 span.round-8.bg-dark.rounded-circle.me-6
@@ -315,7 +336,7 @@
                     td = number_with_precision account.data_scope(type, :error, nil, @trace).to_a.sum(&:profit), precision: 2
                     td 
                     td = account.data_scope(type, [:executed, :closed], nil, @trace).count
-                    td = number_with_precision account.data_scope(type, :all, nil, @trace).to_a.sum(&:profit), precision: 2       
+                    td = number_with_precision account.data_scope(type, [:executed, :closed], nil, @trace).to_a.sum(&:profit), precision: 2       
 
 = render "magics", trace: @trace, account: @account
 
