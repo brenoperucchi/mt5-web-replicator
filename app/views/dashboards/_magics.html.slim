@@ -58,8 +58,8 @@
                 td = number_with_precision @trace.data_scope(:masters, :closed).to_a.sum(&:profit), precision: 2
                 td = number_with_precision @trace.data_scope(:masters, :error).to_a.sum(&:profit), precision: 2
                 td 
-                td = @trace_all.count
-                td = number_with_precision @trace.data_scope(:masters, [:error]).to_a.sum(&:profit), precision: 2     
+                td = @trace.data_scope(:masters, :all).count
+                td = number_with_precision @trace.data_scope(:masters, :all).to_a.sum(&:profit), precision: 2     
             tr
               td -
               td -
