@@ -58,7 +58,9 @@ module ResetDatabase
 	end
 
 	def self.migrate_db_production
-		Store.all.each{|s| s.update(url: s.url + "2")}		
+		Store.all.each do|s| 
+			s.update(url: s.url + "2") unless s.url.include?("2")
+		end
 		payments = Payment.all.order(id: :asc).limit(2)
 		payments.update_all(api_token: 'TEST-8003379344962428-070514-132303626f6b89ba73ab9f77b2a95c9d-77964627', webhook_token:'TEST-ea4aec5d-82ed-42c8-8c8a-abdd14b3690a') if payments.present?
 	end

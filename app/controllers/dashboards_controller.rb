@@ -1,8 +1,8 @@
 class DashboardsController < ApplicationController
 	# skip_before_action :after_sign_in_path_for
 	before_action :set_trace, except: [:index]
-	before_action :filters#, except: :index
 	before_action :set_store
+	before_action :filters#, except: :index
 	before_action :dashboard_restrict
 
 	# before_action :authenticate_user
