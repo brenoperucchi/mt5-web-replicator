@@ -9,7 +9,7 @@
         .card-header-right
       .card-body
         .table-responsive
-          table.table.table-hover.table-borderless
+          table.table.table-hover.table-borderless#transactions
             - type = @account.slave? ? :slaves : :transactions, [:executed, :closed]
             thead
               tr
@@ -43,7 +43,7 @@
                 td -
                 td -
               - @account.data_scope(:transactions, [:executed, :closed], :all, @trace).order(closed_at: 'DESC').each do |copy|
-                tr
+                tr[data-href="#{transaction_dashboard_path(@trace.store.url, @trace.name, copy.account.id, copy.id, datefilter:params[:datefilter])}"]
                   td = copy.ticket
                   td = copy.symbol
                   td = copy.state
@@ -68,3 +68,12 @@
                 td - 
                 td - 
                 td -
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){
+        $(document).on("click", "table#transactions.table tr:not(:first)", function() {
+          console.log("sdds");
+            var link = $(this).data("href");
+            document.location.href = link;
+        });
+    });

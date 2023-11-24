@@ -140,6 +140,8 @@ group :development do
   gem 'bcrypt_pbkdf', '~> 1'
   gem 'ed25519', '~> 1.2'
   gem "lol_dba"
+  # gem 'html2slim', '0.2.3', path: 'vendor/html2slim'
+  gem 'html2slim', '0.2.3', git: 'https://github.com/brenoperucchi/html2slim.git'
 end
 
 gem 'pg', '1.4.5'
@@ -155,23 +157,16 @@ gem "rest-client"
 
 # gem 'stisla-rails'
 
-
 gem 'pay'
-
-# To use Stripe, also include:
 gem 'stripe', '~> 9'
 gem 'mercadopago-sdk'
 gem 'dotenv'
 
 # # To use Braintree + PayPal, also include:
 # gem 'braintree', '>= 4.4', '< 5.0'
-
-# # To use Paddle, also include:
 # gem 'paddle_pay', '~> 0.1'
 
-# To use Receipts
 gem 'receipts', '~> 2'
-
 gem 'next_rails'
 gem 'telegram-bot-ruby'
 gem 'sidekiq', '7.1.3'
@@ -184,10 +179,6 @@ gem 'link_thumbnailer'
 gem 'imgix'
 gem "net-http"
 gem 'money-rails', '~> 1.12'
-gem 'html2slim'
-
-
-
 
 # Stylesheet inlining for email **
 # gem 'inky-rb', require: 'inky'

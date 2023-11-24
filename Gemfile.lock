@@ -31,6 +31,13 @@ GIT
       ransack (= 3.2.1)
 
 GIT
+  remote: https://github.com/brenoperucchi/html2slim.git
+  revision: a780ef710e22eabce3d6f2a9b581a46216c708c8
+  specs:
+    html2slim (0.2.3)
+      hpricot
+
+GIT
   remote: https://github.com/d-a-l-l/terminal-notifier.git
   revision: 3ba9ce569e234062d09c8fd01c4be11e56a9fd1b
   specs:
@@ -286,8 +293,6 @@ GEM
       guard-compat (~> 1.1)
       rspec (>= 2.99.0, < 4.0)
     hpricot (0.8.6)
-    html2slim (0.2.0)
-      hpricot
     http-accept (1.7.0)
     http-cookie (1.0.5)
       domain_name (~> 0.5)
@@ -715,7 +720,7 @@ DEPENDENCIES
   grape-active_model_serializers
   grape_on_rails_routes
   guard-rspec
-  html2slim
+  html2slim (= 0.2.3)!
   image_processing
   imgix
   jbuilder (~> 2.7)

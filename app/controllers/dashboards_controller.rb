@@ -5,6 +5,9 @@ class DashboardsController < ApplicationController
 	before_action :filters#, except: :index
 	before_action :dashboard_restrict
 
+  respond_to :html, :xml, :json
+
+
 	# before_action :authenticate_user
 	# layout 'stisla'
   layout 'modernize'
@@ -17,6 +20,12 @@ class DashboardsController < ApplicationController
 	# 	redirect_to new_user_session_path if !user_signed_in?
 			
 	# end
+
+	def transaction
+		@account = Account.find(params[:account_id])
+		@transaction = Transaction.find(params[:transaction_id])
+		respond_with(@account)
+	end
 
 	def finish
 		trace 	 = Trace.find_by(name: params[:name])

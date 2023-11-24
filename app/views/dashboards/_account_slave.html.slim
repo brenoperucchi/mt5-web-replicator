@@ -9,7 +9,7 @@
         .card-header-right
       .card-body
         .table-responsive
-          table.table.table-hover.table-borderless
+          table.table.table-hover.table-borderless#slaves
             - type = @account.slave? ? :slaves : :transactions
             thead
               tr
@@ -48,7 +48,7 @@
                 td -
               - @account.data_scope(type, nil, :all, @trace).order(open_at: 'DESC').each do |slave|
                 / - open_at_slave = slave.loggings.where(state:["OPEN", "OPENED"]).try(:first).try(:created_at)
-                tr
+                tr[data-href="#{transaction_dashboard_path(@trace.store.url, @trace.name, slave.account.id, slave.master.id, datefilter:params[:datefilter])}"]
                   td = slave.ticket_slave
                   td = slave.symbol
                   td = slave.state
@@ -76,3 +76,11 @@
                 td - 
                 td -
                 td -
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){
+        $(document).on("click", "table#slaves.table tr:not(:first)", function() {
+            var link = $(this).data("href");
+            document.location.href = link;
+        });
+    });
