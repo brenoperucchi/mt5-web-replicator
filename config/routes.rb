@@ -4,12 +4,12 @@ Rails.application.routes.draw do
   constraints subdomain: /.*/ do
     
     get  "stripe/checkout",                           to: "stripe#checkout", as:'checkout_stripe'      
-    get  "stripe/webhook/:id/:payment_id",            to: "stripe#webhook"
-    post "stripe/webhook/:id/:payment_id",            to: "stripe#webhook"
+    get  "stripe/webhook/:webbook_id/:payment_id",            to: "stripe#webhook"
+    post "stripe/webhook/:webbook_id/:payment_id",            to: "stripe#webhook"
 
-    get  "mercadopago/webhook/:id/:payment_id",       to: "mercadopago#webhook"
-    post "mercadopago/webhook/:id/:payment_id",       to: "mercadopago#webhook"
-    post "mercadopago/ipn/:id/:payment_id",           to: "mercadopago#ipn"
+    get  "mercadopago/webhook/:webbook_id/:payment_id",       to: "mercadopago#webhook"
+    post "mercadopago/webhook/:webbook_id/:payment_id",       to: "mercadopago#webhook"
+    post "mercadopago/ipn/:webbook_id/:payment_id",           to: "mercadopago#ipn"
     post "mercadopago/process_payment/:invoice_id",   to: "mercadopago#process_payment"
     get  "mercadopago/finish/:invoice_id",            to: "mercadopago#finish",    as: 'finish_mercadopago'
     get  "mercadopago/back_urls/:state/:invoice_id",  to: "mercadopago#back_urls"
@@ -33,8 +33,8 @@ Rails.application.routes.draw do
     
 
     resource :dashboard, only: [:show, :create], path:"dashboard/:store_name/:name" do
-      get  ':account_id/:transaction_id',             to: 'dashboards#transaction',     on: :collection, as: 'transaction'
-      get  ':account_id',                             to: 'dashboards#account',         on: :collection, as: 'account'
+      get  'account/:account_id/:transaction_id',     to: 'dashboards#transaction',     on: :collection, as: 'transaction'
+      get  'account/:account_id',                     to: 'dashboards#account',         on: :collection, as: 'account'
       get  'contract/:promotion',                     to: 'dashboards#contract',        on: :member#, as: 'account'
       get  'contract',                                to: 'dashboards#contract',        on: :member, as: 'contract'
       post 'contract',                                to: 'dashboards#create',          on: :member
