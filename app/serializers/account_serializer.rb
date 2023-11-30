@@ -85,7 +85,9 @@ class AccountSerializer < ActiveModel::Serializer
 
   def store_message
     params = instance_options[:params]
-    yaml[@expert_name]['disable_msg'].gsub("|version|", @expert_version.gsub('_','.')) unless meta_version_accept
+    if meta_version_accept && yaml[@expert_name][@expert_version] == "disable"
+      yaml[@expert_name]['disable_msg'].gsub("|version|", @expert_version.gsub('_','.')) 
+    end
   end
 
   def account_state
