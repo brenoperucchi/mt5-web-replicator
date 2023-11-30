@@ -61,37 +61,57 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
-      invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
-      invoice.items.update_all(invoice_id:28)
-      invoice.update_columns(id:28)
+      invoice.items.update_all(invoice_id: 41)
+      invoice.update_columns(id: 41)
 
       expect {
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
-          params: {"api_version"=>"v1", "data"=>{"id"=>"1313825330"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1313825330", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1313825330"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
+          params: {"api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319796651", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
       }.to change(invoice, :state).from("pending").to("paid")
       expect(response).to have_http_status 201
     end
 
-    it "Webhook 401" do
+    it "Webhook Pending to Denied" do
       # unfreeze_time
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
       @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
-      invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
-      invoice.items.update_all(invoice_id:28)
-      invoice.update_columns(id:28)
+      invoice.items.update_all(invoice_id: 42)
+      invoice.update_columns(id: 42)
 
       expect {
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
-          params: {"api_version"=>"v1", "data"=>{"id"=>"131382533"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1313825333", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1313825333"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
+          params: {"api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319818071", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
+        invoice.reload
+      }.to change(invoice, :state).from("pending").to("denied")
+      expect(response).to have_http_status 201
+    end
+
+    it "Webhook Pending to Denied - Return 400" do
+      # unfreeze_time
+      # travel_to Date.parse("2023-06-01").beginning_of_month
+      # freeze_time
+
+      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
+
+      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice = @account.customer.create_invoice_customer(invoice_name)
+      # invoice.items.update_all(invoice_id: 1)
+      # invoice.update_columns(id: 1)
+
+      expect {
+        post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
+          params: {"api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319818071", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
       }.not_to change(invoice, :state).from("pending")
-      expect(response).to have_http_status 201
+      expect(response).to have_http_status 400
     end
 
     it "IPN" do
@@ -101,10 +121,10 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
-      invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
-      invoice.items.update_all(invoice_id:28)
-      invoice.update_columns(id:28)
+      invoice.items.update_all(invoice_id: 27)
+      invoice.update_columns(id: 27)
 
       expect {
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
@@ -120,16 +140,16 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
 
-      invoice_name = "Trace##{@trace.id}-Account##{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
       invoice = @account.customer.create_invoice_customer(invoice_name)
-      invoice.items.update_all(invoice_id:28)
-      invoice.update_columns(id:28)
+      invoice.items.update_all(invoice_id: 44)
+      invoice.update_columns(id: 44)
 
       expect {
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
-          params: {"resource"=>"https://api.mercadolibre.com/merchant_orders/10400150087", "topic"=>"merchant_order", "id"=>"1", "payment_id"=>"1", "mercadopago"=>{"resource"=>"https://api.mercadolibre.com/merchant_orders/10400150087", "topic"=>"merchant_order"}}
+          params: {"resource"=>"https://api.mercadolibre.com/merchant_orders/13676542349", "topic"=>"merchant_order", "id"=>"1", "payment_id"=>"1", "mercadopago"=>{"resource"=>"https://api.mercadolibre.com/merchant_orders/13676542349", "topic"=>"merchant_order"}}
         invoice.reload
-      }.to change(invoice, :state).from("pending")
+      }.not_to change(invoice, :state).from("pending")
       expect(response).to have_http_status 201
     end
   end

@@ -5,49 +5,26 @@ class MercadopagoController < ApplicationController
 
   def webhook
     # render :nothing => false, :status => 200, :content_type => 'text/html'
-    store = Store.find(params[:id])
+    store = Store.find(params[:store_id])
     payment = Payment.find_by(id: params[:payment_id])
     logging = Logging.create(content:params, state: "WEBHOOK PENDING", loggerable:store)
-    if payment
-      sdk = Mercadopago::SDK.new(payment.api_token)
-      if params[:topic] == "merchant_order"       #ipn payment
-        responde_id = params.dig(:resource).scan(/\d+/).last
-        response = sdk.merchant_order.get(responde_id)
-        response_status = response.dig(:response, "status")
-        invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))
-
-        if invoice and invoice.pending?
-          invoice.update(state: response_status)
-          logging.update(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
-          payment_status(invoice, response_status)
-        end
-      else                                         #webhook payment
-        responde_id = params.dig("data.id")
-        if responde_id
-          response = sdk.payment.get(responde_id)
-          response_status = response.dig(:response, "status")
-          invoice = Invoice.find_by(id: response.dig(:response, "external_reference"))     
-          if invoice and invoice.pending?
-            payment_status(invoice, response_status)
-            logging.update(content:params.merge(response: response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
-          end
-        end
+    payment_method = payment.payment_method.provider(payment)
+    payment_method.check_payment(params)
+    response = payment_method.response
+    invoice = payment_method.invoice
+    if invoice && payment && response
+      response_status = response.dig(:response, "status")
+      if invoice and invoice.try(:pending?)
+        invoice.payment_status(response_status)
+        logging.update(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
       end
-
-      if invoice.nil?
-        logging.update(state:"INVOICE NOTFIND", content: params)
-        head 201
-        return
-      else
-        head 201
-        return 
-      end
+      head 201
+    else
+      logging.update(state: 'INVOICE NOTFIND', content: params) if invoice.nil?
+      logging.update(state: 'PAYMENT NOTFIND', content: params) if invoice.nil?
+      head 400
     end
-
-    logging.update(state:"PAYMENT NOTFIND", content: params)    
-    head 400
   end
-
 
   def back_urls
     @params = {payment_id: params[:payment_id], status: params[:status], external_reference: params[:external_reference], merchant_order_id: params[:merchant_order_id]}
@@ -59,7 +36,7 @@ class MercadopagoController < ApplicationController
 
   def finish
     @invoice = Invoice.find(params[:invoice_id])
-    if @invoice.response.dig(:payment, :status) == "approved"
+    if @invoice.response.dig(:payment, :status) == 'approved'
       @to_render = :success
     else
       @to_render = :failure
@@ -97,14 +74,6 @@ class MercadopagoController < ApplicationController
     # puts @invoice.response["payment"]
 
     # redirect_to finish_mercadopago_path(@invoice) 
-  end
-
-  private
-
-  def payment_status(invoice, response_status)
-    invoice.update(state: 'paid') if response_status == "approved"
-    invoice.update(state: 'denied') if response_status == "rejected"
-    invoice.update(state: 'refunded') if response_status == "refunded" or response_status == "charged_back" 
   end
 
 end

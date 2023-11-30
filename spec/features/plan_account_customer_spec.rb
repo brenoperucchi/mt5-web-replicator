@@ -25,7 +25,7 @@ RSpec.describe "PlanAccountCustomer" do
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
       @account1.create_invoice_account(@trace, false, nil)
       name = "#{@account1.id}-#{date_today.strftime("%Y-%m")}"
-      invoice = @store.invoice_stores.find_by(name: name)
+      invoice = @store.sinvoices.find_by(name: name)
       expect(invoice.amount.to_f).to be == 100.0
     end
     it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
@@ -35,7 +35,7 @@ RSpec.describe "PlanAccountCustomer" do
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
       @account1.create_invoice_account(@trace, false, nil)
       name = "#{@account1.id}-#{date_today.strftime("%Y-%m")}"
-      invoice = @store.invoice_stores.find_by(name: name)
+      invoice = @store.sinvoices.find_by(name: name)
 
       expect(invoice.name).to be == "2-2022-11"
       expect(invoice.amount.to_f).to be == 100.0
@@ -47,7 +47,7 @@ RSpec.describe "PlanAccountCustomer" do
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
       @account1.create_invoice_account(@trace, true, nil)
       name = "#{@account1.id}-#{date_today.strftime("%Y-%m")}"
-      invoice = @store.invoice_stores.find_by(name: name)
+      invoice = @store.sinvoices.find_by(name: name)
 
       expect(invoice.name).to be == "2-2022-11"
       expect(invoice.amount.to_f).to be == 53.33
@@ -60,7 +60,7 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-12-31")
       @account1.create_invoice_account(@trace, false, "-1")
       name = "2-2022-11"  
-      invoice = @store.invoice_stores.find_by(name: name)
+      invoice = @store.sinvoices.find_by(name: name)
 
       expect(invoice.name).to be == "2-2022-11"
       expect(invoice.amount.to_f).to be == 100.0
@@ -73,7 +73,7 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-12-16")
       @account1.create_invoice_account(@trace, true, "-1")
       name = "2-2022-11"  
-      invoice = @store.invoice_stores.find_by(name: name)
+      invoice = @store.sinvoices.find_by(name: name)
 
       expect(invoice.name).to be == "2-2022-11"
       expect(invoice.amount.to_f).to be == 50.00

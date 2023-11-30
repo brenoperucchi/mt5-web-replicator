@@ -1,19 +1,18 @@
-require 'lib_enums'
-require 'algo_statistic'
+require 'lib_enums' # Path: lib/lib_enums.rb
+require 'algo_statistic' # Path: lib/algo_statistic.rb
 
 class Trace < ApplicationRecord
-
   attr_accessor :search_date_begin, :search_date_end, :search_magic_number
 
   include LibEnums
   include AlgoStatistic
   include LibControl
 
-  enum kind:  {telegram: 0, copy: 1}
+  enum kind: { telegram: 0, copy: 1 }
 
   store :settings, accessors: [
-                                :telegram_option, :telegram_image, :take_profit_limit, 
-                                :telegram_api_id, :telegram_api_hash, :telegram_api_number, 
+                                :telegram_option, :telegram_image, :take_profit_limit,
+                                :telegram_api_id, :telegram_api_hash, :telegram_api_number,
                                 :instrument_control, :restrict_control_instrument, :magics_accept, :desc_contract, :capital_recomendation, :contract_volume_max,
                                 :stock_kind, :capital_multiplier, :magic_same, :desc_finish
                               ]
@@ -21,13 +20,12 @@ class Trace < ApplicationRecord
   has_many :orders
   has_many :transactions
   has_many :statitics, through: :transactions, source: :statistics
-  has_many :masters, :through => :orders, :source => :transactions
-  has_many :slaves,  :through => :orders, :source => :slaves
+  has_many :masters,   through: :orders, source: :transactions
+  has_many :slaves,    through: :orders, source: :slaves
 
-  # has_many :messages, :class_name => "Message::Message", :foreign_key => "trace_id"
-  has_and_belongs_to_many :messages, :class_name => "Message::Message"
+  has_and_belongs_to_many :messages, class_name: "Message::Message"
 
-  has_many :instruments, :class_name => "Instrument", :foreign_key => "trace_id", dependent: :destroy
+  has_many :instruments, class_name: "Instrument", foreign_key: "trace_id", dependent: :destroy
   belongs_to :store, optional: true
 
   scope :active,   ->{ where.not(active_at:nil)}
@@ -35,12 +33,12 @@ class Trace < ApplicationRecord
   # scope :telegram, ->{ where(kind:'telegram')}
 
   has_many :permissions#, dependent: :destroy
-  has_many :accounts, :through => :permissions#, :source => :slave
-  has_many :customer_plans, :through => :permissions#, :source => :slave
+  has_many :accounts,       through: :permissions#, source: :slave
+  has_many :customer_plans, through: :permissions#, source: :slave
 
   
   has_one :permission#, dependent: :destroy
-  has_one :customer_plan, :through => :permission, :source => :customer_plan
+  has_one :customer_plan,  through: :permission, source: :customer_plan
 
   # accepts_nested_attributes_for :payment
 
@@ -156,7 +154,6 @@ class Trace < ApplicationRecord
 
   def restrict_magic_number(resource)
     unless self.magics_accept.blank?
-      trace_magic_number = self.try(:trace).try(:name_id)
       magic_numbers = Order.magic_numbers_split(self.magics_accept)
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)

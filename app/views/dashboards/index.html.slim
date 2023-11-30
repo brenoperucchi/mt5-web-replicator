@@ -7,6 +7,7 @@
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)       
     - chart_values =  trace.dashboard_capital_accumulated(true)
+    - chart_regression = AlgoStatistic.trend_line(chart_values)
     .col-lg-12.d-flex.align-items-strech
       .card.w-100
         .card-body
@@ -35,7 +36,8 @@
               / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
               #chart[style="min-height: 335px;" 
                 data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
-                data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}"]
+                data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}",
+                data-chart-regressionlinear="#{chart_regression.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:linear]]}}"]
             .col-lg-3.col-md-3
               .d-flex.align-items-center.mb-4.pb-1
                 span.round-8.bg-dark.rounded-circle.me-6
@@ -89,8 +91,16 @@
           series: [
             {
               name: "Portfolio",
+              type: "area",
               data: $(this).data("chart-data"),
               // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
+            },
+            {
+              name: 'Revenue',
+              type: "line",
+              curve: "straight",
+              data: $(this).data("chart-regressionlinear"),
+              // data: $(this).data("chart-data"),
             },
             // {
             //   name: "Profit",
@@ -100,7 +110,6 @@
           ],
           chart: {
             fontFamily: "DM Sans,sans-serif",
-            type: "area",
             height: 350,
             zoom: {
               enabled: false,
@@ -112,12 +121,16 @@
           grid: {
             show: true,
           },
-          colors: ["#615dff", "#3dd9eb"],
+          colors: ["#615dff", "yellow"],
           dataLabels: {
             enabled: false,
           },
           stroke: {
             curve: "smooth",
+          },
+          fill: {
+            type:'solid',
+            opacity: [0.35, 1],
           },
           xaxis: {
             type: "datetime",

@@ -11,9 +11,9 @@ class PaymentMethod < ApplicationRecord
 
   accepts_nested_attributes_for :payments
 
-  def provider(invoice, payment)
+  def provider(payment)
     provider_class = "PaymentMethod::#{self.handle.classify}".safe_constantize
-    @provider ||= provider_class.new(invoice, payment)
+    @provider ||= provider_class.new(payment)
   end
 
 end

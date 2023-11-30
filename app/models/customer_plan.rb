@@ -8,9 +8,8 @@ class CustomerPlan < ApplicationRecord
 
   belongs_to :store, optional:true
   belongs_to :payment, optional:true
-  
-  has_many :plan_usages, as: :usageable#, dependent: :destroy
 
+  has_many :plan_usages, as: :usageable #, dependent: :destroy
   has_many :plan_customers, dependent: :destroy
   has_many :customers, through: :plan_customers, source: :customer
 
@@ -25,7 +24,7 @@ class CustomerPlan < ApplicationRecord
 
   # scope :active,  -> { where.not(active_at:nil) }
 
-  validates_presence_of [:name, :amount], :if => proc { |obj| !Current.user.nil? and Current.user.userable.role == "customer" }
+  validates_presence_of [:name, :amount], :if => proc { !Current.user.nil? and Current.user.userable.role == "customer" }
   validates_presence_of :active, :if => :validate_active_at
 
   accepts_nested_attributes_for :customers, :payment

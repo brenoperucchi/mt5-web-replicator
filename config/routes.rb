@@ -4,12 +4,12 @@ Rails.application.routes.draw do
   constraints subdomain: /.*/ do
     
     get  "stripe/checkout",                           to: "stripe#checkout", as:'checkout_stripe'      
-    get  "stripe/webhook/:webbook_id/:payment_id",            to: "stripe#webhook"
-    post "stripe/webhook/:webbook_id/:payment_id",            to: "stripe#webhook"
+    get  "stripe/webhook/:store_id/:payment_id",            to: "stripe#webhook"
+    post "stripe/webhook/:store_id/:payment_id",            to: "stripe#webhook"
 
-    get  "mercadopago/webhook/:webbook_id/:payment_id",       to: "mercadopago#webhook"
-    post "mercadopago/webhook/:webbook_id/:payment_id",       to: "mercadopago#webhook"
-    post "mercadopago/ipn/:webbook_id/:payment_id",           to: "mercadopago#ipn"
+    get  "mercadopago/webhook/:store_id/:payment_id",       to: "mercadopago#webhook"
+    post "mercadopago/webhook/:store_id/:payment_id",       to: "mercadopago#webhook"
+    post "mercadopago/ipn/:store_id/:payment_id",           to: "mercadopago#ipn"
     post "mercadopago/process_payment/:invoice_id",   to: "mercadopago#process_payment"
     get  "mercadopago/finish/:invoice_id",            to: "mercadopago#finish",    as: 'finish_mercadopago'
     get  "mercadopago/back_urls/:state/:invoice_id",  to: "mercadopago#back_urls"

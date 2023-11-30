@@ -34,8 +34,8 @@ class Invoice < ApplicationRecord
 
 
   def invoice_send
-    payment_method = self.payment.payment_method.provider(self, self.payment)
-    payment_method.checkout
+    payment_method = self.payment.payment_method.provider(self.payment)
+    payment_method.checkout(self)
     self.update(payment_link: payment_method.redirect_url)
     return payment_method
   end
@@ -46,11 +46,33 @@ class Invoice < ApplicationRecord
 
 
   def payment_method
-    self.payment.payment_method.provider(self, self.payment)
+    self.payment.payment_method.provider(self.payment)
   end
 
   def response
     read_attribute(:response) || {}
+  end
+
+  def check_payment
+    logging = loggings.where(state: 'opened').take
+    if logging
+      payment_method = payment.payment_method.provider(payment)
+      payment_method.check_payment(ActionController::Parameters.new(eval logging.content))
+    end
+    self.payment_status
+  end
+
+  def payment_status(response_status=nil)
+    response_status ||= self.response[:response].dig("order_status")
+    case response_status
+    when 'approved', 'paid'
+      self.update(state: 'paid')
+    when 'rejected'
+      self.update(state: 'denied')
+    when 'refunded', 'charged_back'
+      self.update(state: 'refunded')
+    end
+
   end
 
 

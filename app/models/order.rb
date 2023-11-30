@@ -34,20 +34,18 @@ class Order < ApplicationRecord
   end
 
   def self.ticket_search(value)
-    self.where("CAST(content_id as TEXT) ILIKE ?", "%#{value}%")
+    where('CAST(content_id as TEXT) ILIKE ?', "%#{value}%")
   end
 
   def self.profit_search(value)
-    self.joins(:transactions).where(transactions:{profit:0..value.to_f})
+    joins(:transactions).where(transactions: { profit: 0..value.to_f })
   end
 
   def self.state_search(*attrs)
-    attrs.reject!{|item| item.empty?}
+    attrs.reject!{ |item| item.empty? }
     return true unless attrs.present?
-    self.where(state:attrs)
-    
+    where(state:attrs)
   end
-
 
   state_machine :initial => :pending do
     after_transition :executed => :closed, :do => :update_state
@@ -69,29 +67,29 @@ class Order < ApplicationRecord
     end
 
     state :closed do
-      def update_state(state)
+      def update_state(_state)
         return (slaves.closed_deleted.count == slaves.count and transactions.first.closed?)
       end
     end
 
     state :prepared do
-      def update_state(state)
+      def update_state(_state)
         self.update_column(:ready_at, Time.current)
         system("rm -rf #{Rails.root}/public/output.jpg") 
       end
     end
     state :executed do
-      def update_state(state)
+      def update_state(_state)
         self.update_column(:execute_at, Time.current)
       end
-      def close_state?(state)
+      def close_state?(_state)
         trans_count = self.transactions.count
         closed_count = self.transactions.closed.count
         trans_count == closed_count ? self.update_column(:execute_at, Time.current) : false
       end
     end
     state :pending do
-      def update_state(state)
+      def update_state(_state)
         self.update_column(:execute_at, nil)
         self.update_column(:ready_at, nil)
       end

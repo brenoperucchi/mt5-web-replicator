@@ -53,7 +53,7 @@ module Control
     end
 
     def scoped_resource
-      current_user.store.invoice_stores
+      current_user.store.sinvoices
     end
 
   end

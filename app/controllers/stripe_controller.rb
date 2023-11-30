@@ -31,7 +31,7 @@ class StripeController < ApplicationController
 	end
 
 	def webhook
-		store = Store.find(params[:id])
+		store = Store.find(params[:store_id])
 		
 		invoice = Invoice.try(:find_by, stripe_invoice_id: params.dig(:data, :object, :id))
 		endpoint_secret = invoice.try(:invoiceable).try(:store).try(:stripe_webhook_secret)

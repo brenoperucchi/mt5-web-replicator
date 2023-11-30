@@ -10,6 +10,11 @@ class Payment < ApplicationRecord
 
   delegate :name, to: :payment_method, allow_nil: true
 
+  # def method(invoice)
+  #   "PaymentMethod::#{payment_method.handle.classify}".safe_constantize.new(invoice, self)
+    
+  # end
+
   def webook_url
     if Rails.env.production?
       "https://#{Store.domain_url}/#{self.payment_method.handle.classify.downcase}/webhook/#{store.id}/#{self.id}"
