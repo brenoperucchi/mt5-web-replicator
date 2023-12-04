@@ -136,7 +136,7 @@
             #chart-dashboard_capital_accumulated[style="min-height: 335px;" 
               data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
               data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}",
-              data-chart-regressionlinear="#{chart_regression.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:linear]]}}"]
+              data-chart-regressionlinear="#{chart_regression.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:linear]] unless x.blank?}}"]
 
             .clearfix
       .col-md-6.col-lg-4.align-items-stretch
