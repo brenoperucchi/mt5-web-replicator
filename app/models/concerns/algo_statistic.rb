@@ -57,10 +57,10 @@ module AlgoStatistic
 
 
 		def masters_filter(data, states=nil)
-			if Rails.env.development?
-			  self.search_date_begin = Date.parse("2023-11-01").to_date 
-			  self.search_date_end   = DateTime.now
-			end
+			# if Rails.env.development?
+			#   self.search_date_begin = Date.parse("2023-11-01").to_date 
+			#   self.search_date_end   = DateTime.now
+			# end
 		  if self.search_date_begin and self.search_date_end
 		  	query = {:closed_at => search_date_begin.beginning_of_day..search_date_end.end_of_day, state: states}.compact
 
@@ -294,7 +294,7 @@ module AlgoStatistic
 		# Preparando os data para a regressão linear
 		# binding.pry
 		x_data = data.map.with_index(0) { |d, index| [index] }
-		y_data = data.map { |d| (d[:profit] - d[:loss]).to_i }
+		y_data = data.map { |d| (d[:portfolio]).to_i }
 		# binding.pry
 
 		# Criando e treinando o modelo
@@ -318,37 +318,80 @@ module AlgoStatistic
 		end
 	end
 
-	def self.trend_line(data)
-
-		# Convertendo datas para números sequenciais a partir de 0
-		x_data = data.map.with_index { |_, index| index }
-		y_data = data.map { |d| d[:portfolio].to_f }
-
-		# Calculando a média de x e y
-		mean_x = x_data.sum.to_f / x_data.size
-		mean_y = y_data.sum.to_f / y_data.size
-
-		# Calculando a inclinação (slope)
-		numerator = x_data.zip(y_data).sum { |x, y| (x - mean_x) * (y - mean_y) }
-		denominator = x_data.sum { |x| (x - mean_x)**2 }
-		slope = numerator.to_f / denominator
-
-		# Forçar o primeiro valor da linha de tendência a ser 0
-		# Ajustar o intercepto para que o primeiro valor (x=0) seja 0
-		intercept = 0
-
-		# Gerando valores da linha de tendência
-		linha_tendencia = x_data.map do |x|
-		  valor_tendencia = slope * x + intercept
-		  { day: data[x][:day], linear: valor_tendencia.round }
-		end
-
-		# A linha de tendência agora começa com um valor de 0 na primeira data
 
 
 
-		
+	def self.trend_line(data, window_size=1)
+	  # Convertendo datas para números sequenciais a partir de 0
+	  x_data = data.map.with_index { |_, index| index }
+	  y_data = data.map { |d| d[:portfolio].to_f }
+
+	  # Calculando média móvel
+	  sma_values = y_data.each_cons(window_size).map { |window| window.sum / window.size.to_f }
+
+	  # Preparar x_data para corresponder ao tamanho de sma_values
+	  x_data_sma = x_data[window_size - 1..-1]
+
+	  # Aplicar regressão linear na média móvel
+	  xxs = x_data_sma.sum { |x| x * x }
+	  xys = x_data_sma.zip(sma_values).sum { |x, y| x * y }
+
+	  # Calculando a inclinação (slope)
+	  slope = xys / xxs.to_f
+	  intercept = 0
+
+	  # Gerando valores da linha de tendência
+	  linha_tendencia = x_data_sma.map.with_index do |x, i|
+	    valor_tendencia = slope * x + intercept
+	    
+	    { day: data[x][:day], linear: valor_tendencia.round }# if i == 0 or i == x_data_sma.size - 1
+	  end
+
+	  linha_tendencia.compact
 	end
+
+	# def self.trend_line(data)
+	# 	data ||= [{:day=>"2023-10-31", :portfolio=>0, :profit=>0, :loss=>0},
+	# 					 {:day=>"2023-11-01", :portfolio=>404.0, :profit=>404.0, :loss=>0},
+	# 					 {:day=>"2023-11-06", :portfolio=>408.0, :profit=>4.0, :loss=>0},
+	# 					 {:day=>"2023-11-07", :portfolio=>612.0, :profit=>204.0, :loss=>0},
+	# 					 {:day=>"2023-11-08", :portfolio=>471.0, :profit=>0, :loss=>-141.0},
+	# 					 {:day=>"2023-11-09", :portfolio=>330.0, :profit=>0, :loss=>-141.0},
+	# 					 {:day=>"2023-11-10", :portfolio=>716.0, :profit=>386.0, :loss=>0},
+	# 					 {:day=>"2023-11-13", :portfolio=>549.0, :profit=>0, :loss=>-167.0},
+	# 					 {:day=>"2023-11-14", :portfolio=>985.0, :profit=>436.0, :loss=>0},
+	# 					 {:day=>"2023-11-16", :portfolio=>829.0, :profit=>0, :loss=>-156.0},
+	# 					 {:day=>"2023-11-17", :portfolio=>741.0, :profit=>0, :loss=>-88.0},
+	# 					 {:day=>"2023-11-20", :portfolio=>739.0, :profit=>0, :loss=>-2.0},
+	# 					 {:day=>"2023-11-21", :portfolio=>674.0, :profit=>0, :loss=>-65.0},
+	# 					 {:day=>"2023-11-22", :portfolio=>554.0, :profit=>0, :loss=>-120.0},
+	# 					 {:day=>"2023-11-23", :portfolio=>371.0, :profit=>0, :loss=>-183.0},
+	# 					 {:day=>"2023-11-24", :portfolio=>323.0, :profit=>0, :loss=>-48.0}
+	# 					]
+
+	#   # Convertendo datas para números sequenciais a partir de 0
+	#   x_data = data.map.with_index { |_, index| index }
+	#   y_data = data.map { |d| d[:portfolio].to_f }
+
+	#   # Calculando a soma dos quadrados de x (xxs) e a soma do produto de x e y (xys)
+	#   xxs = x_data.sum { |x| x * x }
+	#   xys = x_data.zip(y_data).sum { |x, y| x * y }
+
+	#   # Calculando a inclinação (slope)
+	#   slope = xys / xxs.to_f
+
+	#   # Ajustando o intercepto para que o primeiro valor (x=0) seja 0
+	#   intercept = 0
+
+	#   # Gerando valores da linha de tendência
+	#   linha_tendencia = x_data.map do |x|
+	#     valor_tendencia = slope * x + intercept
+	#     { day: data[x][:day], linear: valor_tendencia.round }
+	#   end
+
+	#   linha_tendencia
+	# end
+
 
 	def self.drawdown_dates(collection)
 	  drawdown_balance = 0

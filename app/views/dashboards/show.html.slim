@@ -1,4 +1,6 @@
 - chart_values =  @trace.dashboard_capital_accumulated(true)
+- chart_regression = AlgoStatistic.trend_line(chart_values)
+- chart_regression = [chart_regression[0], chart_regression[-1]]
 - content_for :header do
   css:
     /* CSS para o contêiner flexível */
@@ -133,7 +135,8 @@
             / #chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
             #chart-dashboard_capital_accumulated[style="min-height: 335px;" 
               data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
-              data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}"]
+              data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}",
+              data-chart-regressionlinear="#{chart_regression.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:linear]]}}"]
 
             .clearfix
       .col-md-6.col-lg-4.align-items-stretch
@@ -371,6 +374,7 @@
   = javascript_include_tag "mintone/chart/morris.js"
 
 - content_for :footer do
+  = javascript_include_tag "mintone/moment.min.js"
   javascript:
     $(document).ready(function(){
       $(document).on("click", "table#accounts.table tr", function() {
@@ -382,17 +386,24 @@
           series: [
             {
               name: "Portfolio",
+              type: "area",
               data: $('#chart-dashboard_capital_accumulated').data("chart-data"),
               // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
             },
             {
               name: "Profit",
+              type: "line",
               data: $('#chart-dashboard_capital_accumulated').data("chart-profit"),
+            },
+            {
+              name: 'Trend Line',
+              type: "line",
+              data: $('#chart-dashboard_capital_accumulated').data("chart-regressionlinear"),
+              // data: $(this).data("chart-data"),
             },
           ],
           chart: {
             fontFamily: "DM Sans,sans-serif",
-            type: "area",
             height: 350,
             zoom: {
               enabled: false,
@@ -404,12 +415,19 @@
           grid: {
             show: true,
           },
-          colors: ["#615dff", "#3dd9eb"],
+          colors: ["#615dff","#3dd9eb","#FFA836"],
           dataLabels: {
             enabled: false,
           },
           stroke: {
-            curve: "smooth",
+              show: true,
+              curve: 'straight',
+              lineCap: 'butt',
+              // colors: undefined,
+              width: 4,
+          },
+          markers: {
+            size: 1
           },
           xaxis: {
             type: "datetime",
@@ -426,6 +444,10 @@
                 ],
               },
             },
+          },
+          fill: {
+            type:'solid',
+            opacity: [0.35, 1],
           },
           yaxis: {
             opposite: true,
@@ -444,10 +466,19 @@
             },
           },
           tooltip: {
-            theme: "dark",
+            theme: "light",
+            custom: function({series, seriesIndex, dataPointIndex, w}) {
+              var data1 = w.globals.initialSeries[0].data[dataPointIndex];
+              var data2 = w.globals.initialSeries[1].data[dataPointIndex];
+              var date = moment(new Date(data1[0])).format('D MMM');
+
+              var html = "<div class='apexcharts-tooltip-title' style='font-family: &quot;DM Sans&quot;, sans-serif; font-size: 12px;'>"+ date +"</div><div class='apexcharts-tooltip-series-group apexcharts-active' style='order: 1; display: flex;'> <span class='apexcharts-tooltip-marker' style='background-color: "+ w.globals.colors[0] +";'></span> <div class='apexcharts-tooltip-text' style='font-family: &quot;DM Sans&quot;, sans-serif; font-size: 12px;'> <div class='apexcharts-tooltip-y-group'> <span class='apexcharts-tooltip-text-y-label'>"+ w.globals.seriesNames[0] +" </span> <span class='apexcharts-tooltip-text-y-value'>"+ data1[1]+"</span> </div> <div class='apexcharts-tooltip-goals-group'> <span class='apexcharts-tooltip-text-goals-label'></span> <span class='apexcharts-tooltip-text-goals-value'></span> </div> <div class='apexcharts-tooltip-z-group'> <span class='apexcharts-tooltip-text-z-label'></span> <span class='apexcharts-tooltip-text-z-value'></span> </div> </div></div><div class='apexcharts-tooltip-series-group apexcharts-active' style='order: 1; display: flex;'> <span class='apexcharts-tooltip-marker' style='background-color: "+ w.globals.colors[1]+";'></span> <div class='apexcharts-tooltip-text' style='font-family: &quot;DM Sans&quot;, sans-serif; font-size: 12px;'> <div class='apexcharts-tooltip-y-group'> <span class='apexcharts-tooltip-text-y-label'>"+ w.globals.seriesNames[1]+"</span> <span class='apexcharts-tooltip-text-y-value'>"+data2[1]+"</span> </div> <div class='apexcharts-tooltip-goals-group'> <span class='apexcharts-tooltip-text-goals-label'></span> <span class='apexcharts-tooltip-text-goals-value'></span> </div> <div class='apexcharts-tooltip-z-group'> <span class='apexcharts-tooltip-text-z-label'></span> <span class='apexcharts-tooltip-text-z-value'></span> </div> </div></div>"
+
+              return html
+            }
           },
           legend: {
-            show: true,
+            show: false,
             horizontalAlign: "left",
           },
         };
