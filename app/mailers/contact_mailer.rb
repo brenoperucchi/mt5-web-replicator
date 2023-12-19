@@ -9,7 +9,7 @@ class ContactMailer < ApplicationMailer
     if Rails.env.production?
       delivery_options = { user_name: "contact@imentore.com",
                            password: "3e2w1q",
-                           address: "imentore.com",
+                           address: "mail.imentore.com",
                            port: "587" }
      end
 
