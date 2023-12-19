@@ -47,6 +47,10 @@ html lang="en"
                 / img.img-fluid alt="" src="/images/saasley/img/logo-white.svg" /
                 h4
                   = title = I18n.t :app_name, scope: 'helpers.site.main'
+                small.text-muted
+                  a[href="mailto:contato@imentore.com.br?subject=Contact Imentore"] 
+                    | contato@.imentore.com.br
+
             / p.text-muted
             /   | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pellentesque
             /   | efficitur turpis, vitae dictum dolor tristique in.
@@ -71,8 +75,6 @@ html lang="en"
           /     li
           /       a href="#"  Contact
 
-            small.text-muted
-              | © Copyright 2022. Saasley inc.
     /! :Theme script:
     - if params['locale'] == "en"
       a[class='bottom-image' aria-label="Chat on WhatsApp" href="https://wa.me/5548988227539?text=I%20am%20interested%20in%20knowing%20the%20product."] 
