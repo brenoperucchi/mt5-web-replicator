@@ -13,13 +13,21 @@ module ResetDatabase
 	# end
 
 	def self.delete_logging
-		Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
+		# Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
 		Logging.where(state: "START").delete_all
-		Logging.where(state: "MODIFY").delete_all
-		Message::Message.all.each{|x| (x.traces.blank? and x.orders.blank?) ? x.destroy : true}
-		date = DateTime.now - 1.year
-		Logging.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
-		Message::Message.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
+		Message::Message.joins('LEFT JOIN messages_traces ON messages_traces.message_id = messages.id').joins('LEFT JOIN messages_orders ON messages_orders.message_id = messages.id').where('messages_traces.trace_id IS NULL').where('messages_orders.order_id IS NULL').delete_all
+		date = DateTime.now - 6.months
+		conditions = date.beginning_of_year..date.end_of_day
+		Logging.where(state: "MODIFY", created_at: conditions).delete_all
+		Logging.where(state: "COPY/MODIFY", created_at: conditions).delete_all
+		Logging.where(state: "COPY/CLOSE", created_at: conditions).delete_all
+		Logging.where(state: "ORDERS_CLOSED", created_at: conditions).delete_all
+		Logging.where(state: "ORDERS_OPEN", created_at: conditions).delete_all
+		Message::Message.where(state: "executed", created_at: conditions).delete_all
+
+		# date = DateTime.parse("2022-01-01")
+		# Logging.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
+		# Message::Message.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
 	end
 
 

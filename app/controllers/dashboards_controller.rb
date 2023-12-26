@@ -20,6 +20,11 @@ class DashboardsController < ApplicationController
   # 	redirect_to new_user_session_path if !user_signed_in?
   # end
 
+  def mfe
+    @dates = @trace.analyze_transactions
+    respond_with(@dates)
+  end
+
   def transaction
     @account = Account.find(params[:account_id])
     @transaction = Transaction.find(params[:transaction_id])

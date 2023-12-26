@@ -1,0 +1,75 @@
+- content_for :breadcrumb do
+  li.breadcrumb-item
+    a href="#{dashboard_path(@trace.store.url, @trace.name, params: request.query_parameters)}" 
+      = @trace.name
+  li.breadcrumb-item
+    a href="#{mfes_dashboard_path(@trace.store.url, @trace.name, params: request.query_parameters)}" 
+      | MFEs
+  li.breadcrumb-item
+    a href="#{mfe_by_dashboard_path(@trace.store.url, @trace.name, :month, params[:date], params: request.query_parameters)}" 
+      = params[:date]
+
+
+- date = params[:date] + "-01"
+- date = Date.parse(date)
+- @trace.search_date_begin      = date.beginning_of_month
+- @trace.search_date_end        = date.end_of_month
+
+- data = @trace.analyze_transactions
+/ - data = data.group_by{|x| x[:date].strftime("%Y-%m")}
+.row
+  .col-md-12
+    .card.table-card.latest-activity-card
+      .card-header
+        h5
+          | Dates
+          '
+          / = "#{@account.name} - #{@account.kind}"
+        .card-header-right
+      .card-body
+        .table-responsive
+          table.table.table-hover.table-borderless#transactions
+            - transactions_analyzed_count = 0
+            - transactions_overlapping = []
+            / - type = @account.slave? ? :slaves : :transactions, [:executed, :closed]
+            thead
+              tr
+                th Date
+                th Profit Original
+                th Profit MFE
+                th Reach Target
+                th Transactions Analyzed
+                th Transactions Overlapping
+
+            tbody
+              tr
+              - data.each do |details|
+                / - next if date
+                tr[data-href="#{mfe_by_dashboard_path(@trace.store.url, @trace.name, :day, details[:date], datefilter:params[:datefilter])}"]
+                  / - transactions_overlapping << transaction[:transactions_overlapping].present? ? transaction[:transactions_overlapping].map(&:first).join(', ') : 0
+                  / - if transaction[:transactions_analyzed].present?
+                  /   - transactions_analyzed = transaction[:transactions_analyzed].map(&:ticket).join(', ')
+                  /   - transactions_analyzed_count += transaction[:transactions_analyzed].count
+                  / - else
+                  /   - transactions_analyzed = transaction[:transactions_analyzed].map(&:ticket).join(', ')
+                  td= details[:date]
+                  td= details[:profit_original]
+                  td= details[:profit_date]
+                  td= details[:reach_target]
+                  td= details[:transactions_analyzed].count
+                  td= details[:transactions_overlapping].count
+              tr
+                td Total Original
+                td = data.map{|x| x[:profit_original]}.sum
+                td Total Date
+                td = data.map{|x| x[:profit_date]}.sum
+                td - 
+                td - 
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){
+        $(document).on("click", "table#transactions.table tr:not(:first)", function() {
+            var link = $(this).data("href");
+            document.location.href = link;
+        });
+    });

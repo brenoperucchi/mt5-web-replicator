@@ -21,6 +21,13 @@ class Transaction < ApplicationRecord
   has_many :accounts, through: :order,    source: :accounts
 
   has_many :statistics, as: :statisticable, dependent: :destroy
+  has_one :mfe, -> { where(kind: 'mfe') }, class_name: 'Statistic', as: :statisticable
+
+
+  # enum state: { pending: 0, executed: 1, closed: 2, error: 3, closed_info: 4 }
+
+  scope :pending,               ->{where(state: :pending)}
+  scope :ordered,               ->{where(state: [:pending, :executed])}
 
   scope :closed,                ->{where(state: :closed)}
   scope :executed_closed,       ->{where(state: [:closed, :executed])}
@@ -227,6 +234,14 @@ class Transaction < ApplicationRecord
   
   def mae_min
      self.statistics.mae_min.try(:amount).to_f
+  end
+
+  def mfe_created_at
+     self.statistics.mfe_max.try(:created_at)
+  end
+  
+  def mae_created_at
+     self.statistics.mae_min.try(:created_at)
   end
 
 end

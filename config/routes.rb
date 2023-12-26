@@ -37,6 +37,8 @@ Rails.application.routes.draw do
       get  'account/:account_id',                     to: 'dashboards#account',         on: :collection, as: 'account'
       get  'contract/:promotion',                     to: 'dashboards#contract',        on: :member#, as: 'account'
       get  'contract',                                to: 'dashboards#contract',        on: :member, as: 'contract'
+      get  'mfes',                                    to: 'dashboards#mfe',           on: :member, as: 'mfes'
+      get  'mfes/:kind/:date',                        to: 'dashboards#mfe',           on: :collection, as: 'mfe_by'
       post 'contract',                                to: 'dashboards#create',          on: :member
       get  'finish/:account_id',                      to: 'dashboards#finish',          on: :member, as: 'finish'
       # get  'finish',                                to: 'dashboards#finish_external_payment',          on: :collection

@@ -58,8 +58,9 @@ module AlgoStatistic
 
 		def masters_filter(data, states=nil)
 			# if Rails.env.development?
-			#   self.search_date_begin = Date.parse("2023-11-01").to_date 
+			#   self.search_date_begin = Date.parse("2023-1-01").to_date 
 			#   self.search_date_end   = DateTime.now
+			#   # self.search_date_end = Date.parse("2023-10-05").to_date 
 			# end
 		  if self.search_date_begin and self.search_date_end
 		  	query = {:closed_at => search_date_begin.beginning_of_day..search_date_end.end_of_day, state: states}.compact
