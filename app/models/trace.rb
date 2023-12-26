@@ -220,11 +220,11 @@ class Trace < ApplicationRecord
   def analyze_transactions(data = nil, mfe_target = 50)
     # trace = Trace.find(45)
     # if Rails.env.development?
-    #   trace.search_date_begin = Date.parse("2023-11-01")
-    #   trace.search_date_end = Date.parse("2023-11-30")
+    #   self.search_date_begin = Date.parse("2023-11-23")
+    #   self.search_date_end = Date.parse("2023-11-23")
     # end
     data ||= self.data_scope
-    
+
     grouped_data = data.joins(:mfe).select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at").order(open_at: :asc).group_by { |x| x[:open_at].to_date }.sort
 
     values = []
@@ -260,6 +260,11 @@ class Trace < ApplicationRecord
               reach_target = true
               break
             end
+            if profit_date <= (mfe_target*-1)
+              reach_target = true
+              break
+            end
+
           else
             next if analyzed_transactions.include?(trans2)
             analyzed_transactions << trans2 unless analyzed_transactions.include?(trans2)
@@ -274,6 +279,11 @@ class Trace < ApplicationRecord
               break
             end
           end
+        end
+        if profit_date <= (mfe_target*-1)
+          profit_date = -50
+          reach_target = true
+          break
         end
 
         break if reach_target
