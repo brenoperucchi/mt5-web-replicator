@@ -223,7 +223,7 @@ class Trace < ApplicationRecord
     #   self.search_date_begin = Date.parse("2023-11-23")
     #   self.search_date_end = Date.parse("2023-11-23")
     # end
-    data ||= self.data_scope
+    data ||= self.data_scope.where(state: [:closed, :executed])
 
     grouped_data = data.joins(:mfe).select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at").order(open_at: :asc).group_by { |x| x[:open_at].to_date }.sort
 
