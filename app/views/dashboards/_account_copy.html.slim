@@ -58,7 +58,7 @@
                   td = copy.statistics.mae_min.try(:amount).to_f
                   td = l(copy.open_at, format: :short2)
                   td = l(copy.closed_at, format: :short2) if copy.closed_at.present?
-                  td = l(copy.mfe.created_at, format: :short2) if copy.mfe.created_at.present?
+                  td = l(copy.mfe.created_at, format: :short2) if copy.try(:mfe).try(:created_at).present?
               tr
                 td OPERATIONS
                 td = @account.data_scope(:transactions, [:executed, :closed], :all, @trace).count
