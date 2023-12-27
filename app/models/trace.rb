@@ -170,54 +170,54 @@ class Trace < ApplicationRecord
     (DateTime.now + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
   end
 
-  def daily_find_better_profit_by_mfe(data = nil, mfe_target = 50)
-    trace = Trace.find(45)
-    if Rails.env.development?
-      trace.search_date_begin = Date.parse("2023-11-13")
-      trace.search_date_end = Date.parse("2023-11-13")
-    end
-    data ||= trace.data_scope
+  # def daily_find_better_profit_by_mfe(mfe_target=50, loss_set=50)
+  #   trace = Trace.find(45)
+  #   if Rails.env.development?
+  #     trace.search_date_begin = Date.parse("2023-11-13")
+  #     trace.search_date_end = Date.parse("2023-11-13")
+  #   end
+  #   data ||= trace.data_scope
 
-    grouped_data = data.joins(:mfe).select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at").order(created_at: :asc).group_by { |x| x[:open_at].to_date }.sort
+  #   grouped_data = data.joins(:mfe).select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at").order(created_at: :asc).group_by { |x| x[:open_at].to_date }.sort
 
-    values = {}
-    reach_target = false
+  #   values = {}
+  #   reach_target = false
 
-    grouped_data.each do |date, transactions|
-      profit_date = 0
-      overlapping_transactions = []
-      transactions.each do |trans1|
-        if overlapping_transactions.include?(trans1)
-          next
-        end
+  #   grouped_data.each do |date, transactions|
+  #     profit_date = 0
+  #     overlapping_transactions = []
+  #     transactions.each do |trans1|
+  #       if overlapping_transactions.include?(trans1)
+  #         next
+  #       end
 
-        current_mfe = trans1.mfe_value.to_f
-        overlapping_transactions << trans1
-        reach_target = false
-        potential_overlaps = transactions.select { |t| t.id != trans1.id && t.closed_at > trans1.open_at && t.open_at < trans1.closed_at }
-        potential_overlaps.each do |trans2|
-          if trans1.open_at >= trans2.closed_at && trans1.closed_at >= trans2.mfe_created_at
-            # binding.pry
-            current_mfe += trans2.mfe_value.to_f 
-            overlapping_transactions << trans2
-            reach_target = true if current_mfe >= mfe_target
-          end
-          break if current_mfe >= mfe_target
-        end
-        # profit_date = potential_overlaps.sum(&:profit) unless reach_target
+  #       current_mfe = trans1.mfe_value.to_f
+  #       overlapping_transactions << trans1
+  #       reach_target = false
+  #       potential_overlaps = transactions.select { |t| t.id != trans1.id && t.closed_at > trans1.open_at && t.open_at < trans1.closed_at }
+  #       potential_overlaps.each do |trans2|
+  #         if trans1.open_at >= trans2.closed_at && trans1.closed_at >= trans2.mfe_created_at
+  #           # binding.pry
+  #           current_mfe += trans2.mfe_value.to_f 
+  #           overlapping_transactions << trans2
+  #           reach_target = true if current_mfe >= mfe_target
+  #         end
+  #         break if current_mfe >= mfe_target
+  #       end
+  #       # profit_date = potential_overlaps.sum(&:profit) unless reach_target
 
 
-        profit_date += current_mfe >= mfe_target ? trans1.profit : mfe_target
-        break if current_mfe >= mfe_target
-      end
+  #       profit_date += current_mfe >= mfe_target ? trans1.profit : mfe_target
+  #       break if current_mfe >= mfe_target
+  #     end
 
-      values[date] = {reach_target: reach_target, profit_target: mfe_target, profit_date: profit_date, transactions: overlapping_transactions.uniq, profit_mfe: overlapping_transactions.sum(&:mfe_value).to_f}
-    end
+  #     values[date] = {reach_target: reach_target, profit_target: mfe_target, profit_date: profit_date, transactions: overlapping_transactions.uniq, profit_mfe: overlapping_transactions.sum(&:mfe_value).to_f}
+  #   end
 
-    values
-  end
+  #   values
+  # end
 
-  def analyze_transactions(data = nil, mfe_target = 50)
+  def analyze_transactions(mfe_target = 50, loss_set = 50)
     # trace = Trace.find(45)
     # if Rails.env.development?
     #   self.search_date_begin = Date.parse("2023-11-23")
@@ -280,8 +280,8 @@ class Trace < ApplicationRecord
             end
           end
         end
-        if profit_date <= (mfe_target*-1)
-          profit_date = -50
+        if profit_date <= (loss_set*-1)
+          profit_date = loss_set*-1
           reach_target = true
           break
         end

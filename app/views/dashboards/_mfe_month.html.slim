@@ -15,7 +15,7 @@
 - @trace.search_date_begin      = date.beginning_of_month
 - @trace.search_date_end        = date.end_of_month
 
-- data = @trace.analyze_transactions
+- data = @trace.analyze_transactions(mfe_target, loss_set)
 / - data = data.group_by{|x| x[:date].strftime("%Y-%m")}
 .row
   .col-md-12
@@ -45,7 +45,7 @@
               tr
               - data.each do |details|
                 / - next if date
-                tr[data-href="#{mfe_by_dashboard_path(@trace.store.url, @trace.name, :day, details[:date], datefilter:params[:datefilter])}"]
+                tr[data-href="#{mfe_by_dashboard_path(@trace.store.url, @trace.name, :day, details[:date], params: request.query_parameters)}"]
                   / - transactions_overlapping << transaction[:transactions_overlapping].present? ? transaction[:transactions_overlapping].map(&:first).join(', ') : 0
                   / - if transaction[:transactions_analyzed].present?
                   /   - transactions_analyzed = transaction[:transactions_analyzed].map(&:ticket).join(', ')
