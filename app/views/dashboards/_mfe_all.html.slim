@@ -36,7 +36,6 @@
                   /   - transactions_analyzed_count += transaction[:transactions_analyzed].count
                   / - else
                   /   - transactions_analyzed = transaction[:transactions_analyzed].map(&:ticket).join(', ')
-                  / - binding.pry
                   td= month
                   td= details.sum { |hash| hash[:profit_original] }
                   td= details.sum { |hash| hash[:profit_date] }

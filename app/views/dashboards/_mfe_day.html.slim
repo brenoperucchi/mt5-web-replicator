@@ -12,13 +12,12 @@
     a href="#{mfe_by_dashboard_path(@trace.store.url, @trace.name, :day, params[:date], params: request.query_parameters)}" 
       = params[:date]
 
-- date = params[:date] + "-01"
+- date = params[:date] + "-01 00:00:00 -0300"
 - date = Date.parse(date)
 - @trace.search_date_begin      = date.beginning_of_day
 - @trace.search_date_end        = date.end_of_day
 
 - data = @trace.analyze_transactions(mfe_target, loss_set)
-/ = binding.pry
 / - data = data.group_by{|x| x[:date].strftime("%Y-%m")}
 .row
   .col-md-12
@@ -43,7 +42,6 @@
                 th Fechado em
                 th MfeCreated
             tbody
-              / - binding.pry
               - data[0][:transactions_overlapping].each do |ticket, data|
                 - data[:transactions].each do |transaction|
                   tr

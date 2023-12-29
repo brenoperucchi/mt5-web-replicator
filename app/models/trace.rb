@@ -170,171 +170,21 @@ class Trace < ApplicationRecord
     (DateTime.now + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
   end
 
-  # def daily_find_better_profit_by_mfe(mfe_target=50, loss_set=50)
-  #   trace = Trace.find(45)
-  #   if Rails.env.development?
-  #     trace.search_date_begin = Date.parse("2023-11-13")
-  #     trace.search_date_end = Date.parse("2023-11-13")
-  #   end
-  #   data ||= trace.data_scope
-
-  #   grouped_data = data.joins(:mfe).select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at").order(created_at: :asc).group_by { |x| x[:open_at].to_date }.sort
-
-  #   values = {}
-  #   reach_target = false
-
-  #   grouped_data.each do |date, transactions|
-  #     profit_date = 0
-  #     overlapping_transactions = []
-  #     transactions.each do |trans1|
-  #       if overlapping_transactions.include?(trans1)
-  #         next
-  #       end
-
-  #       current_mfe = trans1.mfe_value.to_f
-  #       overlapping_transactions << trans1
-  #       reach_target = false
-  #       potential_overlaps = transactions.select { |t| t.id != trans1.id && t.closed_at > trans1.open_at && t.open_at < trans1.closed_at }
-  #       potential_overlaps.each do |trans2|
-  #         if trans1.open_at >= trans2.closed_at && trans1.closed_at >= trans2.mfe_created_at
-  #           # binding.pry
-  #           current_mfe += trans2.mfe_value.to_f 
-  #           overlapping_transactions << trans2
-  #           reach_target = true if current_mfe >= mfe_target
-  #         end
-  #         break if current_mfe >= mfe_target
-  #       end
-  #       # profit_date = potential_overlaps.sum(&:profit) unless reach_target
-
-
-  #       profit_date += current_mfe >= mfe_target ? trans1.profit : mfe_target
-  #       break if current_mfe >= mfe_target
-  #     end
-
-  #     values[date] = {reach_target: reach_target, profit_target: mfe_target, profit_date: profit_date, transactions: overlapping_transactions.uniq, profit_mfe: overlapping_transactions.sum(&:mfe_value).to_f}
-  #   end
-
-  #   values
-  # end
-
-  # def analyze_transactions(mfe_target = 50, loss_set = 50)
-  #   # if Rails.env.development?
-  #   #   self.search_date_begin = Date.parse("2023-12-21")
-  #   #   self.search_date_end = Date.parse("2023-12-23")
-  #   # end
-  #   data ||= self.data_scope.where(state: [:closed, :executed])
-  #   grouped_data = group_data(data)
-
-  #   values = []
-
-  #   grouped_data.each do |date, transactions|
-  #     day_analysis = analyze_day_transactions(date, transactions, mfe_target, loss_set)
-  #     values << day_analysis
-  #   end
-
-  #   values
-  # end
-
-  # private
-
-  # def group_data(data)
-  #   data.joins(:mfe)
-  #       .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
-  #       .order(open_at: :asc)
-  #       .group_by { |x| x[:open_at].to_date }
-  #       .sort
-  # end
-
-  # def analyze_day_transactions(date, transactions, mfe_target, loss_set)
-  #   profit_date = 0
-  #   profit_original = 0
-  #   reach_target = false
-  #   overlapping_transactions = {}
-  #   analyzed_transactions = []
-  #   profit_original = transactions.sum(&:profit)
-
-  #   transactions.each_with_index do |trans1, index1|
-  #     next if reach_target
-
-  #     transactions.each do |trans2|
-  #       if profit_date <= (loss_set*-1)
-  #         profit_date = loss_set*-1
-  #         reach_target = true
-  #         break
-  #       end
-  #       if trans1.open_at <= trans2.open_at && trans1.mfe_created_at >= trans2.mfe_created_at and trans1.id != trans2.id
-  #         overlapping_transactions[trans1.ticket] = {}
-  #         overlapping_transactions[trans1.ticket][:transactions] = []
-  #         overlapping_transactions[trans1.ticket][:profit] = 0
-  #         overlapping_transactions[trans1.ticket][:transactions] << trans1 unless overlapping_transactions[trans1.ticket][:transactions].include?(trans1)
-  #         overlapping_transactions[trans1.ticket][:transactions] << trans2 unless overlapping_transactions[trans1.ticket][:transactions].include?(trans2)
-  #         analyzed_transactions << trans1 unless analyzed_transactions.include?(trans1)
-  #         analyzed_transactions << trans2 unless analyzed_transactions.include?(trans2)
-          
-  #         # binding.pry if date == Date.parse("2023-12-21")
-  #         if(trans1.mfe_value + trans2.mfe_value >= mfe_target)
-  #           overlapping_transactions[trans1.ticket][:profit] = mfe_target
-  #         else
-  #           overlapping_transactions[trans1.ticket][:profit] = trans1.profit + trans2.profit
-  #           profit_date += trans2.profit
-  #         end
-  #         if profit_date >= mfe_target
-  #           # binding.pry if date == Date.parse("2023-12-22")
-  #           reach_target = true
-  #           break
-  #         end
-  #         if profit_date <= (mfe_target*-1)
-  #           # binding.pry if date == Date.parse("2023-12-22")
-  #           reach_target = true
-  #           break
-  #         end
-
-  #       else
-  #         # binding.pry if date == Date.parse("2023-12-21")
-  #         next if analyzed_transactions.include?(trans2)
-  #         analyzed_transactions << trans2 unless analyzed_transactions.include?(trans2)
-  #         if(trans2.mfe_value >= mfe_target)
-  #           profit_date += mfe_target
-  #         else
-  #           profit_date += trans2.profit
-  #         end
-
-  #         if profit_date >= mfe_target
-  #           reach_target = true
-  #           break
-  #         end
-  #       end
-  #     end
-
-  #     break if reach_target
-  #   end
-
-  #   {
-  #     date: date,
-  #     reach_target: reach_target,
-  #     profit_target: mfe_target,
-  #     profit_date: profit_date,
-  #     profit_original: profit_original,
-  #     transactions_overlapping: overlapping_transactions,
-  #     transactions_analyzed: analyzed_transactions.uniq,
-  #   }
-  # end
 
   def analyze_transactions(mfe_target = 50, loss_set = 50)
-    # trace = Trace.find(45)
     # if Rails.env.development?
     #   self.search_date_begin = Date.parse("2023-12-22")
     #   self.search_date_end = Date.parse("2023-12-22")
     # end
-    # binding.pry
-    data ||= self.data_scope.where(state: [:closed, :executed])
-
-    grouped_data = data.joins(:mfe).select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at").order(open_at: :asc).group_by { |x| x[:open_at].to_date }.sort
-
     values = []
+    data ||= self.data_scope.where(state: [:closed, :executed])
+    grouped_data = data.joins(:mfe)
+                   .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
+                   .order(open_at: :asc, id: :asc)
+                   .group_by { |x| x[:open_at].to_date }
+                   .sort
 
     grouped_data.each do |date, transactions|
-
       profit_date = 0
       profit_original = 0
       reach_target = false
@@ -343,10 +193,18 @@ class Trace < ApplicationRecord
       profit_original = transactions.sum(&:profit)
 
       transactions.each_with_index do |trans1, index1|
-        next if reach_target
-
+        break if reach_target
         transactions.each do |trans2|
           if trans1.open_at <= trans2.open_at && trans1.mfe_created_at >= trans2.mfe_created_at and trans1.id != trans2.id
+            if profit_date >= mfe_target
+              reach_target = true
+              break
+            end
+            if profit_date <= (-loss_set.abs)
+              reach_target = true
+              break
+            end
+
             overlapping_transactions[trans1.ticket] = {}
             overlapping_transactions[trans1.ticket][:transactions] = []
             overlapping_transactions[trans1.ticket][:profit] = 0
@@ -361,19 +219,8 @@ class Trace < ApplicationRecord
               overlapping_transactions[trans1.ticket][:profit] = trans1.profit + trans2.profit
               profit_date += trans2.profit
             end
-            if profit_date >= mfe_target
-              # binding.pry if date == Date.parse("2023-12-22")
-              reach_target = true
-              break
-            end
-            if profit_date <= (loss_set*-1)
-              # binding.pry if date == Date.parse("2023-12-22")
-              reach_target = true
-              break
-            end
 
           else
-            # binding.pry if date == Date.parse("2023-12-22")
             next if analyzed_transactions.include?(trans2)
             analyzed_transactions << trans2 unless analyzed_transactions.include?(trans2)
             if(trans2.mfe_value >= mfe_target)
@@ -386,10 +233,9 @@ class Trace < ApplicationRecord
               reach_target = true
               break
             end
-            if profit_date <= (loss_set*-1)
-              profit_date = loss_set*-1
+            if profit_date <= (-loss_set.abs)
+              profit_date = -loss_set.abs
               reach_target = true
-              # binding.pry if date == Date.parse("2023-12-22")
               break
             end
 
