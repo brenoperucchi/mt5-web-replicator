@@ -43,6 +43,7 @@
                 th Fechado em
                 th MfeCreated
             tbody
+              / - binding.pry
               - data[0][:transactions_overlapping].each do |ticket, data|
                 - data[:transactions].each do |transaction|
                   tr

@@ -2,7 +2,7 @@ class AccountSerializer < ActiveModel::Serializer
   attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :meta_version_accept, 
              :api_server_hostname, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_time_max_seconds, :api_slippage, 
              :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
-             :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display
+             :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set
 
 
   def api_debug_mode
@@ -62,6 +62,14 @@ class AccountSerializer < ActiveModel::Serializer
 
   def api_mfe_mae_display
     object.api_mfe_mae_display.present? ? object.api_mfe_mae_display.to_b : Store.first.api_mfe_mae_display.to_b
+  end 
+
+  def api_reach_mfe_target
+    object.api_reach_mfe_target.present? ? object.api_reach_mfe_target : Store.first.api_reach_mfe_target
+  end 
+  
+  def api_reach_loss_set
+    object.api_reach_loss_set.present? ? object.api_reach_loss_set : Store.first.api_reach_loss_set
   end 
 
   def yaml

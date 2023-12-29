@@ -38,7 +38,7 @@ class StoreDashboard < Administrate::BaseDashboard
     api_debug_mode_level:     Field::Number.with_options(searchable: false),
     api_freeze_max_time:      Field::Number.with_options(searchable: false),
     api_time_to_check_server: Field::Number.with_options(searchable: false),
-    api_time_max_seconds:          Field::Number.with_options(searchable: false),
+    api_time_max_seconds:     Field::Number.with_options(searchable: false),
     api_slippage:             Field::Number.with_options(searchable: false),
     api_environment_local:    Field::Boolean.with_options(searchable: false),
     api_store_state:          Field::Boolean.with_options(searchable: false),
@@ -48,6 +48,8 @@ class StoreDashboard < Administrate::BaseDashboard
     api_event_on_timer:       Field::Boolean.with_options(searchable: false),
     api_event_on_tick:        Field::Boolean.with_options(searchable: false),
     api_mfe_mae_display:      Field::Boolean.with_options(searchable: false),
+    api_reach_mfe_target:     Field::Number.with_options(searchable: false),
+    api_reach_loss_set:       Field::Number.with_options(searchable: false),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -130,6 +132,8 @@ class StoreDashboard < Administrate::BaseDashboard
   api_event_on_timer
   api_event_on_tick
   api_mfe_mae_display
+  api_reach_mfe_target
+  api_reach_loss_set
   ].freeze
 
 

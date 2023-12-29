@@ -25,7 +25,7 @@ class Account < ApplicationRecord
 
   store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, 
                                :api_time_max_seconds, :api_slippage, :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, 
-                               :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display]
+                               :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set]
 
   belongs_to :store
   belongs_to :customer

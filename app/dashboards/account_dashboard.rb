@@ -43,6 +43,8 @@ class AccountDashboard < Administrate::BaseDashboard
     api_event_on_timer:       Field::Boolean.with_options(searchable: false),
     api_event_on_tick:        Field::Boolean.with_options(searchable: false),
     api_mfe_mae_display:      Field::Boolean.with_options(searchable: false),
+    api_reach_mfe_target:     Field::Number.with_options(searchable: false),
+    api_reach_loss_set:       Field::Number.with_options(searchable: false),
   }.freeze
 
 
@@ -123,6 +125,8 @@ class AccountDashboard < Administrate::BaseDashboard
   api_event_on_timer
   api_event_on_tick
   api_mfe_mae_display
+  api_reach_mfe_target
+  api_reach_loss_set
   ].freeze
 
 

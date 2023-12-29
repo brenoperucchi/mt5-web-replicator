@@ -62,7 +62,7 @@ class	API::V2::APISlavePresenter
 	        when "NOTFIND"
 	          slave.erro
 	          @version = slave.versions.last
-	        when "NOSLTP","ERRORDEAL","TIMEMAX", "NOTCLOSED"
+	        when "NOSLTP","ERRORDEAL","TIMEMAX", "NOTCLOSED", "REACHMFE", "REACHLOSS"
 	          if action == "NOSLTP" or action == "NOTCLOSED"
 	            # skip_logging = true if slave.loggings.where(state: action, created_at:date_today.beginning_of_day..date_today.end_of_day).present?
 	            # api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)

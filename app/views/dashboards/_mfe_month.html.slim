@@ -53,6 +53,7 @@
                   / - else
                   /   - transactions_analyzed = transaction[:transactions_analyzed].map(&:ticket).join(', ')
                   td= details[:date]
+                  / - binding.pry if details[:date] == Date.parse("2023-12-22")
                   td= details[:profit_original]
                   td= details[:profit_date]
                   td= details[:reach_target]
