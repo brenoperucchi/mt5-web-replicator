@@ -171,14 +171,14 @@ class Trace < ApplicationRecord
   end
 
 
-  def analyze_transactions(mfe_target = 50, loss_set = 50)
+  def analyze_transactions(mfe_target = 50, loss_set = 50, grouped_data = nil)
     # if Rails.env.development?
     #   self.search_date_begin = Date.parse("2023-12-22")
     #   self.search_date_end = Date.parse("2023-12-22")
     # end
     values = []
-    data ||= self.data_scope.where(state: [:closed, :executed])
-    grouped_data = data.joins(:mfe)
+    data ||= self.data_scope.where(state: [:closed, :executed]) if grouped_data.nil?
+    grouped_data ||= data.joins(:mfe)
                    .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
                    .order(open_at: :asc, id: :asc)
                    .group_by { |x| x[:open_at].to_date }
@@ -190,8 +190,8 @@ class Trace < ApplicationRecord
       reach_target = false
       overlapping_transactions = {}
       analyzed_transactions = []
-      profit_original = transactions.sum(&:profit)
-
+      profit_original = transactions.map(&:profit).sum
+      
       transactions.each_with_index do |trans1, index1|
         break if reach_target
         transactions.each do |trans2|
@@ -259,6 +259,38 @@ class Trace < ApplicationRecord
     # values <<  {profit_total: profit_reach_target}
     values
   end
+
+  def test_parameters
+    data ||= self.data_scope.where(state: [:closed, :executed])
+    grouped_data = data.joins(:mfe)
+                   .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
+                   .order(open_at: :asc, id: :asc)
+                   .group_by { |x| x[:open_at].to_date }
+                   .sort
+
+    results = []
+
+    target = (2..30).map{|x| x*10}
+
+    target.each do |mfe_target|
+      target.each do |loss_set|
+        result = analyze_transactions(mfe_target, loss_set, grouped_data)
+        self.search_date_begin = Date.parse("2023-10-01")
+        self.search_date_end   = Date.parse("2023-12-30")
+        performance_metric = calculate_performance_metric(result)
+        results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
+      end
+    end
+
+    results.max_by { |r| r[:performance] }
+  end
+
+  def calculate_performance_metric(result)
+    result.map{|x| x[:profit_date]}.sum
+    # Implemente uma lógica para calcular a métrica de desempenho
+  end
+
+
 
   private 
 
