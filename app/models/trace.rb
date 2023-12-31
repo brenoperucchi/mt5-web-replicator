@@ -275,8 +275,8 @@ class Trace < ApplicationRecord
     target.each do |mfe_target|
       target.each do |loss_set|
         result = analyze_transactions(mfe_target, loss_set, grouped_data)
-        self.search_date_begin = Date.parse("2023-10-01")
-        self.search_date_end   = Date.parse("2023-12-30")
+        # self.search_date_begin = Date.parse("2023-10-01")
+        # self.search_date_end   = Date.parse("2023-12-30")
         performance_metric = calculate_performance_metric(result)
         results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
       end
