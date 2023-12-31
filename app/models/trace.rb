@@ -288,7 +288,7 @@ class Trace < ApplicationRecord
 
   require 'thread'
 
-  def test_parameters_parallel
+  def test_parameters_parallel(target)
     data ||= self.data_scope.where(state: [:closed, :executed])
     grouped_data = data.joins(:mfe)
                        .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
@@ -297,7 +297,7 @@ class Trace < ApplicationRecord
                        .sort
 
     results = []
-    target = (2..30).map { |x| x * 10 }
+    target ||= (2..50).map { |x| x * 10 }
     max_threads = 16 # Limite de 8 threads
 
     batches = target.each_slice(target.size / max_threads).to_a
