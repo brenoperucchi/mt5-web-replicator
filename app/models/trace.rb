@@ -288,7 +288,7 @@ class Trace < ApplicationRecord
 
   require 'thread'
 
-  def test_parameters_parallel(target)
+  def test_parameters_parallel(target = nil)
     data ||= self.data_scope.where(state: [:closed, :executed])
     grouped_data = data.joins(:mfe)
                        .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
