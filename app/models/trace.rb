@@ -1,3 +1,4 @@
+require 'thread' # Importe a biblioteca de semáforos
 require 'lib_enums' # Path: lib/lib_enums.rb
 require 'algo_statistic' # Path: lib/algo_statistic.rb
 
@@ -260,37 +261,75 @@ class Trace < ApplicationRecord
     values
   end
 
-  def test_parameters
+  # def test_parameters
+  #   data ||= self.data_scope.where(state: [:closed, :executed])
+  #   grouped_data = data.joins(:mfe)
+  #                  .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
+  #                  .order(open_at: :asc, id: :asc)
+  #                  .group_by { |x| x[:open_at].to_date }
+  #                  .sort
+
+  #   results = []
+
+  #   target = (2..30).map{|x| x*10}
+
+  #   target.each do |mfe_target|
+  #     target.each do |loss_set|
+  #       result = analyze_transactions(mfe_target, loss_set, grouped_data)
+  #       # self.search_date_begin = Date.parse("2023-10-01")
+  #       # self.search_date_end   = Date.parse("2023-12-30")
+  #       performance_metric = calculate_performance_metric(result)
+  #       results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
+  #     end
+  #   end
+
+  #   results.max_by { |r| r[:performance] }
+  # end
+
+  require 'thread'
+
+  def test_parameters_parallel
     data ||= self.data_scope.where(state: [:closed, :executed])
     grouped_data = data.joins(:mfe)
-                   .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
-                   .order(open_at: :asc, id: :asc)
-                   .group_by { |x| x[:open_at].to_date }
-                   .sort
+                       .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
+                       .order(open_at: :asc, id: :asc)
+                       .group_by { |x| x[:open_at].to_date }
+                       .sort
 
     results = []
+    target = (2..30).map { |x| x * 10 }
+    max_threads = 16 # Limite de 8 threads
 
-    target = (2..30).map{|x| x*10}
+    batches = target.each_slice(target.size / max_threads).to_a
 
-    target.each do |mfe_target|
-      target.each do |loss_set|
-        result = analyze_transactions(mfe_target, loss_set, grouped_data)
-        # self.search_date_begin = Date.parse("2023-10-01")
-        # self.search_date_end   = Date.parse("2023-12-30")
-        performance_metric = calculate_performance_metric(result)
-        results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
+    semaphore = Mutex.new
+
+    threads = batches.map do |batch|
+      Thread.new do
+        batch_results = []
+        batch.each do |mfe_target|
+          target.each do |loss_set|
+            result = analyze_transactions(mfe_target, loss_set, grouped_data)
+            performance_metric = calculate_performance_metric(result)
+            batch_results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
+          end
+        end
+        semaphore.synchronize { results.concat(batch_results) }
       end
     end
 
-    results.max_by { |r| r[:performance] }
+    threads.each(&:join)
+
+    best_result = results.max_by { |r| r[:performance] }
+    # binding.pry
+    best_result
   end
+
 
   def calculate_performance_metric(result)
     result.map{|x| x[:profit_date]}.sum
     # Implemente uma lógica para calcular a métrica de desempenho
   end
-
-
 
   private 
 
