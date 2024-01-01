@@ -320,9 +320,9 @@ class Trace < ApplicationRecord
 
     threads.each(&:join)
 
-    best_result = results.max_by { |r| r[:performance] }
-    # binding.pry
-    best_result
+    # best_result = results.max_by { |r| r[:performance] }
+    # best_result
+    results
   end
 
 
