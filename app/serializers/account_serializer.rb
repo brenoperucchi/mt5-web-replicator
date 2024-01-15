@@ -17,23 +17,28 @@ class AccountSerializer < ActiveModel::Serializer
   end
 
   def api_freeze_max_time
-    object.api_freeze_max_time.present? ? object.api_freeze_max_time : Store.first.api_freeze_max_time                       # Default 12
+    object.api_freeze_max_time.present? ? object.api_freeze_max_time : Store.first.api_freeze_max_time                       
+    # Default 12
   end
 
   def api_time_to_check_server
-    object.api_time_to_check_server.present? ? object.api_time_to_check_server : Store.first.api_time_to_check_server         # Default 30
+    object.api_time_to_check_server.present? ? object.api_time_to_check_server : Store.first.api_time_to_check_server         
+    # Default 30
   end
 
   def api_time_max_seconds
-    object.api_time_max_seconds.present? ? object.api_time_max_seconds : Store.first.api_time_max_seconds                     # Default 30
+    object.api_time_max_seconds.present? ? object.api_time_max_seconds : Store.first.api_time_max_seconds                     
+    # Default 30
   end
 
   def api_slippage
-    object.api_slippage.present? ? object.api_slippage : Store.first.api_slippage                      # Default 30
+    object.api_slippage.present? ? object.api_slippage : Store.first.api_slippage                      
+    # Default 30
   end
 
   def api_environment_local
-    object.api_environment_local.present? ? object.api_environment_local.to_b : Store.first.api_environment_local.to_b                    # Default true
+    object.api_environment_local.present? ? object.api_environment_local.to_b : Store.first.api_environment_local.to_b                    
+    # Default true
   end
 
   def api_store_state

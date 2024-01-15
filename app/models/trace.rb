@@ -11,6 +11,8 @@ class Trace < ApplicationRecord
 
   enum kind: { telegram: 0, copy: 1 }
 
+  serialize :mfe_analyzed
+
   store :settings, accessors: [
                                 :telegram_option, :telegram_image, :take_profit_limit,
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number,
@@ -172,10 +174,10 @@ class Trace < ApplicationRecord
   end
 
 
-  def analyze_transactions(mfe_target = 50, loss_set = 50, grouped_data = nil)
+  def mfe_analyze(mfe_target = 50, loss_set = 50, grouped_data = nil)
     # if Rails.env.development?
-    #   self.search_date_begin = Date.parse("2023-12-22")
-    #   self.search_date_end = Date.parse("2023-12-22")
+    #   self.search_date_begin = Date.parse("2024-01-01")
+    #   self.search_date_end = Date.parse("2024-01-30")
     # end
     values = []
     data ||= self.data_scope.where(state: [:closed, :executed]) if grouped_data.nil?
@@ -275,7 +277,7 @@ class Trace < ApplicationRecord
 
   #   target.each do |mfe_target|
   #     target.each do |loss_set|
-  #       result = analyze_transactions(mfe_target, loss_set, grouped_data)
+  #       result = mfe_analyze(mfe_target, loss_set, grouped_data)
   #       # self.search_date_begin = Date.parse("2023-10-01")
   #       # self.search_date_end   = Date.parse("2023-12-30")
   #       performance_metric = calculate_performance_metric(result)
@@ -289,12 +291,16 @@ class Trace < ApplicationRecord
   require 'thread'
 
   def test_parameters_parallel(target = nil)
+    # self.search_date_begin = Date.parse("2024-01-01")
+    # self.search_date_end = Date.parse("2024-01-30")
+
     data ||= self.data_scope.where(state: [:closed, :executed])
     grouped_data = data.joins(:mfe)
                        .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
                        .order(open_at: :asc, id: :asc)
                        .group_by { |x| x[:open_at].to_date }
                        .sort
+    binding.pry
 
     results = []
     target ||= (2..50).map { |x| x * 10 }
@@ -309,7 +315,7 @@ class Trace < ApplicationRecord
         batch_results = []
         batch.each do |mfe_target|
           target.each do |loss_set|
-            result = analyze_transactions(mfe_target, loss_set, grouped_data)
+            result = mfe_analyze(mfe_target, loss_set, grouped_data)
             performance_metric = calculate_performance_metric(result)
             batch_results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
           end
@@ -320,9 +326,9 @@ class Trace < ApplicationRecord
 
     threads.each(&:join)
 
-    # best_result = results.max_by { |r| r[:performance] }
-    # best_result
-    results
+    best_result = results.max_by { |r| r[:performance] }
+    self.update(mfe_analyzed: results)
+    best_result
   end
 
 
