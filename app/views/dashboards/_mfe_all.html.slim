@@ -6,7 +6,7 @@
     a href="#{mfes_dashboard_path(@trace.store.url, @trace.name, params: request.query_parameters)}" 
       | MFEs
 
-- data = @trace.analyze_transactions(mfe_target, loss_set)
+- data = @trace.mfe_analyze(mfe_target, loss_set)
 - data = data.group_by{|x| x[:date].strftime("%Y-%m")}
 .row
   .col-md-12

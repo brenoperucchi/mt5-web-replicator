@@ -15,7 +15,7 @@
 - @trace.search_date_begin      = date.beginning_of_month
 - @trace.search_date_end        = date.end_of_month
 
-- data = @trace.analyze_transactions(mfe_target, loss_set)
+- data = @trace.mfe_analyze(mfe_target, loss_set)
 / - data = data.group_by{|x| x[:date].strftime("%Y-%m")}
 .row
   .col-md-12

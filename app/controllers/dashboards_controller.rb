@@ -21,7 +21,7 @@ class DashboardsController < ApplicationController
   # end
 
   def mfe
-    # @dates = @trace.analyze_transactions
+    # @dates = @trace.mfe_analyze
     # respond_with
   end
 

@@ -280,7 +280,7 @@ class Trace < ApplicationRecord
   #       result = mfe_analyze(mfe_target, loss_set, grouped_data)
   #       # self.search_date_begin = Date.parse("2023-10-01")
   #       # self.search_date_end   = Date.parse("2023-12-30")
-  #       performance_metric = calculate_performance_metric(result)
+  #       performance_metric = mfe_calculate_performance_metric(result)
   #       results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
   #     end
   #   end
@@ -291,7 +291,7 @@ class Trace < ApplicationRecord
   require 'thread'
 
   def test_parameters_parallel(target = nil)
-    # self.search_date_begin = Date.parse("2024-01-01")
+    # self.search_date_begin = Date.parse("2023-12-01")
     # self.search_date_end = Date.parse("2024-01-30")
 
     data ||= self.data_scope.where(state: [:closed, :executed])
@@ -300,8 +300,6 @@ class Trace < ApplicationRecord
                        .order(open_at: :asc, id: :asc)
                        .group_by { |x| x[:open_at].to_date }
                        .sort
-    binding.pry
-
     results = []
     target ||= (2..50).map { |x| x * 10 }
     max_threads = 16 # Limite de 8 threads
@@ -316,7 +314,7 @@ class Trace < ApplicationRecord
         batch.each do |mfe_target|
           target.each do |loss_set|
             result = mfe_analyze(mfe_target, loss_set, grouped_data)
-            performance_metric = calculate_performance_metric(result)
+            performance_metric = mfe_calculate_performance_metric(result)
             batch_results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
           end
         end
@@ -326,15 +324,19 @@ class Trace < ApplicationRecord
 
     threads.each(&:join)
 
-    best_result = results.max_by { |r| r[:performance] }
+    
     self.update(mfe_analyzed: results)
-    best_result
+    mfe_best_result
   end
 
 
-  def calculate_performance_metric(result)
+  def mfe_calculate_performance_metric(result)
     result.map{|x| x[:profit_date]}.sum
     # Implemente uma lógica para calcular a métrica de desempenho
+  end
+
+  def mfe_best_result
+    best_result = mfe_analyzed.max_by { |r| r[:performance] } if mfe_analyzed
   end
 
   private 
