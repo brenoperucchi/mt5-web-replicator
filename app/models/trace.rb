@@ -9,7 +9,8 @@ class Trace < ApplicationRecord
   include AlgoStatistic
   include LibControl
 
-  enum kind: { telegram: 0, copy: 1 }
+  enum kind:      { telegram: 0, copy:     1 }
+  enum kind_copy: { normal:   0, prop_firm:1 }
 
   serialize :mfe_analyzed
 
@@ -128,6 +129,10 @@ class Trace < ApplicationRecord
           slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self)
           slave = order.slaves.new(slave_attributes)
           slave.magic_number = check_magic_number(slave_attributes[:magic_number])
+          if self.prop_firm?
+            slave.comment      = "#{account_slave.id}#{slave.magic_number}_#{slave.comment}"
+            slave.magic_number = "#{account_slave.id}#{slave.magic_number}".to_i
+          end
           if slave.save
             order.accounts << account_slave
             slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)

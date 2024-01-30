@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_01_04_021329) do
+ActiveRecord::Schema.define(version: 2024_01_29_205345) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -530,6 +530,7 @@ ActiveRecord::Schema.define(version: 2024_01_04_021329) do
     t.integer "kind", default: 0
     t.datetime "deleted_at"
     t.text "mfe_analyzed"
+    t.integer "kind_copy", default: 0
   end
 
   create_table "transaction_slaves", force: :cascade do |t|

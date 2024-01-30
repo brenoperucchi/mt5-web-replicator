@@ -23,6 +23,7 @@ class TraceDashboard < Administrate::BaseDashboard
     store:                 Field::BelongsTo,
     meta_host:             Field::String,
     kind:                  CheckboxField.with_options(collection_key: Trace.kinds.keys, default: :copy),
+    kind_copy:             CheckboxField.with_options(collection_key: Trace.kind_copies.keys, default: :normal),
     response:              Field::String,
     capital_recomendation: Field::String.with_options(searchable: false),
     capital_multiplier:    Field::String.with_options(searchable: false),
@@ -53,6 +54,7 @@ class TraceDashboard < Administrate::BaseDashboard
   name
   name_id
   kind
+  kind_copy
   store
   accounts
   transactions
@@ -65,6 +67,7 @@ class TraceDashboard < Administrate::BaseDashboard
   active
   instrument_control
   kind
+  kind_copy
   magic_same
   name
   name_id
@@ -96,6 +99,7 @@ class TraceDashboard < Administrate::BaseDashboard
   active
   instrument_control
   kind
+  kind_copy
   magic_same
   name_id
   magics_accept

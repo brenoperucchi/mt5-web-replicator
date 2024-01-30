@@ -1,5 +1,6 @@
 module Admin
   class BaseController < Admin::ApplicationController
+    include SentientStore
 
   	before_action :restrict_not_admin!
 
