@@ -9,9 +9,9 @@ class CustomerDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
-    email:                Field::String,
-    stripe_customer_id:   Field::String,
-    stripe_product_id:    Field::String,
+    email:                Field::String.with_options(searchable: false),
+    stripe_customer_id:   Field::String.with_options(searchable: false),
+    stripe_product_id:    Field::String.with_options(searchable: false),
     role:                 CheckboxField.with_options(collection_key: Customer.roles.keys, default: :customer),
     role_control:         CheckboxField.with_options(collection_key: Customer.role_controls.keys, default: :admin),
     store:                Field::BelongsTo,
