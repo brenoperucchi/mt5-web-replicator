@@ -30,10 +30,10 @@ class	API::V2::APISlavePresenter
 	          api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit'])
 	          slave.attributes = api_attributes
 	          
-	          if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
-	            slave.state = :executed
-	            slave.master.state = :executed
-	          end                  
+	          # if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
+	          #   slave.state = :executed
+	          #   slave.master.state = :executed
+	          # end                  
 	          # action == "CLOSED" ? slave.close : slave.deleted
 	          if action == "CLOSED" or action == "HASCLOSED"
 	            slave.close 

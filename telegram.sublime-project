@@ -16,7 +16,6 @@
         ".git",
         ".hg",
         "vendor/plugins",
-        "public/images",
         "public/assets",
         "public/uploads",
         "node_modules",

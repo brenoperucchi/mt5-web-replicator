@@ -1,0 +1,41 @@
+- if @trace.customer_plan.kind == "fixed"
+  .py-0.d-flex
+    / span.round-8.bg-dark.rounded-circle.me-6  
+    .mb-0.text-center.mt-0
+      h6.mb-0
+        | Valor
+        '
+        = I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
+      p.fs-3.text-muted.mb-0
+        |Mensalidade
+    .ms-auto
+      span.fs-2
+        - if amount_proportional.to_f > amount_min.to_f
+          h6= number_to_currency amount_plan * contract_volume
+        - else
+          h6= number_to_currency amount_proportional * contract_volume
+
+  - if amount_proportional.to_f > amount_min.to_f
+    .py-0.d-flex
+      / span.round-8.bg-dark.rounded-circle.me-6  
+      .ms-0
+        h6.mb-0
+          | Valor proporcional
+        p.fs-3.text-muted.mb-0
+          |Na primeira inscrição
+      .ms-auto
+        span.fs-2
+          h6= number_to_currency amount_proportional
+- elsif @trace.customer_plan.kind == "percent"
+  .py-0.d-flex
+    / span.round-8.bg-dark.rounded-circle.me-6  
+    .mb-0.text-left.mt-0
+      h6.mb-0
+        |Percentual sobre lucro
+        / = I18n.t @trace.customer_plan.charge_recurrence, scope:'helpers.dashboards.pages.contract.customer_plan.charge_recurrence'
+    .ms-auto
+      span.fs-2
+        h6
+          = number_with_precision amount_plan, precision:0
+          | %
+

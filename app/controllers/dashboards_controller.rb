@@ -32,18 +32,19 @@ class DashboardsController < ApplicationController
   end
 
   def finish
-    trace 	= Trace.find_by(name: params[:name])
-    account = Account.find(params[:account_id])
+    @trace 	= Trace.find_by(name: params[:name])
+    @account = Account.find(params[:account_id])
+    render :finish
     
     # invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-    account.create_invoice_account(@trace, true, nil)
-    @invoice = account.customer.invoices.first
-    @payment = @invoice.invoice_send
-    if @payment.redirect_url
-      redirect_to @payment.redirect_url
-    else
-      render :finish
-    end
+    # account.create_invoice_account(@trace, true, nil)
+    # @invoice = account.customer.invoices.first
+    # @payment = @invoice.invoice_send
+    # if @payment.redirect_url
+    #   redirect_to @payment.redirect_url
+    # else
+    #   render :finish
+    # end
   end
 
   def contract
@@ -77,13 +78,17 @@ class DashboardsController < ApplicationController
       # account.customer.create_invoice_customer(invoice_name)
       # @customer.create_user(email: @customer.user_email, password: password)
       # redirect_to finish_dashboard_path(@trace.store.url, @trace.name, account)
-      account.create_invoice_account(@trace, true, nil)
-      @invoice = account.customer.invoices.first
-      @payment = @invoice.invoice_send
-      if @payment.redirect_url
-        redirect_to @payment.redirect_url
-      else
-        render :finish
+      if customer_plan.kind == "fixed"
+        account.create_invoice_account(@trace, true, nil)
+        @invoice = account.customer.invoices.first
+        @payment = @invoice.invoice_send
+        if @payment.redirect_url
+          redirect_to @payment.redirect_url
+        else
+          render :finish
+        end
+      elsif customer_plan.kind == "percent"
+        redirect_to finish_dashboard_path(@trace.store.url, @trace.name, account)
       end
     else
       filters
