@@ -23,8 +23,11 @@
         "log",
         "doc"
       ],
-      "follow_symlinks": true,
-      "path": "."
-    }
-  ]
+      /*"follow_symlinks": true,*/
+      "path": ".",
+    },
+    {
+			"path": "/Users/brenoperucchi/Devs/Robos/ProfitMT5"
+		},
+  ],
 }

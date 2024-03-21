@@ -338,7 +338,7 @@ module AlgoStatistic
 	  xys = x_data_sma.zip(sma_values).sum { |x, y| x * y }
 
 	  # Calculando a inclinação (slope)
-	  slope = xys / xxs.to_f
+	  slope = (xxs.to_f == 0) ? 0 : (xys / xxs.to_f)
 	  intercept = 0
 
 	  # Gerando valores da linha de tendência
