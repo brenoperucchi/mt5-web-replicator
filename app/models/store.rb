@@ -154,15 +154,13 @@ class Store < ApplicationRecord
       create_invoice_item(invoice, usage, date_today, usage.usageable.amount_discount, proporcional)
     end
 
-    %w(Trace Copy Slave).each do |item|
-      self.plan_usages.where(handle:item).each do |usage|
-        if usage.try(:usageable).try(:amount).nil? or usage.try(:usageable).try(:amount) == 0
-          amount = usage.usageable.plan.amount_extra
-        else
-          amount = usage.usageable.amount
-        end
-        create_invoice_item(invoice, usage, date_today, amount, proporcional)      
+    self.plan_usages.where(handle: ['Trace', 'Copy', 'Slave']).each do |usage|
+      if usage.try(:usageable).try(:amount).nil? or usage.try(:usageable).try(:amount) == 0
+        amount = usage.usageable.plan.amount_extra
+      else
+        amount = usage.usageable.amount
       end
+      create_invoice_item(invoice, usage, date_today, amount, proporcional)      
     end
   end
 
@@ -188,6 +186,10 @@ class Store < ApplicationRecord
       "signallocal.imentore.com.br:8443"
     end
   end
+
+  def domain_url
+    url_domain = Store.domain_url
+  end
   
   private
   
@@ -198,8 +200,12 @@ class Store < ApplicationRecord
         return unless usage.disable_at.month >= date_today.month and usage.disable_at.year >= date_today.year 
       end
     end
-    if usage.calculate_usage(date_today, amount, proporcional)
-      item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount, description: usage.description) 
+    if usage.proporcional_calculate(date_today, amount, proporcional)
+      if usage.resourceable.is_a?(Account)
+        item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount_proportional, description: usage.description, account: usage.resourceable) 
+      else
+        item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount_proportional, description: usage.description) 
+      end
       usage.update(charged_at: date_today)
       invoice.balance_update
     end   

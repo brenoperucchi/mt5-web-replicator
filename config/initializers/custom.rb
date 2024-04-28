@@ -27,7 +27,7 @@ class Numeric
     if self > 0
       "+#{self}"
     elsif zero?
-      "0"
+      "+0"
     else
       "#{self}"
     end

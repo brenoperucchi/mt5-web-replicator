@@ -50,8 +50,8 @@ module AlgoStatistic
 		  data
 		end
 
-		def data_profit
-		  @data_profit = data_scope(:masters, :closed).to_a.sum(&:profit)
+		def data_profit(type=:masters, trace=nil)
+		  @data_profit = data_scope(type, :closed, :all, trace).to_a.sum(&:profit)
 		  @data_profit
 		end
 
@@ -293,10 +293,8 @@ module AlgoStatistic
 						]
 
 		# Preparando os data para a regressão linear
-		# binding.pry
 		x_data = data.map.with_index(0) { |d, index| [index] }
 		y_data = data.map { |d| (d[:portfolio]).to_i }
-		# binding.pry
 
 		# Criando e treinando o modelo
 		linear_regression = RubyLinearRegression.new
@@ -306,7 +304,6 @@ module AlgoStatistic
 		
 		# Coeficientes da regressão linear
 		intercept, slope = [linear_regression.theta[0,0], linear_regression.theta[1,0]]
-		# binding.pry
 
 		# Data de início para cálculo
 		date_begin = Date.parse(data[0][:day])
@@ -318,9 +315,6 @@ module AlgoStatistic
 		  { day: d[:day], linear: valor_tendencia }
 		end
 	end
-
-
-
 
 	def self.trend_line(data, window_size=1)
 	  # Convertendo datas para números sequenciais a partir de 0

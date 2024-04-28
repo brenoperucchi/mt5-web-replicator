@@ -1,0 +1,27 @@
+aside.left-sidebar.with-vertical
+  div
+    nav.sidebar-nav.scroll-sidebar[data-simplebar]
+      ul#sidebarnav
+        li.sidebar-item
+          = link_to panel_dashboard_index_path, class: 'sidebar-link' do
+            span
+              i.ti.ti-aperture
+            span.hide-menu
+              | Home
+        li.sidebar-item
+          = link_to panel_invoices_path, class: 'sidebar-link' do
+            span
+              i.ti.ti-aperture
+            span.hide-menu
+              | Invoices
+    - if user_signed_in?
+      .fixed-profile.p-3.bg-light-secondary.rounded.sidebar-ad.mt-3
+        .hstack.gap-3
+          .john-title
+            h6.mb-0.fs-4.fw-semibold
+              = current_user.userable.name
+            span.fs-2.text-dark
+              = current_user.userable.email
+          = link_to(panel_destroy_session_path, method: :delete, class: "button button--alt button--nav") do
+            button.border-0.bg-transparent.text-primary.ms-auto[tabindex="0" type="button" aria-label="logout" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="logout"]
+              i.ti.ti-power.fs-6

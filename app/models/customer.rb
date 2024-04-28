@@ -1,6 +1,6 @@
 class Customer < ApplicationRecord
   # attr_accessor :user_email
-
+  
   CONTROL_ROLE = %w(admin user)
 
   store :settings, accessors: [:stripe_product_id, :stripe_customer_id]#, :email, :password]
@@ -21,10 +21,13 @@ class Customer < ApplicationRecord
   has_many :plan_usages, as: :resourceable#, dependent: :destroy
   has_many :invoices,    as: :invoiceable, dependent: :destroy
   has_many :tokens,      as: :tokenable, dependent: :destroy
-  has_many :plan_customers, dependent: :destroy
+  
   has_many :accounts,       dependent: :destroy  
   has_many :traces,         through: :accounts, :source => :traces
+  
+  has_many :plan_customers, dependent: :destroy
   has_many :customer_plans, through: :plan_customers, source: :customer_plan#, dependent: :destroy
+  
 
   delegate :email, to: :user, allow_nil: true
 
@@ -46,60 +49,11 @@ class Customer < ApplicationRecord
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   # end
 
-  def create_invoice_customer(name = nil, month_proporcional = false)
-    name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name
-    @invoice = invoices.find_or_initialize_by(name: name, store:store)
-    customer_plans.each do |customer_plan|
-      customer_plan.plan_usages.where(handle: "AccountTracePlan").each do |plan_usage|
-        @invoice.payment = customer_plan.payment
-        @invoice.plan_usage = plan_usage
-
-        contract_volume = (plan_usage.resourceable.contract_volume.try(:to_f) == 0)? 1 : plan_usage.resourceable.contract_volume.try(:to_f)
-
-        if customer_plan.fixed? && customer_plan.monthly?
-          plan_usage.calculate_usage(DateTime.now, customer_plan.amount_use, month_proporcional)
-          amount = plan_usage.amount * contract_volume
-        else
-          amount = customer_plan.amount_use * contract_volume
-        end
-        description = "Date Added: #{I18n.l plan_usage.created_at, format: :short} - #{plan_usage.resourceable_type} #{plan_usage.resourceable_id} \r\n"
-        if @invoice.save && @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
-          plan_usage.update_next_charged
-        end
-
-        # if customer_plan.try(:fixed?)
-        #   @name = :customer_monthly_payment
-        #   @amount_total += plan_usage.amount
-        # end
-      end
-    end
-    @invoice.balance_update
-    @invoice
-  end
-
-  # Creates an invoice for the customer.
-    #
-    # @param name [String] The name of the invoice (optional).
-    # @return [Invoice] The created invoice.
-  def create_invoice(name = nil)
-    name = name.blank? ? "#{self.id}-#{Time.zone.now.strftime("%Y-%m")}" : name 
-    invoice = invoices.find_or_create_by(name: name, store:store)
-    if customer_plan.try(:fixed?)
-      invoice.items.find_or_create_by(name: :customer_monthly_payment, amount: customer_plan.amount_use)
-    else
-      amount = self.accounts.slave.sum(&:balance_month)
-      amount_total = (amount.to_f * (customer_plan.try(:amount_use).to_f / 100))
-      description = "Invoice #{name}\r\n\n"
-      self.accounts.slave.map do |account|
-        account.slaves.map do |slave|
-          description << "Date: #{I18n.l slave.created_at, format: :short} - Ticket #{slave.ticket_slave} - Symbol:#{slave.symbol} - Profit:#{slave.profit}\r\n" if slave.profit != 0
-        end
-      end
-
-      description << "Slaves closed count: #{self.accounts.slave.sum(&:balance_month_count)}\r\n"
-      description << "Amount:#{amount.to_f} * Plan Percent:#{customer_plan.try(:amount_use).to_f / 100} = #{amount_total}\r\n"
-      invoice.items.find_or_create_by(name: :profit_percent,  amount: amount_total, description: description) 
-    end
+  def create_invoice(name = nil, date_today = nil, month_proporcional = false)
+    date_today ||= DateTime.now
+    name = name.blank? ? "#{self.id}-#{date_today.strftime("%Y-%m")}" : name
+    invoice = invoices.find_or_initialize_by(name: name, store:store)
+    invoice.customer_calculate(self, date_today, month_proporcional)
     invoice.balance_update
     invoice
   end

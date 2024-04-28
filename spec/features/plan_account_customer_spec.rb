@@ -22,8 +22,8 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-11-01")
       date_today = DateTime.now
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
-      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
-      @account1.create_invoice_account(@trace, false, nil)
+      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
+      @account1.create_invoice(@trace, false, nil)
       name = "#{@account1.id}-#{date_today.strftime("%Y-%m")}"
       invoice = @store.sinvoices.find_by(name: name)
       expect(invoice.amount.to_f).to be == 100.0
@@ -32,8 +32,8 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-11-15")
       date_today = DateTime.now
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
-      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
-      @account1.create_invoice_account(@trace, false, nil)
+      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
+      @account1.create_invoice(@trace, false, nil)
       name = "#{@account1.id}-#{date_today.strftime("%Y-%m")}"
       invoice = @store.sinvoices.find_by(name: name)
 
@@ -44,8 +44,8 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-11-15")
       date_today = DateTime.now
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
-      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
-      @account1.create_invoice_account(@trace, true, nil)
+      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
+      @account1.create_invoice(@trace, true, nil)
       name = "#{@account1.id}-#{date_today.strftime("%Y-%m")}"
       invoice = @store.sinvoices.find_by(name: name)
 
@@ -56,9 +56,9 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-11-01")
       date_today = DateTime.now
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
-      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
+      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       travel_to Date.parse("2022-12-31")
-      @account1.create_invoice_account(@trace, false, "-1")
+      @account1.create_invoice(@trace, false, "-1")
       name = "2-2022-11"  
       invoice = @store.sinvoices.find_by(name: name)
 
@@ -69,9 +69,9 @@ RSpec.describe "PlanAccountCustomer" do
       travel_to Date.parse("2022-11-01")
       date_today = DateTime.now
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
-      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
+      @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       travel_to Date.parse("2022-12-16")
-      @account1.create_invoice_account(@trace, true, "-1")
+      @account1.create_invoice(@trace, true, "-1")
       name = "2-2022-11"  
       invoice = @store.sinvoices.find_by(name: name)
 
@@ -85,21 +85,25 @@ RSpec.describe "PlanAccountCustomer" do
         @customer_plan = @store.customer_plans.first
         @customer_plan.update(amount: 16)
         @customer_plan.payment.update(min_amount: 5)
-        @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
-        @account1.create_invoice_account(@trace, true)
+        @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
+        @account1.create_invoice(@trace, true)
         # expect(@trace.customer_plan.amount.to_f).to be == 5
         travel_to Date.parse("2022-11-17")
-        expect(number_with_precision @customer_plan.calculate_amount).to be == "7.47"
+        @customer_plan.calculate_amount(nil, nil, @trace)
+        expect(number_with_precision @customer_plan.amount_proportional).to be == "7.47"
       end
+
       it "Customer Plan Amount < Min Amount" do
+        travel_to Date.parse("2022-11-30")
         @customer_plan = @store.customer_plans.first
         @customer_plan.update(amount: 4)
         @customer_plan.payment.update(min_amount: 5)
         @account1.update(contract_volume: 2)
-        @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan.id)
-        @account1.create_invoice_account(@trace, true)
+        @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
+        @account1.create_invoice(@trace, true)
         # expect(@trace.customer_plan.amount.to_f).to be == 5
-        expect(@customer_plan.calculate_amount).to be == 5
+        @customer_plan.calculate_amount(nil, nil, @trace)
+        expect(@customer_plan.amount_proportional).to be == 5
       end
     end
 

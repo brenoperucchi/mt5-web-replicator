@@ -78,6 +78,6 @@ class PaymentDashboard < Administrate::BaseDashboard
   # across all pages of the admin dashboard.
   #
   def display_resource(payment)
-    "#{payment.payment_method.name} - Store ##{payment.try(:store).try(:id)}"
+    "#{payment.payment_method.name} - Store ##{payment.try(:store).try(:name)}"
   end
 end

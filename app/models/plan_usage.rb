@@ -1,19 +1,19 @@
 class PlanUsage < ApplicationRecord
-  attr_accessor :amount, :proportional, :usage_seconds, :description, :amount_proportional
+  attr_accessor :amount, :proportional, :usage_seconds, :description, :amount_proportional, :amount_profit
 
   serialize :plan_serializer, JSON
 
   belongs_to :usageable,    polymorphic: true
   belongs_to :resourceable, polymorphic: true
-  belongs_to :trace,        optional: true
+  belongs_to :trace,        class_name: 'Trace', optional: true
   belongs_to :store
 
 
-  def calculate_usage(date_today=nil, amount_use=nil, proporcional=false, contract_volume=nil)
+  def proporcional_calculate(date_today=nil, amount_use=nil, proporcional=false, contract_volume=nil)
     changes = false
-    date_today      ||= DateTime.now
-    contract_volume ||= (resourceable.try(:contract_volume) == "0" or resourceable.try(:contract_volume).nil?) ? 1 : resourceable.try(:contract_volume).to_f
-    amount_use      ||= usageable.amount_use || plan_serializer["amount"].to_f
+    date_today       ||= DateTime.now
+    amount_use       ||= usageable.amount_use || plan_serializer["amount"].to_f
+    contract_volume  ||= 1
 
     datetime_reference = proporcional ? DateTime.now : date_today
 
@@ -32,26 +32,15 @@ class PlanUsage < ApplicationRecord
     usage_seconds = usage_seconds.round
     if usage_seconds < month_seconds
       self.proportional = (usage_seconds / month_seconds).abs
-      self.amount = amount_use * proportional
+      self.amount_proportional = amount_use * proportional * contract_volume
       changes = true
     elsif usage_seconds >= month_seconds
       self.proportional = 1
-      self.amount = amount_use * proportional
+      self.amount_proportional = amount_use * proportional * contract_volume
       changes = true
     end
-
-    self.amount_proportional = self.amount
-    self.amount = self.amount * contract_volume
-
-    if self.amount < (usageable.try(:payment).try(:min_amount) || 0)
-      self.amount = usageable.try(:payment).try(:min_amount) 
-      self.amount_proportional = (self.amount / contract_volume)
-    end
-    
-    if changes and not usageable_type.nil?
-      self.description = "#{usageable.class.name} ID ##{usageable.id} - #{self.resourceable_type} ##{self.resourceable_id} - PlanUsage ID ##{self.id}\r\n"
-      self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{number_with_precision self.proportional} - amount: #{number_with_precision self.amount} - seconds: #{number_with_precision usage_seconds, precision:0}\r\n"
-    end
+    self.amount_proportional = (usageable.try(:payment).try(:min_amount).to_f > self.amount_proportional) ? usageable.try(:payment).try(:min_amount) : self.amount_proportional
+    self.amount = amount_use
     
     return self
   end
@@ -62,53 +51,25 @@ class PlanUsage < ApplicationRecord
     self.save
   end
 
+  def amount_calculate(date_today=nil, month_proporcional=nil, contract_volume=nil)
+    date_today ||= DateTime.now
+    account      = self.resourceable
+    self.proporcional_calculate(date_today, usageable.amount_use, month_proporcional, contract_volume)
+    if usageable.fixed?# and usageable.monthly?
+      amount_use = self.amount_proportional
+    elsif usageable.percent?
+      resource = account || trace
+      resource.search_date_begin = date_today.beginning_of_month
+      resource.search_date_end = date_today.end_of_month
+      data_profit = resource.data_profit(:slaves, trace)
+      amount_use = data_profit * (usageable.amount_use.to_f / 100)
+    end
+    
+    self.amount              = usageable.amount
+    self.amount_profit       = data_profit
+    self.amount_proportional = amount_use
+
+    return self
+  end
 
 end
-
-
-# def calculate_usage(date_today = nil, amount_use = nil)
-#   # Estabelece valores padrão para data e quantidade se não forem fornecidos
-#   amount_use ||= usageable.amount
-#   date_today ||= DateTime.now
-
-#   # Calcula a quantidade de segundos em um mês
-#   days_month = Time.days_in_month(date_today.month)
-#   month_seconds = days_month * 24 * 3600
-
-#   # Calcula os segundos de uso baseado na data de desativação, se existir
-#   if disable_at.present?
-#     usage_seconds = if active_at.month != date_today.month or active_at.year != date_today.year
-#                       # Se o mês ou ano de ativação são diferentes da data atual, 
-#                       # o uso é calculado a partir do início do mês até a data de desativação
-#                       disable_at.to_time - date_today.beginning_of_month.to_time
-#                     else
-#                       # Se o mês e o ano são os mesmos, 
-#                       # o uso é calculado a partir da data de ativação até a data de desativação
-#                       disable_at.to_time - active_at.to_time
-#                     end
-#   else
-#     # Se não há data de desativação, 
-#     # o uso é calculado a partir da data de criação até o final do mês atual
-#     usage_seconds ||= date_today.end_of_month.to_time - created_at.to_time
-#   end
-
-#   # Calcula a proporção de uso e a quantidade baseada nos segundos de uso
-#   # Nota: o uso não pode exceder 1 mês, então a proporção é limitada a 1
-#   new_proportional = [1, usage_seconds / month_seconds].min
-#   new_amount = amount_use * new_proportional
-
-#   # Verifica se a proporção ou a quantidade mudaram. 
-#   # Se não houver mudanças, retorna falso para indicar que nenhuma atualização é necessária
-#   return false if proportional == new_proportional && amount == new_amount
-
-#   # Atualiza a proporção e a quantidade
-#   self.proportional = new_proportional
-#   self.amount = new_amount
-
-#   # Atualiza a descrição com os novos detalhes
-#   self.description = "#{usageable.class.name} ID ##{usageable.id} - #{resourceable_type} ##{resourceable_id} - PlanUsage ID ##{id}\r\n"
-#   self.description << "#{usageable.class.name}: #{usageable.name} - Proportional: #{proportional} - amount: #{amount} - seconds: #{usage_seconds}\r\n"
-
-#   # Retorna verdadeiro para indicar que houve uma atualização
-#   true
-# end

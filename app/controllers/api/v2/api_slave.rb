@@ -12,7 +12,7 @@ module API
         get "/slave/get/:state/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id], kind: :slave, state: :enable)
           if account
-            map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 5.days)).collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 31.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map
@@ -22,7 +22,7 @@ module API
         post "/slave/post/:state/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           account = Account.find_by(name: params[:account_id], kind: :slave, state: :enable)
           if account
-            map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 5.days)).collect{|t| t.api_request_attributes}.join('/')
+            map = account.slaves.opened.where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 31.days)).collect{|t| t.api_request_attributes}.join('/')
           end
           content_type 'text/plain'
           body map

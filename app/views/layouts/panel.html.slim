@@ -1,0 +1,83 @@
+html[lang="#{current_store.try(:language) || "pt-br"}"]
+  head
+    = render 'layouts/meta'
+    = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "application", 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "https://sdk.mercadopago.com/js/v2"
+    = content_for :header
+    script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
+    script
+      | window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
+  body
+    section
+      #offcanvasRight.offcanvas.offcanvas-end[tabindex="-1" aria-labelledby="offcanvasRightLabel"]
+        #wallet_container
+        / #paymentBrick_container
+        / #statusScreenBrick_container
+    #main-wrapper.page-wrapper[data-layout="vertical" data-sidebartype="full" data-navbarbg="fixed" data-sidebar-position="fixed" data-header-position="fixed"]
+      <!-- Sidebar Start -->
+      - if user_signed_in?
+        = render "layouts/modernize/sidebar_panel"
+      .body-wrapper
+        / = render "layouts/modernize/header"
+        .container-fluid.pt-3
+          / .card
+          /   .card-body
+          /     .row
+          /       .col-lg-9.text-start
+          /         ul.breadcrumb
+          /           - if user_signed_in? and not current_user.try(:userable).try(:user?)
+          /             li.breadcrumb-item
+          /               a href="/admin" 
+          /                 i.feather.icon-home
+          /                 '
+          /                 = I18n.t :admin, scope:'helpers.dashboards'
+          /           - else
+          /             li.breadcrumb-item
+          /               a href="/" 
+          /                 i.feather.icon-home
+          /                 '
+          /                 = I18n.t :site, scope:'helpers.dashboards'
+          /           - if @current_store
+          /             li.breadcrumb-item
+          /               = link_to store_name_dasboards_path(@current_store.url, params: request.query_parameters) do
+          /                 = I18n.t :dashboards, scope:'helpers.dashboards'
+          /               / a href="/dashboards" 
+          /           = content_for :breadcrumb
+          /       .col-lg-3.text-end
+          /         - if action_name != "back_urls"
+          /           .button.list-inline-item
+          /             button#filter.btn.btn-light[type="button"]
+          /               i.feather.icon-plus
+          /               = I18n.t :filters, scope:'helpers.dashboards'
+          /         - if action_name != "contract" and action_name != "create" and not @trace.nil?
+          /           .button.list-inline-item
+          /             = link_to contract_dashboard_path(@trace.store.url, @trace.name), class: 'btn btn-lg btn-dark w-100' do
+          /               = I18n.t :contract, scope:'helpers.dashboards'
+          <!-- Yield Start -->
+          = yield
+    .footer
+      = yield :footer
+      css:
+        .container-fluid{
+/*          min-width: 60%!important;*/
+        }
+      
+= javascript_include_tag "js_modernize"
+/ = javascript_include_tag "modernize/simplebar.min.js"
+/ = javascript_include_tag "modernize/bootstrap.bundle.min.js"
+/ = javascript_include_tag "mintone/bootstrap.min.js"
+/ = javascript_include_tag "modernize/app.min.js"
+/ = javascript_include_tag "modernize/app.init.js"
+/ = javascript_include_tag "modernize/app-style-switcher.js"
+/ = javascript_include_tag "modernize/sidebarmenu.js"
+/ = javascript_include_tag "modernize/custom.js"
+/ = javascript_include_tag "mintone/jquery.session.js"
+/ = javascript_include_tag "modernize/apexcharts.min.js"
+/ = javascript_include_tag "modernize/moment.js"
+/ = javascript_include_tag "modernize/daterangepicker.js"
+/ = javascript_include_tag "mintone/select2.full.min.js"
+
+= render "layouts/google_analytics"
+
+= yield(:javascript)

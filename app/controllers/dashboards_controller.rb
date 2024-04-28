@@ -34,17 +34,7 @@ class DashboardsController < ApplicationController
   def finish
     @trace 	= Trace.find_by(name: params[:name])
     @account = Account.find(params[:account_id])
-    render :finish
-    
-    # invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-    # account.create_invoice_account(@trace, true, nil)
-    # @invoice = account.customer.invoices.first
-    # @payment = @invoice.invoice_send
-    # if @payment.redirect_url
-    #   redirect_to @payment.redirect_url
-    # else
-    #   render :finish
-    # end
+    render :finish    
   end
 
   def contract
@@ -61,38 +51,37 @@ class DashboardsController < ApplicationController
   def create
     sign_out if user_signed_in?
     password = Devise.friendly_token.first(6)
-    customer_plan_id = params[:customer_plan_id]
-    account = @trace.accounts.new(account_params)
-    account.state = "enable"
-    # account.customer.store = current_store
-    account.customer.role = "customer"
-    account.customer.role_control = "user"
-    account.customer.user.password = password
-    account.traces << @trace
-    if @trace.valid? and account.save
-      # invoice_name = "Trace##{@trace.id}-Account##{account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      plan_usage = account.add_account_trace_to_planusage(@trace, customer_plan_id)
+    customer_plan = CustomerPlan.find(params[:customer_plan_id])
+    @account = @trace.accounts.new(account_params)
+    @account.state = "enable"
+    # @account.customer.store = current_store
+    @account.customer.role = "customer"
+    @account.customer.role_control = "user"
+    @account.customer.user.password = password
+    @account.traces << @trace
+    if @trace.valid? and @account.save
+      plan_usage = @account.add_account_trace_to_planusage(@trace, customer_plan)
       customer_plan = plan_usage.usageable
       customer_plan.promotion_use = true if params[:promotion] == "promotion"
       customer_plan.save
-      # account.customer.create_invoice_customer(invoice_name)
+      # @account.customer.create_invoice_customer(invoice_name)
       # @customer.create_user(email: @customer.user_email, password: password)
       # redirect_to finish_dashboard_path(@trace.store.url, @trace.name, account)
       if customer_plan.kind == "fixed"
-        account.create_invoice_account(@trace, true, nil)
-        @invoice = account.customer.invoices.first
-        @payment = @invoice.invoice_send
-        if @payment.redirect_url
-          redirect_to @payment.redirect_url
+        @account.create_invoice(@trace, true, nil)
+        @invoice = @account.customer.invoices.first
+        @invoice.invoice_send
+        if @invoice.redirect_url
+          redirect_to @invoice.redirect_url
         else
           render :finish
         end
-      elsif customer_plan.kind == "percent"
-        redirect_to finish_dashboard_path(@trace.store.url, @trace.name, account)
+      elsif customer_plan.percent?
+        redirect_to finish_dashboard_path(@trace.store.url, @trace.name, @account)
       end
     else
       filters
-      @account = account
+      
       flash[:notice] = "Error na contração de Portfolio"
       render :contract
     end

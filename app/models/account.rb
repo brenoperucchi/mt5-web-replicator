@@ -33,8 +33,9 @@ class Account < ApplicationRecord
 
   has_many :plan_usages, as: :resourceable, dependent: :destroy
 
-  has_many :permissions, dependent: :destroy
-  has_many :traces,       through: :permissions, source: :trace 
+  has_many :permissions,    dependent: :destroy
+  has_many :traces,         through: :permissions, source: :trace 
+  has_many :customer_plans, through: :permissions, source: :customer_plan
   # has_many :plan_usages,  through: :permissions, source: :plan_usage 
 
   has_many :loggings,     dependent: :destroy
@@ -82,57 +83,30 @@ class Account < ApplicationRecord
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   # end
 
-  def create_invoice_account(trace, proporcional = false, month=nil)
+  def create_invoice(trace, month_proporcional = false, month=nil)
     date_today = month.nil? ? DateTime.now.beginning_of_month : (DateTime.now + eval("#{month}.month")).beginning_of_month
     name = name.blank? ? "#{self.id}-#{date_today.strftime("%Y-%m")}" : name 
-    @contract_volume = self.contract_volume.try(:to_f) || 1
 
-    @invoice = customer.invoices.find_or_initialize_by(name: name, store:store)
-    customer.customer_plans.each do |customer_plan|
-      plan_usage = trace.customer_plan.plan_usages.where(handle: "AccountTracePlan").last #.each do |plan_usage|
-        @invoice.payment = trace.customer_plan.payment
-        @invoice.plan_usage = plan_usage
-        plan_usage.calculate_usage(date_today, trace.customer_plan.amount_use, proporcional)
-        if trace.customer_plan.fixed? and trace.customer_plan.monthly?
-          amount = plan_usage.amount 
-        else
-          amount = trace.customer_plan.amount_use 
-        end
-        description = "Contratos: #{@contract_volume} * Amount #{number_with_precision plan_usage.amount_proportional} - Total #{number_with_precision amount} \r\n"
-        description << "#{plan_usage.resourceable_type} #{plan_usage.resourceable_id} - Trace #{trace.id}\r\n"
-        
-        if @invoice.save and @invoice.items.find_or_create_by(name: :customer_monthly_payment,  amount: amount, description: description)
-          plan_usage.update_next_charged
-        end
-
-        # if trace.customer_plan.try(:fixed?)
-        #   @name = :customer_monthly_payment
-        #   @amount_total += plan_usage.amount
-        # end
-      # end
-    end
-    @invoice.balance_update
-
-    # invoices.find_or_create_by(name: name) do |invoice| 
-    #   # invoice.amount = amount
-    #   invoice.email = email
-    # end
-    return @invoice
+    invoice = customer.invoices.find_or_initialize_by(name: name, store:store)
+    invoice.account_calculate(self, trace, date_today, month_proporcional)
+    invoice.balance_update
   end
 
-  def add_account_trace_to_planusage(trace, customer_plan_id)
-    permission = Permission.where(trace: trace, customer_plan_id: customer_plan_id).last
+  def add_account_trace_to_planusage(trace, customer_plan)
+    plan_usage = customer_plan.plan_usages.where(handle: "AccountTracePlan", resourceable: self, disable_at: nil).take
+    permission = Permission.where(trace: trace, customer_plan: customer_plan).last
 
     plan = permission.customer_plan || store.customer_plans.first
-    plan.customers << self.customer
-    plan.accounts  << self
-    # attributes = {name: "Plan Trace##{trace.id}-#{trace.name}", amount: trace.customer_plan_amount.to_f, kind: "fixed", store: self.store}#, trace_ids: [trace.id], account_ids: [self.id]}
-    # plan = customer.customer_plans.create(attributes)
-    planUsage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
-    unless planUsage.errors.any?
-      permission.update(plan_usage: planUsage, customer_plan: plan)
+    plan.customers << customer unless plan.customers.exists?(customer.id)
+    plan.accounts << self unless plan.accounts.exists?(self.id)
+
+    if plan_usage.nil?
+      plan_usage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
+      unless plan_usage.errors.any?
+        permission.update(plan_usage: plan_usage, customer_plan: plan)
+      end
     end
-    return planUsage
+    return plan_usage
   end
 
 
@@ -169,6 +143,12 @@ class Account < ApplicationRecord
     end    
   end
 
+  def amount_trace(trace)
+    plan_usage = plan_usages.where(handle: "AccountTracePlan", resourceable: self, disable_at: nil, trace: trace).try(:last)
+    plan_usage&.amount_calculate
+    plan_usage.try(:amount_profit) || 0
+  end
+
   def trace_copy
     traces.find_by(kind: :copy) if self.copy?
   end
@@ -198,99 +178,9 @@ class Account < ApplicationRecord
     instrument_control.to_b ? instruments.find_by(symbol: symbol.try(:upcase)).try(:name) : symbol
   end
 
-  # def slave_profit
-  #   masters_filter(slaves.closed).to_a.sum(&:profit)
-  # end
 
-  # def slaves_scope(type = :slaves, scope = :all, trace)
-  #   table_name = type == :slaves ? "transaction_slaves" : "transactions"
-    
-  #   data = masters_filter(self.send(type).where("#{table_name}.trace_id = ?", trace.id), scope)
-  #   if scope.is_a?(Array)
-  #     data = data.where(state: scope)
-  #   else
-  #     data = data.send(scope) if data.respond_to?(scope)
-  #   end
-
-  #   data
-  # end
-
-  # # def slaves_scope(type = :slaves, scope = :all, trace)
-  # #   table_name = type == :slaves ? "transaction_slaves" : "transactions"
-  # #   # masters_filter(self.send(type).closed.where("transaction_slaves.trace_id = ?", trace.id)).send(scope)
-  # #   masters_filter(self.send(type).send(scope).where("#{table_name}.trace_id = ?", trace.id), scope)
-  # # end
-  
-  # def masters_filter(data, scope = nil)
-  #   # self.search_date_begin = Date.parse("2023-09-01").to_date 
-  #   # self.search_date_end   = DateTime.now
-  #   if self.search_date_begin and self.search_date_end
-  #     if scope == :executed or scope == :all or (scope.is_a?(Array) and scope.include?(:executed))
-  #       query = {:created_at => search_date_begin..search_date_end.end_of_day}
-  #     else
-  #       query = {:closed_at => search_date_begin..search_date_end.end_of_day}
-  #     end
-  #     data = data.where(query)
-  #   end
-  #   data
-  # end
-
-  # def profit_trade(type = :slaves, trace)
-  #   trades = slaves_scope(type, :closed, trace).try(:size).to_f
-  #   gain_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-  #   AlgoStatistic.profit_trade(trades, gain_trades)
-  # end
-
-  # def loss_trade(type = :slaves, trace)
-  #   trades = slaves_scope(type, :closed, trace).try(:size).to_f
-  #   loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-  #   AlgoStatistic.loss_trade(trades, loss_trades)
-  # end
-
-  # def pay_off(type = :slaves, trace)
-  #   gain = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-  #   gain_operation = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-  #   loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-  #   loss_operation = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-  #   AlgoStatistic.pay_off(gain, gain_operation, loss, loss_operation)
-  # end
-
-  # def expect_pay_off(type = :slaves, trace)
-  #   total_trades = slaves_scope(type, :closed, trace).try(:size)
-  #   profit_trades = slaves_scope(type, :closed, trace).try(:gain).try(:size).to_f
-  #   loss_trades = slaves_scope(type, :closed, trace).try(:loss).try(:size).to_f
-  #   gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-  #   gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-  #   AlgoStatistic.expect_pay_off(profit_trades, total_trades, gross_profit, loss_trades, gross_loss)
-  # end
-
-  # def profit_factor(type = :slaves, trace)
-  #   gross_profit = slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-  #   gross_loss = slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-  #   AlgoStatistic.profit_factor(gross_profit, gross_loss, pay_off(type, trace)).abs
-  # end
-
-  # def profit_drawdown(type = :slaves, trace)
-  #   gain = self.slaves_scope(type, :closed, trace).try(:gain).to_a.sum(&:profit).abs
-  #   loss = self.slaves_scope(type, :closed, trace).try(:loss).to_a.sum(&:profit).abs
-  #   profit = gain - loss
-  #   AlgoStatistic.profit_drawdown(profit, drawdown(type, trace)).abs
-  # end
-
-  # def drawdown(type = :slaves, trace)
-  #   scoped = slaves_scope(type, :closed, trace).order(closed_at: :desc)
-  #   AlgoStatistic.drawdown(scoped)
-  # end
-
-  # def slave_contract_volume(value = nil)
-  #   contract_volume = self.contract_volume 
-    
-  #   # return self.lot if not contract_volume.present? or contract_volume.to_f <= 0.0
-  #   if not contract_volume.present? or contract_volume.to_f <= 0.0
-  #     value.to_s
-  #   else
-  #     contract_volume.to_s
-  #   end
-  # end
+  def contract_volume_use
+    contract_volume ||= (self.try(:contract_volume) == "0" or self.try(:contract_volume).nil?) ? 1 : self.try(:contract_volume).to_f
+  end
 
 end

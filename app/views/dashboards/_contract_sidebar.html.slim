@@ -1,10 +1,11 @@
 - capital_multiplier = @trace.capital_multiplier.present? ? @trace.capital_multiplier.to_i : 1
 - contract_volume = params.dig(:account, :settings, :contract_volume).try(:to_i) || params["contract_volume"].try(:to_i) || 1
 - capital_recomendation = (@trace.capital_recomendation.to_money('USD') * contract_volume * capital_multiplier).to_f
-- amount_proportional = @trace.customer_plan.calculate_amount(contract_volume)
-- amount_plan = @trace.customer_plan.try(:amount_use) || @trace.customer_plan.try(:amount_use) || 0
+- customer_plan = @trace.customer_plan.calculate_amount(contract_volume, nil, @trace)
+- amount_proportional = customer_plan.amount_proportional
+- amount_plan = customer_plan.try(:amount_use) || 0
 / - amount_plan = amount_proportional if  amount_plan > amount_proportional  
-- amount_min = @trace.customer_plan.payment.try(:min_amount)
+- amount_min = customer_plan.payment.try(:min_amount)
   
 .card.w-100
   .card-body.details

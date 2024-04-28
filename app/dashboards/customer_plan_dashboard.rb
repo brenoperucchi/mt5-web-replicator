@@ -9,6 +9,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     id:                 Field::Number,
+    due_at_dates:       Field::Number,
     name:               Field::String,
     amount:             Field::String,
     amount_discount:    Field::String,
@@ -51,6 +52,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     charge_recurrence
     meta_margin_mode
     meta_mode
+    due_at_dates
     store
     customers
     accounts
@@ -72,6 +74,7 @@ class CustomerPlanDashboard < Administrate::BaseDashboard
     charge_recurrence
     meta_margin_mode
     meta_mode
+    due_at_dates
     store
     customers
     accounts

@@ -25,6 +25,13 @@ RSpec.describe 'Store Controller', type: :request do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
     @trace = create(:trace, :copy, store: @store, instrument_control: true)
+    @plan2 = create(:plan, :plan2)
+    @store2 = create(:store, :store2, plan_id: @plan2.id)
+    @trace2 = create(:trace, :copy2, store: @store2, instrument_control: true)
+    @user_customer = create(:user, :customer, store: @store2)
+    @customer = create(:customer, :customer, store:@store2, user:@user_customer)
+    @account_copy = create(:account, :copy, store: @store2, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [@trace2.id], instrument_control:true)
+
     @customer_plan = @store.customer_plans.first
 
     @payment_mpago = @store.payments.first
@@ -38,6 +45,12 @@ RSpec.describe 'Store Controller', type: :request do
     { 'name': 'ONE', 'customer_plan_id': '1', 'account': { 'store_id': '1', 'name': '123456789', 'kind': 'slave',
                                                            'customer_attributes': { 'store_id': '1', 'name': 'Joao Cliente', 'user_attributes': { 'email': 'teste@cliente.com', 'store_id': '1' } },
                                                            'settings': { 'contract_volume': '1' }, 'meta_margin_mode': 'hedging', 'meta_mode': 'demo' }, "store_name": 'store1' }
+  end  
+
+  def valid_attributes_store2
+    { 'name': 'ONE2', 'customer_plan_id': '3', 'account': { 'store_id': '2', 'name': '12345678', 'kind': 'slave',
+                                                           'customer_attributes': { 'store_id': '2', 'name': 'Joao Cliente 2', 'user_attributes': { 'email': 'teste2@cliente.com', 'store_id': '2' } },
+                                                           'settings': { 'contract_volume': '1' }, 'meta_margin_mode': 'hedging', 'meta_mode': 'demo' }, "store_name": 'store2' }
   end
 
   # This should return the minimal set of values that should be in the session
@@ -137,7 +150,6 @@ RSpec.describe 'Store Controller', type: :request do
 
       account = Account.find_by_name('123456789')
       invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
-      # account.customer.create_invoice_customer(invoice_name)
       expect(Invoice.first.name).to be == invoice_name
       expect(Invoice.first.amount.to_f).to be == 100.0
 
@@ -168,7 +180,6 @@ RSpec.describe 'Store Controller', type: :request do
 
       account = Account.find_by_name('123456789')
       invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
-      # account.customer.create_invoice_customer(invoice_name)
       expect(Invoice.all.count).to be == 1
       expect(Invoice.first.name).to be == invoice_name
       expect(Invoice.first.amount.to_f).to be == 50.0
@@ -200,7 +211,6 @@ RSpec.describe 'Store Controller', type: :request do
 
       account = Account.find_by_name('123456789')
       invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
-      # account.customer.create_invoice_customer(invoice_name)
       expect(Invoice.all.count).to be == 1
       expect(Invoice.first.name).to be == invoice_name
       expect(Invoice.first.amount.to_f).to be == 100.0
@@ -229,7 +239,6 @@ RSpec.describe 'Store Controller', type: :request do
 
       account = Account.find_by_name('123456789')
       invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
-      # account.customer.create_invoice_customer(invoice_name)
       expect(Invoice.all.count).to be == 1
       expect(Invoice.first.name).to be == invoice_name
       expect(Invoice.first.amount.to_f).to be == 53.33
@@ -243,44 +252,47 @@ RSpec.describe 'Store Controller', type: :request do
     end
 
     it 'Store 2 with date Proportional' do
-      @plan2 = create(:plan, :plan2)
-      @store2 = create(:store, :store2, plan_id: @plan2.id)
-      @trace2 = create(:trace, :copy2, store: @store2, instrument_control: true)
       customer_plan = @store2.customer_plans.last
       customer_plan.discount_behavior = 'always'
       customer_plan.save
-      customer_plan.traces << @trace2
+      # customer_plan.traces << @trace2
+      @trace2.customer_plan = customer_plan
       unfreeze_time
       travel_to Date.parse('2023-06-15').beginning_of_day
       freeze_time
 
       expect do
-        # post "/dashboard/#{@trace.store.url}/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan.id, :account :  valid_attributes} #, valid_session
-        post "/dashboard/#{@trace2.store.url}/#{@trace2.name}/contract", params: valid_attributes.merge(name: @trace2.name) # , valid_session
+        # post "/dashboard/#{@trace.store.url}/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan, :account :  valid_attributes} #, valid_session
+        post "/dashboard/#{@trace2.store.url}/#{@trace2.name}/contract", params: valid_attributes_store2.merge(name: @trace2.name) # , valid_session
       end.to change(Account, :count).by(1)
       expect(response).to have_http_status 302
       expect(Invoice.all.count).to be == 1
 
-      account = Account.find_by_name('123456789')
+      account = Account.find_by_name('12345678')
+      customer_plan = @trace2.customer_plan
+      expect(account.store_id).to be == 2
+      expect(customer_plan.amount_discount).to be == 30
+      expect(customer_plan.fixed?).to be true
+      expect(customer_plan.percent?).not_to be true
       invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
-      # account.customer.create_invoice_customer(invoice_name)
       expect(Invoice.all.count).to be == 1
       expect(Invoice.first.name).to be == invoice_name
-      expect(Invoice.first.amount.to_f).to be == 53.33
+      expect(Invoice.first.amount.to_f).to be == 37.33
 
-      expect(account.name).to be == '123456789'
+      expect(Invoice.first.plan_usage.plan_serializer["settings"]["amount_discount"]).to be == 30
+
+      expect(account.name).to be == '12345678'
       permission = Permission.where(trace: @trace2, customer_plan: customer_plan).last
       expect(permission).not_to be_nil
-      # expect(permission.plan_usage).not_to be_nil
-      # expect(permission.plan_usage.usageable.amount).to be == 100.00
-      # expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
     end
 
     it 'Semester' do
-      @customer_plan = @store.customer_plans.first
-      @customer_plan.trace_ids = [@trace.id]
+      @customer_plan = @trace.customer_plans.last
+      # @customer_plan.trace_ids = [@trace.id]
       @customer_plan.charge_recurrence = :semester
+      @customer_plan.kind = :fixed
       @customer_plan.save
+      @trace.customer_plan = @customer_plan
 
       travel_to(DateTime.now.end_of_month - 15.days)
       freeze_time
@@ -289,14 +301,16 @@ RSpec.describe 'Store Controller', type: :request do
         post "/dashboard/#{@trace.store.url}/#{@trace.name}/contract", params: valid_attributes # , valid_session
       end.to change(Account, :count).by(1)
       expect(response).to have_http_status 302
-      expect(Invoice.all.count).to be == 1
-
       account = Account.find_by_name('123456789')
+      invoice = account.customer.invoices.last
+      
+      expect(invoice.id).to be == 9
+      expect(invoice.amount.to_f).to be == 50.0
+
+      expect(account.contract_volume).to be ==  "1"
       invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
-      # account.customer.create_invoice_customer(invoice_name)
       expect(Invoice.all.count).to be == 1
-      expect(Invoice.first.name).to be == invoice_name
-      expect(Invoice.first.amount.to_f).to be == 100.0
+      expect(invoice.name).to be == invoice_name
 
       expect(account.name).to be == '123456789'
       permission = Permission.where(trace: @trace, customer_plan: @customer_plan).last
@@ -305,10 +319,64 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission.plan_usage.usageable.amount).to be == 100.00
       expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 6.months).beginning_of_month
     end
-    # it "creates a new Order" do
-    #   expect {
-    #     post '/stores' , params: {:store => valid_attributes} #, valid_session
-    #   }.to change { ActionMailer::Base.deliveries.count }.by(1)
-    # end
+
+    it 'Store 2 - CustomerPlan Percent' do
+
+      unfreeze_time
+      travel_to Date.parse('2023-06-15').beginning_of_day
+      freeze_time
+
+      customer_plan = @store2.customer_plans.last
+      customer_plan.discount_behavior = 'always'
+      customer_plan.save
+      # customer_plan.traces << @trace2
+      @trace2 = Trace.last
+      @trace2.customer_plan = customer_plan
+
+      order_date = (DateTime.now - 20.seconds).strftime("%Y.%m.%d %H:%M:%S")
+
+      expect do
+        # post "/dashboard/#{@trace.store.url}/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan, :account :  valid_attributes} #, valid_session
+        post "/dashboard/#{@trace2.store.url}/#{@trace2.name}/contract", params: valid_attributes_store2.merge(name: @trace2.name) # , valid_session
+      end.to change(Account, :count).by(1)
+      expect(response).to have_http_status 302
+      expect(Invoice.all.count).to be == 1
+      expect(Transaction.all.count).to be == 0
+      expect(TransactionSlave.count).to be == 0
+      post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+          params: {"imentore_copy"=>
+              "{\"orders_open\":{
+                  \"10000020\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000020,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\'#{order_date}\',\"close_at\":\'#{nil}\',\"time_gmt\":\'#{order_date}\',\"time_trader\":\'#{order_date}\',\"timezone\":-3,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                }}"}  
+  
+      expect(Transaction.all.count).to be == 1
+      expect(TransactionSlave.count).to be == 1
+
+      account = Account.find_by_name('12345678')
+      slave = account.slaves.first
+      slave.update(profit: 10.0, state: 'executed')
+      slave.close
+      account = Account.find_by_name('12345678')
+
+      customer_plan = @trace2.customer_plan
+      expect(account.store_id).to be == 2
+      expect(customer_plan.amount_discount).to be == 30
+      expect(customer_plan.amount).to be == 100
+      expect(customer_plan.fixed?).to be true
+      expect(customer_plan.percent?).to be false
+      invoice_name = "#{account.id}-#{Time.zone.now.strftime('%Y-%m')}"
+      account.add_account_trace_to_planusage(@trace2, customer_plan)
+      account.create_invoice(@trace2, true, nil)
+      expect(Invoice.all.count).to be == 1
+      expect(Invoice.first.name).to be == invoice_name
+      expect(Invoice.first.amount.to_f).to be == 37.33
+
+      expect(Invoice.first.plan_usage.plan_serializer["settings"]["amount_discount"]).to be == 30
+
+      expect(account.name).to be == '12345678'
+      permission = Permission.where(trace: @trace2, customer_plan: customer_plan).last
+      expect(permission).not_to be_nil
+    end
+
   end
 end

@@ -29,10 +29,12 @@ class MercadopagoController < ApplicationController
   def back_urls
     @params = {payment_id: params[:payment_id], status: params[:status], external_reference: params[:external_reference], merchant_order_id: params[:merchant_order_id]}
     @invoice = Invoice.find(params[:invoice_id])
+    @invoice.payment_method.check_payment_get(params[:payment_id])
     respond_to do |wants|
       wants.html { render :back_urls, layout: 'modernize'}
     end
   end
+
 
   def finish
     @invoice = Invoice.find(params[:invoice_id])

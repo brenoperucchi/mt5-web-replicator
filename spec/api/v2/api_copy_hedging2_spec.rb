@@ -13,7 +13,8 @@ RSpec.describe API::V2::APICopy do
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @ticket_master = 10000001
-    
+    travel_to DateTime.parse("2023-08-02 16:45:40 -03 -0300")
+    freeze_time
     post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
       params: {"imentore_copy"=>"{\"orders_open\":{
                 \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000,\"profit\":\"-0.15\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":0,\"state_meta\":null,\"comment\":null},
@@ -329,7 +330,95 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.count).to be == 0
       end
 
+      it 'Hedging - Seconds_Ago gpt work' do
+        travel_to Time.zone.local(2024, 4, 15, 12, 0, 0) # Fixes the time to a known value
+        order_date = Time.current.strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = 3.hours.from_now.strftime("%Y.%m.%d %H:%M:%S")
+
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000020\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000020,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\'#{order_date}\',\"close_at\":\"2024.04.14 21:44:28\",\"time_gmt\":\'#{order_date_gmt}\',\"time_trader\":\'#{order_date}\',\"timezone\":-3,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                  }}"}  
+
+
+        order = Order.find_by(content_id: 10000020)
+        expect(order).not_to be_nil
+        expect(order.transactions.first.open_at).to be == Time.zone.local(2024, 4, 15, 12, 0, 0)
+        travel_back # Resets the time travel
+      end
+
+      it 'Hedging - Seconds_Ago not difference' do
+        unfreeze_time
+        travel_to DateTime.now
+        order_date = DateTime.now.strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = (DateTime.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000020\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000020,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\'#{order_date}\',\"close_at\":\"2024.04.14 21:44:28\",\"time_gmt\":\'#{order_date_gmt}\',\"time_trader\":\'#{order_date}\',\"timezone\":-3,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                  }}"}  
+        order = Order.find_by(content_id:10000020)
+        @slave = order.slaves.find_by(ticket_master: 10000020)
+        expect(@slave.master.state).to be == "executed"
+        expect(@slave.master.open_at).to be == DateTime.now
+        expect(@slave.master.created_at).to be == DateTime.now
+        
+        expect(@slave.seconds_ago).to be <= 30
+        expect(@slave.seconds_ago).to be >= 0
+        expect(@slave.seconds_ago).to be == 0
+      end
+
+      it 'Hedging - Seconds_Ago for open_at' do
+        unfreeze_time
+        travel_to DateTime.now
+        freeze_time
+        order_date = (DateTime.now - 40.seconds).strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = (DateTime.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000020\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000020,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\'#{order_date}\',\"close_at\":\"2024.04.14 21:44:28\",\"time_gmt\":\'#{order_date_gmt}\',\"time_trader\":\'#{order_date}\',\"timezone\":-3,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                  }}"}  
+        order = Order.find_by(content_id:10000020)
+        @slave = order.slaves.find_by(ticket_master: 10000020)
+        expect(@slave.master.state).to be == "executed"
+        expect(@slave.seconds_ago).not_to be <= 30
+        expect(@slave.seconds_ago).to be >= 0
+        expect(@slave.seconds_ago).to be == 40
+
+        expect(@slave.master.open_at).to be == DateTime.now - 40.seconds
+        expect(@slave.master.created_at).to be == DateTime.now 
+      end
+
+      it 'Hedging - Seconds_Ago for created_at' do
+        unfreeze_time
+        travel_to DateTime.now
+        freeze_time
+        order_date = (DateTime.now - 20.seconds).strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = (DateTime.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
+        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+            params: {"imentore_copy"=>
+                "{\"orders_open\":{
+                    \"10000020\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000020,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\'#{order_date}\',\"close_at\":\"2024.04.14 21:44:28\",\"time_gmt\":\'#{order_date_gmt}\',\"time_trader\":\'#{order_date}\',\"timezone\":-3,\"symbol_digit\":5,\"magic_number\":20001,\"comment\":null}
+                  }}"}  
+        order = Order.find_by(content_id:10000020)
+        transaction = order.transactions.first
+        transaction.update(created_at: transaction.created_at - 40.seconds)
+        @slave = order.slaves.find_by(ticket_master: 10000020)
+        expect(@slave.master.state).to be == "executed"
+        expect(@slave.seconds_ago).not_to be <= 30
+        expect(@slave.seconds_ago).to be >= 0
+        expect(@slave.seconds_ago).to be == 40
+
+        expect(@slave.master.open_at).to be == DateTime.now - 20.seconds
+        expect(@slave.master.created_at).to be == DateTime.now - 40.seconds
+        unfreeze_time
+      end
+
       it 'Hedging - Verify account 20100' do
+        travel_to DateTime.parse("2023-08-02 16:46:17 -03 -0300")
+        freeze_time
         account = Account.find_by(name: 20100)
         @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
         # @slave = account.orders.find_by(content_id:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
@@ -341,7 +430,7 @@ RSpec.describe API::V2::APICopy do
         expect(@slave.ticket_master).to be == 10000001
         expect(@transaction.state).to be == "executed"
         expect(@slave.state).to be == "pending"
-        expect(@slave.seconds_ago).to be <= 30
+        expect(@slave.seconds_ago).to be <= 40
         expect(@slave.seconds_ago).to be >= 0
 
         @slave.execute

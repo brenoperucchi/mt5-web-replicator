@@ -12,6 +12,7 @@
 //
 
 //= require modernize/simplebar.min.js
+//= require stisla/popper.js
 // require modernize/bootstrap.min.js
 //= require modernize/bootstrap.bundle.min.js
 //= require mintone/bootstrap.min.js

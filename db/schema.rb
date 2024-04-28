@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_01_29_205345) do
+ActiveRecord::Schema.define(version: 2024_04_24_145012) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -152,12 +152,16 @@ ActiveRecord::Schema.define(version: 2024_01_29_205345) do
   create_table "invoice_items", force: :cascade do |t|
     t.string "name"
     t.text "settings"
-    t.decimal "amount", precision: 10, scale: 2
+    t.decimal "amount", precision: 10, scale: 2, default: "0.0"
     t.bigint "invoice_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "description"
+    t.bigint "account_id"
+    t.bigint "trace_id"
+    t.index ["account_id"], name: "index_invoice_items_on_account_id"
     t.index ["invoice_id"], name: "index_invoice_items_on_invoice_id"
+    t.index ["trace_id"], name: "index_invoice_items_on_trace_id"
   end
 
   create_table "invoices", force: :cascade do |t|
@@ -174,6 +178,7 @@ ActiveRecord::Schema.define(version: 2024_01_29_205345) do
     t.bigint "payment_id"
     t.bigint "plan_usage_id"
     t.text "response"
+    t.datetime "due_at"
     t.index ["invoiceable_type", "invoiceable_id"], name: "index_invoices_on_invoiceable"
     t.index ["payment_id"], name: "index_invoices_on_payment_id"
     t.index ["plan_usage_id"], name: "index_invoices_on_plan_usage_id"

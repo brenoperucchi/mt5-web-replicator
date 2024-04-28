@@ -18,8 +18,8 @@ Rails.application.routes.draw do
     get "billing",      to: "pay#billing"
 
     resources :invoice_items
-    resources :customers
     resources :stores
+
     # "/:store_name/dashboards/"
     #   get  '/all',                      to: 'dashboards#index',           on: :collection 
     #   get  '/:name',                    to: 'dashboards#show',            on: :collection, as: 'show'
@@ -30,7 +30,6 @@ Rails.application.routes.draw do
     get  '/dashboards/all',                  to: 'dashboards#index'#, as: 'index_dasboards'
     get  '/dashboards/:store_name',          to: 'dashboards#index',  as: 'store_name_dasboards'
     get  '/dashboards/:store_name/all',      to: 'dashboards#index'#
-    
 
     resource :dashboard, only: [:show, :create], path:"dashboard/:store_name/:name" do
       get  'account/:account_id/:transaction_id',     to: 'dashboards#transaction',     on: :collection, as: 'transaction'
@@ -49,16 +48,49 @@ Rails.application.routes.draw do
     constraints(name: /[A-Z][A-Z][0-9]+/) do
       resource :robos, controller: 'dashboards', path:"robos/:name"
     end
-
     
     devise_for :users, controllers: {
       sessions: 'users/sessions',
       registrations: 'users/registrations'
     }
+
+    # devise_scope :user do
+    #   # get '/customer',   to: 'sessions#new'
+    #   get 'control/login',      to: 'control/sessions#new',    as: 'new_session'
+    #   post 'control/login',     to: 'control/sessions#create', as: 'session'
+    #   delete 'control/logout',  to: 'control/sessions#destroy', as: 'destroy_session'
+    # end
+  
+    # resources :clients
     
-    resources :clients
     mount Sidekiq::Web => '/sidekiq'
     mount API::Base, at: "/"
+
+    namespace :panel do
+      # devise_for :users, excepted: %w[sessions#new session#destroy]
+
+      devise_for :user,  controller: {
+        sessions: 'panel/sessions'
+      }
+
+      devise_scope :user do
+        # get '/customer',   to: 'sessions#new'
+        get 'login',      to: 'sessions#new',    as: 'new_session'
+        post 'login',     to: 'sessions#create', as: 'session'
+        delete 'logout',  to: 'sessions#destroy', as: 'destroy_session'
+      end
+
+      resources :dashboard, only: [:index] do
+        get 'back_url/:store_name/:state/:invoice_id' , to: 'dashboard#back_url', as: 'back_url', on: :collection
+      end
+      
+      resources :invoices, only: [:index] do
+        get  'invoice_send', to: 'invoices#invoice_send', on: :member, as: 'invoice_send'
+      end
+
+      root "dashboard#index"
+    end
+
     namespace :control do
       resources :instruments
       resources :accounts

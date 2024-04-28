@@ -23,6 +23,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
     loggings:             Field::HasMany,
     invoiceable:          Field::Polymorphic,
+    due_at:               Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
@@ -40,6 +41,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   items
   payment
   invoiceable
+  due_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -57,6 +59,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   amount
   loggings
   items
+  due_at
   created_at
   updated_at
   ].freeze
@@ -73,6 +76,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   plan_usage
   stripe_invoice_id
   items
+  due_at
   ].freeze
 
   # COLLECTION_FILTERS

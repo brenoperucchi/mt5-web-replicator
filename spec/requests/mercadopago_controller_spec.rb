@@ -59,10 +59,10 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
+      @account.create_invoice(@trace, nil)
 
       invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice_customer(invoice_name)
+      invoice = @account.customer.create_invoice(invoice_name)
       invoice.items.update_all(invoice_id: 41)
       invoice.update_columns(id: 41)
 
@@ -79,10 +79,10 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
+      @account.create_invoice(@trace, nil)
 
       invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice_customer(invoice_name)
+      invoice = @account.customer.create_invoice(invoice_name)
       invoice.items.update_all(invoice_id: 42)
       invoice.update_columns(id: 42)
 
@@ -99,10 +99,10 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
+      @account.create_invoice(@trace, nil)
 
       invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice_customer(invoice_name)
+      invoice = @account.customer.create_invoice(invoice_name)
       # invoice.items.update_all(invoice_id: 1)
       # invoice.update_columns(id: 1)
 
@@ -119,10 +119,10 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
+      @account.create_invoice(@trace, nil)
 
       invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice_customer(invoice_name)
+      invoice = @account.customer.create_invoice(invoice_name)
       invoice.items.update_all(invoice_id: 27)
       invoice.update_columns(id: 27)
 
@@ -138,10 +138,10 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       # travel_to Date.parse("2023-06-01").beginning_of_month
       # freeze_time
 
-      @account.add_account_trace_to_planusage(@trace, @customer.customer_plans.first)
+      @account.create_invoice(@trace, nil)
 
       invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice_customer(invoice_name)
+      invoice = @account.customer.create_invoice(invoice_name)
       invoice.items.update_all(invoice_id: 44)
       invoice.update_columns(id: 44)
 

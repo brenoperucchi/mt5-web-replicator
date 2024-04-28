@@ -25,18 +25,28 @@ class PaymentMethod::MercadoPago
     end
   end
 
+
+  def check_payment_get(response_id)
+    @response = sdk.payment.get(response_id) if response_id
+    unless @response.nil? || @response[:status] != 200 || @response[:response].empty? ||@response[:response]["status"].empty?
+      @invoice = Invoice.find_by(id: @response.dig(:response, 'external_reference'))
+      @invoice&.update( response: @invoice.response.merge("response": @response[:response] ))
+      @invoice.paid! if @response[:response]["status"] == 'approved'
+    end
+  end
+
   def response_status
     @response["status"] || false
   end
 
-  def redirect_url
-    # false
-    if Rails.env.development? || Rails.env.test?
-      @response["sandbox_init_point"] || false
-    else
-      @response["init_point"] || false
-    end
-  end
+  # def redirect_url
+  #   # false
+  #   if Rails.env.development? || Rails.env.test?
+  #     @response["sandbox_init_point"] || false
+  #   else
+  #     @response["init_point"] || false
+  #   end
+  # end
 
   def payment_id
     @response["id"]
@@ -71,9 +81,9 @@ class PaymentMethod::MercadoPago
       # the purpose: 'wallet_purchase', allows only logged payments
       # to allow guest payments you can omit this property
       back_urls: {
-                  success:"https://#{Store.domain_url}/mercadopago/back_urls/success/#{invoice.id}",
-                  failure:"https://#{Store.domain_url}/mercadopago/back_urls/failure/#{invoice.id}",
-                  pending:"https://#{Store.domain_url}/mercadopago/back_urls/pending/#{invoice.id}",
+                  success: invoice.back_urls(:success),
+                  failure: invoice.back_urls(:failure),
+                  pending: invoice.back_urls(:pending),
                  },
       auto_return: 'approved',		  					 
       external_reference: invoice.id,

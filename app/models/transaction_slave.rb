@@ -165,25 +165,13 @@ class TransactionSlave < ApplicationRecord
   end
 
   def seconds_ago
-    difference = (self.master.created_at - self.master.open_at).to_i
-    difference = difference > 1 ? difference : 0
-    seconds_ago = (self.master.open_at - Time.zone.now + difference).to_i.abs
-    Rails.env.test? ? 0 : seconds_ago
+    # difference = (self.master.created_at - self.master.open_at).to_i
+    # difference = difference > 1 ? difference : 0
+    # seconds_ago = (self.master.open_at - Time.zone.now + difference).to_i.abs
+    seconds_ago1 = (self.master.open_at - Time.zone.now).to_i.abs
+    seconds_ago2 = (self.master.created_at - Time.zone.now).to_i.abs
+    result = seconds_ago1 > seconds_ago2 ? seconds_ago1 : seconds_ago2
+    # Rails.env.test? ? 0 : result
   end
-
-  # def check_account_contract_volume(value = nil)
-  #   number = value || self.lot
-  #   contract_volume = account.contract_volume 
-  #   return self.lot if not contract_volume.present? or contract_volume.to_f <= 0.0
-
-  #   if number.include?(".")
-  #     decimal_part = number.split(".").last
-  #     new_number = "0." + ("0" * (decimal_part.length-1).abs) + (1 * contract_volume.to_i).to_s
-  #     return new_number
-  #   else
-  #     return contract_volume
-  #   end
-  # end
-
 
 end
