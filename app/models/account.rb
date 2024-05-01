@@ -25,7 +25,8 @@ class Account < ApplicationRecord
 
   store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, 
                                :api_time_max_seconds, :api_slippage, :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, 
-                               :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set]
+                               :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, 
+                               :api_send_orders_history, :api_send_orders_history_date_start, :api_send_orders_history_date_end, :api_close_all_orders]
 
   belongs_to :store
   belongs_to :customer
@@ -63,7 +64,8 @@ class Account < ApplicationRecord
   def set_advanced_attributes
     self.update(api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 12, api_time_to_check_server: 15, api_time_max_seconds: 30, api_slippage: 30, 
                 api_environment_local: false, api_store_state: true, api_milliseconds_timer: 3000, api_milliseconds_tick: 3000, api_event_on_timer: true, 
-                api_event_on_tick: false, api_mfe_mae_display: true)
+                api_event_on_tick: false, api_mfe_mae_display: true, api_send_orders_history: false, api_send_orders_history: false, 
+                api_send_orders_history_date_start: nil, api_send_orders_history_date_end: nil, api_close_all_orders: false)
   end
 
   def contract_volume
@@ -182,5 +184,12 @@ class Account < ApplicationRecord
   def contract_volume_use
     contract_volume ||= (self.try(:contract_volume) == "0" or self.try(:contract_volume).nil?) ? 1 : self.try(:contract_volume).to_f
   end
+
+  def api_send_orders_history_date_start
+    DateTime.parse(store.settings["api_send_orders_history_date_start"] || DateTime.now.beginning_of_month.beginning_of_day.to_s)
+  end
+  def api_send_orders_history_date_end  
+    DateTime.parse(store.settings["api_send_orders_history_date_end"] || DateTime.now.end_of_month.end_of_day.to_s)
+  end                             
 
 end

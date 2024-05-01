@@ -133,4 +133,15 @@ class Invoice < ApplicationRecord
     end
   end
 
+
+  def conciliate_orders(orders_presenter, account)
+    amount_items = items.where(account: account).to_a.sum(&:amount)
+    if amount_items != orders_presenter.conciliate_amount
+      conciliate_amount = orders_presenter.conciliate_amount - amount_items
+      if self.items.create(name: :conciliate, account: account, amount: conciliate_amount, description: "Conciliação de Ordens - Account: #{account.name}")
+        self.balance_update
+      end
+    end
+  end
+
 end

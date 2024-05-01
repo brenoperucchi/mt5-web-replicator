@@ -123,6 +123,7 @@ Rails.application.routes.draw do
       resources :customer_plans
       resources :invoices do
          get :invoice_send, on: :member
+         get :conciliate_orders, on: :member
       end           
       resources :invoice_items
       resources :loggings

@@ -28,6 +28,8 @@ class AccountDashboard < Administrate::BaseDashboard
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     deleted_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    api_send_orders_history_date_start: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"), 
+    api_send_orders_history_date_end:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"), 
 
     api_debug_mode:           Field::Boolean.with_options(searchable: false),
     api_debug_mode_level:     Field::Number.with_options(searchable: false),
@@ -45,6 +47,8 @@ class AccountDashboard < Administrate::BaseDashboard
     api_mfe_mae_display:      Field::Boolean.with_options(searchable: false),
     api_reach_mfe_target:     Field::Number.with_options(searchable: false),
     api_reach_loss_set:       Field::Number.with_options(searchable: false),
+    api_send_orders_history:  Field::Boolean.with_options(searchable: false),
+    api_close_all_orders:     Field::Boolean.with_options(searchable: false),
   }.freeze
 
 
@@ -111,22 +115,26 @@ class AccountDashboard < Administrate::BaseDashboard
   ].freeze
 
   FORM_ATTRIBUTES_ADVANCED = %i[
+  api_store_state
+  api_close_all_orders
   api_debug_mode
   api_debug_mode_level
   api_freeze_max_time
   api_time_to_check_server
   api_time_max_seconds
   api_slippage
-  api_environment_local
-  api_store_state
   api_store_message
-  api_milliseconds_timer
-  api_milliseconds_tick
+  api_send_orders_history_date_start
+  api_send_orders_history_date_end
+  api_send_orders_history
+  api_environment_local
   api_event_on_timer
   api_event_on_tick
   api_mfe_mae_display
   api_reach_mfe_target
   api_reach_loss_set
+  api_milliseconds_timer
+  api_milliseconds_tick
   ].freeze
 
 

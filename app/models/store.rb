@@ -15,7 +15,8 @@ class Store < ApplicationRecord
                                 :stripe_webhook_secret, :stripe_api_secret, :stripe_product_id, :stripe_customer_id, :contact_whatsapp, :dashboard_date_filter, 
                                 :api_server_hostname, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_time_max_seconds, :api_slippage, 
                                 :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
-                                :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set
+                                :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, :api_send_orders_history, 
+                                :api_send_orders_history_ranges, :api_close_all_orders
                               ]
   enum state: {disable:0, enable:1}
   acts_as_taggable_on :tags

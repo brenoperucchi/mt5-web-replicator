@@ -50,6 +50,7 @@ class StoreDashboard < Administrate::BaseDashboard
     api_mfe_mae_display:      Field::Boolean.with_options(searchable: false),
     api_reach_mfe_target:     Field::Number.with_options(searchable: false),
     api_reach_loss_set:       Field::Number.with_options(searchable: false),
+    api_send_orders_history:  Field::Boolean.with_options(searchable: false),
   }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -134,6 +135,7 @@ class StoreDashboard < Administrate::BaseDashboard
   api_mfe_mae_display
   api_reach_mfe_target
   api_reach_loss_set
+  api_send_orders_history
   ].freeze
 
 

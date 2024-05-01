@@ -5,7 +5,7 @@ class	API::V2::APISlavePresenter
 	  message = params[:body]
 	  content = YAML.load(message)
 	  date_today = DateTime.now
-	  skip_logging = false;
+	  skip_logging = false
 
 	  if not content.blank? and content.is_a?(Hash)
 	    action = content['meta_state']

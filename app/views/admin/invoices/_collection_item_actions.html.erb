@@ -22,3 +22,10 @@
     class: "action-edit",
   ) if show_action?(:invoice_send, resource) %></td>
 <% end %>
+<% if resource.class.name == "Invoice" %>
+  <td><%= link_to(
+    'Conciliate',
+    [:conciliate_orders, namespace, resource],
+    class: "action-edit",
+  ) %></td>
+<% end %>
