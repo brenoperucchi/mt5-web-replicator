@@ -62,8 +62,8 @@ class Account < ApplicationRecord
   # end
 
   def set_advanced_attributes
-    self.update(api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 12, api_time_to_check_server: 15, api_time_max_seconds: 30, api_slippage: 30, 
-                api_environment_local: false, api_store_state: true, api_milliseconds_timer: 3000, api_milliseconds_tick: 3000, api_event_on_timer: true, 
+    self.update(api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 30, api_time_to_check_server: 30, api_time_max_seconds: 30, api_slippage: 30, 
+                api_environment_local: false, api_store_state: true, api_milliseconds_timer: 2400, api_milliseconds_tick: 2400, api_event_on_timer: true, 
                 api_event_on_tick: false, api_mfe_mae_display: true, api_send_orders_history: false, api_send_orders_history: false, 
                 api_send_orders_history_date_start: nil, api_send_orders_history_date_end: nil, api_close_all_orders: false)
   end
