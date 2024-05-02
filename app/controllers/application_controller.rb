@@ -16,7 +16,7 @@ class ApplicationController < ActionController::Base
 	def after_sign_in_path_for(resource)
 		if resource.userable.try(:administrator?)
 			admin_customers_path
-		elsif resource.userable.try(:customer?) and (resource.userable.try(:admin?) && resource.userable.try(:owner?))
+		elsif resource.userable.try(:customer?) and (resource.userable.try(:admin?) || resource.userable.try(:owner?))
 			control_accounts_path
 		elsif resource.userable.try(:customer?) and resource.userable.try(:user?)
 			panel_dashboard_index_path
