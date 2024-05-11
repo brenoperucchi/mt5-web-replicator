@@ -24,7 +24,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
     travel_to Date.parse("2023-06-01")
 	  @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store, instrument_control: true)
+    @trace = create(:trace, :copy, stores: [@store], instrument_control: true)
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)

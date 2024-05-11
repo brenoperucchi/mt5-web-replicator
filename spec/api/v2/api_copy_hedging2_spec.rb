@@ -4,7 +4,7 @@ RSpec.describe API::V2::APICopy do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store)
+    @trace = create(:trace, :copy, stores: [@store])
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)
@@ -68,8 +68,8 @@ RSpec.describe API::V2::APICopy do
         expect(TransactionSlave.executed.count).to be == 0
         expect(TransactionSlave.closed.count).to be == 0
         expect(TransactionSlave.pending.count).to be == 26
-        expect(TransactionSlave.remove.count).to be == 0
-        expect(TransactionSlave.deleted.count).to be == 2
+        expect(TransactionSlave.remove.count).to be == 2
+        expect(TransactionSlave.deleted.count).to be == 0
 
         order = Order.where(content_id:10000015).take
         expect(order.content_id).to be == 10000015
@@ -204,11 +204,12 @@ RSpec.describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Should Restrict Order by Magic Number On Copy Account' do
         account = Account.find_by(name: 20100)
-        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        order = account.orders.find_by(content_id:@ticket_master)
+        @transaction = order.transactions.first
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@transaction.loggings.count).to be == 1
         expect(@transaction.state).to be == "executed"
-        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
 
         Account.find_by(name: 10100).update(magics_accept: "20000")
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
@@ -221,7 +222,7 @@ RSpec.describe API::V2::APICopy do
         @transaction = order.transactions.first
         expect(@transaction.loggings.count).to be == 2
         expect(@transaction.state).to be == "error"
-        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
         expect(order.state).to be == "error"
         expect(order.slaves.count).to be == 0
       end
@@ -230,11 +231,12 @@ RSpec.describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Should Not Restrict Order by Magic Number On Copy Account' do
         account = Account.find_by(name: 20100)
-        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        order = account.orders.find_by(content_id:@ticket_master)
+        @transaction = order.transactions.first
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@transaction.loggings.count).to be == 1
         expect(@transaction.state).to be == "executed"
-        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
 
         Account.find_by(name: 10100).update(magics_accept: "20000")
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
@@ -247,7 +249,7 @@ RSpec.describe API::V2::APICopy do
         @transaction = order.transactions.first
         expect(@transaction.loggings.count).to be == 1
         expect(@transaction.state).to be == "executed"
-        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
         expect(order.state).to be == "executed"
         expect(order.slaves.count).to be == 2
       end
@@ -256,11 +258,12 @@ RSpec.describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Should Restrict Order by Magic Number On Trace' do
         account = Account.find_by(name: 20100)
-        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        order = account.orders.find_by(content_id:@ticket_master)
+        @transaction = order.transactions.first
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@transaction.loggings.count).to be == 1
         expect(@transaction.state).to be == "executed"
-        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
 
         Trace.find(1).update(magics_accept: "20001")
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
@@ -273,7 +276,7 @@ RSpec.describe API::V2::APICopy do
         @transaction = order.transactions.first
         expect(@transaction.loggings.count).to be == 2
         expect(@transaction.state).to be == "error"
-        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
         expect(order.state).to be == "error"
         expect(order.slaves.count).to be == 0
       end
@@ -282,11 +285,12 @@ RSpec.describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Should Restrict Order by Magic Number On Trace' do
         account = Account.find_by(name: 20100)
-        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        order = account.orders.find_by(content_id:@ticket_master, store: @store)
+        @transaction = order.transactions.first
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@transaction.loggings.count).to be == 1
         expect(@transaction.state).to be == "executed"
-        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
 
         Trace.find(1).update(magics_accept: "20001")
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
@@ -299,7 +303,7 @@ RSpec.describe API::V2::APICopy do
         @transaction = order.transactions.first
         expect(@transaction.loggings.count).to be == 2
         expect(@transaction.state).to be == "error"
-        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
         expect(order.state).to be == "error"
         expect(order.slaves.count).to be == 0
       end
@@ -308,11 +312,12 @@ RSpec.describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 20100)
-        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        order = account.orders.find_by(content_id:@ticket_master)
+        @transaction = order.transactions.first
         expect(account.orders.where(content_id:10000001).count).to eq(1)
         expect(@transaction.loggings.count).to be == 1
         expect(@transaction.state).to be == "executed"
-        expect(@transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
 
         Account.find_by(name: 10100).update(magics_accept: "20000")
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
@@ -325,7 +330,7 @@ RSpec.describe API::V2::APICopy do
         @transaction = order.transactions.first
         expect(@transaction.loggings.count).to be == 2
         expect(@transaction.state).to be == "error"
-        expect(@transaction.order.state).to be == "error"
+        expect(order.state).to be == "error"
         expect(order.state).to be == "error"
         expect(order.slaves.count).to be == 0
       end
@@ -420,7 +425,8 @@ RSpec.describe API::V2::APICopy do
         travel_to DateTime.parse("2023-08-02 16:46:17 -03 -0300")
         freeze_time
         account = Account.find_by(name: 20100)
-        @transaction = account.orders.find_by(content_id:@ticket_master).transactions.first
+        order = account.orders.find_by(content_id:@ticket_master)
+        @transaction = order.transactions.first
         # @slave = account.orders.find_by(content_id:@ticket_master).slaves.find_by(ticket_master: @ticket_master)
         @slave = account.slaves.find_by(ticket_master: @ticket_master)
         expect(account.orders.where(content_id:10000001).count).to eq(1)
@@ -529,7 +535,7 @@ RSpec.describe API::V2::APICopy do
         @slave_1 = account_87.slaves.find_by(ticket_master: @ticket_master)
         @slave_2 = account_88.slaves.find_by(ticket_master: @ticket_master)
         expect(@slave_1.state).to be == "remove"
-        expect(@slave_2.state).to be == "deleted"
+        expect(@slave_2.state).to be == "remove"
         expect(@slave_1.master.state).to be == "closed"
         expect(@slave_2.master.state).to be == "closed"
         expect(response.status).to be == 201
@@ -656,7 +662,7 @@ RSpec.describe API::V2::APICopy do
 
         expect(@slave2.ticket_master).to be == 10000001
         expect(@transaction2.ticket).to be == 10000001
-        expect(@slave2.state).to be == "deleted"
+        expect(@slave2.state).to be == "remove"
         expect(@slave2.master.state).to be == "closed"
         expect(@order2.id).to be == 1
         expect(@order2.state).to be == "closed"

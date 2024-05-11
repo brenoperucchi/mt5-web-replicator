@@ -60,5 +60,9 @@ module Control
     # See https://administrate-prototype.herokuapp.com/customizing_controller_actions
     # for more information
 
+    # def scoped_resource
+    #   current_store.orders
+    # end
+
   end
 end

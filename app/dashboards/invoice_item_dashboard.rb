@@ -9,8 +9,10 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
     name:                 Field::String,
+    account:              Field::BelongsTo,
     invoice:              Field::BelongsTo,
     amount:               Field::String,
+    state:                Field::String,
     description:          Field::String,
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -23,8 +25,9 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   name
+  state
   amount
-  invoice
+  account
   description
   created_at
   ].freeze 
@@ -33,6 +36,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   name
+  state
   amount
   invoice
   description
@@ -45,6 +49,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
   name
+  state
   amount
   invoice
   ].freeze

@@ -10,7 +10,7 @@ class Invoice < ApplicationRecord
   delegate :email, to: :invoiceable, allow_nil: true
   # delegate :trace, to: :plan_usage, allow_nil: true
   
-  enum state: {pending: 0, opened:1, paid: 2, denied:3, refunded:4}
+  enum state: {pending: 0, to_paid:1, paid: 2, denied:3, refunded:4}
   
   store :settings, accessors: [:email, :payment_link, :back_url]
 
@@ -84,63 +84,80 @@ class Invoice < ApplicationRecord
 
   end
 
-  def customer_calculate(customer, date_today, month_proporcional = nil)
-    customer.accounts.each do |account|
+  def customer_calculate(customer, date, month_proporcional = nil)
+    customer.accounts.slave.each do |account|
       account.traces.each do |trace|
-        account_calculate(account, trace, date_today, month_proporcional)
+        account_calculate(account, trace, date, month_proporcional)
       end
     end
   end
 
-  def account_calculate(account, trace, date_today, month_proporcional = nil)
+  def account_calculate(account, trace, date, month_proporcional = nil)
     date_due_at = (DateTime.parse(self.name[3..] + "-01 00:00:00 #{DateTime.now.zone}") + 1.month).beginning_of_month.beginning_of_day
     self.due_at = date_due_at + (trace.customer_plan.due_at_dates.to_i - 1).days
 
+    data_profit = account.data_profit(:slaves, trace)
     plan_usage = account.add_account_trace_to_planusage(trace, trace.customer_plan)#.each do |plan_usage|
-    plan_usage.amount_calculate(date_today, month_proporcional)
+    plan_usage.amount_calculate(date, month_proporcional, data_profit)
     
     customer_plan = plan_usage.usageable
 
     self.payment = customer_plan.payment
-    self.plan_usage = plan_usage
+    # self.plan_usage = plan_usage
 
+    timestamp = I18n.l DateTime.now, format: :short8
 
     if customer_plan.fixed?# and customer_plan.monthly?
       # invoice.back_url = "mercadopago/back_urls/success/#{self.id}"
       amount = plan_usage.amount_proportional 
-      description = "Contratos: #{account.contract_volume} * Valor #{number_with_precision plan_usage.amount_proportional}"
+      description = "#{timestamp} - Contratos: #{account.contract_volume_use} * Valor #{number_with_precision plan_usage.amount_proportional} = #{number_with_precision amount}"
     elsif customer_plan.percent?
       # invoice.back_url = "panel/dashboard/back_urls/success/#{self.id}"
-      account.search_date_begin = date_today.beginning_of_month
-      account.search_date_end = date_today.end_of_month
+      account.search_date_begin = date.beginning_of_month
+      account.search_date_end = date.end_of_month
       data_profit = account.data_profit(:slaves, trace)
       amount = data_profit * (customer_plan.amount_use.to_f / 100)
-      description = "Lucro do mês: #{number_with_precision data_profit} * Percentual Plan #{number_with_precision customer_plan.amount_use.to_f, significant:true, precision: 2}%"
+      description = "#{timestamp} - Sistema: #{number_with_precision data_profit} * Percentual Plan #{number_with_precision customer_plan.amount_use.to_f, significant:true, precision: 2}% = #{number_with_precision amount}"
     end
   
     if self.save
-      item = self.items.find_or_create_by(name: :customer_monthly_payment, account: account, trace: trace)
+      item = self.items.find_or_create_by(name: :customer_monthly_payment, account: account, trace: trace, plan_usage:plan_usage)
       item.update(amount: amount, description: description)
       plan_usage.update_next_charged
     end
   end
 
   def back_urls(kind)
-    if self.plan_usage.usageable.fixed?
+    if self.invoiceable.owner? 
       "https://#{store.domain_url}/mercadopago/back_urls/#{kind.to_s}/#{self.id}"
-    elsif self.plan_usage.usageable.percent?
+    elsif self.invoiceable.customer?
       "https://#{store.domain_url}/panel/dashboard/back_url/#{store.url}/#{kind.to_s}/#{self.id}"
     end
   end
 
 
-  def conciliate_orders(orders_presenter, account)
-    amount_items = items.where(account: account).to_a.sum(&:amount)
-    if amount_items != orders_presenter.conciliate_amount
-      conciliate_amount = orders_presenter.conciliate_amount - amount_items
-      if self.items.create(name: :conciliate, account: account, amount: conciliate_amount, description: "Conciliação de Ordens - Account: #{account.name}")
-        self.balance_update
-      end
+  def self.generate_month(date = nil)
+    timestamp = I18n.l DateTime.now, format: :short8
+    puts "#{timestamp} - Runner Invoice.generate_month"
+    Customer.customer.user.not_deleted.each do |customer|
+      customer.create_invoice(nil, date)
+      customer.invoices.map(&:conciliate_request)
+    end
+  end
+
+  def self.metatrader_conciliate
+    timestamp = I18n.l DateTime.now, format: :short8
+    puts "#{timestamp} - Runner Invoice.metatrader_conciliate"
+    Invoice.pending.each do |invoice|
+      invoice.conciliate_request
+    end
+  end
+
+  def conciliate_request
+    items.normal.each do |item|
+      next unless item.plan_usage.usageable.percent?
+      break if items.conciliate.exists?
+      item.conciliate! if item.conciliate_metatrader_on
     end
   end
 

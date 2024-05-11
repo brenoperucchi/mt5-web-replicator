@@ -13,11 +13,11 @@ class	API::V2::APISlavePresenter
 	    account = Account.find_by(name: params[:account_id], account_server: account_server, state: :enable, kind: :slave)
 	    if account
 	      # TransactionSlave.check_duplicate(content['comment'], account)
-	      slave = account.slaves.where(comment: content['comment']).not_deleted.first
+	      slave = account.slaves.not_deleted.where(comment: content['comment']).last
 	      order = Order.find_by(content: content['comment'])  
 
 	      if slave.nil?
-	        Logging.create(content:message, state: action, parent: order.try(:message).try(:loggings).try(:first), account: account)
+	        # Logging.create(content:message, state: action, parent: order.try(:message).try(:loggings).try(:first), account: account)
 	      else
 	        case action
 	        when "OPEN", "OPENED"
@@ -27,9 +27,24 @@ class	API::V2::APISlavePresenter
 	          @version = slave.versions.last
 	          map = "#{slave.master.trace.id}|#{slave.id}|OK"
 	        when "CLOSED", "DELETED", "HASCLOSED"
-	          api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit'])
-	          slave.attributes = api_attributes
-	          
+	        	api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
+	        	# if account.hedging?
+	        	#   slave1 = account.slaves.find_by(ticket_master: api_attributes[:comment], ticket_slave: api_attributes[:ticket_slave], state: "executed")
+	        	#   # slave ||= account.slaves.find_by(comment: api_attributes[:comment])
+	        	#   slave2 ||= account.slaves.where(ticket_master: api_attributes[:comment], ticket_slave:nil, state: "pending").take
+	        	#   if slave1.nil? and slave2.nil?
+	        	#     api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
+	        	#     slave = account.slaves.find_by(comment: content['comment']).dup
+	        	#     slave.attributes = api_attributes
+	        	#     if slave.save
+	        	#       @version = slave.versions.last
+	        	#       slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: "DUPLICATE")
+	        	#     else
+	        	#       Logging.create(content:message, state: "NOTDUPLICATE", parent: order.try(:message).try(:loggings).try(:first), account: account)
+	        	#     end
+	        	#   end
+	        	# end
+	          slave.attributes = api_attributes	          
 	          # if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
 	          #   slave.state = :executed
 	          #   slave.master.state = :executed

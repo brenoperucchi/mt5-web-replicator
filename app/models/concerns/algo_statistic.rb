@@ -38,7 +38,13 @@ module AlgoStatistic
 			if trace.nil?
 		  	data = masters_filter(self.send(type), states)
 		  else
-		  	data = masters_filter(self.send(type).where("#{table_name}.trace_id = ?", trace.id), states)
+		  	if(type == :slaves)
+		  		filtered_relation = self.send(type).where(store_id: self.store_id).where("#{table_name}.trace_id = ?", trace.id)
+		  		# filtered_relation = self.send(type).where("#{table_name}.trace_id = ?", trace.id).joins(:order).where("orders.store_id = ?", trace.store_id)
+		  	else
+		  		filtered_relation = self.send(type).where("#{table_name}.trace_id = ?", trace.id)
+		  	end
+		  	data = masters_filter(filtered_relation, states)
 		  end
 		  		 
 		  data = data.send(scope) if not scope.nil? and data.respond_to?(scope)
@@ -65,7 +71,7 @@ module AlgoStatistic
 		  if self.search_date_begin and self.search_date_end
 		  	query = {:closed_at => search_date_begin.beginning_of_day..search_date_end.end_of_day, state: states}.compact
 
-		    if (states != :closed or states == :all) or (states.is_a?(Array) and not states.include?(:closed))
+		    if (states != :closed or states == :all) && (states.is_a?(Array) and not states.include?(:closed))
 		      query = {:created_at => search_date_begin.beginning_of_day..search_date_end.end_of_day, state: states}.compact
 		    end
 

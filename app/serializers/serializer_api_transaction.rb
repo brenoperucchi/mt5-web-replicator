@@ -12,7 +12,29 @@ class SerializerAPITransaction < ActiveModel::Serializer
       ticket: ticket,
       open_at: open_at,
       comment: obj['comment'],
-      ticket_deal: obj['ticket_deal'],
+      ticket_deal: ticket_deal,
+      profit: obj['profit'],
+      # time_trader: time_trader,
+      # mae: mae,
+      # mfe: mfe,
+    }
+  end  
+
+  def new_attributes
+    {
+      ticket_master: ticket_master,
+      ticket_slave: ticket_slave,
+      ticket_deal: ticket_deal,
+      ordertype: ordertype,
+      lot: lot,
+      price_open: price_open,
+      price_closed: price_closed,
+      magic_number: magic_number,
+      stop_loss: stop_loss,
+      take_profit: take_profit,
+      ticket: ticket,
+      open_at: open_at,
+      comment: obj['comment'],
       profit: obj['profit'],
       # time_trader: time_trader,
       # mae: mae,
@@ -40,9 +62,21 @@ class SerializerAPITransaction < ActiveModel::Serializer
     obj['open_price']
   end
 
-  # def price_closed
-  #   obj['close_price']
-  # end
+  def price_closed
+    obj['close_price']
+  end
+
+  def ticket_slave
+    obj['ticket_slave_id']
+  end
+
+  def ticket_slave
+    obj['ticket_slave_id']
+  end
+
+  def ticket_deal
+    obj['ticket_deal']
+  end
 
   def magic_number
     obj['magicnumber']

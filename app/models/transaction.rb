@@ -10,19 +10,25 @@ class Transaction < ApplicationRecord
   #   class_name: 'Track'
   # }
 
-  belongs_to :order, optional:true
+  # belongs_to :order, optional:true
   belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id, optional:true
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
   belongs_to :deal, optional:true
 
   has_many :loggings, as: :resourceable, dependent: :destroy
-  has_many :slaves,   through: :order,    source: :slaves
-  has_many :accounts, through: :order,    source: :accounts
+  
+  has_many :order_transactions, dependent: :destroy
+  has_many :orders, through: :order_transactions, source: :order, dependent: :destroy
+  # has_many :orders
+
+  has_many :slaves,   through: :orders,    source: :slaves
+  has_many :accounts, through: :orders,    source: :accounts
 
   has_many :statistics, as: :statisticable, dependent: :destroy
   has_one :mfe, -> { where(kind: 'mfe') }, class_name: 'Statistic', as: :statisticable
 
+  validates_uniqueness_of :ticket, scope: [:account_id, :trace_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   # enum state: { pending: 0, executed: 1, closed: 2, error: 3, closed_info: 4 }
 
@@ -97,7 +103,7 @@ class Transaction < ApplicationRecord
     
     state :error do
       def update_state(state)
-        self.try(:order).try(:erro)
+        self.orders.map(&:erro)
       end
     end
     state :executed do
@@ -111,15 +117,15 @@ class Transaction < ApplicationRecord
     state :closed do
       def update_state(state)
         self.telegram_message(:CLOSED)
-        self.try(:order).try(:close)
         self.slaves.not_deleted.map(&:remove)
+        self.orders.map(&:close)
         return true
       end
     end
   end
 
   def telegram_message(state)
-    chat_id = self.trace.store.telegram_bot_chat_id
+    chat_id = self.account.store.telegram_bot_chat_id
     if chat_id.present?
       content = self.telegram_message_prepare(state)
       TelegramJob.perform_async(chat_id, content)
@@ -141,7 +147,7 @@ class Transaction < ApplicationRecord
     if not self.error?
       # Se houver mudanças, prosseguir com o salvamento e outras ações
       if self.changed?
-        chat_id = self.trace.store.telegram_bot_chat_id
+        chat_id = self.account.store.telegram_bot_chat_id
         if chat_id.present?
           content = self.telegram_message_prepare(:MODIFY)
           TelegramJob.perform_async(chat_id, content)
@@ -211,8 +217,22 @@ class Transaction < ApplicationRecord
   end
 
   def restrict_magic_number?
-    order.restrict_magic_number(self) or trace.restrict_magic_number(self)
+    restrict_magic_number(self) or trace.restrict_magic_number(self)
   end
+
+  def restrict_magic_number(resource)
+    unless resource.account.magics_accept.blank?
+      trace_magic_number = self.try(:trace).try(:name_id)
+      magic_numbers = Order.magic_numbers_split(resource.account.magics_accept)
+      changeset = resource.try(:versions).try(:last).try(:changeset)
+      version = resource.try(:version)
+      unless magic_numbers.detect{|x| x == resource.magic_number}
+        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
+        resource.erro!
+      end
+    end
+    resource.error?
+  end  
 
   def validate_restriction
     # restrict_nil_instrument? 

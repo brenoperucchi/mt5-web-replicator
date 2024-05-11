@@ -4,8 +4,8 @@ RSpec.describe API::V2::APICopy do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store, instrument_control: true)
-    @trace2 = create(:trace, :copy2, store: @store)
+    @trace = create(:trace, :copy, stores: [@store], instrument_control: true)
+    @trace2 = create(:trace, :copy2, stores:[@store])
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)
@@ -94,7 +94,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.accounts.count).to be == 3
         transaction = order.transactions.first
         expect(transaction.state).to be == "executed"
-        expect(transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
         expect(order.state).to be == "executed"
         expect(order.transactions.first.stop_loss).to be == "0.0"
         expect(order.transactions.first.take_profit).to be == "0.0"
@@ -130,7 +130,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.accounts.count).to be == 4
         transaction = order.transactions.first
         expect(transaction.state).to be == "executed"
-        expect(transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
         expect(order.state).to be == "executed"
         expect(order.transactions.first.stop_loss).to be == "0.0"
         expect(order.transactions.first.take_profit).to be == "0.0"
@@ -155,7 +155,7 @@ RSpec.describe API::V2::APICopy do
 
     context 'POST' do
       it 'Account Netting to Netting - Contract 1 and Change Stop Loss and Take Profit' do
-        trace2 = create(:trace, :copy_netting, store: @store)
+        trace2 = create(:trace, :copy_netting, stores: [@store])
         account_copy = create(:account, :copy_netting, store: @store, customer:@customer, trace_ids: [trace2.id], instrument_control:true)
         account_netting = create(:account, :slave_netting, store: @store, customer:@customer, trace_ids: [trace2.id])
         post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/30100/HEDGING',
@@ -168,7 +168,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.accounts.count).to be == 2
         transaction = order.transactions.first
         expect(transaction.state).to be == "executed"
-        expect(transaction.order.state).to be == "executed"
+        expect(order.state).to be == "executed"
         expect(order.state).to be == "executed"
         expect(order.transactions.first.stop_loss).to be == "0.0"
         expect(order.transactions.first.take_profit).to be == "0.0"
@@ -492,6 +492,7 @@ RSpec.describe API::V2::APICopy do
         expect(slave2.state).to be == "pending"
         transaction.close
         expect(transaction.state).to be == "closed"
+        order.reload
         expect(order.state).to be == "closed"
       end
       
@@ -567,7 +568,7 @@ RSpec.describe API::V2::APICopy do
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 20100)
         # @transaction = account.orders.find_by(content_id:10000005).transactions.first
-        message = Message::V2::Metatrader.create(content: nil, content_at: Time.zone.now, store: @trace.store, trace_ids:@trace.id)
+        message = Message::V2::Metatrader.create(content: nil, content_at: Time.zone.now, store: account.store, trace_ids:@trace.id)
         message.update_columns(state: "executed")
         if message.execute
           body "OK|OK|OK"

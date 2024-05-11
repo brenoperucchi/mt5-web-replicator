@@ -4,9 +4,9 @@ module Admin
 
     def conciliate_orders
       @invoice = Invoice.find(params[:id])
-      if @invoice && @invoice.loggings.where(state: "CONCIILIATE").present?
+      if @invoice && @invoice.loggings.where(state: "CONCILIATE").present?
         
-        logging = @invoice.loggings.where(state: "CONCIILIATE").last
+        logging = @invoice.loggings.where(state: "CONCILIATE").last
 
         @orders_presenter = API::V2::APISlaveOrdersHistoryPresenter.new(logging.content)
         @conciliate_orders = @orders_presenter&.orders

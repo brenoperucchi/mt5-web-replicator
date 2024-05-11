@@ -100,9 +100,9 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                           h6.mb-0.fw-semibold
                             = link_to panel_invoices_path, class: 'btn btn-sm btn-dark w-100' do
                               | Faturas
-                          span.fs-3
-                            = link_to dashboard_path(trace.store.url, trace.name, params:request.query_parameters), class: 'btn btn-sm btn-light w-100' do
-                              = I18n.t :info_dashboard, scope:'helpers.dashboards'                            
+                          / span.fs-3
+                          /   = link_to dashboard_path(@current_store.url, trace.name, params:request.query_parameters), class: 'btn btn-sm btn-light w-100' do
+                          /     = I18n.t :info_dashboard, scope:'helpers.dashboards'                            
                       /   td.ps-0
                       /     - if invoice.state == "paid"
                       /       span.badge.bg-success-subtle.text-success.rounded-pill
@@ -185,7 +185,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
 /                   / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
 /                 div.d-flex.align-items-baseline.mb-2.mt-4
 /                   / button.btn.btn-primary.w-100
-/                   = link_to dashboard_path(trace.store.url, trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
+/                   = link_to dashboard_path(@current_store.url, trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
 /                     = I18n.t :info_dashboard, scope:'helpers.dashboards'
 
 /                 div

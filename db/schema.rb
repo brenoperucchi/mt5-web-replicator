@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_24_145012) do
+ActiveRecord::Schema.define(version: 2024_05_10_201352) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -159,8 +159,11 @@ ActiveRecord::Schema.define(version: 2024_04_24_145012) do
     t.text "description"
     t.bigint "account_id"
     t.bigint "trace_id"
+    t.integer "state", default: 0
+    t.bigint "plan_usage_id"
     t.index ["account_id"], name: "index_invoice_items_on_account_id"
     t.index ["invoice_id"], name: "index_invoice_items_on_invoice_id"
+    t.index ["plan_usage_id"], name: "index_invoice_items_on_plan_usage_id"
     t.index ["trace_id"], name: "index_invoice_items_on_trace_id"
   end
 
@@ -248,6 +251,15 @@ ActiveRecord::Schema.define(version: 2024_04_24_145012) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["account_id"], name: "index_morphics_on_account_id"
     t.index ["transaction_id"], name: "index_morphics_on_transaction_id"
+  end
+
+  create_table "order_transactions", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "transaction_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["order_id"], name: "index_order_transactions_on_order_id"
+    t.index ["transaction_id"], name: "index_order_transactions_on_transaction_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -465,6 +477,15 @@ ActiveRecord::Schema.define(version: 2024_04_24_145012) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "store_traces", force: :cascade do |t|
+    t.bigint "store_id", null: false
+    t.bigint "trace_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["store_id"], name: "index_store_traces_on_store_id"
+    t.index ["trace_id"], name: "index_store_traces_on_trace_id"
+  end
+
   create_table "stores", force: :cascade do |t|
     t.string "name"
     t.datetime "active_at"
@@ -565,8 +586,9 @@ ActiveRecord::Schema.define(version: 2024_04_24_145012) do
     t.integer "deal_id"
     t.integer "trace_id"
     t.integer "order_id"
+    t.bigint "store_id"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
-    t.index ["ticket_master", "account_id"], name: "index_transaction_slaves_on_ticket_master_and_account_id", unique: true
+    t.index ["store_id"], name: "index_transaction_slaves_on_store_id"
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
 
@@ -651,6 +673,8 @@ ActiveRecord::Schema.define(version: 2024_04_24_145012) do
   add_foreign_key "instruments", "accounts"
   add_foreign_key "instruments", "stores"
   add_foreign_key "invoices", "stores"
+  add_foreign_key "order_transactions", "orders"
+  add_foreign_key "order_transactions", "transactions"
   add_foreign_key "pay_charges", "pay_customers", column: "customer_id"
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
@@ -658,6 +682,8 @@ ActiveRecord::Schema.define(version: 2024_04_24_145012) do
   add_foreign_key "plan_stores", "plan_items"
   add_foreign_key "plan_stores", "stores"
   add_foreign_key "plan_usages", "stores"
+  add_foreign_key "store_traces", "stores"
+  add_foreign_key "store_traces", "traces"
   add_foreign_key "stores", "plans"
   add_foreign_key "taggings", "tags"
   add_foreign_key "versions", "loggings"

@@ -53,7 +53,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   active
   name
   name_id
-  accounts
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -71,8 +70,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   capital_multiplier
   contract_volume_max
   customer_plans
-  accounts
-  orders
   desc_contract
   created_at
   updated_at
@@ -92,8 +89,6 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   capital_recomendation
   capital_multiplier
   contract_volume_max
-  customer_plans
-  accounts
   store_id
   desc_contract
   ].freeze

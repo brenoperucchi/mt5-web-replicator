@@ -38,6 +38,12 @@ module Signalforex
 
     config.autoload_paths += %W(#{config.root}/app/fields)
     config.eager_load_paths += %W(#{config.root}/app/fields)
+
+    # config.autoload_paths += %W(#{config.root}/app/controllers/control)
+    # config.eager_load_paths += %W(#{config.root}/app/controllers/control)
+
+    # config.autoload_paths += %W(#{config.root}/app/dashboards/control)
+    # config.eager_load_paths += %W(#{config.root}/app/dashboards/control)
     
     config.autoload_paths += %W(#{config.root}/app/models/presenters)
     config.eager_load_paths += %W(#{config.root}/app/models/presenters)

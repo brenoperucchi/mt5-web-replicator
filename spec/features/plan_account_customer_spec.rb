@@ -7,7 +7,7 @@ RSpec.describe "PlanAccountCustomer" do
     @plan1 = create(:plan, :plan1)
     @plan2 = create(:plan, :plan2)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store)
+    @trace = create(:trace, :copy, stores: [@store])
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)

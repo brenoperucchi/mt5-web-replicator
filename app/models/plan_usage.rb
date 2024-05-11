@@ -8,6 +8,7 @@ class PlanUsage < ApplicationRecord
   belongs_to :trace,        class_name: 'Trace', optional: true
   belongs_to :store
 
+  has_many :invoice_items
 
   def proporcional_calculate(date_today=nil, amount_use=nil, proporcional=false, contract_volume=nil)
     changes = false
@@ -51,7 +52,7 @@ class PlanUsage < ApplicationRecord
     self.save
   end
 
-  def amount_calculate(date_today=nil, month_proporcional=nil, contract_volume=nil)
+  def amount_calculate(date_today=nil, month_proporcional=nil, contract_volume=nil, data_profit)
     date_today ||= DateTime.now
     account      = self.resourceable
     self.proporcional_calculate(date_today, usageable.amount_use, month_proporcional, contract_volume)
@@ -61,7 +62,6 @@ class PlanUsage < ApplicationRecord
       resource = account || trace
       resource.search_date_begin = date_today.beginning_of_month
       resource.search_date_end = date_today.end_of_month
-      data_profit = resource.data_profit(:slaves, trace)
       amount_use = data_profit * (usageable.amount_use.to_f / 100)
     end
     

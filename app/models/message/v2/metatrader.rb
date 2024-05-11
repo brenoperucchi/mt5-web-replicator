@@ -52,7 +52,7 @@ class Message::V2::Metatrader < Message::Message
   def transaction_closed(transaction, copy_params, logging, kind)
     apiCopySerializerClass = Class.const_get("API::#{API_VERSION.try(:upcase)}::APICopySerializer")
     if transaction and transaction.can_close?
-      transaction.order.messages << self
+      # transaction.order.messages << self
       transaction.trace.messages << self
       transaction.attributes = apiCopySerializerClass.new(copy_params).closed_attributes
       transaction.save

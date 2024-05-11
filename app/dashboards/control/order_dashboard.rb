@@ -25,6 +25,7 @@ module Control
       state:        Field::String,
       symbol:       Field::String,
       trace:        Field::BelongsTo,
+      store:        Field::BelongsTo,
       account:      Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
       transactions: Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
       # slaves: Field::HasMany,
@@ -42,6 +43,7 @@ module Control
     symbol
     content_id
     trace
+    store
     account
     profit_copy
     profit_slave
@@ -56,6 +58,7 @@ module Control
     symbol
     content_id
     trace
+    store
     account
     message
     profit_copy

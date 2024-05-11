@@ -12,7 +12,12 @@ class Order < ApplicationRecord
   has_many :slaves,       class_name: 'TransactionSlave', dependent: :destroy, foreign_key: :order_id
 
   has_many :loggings, as: :resourceable,  dependent: :destroy
-  has_many :transactions,                 dependent: :destroy
+  
+  has_many :order_transactions, dependent: :destroy
+  has_many :transactions, through: :order_transactions, source: :master, dependent: :destroy
+  
+  has_many :masters, class_name: 'Transaction', dependent: :destroy
+  
   has_many :balances,                     dependent: :destroy, autosave: true
   has_many :accounts, through: :balances, source: :account,    autosave: true
 
@@ -23,7 +28,7 @@ class Order < ApplicationRecord
   scope :closed,    ->{ where(state: 'closed')}
   scope :pending,   ->{ where(state: 'pending')}
 
-  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id], on: :create, if: Proc.new { content_id != -1 }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id, :store_id], on: :create, if: Proc.new { content_id != -1 }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 
   has_one_attached :image
 

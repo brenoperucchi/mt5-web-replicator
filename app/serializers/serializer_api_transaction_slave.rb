@@ -13,14 +13,14 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
       stop_loss: stop_loss,
       take_profit: take_profit,
       profit: obj['profit'],
-      comment: obj['comment'],
+      comment: comment,
       magic_number: magic_number,
       open_at: open_at,
       closed_at: closed_at,
     }.compact
   end
 
-  def trace_attributes(instrument, account_slave, master, trace)
+  def trace_attributes(instrument, account_slave, master, trace, store)
     {
       symbol: instrument,
       ticket_master: ticket_master,
@@ -41,6 +41,7 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
       trace: trace,
       open_at: nil,
       closed_at: nil,
+      store: store,
     }.compact
   end
 
@@ -86,6 +87,10 @@ class SerializerAPITransactionSlave < ActiveModel::Serializer
 
   def ticket_slave
     obj['ticket_slave_id']
+  end
+
+  def comment
+    obj['comment']
   end
 
   # def ticket_deal

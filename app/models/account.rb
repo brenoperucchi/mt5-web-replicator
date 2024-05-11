@@ -52,7 +52,7 @@ class Account < ApplicationRecord
 
   validates_presence_of :name
   validates :name, format: { with: /\A\d+\z/} #, message: "Integer only. No sign allowed." }
-  validates_uniqueness_of :name, scope: [:store_id, :account_server_id], if: Proc.new { |b| b.store_id.present? }
+  validates_uniqueness_of :name, scope: [:store_id, :account_server_id, :kind], if: Proc.new { |b| b.store_id.present? }
   # validates_uniqueness_of :name, scope: :store_id, if: Proc.new { |b| b.account_server_id.present? }
 
   accepts_nested_attributes_for :customer
@@ -147,7 +147,8 @@ class Account < ApplicationRecord
 
   def amount_trace(trace)
     plan_usage = plan_usages.where(handle: "AccountTracePlan", resourceable: self, disable_at: nil, trace: trace).try(:last)
-    plan_usage&.amount_calculate
+    data_profit = data_profit(:slaves, trace)
+    plan_usage&.amount_calculate(nil, nil, nil, data_profit)
     plan_usage.try(:amount_profit) || 0
   end
 
@@ -186,10 +187,13 @@ class Account < ApplicationRecord
   end
 
   def api_send_orders_history_date_start
-    DateTime.parse(store.settings["api_send_orders_history_date_start"] || DateTime.now.beginning_of_month.beginning_of_day.to_s)
+    @api_send_orders_history_date_start ||= DateTime.parse(self.settings["api_send_orders_history_date_start"] || DateTime.now.beginning_of_month.beginning_of_day.to_s)
   end
+
   def api_send_orders_history_date_end  
-    DateTime.parse(store.settings["api_send_orders_history_date_end"] || DateTime.now.end_of_month.end_of_day.to_s)
+    @api_send_orders_history_date_end ||= DateTime.parse(self.settings["api_send_orders_history_date_end"] || DateTime.now.end_of_month.end_of_day.to_s)
   end                             
+
+
 
 end

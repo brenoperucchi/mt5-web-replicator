@@ -45,7 +45,7 @@
                 td -
                 td -
               - @account.data_scope(:transactions, [:executed, :closed], :all, @trace).order(created_at: 'asc').each do |copy|
-                tr[data-href="#{transaction_dashboard_path(@trace.store.url, @trace.name, copy.account.id, copy.id, params: request.query_parameters)}"]
+                tr[data-href="#{transaction_dashboard_path(@account.store.url, @trace.name, copy.account.id, copy.id, params: request.query_parameters)}"]
                   td = copy.ticket
                   td = copy.symbol
                   td = copy.state

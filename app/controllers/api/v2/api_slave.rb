@@ -49,7 +49,6 @@ module API
 
           if account
             customer = account.customer
-
             content = File.open(params[:logfile][:tempfile]).try(:read)
 
             presenter = API::V2::APISlaveOrdersHistoryPresenter.new(content)
@@ -57,20 +56,31 @@ module API
             invoice_name = "#{customer.id}-#{date.strftime("%Y-%m")}"
 
             invoice = customer.invoices.find_by(name: invoice_name) #, store: account.store)
-
-            invoice_item = invoice.items.where(name: :conciliate, account:account)
-            if invoice_item
-              invoice.items.where(name: :conciliate, account:account).destroy_all
-              invoice.loggings.where(state: "CONCIILIATE", account: account).destroy_all
+            if invoice
+              invoice_item = invoice.items.find_by(state: :conciliate, account:account)
+              if invoice_item
+                invoice.items.where(name: :conciliate, account:account).destroy_all
+                invoice.loggings.where(state: "CONCILIATE", account: account).destroy_all
+                invoice_item.conciliate_metatrader(presenter)
+                if invoice_item.save
+                  invoice_item.conciliated!
+                  invoice_item.conciliate_metatrader_off
+                  invoice.to_paid!
+                  invoice.balance_update
+                  account.loggings.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item)
+                end
+              else
+                account.loggings.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice)
+              end
+            else
+              account.loggings.create(content: presenter.json.to_json, state: "NOTCONCILIATE")
             end
-            account&.loggings.create(content: presenter.json.to_json, state: "CONCIILIATE", loggerable:invoice)
-            invoice&.conciliate_orders(presenter, account)
             map = "OK|OK|OK"
+          else
+            Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE")  
           end
-          
           body map
         end
-
       end
     end
   end

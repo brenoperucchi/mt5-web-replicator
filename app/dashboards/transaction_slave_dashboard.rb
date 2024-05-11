@@ -115,6 +115,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   magic_number
   account
   open_at
+  closed_at
   created_at
   updated_at
   ].freeze

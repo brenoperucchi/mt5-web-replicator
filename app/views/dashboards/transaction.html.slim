@@ -1,9 +1,9 @@
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_path(@trace.store.url, @trace.name, params: request.query_parameters)}" 
+    a href="#{dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
       = @trace.name
   li.breadcrumb-item
-    a href="#{account_dashboard_path(@trace.store.url, @trace.name, @account.id, params: request.query_parameters)}" 
+    a href="#{account_dashboard_path(@account.store.url, @trace.name, @account.id, params: request.query_parameters)}" 
       = @account.name
   li.breadcrumb-item
     a href="#" 
@@ -63,7 +63,7 @@
                 td - 
                 td - 
                 td -
-              - @transaction.order.slaves.where(state: [:closed, :executed]).order(closed_at: 'DESC').each do |slave|
+              - @transaction.orders.find_by(store: @current_store).slaves.where(state: [:closed, :executed]).order(closed_at: 'DESC').each do |slave|
                 tr
                   td = slave.ticket_slave
                   td = slave.try(:account).try(:name)

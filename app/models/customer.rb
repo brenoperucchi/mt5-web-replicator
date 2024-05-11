@@ -49,12 +49,17 @@ class Customer < ApplicationRecord
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
   # end
 
-  def create_invoice(name = nil, date_today = nil, month_proporcional = false)
-    date_today ||= DateTime.now
-    name = name.blank? ? "#{self.id}-#{date_today.strftime("%Y-%m")}" : name
-    invoice = invoices.find_or_initialize_by(name: name, store:store)
-    invoice.customer_calculate(self, date_today, month_proporcional)
-    invoice.balance_update
+  def create_invoice(name = nil, date = nil, month_proporcional = false)
+    date ||= DateTime.now
+    date = date - 1.month
+
+    name = name.blank? ? "#{self.id}-#{date.strftime("%Y-%m")}" : name
+    invoice = invoices.find_by(name: name, store:store)
+    if invoice.nil?
+      invoice = invoices.new(name: name, store:store)
+      invoice.customer_calculate(self, date, month_proporcional)
+      invoice.balance_update
+    end
     invoice
   end
   

@@ -114,6 +114,7 @@ class StoreDashboard < Administrate::BaseDashboard
   plan
   plan_items
   accounts
+  traces
   payment
   payment_methods
   ].freeze

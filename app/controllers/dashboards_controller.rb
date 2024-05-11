@@ -66,7 +66,7 @@ class DashboardsController < ApplicationController
       customer_plan.save
       # @account.customer.create_invoice_customer(invoice_name)
       # @customer.create_user(email: @customer.user_email, password: password)
-      # redirect_to finish_dashboard_path(@trace.store.url, @trace.name, account)
+      # redirect_to finish_dashboard_path(@account.store.url, @trace.name, account)
       if customer_plan.kind == "fixed"
         @account.create_invoice(@trace, true, nil)
         @invoice = @account.customer.invoices.first
@@ -77,7 +77,7 @@ class DashboardsController < ApplicationController
           render :finish
         end
       elsif customer_plan.percent?
-        redirect_to finish_dashboard_path(@trace.store.url, @trace.name, @account)
+        redirect_to finish_dashboard_path(@account.store.url, @trace.name, @account)
       end
     else
       filters
@@ -124,6 +124,8 @@ class DashboardsController < ApplicationController
     @trace.search_date_end 					= session[:date_end].strip().to_datetime.change(offset: @timezone) 
     # @trace.dashboard_magic_number 	= session[:dashboard_magic_number]
 
+    @accounts = @trace.accounts.where(kind: :copy)
+    @accounts += @trace.accounts.where(kind: :slave, store: @current_store).order('kind desc')
     respond_to do |wants|
       wants.html do
         if @trace
@@ -159,7 +161,7 @@ class DashboardsController < ApplicationController
   def set_store
     @current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
     @current_store ||= @trace.try(:store)
-    @current_store ||= Trace.find_by(name: params[:name])
+    @current_store ||= Trace.find_by(name: params[:name]).try(:stores).try(:first)
     @current_store ||= current_store
   end
 

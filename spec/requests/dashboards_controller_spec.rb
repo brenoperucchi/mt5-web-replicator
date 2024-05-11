@@ -22,7 +22,7 @@ RSpec.describe 'Store Controller', type: :request do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store, instrument_control: true)
+    @trace = create(:trace, :copy, stores: [@store], instrument_control: true)
     @customer_plan  = @store.customer_plans.first
     @user_customer  = create(:user, :customer, store: @store)
     @user_admin     = create(:user, :admin, store: @store)
@@ -69,7 +69,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(response).to have_http_status 200
     end
 
-    it '#account #copy ' do
+    it '#account #copy 'do
       account = Account.find_by(name: 10100)
       expect(account.kind).to be == "copy"
       expect(account.state).to be == "enable"

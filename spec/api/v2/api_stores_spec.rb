@@ -5,8 +5,8 @@ RSpec.describe API::V2::APIStore do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
     
-    @trace = create(:trace, :copy, store: @store, instrument_control: true)
-    @trace2 = create(:trace, :copy2, store: @store)
+    @trace = create(:trace, :copy, stores: [@store], instrument_control: true)
+    @trace2 = create(:trace, :copy2, stores: [@store])
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)

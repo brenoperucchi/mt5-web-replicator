@@ -36,7 +36,6 @@
       .ms-auto
         span.fs-2
           h6= number_with_precision(capital_recomendation, precision:2, significant:true)
-      / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
     - if @trace.id == 45
       div.mt-4
         / button.btn.btn-primary.w-100
@@ -44,6 +43,6 @@
           = I18n.t :more_information, scope:'helpers.dashboards'
     div
       / button.btn.btn-primary.w-100
-      = link_to dashboard_path(@trace.store.url, @trace.name, params:request.query_parameters), class: 'btn btn-dark w-100' do
+      = link_to dashboard_path(@current_store.url, @trace.name, params:request.query_parameters), class: 'btn btn-dark w-100' do
         = I18n.t :info_dashboard, scope:'helpers.dashboards'
         

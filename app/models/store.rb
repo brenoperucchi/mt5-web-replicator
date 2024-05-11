@@ -28,7 +28,11 @@ class Store < ApplicationRecord
   belongs_to :payment, optional: true
 
   has_many :accounts, dependent: :destroy
-  has_many :traces,   dependent: :destroy
+
+  has_many :store_traces, dependent: :destroy
+  has_many :traces, through: :store_traces, source: :trace, dependent: :destroy
+
+  # has_many :traces,   dependent: :destroy
   has_many :users,    dependent: :destroy
   has_many :orders,   dependent: :destroy 
 

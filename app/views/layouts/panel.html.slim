@@ -52,7 +52,7 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
           /               = I18n.t :filters, scope:'helpers.dashboards'
           /         - if action_name != "contract" and action_name != "create" and not @trace.nil?
           /           .button.list-inline-item
-          /             = link_to contract_dashboard_path(@trace.store.url, @trace.name), class: 'btn btn-lg btn-dark w-100' do
+          /             = link_to contract_dashboard_path(@account.store.url, @trace.name), class: 'btn btn-lg btn-dark w-100' do
           /               = I18n.t :contract, scope:'helpers.dashboards'
           <!-- Yield Start -->
           = yield

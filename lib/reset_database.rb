@@ -85,4 +85,51 @@ module ResetDatabase
     end
   end
 
+  def self.transactions_slaves_with_store_id
+    self.migrate_all_traces
+    orders = []
+    transactions = []
+    slaves = []
+    TransactionSlave.where(store_id:nil).all.each do |ts|
+      begin
+        store_id = ts.try(:account).try(:store_id) || ts.try(:order).try(:store_id) || ts.try(:trace).try(:store_id) || ts.try(:trace).stores.first.id
+        ts.update_column(:store_id, store_id)
+        if store_id.nil?
+          orders << ts.try(:order).try(:id)
+          transactions << ts.try(:master).try(:id)
+        end
+      rescue
+        orders << ts.try(:order).try(:id)
+        transactions << ts.try(:master).try(:id)
+        slaves << ts.try(:id)
+      end
+    end
+    
+    Order.where(id: orders.uniq.compact).map(&:destroy)
+    Transaction.where(id: transactions.uniq.compact).map(&:destroy)
+    TransactionSlave.where(store_id: nil).map(&:destroy)
+
+    puts "Orders => #{orders}"
+    puts "Transaction => #{transactions}"
+    puts "Slaves => #{slaves}"
+  end
+
+  def self.orders_migrate_to_transaction
+    orders = []
+    Order.all.each do |order|
+      begin
+        order.transaction_ids = order.master_ids.uniq.compact
+      rescue
+        orders << "Error: #{order.id}\n"
+      end
+    end
+    puts "Orders => #{orders}"
+  end
+
+  def self.migrate_all_traces
+    Trace.all.each do |trace|
+      trace.stores << Store.find_by(id:trace.store_id) if trace.store_id.present? and not trace.stores.exists?(trace.store)
+    end
+  end
+
 end

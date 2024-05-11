@@ -29,10 +29,10 @@ class TransactionDashboard < Administrate::BaseDashboard
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     trace:              Field::BelongsTo,
-    order:              Field::BelongsTo,
     message:            Field::BelongsTo.with_options(class_name:'Message::Message'),
     account:            Field::BelongsTo,
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
+    orders:             Field::HasMany,
     loggings:           Field::HasMany,
     versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
   }.freeze
@@ -61,7 +61,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   symbol
   state
   ticket
-  order
+  orders
   trace
   account
   loggings

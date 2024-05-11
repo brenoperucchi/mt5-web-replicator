@@ -4,8 +4,8 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, store: @store, instrument_control: true)
-    @trace2 = create(:trace, :copy2, store: @store)
+    @trace = create(:trace, :copy, stores: @store, instrument_control: true)
+    @trace2 = create(:trace, :copy2, stores: @store)
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, store:@store, user:@user_admin)
@@ -301,7 +301,7 @@ RSpec.describe API::V1::APITransactionsCopy, type: :skip do
       it 'Hedging - Restrict Magic Number' do
         account = Account.find_by(name: 5634787)
         # @transaction = account.orders.find_by(content_id:483857785).transactions.first
-        message = Message::Metatrader.create(content: nil, content_at: Time.zone.now, store: @trace.store, trace_ids:@trace.id)
+        message = Message::Metatrader.create(content: nil, content_at: Time.zone.now, store: account.store, trace_ids:@trace.id)
         message.update_columns(state: "executed")
         if message.execute
           body "OK|OK|OK"

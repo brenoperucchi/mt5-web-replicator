@@ -48,8 +48,9 @@ class CustomerPlan < ApplicationRecord
 
   def calculate_amount(contract_volume=nil, account=nil, trace)
     plan_usage = plan_usages.new(usageable: payment, resourceable: account, trace:trace)
-    # plan_usage.proporcional_calculate(DateTime.now, self.amount_use, false, contract_volume)
-    plan_usage.amount_calculate(DateTime.now, nil, contract_volume)
+    resource = account || trace
+    data_profit = resource.data_profit(:slaves, trace)
+    plan_usage.amount_calculate(DateTime.now, nil, contract_volume, data_profit)
     
     self.amount              = plan_usage.try(:amount) || 0
     self.amount_proportional = plan_usage.try(:amount_proportional) || 0

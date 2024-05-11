@@ -18,6 +18,7 @@ class AccountDashboard < Administrate::BaseDashboard
     contract_volume:      Field::String.with_options(searchable: false),
     traces:               Field::HasMany,
     orders:               Field::HasMany,
+    slaves:               Field::HasMany,
     loggings:             Field::HasMany,
     instruments:          Field::HasMany,
     account_server:       Field::BelongsTo,
@@ -86,6 +87,7 @@ class AccountDashboard < Administrate::BaseDashboard
   store
   account_server
   orders
+  slaves
   loggings
   instruments
   deleted_at

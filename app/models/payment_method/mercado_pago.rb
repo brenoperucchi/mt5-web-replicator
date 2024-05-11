@@ -73,7 +73,7 @@ class PaymentMethod::MercadoPago
     # Create a preference object
 
     if invoice.invoiceable_type == "Customer"
-      title = "Inscrição #{invoice.plan_usage.usageable.name}"
+      title = "Inscrição #{invoice.invoiceable.name}"
     else
       title = "Plano Imentore - #{invoice.items.first.name}"
     end

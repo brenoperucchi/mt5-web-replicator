@@ -50,11 +50,23 @@ module API
                   map = "#{slave.master.trace.id}|#{slave.id}|OK"
                 when "CLOSED", "DELETED", "HASCLOSED"
                   api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(profit:content['profit']).except(:price_open)
-                  slave.attributes = api_attributes
-                  if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
-                    slave.state = :executed
-                    slave.master.state = :executed
+                  if account.hedging?
+                    slave = account.slaves.find_by(comment: content['comment'], ticket_slave: content["ticket_slave_id"])
+                    if slave.nil?
+                      new_attributes = SerializerAPITransactionSlave.new(message).new_attributes
+                      slave = account.slaves.find_by(comment: content['comment']).dup
+                      slave.attributes = new_attributes
+                      if slave.save
+                        @version = slave.versions.last
+                        slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: "DUPLICATE")
+                      end
+                    end
                   end
+                  slave.attributes = api_attributes
+                  # if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
+                  #   slave.state = :executed
+                  #   slave.master.state = :executed
+                  # end
                   if action == "CLOSED" or action == "HASCLOSED"
                     slave.close
                   else

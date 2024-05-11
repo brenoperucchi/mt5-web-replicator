@@ -40,6 +40,7 @@ class OrderDashboard < Administrate::BaseDashboard
   state
   symbol
   content_id
+  store
   trace
   account
   profit_copy
@@ -54,6 +55,7 @@ class OrderDashboard < Administrate::BaseDashboard
   state
   symbol
   content_id
+  store
   trace
   account
   message

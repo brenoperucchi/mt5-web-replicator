@@ -15,6 +15,7 @@ class TransactionSlave < ApplicationRecord
   belongs_to :account
   belongs_to :trace
   belongs_to :order
+  belongs_to :store, optional: true
   belongs_to :master, :class_name => "Transaction", :foreign_key => "transaction_id", optional: true
   
   has_many :loggings, as: :resourceable, dependent: :destroy  
@@ -37,9 +38,9 @@ class TransactionSlave < ApplicationRecord
   scope :sell,                ->{where(ordertype: 1)}
 
   validates_presence_of :symbol
-  validates_uniqueness_of :ticket_master, scope: [:account_id], on: :create, if: Proc.new { account.try(:hedging?) }
-  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id], on: :create, allow_blank: false, allow_nil: false, 
-                            if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :ticket_master, scope: [:account_id, :ticket_slave, :order_id], on: :create, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id, :order_id], on: :create, allow_blank: false, allow_nil: false, 
+                          if: Proc.new { account.try(:hedging?) }
   # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   after_create :restrict_magic_number?#, :check_duplicate
@@ -110,7 +111,7 @@ class TransactionSlave < ApplicationRecord
       transition [:error, :pending, :executed] => :remove
     end  
     event :close do
-      transition [:remove, :executed] => :closed
+      transition [:pending, :remove, :executed, :error] => :closed
     end  
     event :deleted do
       transition [:pending, :remove, :executed, :closed] => :deleted
@@ -121,7 +122,7 @@ class TransactionSlave < ApplicationRecord
 
     state :remove do
       def delete_pending(state)
-        self.deleted
+        # self.deleted
         # self.master.close
       end
     end

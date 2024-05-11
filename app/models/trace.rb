@@ -3,7 +3,7 @@ require 'lib_enums' # Path: lib/lib_enums.rb
 require 'algo_statistic' # Path: lib/algo_statistic.rb
 
 class Trace < ApplicationRecord
-  attr_accessor :search_date_begin, :search_date_end, :search_magic_number
+  attr_accessor :search_date_begin, :search_date_end, :search_magic_number, :store
 
   include LibEnums
   include AlgoStatistic
@@ -30,6 +30,9 @@ class Trace < ApplicationRecord
   has_and_belongs_to_many :messages, class_name: "Message::Message"
 
   has_many :instruments, class_name: "Instrument", foreign_key: "trace_id", dependent: :destroy
+  
+  has_many :store_traces
+  has_many :stores, through: :store_traces, source: :store,  dependent: :destroy
   belongs_to :store, optional: true
 
   scope :active,   ->{ where.not(active_at:nil)}
@@ -98,53 +101,58 @@ class Trace < ApplicationRecord
     
     copy_attributes = apiCopySerializerClass.new(order_params).copy_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
 
-    if account.netting?
-      order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
-      if order.nil?
-        order = account.orders.create(messages: [message], message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:self.store) 
+    self.stores.each do |current_store|
+      if account.netting?
+        order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
+        if order.nil?
+          order = account.orders.create(messages: [message], message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:current_store) 
+        end
+        transaction = Transaction.find_by(symbol: instrument, account: account, trace:self)
+        transaction ||= Transaction.create(copy_attributes.merge(account:account))
+      elsif account.hedging?
+        order = Order.create_with(trace: self, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: current_store).find_or_create_by(content_id: ticket, trace:self, store: current_store)
+        # order = account.orders.create_with(trace: supelf, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: account.try(:store)).find_or_create_by(content_id: ticket, trace:self)
+        transaction = Transaction.create_with(copy_attributes).find_or_create_by(ticket: ticket, trace:self)
       end
-      transaction = order.transactions.find_by(symbol: instrument, account: account)
-      transaction ||= order.transactions.create(copy_attributes.merge(account:account))
-    elsif account.hedging?
-      order = account.orders.create_with(trace: self, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: self.try(:store)).find_or_create_by(content_id: ticket, trace:self)
-      transaction = order.transactions.create_with(copy_attributes).find_or_create_by(ticket: ticket, trace:self)
-    end
+      if transaction.valid?
+        transaction.orders << order unless transaction.orders.exists?(order.id)
+        account.orders << order unless account.orders.exists?(order.id)
+      end
 
-    # api_transaction = apiCopySerializerClass.new(order_params)
-    transaction.update_mfe_mae(copy_attributes[:mfe], copy_attributes[:mae], copy_attributes[:time_trader]) 
 
-    # CREATE ORDER -> TRANSACTION -> SLAVES
-    if order.valid?
-      order.execute
-    end
+      # api_transaction = apiCopySerializerClass.new(order_params)
+      transaction.update_mfe_mae(copy_attributes[:mfe], copy_attributes[:mae], copy_attributes[:time_trader]) 
 
-    if order and not order.error?
-      transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account)
-      transaction.execute
-      if transaction and not transaction.error?
-        return true if account.netting? and order.slaves.count > 0 
-        self.accounts.slave.enable.each do |account_slave|
-          
-          instrument = check_instrument(account, symbol, account_slave)
-          slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self)
-          slave = order.slaves.new(slave_attributes)
-          slave.magic_number = check_magic_number(slave_attributes[:magic_number])
-          if self.prop_firm?
-            slave.comment      = "#{account_slave.id}#{slave.magic_number}_#{slave.comment}"
-            slave.magic_number = "#{account_slave.id}#{slave.magic_number}".to_i
-          end
-          if slave.save
-            order.accounts << account_slave
-            slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
-          else
-            message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order)
+      # CREATE ORDER -> TRANSACTION -> SLAVES
+      if order.valid?
+        order.execute
+      end
+
+      if order and not order.error?
+        transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account)
+        transaction.execute unless transaction.executed?
+        if transaction and not transaction.error?
+          return true if account.netting? and order.slaves.count > 0 
+          self.accounts.slave.enable.where(store: current_store).each do |account_slave|
+            
+            instrument = check_instrument(account, symbol, account_slave)
+            slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self, current_store)
+            slave = order.slaves.new(slave_attributes)
+            slave.magic_number = check_magic_number(slave_attributes[:magic_number])
+            if self.prop_firm?
+              slave.comment      = "#{account_slave.id}#{slave.magic_number}_#{slave.comment}"
+              slave.magic_number = "#{account_slave.id}#{slave.magic_number}".to_i
+            end
+            if slave.save
+              account_slave.orders << order unless account_slave.orders.exists?(order.id) 
+              slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
+            else
+              message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order)
+            end
           end
         end
-
       end
     end
-
-    return order.executed? && transaction.executed?
   end
 
   def check_magic_number(magic_number)
@@ -166,7 +174,7 @@ class Trace < ApplicationRecord
       changeset = resource.try(:versions).try(:last).try(:changeset)
       version = resource.try(:version)
       unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and the trace: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:resource.order.message.loggings.first)
+        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and the trace: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:resource.message.loggings.first)
         resource.erro!
       end
     end

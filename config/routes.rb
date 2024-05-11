@@ -86,6 +86,7 @@ Rails.application.routes.draw do
       
       resources :invoices, only: [:index] do
         get  'invoice_send', to: 'invoices#invoice_send', on: :member, as: 'invoice_send'
+        get  'conciliate_orders', to: 'invoices#conciliate_orders', on: :member, as: 'conciliate_orders'
       end
 
       root "dashboard#index"
