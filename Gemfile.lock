@@ -194,6 +194,7 @@ GEM
       xpath (~> 3.2)
     case_transform (0.2)
       activesupport
+    certified (1.0.0)
     chronic (0.10.2)
     cocoon (1.2.15)
     coderay (1.1.3)
@@ -710,6 +711,7 @@ DEPENDENCIES
   capistrano-yarn
   capistrano3-puma (= 6.0.0.beta.1)
   capybara (>= 2.15)
+  certified
   database_cleaner
   debase (>= 0.2.5.beta2)
   debug (>= 1.0.0)
