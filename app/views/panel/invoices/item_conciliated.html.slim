@@ -12,13 +12,13 @@
         th Close At
         th Comment
     tbody
-      - @conciliate_orders.each do |key, value|
+      - @item_conciliated.each do |key, value|
         tr
           td = value["ticket_id"]
           td = value["symbol"]
           td = value["price_open"]
           td = value["price_closed"]
-          td = value["profit"]
+          td = number_with_precision value["profit"], precision:2
           td = value["open_at"]
           td = value["close_at"]
           td = value["comment"]
@@ -26,4 +26,4 @@
         td[colspan=5 style="text-align:right;"] 
           | Total
           '
-          = @orders_presenter&.conciliate_amount
+          = number_with_precision @presenter&.conciliate_amount, precision:2

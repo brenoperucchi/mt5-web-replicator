@@ -11,6 +11,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     account:              Field::BelongsTo,
     invoice:              Field::BelongsTo,
+    plan_usage:           Field::BelongsTo,
     amount:               Field::String,
     state:                Field::String,
     description:          Field::String,
@@ -28,6 +29,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   state
   amount
   account
+  plan_usage
   description
   created_at
   ].freeze 
@@ -39,6 +41,8 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   state
   amount
   invoice
+  account
+  plan_usage
   description
   created_at
   updated_at

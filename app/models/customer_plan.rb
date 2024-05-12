@@ -27,6 +27,8 @@ class CustomerPlan < ApplicationRecord
 
   validates_presence_of [:name, :amount], :if => proc { !Current.user.nil? and Current.user.userable.role == "customer" }
   validates_presence_of :active, :if => :validate_active_at
+  validates_presence_of :due_at_dates
+
 
   accepts_nested_attributes_for :customers, :payment
 

@@ -110,14 +110,14 @@ class Invoice < ApplicationRecord
     if customer_plan.fixed?# and customer_plan.monthly?
       # invoice.back_url = "mercadopago/back_urls/success/#{self.id}"
       amount = plan_usage.amount_proportional 
-      description = "#{timestamp} - Contratos: #{account.contract_volume_use} * Valor #{number_with_precision plan_usage.amount_proportional} = #{number_with_precision amount}"
+      description = "#{timestamp} - Contratos: #{account.contract_volume_use} * Valor #{number_with_precision plan_usage.amount_proportional}"
     elsif customer_plan.percent?
       # invoice.back_url = "panel/dashboard/back_urls/success/#{self.id}"
       account.search_date_begin = date.beginning_of_month
       account.search_date_end = date.end_of_month
       data_profit = account.data_profit(:slaves, trace)
       amount = data_profit * (customer_plan.amount_use.to_f / 100)
-      description = "#{timestamp} - Sistema: #{number_with_precision data_profit} * Percentual Plan #{number_with_precision customer_plan.amount_use.to_f, significant:true, precision: 2}% = #{number_with_precision amount}"
+      description = "#{timestamp} - Sistema: #{number_with_precision data_profit} * Percentual Plan #{number_with_precision customer_plan.amount_use.to_f, significant:true, precision: 2}%"
     end
   
     if self.save
@@ -136,28 +136,36 @@ class Invoice < ApplicationRecord
   end
 
 
-  def self.generate_month(date = nil)
+  def self.generate_month_customers(date = nil)
     timestamp = I18n.l DateTime.now, format: :short8
     puts "#{timestamp} - Runner Invoice.generate_month"
     Customer.customer.user.not_deleted.each do |customer|
       customer.create_invoice(nil, date)
-      customer.invoices.map(&:conciliate_request)
     end
+
+    # self.conciliate_invoice_items
   end
 
-  def self.metatrader_conciliate
+  def self.conciliate_invoice_items
     timestamp = I18n.l DateTime.now, format: :short8
-    puts "#{timestamp} - Runner Invoice.metatrader_conciliate"
+    puts "#{timestamp} - Runner Invoice.conciliate_invoice_items"
     Invoice.pending.each do |invoice|
       invoice.conciliate_request
     end
   end
 
   def conciliate_request
-    items.normal.each do |item|
-      next unless item.plan_usage.usageable.percent?
-      break if items.conciliate.exists?
-      item.conciliate! if item.conciliate_metatrader_on
+    items.each do |item|
+      next if item.account.nil?
+      if item.can_conciliated?
+        # item.conciliated!
+      elsif item.can_conciliate? and not items.conciliate.exists?
+        item.conciliate! if item.conciliate_metatrader_on
+      end
+    end
+
+    if items.all? { |item| item.can_conciliated? }
+      to_paid! 
     end
   end
 

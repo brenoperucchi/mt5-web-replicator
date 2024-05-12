@@ -158,7 +158,6 @@ gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
 gem 'lucky_case'
 gem 'ruby_linear_regression'
 gem 'whenever', require: false
-gem 'certified'
 
 
 # gem 'ocr_space', path: "vendor/ocr_space"

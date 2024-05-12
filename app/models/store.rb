@@ -216,7 +216,6 @@ class Store < ApplicationRecord
     end   
   end
 
-
   def api_setters
     return if self.id != 1
     methods = {
@@ -242,6 +241,5 @@ class Store < ApplicationRecord
       end
     end
   end
-
 
 end

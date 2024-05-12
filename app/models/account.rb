@@ -32,6 +32,9 @@ class Account < ApplicationRecord
   belongs_to :customer
   belongs_to :account_server, optional: true
 
+  has_many :invoices, through: :customer, source: :invoices
+  has_many :invoice_items, through: :customer, source: :invoice_items
+
   has_many :plan_usages, as: :resourceable, dependent: :destroy
 
   has_many :permissions,    dependent: :destroy

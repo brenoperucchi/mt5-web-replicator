@@ -46,6 +46,7 @@ module API
         post "/orders_history/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
           account = Account.find_by(name: params[:account_id])
+          change = false
 
           if account
             customer = account.customer
@@ -65,19 +66,19 @@ module API
                 if invoice_item.save
                   invoice_item.conciliated!
                   invoice_item.conciliate_metatrader_off
-                  invoice.to_paid!
+                  invoice.conciliate_request
                   invoice.balance_update
                   account.loggings.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item)
+                  change = true
                 end
-              else
-                account.loggings.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice)
               end
-            else
-              account.loggings.create(content: presenter.json.to_json, state: "NOTCONCILIATE")
             end
             map = "OK|OK|OK"
-          else
-            Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE")  
+          end
+          unless change
+            Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item)  
+            account&.invoice_items&.map(&:normal!)
+            account&.invoice_items&.map(&:conciliate_metatrader_off)
           end
           body map
         end

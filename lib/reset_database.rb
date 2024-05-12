@@ -90,7 +90,7 @@ module ResetDatabase
     orders = []
     transactions = []
     slaves = []
-    TransactionSlave.where(store_id:nil).all.each do |ts|
+    TransactionSlave.where(store_id:nil).each do |ts|
       begin
         store_id = ts.try(:account).try(:store_id) || ts.try(:order).try(:store_id) || ts.try(:trace).try(:store_id) || ts.try(:trace).stores.first.id
         ts.update_column(:store_id, store_id)
@@ -106,12 +106,22 @@ module ResetDatabase
     end
     
     Order.where(id: orders.uniq.compact).map(&:destroy)
+    masters = Transaction.where(id: transactions.uniq.compact)
+    masters_count = masters.count
+    masters.map(&:destroy)
+    slaves2 = TransactionSlave.where(store_id: nil)
+    slaves2_count = slaves2.count
+    slaves2.map(&:destroy)
+
+    Order.where(id: orders.uniq.compact).map(&:destroy)
     Transaction.where(id: transactions.uniq.compact).map(&:destroy)
     TransactionSlave.where(store_id: nil).map(&:destroy)
 
     puts "Orders => #{orders}"
     puts "Transaction => #{transactions}"
+    puts "Transaction Deleted => #{masters_count}"
     puts "Slaves => #{slaves}"
+    puts "Slaves Deleted => #{slaves2_count}"
   end
 
   def self.orders_migrate_to_transaction

@@ -33,10 +33,8 @@ class InvoiceItem < ApplicationRecord
   end
 
   def conciliate_metatrader_off
-    if self.conciliated?
-      account.api_send_orders_history = false
-      account.save
-    end
+    account.api_send_orders_history = false
+    account.save
   end
 
   def conciliate_metatrader(presenter)
@@ -46,13 +44,22 @@ class InvoiceItem < ApplicationRecord
     plan_usage.amount_calculate(date, nil, account.contract_volume_use, amount_presenter)
     self.amount = plan_usage.amount_proportional
     timestamp = I18n.l DateTime.now, format: :short8
-    self.description << "\n#{timestamp} - Metatrader: #{number_with_precision amount_presenter} * Percentual Plan #{number_with_precision plan_usage.amount, significant:true, precision: 2}% = #{number_with_precision self.amount}"
+    self.description << "\n#{timestamp} - Metatrader: #{number_with_precision amount_presenter} * Percentual Plan #{number_with_precision plan_usage.amount, significant:true, precision: 2}%"
     # self.description << "\n#{timestamp} - Conciliação valor: #{number_with_precision self.amount}"
   end
 
   def invoice_date
     name_split = invoice.name.split("-", 2).try(:last)
     DateTime.parse(name_split + "-01 00:00:00 #{DateTime.now.zone}")
+  end
+
+
+  def can_conciliate?
+    (self.normal? || !self.conciliated?) and plan_usage&.usageable&.percent?
+  end
+
+  def can_conciliated?
+    self.conciliated? || plan_usage&.usageable&.fixed?
   end
 
 end

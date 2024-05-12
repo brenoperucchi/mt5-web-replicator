@@ -567,7 +567,7 @@ en:
       short5: "%b %d %H:%M:%S"
       short6: "%m/%d/%Y"
       short7: "%B %Y"
-      short8: "%m/%d/%Y %H:%M:%S" 
+      short8: "%m/%d - %H:%M"
     pm: pm
     
   administrate:

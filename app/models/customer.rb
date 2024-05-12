@@ -19,7 +19,10 @@ class Customer < ApplicationRecord
   belongs_to :store
   has_one  :user,        as: :userable, dependent: :destroy
   has_many :plan_usages, as: :resourceable#, dependent: :destroy
+  
   has_many :invoices,    as: :invoiceable, dependent: :destroy
+  has_many :invoice_items, through: :invoices, source: :items
+
   has_many :tokens,      as: :tokenable, dependent: :destroy
   
   has_many :accounts,       dependent: :destroy  
@@ -60,6 +63,7 @@ class Customer < ApplicationRecord
       invoice.customer_calculate(self, date, month_proporcional)
       invoice.balance_update
     end
+    invoice&.conciliate_request
     invoice
   end
   

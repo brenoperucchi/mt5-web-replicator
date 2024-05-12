@@ -160,9 +160,9 @@ class DashboardsController < ApplicationController
 
   def set_store
     @current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
-    @current_store ||= @trace.try(:store)
-    @current_store ||= Trace.find_by(name: params[:name]).try(:stores).try(:first)
     @current_store ||= current_store
+    # @current_store ||= @trace.try(:store)
+    # @current_store ||= Trace.find_by(name: params[:name]).try(:stores).try(:first)
   end
 
   def set_trace

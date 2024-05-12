@@ -22,10 +22,10 @@ set :output, "log/cron_log.log"
 
 every 1.minute do # 1.minute 1.day 1.week 1.month 1.year is also supported
   # the following tasks are run in parallel (not in sequence)
-  runner "Invoice.generate_month"
+  runner "Invoice.generate_month_customers"
 end
 
 every 5.minute do # 1.minute 1.day 1.week 1.month 1.year is also supported
   # the following tasks are run in parallel (not in sequence)
-  runner "Invoice.metatrader_conciliate"
+  runner "Invoice.conciliate_invoice_items"
 end
