@@ -117,8 +117,9 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                                 td.py-2
                                   = number_with_precision item.amount, precision:2
                                 td
-                                  = link_to item_conciliated_panel_invoice_path(invoice, item), class: 'btn btn-sm btn-dark w-100' do
-                                    | MT5 Conciliação
+                                  - if item.plan_usage.usageable.percent?
+                                    = link_to item_conciliated_panel_invoice_path(invoice, item), class: 'btn btn-sm btn-dark w-100' do
+                                      | MT5 Conciliação
 
 
                           
