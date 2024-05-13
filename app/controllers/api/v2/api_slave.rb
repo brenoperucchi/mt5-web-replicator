@@ -47,35 +47,41 @@ module API
           content_type 'text/plain'
           account = Account.find_by(name: params[:account_id])
           change = false
+          return_request = "OK|OK|OK"
+          if params.dig(:logfile).present?
 
-          if account
-            customer = account.customer
-            content = File.open(params[:logfile][:tempfile]).try(:read)
-
+            content   = File.open(params[:logfile][:tempfile]).try(:read)
             presenter = API::V2::APISlaveOrdersHistoryPresenter.new(content)
-            date = DateTime.parse(presenter.start_month)
-            invoice_name = "#{customer.id}-#{date.strftime("%Y-%m")}"
-            invoice = customer.invoices.find_by(name: invoice_name) #, store: account.store)
-            if invoice
-              invoice_item = invoice.items.find_by(state: :conciliate, account:account)
-              if invoice_item
-                invoice.items.where(name: :conciliate, account:account).destroy_all
-                invoice.loggings.where(state: "CONCILIATE", account: account).destroy_all
-                invoice_item.conciliate_metatrader(presenter)
-                if invoice_item.save
-                  invoice_item.conciliated!
-                  invoice_item.conciliate_metatrader_off
-                  invoice.conciliate_request
-                  invoice.balance_update
-                  Logging.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item, account: account)
-                  change = true
+            disable_log = true if presenter.start_month == "1970.01.01 00:00"
+            
+            if account
+              customer  = account.customer
+              date      = DateTime.parse(presenter.start_month)
+              invoice_name = "#{customer.id}-#{date.strftime("%Y-%m")}"
+
+              invoice = customer.invoices.find_by(name: invoice_name) #, store: account.store)
+              if invoice
+                invoice_item = invoice.items.find_by(state: :conciliate, account:account)
+                if invoice_item
+                  invoice.items.where(name: :conciliate, account:account).destroy_all
+                  invoice.loggings.where(state: "CONCILIATE", account: account).destroy_all
+                  invoice_item.conciliate_metatrader(presenter)
+                  if invoice_item.save
+                    invoice_item.conciliated!
+                    invoice_item.conciliate_metatrader_off
+                    invoice.conciliate_request
+                    invoice.balance_update
+                    Logging.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item, account: account)
+                    change = true
+                  end
                 end
               end
             end
-            map = "OK|OK|OK"
+          else
+            disable_log = true
           end
           unless change
-            Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item, account: account)  
+            Logging.create(content: presenter&.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item, account: account) unless disable_log
             invoice&.items&.conciliate&.map(&:conciliate_metatrader_off)
             account&.invoice_items&.map do |item| 
               if item.conciliate?
@@ -84,7 +90,7 @@ module API
               end
             end
           end
-          body map
+          body change ? return_request : false
         end
       end
     end
