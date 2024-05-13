@@ -167,7 +167,7 @@ pt-BR:
       account:
         name: Metatrader Conta
         state: Status
-        kind: Tipo de conta (copy/slave)
+        kind: Copy/Slave
         customer_id: Cliente
         meta_mode: MetaTrader Modo
         meta_margin_mode: Meta Margem

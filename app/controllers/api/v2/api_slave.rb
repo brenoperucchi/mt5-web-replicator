@@ -67,7 +67,7 @@ module API
                   invoice_item.conciliate_metatrader_off
                   invoice.conciliate_request
                   invoice.balance_update
-                  Logging.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item)
+                  Logging.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item, account: account)
                   change = true
                 end
               end

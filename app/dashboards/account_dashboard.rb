@@ -66,6 +66,7 @@ class AccountDashboard < Administrate::BaseDashboard
   kind
   meta_mode
   meta_margin_mode
+  store
   traces
   orders
   ].freeze
@@ -83,9 +84,9 @@ class AccountDashboard < Administrate::BaseDashboard
   meta_margin_mode
   contract_volume
   magics_accept
-  traces
   store
   account_server
+  traces
   orders
   slaves
   loggings
