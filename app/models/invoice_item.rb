@@ -22,11 +22,8 @@ class InvoiceItem < ApplicationRecord
   def conciliate_metatrader_on
     if self.normal?
       date       = invoice_date
-      date_start = date.beginning_of_month.beginning_of_day.to_s 
-      date_ended = date.end_of_month.end_of_day.to_s 
-
-      account.api_send_orders_history_date_start = date_start
-      account.api_send_orders_history_date_end = date_ended
+      account.api_send_orders_history_date_start = date.beginning_of_month.beginning_of_day.utc.to_s 
+      account.api_send_orders_history_date_end = date.end_of_month.end_of_day.utc.to_s 
       account.api_send_orders_history = true
       account.save
     end

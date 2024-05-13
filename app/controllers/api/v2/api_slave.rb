@@ -55,7 +55,6 @@ module API
             presenter = API::V2::APISlaveOrdersHistoryPresenter.new(content)
             date = DateTime.parse(presenter.start_month)
             invoice_name = "#{customer.id}-#{date.strftime("%Y-%m")}"
-
             invoice = customer.invoices.find_by(name: invoice_name) #, store: account.store)
             if invoice
               invoice_item = invoice.items.find_by(state: :conciliate, account:account)
@@ -77,8 +76,13 @@ module API
           end
           unless change
             Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item)  
-            account&.invoice_items&.map(&:normal!)
-            account&.invoice_items&.map(&:conciliate_metatrader_off)
+            invoice&.items.conciliate&.map(&:conciliate_metatrader_off)
+            account&.invoice_items&.map do |item| 
+              if item.conciliate?
+                item.conciliate_metatrader_off
+                item.normal!
+              end
+            end
           end
           body map
         end

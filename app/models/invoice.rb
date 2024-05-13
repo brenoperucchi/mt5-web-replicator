@@ -143,7 +143,7 @@ class Invoice < ApplicationRecord
       customer.create_invoice(nil, date)
     end
 
-    # self.conciliate_invoice_items
+    self.conciliate_invoice_items
   end
 
   def self.conciliate_invoice_items
