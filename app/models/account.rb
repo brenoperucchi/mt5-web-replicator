@@ -49,7 +49,7 @@ class Account < ApplicationRecord
 
   has_many :balances,     dependent: :destroy, autosave: true
   has_many :orders,       through: :balances, source: :order,         dependent: :destroy, autosave: true
-  has_many :transactions, through: :orders,   source: :transactions,  dependent: :destroy
+  has_many :transactions,-> { distinct }, through: :orders,   source: :transactions,  dependent: :destroy
   has_many :slaves,       ->(account) { where("transaction_slaves.account_id = ?", account.id).distinct },
                            through: :orders, source: :slaves,         dependent: :destroy
 

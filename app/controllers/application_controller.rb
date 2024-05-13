@@ -27,6 +27,15 @@ class ApplicationController < ActionController::Base
 		end	  
 	end
 
+	def after_sign_out_path_for(user)
+		flash[:notice] = I18n.t(:after_sign_success, scope: 'helpers.controller.app_controller') unless user_signed_in? 
+		if request.url.include?("/panel/logout")
+			new_panel_user_session_path
+		else
+			new_user_session_path
+		end	  
+	end
+
   private
 
   def set_current_user

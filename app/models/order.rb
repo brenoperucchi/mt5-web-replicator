@@ -14,7 +14,7 @@ class Order < ApplicationRecord
   has_many :loggings, as: :resourceable,  dependent: :destroy
   
   has_many :order_transactions, dependent: :destroy
-  has_many :transactions, through: :order_transactions, source: :master, dependent: :destroy
+  has_many :transactions,-> { distinct }, through: :order_transactions, source: :master, dependent: :destroy
   
   has_many :masters, class_name: 'Transaction', dependent: :destroy
   

@@ -66,7 +66,7 @@ module ResetDatabase
     # end
   end
 
-  def self.migrate_db_production
+  def self.migrate_db_production_to_development
     Store.all.each do|s| 
       s.update(url: s.url + "2") unless s.url.include?("2")
     end
