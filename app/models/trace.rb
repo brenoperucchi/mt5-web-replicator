@@ -24,7 +24,7 @@ class Trace < ApplicationRecord
   has_many :orders
   has_many :transactions
   has_many :statitics, through: :transactions, source: :statistics
-  has_many :masters,   through: :orders, source: :transactions
+  has_many :masters,-> { distinct },   through: :orders, source: :transactions
   has_many :slaves,    through: :orders, source: :slaves
 
   has_and_belongs_to_many :messages, class_name: "Message::Message"

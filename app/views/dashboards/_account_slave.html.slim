@@ -1,3 +1,6 @@
+- @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+- @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
+
 .row
   .col-md-12
     .card.table-card.latest-activity-card
