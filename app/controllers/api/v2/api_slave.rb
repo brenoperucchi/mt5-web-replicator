@@ -76,7 +76,7 @@ module API
           end
           unless change
             Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item)  
-            invoice&.items.conciliate&.map(&:conciliate_metatrader_off)
+            invoice&.items&.conciliate&.map(&:conciliate_metatrader_off)
             account&.invoice_items&.map do |item| 
               if item.conciliate?
                 item.conciliate_metatrader_off
