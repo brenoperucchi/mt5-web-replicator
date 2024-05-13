@@ -1,0 +1,49 @@
+= render "filter"
+
+.row
+  .col-md-12
+    .card.table-card.latest-activity-card
+      .card-header
+        h5 Accounts
+      .card-body
+        .table-responsive
+          table.table.table-hover.table-borderless#accounts
+            thead
+              tr
+                th Account
+                th Name
+                th Email
+                th
+                th Fator Lucro
+                th Tx de Acerto
+                th Lucro/MaxDD
+                th 
+                th Qtd Total
+                th $ Total
+            tbody
+              - @accounts.each do |account|
+                - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+                - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
+                tr[data-href="#{account_dashboard_path(@current_store.url, @trace.name, account.id, datefilter:params[:datefilter])}"]
+                  - type = account.slave? ? :slaves : :masters
+                  td = "#{account.name} - #{account.kind}"
+                  td = account.customer.name
+                  td = account.customer.email
+
+                  td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
+                  td = account.profit_trade(type, @trace)
+                  td = number_with_precision account.profit_drawdown(type, @trace), precision: 2
+                  td                   td 
+                  td = account.data_scope(type, [:executed, :closed], nil, @trace).count
+                  td = number_with_precision account.data_scope(type, [:executed, :closed], nil, @trace).to_a.sum(&:profit), precision: 2     
+
+
+- content_for :footer do
+  = javascript_include_tag "mintone/moment.min.js"
+  javascript:
+    $(document).ready(function(){
+      $(document).on("click", "table#accounts.table tr", function() {
+        var link  = $(this).data("href")
+            document.location.href=link;
+      });
+    });

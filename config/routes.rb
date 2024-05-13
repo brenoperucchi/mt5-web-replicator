@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     get  '/dashboards/:store_name/all',      to: 'dashboards#index'#
 
     resource :dashboard, only: [:show, :create], path:"dashboard/:store_name/:name" do
+      get  :account_admin,                            on: :collection
       get  'account/:account_id/:transaction_id',     to: 'dashboards#transaction',     on: :collection, as: 'transaction'
       get  'account/:account_id',                     to: 'dashboards#account',         on: :collection, as: 'account'
       get  'contract/:promotion',                     to: 'dashboards#contract',        on: :member#, as: 'account'

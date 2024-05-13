@@ -27,7 +27,6 @@ class Account < ApplicationRecord
                                :api_time_max_seconds, :api_slippage, :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, 
                                :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, 
                                :api_send_orders_history, :api_send_orders_history_date_start, :api_send_orders_history_date_end, :api_close_all_orders]
-
   belongs_to :store
   belongs_to :customer
   belongs_to :account_server, optional: true
@@ -40,11 +39,8 @@ class Account < ApplicationRecord
   has_many :permissions,    dependent: :destroy
   has_many :traces,         through: :permissions, source: :trace 
   has_many :customer_plans, through: :permissions, source: :customer_plan
-  # has_many :plan_usages,  through: :permissions, source: :plan_usage 
 
   has_many :loggings,     dependent: :destroy
-  # has_many :loggings,      as: :loggerable, dependent: :destroy
-
   has_many :instruments,  dependent: :destroy
 
   has_many :balances,     dependent: :destroy, autosave: true

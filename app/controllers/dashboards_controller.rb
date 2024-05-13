@@ -20,6 +20,20 @@ class DashboardsController < ApplicationController
   # 	redirect_to new_user_session_path if !user_signed_in?
   # end
 
+  def account_admin
+    @accounts = @trace.accounts.where(kind: :copy)
+    @accounts += @trace.accounts.where(kind: :slave, store: @current_store).order('kind desc')
+    respond_to do |wants|
+      wants.html do
+        if @trace
+          render action: :account_admin
+        else
+          redirect_to dashboards_path
+        end
+      end
+    end
+  end
+
   def mfe
     # @dates = @trace.mfe_analyze
     # respond_with

@@ -351,7 +351,7 @@
                   - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
                   - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
                   tr[data-href="#{account_dashboard_path(@current_store.url, @trace.name, account.id, datefilter:params[:datefilter])}"]
-                    - type = account.slave? ? :slaves : :masters
+                    - type = account.slave? ? :slaves : :transactions
                     td = "#{account.name} - #{account.kind}"
                     td
                     td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
