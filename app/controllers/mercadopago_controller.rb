@@ -14,7 +14,7 @@ class MercadopagoController < ApplicationController
     invoice = payment_method.invoice
     if invoice && payment && response
       response_status = response.dig(:response, "status")
-      if invoice and invoice.try(:pending?)
+      if invoice and invoice.try(:to_paid?)
         invoice.payment_status(response_status)
         logging.update(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
       end

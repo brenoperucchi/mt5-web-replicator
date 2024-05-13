@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :plan do
     trait :plan1 do
       name { "Plan 1" }
-      active_at { DateTime.now }
+      active_at { DateTime.current }
       amount {'50'} 
       amount_extra {'30'}     
 
@@ -16,7 +16,7 @@ FactoryBot.define do
     end
     trait :plan2 do
       name { "Plan 2" }
-      active_at { DateTime.now }
+      active_at { DateTime.current }
       amount {'100'} 
       amount_extra {'30'}     
 

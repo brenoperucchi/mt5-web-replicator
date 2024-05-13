@@ -33,7 +33,7 @@ module API
         end      
         desc "Return Store Config"
         post "/config/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
-          date_today = DateTime.now
+          date_today = DateTime.current
           kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
           account_server_name = params[:account_server_name].try(:downcase)
           account_name = params[:account_id]

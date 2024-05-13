@@ -2,7 +2,7 @@ FactoryBot.define do
 
   factory :store do
     name { "Store 1" }
-    active_at { DateTime.now }
+    active_at { DateTime.current }
     state { 1 }
     email { 'user@store1.com' }
     url { 'store1' }
@@ -21,13 +21,13 @@ FactoryBot.define do
 
 
     after(:create) do |store, evaluator|
-      store.customer_plans.create(name: :plan1, kind:0, amount:100, payment: store.payments.first)
+      store.customer_plans.create(name: :plan1, kind:0, amount:100, payment: store.payments.first, due_at_dates: 5)
       store.update(payment_id: 1)
     end
 
     trait :store2 do
       name { "Store 2" }
-      active_at { DateTime.now }
+      active_at { DateTime.current }
       email { 'user@store2.com' }
       url { 'store2' }
       tag_list { "" }
@@ -45,7 +45,7 @@ FactoryBot.define do
       end
 
       after(:create) do |store, evaluator|
-        store.customer_plans.create(name: :plan1, kind:0, amount:100, amount_discount:30, payment: store.payments.first)
+        store.customer_plans.create(name: :plan1, kind:0, amount:100, amount_discount:30, payment: store.payments.first, due_at_dates: 5)
         store.update(payment_id: 1)
       end
 

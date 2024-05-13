@@ -12,7 +12,7 @@ class PlanItem < ApplicationRecord
     if attribute != "1" 
       self.active_at = nil 
     else 
-      self.active_at = DateTime.now if active_at.nil?
+      self.active_at = DateTime.current if active_at.nil?
     end
   end
 

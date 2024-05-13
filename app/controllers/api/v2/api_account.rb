@@ -42,7 +42,7 @@ module API
               }
 
               # Use find_or_create_by para uma abordagem mais concisa
-              logging = account.loggings.find_or_create_by(state: "LOGFILE", created_at: DateTime.now.all_day)
+              logging = account.loggings.find_or_create_by(state: "LOGFILE", created_at: DateTime.current.all_day)
               logging.update(attributes)
 
               upload_file = logging.files.first_or_initialize(store:account.store, kind: params[:kind])

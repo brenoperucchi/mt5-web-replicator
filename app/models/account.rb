@@ -85,16 +85,17 @@ class Account < ApplicationRecord
 
   # def register_plan_create
   #   plan = CustomerPlan.find_by(id:self.customer_plan_id)
-  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "CustomerPlan", store: self.store)
   # end
 
   def create_invoice(trace, month_proporcional = false, month=nil)
-    date_today = month.nil? ? DateTime.now.beginning_of_month : (DateTime.now + eval("#{month}.month")).beginning_of_month
+    date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
     name = name.blank? ? "#{self.id}-#{date_today.strftime("%Y-%m")}" : name 
 
-    invoice = customer.invoices.find_or_initialize_by(name: name, store:store)
+    invoice = customer.invoices.find_or_initialize_by(name: name, store:store, kind: :client)
     invoice.account_calculate(self, trace, date_today, month_proporcional)
     invoice.balance_update
+    invoice.conciliate_request
   end
 
   def add_account_trace_to_planusage(trace, customer_plan)
@@ -106,7 +107,7 @@ class Account < ApplicationRecord
     plan.accounts << self unless plan.accounts.exists?(self.id)
 
     if plan_usage.nil?
-      plan_usage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
+      plan_usage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
       unless plan_usage.errors.any?
         permission.update(plan_usage: plan_usage, customer_plan: plan)
       end
@@ -190,11 +191,11 @@ class Account < ApplicationRecord
   end
 
   def api_send_orders_history_date_start
-    @api_send_orders_history_date_start ||= DateTime.parse(self.settings["api_send_orders_history_date_start"] || DateTime.now.beginning_of_month.beginning_of_day.to_s)
+    @api_send_orders_history_date_start ||= DateTime.parse(self.settings["api_send_orders_history_date_start"] || DateTime.current.beginning_of_month.beginning_of_day.to_s)
   end
 
   def api_send_orders_history_date_end  
-    @api_send_orders_history_date_end ||= DateTime.parse(self.settings["api_send_orders_history_date_end"] || DateTime.now.end_of_month.end_of_day.to_s)
+    @api_send_orders_history_date_end ||= DateTime.parse(self.settings["api_send_orders_history_date_end"] || DateTime.current.end_of_month.end_of_day.to_s)
   end                             
 
 

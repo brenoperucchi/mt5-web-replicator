@@ -76,7 +76,7 @@ RSpec.describe 'Store Controller', type: :request do
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319796651", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
-      }.to change(invoice, :state).from("pending").to("paid")
+      }.to change(invoice, :state).from("to_paid").to("paid")
       expect(response).to have_http_status 201
     end
 
@@ -128,7 +128,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
       expect(permission.plan_usage).not_to be_nil
       expect(permission.plan_usage.usageable.amount).to be == 100.00
-      expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      expect(permission.plan_usage.charged_at).to be == (DateTime.current + 15.days + 1.months).beginning_of_month
     end
 
     it 'Promition_page and promotion_use False' do
@@ -158,7 +158,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
       expect(permission.plan_usage).not_to be_nil
       expect(permission.plan_usage.usageable.amount).to be == 100.00
-      expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      expect(permission.plan_usage.charged_at).to be == (DateTime.current + 15.days + 1.months).beginning_of_month
     end
 
     it 'Always and promotion_use False' do
@@ -189,7 +189,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
       expect(permission.plan_usage).not_to be_nil
       expect(permission.plan_usage.usageable.amount).to be == 100.00
-      expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      expect(permission.plan_usage.charged_at).to be == (DateTime.current + 15.days + 1.months).beginning_of_month
     end
 
     it 'None Promotion_use TRUE' do
@@ -220,7 +220,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
       expect(permission.plan_usage).not_to be_nil
       expect(permission.plan_usage.usageable.amount).to be == 100.00
-      expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      expect(permission.plan_usage.charged_at).to be == (DateTime.current + 15.days + 1.months).beginning_of_month
     end
   end
   describe 'Contract Trace on dashboards' do
@@ -248,7 +248,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
       expect(permission.plan_usage).not_to be_nil
       expect(permission.plan_usage.usageable.amount).to be == 100.00
-      expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 1.months).beginning_of_month
+      expect(permission.plan_usage.charged_at).to be == (DateTime.current + 15.days + 1.months).beginning_of_month
     end
 
     it 'Store 2 with date Proportional' do
@@ -294,7 +294,7 @@ RSpec.describe 'Store Controller', type: :request do
       @customer_plan.save
       @trace.customer_plan = @customer_plan
 
-      travel_to(DateTime.now.end_of_month - 15.days)
+      travel_to(DateTime.current.end_of_month - 15.days)
       freeze_time
 
       expect do
@@ -317,7 +317,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
       expect(permission.plan_usage).not_to be_nil
       expect(permission.plan_usage.usageable.amount).to be == 100.00
-      expect(permission.plan_usage.charged_at).to be == (DateTime.now + 15.days + 6.months).beginning_of_month
+      expect(permission.plan_usage.charged_at).to be == (DateTime.current + 15.days + 6.months).beginning_of_month
     end
 
     it 'Store 2 - CustomerPlan Percent' do
@@ -333,7 +333,7 @@ RSpec.describe 'Store Controller', type: :request do
       @trace2 = Trace.last
       @trace2.customer_plan = customer_plan
 
-      order_date = (DateTime.now - 20.seconds).strftime("%Y.%m.%d %H:%M:%S")
+      order_date = (DateTime.current - 20.seconds).strftime("%Y.%m.%d %H:%M:%S")
 
       expect do
         # post "/dashboard/#{@store.url}/#{@trace2.name}/contract" , params: {name: @trace2.name, customer_plan_id: customer_plan, :account :  valid_attributes} #, valid_session

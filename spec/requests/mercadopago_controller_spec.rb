@@ -65,12 +65,11 @@ RSpec.describe 'Mercadopago Controller', type: :request do
       invoice = @account.customer.create_invoice(invoice_name)
       invoice.items.update_all(invoice_id: 41)
       invoice.update_columns(id: 41)
-
       expect {
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319796651", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
-      }.to change(invoice, :state).from("pending").to("paid")
+      }.to change(invoice, :state).from("to_paid").to("paid")
       expect(response).to have_http_status 201
     end
 
@@ -90,7 +89,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319818071", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
-      }.to change(invoice, :state).from("pending").to("denied")
+      }.to change(invoice, :state).from("to_paid").to("denied")
       expect(response).to have_http_status 201
     end
 
@@ -110,7 +109,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319818071", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319818071"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
         invoice.reload
-      }.not_to change(invoice, :state).from("pending")
+      }.not_to change(invoice, :state).from("to_paid")
       expect(response).to have_http_status 400
     end
 
@@ -130,7 +129,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"resource"=>"https://api.mercadolibre.com/merchant_orders/10395616659", "topic"=>"merchant_order", "id"=>"1", "payment_id"=>"1", "mercadopago"=>{"resource"=>"https://api.mercadolibre.com/merchant_orders/10400150087", "topic"=>"merchant_order"}}
         invoice.reload
-      }.not_to change(invoice, :state).from("pending")
+      }.not_to change(invoice, :state).from("to_paid")
       expect(response).to have_http_status 201
     end
     it "IPN" do
@@ -149,7 +148,7 @@ RSpec.describe 'Mercadopago Controller', type: :request do
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"resource"=>"https://api.mercadolibre.com/merchant_orders/13676542349", "topic"=>"merchant_order", "id"=>"1", "payment_id"=>"1", "mercadopago"=>{"resource"=>"https://api.mercadolibre.com/merchant_orders/13676542349", "topic"=>"merchant_order"}}
         invoice.reload
-      }.not_to change(invoice, :state).from("pending")
+      }.not_to change(invoice, :state).from("to_paid")
       expect(response).to have_http_status 201
     end
   end

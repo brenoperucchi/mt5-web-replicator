@@ -12,11 +12,11 @@ class PlanUsage < ApplicationRecord
 
   def proporcional_calculate(date_today=nil, amount_use=nil, proporcional=false, contract_volume=nil)
     changes = false
-    date_today       ||= DateTime.now
+    date_today       ||= DateTime.current
     amount_use       ||= usageable.amount_use || plan_serializer["amount"].to_f
     contract_volume  ||= 1
 
-    datetime_reference = proporcional ? DateTime.now : date_today
+    datetime_reference = proporcional ? DateTime.current : date_today
 
     days_month = Time.days_in_month(date_today.month)
     month_seconds = (days_month * 24 * 3600).to_f
@@ -47,13 +47,13 @@ class PlanUsage < ApplicationRecord
   end
 
   def update_next_charged
-    days = DateTime.now.day > 15 ? 15 : 0
-    self.charged_at = (DateTime.now + days + usageable.class.charge_recurrences[usageable.charge_recurrence.to_s].months).beginning_of_month
+    days = DateTime.current.day > 15 ? 15 : 0
+    self.charged_at = (DateTime.current + days + usageable.class.charge_recurrences[usageable.charge_recurrence.to_s].months).beginning_of_month
     self.save
   end
 
   def amount_calculate(date_today=nil, month_proporcional=nil, contract_volume=nil, data_profit)
-    date_today ||= DateTime.now
+    date_today ||= DateTime.current
     account      = self.resourceable
     self.proporcional_calculate(date_today, usageable.amount_use, month_proporcional, contract_volume)
     if usageable.fixed?# and usageable.monthly?

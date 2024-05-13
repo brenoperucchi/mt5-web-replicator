@@ -20,7 +20,7 @@ RSpec.describe "PlanAccountCustomer" do
   describe "Plan - insert discount value" do
     it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
       travel_to Date.parse("2022-11-01")
-      date_today = DateTime.now
+      date_today = DateTime.current
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       @account1.create_invoice(@trace, false, nil)
@@ -30,7 +30,7 @@ RSpec.describe "PlanAccountCustomer" do
     end
     it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
       travel_to Date.parse("2022-11-15")
-      date_today = DateTime.now
+      date_today = DateTime.current
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       @account1.create_invoice(@trace, false, nil)
@@ -42,7 +42,7 @@ RSpec.describe "PlanAccountCustomer" do
     end
     it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
       travel_to Date.parse("2022-11-15")
-      date_today = DateTime.now
+      date_today = DateTime.current
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       @account1.create_invoice(@trace, true, nil)
@@ -54,7 +54,7 @@ RSpec.describe "PlanAccountCustomer" do
     end
     it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
       travel_to Date.parse("2022-11-01")
-      date_today = DateTime.now
+      date_today = DateTime.current
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       travel_to Date.parse("2022-12-31")
@@ -67,7 +67,7 @@ RSpec.describe "PlanAccountCustomer" do
     end
     it 'Hedging - Verify Slave has orders and before delete 1 order the count was correctly' do 
       travel_to Date.parse("2022-11-01")
-      date_today = DateTime.now
+      date_today = DateTime.current
       expect(@trace.customer_plan.amount.to_f).to be == 100.0
       @account1.add_account_trace_to_planusage(@trace, @trace.customer_plan)
       travel_to Date.parse("2022-12-16")

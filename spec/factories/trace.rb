@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :trace do
-    active_at { DateTime.now }
+    active_at { DateTime.current }
     contract_volume_max { 2 }
 
     trait :first do

@@ -4,7 +4,7 @@ class	API::V2::APISlavePresenter
 	  map = String.new
 	  message = params[:body]
 	  content = YAML.load(message)
-	  date_today = DateTime.now
+	  date_today = DateTime.current
 	  skip_logging = false
 
 	  if not content.blank? and content.is_a?(Hash)

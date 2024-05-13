@@ -82,15 +82,15 @@ class Store < ApplicationRecord
     if resource.plan_usages.blank? and not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(active_at:nil) if usage_olders.present?
-      resource.plan_usages.create(usageable:usageable,  active_at: DateTime.now, handle:resource_handle, store: self)
+      resource.plan_usages.create(usageable:usageable,  active_at: DateTime.current, handle:resource_handle, store: self)
     end
   end
 
   def register_customer_plan(resource, name)
     if not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
-      usage_olders.update_all(disable_at:DateTime.now) if usage_olders.present?
-      resource.plan_usages.create(usageable:resource.customer_plan,  active_at: DateTime.now, handle:name, store: self)
+      usage_olders.update_all(disable_at:DateTime.current) if usage_olders.present?
+      resource.plan_usages.create(usageable:resource.customer_plan,  active_at: DateTime.current, handle:name, store: self)
     end
   end
 
@@ -100,20 +100,20 @@ class Store < ApplicationRecord
 
   def disable_store
     plan_older = self.plan_usages.where.not(active_at:nil).where(resourceable:self)
-    plan_older.update_all(disable_at:DateTime.now) if plan_older.present?
+    plan_older.update_all(disable_at:DateTime.current) if plan_older.present?
   end
 
   def register_plan_update
     if plan_id_changed? or self.plan_usages.empty?
       plan_older = self.plan_usages.where.not(active_at:nil).where(resourceable:self)
-      plan_older.update_all(disable_at:DateTime.now) if plan_older.present?
-      self.plan_usages.create(usageable: self.plan, resourceable:self, active_at:DateTime.now, handle: "Plan")
+      plan_older.update_all(disable_at:DateTime.current) if plan_older.present?
+      self.plan_usages.create(usageable: self.plan, resourceable:self, active_at:DateTime.current, handle: "Plan")
     end
   end
 
   def register_plan_create
     plan = Plan.find_by(id:self.plan_id)
-    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "Plan")
+    self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "Plan")
   end
 
   def telegram_bot_token
@@ -147,10 +147,10 @@ class Store < ApplicationRecord
   end
 
   def create_invoice_month(proporcional=false, month=nil)
-    date_today = month.nil? ? DateTime.now.beginning_of_month : (DateTime.now + eval("#{month}.month")).beginning_of_month
-    # date_today = DateTime.now - 1.month
-    #date_today = DateTime.now
-    #date_today = DateTime.now + 1.month
+    date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
+    # date_today = DateTime.current - 1.month
+    #date_today = DateTime.current
+    #date_today = DateTime.current + 1.month
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
     invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: (self.payment || self.payments.first))
 

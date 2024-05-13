@@ -7,7 +7,7 @@ module Telegram::Util
 			attributes = better_array(attributes)
 
 			string = "--------------------\r\n"
-			string << "Time: #{I18n.localize DateTime.now, format: :short2}\r\n"
+			string << "Time: #{I18n.localize DateTime.current, format: :short2}\r\n"
 			string << "SYMBOL: #{symbol}\r\n"
 			string << "STATE: #{state}\r\n"
 			string << "COMMENT ID: #{self.ticket}\r\n"

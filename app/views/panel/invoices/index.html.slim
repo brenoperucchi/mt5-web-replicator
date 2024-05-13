@@ -66,11 +66,11 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                           span.badge.bg-success-subtle.text-success.rounded-pill
                             span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
                             | Pago 
-                        - elsif not invoice.paid? and DateTime.now <= invoice.due_at
+                        - elsif not invoice.paid? and DateTime.current <= invoice.due_at
                           span.badge.bg-warning-subtle.text-warning.rounded-pill
                             span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
                             | Em Aberto 
-                        - elsif not invoice.paid? and DateTime.now > invoice.due_at 
+                        - elsif not invoice.paid? and DateTime.current > invoice.due_at 
                           span.badge.bg-danger-subtle.text-danger.rounded-pill
                             span.round-8.text-bg-danger.rounded-circle.d-inline-block.me-1
                             | Atrasado
@@ -81,7 +81,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                         h6.mb-0
                           | Vencimento
                         span.fs-2
-                          = I18n.l (invoice.due_at || DateTime.now), format: :short6
+                          = I18n.l (invoice.due_at || DateTime.current), format: :short6
                       td.text-end.ps-0
                         - if invoice.to_paid? 
                           = link_to invoice_send_panel_invoice_path(invoice), class: 'btn btn-sm btn-dark w-100' do

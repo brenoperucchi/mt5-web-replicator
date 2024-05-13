@@ -66,7 +66,7 @@ class Message::Import < Message::Message
   end
 
   def adjust_time_zone(parsed_time)
-    parsed_time.new_offset(DateTime.now.zone.to_f / 24)
+    parsed_time.new_offset(DateTime.current.zone.to_f / 24)
   end
 
   def create_transaction(order_data, trace)
@@ -124,7 +124,7 @@ class Message::Import < Message::Message
   #     parsed_time = DateTime.strptime(time_string + Time.now.zone , "%H:%M %d/%m/%Y %Z")
 
   #     # Aplicando a zona horária local
-  #     created_at = parsed_time.new_offset(DateTime.now.zone.to_f / 24)
+  #     created_at = parsed_time.new_offset(DateTime.current.zone.to_f / 24)
 
   #     type = row[3].downcase == "venda" ? "1" : "0"
 

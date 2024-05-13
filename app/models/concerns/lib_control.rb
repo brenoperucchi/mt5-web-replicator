@@ -5,9 +5,9 @@ module LibControl
 		after_create :register_resource_plan
 
 		def soft_destroy
-		  self.plan_usages.where(disable_at:nil).update_all(disable_at:DateTime.now) if self.respond_to?(:plan_usages)
+		  self.plan_usages.where(disable_at:nil).update_all(disable_at:DateTime.current) if self.respond_to?(:plan_usages)
       self.soft_destroy_custom if self.respond_to?(:soft_destroy_custom)
-		  self.update(deleted_at: DateTime.now) if self.respond_to?(:deleted_at)
+		  self.update(deleted_at: DateTime.current) if self.respond_to?(:deleted_at)
 		end
 
 		def soft_restore
@@ -35,8 +35,8 @@ module LibControl
 
   # module InstanceMethods
   # 	def soft_destroy
-  # 	  self.plan_usage.update(disable_at:DateTime.now) if self.plan_usage
-  # 	  self.update(deleted_at: DateTime.now)
+  # 	  self.plan_usage.update(disable_at:DateTime.current) if self.plan_usage
+  # 	  self.update(deleted_at: DateTime.current)
   # 	  self.remove_resource_plan
   # 	end
 

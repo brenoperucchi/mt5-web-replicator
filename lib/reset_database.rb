@@ -15,8 +15,8 @@ module ResetDatabase
   def self.delete_logging
     # Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
     Message::Message.joins('LEFT JOIN messages_traces ON messages_traces.message_id = messages.id').joins('LEFT JOIN messages_orders ON messages_orders.message_id = messages.id').where('messages_traces.trace_id IS NULL').where('messages_orders.order_id IS NULL').delete_all
-    date1 = DateTime.now - 12.months
-    date2 = DateTime.now - 4.months
+    date1 = DateTime.current - 12.months
+    date2 = DateTime.current - 4.months
     conditions = (date1.beginning_of_day..date2.end_of_day)
     Logging.where(state: "START",         created_at: conditions).delete_all
     Logging.where(state: "MODIFY",        created_at: conditions).delete_all
@@ -51,7 +51,7 @@ module ResetDatabase
     account = Account.find(account_id)
     store = Store.find(store_id)
 
-    new_trace = Trace.create(name: "Migrate Trace #{trace.name} ##{trace.id} - Account #{account.name} ID ##{account_id}", name_id: DateTime.now.to_i, kind:"copy", customer_plans: [Store.first.customer_plans.first], active: false, contract_volume_max:1, store:store)
+    new_trace = Trace.create(name: "Migrate Trace #{trace.name} ##{trace.id} - Account #{account.name} ID ##{account_id}", name_id: DateTime.current.to_i, kind:"copy", customer_plans: [Store.first.customer_plans.first], active: false, contract_volume_max:1, store:store)
     Order.where(account_id: account_id, trace_id: trace_id).each do |o|
       o.update(trace: new_trace)
       o.transactions.update_all(trace_id: new_trace.id)

@@ -49,21 +49,21 @@ class Customer < ApplicationRecord
 
   # def register_plan_create
   #   plan = CustomerPlan.find_by(id:self.customer_plan_id)
-  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.now, handle: "CustomerPlan", store: self.store)
+  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "CustomerPlan", store: self.store)
   # end
 
   def create_invoice(name = nil, date = nil, month_proporcional = false)
-    date ||= DateTime.now
+    date ||= DateTime.current
     date = date - 1.month
 
     name = name.blank? ? "#{self.id}-#{date.strftime("%Y-%m")}" : name
     invoice = invoices.find_by(name: name, store:store)
     if invoice.nil?
-      invoice = invoices.new(name: name, store:store)
+      invoice = invoices.new(name: name, store:store, kind: :client)
       invoice.customer_calculate(self, date, month_proporcional)
       invoice.balance_update
+      invoice.conciliate_request
     end
-    invoice&.conciliate_request
     invoice
   end
   

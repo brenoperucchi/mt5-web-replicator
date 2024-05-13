@@ -174,7 +174,7 @@ class Transaction < ApplicationRecord
 
   def update_mfe_mae(mfe, mae, time_trader)
     unless time_trader.nil? or mae.nil? or mfe.nil?
-      # date_today = month.nil? ? DateTime.now : DateTime.now + eval(month)
+      # date_today = month.nil? ? DateTime.current : DateTime.current + eval(month)
       statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
       
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)

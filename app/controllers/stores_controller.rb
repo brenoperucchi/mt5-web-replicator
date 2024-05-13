@@ -32,7 +32,7 @@ class StoresController < ApplicationController
 		respond_to do |format|
 		  if @store.save
 		  	PaymentMethod.all.each{|payment| payment.stores << @store}
-		  	customer_plan = @store.customer_plans.create(name: :example, amount:10.00, kind:'fixed', store:@store, payment: @store.payments.first)
+		  	customer_plan = @store.customer_plans.create(name: :example, amount:10.00, kind:'fixed', store:@store, payment: @store.payments.first, due_at_dates:5)
 		  	customer = @store.customers.new(name:url_name, customer_plans:[customer_plan], role:'customer', role_control:'owner', store:@store)
 		  	user = @store.users.create(email:store_params[:email], password:password, userable:customer)
 		  	if customer.save and user.valid?

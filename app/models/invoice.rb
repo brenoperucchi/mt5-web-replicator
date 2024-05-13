@@ -10,6 +10,7 @@ class Invoice < ApplicationRecord
   delegate :email, to: :invoiceable, allow_nil: true
   # delegate :trace, to: :plan_usage, allow_nil: true
   
+  enum kind:  {system:0, client:1}
   enum state: {pending: 0, to_paid:1, paid: 2, denied:3, refunded:4}
   
   store :settings, accessors: [:email, :payment_link, :back_url]
@@ -75,11 +76,11 @@ class Invoice < ApplicationRecord
     response_status ||= self.response[:response].dig("order_status")
     case response_status
     when 'approved', 'paid'
-      self.update(state: 'paid')
+      self.paid!
     when 'rejected'
-      self.update(state: 'denied')
+      self.denied!
     when 'refunded', 'charged_back'
-      self.update(state: 'refunded')
+      self.refunded!
     end
 
   end
@@ -93,7 +94,7 @@ class Invoice < ApplicationRecord
   end
 
   def account_calculate(account, trace, date, month_proporcional = nil)
-    date_due_at = (DateTime.parse(self.name[3..] + "-01 00:00:00 #{DateTime.now.zone}") + 1.month).beginning_of_month.beginning_of_day
+    date_due_at = (DateTime.parse(self.name[3..] + "-01 00:00:00 #{DateTime.current.zone}") + 1.month).beginning_of_month.beginning_of_day
     self.due_at = date_due_at + (trace.customer_plan.due_at_dates.to_i - 1).days
 
     data_profit = account.data_profit(:slaves, trace)
@@ -105,7 +106,7 @@ class Invoice < ApplicationRecord
     self.payment = customer_plan.payment
     # self.plan_usage = plan_usage
 
-    timestamp = I18n.l DateTime.now, format: :short8
+    timestamp = I18n.l DateTime.current, format: :short8
 
     if customer_plan.fixed?# and customer_plan.monthly?
       # invoice.back_url = "mercadopago/back_urls/success/#{self.id}"
@@ -137,7 +138,7 @@ class Invoice < ApplicationRecord
 
 
   def self.generate_month_customers(date = nil)
-    timestamp = I18n.l DateTime.now, format: :short8
+    timestamp = I18n.l DateTime.current, format: :short8
     puts "#{timestamp} - Runner Invoice.generate_month"
     Customer.customer.user.not_deleted.each do |customer|
       customer.create_invoice(nil, date)
@@ -147,7 +148,7 @@ class Invoice < ApplicationRecord
   end
 
   def self.conciliate_invoice_items
-    timestamp = I18n.l DateTime.now, format: :short8
+    timestamp = I18n.l DateTime.current, format: :short8
     puts "#{timestamp} - Runner Invoice.conciliate_invoice_items"
     Invoice.pending.each do |invoice|
       invoice.conciliate_request
