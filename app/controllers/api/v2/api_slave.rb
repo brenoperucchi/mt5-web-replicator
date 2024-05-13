@@ -67,7 +67,7 @@ module API
                   invoice_item.conciliate_metatrader_off
                   invoice.conciliate_request
                   invoice.balance_update
-                  account.loggings.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item)
+                  Logging.create(content: presenter.json.to_json, state: "CONCILIATE", loggerable:invoice, resourceable:invoice_item)
                   change = true
                 end
               end
@@ -75,7 +75,7 @@ module API
             map = "OK|OK|OK"
           end
           unless change
-            Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item)  
+            Logging.create(content: presenter.json.to_json, state: "NOTCONCILIATE", loggerable:invoice, resourceable: invoice_item, account: account)  
             invoice&.items&.conciliate&.map(&:conciliate_metatrader_off)
             account&.invoice_items&.map do |item| 
               if item.conciliate?
