@@ -139,9 +139,6 @@ class DashboardsController < ApplicationController
 
   def account
     @account = Account.find(params[:account_id])
-
-    # @trace = Trace.find_by(name: params[:name])
-    # @account = current_store.accounts.find(params[:id])
     @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone) 
     @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone) 
     if @account

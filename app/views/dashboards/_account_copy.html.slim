@@ -10,7 +10,7 @@
       .card-body
         .table-responsive
           table.table.table-hover.table-borderless#transactions
-            - type = @account.slave? ? :slaves : :transactions, [:executed, :closed]
+            - type = @account.slave? ? :slaves : :masters, [:executed, :closed]
             thead
               tr
                 - if @account.copy?
@@ -33,9 +33,9 @@
             tbodyre
               tr
                 td OPERATIONS
-                td = @account.data_scope(:transactions, [:executed, :closed], :all, @trace).count
+                td = @account.data_scope(:masters, [:executed, :closed], :all, @trace).count
                 td TOTAL PROFIT
-                td= number_with_precision @account.data_scope(:transactions, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2     
+                td= number_with_precision @account.data_scope(:masters, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2     
                 td - 
                 td - 
                 td - 
@@ -44,7 +44,7 @@
                 td -
                 td -
                 td -
-              - @account.data_scope(:transactions, [:executed, :closed], :all, @trace).order(created_at: 'asc').each do |copy|
+              - @account.data_scope(:masters, [:executed, :closed], :all, @trace).order(created_at: 'asc').each do |copy|
                 tr[data-href="#{transaction_dashboard_path(@account.store.url, @trace.name, copy.account.id, copy.id, params: request.query_parameters)}"]
                   td = copy.ticket
                   td = copy.symbol
@@ -61,9 +61,9 @@
                   td = l(copy.mfe.created_at, format: :short2) if copy.try(:mfe).try(:created_at).present?
               tr
                 td OPERATIONS
-                td = @account.data_scope(:transactions, [:executed, :closed], :all, @trace).count
+                td = @account.data_scope(:masters, [:executed, :closed], :all, @trace).count
                 td TOTAL PROFIT
-                td= number_with_precision @account.data_scope(:transactions, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2       
+                td= number_with_precision @account.data_scope(:masters, [:executed, :closed], :all, @trace).to_a.sum(&:profit), precision: 2       
                 td - 
                 td - 
                 td - 
