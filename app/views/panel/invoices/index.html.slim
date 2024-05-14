@@ -111,13 +111,13 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                                         td.m-0
                                           = line
                                 td.py-2
-                                  = item.account.name
+                                  = item&.account.try(:name)
                                 td.py-2
-                                  = item.trace.name
+                                  = item&.trace.try(:name)
                                 td.py-2
-                                  = number_with_precision item.amount, precision:2
+                                  = number_with_precision item.try(:amount), precision:2
                                 td
-                                  - if item.plan_usage.usageable.percent?
+                                  - if item&.plan_usage&.usageable&.percent?
                                     = link_to item_conciliated_panel_invoice_path(invoice, item), class: 'btn btn-sm btn-dark w-100' do
                                       | MT5 Conciliação
 
