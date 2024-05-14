@@ -39,7 +39,7 @@ module AlgoStatistic
         data = masters_filter(self.send(type), states)
       else
         if(type == :slaves)
-          filtered_relation = self.send(type).where(store_id: self.store_id).where("#{table_name}.trace_id = ?", trace.id)
+          filtered_relation = self.send(type).where(store: [trace&.stores]).where("#{table_name}.trace_id = ?", trace.id)
           # filtered_relation = self.send(type).where("#{table_name}.trace_id = ?", trace.id).joins(:order).where("orders.store_id = ?", trace.store_id)
         else
           filtered_relation = self.send(type).where("#{table_name}.trace_id = ?", trace.id)
@@ -47,7 +47,7 @@ module AlgoStatistic
         data = masters_filter(filtered_relation, states)
       end
            
-      data = data.send(scope) if not scope.nil? and data.respond_to?(scope)
+      data = data.send(scope) if !scope.nil? and data.present? and data.respond_to?(*scope)
 
       if self.search_magic_number.present?
         data = data.where(magic_number: self.search_magic_number)
@@ -64,9 +64,9 @@ module AlgoStatistic
 
     def masters_filter(data, states=nil)
       # if Rails.env.development?
-      #   self.search_date_begin = Date.parse("2024-05-13").to_date 
+      #   self.search_date_begin = Date.parse("2024-05-01").to_date 
       #   self.search_date_end   = DateTime.current
-      #   # self.search_date_end = Date.parse("2023-10-05").to_date 
+      #   # self.search_date_end = Date.parse("2024-05-30").to_date 
       # end
       if self.search_date_begin and self.search_date_end
         if (states != :closed or states == :all) && (states.is_a?(Array) and not states.include?(:closed))

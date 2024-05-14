@@ -13,13 +13,14 @@ class InvoiceDashboard < Administrate::BaseDashboard
     email:                DisableTextField,
     name:                 Field::String,
     payment_link:         Field::String.with_options(searchable: false),
-    # stripe_product_id:    Field::String.with_options(searchable: false),  
-    # stripe_customer_id:   Field::String.with_options(searchable: false),  
+    # stripe_product_id:  Field::String.with_options(searchable: false),  
+    # stripe_customer_id: Field::String.with_options(searchable: false),  
     stripe_invoice_id:    Field::String.with_options(searchable: false),  
     amount:               Field::Number,
-    # items:                Field::NestedHasMany.with_options(class_name: 'InvoiceItem'),
+    # items:              Field::NestedHasMany.with_options(class_name: 'InvoiceItem'),
     payment:              Field::BelongsTo,
     plan_usage:           Field::BelongsTo,
+    store:                Field::BelongsTo,
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
     loggings:             Field::HasMany,
     invoiceable:          Field::Polymorphic,
@@ -39,6 +40,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   email
   amount
   items
+  store
   payment
   invoiceable
   due_at
@@ -52,6 +54,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   name
   invoiceable
   email
+  store
   payment
   payment_link
   plan_usage
@@ -72,6 +75,7 @@ class InvoiceDashboard < Administrate::BaseDashboard
   state
   amount
   email
+  store
   payment
   plan_usage
   stripe_invoice_id

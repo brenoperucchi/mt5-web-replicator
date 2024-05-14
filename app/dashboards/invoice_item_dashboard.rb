@@ -11,6 +11,8 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
     name:                 Field::String,
     account:              Field::BelongsTo,
     invoice:              Field::BelongsTo,
+    trace:                Field::BelongsTo,
+    store:                Field::BelongsTo,
     plan_usage:           Field::BelongsTo,
     amount:               Field::String,
     state:                Field::String,
@@ -28,8 +30,9 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   name
   state
   amount
+  store
+  trace
   account
-  plan_usage
   description
   created_at
   ].freeze 
@@ -40,8 +43,10 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   name
   state
   amount
-  invoice
+  store
+  trace
   account
+  invoice
   plan_usage
   description
   created_at
@@ -55,7 +60,12 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   name
   state
   amount
+  store
+  trace
+  account
   invoice
+  plan_usage
+  description
   ].freeze
 
   # COLLECTION_FILTERS

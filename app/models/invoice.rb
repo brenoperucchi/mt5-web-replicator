@@ -94,7 +94,7 @@ class Invoice < ApplicationRecord
   end
 
   def account_calculate(account, trace, date, month_proporcional = nil)
-    date_due_at = (DateTime.parse(self.name[3..] + "-01 00:00:00 #{DateTime.current.zone}") + 1.month).beginning_of_month.beginning_of_day
+    date_due_at = (DateTime.parse(self.name[4..] + "-01 00:00:00 #{DateTime.current.zone}") + 1.month).beginning_of_month.beginning_of_day
     self.due_at = date_due_at + (trace.customer_plan.due_at_dates.to_i - 1).days
 
     data_profit = account.data_profit(:slaves, trace)
