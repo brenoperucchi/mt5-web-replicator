@@ -106,7 +106,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                               tr
                                 td.py-2[colspan=2]
                                   table 
-                                    - item.description&.split("\n").each do |line|
+                                    - item.description&.split("\n")&.each do |line|
                                       tr
                                         td.m-0
                                           = line
