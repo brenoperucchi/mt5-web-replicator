@@ -1,5 +1,4 @@
 require "administrate/base_dashboard"
-require 'belongs_to_field'
 
 class Control::CustomerDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
@@ -13,7 +12,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     email:                MessagesField,
     password:             MessagesField,
     user:                 Field::HasOne,
-    customer_plan:        Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    customer_plan:        Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     role:                 DisableTextField.with_options(value:"customer", type: 'hide'),
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     store_id:             DisableTextField.with_options(default: :current_store),

@@ -1,5 +1,3 @@
-require 'belongs_to_field'
-
 require "administrate/base_dashboard"
 
 class Control::InstrumentDashboard < Administrate::BaseDashboard
@@ -15,8 +13,8 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
     name:       Field::String,
     # volumes:    Field::String.with_options(searchable: false),
     store_id:   DisableTextField.with_options(default: :current_store, type: 'hide'),
-    trace:      Fields::BelongsToField.with_options(associated: :store),
-    account:    Fields::BelongsToField.with_options(associated: :store),
+    trace:      Field::BelongsToField.with_options(associated: :store),
+    account:    Field::BelongsToField.with_options(associated: :store),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze

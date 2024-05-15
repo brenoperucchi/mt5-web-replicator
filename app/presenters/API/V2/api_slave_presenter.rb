@@ -1,5 +1,13 @@
 class	API::V2::APISlavePresenter 
 
+	def self.check_order_duplicate(slave, content, action)
+		orders = Order.where(content_id: content['comment'].try(:to_i), store: slave.store, account:slave.try(:master).try(:account), trace:slave.trace).where.not(id:slave.order.id)
+		if orders.present?
+			slave.loggings.create(content: orders&.map{|o|OrderSerializer.new(o)}, state: :ORDERDUPLICATE, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last)												
+			orders.destroy_all
+		end
+	end
+
 	def self.api_slave(params, version, request)
 	  map = String.new
 	  message = params[:body]
@@ -12,13 +20,11 @@ class	API::V2::APISlavePresenter
 	    account_server = AccountServer.find_or_create_by(name: params[:account_server_name].try(:downcase))
 	    account = Account.find_by(name: params[:account_id], account_server: account_server, state: :enable, kind: :slave)
 	    if account
-	      # TransactionSlave.check_duplicate(content['comment'], account)
-	      slave = account.slaves.not_deleted.where(comment: content['comment']).last
-	      order = Order.find_by(content: content['comment'])  
+	      slave = account.slaves.not_deleted.where(comment: content['comment']).first
 
-	      if slave.nil?
-	        # Logging.create(content:message, state: action, parent: order.try(:message).try(:loggings).try(:first), account: account)
-	      else
+				self.check_order_duplicate(slave, content, action)	      
+
+	      unless slave.nil?
 	        case action
 	        when "OPEN", "OPENED"
 	          api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
@@ -95,7 +101,6 @@ class	API::V2::APISlavePresenter
 	        logging_content = nil
 	        # message << params.except("body").to_s.delete('\\"')
 	        slave.loggings.create(content:message, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: slave.order.messages.last) unless skip_logging
-
 	      end
 	    else
 	      Logging.create(content:message, state: action)

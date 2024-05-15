@@ -1,4 +1,3 @@
-require 'belongs_to_field'
 require 'has_many_scope_field'
 require "administrate/base_dashboard"
 
@@ -19,10 +18,10 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     contract_volume:      Field::String.with_options(searchable: false),
     # stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3, searchable: false),
     traces:               Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
-    orders:               Fields::HasManyScopeField.with_options(dashboard:'control', direction: :desc, sort_by: :created_at),
+    slaves:               Fields::HasManyScopeField.with_options(dashboard:'control', direction: :desc, sort_by: :created_at),
     instruments:          Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     store:                Field::BelongsTo,
-    customer:             Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    customer:             Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     account_server:       Field::BelongsTo,
     magics_accept:        Field::String.with_options(searchable: false),
     instrument_control:   Field::Boolean,
@@ -41,7 +40,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   state
   kind
   traces
-  orders
+  slaves
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -60,7 +59,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   customer
   store
   traces
-  orders
+  slaves
   instruments
   created_at
   updated_at

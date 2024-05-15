@@ -100,7 +100,7 @@ Rails.application.routes.draw do
       resources :customer_plans
       resources :invoices, except:[:new]
       resources :loggings, only:[:show]
-      resources :orders, except:[:edit, :new, :destroy, :update]
+      resources :transaction_slaves, except:[:edit, :new, :destroy, :update]
       resources :traces
       resources :transactions, only:[:show]
       resources :transaction_slaves, only:[:show]

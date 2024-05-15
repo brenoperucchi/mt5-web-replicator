@@ -1,5 +1,4 @@
 require 'has_many_scope_field'
-require 'belongs_to_field'
 require "administrate/base_dashboard"
 
 
@@ -24,7 +23,7 @@ class Control::CustomerPlanDashboard < Administrate::BaseDashboard
     customers:          Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
     accounts:           Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
     traces:             Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
-    payment:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    payment:            Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze

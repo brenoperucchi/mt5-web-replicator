@@ -93,7 +93,6 @@ class Trace < ApplicationRecord
   end
 
   def create_order(order_params, account, message, symbol, api_version)
-
     apiCopySerializerClass = Class.const_get("API::#{api_version.try(:upcase)}::APICopySerializer")
 
     ticket = order_params['ticket_id']
@@ -102,6 +101,9 @@ class Trace < ApplicationRecord
     copy_attributes = apiCopySerializerClass.new(order_params).copy_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
 
     self.stores.each do |current_store|
+      slaves = self.accounts.slave.enable.where(store: current_store)
+
+      next unless slaves.present?
       if account.netting?
         order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
         if order.nil?
@@ -133,7 +135,7 @@ class Trace < ApplicationRecord
         transaction.execute unless transaction.executed?
         if transaction and not transaction.error?
           return true if account.netting? and order.slaves.count > 0 
-          self.accounts.slave.enable.where(store: current_store).each do |account_slave|
+          slaves.each do |account_slave|
             
             instrument = check_instrument(account, symbol, account_slave)
             slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self, current_store)
@@ -148,6 +150,7 @@ class Trace < ApplicationRecord
               slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
             else
               message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order)
+              me
             end
           end
         end

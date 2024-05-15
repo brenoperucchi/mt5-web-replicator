@@ -42,7 +42,7 @@ module API
           body map
         end 
 
-        desc "Slave Post Receive Transaction "
+        desc "Slave Conciliate Metatrader Transactions "
         post "/orders_history/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
           account = Account.find_by(name: params[:account_id])

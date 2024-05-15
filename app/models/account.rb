@@ -41,6 +41,7 @@ class Account < ApplicationRecord
   has_many :customer_plans, through: :permissions, source: :customer_plan
 
   has_many :loggings,     dependent: :destroy
+  has_many :upload_files, dependent: :destroy
   has_many :instruments,  dependent: :destroy
 
   has_many :balances,     dependent: :destroy, autosave: true
@@ -87,7 +88,7 @@ class Account < ApplicationRecord
 
   def create_invoice(trace, month_proporcional = false, month=nil)
     date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
-    name = name.blank? ? "#{self.id}-#{date_today.strftime("%Y-%m")}" : name 
+    name = name.blank? ? "#{self.customer.id}-#{date_today.strftime("%Y-%m")}" : name 
 
     invoice = customer.invoices.find_or_initialize_by(name: name, store:store, kind: :client)
     invoice.account_calculate(self, trace, date_today, month_proporcional)

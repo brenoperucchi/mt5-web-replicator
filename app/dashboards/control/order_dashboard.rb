@@ -1,5 +1,4 @@
 require 'has_many_scope_field'
-require 'belongs_to_field'
 require "administrate/base_dashboard"
 
 module Control
@@ -26,7 +25,7 @@ module Control
       symbol:       Field::String,
       trace:        Field::BelongsTo,
       store:        Field::BelongsTo,
-      account:      Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+      account:      Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
       transactions: Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
       # slaves: Field::HasMany,
       slaves:       Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),

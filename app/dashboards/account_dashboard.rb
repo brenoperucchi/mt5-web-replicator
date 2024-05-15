@@ -20,6 +20,7 @@ class AccountDashboard < Administrate::BaseDashboard
     orders:               Field::HasMany,
     slaves:               Field::HasMany,
     loggings:             Field::HasMany,
+    upload_files:         Field::HasMany,
     instruments:          Field::HasMany,
     account_server:       Field::BelongsTo,
     store:                Field::BelongsTo,
@@ -90,6 +91,7 @@ class AccountDashboard < Administrate::BaseDashboard
   orders
   slaves
   loggings
+  upload_files
   instruments
   deleted_at
   created_at

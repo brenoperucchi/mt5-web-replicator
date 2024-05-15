@@ -12,6 +12,8 @@ class InvoiceItem < ApplicationRecord
 
   enum state: {normal: 0, conciliate:1, conciliated:2, error:3}
 
+  delegate :store_id, to: :invoice, allow_nil: true
+
   after_save :calculate_invoice
 
   def calculate_invoice

@@ -87,7 +87,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                           = link_to invoice_send_panel_invoice_path(invoice), class: 'btn btn-sm btn-dark w-100' do
                             / = I18n.t :payment, scope:'helpers.dashboards'
                             | Pagamento
-                        - else
+                        - elsif invoice.pending?
                           span.badge.bg-warning-subtle.text-warning.rounded-pill
                             span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
                             | Aguardando Conciliação

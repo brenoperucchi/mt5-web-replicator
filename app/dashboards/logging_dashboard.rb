@@ -8,18 +8,16 @@ class LoggingDashboard < Administrate::BaseDashboard
   # which determines how the attribute is displayed
   # on pages throughout the dashboard.
   ATTRIBUTE_TYPES = {
-    id: Field::Number,
-    content: Field::Text.with_options(searchable: false),
-    loggerable: Field::Polymorphic,
+    id:           Field::Number,
+    content:      Field::Text.with_options(searchable: false),
+    loggerable:   Field::Polymorphic,
     resourceable: Field::Polymorphic,
-    files: Field::HasMany,
-    # user:Field::BelongsTo,
-    # account: Field::String.with_options(searchable: false),
-    account: Field::BelongsTo,
-    changeset: Field::String.with_options(searchable: true),
-    state: Field::String.with_options(searchable: false),
-    created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
+    files:        Field::HasMany,
+    account:      Field::BelongsTo,
+    changeset:    Field::String.with_options(searchable: true),
+    state:        Field::String.with_options(searchable: false),
+    created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
   }.freeze
 
   # COLLECTION_ATTRIBUTES

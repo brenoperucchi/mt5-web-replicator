@@ -165,9 +165,7 @@ class Invoice < ApplicationRecord
       end
     end
 
-    if items.all? { |item| item.can_conciliated? }
-      to_paid! 
-    end
+    to_paid! if items.all? { |item| item.can_conciliated? }
   end
 
 end

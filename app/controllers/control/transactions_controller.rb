@@ -22,6 +22,10 @@ module Control
     #   Foo.find_by!(slug: param)
     # end
 
+    def find_resource(param)
+      Transaction.find_by!(id: param)
+    end
+
     # The result of this lookup will be available as `requested_resource`
 
     # Override this if you have certain roles that require a subset

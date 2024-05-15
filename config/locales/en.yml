@@ -326,11 +326,11 @@ en:
         one: Instrument
         other: Instruments
       transaction:
-        one: Transaction Copy
-        other: Transactions Copy
+        one: Copy
+        other: Copy
       transaction_slave:
-        one: Transaction Slave
-        other: Transactions Slaves
+        one: Slave
+        other: Slaves
       invoice:
         one: Invoice
         other: Invoices

@@ -1,6 +1,5 @@
 require "administrate/base_dashboard"
 require 'has_many_scope_field'
-require 'belongs_to_field'
 
 class Control::TransactionSlaveDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES
@@ -13,9 +12,9 @@ class Control::TransactionSlaveDashboard < Administrate::BaseDashboard
     id:                 Field::Number.with_options(searchable: true),
     loggings:           Field::HasMany,
     versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
-    order:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-    account:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-    trace:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    order:              Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    account:            Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    trace:              Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     master:             Field::BelongsTo.with_options(class_name:'Transaction'),
     ticket_master:      Field::String,
     ticket_slave:       Field::String,
@@ -103,7 +102,6 @@ class Control::TransactionSlaveDashboard < Administrate::BaseDashboard
   comment
   lot
   magic_number
-  open_at
   ].freeze
 
   # COLLECTION_FILTERS

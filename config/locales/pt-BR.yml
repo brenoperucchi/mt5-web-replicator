@@ -326,11 +326,11 @@ pt-BR:
         one: Ativo
         other: Ativos
       transaction:
-        one: Transação Copy
-        other: Transações Copy
+        one: Copy
+        other: Copys
       transaction_slave:
-        one: Transações Slave
-        other: Transações Slaves
+        one: Slave
+        other: Slaves
       invoice_item:
         one: Fatura Item
         other: Faturas Items

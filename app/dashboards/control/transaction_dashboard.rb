@@ -1,5 +1,4 @@
 #require 'has_many_scope_field'
-require 'belongs_to_field'
 require "administrate/base_dashboard"
 
 class Control::TransactionDashboard < Administrate::BaseDashboard
@@ -30,10 +29,10 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    order:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-    trace:              Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-    message:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
-    account:            Fields::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    # order:              Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    trace:              Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    message:            Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
+    account:            Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     loggings:           Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
@@ -65,7 +64,6 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
   ticket
   trace
   account
-  order
   slaves
   ordertype
   lot

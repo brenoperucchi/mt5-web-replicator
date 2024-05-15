@@ -2,13 +2,11 @@ class UploadFile < ApplicationRecord
   belongs_to :uploadable, polymorphic: true, optional: true
   belongs_to :store,                         optional: true
   belongs_to :trace,                         optional: true
+  belongs_to :account,                       optional: true
 
   after_create_commit :import_file
 
   has_one_attached :file
-
-
-  # delegate :account, to: :uploadable#, prefix: true, allow_nil: true
 
 
   def import_file(trace_id=nil)
@@ -24,14 +22,11 @@ class UploadFile < ApplicationRecord
   end
 
   def file_content
-    file.download if file.attached?
+    file.download rescue nil if file.attached?
   end
 
   def filename
     file.filename.to_s if file.attached?
   end
 
-  def account
-    uploadable.account.name if uploadable.present? and uploadable.respond_to?(:account)
-  end
 end
