@@ -5,7 +5,6 @@ class InvoiceItem < ApplicationRecord
   belongs_to :invoice,    optional:true
   belongs_to :account,    optional:true
   belongs_to :trace,      optional:true
-  belongs_to :store,      optional:true
   belongs_to :plan_usage, optional:true
 
   has_many :loggings,      as: :resourceable, dependent: :destroy
