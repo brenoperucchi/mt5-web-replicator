@@ -2,7 +2,7 @@
 - loss_set = params[:loss_set].blank? ? 50 : params[:loss_set].to_f
 / - content_for :breadcrumb do
 /   li.breadcrumb-item
-/     a href="#{dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+/     a href="#{dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
 /       = @trace.name
 
 = render "filter"

@@ -1,15 +1,15 @@
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+    a href="#{dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
       = @trace.name
   li.breadcrumb-item
-    a href="#{mfes_dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+    a href="#{mfes_dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
       | MFEs
   li.breadcrumb-item
-    a href="#{mfe_by_dashboard_path(@account.store.url, @trace.name, :month, params[:date][0..6], params: request.query_parameters)}" 
+    a href="#{mfe_by_dashboard_path(current_store.url, @trace.name, :month, params[:date][0..6], params: request.query_parameters)}" 
       = params[:date][0..6]
   li.breadcrumb-item
-    a href="#{mfe_by_dashboard_path(@account.store.url, @trace.name, :day, params[:date], params: request.query_parameters)}" 
+    a href="#{mfe_by_dashboard_path(current_store.url, @trace.name, :day, params[:date], params: request.query_parameters)}" 
       = params[:date]
 
 - date = params[:date] + "-01 00:00:00 -0300"

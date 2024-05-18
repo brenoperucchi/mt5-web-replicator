@@ -1,9 +1,9 @@
 - content_for :breadcrumb do
   li.breadcrumb-item
-    a href="#{dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+    a href="#{dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
       = @trace.name
   li.breadcrumb-item
-    a href="#{mfes_dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+    a href="#{mfes_dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
       | MFEs
 
 - data = @trace.mfe_analyze(mfe_target, loss_set)
@@ -29,7 +29,7 @@
             tbody
               - data.each do |month, details|
                 / - next if date
-                tr[data-href="#{mfe_by_dashboard_path(@account.store.url, @trace.name, :month, month, params: request.query_parameters)}"]
+                tr[data-href="#{mfe_by_dashboard_path(current_store.url, @trace.name, :month, month, params: request.query_parameters)}"]
                   / - transactions_overlapping << transaction[:transactions_overlapping].present? ? transaction[:transactions_overlapping].map(&:first).join(', ') : 0
                   / - if transaction[:transactions_analyzed].present?
                   /   - transactions_analyzed = transaction[:transactions_analyzed].map(&:ticket).join(', ')
