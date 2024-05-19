@@ -12,7 +12,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
     account:              Field::BelongsTo,
     invoice:              Field::BelongsTo,
     trace:                Field::BelongsTo,
-    store:                Field::BelongsTo,
+    store:                Field::Delegate.with_options(class_name: "Store", searchable: false),
     plan_usage:           Field::BelongsTo,
     amount:               Field::String,
     state:                Field::String,
@@ -26,6 +26,11 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   #
   # By default, it's limited to four items to reduce clutter on index pages.
   # Feel free to add, remove, or rearrange items.
+
+  DELEGATE_ATTRIBUTES = %i{
+  store
+  }
+
   COLLECTION_ATTRIBUTES = %i[
   name
   state
