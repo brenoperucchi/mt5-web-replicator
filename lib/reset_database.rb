@@ -16,7 +16,7 @@ module ResetDatabase
     # Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
     Message::Message.joins('LEFT JOIN messages_traces ON messages_traces.message_id = messages.id').joins('LEFT JOIN messages_orders ON messages_orders.message_id = messages.id').where('messages_traces.trace_id IS NULL').where('messages_orders.order_id IS NULL').delete_all
     date1 = DateTime.current - 12.months
-    date2 = DateTime.current - 4.months
+    date2 = DateTime.current - 6.months
     conditions = (date1.beginning_of_day..date2.end_of_day)
     Logging.where(state: "START",         created_at: conditions).delete_all
     Logging.where(state: "MODIFY",        created_at: conditions).delete_all
@@ -25,6 +25,21 @@ module ResetDatabase
     Logging.where(state: "ORDERS_CLOSED", created_at: conditions).delete_all
     Logging.where(state: "ORDERS_OPEN",   created_at: conditions).delete_all
     Message::Message.where(state: "executed", created_at: conditions).delete_all
+
+
+    results = Logging
+      .group(:state, :loggerable_type, :loggerable_id)
+      .count
+      .select { |(state, loggerable_type, loggerable_id), count| 
+        count > 200 && state.present? && loggerable_type.present? && loggerable_id.present? 
+      }
+      .sort_by { |_, count| -count }
+
+    results.each do |(state, loggerable_type, loggerable_id), count|
+      logs_to_delete = Logging.where(state: state, loggerable_type:loggerable_type, loggerable_id: loggerable_id).offset(1)
+      logs_to_delete.delete_all
+    end
+
 
     # date = DateTime.parse("2022-01-01")
     # Logging.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
