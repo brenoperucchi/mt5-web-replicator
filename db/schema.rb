@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_05_15_173343) do
+ActiveRecord::Schema.define(version: 2024_06_04_200225) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -75,8 +75,10 @@ ActiveRecord::Schema.define(version: 2024_05_15_173343) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "order_id"
+    t.index ["account_id"], name: "idx_balances_account_id"
     t.index ["account_id"], name: "index_balances_on_account_id"
     t.index ["master_id"], name: "index_balances_on_master_id"
+    t.index ["order_id"], name: "idx_balances_order_id"
     t.index ["order_id"], name: "index_balances_on_order_id"
     t.index ["slave_id"], name: "index_balances_on_slave_id"
   end
@@ -150,7 +152,7 @@ ActiveRecord::Schema.define(version: 2024_05_15_173343) do
   end
 
   create_table "invoice_items", force: :cascade do |t|
-    t.string "name"
+    t.string "handle"
     t.text "settings"
     t.decimal "amount", precision: 10, scale: 2, default: "0.0"
     t.bigint "invoice_id", null: false
@@ -204,6 +206,7 @@ ActiveRecord::Schema.define(version: 2024_05_15_173343) do
     t.bigint "account_id"
     t.string "ancestry", collation: "C"
     t.text "settings"
+    t.index ["account_id", "state", "created_at"], name: "idx_loggings_account_state_created_at"
     t.index ["account_id"], name: "index_loggings_on_account_id"
     t.index ["ancestry"], name: "index_loggings_on_ancestry"
     t.index ["loggerable_type", "loggerable_id"], name: "index_loggings_on_loggerable_type_and_loggerable_id"
@@ -283,6 +286,7 @@ ActiveRecord::Schema.define(version: 2024_05_15_173343) do
     t.index ["account_id"], name: "index_orders_on_account_id"
     t.index ["content_id"], name: "index_orders_on_content_id"
     t.index ["deal_id"], name: "index_orders_on_deal_id"
+    t.index ["id"], name: "idx_orders_id"
     t.index ["message_id"], name: "index_orders_on_message_id"
     t.index ["store_id"], name: "index_orders_on_store_id"
     t.index ["trace_id"], name: "index_orders_on_trace_id"
@@ -589,6 +593,8 @@ ActiveRecord::Schema.define(version: 2024_05_15_173343) do
     t.integer "order_id"
     t.bigint "store_id"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
+    t.index ["order_id"], name: "idx_transaction_slaves_order_id"
+    t.index ["state", "closed_at"], name: "idx_transaction_slaves_state_closed_at"
     t.index ["store_id"], name: "index_transaction_slaves_on_store_id"
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end

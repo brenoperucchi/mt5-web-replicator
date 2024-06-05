@@ -7,10 +7,10 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.1.7.4'
+gem 'rails', '~> 6.1.7.8'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
-gem 'puma', '>= 6.3.1'
+gem 'puma', '>= 6.4.1'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
@@ -137,13 +137,13 @@ gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 
 # ADMINISTRATE
-# gem "administrate",         path: "vendor/administrate"
+gem "administrate",         path: "vendor/administrate"
 # gem 'administrate-field-tag',       path: 'vendor/administrate-field-tag/'
 # gem 'administrate_ransack', path: "vendor/administrate_ransack"
 # gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
 # gem "administrate", path: "vendor/administrate"
 # gem 'administrate-field-scoped_has_many', path: "vendor/administrate-field-scoped_has_many"
-gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
+# gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
 gem 'administrate-field-image'
 gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git', branch: 'main'
 gem "administrate-field-nested_has_many"
