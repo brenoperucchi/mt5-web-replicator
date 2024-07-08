@@ -101,7 +101,7 @@ Rails.application.routes.draw do
       resources :invoices, except:[:new]
       resources :loggings, only:[:show]
       resources :transaction_slaves, except:[:edit, :new, :destroy, :update]
-      resources :traces
+      resources :orders
       resources :transactions, only:[:show]
       resources :transaction_slaves, only:[:show]
       resources :stores
@@ -127,7 +127,9 @@ Rails.application.routes.draw do
          get :invoice_send, on: :member
          get :conciliate_orders, on: :member
       end           
-      resources :invoice_items
+      resources :invoice_items do
+        get 'show_conciliated', on: :member
+      end
       resources :loggings
         # resources :messages
         # resources :metatraders
