@@ -58,6 +58,7 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   account_server
   customer
   store
+  accounts
   traces
   slaves
   instruments

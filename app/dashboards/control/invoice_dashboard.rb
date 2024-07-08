@@ -13,6 +13,8 @@ class Control::InvoiceDashboard < Administrate::BaseDashboard
     email:                Field::String.with_options(searchable: false),
     amount:               Field::Number,
     invoiceable:          Field::Polymorphic,
+    items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
+    payment_link:         Field::String.with_options(searchable: false),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze
