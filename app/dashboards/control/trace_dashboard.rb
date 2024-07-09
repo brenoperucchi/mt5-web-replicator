@@ -71,6 +71,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   contract_volume_max
   customer_plans
   desc_contract
+  accounts
   created_at
   updated_at
   ].freeze

@@ -25,6 +25,7 @@ gem 'jbuilder', '~> 2.7'
 # gem 'bcrypt', '~> 3.1.7'
 
 gem 'bundler', '2.4.20'
+gem 'pg'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
@@ -95,7 +96,6 @@ group :development do
   gem 'html2slim', '0.2.3', git: 'https://github.com/brenoperucchi/html2slim.git'
 end
 
-gem 'pg', '1.4.5'
 gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
 gem 'administrate-field-acts_as_taggable'

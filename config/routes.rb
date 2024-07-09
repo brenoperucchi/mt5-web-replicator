@@ -101,7 +101,7 @@ Rails.application.routes.draw do
       resources :invoices, except:[:new]
       resources :loggings, only:[:show]
       resources :transaction_slaves, except:[:edit, :new, :destroy, :update]
-      resources :orders
+      resources :traces
       resources :transactions, only:[:show]
       resources :transaction_slaves, only:[:show]
       resources :stores

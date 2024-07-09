@@ -432,7 +432,7 @@ GEM
     pay (6.8.1)
       rails (>= 6.0.0)
     pdf-core (0.9.0)
-    pg (1.4.5)
+    pg (1.5.6)
     prawn (2.4.0)
       pdf-core (~> 0.9.0)
       ttfunk (~> 1.7)
@@ -740,7 +740,7 @@ DEPENDENCIES
   next_rails
   paper_trail (= 13.0.0)
   pay
-  pg (= 1.4.5)
+  pg
   pry (~> 0.14.1)
   pry-byebug
   puma (>= 6.4.1)
