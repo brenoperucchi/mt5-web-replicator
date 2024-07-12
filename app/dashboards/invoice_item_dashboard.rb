@@ -32,7 +32,7 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   }
 
   COLLECTION_ATTRIBUTES = %i[
-  name
+  invoice
   state
   amount
   store
@@ -62,7 +62,6 @@ class InvoiceItemDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  name
   state
   amount
   store

@@ -106,8 +106,9 @@ Rails.application.routes.draw do
       resources :transaction_slaves, only:[:show]
       resources :stores
       resources :payments
+      resources :orders
 
-      root "orders#index"
+      # root "orders#index"
     end
 
     namespace :admin do

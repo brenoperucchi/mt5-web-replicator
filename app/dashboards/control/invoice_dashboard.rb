@@ -14,6 +14,7 @@ class Control::InvoiceDashboard < Administrate::BaseDashboard
     amount:               Field::Number,
     invoiceable:          Field::Polymorphic,
     items:                Field::HasMany.with_options(class_name: 'InvoiceItem'),
+    payment:              Field::BelongsTo,
     payment_link:         Field::String.with_options(searchable: false),
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -39,6 +40,8 @@ class Control::InvoiceDashboard < Administrate::BaseDashboard
   name
   email
   amount
+  payment
+  payment_link
   invoiceable
   created_at
   updated_at

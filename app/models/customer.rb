@@ -16,7 +16,8 @@ class Customer < ApplicationRecord
   # before_update :register_plan_update
   # after_create :register_plan_create
 
-  belongs_to :store
+  # belongs_to :store
+
   has_one  :user,        as: :userable, dependent: :destroy
   has_many :plan_usages, as: :resourceable#, dependent: :destroy
   
@@ -32,6 +33,7 @@ class Customer < ApplicationRecord
   has_many :customer_plans, through: :plan_customers, source: :customer_plan#, dependent: :destroy
   
 
+  delegate :store, to: :user, allow_nil: true
   delegate :email, to: :user, allow_nil: true
 
   pay_customer
@@ -52,14 +54,14 @@ class Customer < ApplicationRecord
   #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "CustomerPlan", store: self.store)
   # end
 
-  def create_invoice(name = nil, date = nil, month_proporcional = false)
+  def create_invoice(date = nil, month_proporcional = false)
     date ||= DateTime.current
     date = date - 1.month
 
-    name = name.blank? ? "#{self.id}-#{date.strftime("%Y-%m")}" : name
-    invoice = invoices.find_by(name: name, store:store)
+    invoice_name ||= "#{self.id}-#{date.strftime("%Y-%m")}"
+    invoice = invoices.find_by(name: invoice_name, store:store)
     if invoice.nil?
-      invoice = invoices.new(name: name, store:store, kind: :client)
+      invoice = invoices.new(name: invoice_name, store:store, kind: :client)
       invoice.customer_calculate(self, date, month_proporcional)
       invoice.balance_update
       invoice.conciliate_request

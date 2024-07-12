@@ -29,4 +29,8 @@ class InvoiceItemPolicy < ApplicationPolicy
     @user.userable.role == "customer" or @user.userable.role == "administrator" 
   end
 
+  def show_conciliated?    
+    @user.userable.role == "customer" or @user.userable.role == "administrator" 
+  end
+
 end

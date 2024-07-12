@@ -78,9 +78,6 @@ class DashboardsController < ApplicationController
       customer_plan = plan_usage.usageable
       customer_plan.promotion_use = true if params[:promotion] == "promotion"
       customer_plan.save
-      # @account.customer.create_invoice_customer(invoice_name)
-      # @customer.create_user(email: @customer.user_email, password: password)
-      # redirect_to finish_dashboard_path(@account.store.url, @trace.name, account)
       if customer_plan.kind == "fixed"
         @account.create_invoice(@trace, true, nil)
         @invoice = @account.customer.invoices.first

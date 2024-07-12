@@ -14,7 +14,8 @@ class CustomerDashboard < Administrate::BaseDashboard
     stripe_product_id:    Field::String.with_options(searchable: false),
     role:                 CheckboxField.with_options(collection_key: Customer.roles.keys, default: :customer),
     role_control:         CheckboxField.with_options(collection_key: Customer.role_controls.keys, default: :admin),
-    store:                Field::BelongsTo,
+    # store:                Field::BelongsTo,
+    store:                Field::Delegate.with_options(class_name: "Store", searchable: false),
     user:                 Field::HasOne,
     # customer_plan:      Field::BelongsTo,
     customer_plans:       Field::HasMany,
@@ -67,7 +68,6 @@ class CustomerDashboard < Administrate::BaseDashboard
   role_control
   stripe_customer_id
   stripe_product_id
-  store
   user
   customer_plans
   accounts

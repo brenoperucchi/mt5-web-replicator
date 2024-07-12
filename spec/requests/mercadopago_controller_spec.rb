@@ -13,7 +13,7 @@ require 'rails_helper'
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 #
 # Compared to earlier versions of this generator, there is very limited use of
-# stubs and message expectations in this spec.  Stubs are only used when there
+# stubs and message expectations in this spec.  Stubs are only used when there0
 # is no simpler way to get a handle on the object needed for the example.
 # Message expectations are only used when there is no simpler way to specify
 # that an instance is receiving a specific message.
@@ -27,8 +27,8 @@ RSpec.describe 'Mercadopago Controller', type: :request do
     @trace = create(:trace, :copy, stores: [@store], instrument_control: true)
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
-    @admin = create(:customer, :admin, store:@store, user:@user_admin)
-    @customer = create(:customer, :customer, store:@store, user:@user_customer)
+    @admin = create(:customer, :admin, user:@user_admin)
+    @customer = create(:customer, :customer, user:@user_customer)
     @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     # @invoice = create(:invoice, store: @store, invoiceable:@customer)
@@ -61,8 +61,8 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.create_invoice(@trace, nil)
 
-      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice(invoice_name)
+      # invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice = @account.customer.create_invoice
       invoice.items.update_all(invoice_id: 41)
       invoice.update_columns(id: 41)
       expect {
@@ -80,8 +80,8 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.create_invoice(@trace, nil)
 
-      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice(invoice_name)
+      # invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice = @account.customer.create_invoice
       invoice.items.update_all(invoice_id: 42)
       invoice.update_columns(id: 42)
 
@@ -100,8 +100,8 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.create_invoice(@trace, nil)
 
-      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice(invoice_name)
+      # invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice = @account.customer.create_invoice
       # invoice.items.update_all(invoice_id: 1)
       # invoice.update_columns(id: 1)
 
@@ -120,8 +120,8 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.create_invoice(@trace, nil)
 
-      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice(invoice_name)
+      # invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice = @account.customer.create_invoice
       invoice.items.update_all(invoice_id: 27)
       invoice.update_columns(id: 27)
 
@@ -139,8 +139,8 @@ RSpec.describe 'Mercadopago Controller', type: :request do
 
       @account.create_invoice(@trace, nil)
 
-      invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
-      invoice = @account.customer.create_invoice(invoice_name)
+      # invoice_name = "#{@account.id}-#{Time.zone.now.strftime("%Y-%m")}" 
+      invoice = @account.customer.create_invoice
       invoice.items.update_all(invoice_id: 44)
       invoice.update_columns(id: 44)
 

@@ -1,4 +1,5 @@
 class InvoiceItem < ApplicationRecord
+  enum state: {normal: 0, conciliate:1, conciliated:2, error:3}
 
   # store :settings, accessors: [:name]
 
@@ -10,9 +11,10 @@ class InvoiceItem < ApplicationRecord
 
   has_many :loggings,      as: :resourceable, dependent: :destroy
 
-  enum state: {normal: 0, conciliate:1, conciliated:2, error:3}
+  include LibEnums
 
   delegate :store, to: :invoice, allow_nil: true
+  delegate :name,  to: :invoice, allow_nil: true
 
   after_save :calculate_invoice
 

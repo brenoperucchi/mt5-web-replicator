@@ -6,8 +6,9 @@ module LibEnums
 
     self.defined_enums.keys.each do |enum|
       define_method("#{enum}=") do |value|
-        value_inclusion = self.class.send("#{enum.pluralize}").keys
-        if value.nil? || !value_inclusion.include?(value)
+        inclusion = self.class.send("#{enum.pluralize}")&.keys.include?(value) if value.is_a?(String)
+        inclusion ||= self.class.send("#{enum.pluralize}")&.values.include?(value) if value.is_a?(Numeric)
+        if value.nil? || !inclusion
           instance_variable_set("@not_valid_#{enum}", true)
         else
           super(value)

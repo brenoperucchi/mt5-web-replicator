@@ -15,6 +15,9 @@
         ".svn",
         ".git",
         ".hg",
+        ".vscode",
+        ".ruby-lsp",
+        ".bundle",
         "vendor/plugins",
         "public/assets",
         "public/uploads",
@@ -26,8 +29,5 @@
       /*"follow_symlinks": true,*/
       "path": ".",
     },
-    {
-			"path": "/Users/brenoperucchi/Devs/Robos/ProfitMT5"
-		},
   ],
 }

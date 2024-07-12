@@ -1,19 +1,5 @@
 module Admin
   class InvoicesController < Admin::BaseController
-
-
-    def conciliate_orders
-      @invoice = Invoice.find(params[:id])
-      if @invoice && @invoice.loggings.where(state: "CONCILIATE").present?
-        
-        logging = @invoice.loggings.where(state: "CONCILIATE").last
-
-        @orders_presenter = API::V2::APISlaveOrdersHistoryPresenter.new(logging.content)
-        @conciliate_orders = @orders_presenter&.orders
-        @conciliate_orders = @conciliate_orders if @conciliate_orders.present?
-      end
-      @conciliate_orders ||= []
-    end
     # Overwrite any of the RESTful controller actions to implement custom behavior
     # For example, you may want to send an email after a foo is updated.
     #

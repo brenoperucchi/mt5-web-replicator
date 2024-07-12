@@ -122,7 +122,7 @@ class Invoice < ApplicationRecord
     end
   
     if self.save
-      item = self.items.find_or_create_by(name: :customer_monthly_payment, account: account, trace: trace, plan_usage:plan_usage)
+      item = self.items.find_or_create_by(handle: :customer_monthly_payment, account: account, trace: trace, plan_usage:plan_usage)
       item.update(amount: amount, description: description)
       plan_usage.update_next_charged
     end
@@ -141,7 +141,7 @@ class Invoice < ApplicationRecord
     timestamp = I18n.l DateTime.current, format: :short8
     puts "#{timestamp} - Runner Invoice.generate_month"
     Customer.customer.user.not_deleted.each do |customer|
-      customer.create_invoice(nil, date)
+      customer.create_invoice(date)
     end
 
     self.conciliate_invoice_items

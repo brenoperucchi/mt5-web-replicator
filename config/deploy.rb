@@ -61,7 +61,7 @@ namespace :deploy do
     # invoke 'unicorn:start'
     on roles(:app) do
       execute "systemctl --user restart puma.service"
-      execute "systemctl --user restart sidekiq.service"
+      # execute "systemctl --user restart sidekiq.service"
       # execute "systemctl --user status puma.service"
       # execute "systemctl --user start puma.service"
       # execute "systemctl --user status puma.service"

@@ -15,10 +15,11 @@
     data: { confirm: t("administrate.actions.confirm") }
   ) if show_action?(:destroy, resource) %></td>
 <% end %>
-<% if resource.class.name == "Invoice" %>
+<% if resource.class.name == "InvoiceItem" %>
   <td><%= link_to(
-    'Send Invoice',
-    [:invoice_send, namespace, resource],
+    'Show Conciliate',
+    [:show_conciliated, namespace, resource],
     class: "action-edit",
-  ) if show_action?(:invoice_send, resource) %></td>
+  ) if show_action?(:show_conciliated, resource) %></td>
 <% end %>
+

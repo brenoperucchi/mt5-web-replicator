@@ -10,7 +10,7 @@ class	API::V2::APISlavePresenter
 
 	def self.api_slave(params, version, request)
 	  map = String.new
-	  message = params[:body]
+	  message = params[:body] 
 	  content = YAML.load(message)
 	  date_today = DateTime.current
 	  skip_logging = false
@@ -22,9 +22,9 @@ class	API::V2::APISlavePresenter
 	    if account
 	      slave = account.slaves.not_deleted.where(comment: content['comment']).first
 
-				self.check_order_duplicate(slave, content, action)	      
-
 	      unless slave.nil?
+					self.check_order_duplicate(slave, content, action)	      
+
 	        case action
 	        when "OPEN", "OPENED"
 	          api_attributes = SerializerAPITransactionSlave.new(message).api_attributes
@@ -75,9 +75,6 @@ class	API::V2::APISlavePresenter
 	          if logging_count >= 2
 	            action = "NOSLTP"
 	            skip_logging = true if slave.loggings.where(state: action, created_at:date_today.beginning_of_day..date_today.end_of_day).present?                    
-	            # api_attributes = SerializerAPITransactionSlave.new(message).api_attributes.merge(stop_loss:0, take_profit:0).except(:price_open, :price_closed)
-	            # slave.attributes = api_attributes
-	            # slave.save
 	            @version = slave.versions.last
 	          end
 	        when "NOTFIND"

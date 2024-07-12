@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
 		if resource.userable.try(:administrator?)
 			admin_customers_path
 		elsif resource.userable.try(:customer?) and (resource.userable.try(:admin?) || resource.userable.try(:owner?))
-			control_accounts_path
+			control_orders_path
 		elsif resource.userable.try(:customer?) and resource.userable.try(:user?)
 			panel_dashboard_index_path
 		else
