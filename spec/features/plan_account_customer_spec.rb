@@ -11,7 +11,7 @@ RSpec.describe "PlanAccountCustomer" do
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, user:@user_admin)
-    @customer = create(:customer, :customer, store:@store, user:@user_customer, customer_plan_ids:[1])
+    @customer = create(:customer, :customer, user:@user_customer, customer_plan_ids:[1])
     @account_copy = create(:account, :copy, store: @store, customer:@customer,meta_margin_mode: 'hedging')
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging', contract_volume: 1)
     @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')    

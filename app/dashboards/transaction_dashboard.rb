@@ -10,6 +10,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:                 Field::Number,
     ticket:             Field::String,
+    position_id:        Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
     mfe_max:            Field::String.with_options(searchable: false),
@@ -61,6 +62,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   symbol
   state
   ticket
+  position_id
   orders
   trace
   account

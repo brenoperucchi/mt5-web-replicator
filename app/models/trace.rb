@@ -9,7 +9,7 @@ class Trace < ApplicationRecord
   include AlgoStatistic
   include LibControl
 
-  enum kind:      { telegram: 0, copy:     1 }
+  enum kind:      { telegram: 0, copy: 1, manual:2}
   enum kind_copy: { normal:   0, prop_firm:1 }
 
   serialize :mfe_analyzed
@@ -93,12 +93,12 @@ class Trace < ApplicationRecord
   end
 
   def create_order(order_params, account, message, symbol, api_version)
-    apiCopySerializerClass = Class.const_get("API::#{api_version.try(:upcase)}::APICopySerializer")
-
-    ticket = order_params['ticket_id']
-    instrument = check_instrument(account, symbol)
+    copySerializer = Class.const_get("API::#{api_version.try(:upcase)}::CopySerializer").new(order_params)
     
-    copy_attributes = apiCopySerializerClass.new(order_params).copy_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
+    instrument = check_instrument(account, symbol)
+      
+    copy_attributes = copySerializer.copy_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
+    ticket = copySerializer.ticket
 
     self.stores.each do |current_store|
       slaves = self.accounts.slave.enable.where(store: current_store)
@@ -107,7 +107,7 @@ class Trace < ApplicationRecord
       if account.netting?
         order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
         if order.nil?
-          order = account.orders.create(messages: [message], message: message, trace: self, content_id:ticket, symbol: instrument, account:account, store:current_store) 
+          order = account.orders.create(messages: [message], message: message, trace: self, content_id: ticket, symbol: instrument, account:account, store:current_store) 
         end
         transaction = Transaction.find_by(symbol: instrument, account: account, trace:self)
         transaction ||= Transaction.create(copy_attributes.merge(account:account))
@@ -122,7 +122,7 @@ class Trace < ApplicationRecord
       end
 
 
-      # api_transaction = apiCopySerializerClass.new(order_params)
+      # api_transaction = copySerializer.new(order_params)
       transaction.update_mfe_mae(copy_attributes[:mfe], copy_attributes[:mae], copy_attributes[:time_trader]) 
 
       # CREATE ORDER -> TRANSACTION -> SLAVES
@@ -130,7 +130,7 @@ class Trace < ApplicationRecord
         order.execute
       end
 
-      if order and not order.error?
+      if order.valid? and not order.error?
         transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account)
         transaction.execute unless transaction.executed?
         if transaction and not transaction.error?
@@ -138,7 +138,8 @@ class Trace < ApplicationRecord
           slaves.each do |account_slave|
             
             instrument = check_instrument(account, symbol, account_slave)
-            slave_attributes = SerializerAPITransactionSlave.new(order_params).trace_attributes(instrument, account_slave, transaction, self, current_store)
+            serializer = "API::#{api_version.try(:upcase)}::SlaveSerializer".classify.safe_constantize.new(order_params)
+            slave_attributes = serializer.trace_attributes(instrument, account_slave, transaction, self, current_store)            
             slave = order.slaves.new(slave_attributes)
             slave.magic_number = check_magic_number(slave_attributes[:magic_number])
             if self.prop_firm?
@@ -150,7 +151,6 @@ class Trace < ApplicationRecord
               slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
             else
               message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order)
-              me
             end
           end
         end

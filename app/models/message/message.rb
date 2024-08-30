@@ -32,6 +32,11 @@ class Message::Message < ApplicationRecord
     loggings.try(:first).try(:subtree)
   end
 
+  # def presenter
+  #   api_version = self.class.const_get('API_VERSION')
+  #   "API::#{api_version.try(:upcase)}::OrdersPresenter".classify.safe_constantize.new(content)
+  # end
+
   def params_copy(key = nil)
     if self.content.is_a?(String)
       begin

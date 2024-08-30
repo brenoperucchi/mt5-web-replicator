@@ -1,7 +1,7 @@
 class AccountSerializer < ActiveModel::Serializer
-  attributes :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :meta_version_accept, 
+  attributes :api_store_message, :store_state, :store_message, :account_state, :account_margin_mode, :account_mode, :meta_version_accept, 
              :api_server_hostname, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_time_max_seconds, :api_slippage, 
-             :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
+             :api_environment_local, :api_store_state, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
              :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, :api_send_orders_history, 
              :api_send_orders_history_ranges, :api_close_all_orders
 
@@ -47,7 +47,7 @@ class AccountSerializer < ActiveModel::Serializer
   end
 
   def api_store_message
-    object.api_store_message.present? ? object.api_store_message : Store.first.api_store_message
+    object.api_store_message.present? ? object.api_store_message : (Store.first.api_store_message || "")
   end
 
   def api_milliseconds_timer
@@ -117,7 +117,7 @@ class AccountSerializer < ActiveModel::Serializer
     params = instance_options[:params]
     if meta_version_accept && yaml[@expert_name][@expert_version] == "disable"
       yaml[@expert_name]['disable_msg'].gsub("|version|", @expert_version.gsub('_','.')) 
-    end
+    end.to_s
   end
 
   def account_state

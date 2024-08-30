@@ -4,10 +4,7 @@ class Message::V2::Metatrader < Message::Message
 
   API_VERSION = "v2"
 
-
   state_machine :initial => :pending do
-    # after_transition :pending => :executed, :do => lambda { |message| message.create_orders }
-    # after_transition :pending => :executed, :do => lambda { |message| message.close_orders }
     event :execute do
         transition :pending => :executed
     end
@@ -50,11 +47,11 @@ class Message::V2::Metatrader < Message::Message
   end
 
   def transaction_closed(transaction, copy_params, logging, kind)
-    apiCopySerializerClass = Class.const_get("API::#{API_VERSION.try(:upcase)}::APICopySerializer")
+    copySerializer = Class.const_get("API::#{API_VERSION.try(:upcase)}::CopySerializer")
     if transaction and transaction.can_close?
       # transaction.order.messages << self
       transaction.trace.messages << self
-      transaction.attributes = apiCopySerializerClass.new(copy_params).closed_attributes
+      transaction.attributes = copySerializer.new(copy_params).closed_attributes
       transaction.save
       transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
       transaction.update_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
@@ -93,7 +90,7 @@ class Message::V2::Metatrader < Message::Message
           params_copy("orders_open").each_with_index do |(ticket, copy_params), index|
             next if copy_params.empty?
 
-            # copy_attributes = API::V220::APICopySerializer.new(copy_params).api_attributes
+            # copy_attributes = API::V220::CopySerializer.new(copy_params).api_attributes
             state_meta = copy_params["state_meta"]
             traces.active.not_deleted.each do |trace|
               orders = trace.orders.where(content_id: ticket)
@@ -113,7 +110,7 @@ class Message::V2::Metatrader < Message::Message
                     self.orders << order unless self.order_ids.include?(order.id)
                     self.traces << trace unless self.trace_ids.include?(trace.id)
                     order.transactions.each do|t|     
-                      t.update_order_and_log(copy_params) if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
+                      t.update_modify_meta(copy_params) if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
                     end
                   end
                 end

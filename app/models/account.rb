@@ -46,10 +46,12 @@ class Account < ApplicationRecord
 
   has_many :balances,     dependent: :destroy, autosave: true
   has_many :orders,       through: :balances, source: :order,         dependent: :destroy, autosave: true
-  has_many :masters,      class_name: 'Transaction',  dependent: :destroy
   has_many :transactions,-> { distinct }, through: :orders,   source: :transactions,  dependent: :destroy
   has_many :slaves,       ->(account) { where("transaction_slaves.account_id = ?", account.id).distinct },
                            through: :orders, source: :slaves,         dependent: :destroy
+
+  has_many :masters,      class_name: 'Transaction',  dependent: :destroy
+  has_many :transaction_slaves, dependent: :destroy
 
   validates_presence_of :name
   validates :name, format: { with: /\A\d+\z/} #, message: "Integer only. No sign allowed." }
@@ -65,8 +67,8 @@ class Account < ApplicationRecord
   def set_advanced_attributes
     self.update(api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 30, api_time_to_check_server: 30, api_time_max_seconds: 30, api_slippage: 30, 
                 api_environment_local: false, api_store_state: true, api_milliseconds_timer: 2400, api_milliseconds_tick: 2400, api_event_on_timer: true, 
-                api_event_on_tick: false, api_mfe_mae_display: true, api_send_orders_history: false, api_send_orders_history: false, 
-                api_send_orders_history_date_start: nil, api_send_orders_history_date_end: nil, api_close_all_orders: false)
+                api_event_on_tick: false, api_mfe_mae_display: true,  api_send_orders_history: false, api_send_orders_history_date_start: nil, 
+                api_send_orders_history_date_end: nil, api_close_all_orders: false)
   end
 
   def contract_volume

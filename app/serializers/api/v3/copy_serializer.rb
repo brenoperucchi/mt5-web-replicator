@@ -1,6 +1,6 @@
 module API
-  module V2
-    class APICopySerializer < ActiveModel::Serializer
+  module V3
+    class CopySerializer < ActiveModel::Serializer
       
       def copy_attributes
         {
@@ -13,9 +13,10 @@ module API
           take_profit: take_profit,
           ticket: ticket,
           open_at: open_at,
-          comment: obj['comment'],
-          ticket_deal: obj['ticket_deal'],
-          profit: obj['profit'],
+          comment: comment,
+          ticket_deal: ticket_deal,
+          profit: profit,
+          entry: entry,
           # time_trader: time_trader,
           # mae: mae,
           # mfe: mfe,
@@ -25,10 +26,35 @@ module API
       def closed_attributes
         {
           price_closed: price_closed,
-          profit: obj['profit'],
+          profit: profit,
           closed_at: closed_at,
         }
       end
+
+      def trace_attributes(instrument, account_slave, master, trace)
+        {
+          symbol: instrument,
+          ticket: ticket,
+          position_id: obj['positionID'],
+          ticket_deal: ticket_deal,
+          ordertype: ordertype,
+          lot: lot,
+          price_open: price_open,
+          price_closed: price_closed,
+          price_request: price_open,
+          stop_loss: stop_loss,
+          take_profit: take_profit,
+          profit: 0,
+          comment: comment,
+          magic_number: magic_number,
+          account: account_slave,
+          master: master,
+          trace: trace,
+          open_at: nil,
+          closed_at: nil
+        }.compact
+      end
+
 
       def obj
         if object.is_a?(Hash)
@@ -38,36 +64,56 @@ module API
         end
       end
 
+      def comment
+        obj['comment']
+      end
+
+      def ticket_deal
+        obj['ticketDeal']
+      end
+
       def ordertype
         obj['type']
       end
 
+      def entry
+        obj['entry']
+      end
+
       def lot
+        obj['volume']
+      end      
+
+      def volume
         obj['volume']
       end
 
       def price_open
-        obj['price_open']
+        obj['priceOpen']
       end
 
       def price_closed
-        obj['price_closed']
+        obj['priceClose']
       end
 
       def magic_number
-        obj['magicnumber'] || obj['magic_number']
+        obj['magicNumber']
       end
 
       def stop_loss
-        obj['stop_loss']
+        obj['stopLoss']
       end
 
       def take_profit
-        obj['take_profit']
+        obj['takeProfit']
       end
 
       def ticket
-        obj['ticket_id']
+        obj['ticketMaster']
+      end
+
+      def profit
+        obj['profit']
       end
 
       def mfe
@@ -79,20 +125,20 @@ module API
       end
 
       def time_trader
-        time_zone(obj['time_gmt'], obj['time_trader'], obj['time_trader']) unless obj['time_trader'].nil?
+        time_zone_diff(obj['timeGMT'], obj['timeTrader'], obj['timeTrader']) unless obj['timeTrader'].nil?
       end
 
       def closed_at
-        update_time_zone((obj['closed_at'] || obj['close_at']))
+        update_time_zone(obj['closeAt'])
       end
 
       def open_at
-        update_time_zone(obj['open_at'])
+        update_time_zone(obj['openAt'])
       end
 
       def update_time_zone(time_at)
         return nil if time_at.blank?
-        time_zone_diff(obj['time_gmt'], obj['time_trader'], time_at)
+        time_zone_diff(obj['timeGMT'], obj['timeTrader'], time_at)
       end
 
       def time_zone_diff(time_gmt, time_trader, time_at)

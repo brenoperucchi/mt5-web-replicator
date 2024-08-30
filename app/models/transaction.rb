@@ -30,16 +30,15 @@ class Transaction < ApplicationRecord
 
   validates_uniqueness_of :ticket, scope: [:account_id, :trace_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
-  # enum state: { pending: 0, executed: 1, closed: 2, error: 3, closed_info: 4 }
+  # enum state: { pending: 0, executed: 1, closed: 2, error: 3 }
 
   scope :pending,               ->{where(state: :pending)}
   scope :ordered,               ->{where(state: [:pending, :executed])}
-
   scope :closed,                ->{where(state: :closed)}
   scope :executed_closed,       ->{where(state: [:closed, :executed])}
-  scope :closed_info,           ->{where(state: 'closed_info')}
   scope :finish,                ->{where(state: [:closed, 'error'])}
   scope :executed,              ->{where(state: 'executed')}
+  scope :not_executed,          ->{where.not(state: 'executed')}
   scope :error,                 ->{where(state: 'error')}
   scope :not_error,             ->{where.not(state: 'error')}
   scope :closed_error,          ->{where(state: [:closed, 'error'])}
@@ -92,10 +91,7 @@ class Transaction < ApplicationRecord
       transition [:pending, :executed, :closed] => :error
     end
     event :close do
-      transition [:pending, :executed, :closed_info] => :closed
-    end
-    event :close_info do
-      transition [:closed] => :closed_info
+      transition [:pending, :executed] => :closed
     end
     event :restart do
       transition [:executed, :error, :closed] => :pending
@@ -132,20 +128,17 @@ class Transaction < ApplicationRecord
     end
   end
 
-  def update_order_and_log(copy_params)
+  def update_modify_meta(serializer)
     attributes = {
-      lot: copy_params["volume"],
-      take_profit: copy_params['take_profit'],
-      stop_loss: copy_params['stop_loss'],
-      profit: copy_params["profit"]
+      lot: serializer.lot,
+      take_profit: serializer.take_profit,
+      stop_loss: serializer.stop_loss,
+      profit: serializer.profit,
+      price_request: serializer.price_open
     }
-
-    # Atribuir os novos valores aos atributos, mas não salve ainda
     self.assign_attributes(attributes)
 
-    # Efetuar outras ações se o objeto não estiver em estado de erro
     if not self.error?
-      # Se houver mudanças, prosseguir com o salvamento e outras ações
       if self.changed?
         chat_id = self.account.store.telegram_bot_chat_id
         if chat_id.present?
@@ -153,23 +146,30 @@ class Transaction < ApplicationRecord
           TelegramJob.perform_async(chat_id, content)
         end
 
-        if self.save
-          # Crie o log apenas se o salvamento foi bem-sucedido
-          loggings.create(content: copy_params, changeset: versions.last.changeset, version: version, state: 'MODIFY')
-          update_attributes_slaves(lot, take_profit, stop_loss)
-        end
+        # if self.save
+        #   loggings.create(content: serializer.obj, changeset: versions.last.changeset, version: version, state: 'MODIFY')
+        #   update_slaves(lot, take_profit, stop_loss)
+        # end
       end
     end
 
     # Atualizar as estatísticas MFE e MAE independentemente das mudanças em outros atributos
-    update_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"])
+    # update_mfe_mae(serializer.mfe, serializer.mae, serializer.time_trader)
 
-    return self
+    return self.save
+  end
+
+  def close_slaves
+    slaves.each do |slave|
+      if slave.close
+        slave.loggings.create(content: "Automatically remove by Transaction.close_slaves - #{self.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:slave.loggings.first, loggerable: slave.order.messages.last)
+      end
+    end
   end
 
 
-  def update_attributes_slaves(lot=nil, take_profit=nil, stop_loss=nil)
-    self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss)}
+  def update_slaves(lot=nil, take_profit=nil, stop_loss=nil, price_request=nil)
+    self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss, price_request)}
   end
 
   def update_mfe_mae(mfe, mae, time_trader)

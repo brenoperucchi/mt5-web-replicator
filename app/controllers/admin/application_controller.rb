@@ -40,7 +40,7 @@ module Admin
     end
 
 
-    def index      
+    def index
       authorize_resource(resource_class)
       search_term = params[:search].to_s.strip
       resources = filter_resources(scoped_resource, search_term: search_term)

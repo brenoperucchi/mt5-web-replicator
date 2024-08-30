@@ -29,7 +29,7 @@ RSpec.describe 'Store Controller', type: :request do
     @store2 = create(:store, :store2, plan_id: @plan2.id)
     @trace2 = create(:trace, :copy2, stores: [@store2], instrument_control: true)
     @user_customer = create(:user, :customer, store: @store2)
-    @customer = create(:customer, :customer, store:@store2, user:@user_customer)
+    @customer = create(:customer, :customer, user:@user_customer)
     @account_copy = create(:account, :copy, store: @store2, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [@trace2.id], instrument_control:true)
 
     @customer_plan = @store.customer_plans.first

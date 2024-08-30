@@ -1,6 +1,6 @@
 class TransactionSlave < ApplicationRecord
   
-  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, closed_info:7}
+  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, conciliated:7}
 
   include LibEnums
 
@@ -26,10 +26,11 @@ class TransactionSlave < ApplicationRecord
   scope :to_remove,           ->{where(state: 'remove')}
   scope :pending_executed,    ->{where(state: [:pending, :executed])}
   scope :closed_deleted,      ->{where(state: [:closed, :deleted])}
-  scope :opened,              ->{where(state: [:pending, :executed, :remove, :closed_info])}
+  scope :opened,              ->{where(state: [:pending, :executed, :remove])}
   scope :entire,              ->{where(state: [:pending, :executed, :remove, :deleted, :closed])}
   scope :not_closed,          ->{where.not(state: ['closed', 'deleted'])}
   scope :closed_error,        ->{where(state: ['closed', 'error'])}
+  scope :not_executed,        ->{where.not(state: ['executed'])}
   scope :not_error,           ->{where.not(state: ['error'])}
   scope :not_gain,            ->{where.not('transaction_slaves.profit >= 0')}
   scope :gain,                ->{where('transaction_slaves.profit >= 0')}
@@ -40,7 +41,7 @@ class TransactionSlave < ApplicationRecord
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :ticket_slave, :order_id], on: :create, if: Proc.new { account.try(:hedging?) }
   validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id, :order_id], on: :create, allow_blank: false, allow_nil: false, 
-                          if: Proc.new { account.try(:hedging?) }
+                          if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0}
   # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   after_create :restrict_magic_number?#, :check_duplicate
@@ -72,11 +73,11 @@ class TransactionSlave < ApplicationRecord
   end
 
   def open_at_master
-    master.open_at
+    master.try(:open_at)
   end
 
   def closed_at_master
-    master.closed_at
+    master.try(:closed_at)
   end
 
   # def check_duplicate
@@ -113,6 +114,9 @@ class TransactionSlave < ApplicationRecord
     event :close do
       transition [:pending, :remove, :executed, :error] => :closed
     end  
+    event :conciliate do
+      transition [:pending, :remove, :executed, :error] => :conciliated
+    end  
     event :deleted do
       transition [:pending, :remove, :executed, :closed] => :deleted
     end
@@ -122,30 +126,13 @@ class TransactionSlave < ApplicationRecord
 
     state :remove do
       def delete_pending(state)
-        # self.deleted
-        # self.master.close
       end
     end
     
     state :closed do
       def update_state(state)
         self.update(closed_at: Time.zone.now)
-
         self.order.close
-        # self.orders.map(&:close)# if orders.first.slaves.closed.count == orders.first.slaves.count
-
-        # if master.trace.copy? and account.hedging?
-        #   master.close
-        # elsif master.slaves.count > 1 and master.slaves.first == self
-    
-        # NOTE - IF TP1 IS REACH THEN TPs IS MASTER OPEN PRICE
-        # if master.slaves.count > 1 and master.slaves.first == self
-        #   master.slaves.not_closed.each do |slave|
-        #     slave.update(stop_loss: slave.price_open)
-        #   end
-        # # else
-        # #   master.close if master.slaves.not_closed.count == 0
-        # end
       end
     end
     
@@ -155,9 +142,9 @@ class TransactionSlave < ApplicationRecord
     order.restrict_magic_number(self)
   end
 
-  def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil)
+  def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil, price_request=nil)
     lot = nil if account.hedging? or master.account.hedging?
-    attributes = {lot: lot, take_profit:take_profit, stop_loss:stop_loss}.compact
+    attributes = {lot: lot, take_profit:take_profit, stop_loss:stop_loss, price_request:price_request}.compact
     self.update(attributes)
   end
 
@@ -166,13 +153,13 @@ class TransactionSlave < ApplicationRecord
   end
 
   def seconds_ago
-    # difference = (self.master.created_at - self.master.open_at).to_i
-    # difference = difference > 1 ? difference : 0
-    # seconds_ago = (self.master.open_at - Time.zone.now + difference).to_i.abs
-    seconds_ago1 = (self.master.open_at - Time.zone.now).to_i.abs
-    seconds_ago2 = (self.master.created_at - Time.zone.now).to_i.abs
+    seconds_ago1 = 0 
+    seconds_ago2 = 0
+
+    seconds_ago1 = (self.master.open_at - Time.zone.now).to_i.abs if self.master.try(:open_at) 
+    seconds_ago2 = (self.master.created_at - Time.zone.now).to_i.abs if self.master.try(:created_at)
+    
     result = seconds_ago1 > seconds_ago2 ? seconds_ago1 : seconds_ago2
-    # Rails.env.test? ? 0 : result
   end
 
 end

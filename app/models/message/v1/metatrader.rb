@@ -24,14 +24,14 @@ class Message::V1::Metatrader < Message::Message
         trace.masters.where(account:account_copy).pending_executed.each do |transaction|
           transaction.close
           transaction.close_info
-          transaction.loggings.create(content: "Remove automatically by Close Orders Blank #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
+          transaction.loggings.create(content: "Remove automatically by Close Orders Blank #{transaction.id}", state: "closed", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
         end
       else
         trace.masters.where(account:account_copy).pending_executed.each do |transaction|
           unless yaml_content['orders'].flatten.detect{|x| x['ticket_id'].to_i == transaction.ticket.to_i}
             transaction.close
             transaction.close_info
-            transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "CLOSED_INFO", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
+            transaction.loggings.create(content: "Remove automatically by Close Orders #{transaction.id}", state: "closed", resourceable:self, changeset: transaction.try(:versions).try(:last).try(:changeset))
           end
         end      
       end

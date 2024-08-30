@@ -59,7 +59,9 @@
       <div class='main_content_sidebar' style="">
           <div class="wrapper d-flex align-items-stretch">
 
-            <% states = Logging.all.distinct.pluck(:state).sort.reverse %>
+            <% states = Logging.all.distinct.pluck(:state) %>
+            <% states.delete("(null)") %>
+            <% states = states.compact.sort.reverse %>
             <% attribute_labels = { profit_search: 'Profit Copy', ticket_search:'Ticket' } %>
 
             <nav id="sidebar" class="order-last active">

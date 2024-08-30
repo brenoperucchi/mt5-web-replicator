@@ -50,7 +50,7 @@ class Store < ApplicationRecord
   has_many :payments,    dependent: :destroy
   has_many :payment_methods, through: :payments, source: :payment_method
 
-  has_many :loggings,   as: :loggerable,    dependent: :destroy
+  has_many :loggings,   as: :resourceable,  dependent: :destroy
   has_many :tokens,     as: :resourceable,  dependent: :destroy
 
   has_many :plan_stores, dependent: :destroy
@@ -207,9 +207,9 @@ class Store < ApplicationRecord
     end
     if usage.proporcional_calculate(date_today, amount, proporcional)
       if usage.resourceable.is_a?(Account)
-        item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount_proportional, description: usage.description, account: usage.resourceable) 
+        item = invoice.items.find_or_create_by(handle: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount_proportional, description: usage.description, account: usage.resourceable) 
       else
-        item = invoice.items.find_or_create_by(name: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount_proportional, description: usage.description) 
+        item = invoice.items.find_or_create_by(handle: "month_#{usage.handle.try(:downcase)}",  amount: usage.amount_proportional, description: usage.description) 
       end
       usage.update(charged_at: date_today)
       invoice.balance_update

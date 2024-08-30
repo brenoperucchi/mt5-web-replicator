@@ -16,6 +16,7 @@ class LoggingDashboard < Administrate::BaseDashboard
     account:      Field::BelongsTo,
     changeset:    Field::String.with_options(searchable: true),
     state:        Field::String.with_options(searchable: false),
+    request_url:  Field::String.with_options(searchable: false),
     created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S")
   }.freeze
@@ -45,6 +46,7 @@ class LoggingDashboard < Administrate::BaseDashboard
   resourceable
   changeset
   content
+  request_url
   files
   created_at
   updated_at

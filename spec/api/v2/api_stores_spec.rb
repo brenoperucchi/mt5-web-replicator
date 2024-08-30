@@ -40,7 +40,7 @@ RSpec.describe API::V2::APIStore do
         # account = Account.find_by(name_id: params[:account_name_id])
 
         # @store2 = create(:store, :store2, plan_id: @plan1.id)
-        @customer2 = create(:customer, :customer2, store:@store, user:@user_customer)
+        @customer2 = create(:customer, :customer2, user:@user_customer)
         @account_copy2 = create(:account, :copy, store: @store, customer:@customer2, meta_margin_mode: 'hedging', trace_ids: [1,2], instrument_control:true)    
         post "/api/v2/stores/config/imentore_copy/2_10/XPDEMO/10100/HEDGING", params: {'EnvironmentLocal':'1'}
         account_server = AccountServer.find_by(name: "xpdemo")
@@ -74,7 +74,7 @@ RSpec.describe API::V2::APIStore do
 
         account_server = AccountServer.find_by(name: "darwinexdemo")
         @store2 = create(:store, :store2, plan_id: @plan1.id)
-        @customer2 = create(:customer, :customer2, store:@store, user:@user_customer)
+        @customer2 = create(:customer, :customer2, user:@user_customer)
         @account_copy2 = create(:account, :copy2, store: @store2, customer:@customer2, meta_margin_mode: 'hedging', trace_ids: [1,2], instrument_control:true)    
         post "/api/v2/stores/config/imentore_copy/2_10/DarwinexDemo/10100/HEDGING", params: {'EnvironmentLocal':'1'}
         expect(Account.all.size).to be == 3

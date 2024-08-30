@@ -22,13 +22,14 @@ class Order < ApplicationRecord
   has_many :accounts, through: :balances, source: :account,    autosave: true
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
-  scope :ready,     ->{ where(state: 'prepared').where.not(state:'error')}
-  scope :error,     ->{ where(state: 'error')}
-  scope :executed,  ->{ where(state: 'executed')}
-  scope :closed,    ->{ where(state: 'closed')}
-  scope :pending,   ->{ where(state: 'pending')}
+  scope :ready,       ->{ where(state: 'prepared').where.not(state:'error')}
+  scope :error,       ->{ where(state: 'error')}
+  scope :executed,    ->{ where(state: 'executed')}
+  scope :closed,      ->{ where(state: 'closed')}
+  scope :pending,     ->{ where(state: 'pending')}
+  scope :conciliated, ->{ where(state: 'conciliated')}
 
-  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id, :store_id], on: :create, if: Proc.new { content_id != -1 }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id, :store_id], on: :create, if: Proc.new { state != "conciliated" }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 
   has_one_attached :image
 
@@ -63,6 +64,9 @@ class Order < ApplicationRecord
     end
     event :erro do
       transition [:pending, :prepared, :executed] => :error
+    end
+    event :conciliate do
+      transition [:pending] => :conciliated
     end
     event :close do
       transition [:executed] => :closed
@@ -173,18 +177,19 @@ class Order < ApplicationRecord
     seconds_ago = resource.try(:seconds_ago) || 0
     openprice = price_open(resource)
     order_trace = self.trace_id
-    openat = Rails.env.test? ? 0 : resource.master.open_at.to_i
+    openat = Rails.env.test? ? 0 : resource.try(:master).try(:open_at).to_i
     comment = resource.try(:comment).to_s.gsub(/[^0-9A-Za-z]/, '_')
     contract_volume = resource.try(:account).try(:contract_volume)
     "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{resource.magic_number}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}|#{contract_volume}"
   end
 
   def price_open(resource)
-    if resource.pending?
+    # binding.pry
+    # if resource.pending?
       (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
-    else
-      resource.price_open
-    end
+    # else
+    #   resource.price_open
+    # end
   end
 
   def order_pending?

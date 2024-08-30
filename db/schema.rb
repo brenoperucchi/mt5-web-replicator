@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_06_04_200225) do
+ActiveRecord::Schema.define(version: 2024_08_12_174917) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -206,6 +206,7 @@ ActiveRecord::Schema.define(version: 2024_06_04_200225) do
     t.bigint "account_id"
     t.string "ancestry", collation: "C"
     t.text "settings"
+    t.text "params"
     t.index ["account_id", "state", "created_at"], name: "idx_loggings_account_state_created_at"
     t.index ["account_id"], name: "index_loggings_on_account_id"
     t.index ["ancestry"], name: "index_loggings_on_ancestry"
@@ -592,6 +593,8 @@ ActiveRecord::Schema.define(version: 2024_06_04_200225) do
     t.integer "trace_id"
     t.integer "order_id"
     t.bigint "store_id"
+    t.integer "entry"
+    t.bigint "position_id"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
     t.index ["order_id"], name: "idx_transaction_slaves_order_id"
     t.index ["state", "closed_at"], name: "idx_transaction_slaves_state_closed_at"
@@ -626,6 +629,8 @@ ActiveRecord::Schema.define(version: 2024_06_04_200225) do
     t.datetime "closed_at"
     t.integer "deal_id"
     t.integer "ticket_deal"
+    t.integer "entry"
+    t.bigint "position_id"
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"
