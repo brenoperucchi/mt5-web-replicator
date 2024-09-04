@@ -1,4 +1,4 @@
-class	API::V3::StorePresenter < API::BasePresenter
+class	API::V3::StorePresenter < API::V3::BasePresenter
 
 	attr_accessor :params, :version, :request, :logging, :serializer, :account
 

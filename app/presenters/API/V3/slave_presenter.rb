@@ -1,4 +1,4 @@
-class	API::V3::SlavePresenter < API::BasePresenter
+class	API::V3::SlavePresenter < API::V3::BasePresenter
 
 	API_VERSION = "v3"
 
