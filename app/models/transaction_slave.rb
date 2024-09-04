@@ -142,10 +142,8 @@ class TransactionSlave < ApplicationRecord
     order.restrict_magic_number(self)
   end
 
-  def set_sl_and_tp_order(lot=nil, take_profit=nil, stop_loss=nil, price_request=nil)
-    lot = nil if account.hedging? or master.account.hedging?
-    attributes = {lot: lot, take_profit:take_profit, stop_loss:stop_loss, price_request:price_request}.compact
-    self.update(attributes)
+  def set_sl_and_tp_order(serializer)
+    self.update(serializer.slave_attributes)
   end
 
   def api_request_attributes

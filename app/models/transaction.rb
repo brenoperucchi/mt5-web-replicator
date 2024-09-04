@@ -129,14 +129,7 @@ class Transaction < ApplicationRecord
   end
 
   def update_modify_meta(serializer)
-    attributes = {
-      lot: serializer.lot,
-      take_profit: serializer.take_profit,
-      stop_loss: serializer.stop_loss,
-      profit: serializer.profit,
-      price_request: serializer.price_open
-    }
-    self.assign_attributes(attributes)
+    self.assign_attributes(serializer.transaction_attributes)
 
     if not self.error?
       if self.changed?
@@ -145,43 +138,36 @@ class Transaction < ApplicationRecord
           content = self.telegram_message_prepare(:MODIFY)
           TelegramJob.perform_async(chat_id, content)
         end
-
-        # if self.save
-        #   loggings.create(content: serializer.obj, changeset: versions.last.changeset, version: version, state: 'MODIFY')
-        #   update_slaves(lot, take_profit, stop_loss)
-        # end
       end
     end
-
-    # Atualizar as estatísticas MFE e MAE independentemente das mudanças em outros atributos
-    # update_mfe_mae(serializer.mfe, serializer.mae, serializer.time_trader)
-
     return self.save
   end
 
   def close_slaves
     slaves.each do |slave|
-      if slave.close
+      if slave.remove
         slave.loggings.create(content: "Automatically remove by Transaction.close_slaves - #{self.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:slave.loggings.first, loggerable: slave.order.messages.last)
       end
     end
   end
 
 
-  def update_slaves(lot=nil, take_profit=nil, stop_loss=nil, price_request=nil)
-    self.slaves.each{|s| s.set_sl_and_tp_order(lot, take_profit, stop_loss, price_request)}
+  def update_slaves(serializer)
+    self.slaves.each{|s| s.set_sl_and_tp_order(serializer)}
   end
 
-  def update_mfe_mae(mfe, mae, time_trader)
-    unless time_trader.nil? or mae.nil? or mfe.nil?
+  def update_mfe_mae(serializer)
+    attributes = serializer.mfe_attributes
+
+    if attributes.present?
       # date_today = month.nil? ? DateTime.current : DateTime.current + eval(month)
-      statistic_name = "#{time_trader.to_date.strftime("%Y-%m-%d")}"
+      statistic_name = "#{serializer.time_trader.to_date.strftime("%Y-%m-%d")}"
       
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
-      statistic.update(amount: mfe.to_f) if mfe.to_f > statistic.amount.to_f 
+      statistic.update(amount: serializer.mfe.to_f) if serializer.mfe.to_f > statistic.amount.to_f 
 
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mae)
-      statistic.update(amount: mae.to_f) if mae.to_f < statistic.amount.to_f 
+      statistic.update(amount: serializer.mae.to_f) if serializer.mae.to_f < statistic.amount.to_f 
     end
   end  
 

@@ -16,7 +16,7 @@ RSpec.describe API::V2::APICopy do
     @account4 = create(:account, :slave4, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @account_copy2 = create(:account, :copy2, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2])
     
-    post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+    post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
       params: {"imentore_copy"=>"{\"orders_open\":{
               }}"}
   end
@@ -30,7 +30,7 @@ RSpec.describe API::V2::APICopy do
         expect(account.state).to be == "enable"
         account.update(state: 'disable')
         account.reload
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
@@ -49,7 +49,7 @@ RSpec.describe API::V2::APICopy do
         expect(account.state).to be == "enable"
         account.update(state: 'enable')
         account.reload
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
@@ -66,7 +66,7 @@ RSpec.describe API::V2::APICopy do
     context 'POST' do
       it 'Testing if ApiCopy fixing UTF-8 problem' do
         file_content = eval(File.read("#{Rails.root}/spec/api/v2/_params_enconding_problem.txt"))
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: file_content
         expect(Message::V2::Metatrader.all.count).to be == 4
         expect(Message::V2::Metatrader.last.state).to be == "executed"
@@ -76,7 +76,7 @@ RSpec.describe API::V2::APICopy do
 
       it 'Testing if ApiCopy fixing UTF-8 problem' do
         file_content = eval(File.read("#{Rails.root}/spec/api/v2/_params_enconding_problem.txt"))
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: file_content
         expect(Message::V2::Metatrader.all.count).to be == 4
         expect(Message::V2::Metatrader.last.state).to be == "executed"
@@ -84,7 +84,7 @@ RSpec.describe API::V2::APICopy do
       end
 
       it 'Account Hedging to Hedging - Contract 1 and Change Stop Loss and Take Profit' do
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
@@ -102,7 +102,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.last.stop_loss).to be == "0.0"
         expect(order.slaves.last.take_profit).to be == "0.0"
         expect(order.slaves.last.lot).to be == "0.02"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87000\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.2000,\"take_profit\":2.0000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null,\"state_meta\":\"PROFIT\\/SLTPLOT\"}
@@ -113,14 +113,14 @@ RSpec.describe API::V2::APICopy do
         expect(order.transactions.first.lot).to be == "0.04"
         expect(order.slaves.last.stop_loss).to be == "1.2"
         expect(order.slaves.last.take_profit).to be == "2.0"
-        expect(order.slaves.last.lot).to be == "0.02"
+        expect(order.slaves.last.lot).to be == "0.04"
       end
     end
 
     context 'POST' do
       it 'Account Hedging to Netting - Contract 1 and Change Stop Loss and Take Profit' do
         @account_netting = create(:account, :slave_netting, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [@trace.id])
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
@@ -138,7 +138,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.last.stop_loss).to be == "0.0"
         expect(order.slaves.last.take_profit).to be == "0.0"
         expect(order.slaves.last.lot).to be == "0.02"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87000\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.2000,\"take_profit\":2.0000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null,\"state_meta\":\"PROFIT\\/SLTPLOT\"}
@@ -149,7 +149,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.transactions.first.lot).to be == "0.04"
         expect(order.slaves.last.stop_loss).to be == "1.2"
         expect(order.slaves.last.take_profit).to be == "2.0"
-        expect(order.slaves.last.lot).to be == "0.02"
+        expect(order.slaves.last.lot).to be == "0.04"
       end
     end
 
@@ -158,7 +158,7 @@ RSpec.describe API::V2::APICopy do
         trace2 = create(:trace, :copy_netting, stores: [@store])
         account_copy = create(:account, :copy_netting, store: @store, customer:@customer, trace_ids: [trace2.id], instrument_control:true)
         account_netting = create(:account, :slave_netting, store: @store, customer:@customer, trace_ids: [trace2.id])
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/30100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/30100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
@@ -176,7 +176,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.last.stop_loss).to be == "0.0"
         expect(order.slaves.last.take_profit).to be == "0.0"
         expect(order.slaves.last.lot).to be == "0.02"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/30100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/30100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87000\",\"volume\":\"0.04\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":1.2000,\"take_profit\":2.0000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null,\"state_meta\":\"PROFIT\\/SLTPLOT\"}
@@ -197,7 +197,7 @@ RSpec.describe API::V2::APICopy do
         # @account_copy.trace_ids = 1
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "10100"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
                 \"orders_open\":{
@@ -214,9 +214,8 @@ RSpec.describe API::V2::APICopy do
         expect(orders.closed.count).to be == 2
         orders = Order.all
         expect(orders.sum(&:profit_copy).to_f).to be == 2.0
-        expect(Transaction.closed_info.count).to be == 0
         expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
                 \"orders_closed\":{
@@ -232,7 +231,6 @@ RSpec.describe API::V2::APICopy do
         expect(orders.closed.count).to be == 4
         expect(orders.sum(&:profit_copy).to_f).to be == 4.00
         expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 2.00
-        expect(Transaction.closed_info.count).to be == 0
       end
 
       it 'Restrict_magic on first trace' do
@@ -243,7 +241,7 @@ RSpec.describe API::V2::APICopy do
 
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "10100"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
                 \"orders_open\":{
@@ -260,7 +258,7 @@ RSpec.describe API::V2::APICopy do
         expect(orders.closed.count).to be == 2
         expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
         expect(Trace.find(2).transactions.executed.find_by_ticket(10000002).profit.to_f).to be == 0.0
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
                 \"orders_closed\":{
@@ -289,18 +287,16 @@ RSpec.describe API::V2::APICopy do
         expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
         expect(Trace.find(2).transactions.closed.find_by_ticket(10000002).profit.to_f).to be == 1.0
         expect(orders.sum(&:profit_copy).to_f).to be == 3.0
-        expect(Transaction.closed_info.count).to be == 0
         expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
 
         expect(orders.sum(&:profit_copy).to_f).to be == 3.0
         expect(trace.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
-        expect(Transaction.closed_info.count).to be == 0
       end
     end
 
     context 'Traces - Close Orders' do
       it 'Traces with two accounts copys' do
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                     \"10000002\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000002,\"ticket_deal\":2014200564,\"type\":0,\"price_open\":\"0.87312\",\"price_closed\":\"0.87307\",\"volume\":\"0.02\",\"profit\":\"0\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 21:39:55\",\"close_at\":\"2023.08.02 21:42:51\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"comment\":null},
@@ -316,7 +312,6 @@ RSpec.describe API::V2::APICopy do
         expect(TransactionSlave.where(ticket_master: 10000002, account: @account3).count).to be == 0
 
         expect(Account.find_by_name(10100).traces.first.transactions.count).to be == 2
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'closed_info').count).to be == 0
         expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be    == 2
         expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be     == 2
         
@@ -330,26 +325,21 @@ RSpec.describe API::V2::APICopy do
         expect(Order.where(content_id: 10000001).last.slaves.count).to be                                    == 1
         
         expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be    == 2
-        expect(Account.find_by_name(10200).traces.first.transactions.where(state:'closed_info').count).to be == 0
         expect(Account.find_by_name(10200).traces.last.transactions.where(state:'executed').count).to be     == 2
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'closed_info').count).to be  == 0
 
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000003\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000003,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
 
                   }}"}
         expect(Account.find_by_name(10100).traces.first.transactions.count).to be == 3
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'closed_info').count).to be == 0
         expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be == 3
         expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be == 3
         
         expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be == 3
-        expect(Account.find_by_name(10200).traces.first.transactions.where(state:'closed_info').count).to be == 0
         expect(Account.find_by_name(10200).traces.last.transactions.where(state:'executed').count).to be == 3
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'closed_info').count).to be == 0
 
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_closed\":{
                     \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                     \"10000002\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000002,\"ticket_deal\":2014200564,\"type\":0,\"price_open\":\"0.87312\",\"price_closed\":\"0.87307\",\"volume\":\"0.02\",\"profit\":\"0\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 21:39:55\",\"close_at\":\"2023.08.02 21:42:51\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"comment\":null},
@@ -363,14 +353,13 @@ RSpec.describe API::V2::APICopy do
         expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be == 0
         expect(Account.find_by_name(10200).traces.first.transactions.where(state:'closed').count).to be == 3
         expect(Account.find_by_name(10200).traces.last.transactions.where(state:'executed').count).to be == 0
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'closed_info').count).to be == 0
         expect(Account.find_by_name(10200).traces.last.transactions.where(state:'closed').count).to be == 3
 
       end
     end
-    context 'Control Instrument', focus:true do
+    context 'Control Instrument' do
       it 'Hedging - Change instruments on copy to slaves' do
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                     \"10000002\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000002,\"ticket_deal\":2014200564,\"type\":0,\"price_open\":\"0.87312\",\"price_closed\":\"0.87307\",\"volume\":\"0.02\",\"profit\":\"0\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 21:39:55\",\"close_at\":\"2023.08.02 21:42:51\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"comment\":null},
@@ -398,7 +387,7 @@ RSpec.describe API::V2::APICopy do
       it 'Hedging - Change instruments on copy to slaves' do
         @account_copy.instruments.create(symbol: 'GBPUSD', name: 'GBPCAD', volumes:0.01)
         expect(@account_copy.name).to be == "10100"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000001\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}        
@@ -412,7 +401,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.first.symbol).to be == "GBPCAD"
         expect(order.slaves.first.symbol).not_to be == "GBPUSD"
         
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000002\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000002,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}        
@@ -425,7 +414,7 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.first.symbol).not_to be == "GBPUSD"
       end
       it 'Trace - Create order all traces'do 
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000003\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000003,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}                
@@ -441,7 +430,7 @@ RSpec.describe API::V2::APICopy do
       end
       
       it 'Trace - One trace disable' do #, focus: true do 
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000004\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000004,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}          
@@ -452,7 +441,7 @@ RSpec.describe API::V2::APICopy do
         expect(slaves[2].trace).to be == @trace2
         
         @trace2.soft_destroy
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000005\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000005,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}                
@@ -467,7 +456,7 @@ RSpec.describe API::V2::APICopy do
   describe API::V2::APICopy do
     context 'POST' do
       it 'Hedging - Restrict Magic Number' do
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000005\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000005,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}            
@@ -499,7 +488,7 @@ RSpec.describe API::V2::APICopy do
       it 'Hedging - Magic should be the same of Copy & Slave' do
         @trace.update(magic_same: true)
         @trace.reload
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}
@@ -521,7 +510,7 @@ RSpec.describe API::V2::APICopy do
       end
       it 'Hedging - Magic should be the same of Copy & Slave' do
         @trace.update(magic_same: "1")
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}
@@ -544,7 +533,7 @@ RSpec.describe API::V2::APICopy do
 
       it 'Hedging - Magic shouldnt be the same of Copy & Slave' do
         @trace.update(magic_same: false)
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
                     \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}        

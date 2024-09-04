@@ -10,7 +10,7 @@ module API
       resource :copy do 
         resource :post do
 
-          # "/api/v3/copy/post/orders/imentore_copy/2_30_05/DarwinexDemo/3000064179/HEDGING" (length: 117)
+          # "/api/v/copy/post/orders/imentore_copy/2_30_05/DarwinexDemo/3000064179/HEDGING" (length: 117)
           resource :orders do
             post "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
               content_type 'text/plain'

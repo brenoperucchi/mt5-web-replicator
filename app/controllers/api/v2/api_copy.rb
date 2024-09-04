@@ -30,7 +30,7 @@ module API
 
         post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
-          API::V2::APICopyPresenter.api_copy(params, version, request)
+          API::V2::APICopyPresenter.api_copy(params, request)
           body "OK|OK|OK"
           status 201
         end
@@ -41,7 +41,7 @@ module API
           resource :orders do
             post "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
               content_type 'text/plain'
-              presenter = API::V3::CopyPresenter.new(params, request)
+              presenter = API::V2::APICopyPresenter.api_copy(params, request)
               if presenter.execute
                 body "OK|OK|OK"
                 status 201

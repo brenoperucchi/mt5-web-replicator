@@ -47,14 +47,14 @@ class Message::V2::Metatrader < Message::Message
   end
 
   def transaction_closed(transaction, copy_params, logging, kind)
-    copySerializer = Class.const_get("API::#{API_VERSION.try(:upcase)}::CopySerializer")
+    copySerializer = API::V2::CopySerializer.new(copy_params)
     if transaction and transaction.can_close?
       # transaction.order.messages << self
       transaction.trace.messages << self
-      transaction.attributes = copySerializer.new(copy_params).closed_attributes
+      transaction.attributes = copySerializer.closed_attributes
       transaction.save
       transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent:logging, account: account, loggerable: self)
-      transaction.update_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
+      transaction.update_mfe_mae(copySerializer) 
       
       if not transaction.error?
         if transaction.close 
@@ -90,7 +90,7 @@ class Message::V2::Metatrader < Message::Message
           params_copy("orders_open").each_with_index do |(ticket, copy_params), index|
             next if copy_params.empty?
 
-            # copy_attributes = API::V220::CopySerializer.new(copy_params).api_attributes
+            copySerializer = API::V2::CopySerializer.new(copy_params)
             state_meta = copy_params["state_meta"]
             traces.active.not_deleted.each do |trace|
               orders = trace.orders.where(content_id: ticket)
@@ -109,8 +109,12 @@ class Message::V2::Metatrader < Message::Message
                   orders.each do |order|
                     self.orders << order unless self.order_ids.include?(order.id)
                     self.traces << trace unless self.trace_ids.include?(trace.id)
-                    order.transactions.each do|t|     
-                      t.update_modify_meta(copy_params) if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
+                    order.transactions.each do|transaction|     
+                      if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
+                        transaction.update_modify_meta(copySerializer) 
+                        transaction.update_slaves(copySerializer)
+                        transaction.update_mfe_mae(copySerializer)
+                      end
                     end
                   end
                 end

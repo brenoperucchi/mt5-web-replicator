@@ -123,7 +123,7 @@ class Trace < ApplicationRecord
 
 
       # api_transaction = copySerializer.new(order_params)
-      transaction.update_mfe_mae(copy_attributes[:mfe], copy_attributes[:mae], copy_attributes[:time_trader]) 
+      transaction.update_mfe_mae(copySerializer) 
 
       # CREATE ORDER -> TRANSACTION -> SLAVES
       if order.valid?

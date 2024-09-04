@@ -1,6 +1,8 @@
 class	API::V2::APICopyPresenter 
 
-	def self.api_copy(params, version, request)
+	API_VERSION = "V2"
+
+	def self.api_copy(params, request)
 
 
 		# Logging.create(content:params, state: "COPY")
@@ -11,12 +13,11 @@ class	API::V2::APICopyPresenter
 		    params["imentore_copy"] = params["imentore_copy"].encode('UTF-8', 'binary', invalid: :replace, undef: :replace, replace: '')
 		  end
 
-		  klass_metatrader = "Message::#{version.upcase}::Metatrader".classify.safe_constantize
 		  attributes = {content: params["imentore_copy"], params: params.except("imentore_copy").to_json, request_url: request.url, content_at: Time.zone.now, store: account.try(:store), account:account}
 
 		  # Message Open
-		  message_open = klass_metatrader.new(attributes)
-		  message_close = klass_metatrader.new(attributes)
+		  message_open = Message::V2::Metatrader.new(attributes)
+		  message_close = Message::V2::Metatrader.new(attributes)
 		  
 		  begin
 		    message_open.save

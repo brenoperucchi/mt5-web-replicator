@@ -21,7 +21,7 @@ class	API::V2::APISlavePresenter
 	    account = Account.find_by(name: params[:account_id], account_server: account_server, state: :enable, kind: :slave)
 	    if account
 	      slave = account.slaves.not_deleted.where(comment: content['comment']).first
-				serializer = "API::#{api_version.upcase}::SlaveSerializer".classify.safe_constantize.new(message)
+				serializer = API::V2::SlaveSerializer.new(message)
 
 	      unless slave.nil?
 					self.check_order_duplicate(slave, content, action)	      
@@ -41,7 +41,7 @@ class	API::V2::APISlavePresenter
 	          @version = slave.versions.last(2).try(:first)
 	          map = "#{slave.master.trace.id}|#{slave.id}|OK"
 	        when "MODIFY"
-	          slave.set_sl_and_tp_order(nil, content['take_profit'], content['stop_loss'])
+	          slave.set_sl_and_tp_order(serializer)
 	          @version = slave.versions.last
 	          map = "#{slave.master.trace.id}|#{slave.id}|OK"
 	        when "MODIFY_VOLUME"

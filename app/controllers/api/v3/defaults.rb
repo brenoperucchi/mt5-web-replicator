@@ -31,6 +31,7 @@ module API
           def content
             content = File.open(params[:data][:tempfile]).try(:read)
             content.gsub!("\u0000", "")
+            return content
           end
 
         end

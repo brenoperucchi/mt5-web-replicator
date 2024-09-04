@@ -41,17 +41,6 @@ module API
           end
         end
 
-
-
-          # presenter = API::V3::MetatraderPresenter.new(params, request)
-          # presenter.execute
-          # if presenter.pending_orders?
-          #   status 201
-          #   body presenter.response
-          # else
-          #   status 401
-          # end
-
         # /api/v3/slave/post/store/imentore_slave/3_00_02/DarwinexDemo/3000064180/HEDGING
         resource :post do
           resource :store do

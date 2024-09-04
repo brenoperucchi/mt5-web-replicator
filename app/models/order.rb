@@ -184,12 +184,7 @@ class Order < ApplicationRecord
   end
 
   def price_open(resource)
-    # binding.pry
-    # if resource.pending?
-      (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
-    # else
-    #   resource.price_open
-    # end
+    (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
   end
 
   def order_pending?

@@ -46,6 +46,15 @@ module API::V2
       }.compact
     end
 
+    def slave_attributes
+      {
+        take_profit: take_profit, 
+        stop_loss: stop_loss, 
+        price_request: price_open, 
+        lot: lot
+      }.compact
+    end
+
     def obj
       if object.is_a?(Hash)
         object

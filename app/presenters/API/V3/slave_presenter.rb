@@ -45,7 +45,7 @@ class	API::V3::SlavePresenter < API::BasePresenter
           end
           @version = slave.versions.last(2).try(:first)
         when "MODIFY"
-          slave.set_sl_and_tp_order(nil, json['take_profit'], json['stop_loss'])
+          slave.set_sl_and_tp_order(serializer)
           @version = slave.versions.last
         when "MODIFY_VOLUME"
           @version = slave.versions.last
@@ -79,65 +79,65 @@ class	API::V3::SlavePresenter < API::BasePresenter
 	end
 
 	def conciliate
-	  # slaves = account.transaction_slaves.not_executed
-	  # slave_profit = slaves.map(&:profit).compact.sum
-	  # if(json["HistoryOrdersProfit"].to_f != slave_profit.to_f and account.api_send_orders_history == false)
-	  #   account.update(api_send_orders_history: true)
-	  # end
+	  slaves = account.transaction_slaves.not_executed
+	  slave_profit = slaves.map(&:profit).compact.sum
+	  if(json["HistoryOrdersProfit"].to_f != slave_profit.to_f and account.api_send_orders_history == false)
+	    account.update(api_send_orders_history: true)
+	  end
 
-	  # if(json["HistoryOrdersCount"].to_i == historyOrders.count)
-	  #   if historyOrders.map { |h| h["profit"] }.sum.to_f != slave_profit.to_f
-	  #     slaves.update_all(profit: 0)
-	  #     account.loggings.create(state: "conciliated_account_zero", content: json, request_url: request.url)
+	  if(json["HistoryOrdersCount"].to_i == historyOrders.count)
+	    if historyOrders.map { |h| h["profit"] }.sum.to_f != slave_profit.to_f
+	      slaves.update_all(profit: 0)
+	      account.loggings.create(state: "conciliated_account_zero", content: json, request_url: request.url)
 	
-	  #     slaves.each do |t| 
-	  #       delete = false
-	  #       historyOrders.each do |json| 
-	  #         delete = json["ticketSlave"] == t.ticket_slave
-	  #         break if delete
-	  #       end
-	  #       t.update(profit: 0) unless delete
-	  #     end
-	  #   end
-	  #   account.update(api_send_orders_history: false)
-	  # end
+	      slaves.each do |t| 
+	        delete = false
+	        historyOrders.each do |json| 
+	          delete = json["ticketSlave"] == t.ticket_slave
+	          break if delete
+	        end
+	        t.update(profit: 0) unless delete
+	      end
+	    end
+	    account.update(api_send_orders_history: false)
+	  end
 
-	  # historyOrders.each do |json|
-	  #   change = false
-	  #   symbol = json["symbol"]
-	  #   slave = TransactionSlave.find_by(symbol: symbol, ticket_slave: json["ticketSlave"], account: account)
-	  #   if slave
-	  #     if slave.try(:profit).to_f != json["profit"].to_f
-	  #       slave.profit = json["profit"].to_f
-	  #       slave.save
-	  #       change = true
-	  #     end
-	  #     # if slave.state == "pending" || slave.state == "executed"
-	  #     #   slave.remove
-	  #     #   change = true
-	  #     # end
-	  #   else
-	  #     order = Order.find_by(symbol: symbol, content_id: json["ticketMaster"])
-	  #     ticket_master = 0
-	  #     if order
-	  #       trace = order.trace
-	  #       comment = json["ticketMaster"]
-	  #     else
-	  #       comment = "conciliate_order"
-	  #       trace = Trace.create_with(name: "manual_orders", name_id: -1, store: account.store, kind: 2, contract_volume_max: 1, customer_plans: [account.store.customer_plans.first])
-	  #                   .find_or_create_by(name: "manual_orders", name_id: -1)
-	  #       order = Order.create(symbol: symbol, content: json, content_id: ticket_master, account: account, state: 'conciliated', store: account.store, trace: trace)
-	  #     end
-	  #     serializer = API::V3::SlaveSerializer.new(json)
-	  #     attributes = serializer.trace_attributes(symbol, account, nil, trace, account.store)
-	  #                    .merge(state: "closed", ticket_slave: json['positionID'], ticket_master: ticket_master, profit: json["profit"], comment: comment, open_at: json["openAt"], closed_at: json["closeAt"], price_open: json['priceOpen'])
-	  #     slave = order.slaves.create(attributes)
-	  #     change = true
-	  #   end
-	  #   if change
-	  #     slave.loggings.create(state: "conciliated", content: json, resourceable: slave, changeset: slave.versions.try(:last).try(:changeset), version: slave.versions.try(:last), parent: slave.loggings.try(:first), request_url: request.url, account: account)
-	  #   end
-	  # end
+	  historyOrders.each do |json|
+	    change = false
+	    symbol = json["symbol"]
+	    slave = TransactionSlave.find_by(symbol: symbol, ticket_slave: json["ticketSlave"], account: account)
+	    if slave
+	      if slave.try(:profit).to_f != json["profit"].to_f
+	        slave.profit = json["profit"].to_f
+	        slave.save
+	        change = true
+	      end
+	      # if slave.state == "pending" || slave.state == "executed"
+	      #   slave.remove
+	      #   change = true
+	      # end
+	    else
+	      order = Order.find_by(symbol: symbol, content_id: json["ticketMaster"])
+	      ticket_master = 0
+	      if order
+	        trace = order.trace
+	        comment = json["ticketMaster"]
+	      else
+	        comment = "conciliate_order"
+	        trace = Trace.create_with(name: "manual_orders", name_id: -1, store: account.store, kind: 2, contract_volume_max: 1, customer_plans: [account.store.customer_plans.first])
+	                    .find_or_create_by(name: "manual_orders", name_id: -1)
+	        order = Order.create(symbol: symbol, content: json, content_id: ticket_master, account: account, state: 'conciliated', store: account.store, trace: trace)
+	      end
+	      serializer = API::V3::SlaveSerializer.new(json)
+	      attributes = serializer.trace_attributes(symbol, account, nil, trace, account.store)
+	                     .merge(state: "closed", ticket_slave: json['positionID'], ticket_master: ticket_master, profit: json["profit"], comment: comment, open_at: json["openAt"], closed_at: json["closeAt"], price_open: json['priceOpen'])
+	      slave = order.slaves.create(attributes)
+	      change = true
+	    end
+	    if change
+	      slave.loggings.create(state: "conciliated", content: json, resourceable: slave, changeset: slave.versions.try(:last).try(:changeset), version: slave.versions.try(:last), parent: slave.loggings.try(:first), request_url: request.url, account: account)
+	    end
+	  end
 	end
 	
 	private

@@ -31,6 +31,34 @@ module API
         }
       end
 
+
+      def transaction_attributes
+        {
+          lot: lot,
+          take_profit: take_profit,
+          stop_loss: stop_loss,
+          profit: profit,
+          price_request: price_open
+        }.compact
+      end
+
+      def slave_attributes
+        {
+          take_profit: take_profit, 
+          stop_loss: stop_loss, 
+          price_request: price_open, 
+          lot: lot
+        }.compact
+      end
+
+      def mfe_attributes
+        { 
+          mfe: mfe, 
+          mae: mae, 
+          time_trader: time_trader
+        }.compact
+      end
+
       def trace_attributes(instrument, account_slave, master, trace)
         {
           symbol: instrument,

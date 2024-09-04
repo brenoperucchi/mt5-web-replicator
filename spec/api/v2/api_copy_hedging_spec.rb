@@ -13,7 +13,7 @@ RSpec.describe API::V2::APICopy do
     @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
     @ticket_master = 10000001
     
-    post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING', 
+    post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
       params: {"imentore_copy"=>"{\"orders_open\":{
                 \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000,\"profit\":\"-0.15\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":0,\"state_meta\":null,\"comment\":null},
               }}"}
@@ -29,7 +29,7 @@ RSpec.describe API::V2::APICopy do
         open_at = open_at + ".00000000"
         transaction = Transaction.find_by(ticket: 10000001)
         expect(transaction.stop_loss).to be == "0.0"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
                 \"orders_open\":{
@@ -46,7 +46,7 @@ RSpec.describe API::V2::APICopy do
         open_at = open_at + ".00000000"
         transaction = Transaction.find_by(ticket: 10000001)
         expect(transaction.stop_loss).to be == "0.0"
-        post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+        post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{
                 \"orders_open\":{

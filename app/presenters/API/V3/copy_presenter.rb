@@ -39,8 +39,8 @@ class	API::V3::CopyPresenter < API::BasePresenter
                     message.orders << order unless message.order_ids.include?(order.id)
                     message.traces << trace unless message.trace_ids.include?(trace.id)
                     if transaction.update_modify_meta(serializer)
-                      transaction.update_slaves(serializer.lot, serializer.take_profit, serializer.stop_loss, serializer.price_open)
-                      transaction.update_mfe_mae(serializer.mfe, serializer.mae, serializer.time_trader)
+                      transaction.update_slaves(serializer)
+                      transaction.update_mfe_mae(serializer)
                       version = transaction.try(:versions).try(:last)
                       transaction.loggings.create(content: serializer.obj, changeset: version.changeset, version: version, state: 'MODIFY', resourceable: order, account: account, parent: message.loggings.try(:first), request_url: message.try(:request_url), loggerable: message)
                     end 
@@ -65,29 +65,34 @@ class	API::V3::CopyPresenter < API::BasePresenter
 	    logging = message.loggings.create(content: pendingOrders, state: "COPY/PENDING", changeset: account.name, account: account, request_url: request.url, params: params)		    	    
       transactions = Transaction.executed.where(ordertype: [2..], account: account)
       transactions.each do |transaction|
-        unless pendingOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
+      	pending  = pendingOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
+      	position = positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
+        if not pending and not position
           if transaction.close
             transaction.close_slaves
           end
         end
       end
-    else
+    end
+    if pendingOrders.blank?
       transactions = Transaction.executed.where(ordertype: [2..], account: account)
       transactions.each do |transaction| 
-        if transaction.close
-          transaction.close_slaves
-        end    
+      	unless positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
+          transaction.close_slaves if transaction.close
+        end
       end
 	  end
 	end
 
 	def closing
 		message.loggings.create(content:message.content, state: "COPY/CLOSE", changeset: account.name, account: account, request_url: request.url, params: params)		    
-
 	  if account
 	    historyOrders.each do |json|
-	      Transaction.where(ticket: json["ticketMaster"], account: account).each do |transaction|          
-	        transaction_closed(transaction, json, :copy_close)
+	      Transaction.executed.where(ticket: json["ticketMaster"], account: account).each do |transaction|          
+	      	position = positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
+	      	if position.blank?
+	        	transaction_closed(transaction, json, :copy_close)
+	        end
 	      end
 	    end
 	  end
@@ -95,30 +100,30 @@ class	API::V3::CopyPresenter < API::BasePresenter
 	  if positionOrders.present?    
 	    account.transactions.executed.each do |transaction|
 	      ticket_id = transaction.ticket.to_s
-	      unless positionOrders.include?(ticket_id) 
+	      unless positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
 	        order_params = historyOrders.detect{|json| json["ticketMaster"] == ticket_id} || {}
 	        transaction_closed(transaction, order_params, :copy_close) if order_params.present?
 	      end
 	    end        
 	  end
 
-	  account.transactions.executed.each do |transaction|
-	    ticket_id = transaction.ticket.to_s
-	    order_params = historyOrders.detect{|json| json["ticketMaster"] == ticket_id} || {}
-	    transaction_closed(transaction, order_params, :copy_close) if order_params.present?
-	  end
+	  # account.transactions.executed.each do |transaction|
+	  #   ticket_id = transaction.ticket.to_s
+	  #   order_params = historyOrders.detect{|json| json["ticketMaster"] == ticket_id} || {}
+	  #   transaction_closed(transaction, order_params, :copy_close) if order_params.present?
+	  # end
 	  return true
 	end
 
 	def transaction_closed(transaction, copy_params, kind)
-	  copySerializer = Class.const_get("API::#{API_VERSION.try(:upcase)}::CopySerializer")
+		copySerializer = API::V3::CopySerializer.new(copy_params)
 	  if transaction and transaction.can_close?
 	    # transaction.order.messages << self
 	    transaction.trace.messages << message
-	    transaction.attributes = copySerializer.new(copy_params).closed_attributes
+	    transaction.attributes = copySerializer.closed_attributes
 	    transaction.save
 	    transaction.loggings.create(content:copy_params, state: "CLOSED", changeset: transaction.try(:versions).try(:last).try(:changeset), parent: message.loggings.first, account: account, loggerable: message)
-	    transaction.update_mfe_mae(copy_params["mfe"], copy_params["mae"], copy_params["time_trader"]) 
+	    transaction.update_mfe_mae(copySerializer) 
 	    
 	    if not transaction.error?
 	      if transaction.close 

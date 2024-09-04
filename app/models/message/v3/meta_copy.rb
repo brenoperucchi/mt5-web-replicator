@@ -25,9 +25,9 @@ class Message::V3::MetaCopy < Message::Message
     if self.valid?
       copyPresenter = API::V3::CopyPresenter.new(params, request, self, account)
       copyPresenter.opening
-      copyPresenter.pending
       copyPresenter.closing 
-      copyPresenter.conciliate
+      copyPresenter.pending
+      # copyPresenter.conciliate
     end
   end
 

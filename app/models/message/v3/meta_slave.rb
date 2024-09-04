@@ -25,8 +25,8 @@ class Message::V3::MetaSlave < Message::Message
     if self.valid?
       slavePresenter = API::V3::SlavePresenter.new(params, request, self, account)
       slavePresenter.execute_status
-      slavePresenter.conciliate
       slavePresenter.slaves
+      # slavePresenter.conciliate
       self.response = slavePresenter.response
     end
   end

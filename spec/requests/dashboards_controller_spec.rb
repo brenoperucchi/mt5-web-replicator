@@ -75,7 +75,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(account.state).to be == "enable"
       account.update(state: 'enable')
       account.reload
-      post '/api/v2/copy/post/imentore_copy/2_21/MetaQuotes/10100/HEDGING',
+      post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
           params: {"imentore_copy"=>
               "{\"orders_open\":{
                   \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
