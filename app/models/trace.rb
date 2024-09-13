@@ -121,11 +121,8 @@ class Trace < ApplicationRecord
         account.orders << order unless account.orders.exists?(order.id)
       end
 
-
-      # api_transaction = copySerializer.new(order_params)
       transaction.update_mfe_mae(copySerializer) 
-
-      # CREATE ORDER -> TRANSACTION -> SLAVES
+      
       if order.valid?
         order.execute
       end

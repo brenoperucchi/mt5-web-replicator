@@ -1,7 +1,5 @@
 class Message::V3::MetaCopy < Message::Message
 
-  attr_accessor :request
-
   self.table_name = "messages"
   self.inheritance_column = :_type_disabled
 
@@ -23,7 +21,7 @@ class Message::V3::MetaCopy < Message::Message
 
   def execute_copy
     if self.valid?
-      copyPresenter = API::V3::CopyPresenter.new(params, request, self, account)
+      copyPresenter = API::V3::CopyPresenter.new(params, self, account)
       copyPresenter.opening
       copyPresenter.closing 
       copyPresenter.pending

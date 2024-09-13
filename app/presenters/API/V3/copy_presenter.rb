@@ -2,11 +2,10 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
 
 	API_VERSION = "v3"
 
-	attr_accessor :request, :message, :account
+	attr_accessor :message, :account
 
-	def initialize(params, request, message, account)
+	def initialize(params, message, account)
 		@params = params
-		@request = request
 		@message = message
 		@account = account
 	end
@@ -14,7 +13,7 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
 	def opening(jsons = nil, state = "COPY/OPEN")
 		jsons  ||= positionOrders
 	  if jsons.present?
-	    logging = message.loggings.create(content: jsons, state: state, changeset: account.name, account: account, request_url: request.url, params: params, resourceable: account.store)		    
+	    logging = message.loggings.create(content: jsons, state: state, changeset: account.name, account: account, request_url: message.request_url, params: params, resourceable: account.store)		    
       traces = account.traces.copy.active
       if traces.present?
         changed = true
@@ -62,7 +61,7 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
 	def pending
 		self.opening(pendingOrders, "COPY/PENDING")
 	  if pendingOrders.present?
-	    logging = message.loggings.create(content: pendingOrders, state: "COPY/PENDING", changeset: account.name, account: account, request_url: request.url, params: params)		    	    
+	    logging = message.loggings.create(content: pendingOrders, state: "COPY/PENDING", changeset: account.name, account: account, request_url: message.request_url, params: params)		    	    
       transactions = Transaction.executed.where(ordertype: [2..], account: account)
       transactions.each do |transaction|
       	pending  = pendingOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
@@ -85,7 +84,7 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
 	end
 
 	def closing
-		message.loggings.create(content:message.content, state: "COPY/CLOSE", changeset: account.name, account: account, request_url: request.url, params: params)		    
+		message.loggings.create(content:message.content, state: "COPY/CLOSE", changeset: account.name, account: account, request_url: message.request_url, params: params)		    
 	  if account
 	    historyOrders.each do |json|
 	      Transaction.executed.where(ticket: json["ticketMaster"], account: account).each do |transaction|          
@@ -148,7 +147,7 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
 	  if(json["HistoryOrdersCount"].to_i == historyOrders.count)
 	    if historyOrders.map { |h| h["profit"] }.sum.to_f != copy_profit.to_f
 	      transactions.update_all(profit: 0)
-	      account.loggings.create(state: "conciliated_account_zero", content: json, request_url: request.url)
+	      account.loggings.create(state: "conciliated_account_zero", content: json, request_url: message.request_url)
 
 	      transactions.each do |t| 
 	        delete = false
@@ -194,7 +193,7 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
 	      change = true
 	    end
 	    if change
-	      transaction.loggings.create(state: "conciliated", content: json, resourceable: transaction, changeset: transaction.versions.try(:last).try(:changeset), version: transaction.versions.try(:last), parent: transaction.loggings.try(:first), request_url: request.url, account: account)
+	      transaction.loggings.create(state: "conciliated", content: json, resourceable: transaction, changeset: transaction.versions.try(:last).try(:changeset), version: transaction.versions.try(:last), parent: transaction.loggings.try(:first), request_url: message.request_url, account: account)
 	    end
 	  end
 	end

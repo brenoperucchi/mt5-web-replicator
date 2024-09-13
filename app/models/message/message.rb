@@ -10,8 +10,8 @@ class Message::Message < ApplicationRecord
   serialize :params
   
   # has_many :orders
-  has_and_belongs_to_many :orders
-  has_and_belongs_to_many :traces 
+  has_and_belongs_to_many :orders, -> { distinct }
+  has_and_belongs_to_many :traces, -> { distinct }
 
   has_many :transactions,   through: :orders, source: :transactions
   has_many :slaves,         through: :orders, source: :slaves
