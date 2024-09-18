@@ -129,8 +129,6 @@ class AccountDashboard < Administrate::BaseDashboard
   api_time_max_seconds
   api_slippage
   api_store_message
-  api_send_orders_history_date_start
-  api_send_orders_history_date_end
   api_send_orders_history
   api_environment_local
   api_event_on_timer

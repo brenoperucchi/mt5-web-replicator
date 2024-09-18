@@ -20,7 +20,9 @@ class	API::V3::CopyPresenter < API::V3::BasePresenter
         jsons.each do |json|
           next if json.empty?
 
-          state_meta = json["state_meta"]
+          next if (state == "COPY/PENDING") and (json['type'].to_i < 2)
+
+          # state_meta = json["state_meta"]
           traces.active.not_deleted.each do |trace|
             @orders = trace.orders.where(content_id: json["ticketMaster"], account: account)
             if not @orders.present?
