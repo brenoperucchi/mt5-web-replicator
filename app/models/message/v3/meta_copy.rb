@@ -21,12 +21,16 @@ class Message::V3::MetaCopy < Message::Message
 
   def execute_copy
     if self.valid?
-      copyPresenter = API::V3::CopyPresenter.new(params, self, account)
+      copyPresenter = presenter
       copyPresenter.opening
       copyPresenter.closing 
       copyPresenter.pending
-      # copyPresenter.conciliate
+      copyPresenter.conciliate
     end
+  end
+
+  def presenter
+    API::V3::CopyPresenter.new(params, self, account)
   end
 
 end

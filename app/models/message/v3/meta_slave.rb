@@ -8,11 +8,15 @@ class Message::V3::MetaSlave < Message::Message
   API_VERSION = "V3"
 
   state_machine :initial => :pending do
-    before_transition :pending => :executed, :do => :execute_copy
+    before_transition :pending => :executed, :do => :execute_slave
+    # before_transition [:pending, :executed] => :conciliated, :do => :execute_conciliated
     
     event :execute do
         transition :pending => :executed
     end
+    event :conciliate do
+      transition [:pending, :executed] => :conciliated
+    end    
     event :erro do
       transition [:pending, :executed] => :error
     end    
@@ -21,14 +25,27 @@ class Message::V3::MetaSlave < Message::Message
   validates_presence_of :account
 
 
-  def execute_copy
+  def execute_slave
     if self.valid?
-      slavePresenter = API::V3::SlavePresenter.new(params, request, self, account)
+      slavePresenter = presenter
       slavePresenter.execute_status
       slavePresenter.slaves
-      # slavePresenter.conciliate
       self.response = slavePresenter.response
     end
+  end  
+
+  def execute_conciliated
+    if self.valid?
+      slavePresenter = presenter
+      slavePresenter.slaves
+      slavePresenter.conciliate
+      self.response = slavePresenter.response
+    end
+  end
+
+
+  def presenter
+    API::V3::SlavePresenter.new(params, self, account)
   end
 
 end

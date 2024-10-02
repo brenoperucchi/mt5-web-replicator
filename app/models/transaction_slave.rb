@@ -142,8 +142,9 @@ class TransactionSlave < ApplicationRecord
     order.restrict_magic_number(self)
   end
 
-  def set_sl_and_tp_order(serializer)
-    self.update(serializer.slave_attributes)
+  def set_sl_and_tp_order(take_profit, stop_loss, price_request, lot)
+    attributes = {take_profit: take_profit, stop_loss: stop_loss, price_request: price_request, lot: lot}.compact
+    self.update(attributes)
   end
 
   def api_request_attributes

@@ -129,6 +129,7 @@ class Transaction < ApplicationRecord
   end
 
   def update_modify_meta(serializer)
+    volume = self.lot
     self.assign_attributes(serializer.transaction_attributes)
 
     if not self.error?
@@ -140,7 +141,12 @@ class Transaction < ApplicationRecord
         end
       end
     end
-    return self.save
+    if self.save
+      update_slaves(serializer, volume)
+      return true
+    else
+      false
+    end
   end
 
   def close_slaves
@@ -152,8 +158,21 @@ class Transaction < ApplicationRecord
   end
 
 
-  def update_slaves(serializer)
-    self.slaves.each{|s| s.set_sl_and_tp_order(serializer)}
+  def update_slaves(serializer, transaction_lot)
+    self.slaves.each do |slave| 
+      contract_volume = slave.try(:account).try(:contract_volume)
+      slave_attributes = serializer.slave_attributes
+      if slave.executed? and contract_volume !=  "0" 
+        if transaction_lot == slave.lot
+          volume = serializer.volume 
+        else  
+          volume = contract_volume
+        end
+        # binding.pry
+        slave_attributes.merge!(lot: volume.to_f)
+      end
+      slave.set_sl_and_tp_order(*slave_attributes.values)
+    end
   end
 
   def update_mfe_mae(serializer)

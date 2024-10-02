@@ -112,7 +112,7 @@ class Message::V2::Metatrader < Message::Message
                     order.transactions.each do|transaction|     
                       if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
                         transaction.update_modify_meta(copySerializer) 
-                        transaction.update_slaves(copySerializer)
+                        # transaction.update_slaves(copySerializer)
                         transaction.update_mfe_mae(copySerializer)
                       end
                     end

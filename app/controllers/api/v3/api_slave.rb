@@ -16,7 +16,7 @@ module API
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
             message = Message::V3::MetaSlave.create(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
-            message.request = request
+            # message.request = request
             if message.execute
               status 201
               body message.response
@@ -33,12 +33,15 @@ module API
           account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
-            slavePresenter = API::V3::SlavePresenter.new(params, request, nil, account)
-            status 201
-            body slavePresenter.slaves
-          else
-            status 400
+            message = Message::V3::MetaSlave.new(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
+            # slavePresenter = API::V3::SlavePresenter.new(params, message, account)
+            if message.execute_conciliated
+              status 201
+              body message.response
+              return true
+            end
           end
+          status 400
         end
 
         # /api/v3/slave/post/store/imentore_slave/3_00_02/DarwinexDemo/3000064180/HEDGING
