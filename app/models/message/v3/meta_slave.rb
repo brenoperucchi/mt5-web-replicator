@@ -38,7 +38,7 @@ class Message::V3::MetaSlave < Message::Message
     if self.valid?
       slavePresenter = presenter
       slavePresenter.slaves
-      slavePresenter.conciliate
+      # slavePresenter.conciliate
       self.response = slavePresenter.response
     end
   end
