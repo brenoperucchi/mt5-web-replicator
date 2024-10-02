@@ -25,6 +25,8 @@ module ResetDatabase
     Logging.where(state: "ORDERS_CLOSED", created_at: conditions).delete_all
     Logging.where(state: "ORDERS_OPEN",   created_at: conditions).delete_all
     Message::Message.where(state: "executed", created_at: conditions).delete_all
+    # TransactionSlave.pending.where("created_at < ?",180.days.ago).destroy_all
+    # TransactionSlave.remove.where("created_at < ?", 180.days.ago).destroy_all
 
 
     results = Logging
