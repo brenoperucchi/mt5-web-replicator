@@ -77,6 +77,7 @@ group :development do
 
   gem 'ruby-debug-ide'
   gem 'debase',' >= 0.2.5.beta2'
+  gem 'rexml', '>= 3.3.8'
   gem 'rubocop'
   gem 'foreman'
   gem 'capistrano', '~> 3.6'
