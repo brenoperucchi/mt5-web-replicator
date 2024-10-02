@@ -447,7 +447,7 @@ GEM
     psych (5.1.1.1)
       stringio
     public_suffix (5.0.4)
-    puma (6.4.2)
+    puma (6.4.3)
       nio4r (~> 2.0)
     pundit (2.3.1)
       activesupport (>= 3.0.0)
@@ -743,7 +743,7 @@ DEPENDENCIES
   pg
   pry (~> 0.14.1)
   pry-byebug
-  puma (>= 6.4.1)
+  puma (>= 6.4.3)
   pundit
   rack-cors
   rails (~> 6.1.7.8)
