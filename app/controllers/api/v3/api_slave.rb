@@ -15,7 +15,7 @@ module API
           account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
-            message = Message::V3::MetaSlave.create(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
+            message = Message::V3::MetaSlave.create(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
             # message.request = request
             if message.execute
               status 201
@@ -33,7 +33,7 @@ module API
           account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
-            message = Message::V3::MetaSlave.new(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
+            message = Message::V3::MetaSlave.new(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
             # slavePresenter = API::V3::SlavePresenter.new(params, message, account)
             if message.execute_conciliated
               status 201
