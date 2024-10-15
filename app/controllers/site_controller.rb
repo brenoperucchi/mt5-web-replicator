@@ -1,8 +1,9 @@
 class SiteController < ApplicationController
-	layout "saasley"
+	layout "prompt"
 
 	def index
 		@dolar = 5
+		@store = Store.new 
 	end
 
 	def support

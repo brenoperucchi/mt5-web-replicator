@@ -1,8 +1,19 @@
 const { environment } = require('@rails/webpacker')
-
 module.exports = environment
 
-const { environment } = require('@rails/webpacker')
+const sassLoader = environment.loaders.get('sass');
+const sassLoaderConfig = sassLoader.use.find(el => el.loader === 'sass-loader');
+
+sassLoaderConfig.options = {
+  sourceMap: true,
+};
+
+environment.loaders.get('sass').use.splice(-1, 0, {
+  loader: 'resolve-url-loader',
+  options: {
+    sourceMap: true,
+  },
+});
 
 const fileLoader = environment.loaders.get('file')
 fileLoader.exclude = /node_modules[\\/]quill/
@@ -16,6 +27,24 @@ const svgLoader = {
 }
   
 environment.loaders.prepend('svg', svgLoader)
+
+// Loader para imagens
+environment.loaders.append('images', {
+  test: /\.(png|jpe?g|gif|svg)$/i,
+  type: 'asset/resource',
+  generator: {
+    filename: 'images/[hash][ext][query]'
+  }
+});
+
+// Loader para fontes
+environment.loaders.append('fonts', {
+  test: /\.(woff|woff2|eot|ttf|otf)$/i,
+  type: 'asset/resource',
+  generator: {
+    filename: 'fonts/[hash][ext][query]'
+  }
+});
 
 module.exports = environment
 

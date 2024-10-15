@@ -19,24 +19,22 @@ class StoresController < ApplicationController
 		@store = Store.new(store_params)
 
 		@store.state = "enable"
-		# @store.url = @store.name.to_underscore
-		# @store.name = @store.customers.try(:first).try(:name)
-		password = Devise.friendly_token.first(6)
-		url_name = "store#{Store.last.try(:id).to_i + 1}"
+		password   = Devise.friendly_token.first(6)
+		store_name = "Sistema-#{Store.last.try(:id).to_i + 1}"
+		url_name 	 = store_name.to_underscore
+		email 	   = store_params[:email]
 		@store.language = params[:locale].present? ? params[:locale] : 'pt-BR'
 		@store.url = url_name
-		@store.name = url_name
+		@store.name = store_name
 		@store.plan = Plan.first
-		@store.payment = Store.first.payments.first
+		@store.payment = Payment.first
 
 		respond_to do |format|
 		  if @store.save
-		  	PaymentMethod.all.each{|payment| payment.stores << @store}
-		  	customer_plan = @store.customer_plans.create(name: :example, amount:10.00, kind:'fixed', store:@store, payment: @store.payments.first, due_at_dates:5)
-		  	customer = @store.customers.new(name:url_name, customer_plans:[customer_plan], role:'customer', role_control:'owner')
-		  	user = customer.build_user(email:store_params[:email], password:password, userable:customer, store:@store)
-		  	if customer.save and user.valid?
+		  	
+		  	if @store.create_association_after_create(email, password)
 			  	# @store.customers.first.update(user_id: @store.users.first.id, role: 'customer')
+			  	user = @store.users.first
 			  	sign_in(user)
 			  	ContactMailer.email(user, password).deliver_now
 			    format.html { redirect_to control_accounts_path }

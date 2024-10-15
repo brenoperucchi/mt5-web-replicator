@@ -36,6 +36,7 @@ class Store < ApplicationRecord
   has_many :users,    dependent: :destroy
   has_many :orders,   dependent: :destroy 
 
+  has_many :transaction_slaves, -> { distinct }, :through => :accounts, :source => :transaction_slaves,   dependent: :destroy
   has_many :transactions,-> { distinct }, :through => :accounts, :source => :transactions,                dependent: :destroy
   has_many :customers,                    :through => :users, source: :userable, source_type: 'Customer', dependent: :destroy
   
@@ -195,7 +196,46 @@ class Store < ApplicationRecord
   def domain_url
     url_domain = Store.domain_url
   end
+
+  def create_association_after_create(email, password)
+    customer_name = "Customer-#{Store.maximum(:id).to_i + 1}"
+    
+    PaymentMethod.all.each do |payment|
+      payment.stores << self unless payment.stores.include?(self)
+    end
+
+    customer_plan = self.customer_plans.create(
+      name: 'Plan 1', 
+      amount: 10.00, 
+      kind: 'fixed', 
+      store: self, 
+      payment: self.payments.first, 
+      due_at_dates: 5
+    )
+
+    customer = self.customers.new(
+      name: customer_name, 
+      customer_plans: [customer_plan], 
+      role: 'customer', 
+      role_control: 'owner'
+    )
   
+    user = customer.build_user(
+      email: email,
+      password: password,
+      userable: customer, 
+      store: self
+    )
+
+    if customer_plan.valid? && customer.save
+      trace_name = "Trace Example #{Trace.last.id + 1}"
+      account = self.accounts.create(customer:customer, state:1, kind:1, meta_mode:0, meta_margin_mode:1, name:123456, contract_volume:0)
+      trace   = self.traces.create(name: "Trace 1", name_id: 0, contract_volume_max: 0, customer_plans: [customer_plan], accounts: [account], kind:1, kind_copy: 0, store: self)
+      trace.stores << self unless trace.stores.include?(self)
+      return true
+    end
+  end
+
   private
   
   def create_invoice_item(invoice, usage, date_today, amount=nil, proporcional)
@@ -241,5 +281,6 @@ class Store < ApplicationRecord
       end
     end
   end
+
 
 end

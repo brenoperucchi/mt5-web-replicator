@@ -22,7 +22,9 @@ RSpec.describe 'Store Controller', type: :request do
 	before(:context) do
 	  @plan1  = create(:plan, :plan1)
     @store  = create(:store, plan: @plan1)
-    # @stripe = create(:payment_method, :stripe)
+    @stripe = create(:payment_method, :stripe)
+    @payment = create(:payment, payment_method: @stripe, store: @store)
+    @store_name = "Sistema-#{Store.last.try(:id).to_i + 1}" 
 
     # @stripe = create(:payment_method, :mercadopago)
 	end
@@ -30,8 +32,10 @@ RSpec.describe 'Store Controller', type: :request do
   # This should return the minimal set of attributes required to create a valid
   # Order. As you add validations to Order, be sure to
   # update the return value of this method accordingly.
+  
+  
   def valid_attributes
-    { "name"=>"Store1", "email"=>"store1@email.com", "password"=>"123123", "url"=>"store1", "plan_id"=>"1" }
+    { "name"=>"#{@store_name}", "email"=>"store1@email.com", "password"=>"123123", "url"=>"store1", "plan_id"=>"1" }
   end
 
   # This should return the minimal set of values that should be in the session
@@ -41,6 +45,7 @@ RSpec.describe 'Store Controller', type: :request do
     {}
   end
 
+
   describe "POST create /stores/create" do#, focus:true do
     describe "with valid params" do
       it "creates a new Order" do
@@ -48,11 +53,15 @@ RSpec.describe 'Store Controller', type: :request do
           post '/stores' , params: {:store => valid_attributes} #, valid_session
           @store.reload
         }.to change(Store, :count).by(1)
-       expect(response).to have_http_status 302
-       expect(Store.all.count).to eq(2)
-       expect(Store.first.name).to eq('Store 1')
-       expect(Store.first.payment_id).to eq(1)
-       expect(Store.last.payment_id).to eq(1)
+        @store = Store.last
+        count = Store.count
+        expect(response).to have_http_status 302
+        expect(Store.all.count).to eq(count)
+        expect(@store.name).to be == @store_name
+        expect(@store.payment_id).to eq(1)
+        expect(@store.payment_id).to eq(1)
+        expect(@store.accounts.count).to eq(1)
+        expect(@store.traces.count).to eq(1)
 
       end
       it "creates a new Order" do

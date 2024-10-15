@@ -76,6 +76,10 @@ module API
         obj['volume']
       end
 
+      def volume
+        obj['volume']
+      end
+
       def price_open
         obj['price_open']
       end

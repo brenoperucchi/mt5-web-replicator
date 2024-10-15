@@ -54,8 +54,13 @@ module Control
     # See https://administrate-prototype.herokuapp.com/customizing_controller_actions
     # for more information
 
+
+    def dashboard
+      @dashboard ||= Control::TransactionSlaveDashboard.new
+    end
+
     def scoped_resource
-      resource_class
+      current_user.store.slaves
     end
 
   end

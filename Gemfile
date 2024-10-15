@@ -168,3 +168,5 @@ gem 'whenever', require: false
 # Stylesheet inlining for email **
 # gem 'inky-rb', require: 'inky'
 # gem 'premailer-rails'
+
+# gem "tailwindcss-rails", "~> 2.5"

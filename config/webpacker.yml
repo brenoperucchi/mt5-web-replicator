@@ -2,7 +2,7 @@
 
 default: &default
   source_path: app/javascript
-  source_entry_path: /
+  source_entry_path: packs
   public_root_path: public
   public_output_path: packs
   cache_path: tmp/webpacker
@@ -10,7 +10,7 @@ default: &default
 
   # Additional paths webpack should look up modules
   # ['app/assets', 'engine/foo/app/assets']
-  additional_paths: ['vendor/', 'node_modules/flag-icon-css/']
+  additional_paths: []
 
   # Reload manifest.json on all requests so we reload latest compiled packs
   cache_manifest: false
@@ -58,7 +58,7 @@ production:
   <<: *default
 
   # Production depends on precompilation of packs prior to booting for performance.
-  compile: true
+  compile: false
 
   # Cache manifest.json for performance
   cache_manifest: true
