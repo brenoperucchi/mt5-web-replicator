@@ -13,8 +13,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     id:                 Field::Number.with_options(searchable: true),
     ticket_master:      Field::String,
     ticket_slave:       Field::String,
-    position_id:        Field::String,
     ticket_deal:        Field::String,
+    position_id:        Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
     ordertype:          Field::String,
@@ -68,8 +68,8 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   state
   ticket_master
   ticket_slave
-  position_id
   ticket_deal
+  position_id
   order
   trace
   master
@@ -104,6 +104,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ticket_master
   ticket_slave
   ticket_deal
+  position_id
   ordertype
   lot
   profit
