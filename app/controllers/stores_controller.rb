@@ -11,7 +11,7 @@ class StoresController < ApplicationController
 	end
 
 	def new
-		@store = Store.new
+		@store = Store.new(email: params.dig(:store, :email))
 	end
 
 
@@ -19,8 +19,8 @@ class StoresController < ApplicationController
 		@store = Store.new(store_params)
 
 		@store.state = "enable"
-		password   = Devise.friendly_token.first(6)
-		store_name = "Sistema-#{Store.last.try(:id).to_i + 1}"
+		password   = 123123
+		store_name = "Sistema-#{Store.maximum(:id) + 1}"
 		url_name 	 = store_name.to_underscore
 		email 	   = store_params[:email]
 		@store.language = params[:locale].present? ? params[:locale] : 'pt-BR'

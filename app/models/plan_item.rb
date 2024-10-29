@@ -8,6 +8,8 @@ class PlanItem < ApplicationRecord
   
   has_many :plan_usages, as: :usageable
 
+  scope :active, -> { where.not(active_at: nil) }
+
   def active=(attribute)
     if attribute != "1" 
       self.active_at = nil 

@@ -3,7 +3,8 @@
 .row
   - @traces.reverse.each do |amount_profit, id|                   
     - trace = Trace.find(id)
-    - next if not @all_records and trace.capital_recomendation.blank?
+    / - next if not @all_records and trace.capital_recomendation.blank?
+    - next if not request.fullpath.include?("all") || !trace.dashboard_restrict.to_b
     - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
     - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
     - trace.store                  = @current_store

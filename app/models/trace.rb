@@ -18,7 +18,7 @@ class Trace < ApplicationRecord
                                 :telegram_option, :telegram_image, :take_profit_limit,
                                 :telegram_api_id, :telegram_api_hash, :telegram_api_number,
                                 :instrument_control, :restrict_control_instrument, :magics_accept, :desc_contract, :capital_recomendation, :contract_volume_max,
-                                :stock_kind, :capital_multiplier, :magic_same, :desc_finish
+                                :stock_kind, :capital_multiplier, :magic_same, :desc_finish, :dashboard_restrict
                               ]
 
   has_many :orders
@@ -33,7 +33,7 @@ class Trace < ApplicationRecord
   
   has_many :store_traces
   has_many :stores, through: :store_traces, source: :store,  dependent: :destroy
-  belongs_to :store, optional: true
+  # belongs_to :store, optional: true
 
   scope :active,   ->{ where.not(active_at:nil)}
   scope :not_deleted,  -> { where(deleted_at:nil) }
@@ -49,9 +49,10 @@ class Trace < ApplicationRecord
 
   # accepts_nested_attributes_for :payment
 
-  validates_presence_of   [:name, :name_id]
+  # validates_presence_of   [:name, :name_id]
   validates_presence_of   [:contract_volume_max, :customer_plans]
-  validates_uniqueness_of [:name_id], scope: :store_id
+  validates_uniqueness_of [:name_id], scope: :store_id, unless: Proc.new { |trace| trace.magic_same.to_b }
+  validates_uniqueness_of [:name], scope: :store_id
   validates :capital_recomendation, format: { with: /\A\d+([.,]\d{3})*([.,]\d+)?\z/, message: 'must be a number' }, allow_blank: true
 
   validate  :associated_with_customer_plan_and_amount_greater_than_zero, on: :update
@@ -137,7 +138,7 @@ class Trace < ApplicationRecord
             instrument = check_instrument(account, symbol, account_slave)
             serializer = "API::#{api_version.try(:upcase)}::SlaveSerializer".classify.safe_constantize.new(order_params)
             slave_attributes = serializer.trace_attributes(instrument, account_slave, transaction, self, current_store)            
-            slave = order.slaves.new(slave_attributes)
+            slave = order.slaves.new(slave_attributes.merge(position_id:nil, ticket_deal:nil))
             slave.magic_number = check_magic_number(slave_attributes[:magic_number])
             if self.prop_firm?
               slave.comment      = "#{account_slave.id}#{slave.magic_number}_#{slave.comment}"

@@ -11,7 +11,8 @@ class UserDashboard < Administrate::BaseDashboard
     id:             Field::Number,
     email:          Field::String,
     password:       Field::Password,
-    store:          Field::BelongsTo,
+    # store:          Field::BelongsTo,
+    store_id:       DisableTextField.with_options(default: :current_store),
     userable:       Field::Polymorphic,
     created_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
@@ -25,7 +26,7 @@ class UserDashboard < Administrate::BaseDashboard
   COLLECTION_ATTRIBUTES = %i[
   id
   email
-  store
+  store_id
   userable
   created_at
   ].freeze
@@ -36,7 +37,7 @@ class UserDashboard < Administrate::BaseDashboard
   id
   email
   password
-  store
+  store_id
   userable
   created_at
   updated_at
@@ -48,7 +49,7 @@ class UserDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   email
   password
-  store
+  store_idt
   ].freeze
 
   # COLLECTION_FILTERS

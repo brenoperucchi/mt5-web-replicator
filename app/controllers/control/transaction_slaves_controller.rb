@@ -60,7 +60,7 @@ module Control
     end
 
     def scoped_resource
-      current_user.store.slaves
+      TransactionSlave.where(store_id:current_user.store)
     end
 
   end

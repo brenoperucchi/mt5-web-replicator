@@ -113,6 +113,7 @@ pt-BR:
           resume3: O sistema dará todas informações Log entradas tanto da conta COPY quanto das contas SLAVES.
         pricing:
           plan:
+            free: Gratuito
             basic: Básico
             business: Negócio
             premium: Premium
@@ -188,6 +189,7 @@ pt-BR:
         capital_recomendation: Capital Recomendado
         capital_multiplier: Multiplicador de Capital
         contract_volume_max: Contrato Volume Max
+        restrict_dashboard: Restrição Dashboard
         customer_plans: Plano do Portfolio
         accounts: Conta
         orders: Ordens
@@ -196,6 +198,8 @@ pt-BR:
         instruments: Ativos
         created_at: criado
         updated_at: atualizado
+      user:
+        metatrader_account: Login Acesso (email / conta metatrader)
       store:
         name: Nome
         state: Status
@@ -206,6 +210,8 @@ pt-BR:
         volume_default: Volume Default
         stripe_api_secret: Stripe API (secret)
         stripe_webhook_secret: Stripe Webhook (secret)
+        dashboard_restrict: Restrição Dashboard
+        dashboard_date_filter: Filtro Data
       instrument:
         id: #ID
         account: Conta

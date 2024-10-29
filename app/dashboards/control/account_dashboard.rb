@@ -12,8 +12,8 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     id:                   Field::Number.with_options(searchable: true),
     name:                 Field::String,
     state:                Field::Boolean.with_options(enum:true, checked:"enable", unchecked:"disable"),
-    kind:                 CheckboxField.with_options(object:"customer", collection_key: Account.kinds.keys, default: :fixed),
-    meta_margin_mode:     CheckboxField.with_options(object:"customer", collection_key: Account.meta_margin_modes.keys, default: :hedging),
+    kind:                 CheckboxField.with_options(object:"customer", collection_key: Account.kinds.keys.reverse, default: :slave),
+    meta_margin_mode:     CheckboxField.with_options(object:"customer", collection_key: Account.meta_margin_modes.keys.reverse, default: :hedging),
     meta_mode:            CheckboxField.with_options(object:"customer", collection_key: Account.meta_modes.keys, default: :demo),
     contract_volume:      Field::String.with_options(searchable: false),
     # stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3, searchable: false),
@@ -30,10 +30,6 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   }.freeze
 
   # COLLECTION_ATTRIBUTES
-  # an array of attributes that will be displayed on the model's index page.
-  #
-  # By default, it's limited to four items to reduce clutter on index pages.
-  # Feel free to add, remove, or rearrange items.
   COLLECTION_ATTRIBUTES = %i[
   name
   customer
@@ -44,15 +40,14 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
-  # an array of attributes that will be displayed on the model's show page.
   SHOW_PAGE_ATTRIBUTES = %i[
   id
-  name
   state
-  instrument_control
+  name
   kind
   meta_mode
   meta_margin_mode
+  instrument_control
   contract_volume
   magics_accept
   account_server
@@ -68,18 +63,32 @@ class Control::AccountDashboard < Administrate::BaseDashboard
   # FORM_ATTRIBUTES
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
+
+  # FORM_ATTRIBUTES_NEW = %i[
+  # state
+  # name
+  # kind
+  # meta_mode
+  # meta_margin_mode
+  # instrument_control
+  # contract_volume
+  # magics_accept
+  # customer
+  # traces
+  # ].freeze
+
   FORM_ATTRIBUTES = %i[
   state
-  instrument_control
+  name
   kind
   meta_mode
   meta_margin_mode
-  name
+  instrument_control
   contract_volume
   magics_accept
-  account_server
   customer
   traces
+  account_server
   ].freeze
 
   # COLLECTION_FILTERS

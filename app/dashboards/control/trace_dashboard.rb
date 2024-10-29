@@ -27,11 +27,13 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     capital_multiplier:       Field::String.with_options(searchable: false),
     contract_volume_max:      Field::String.with_options(searchable: false),
     # stock_kind:               CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3),
+    dashboard_restrict:       Field::Boolean,
     active:                   Field::Boolean,
     kind:                     DisableTextField.with_options(value:"copy", type:'hide'),
     # volumes:                Field::ActsAsTaggable,
     # messages:               Fields::HasManyScopeField.with_options(associated: :store, direction: :desc, sort_by: :created_at),
-    store_id:                 DisableAssociation.with_options(attribute: :store, type:'hide'),
+    # store_id:                 DisableTextField.with_options(default: :current_store, type: 'hide'),
+    stores:                   DisableAssociation.with_options(type: 'has_many', association: :stores, attribute_name: :store_id, hide:true),
     take_profit_limit:        DisableTextField.with_options(value:2, type:'hide'),
     instruments:              Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     orders:                   Fields::HasManyScopeField.with_options(associated: :trace, dashboard:'control', direction: :desc, sort_by: :created_at),
@@ -53,6 +55,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   active
   name
   name_id
+  dashboard_restrict
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -63,6 +66,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   active
   instrument_control
   kind
+  dashboard_restrict
   magic_same
   name_id
   magics_accept
@@ -80,17 +84,19 @@ class Control::TraceDashboard < Administrate::BaseDashboard
   # an array of attributes that will be displayed
   # on the model's form (`new` and `edit`) pages.
   FORM_ATTRIBUTES = %i[
-  name
   active
+  name
   instrument_control
   kind
+  dashboard_restrict
   magic_same
   name_id
   magics_accept
   capital_recomendation
   capital_multiplier
   contract_volume_max
-  store_id
+  customer_plans
+  stores
   desc_contract
   ].freeze
 

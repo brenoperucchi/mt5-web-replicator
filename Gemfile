@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 6.1.7.8'
+gem 'rails', '6.1.7.9'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '>= 6.4.3'
@@ -24,7 +24,7 @@ gem 'jbuilder', '~> 2.7'
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
-gem 'bundler', '2.4.20'
+gem 'bundler', '2.4.22'
 gem 'pg'
 
 # Use Active Storage variant
@@ -99,17 +99,17 @@ end
 
 gem 'wannabe_bool'
 gem 'acts-as-taggable-on', '~> 7.0'
-gem 'administrate-field-acts_as_taggable'
 gem 'ancestry'
 gem 'paper_trail', '13.0.0'
 gem 'devise'
 gem "font-awesome-rails"
 gem 'jquery-rails'
 gem "rest-client"
-gem 'pay'
+gem 'pay', '6.8.1'
 gem 'stripe', '~> 9'
 gem 'mercadopago-sdk'
 gem 'dotenv'
+gem 'stringio', '3.0.9'
 
 # # To use Braintree + PayPal, also include:
 # gem 'braintree', '>= 4.4', '< 5.0'
@@ -144,12 +144,13 @@ gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 # gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
 # gem "administrate", path: "vendor/administrate"
 # gem 'administrate-field-scoped_has_many', path: "vendor/administrate-field-scoped_has_many"
-gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
+gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: 'updated'
 gem 'administrate-field-image'
 gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git', branch: 'main'
 gem "administrate-field-nested_has_many"
 gem 'administrate_ransack',         git: "https://github.com/brenoperucchi/administrate_ransack.git", branch: 'master'
 gem "administrate-field-tinymce",   git: 'https://github.com/smedrick/administrate-field-tinymce.git'
+gem 'administrate-field-acts_as_taggable'
 gem 'administrate-field-active_storage'
 gem "image_processing"
 # ADMINISTRATE
@@ -168,5 +169,3 @@ gem 'whenever', require: false
 # Stylesheet inlining for email **
 # gem 'inky-rb', require: 'inky'
 # gem 'premailer-rails'
-
-# gem "tailwindcss-rails", "~> 2.5"

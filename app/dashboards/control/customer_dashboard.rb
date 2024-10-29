@@ -16,7 +16,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     role:                 DisableTextField.with_options(value:"customer", type: 'hide'),
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
     # store_id:             DisableTextField.with_options(default: :current_store),
-    store:                Field::Delegate.with_options(class_name: "Store", searchable: false),
+    store_id:             DisableTextField.with_options(default: :current_store, type: 'hide'),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
     invoices:             DisableAssociation.with_options(type: 'has_many', association: :invoices),
     customer_plans:       DisableAssociation.with_options(type: 'has_many', association: :invoices),
@@ -43,7 +43,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   name
   email
   role_control
-  store
+  store_id
   accounts
   customer_plans
   invoices
@@ -57,7 +57,7 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   name
   user
-  store
+  store_id
   customer_plans
   role
   role_control

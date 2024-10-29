@@ -24,7 +24,7 @@ RSpec.describe 'Store Controller', type: :request do
     @store  = create(:store, plan: @plan1)
     @stripe = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @stripe, store: @store)
-    @store_name = "Sistema-#{Store.last.try(:id).to_i + 1}" 
+    @store_name = "Sistema-#{Store.maximum(:id).to_i + 1}" 
 
     # @stripe = create(:payment_method, :mercadopago)
 	end
@@ -61,7 +61,7 @@ RSpec.describe 'Store Controller', type: :request do
         expect(@store.payment_id).to eq(1)
         expect(@store.payment_id).to eq(1)
         expect(@store.accounts.count).to eq(1)
-        expect(@store.traces.count).to eq(1)
+        expect(@store.traces.last.stores).to be_present
 
       end
       it "creates a new Order" do

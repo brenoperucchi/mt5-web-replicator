@@ -12,9 +12,9 @@ module Control
     # This will be used to set the resource for the `show`, `edit`, and `update`
     # actions.
     #
-    # def find_resource(param)
-    #   Foo.find_by!(slug: param)
-    # end
+    def find_resource(param)
+      Trace.find_by!(id: param)
+    end
 
     # The result of this lookup will be available as `requested_resource`
 
@@ -34,6 +34,12 @@ module Control
     # empty values into nil values. It uses other APIs such as `resource_class`
     # and `dashboard`:
     #
+
+    # def resource_params
+    #     # params.require(:store).permit(:name, :master, :slaves, tag_list:[])
+    #     params.require(resource_class.model_name.param_key).permit(dashboard.permitted_attributes)
+    # end
+
     # def resource_params
     #   params.require(resource_class.model_name.param_key).
     #     permit(dashboard.permitted_attributes).

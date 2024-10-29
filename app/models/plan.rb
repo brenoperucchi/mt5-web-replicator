@@ -10,6 +10,8 @@ class Plan < ApplicationRecord
   # has_many :items, :class_name => "PlanPaymentItem", :foreign_key => "plan_payment_id"
   has_many :plan_usages, as: :usageable
 
+  scope :active,   ->{ where.not(active_at: nil)}
+
   # after_create :create_items
 
   validates_presence_of :name, :amount

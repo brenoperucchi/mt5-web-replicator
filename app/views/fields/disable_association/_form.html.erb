@@ -1,28 +1,36 @@
 <% content_for :head do %>
   <style type="text/css">
-    .field-unit.field-hide {display: none!important;}
+    .hide {display: none!important;}
   </style>
 <% end %>
 
+<%- attribute_name = field.options[:attribute_name] %>
+<%- attribute_name_ids = field.attribute.to_s.singularize + "_ids" %>
+<%- class_hide = field.options[:hide] ? "hide" : "" %>
+
 <% if action_name == "new" or action_name == "create" %>
   <% if field.options[:type] != "has_many" %>  
-    <div class="field-unit__label">
+    <div class="field-unit__label <%= class_hide %>">
       <%= f.label field.attribute %>
     </div>
-    <div class="field-unit__field">
+    <div class="field-unit__field <%= class_hide %>">
       <%= f.text_field field.attribute, value: field.default_value(current_user, :name), disabled:true %>
       <%= f.hidden_field field.attribute, value: field.default_value(current_user, :id) %>
-
     </div>
+  <% elsif field.options[:type] == "has_many" %>  
+      <div class="field-unit__field <%= class_hide %>">
+        <%= f.text_field attribute_name_ids, value: field.default_value(current_user, :name), disabled:true %>
+        <%= f.text_field attribute_name_ids, multiple: true, value: current_user.send(attribute_name) %>
+      </div>
   <% end %>
 <% else %>
 
-  <div class="field-unit__label">
+  <div class="field-unit__label <%= class_hide %>">
     <%= f.label field.attribute %>
   </div>
-  <div class="field-unit__field">
-    <%= f.text_field field.attribute, value: field.default_value(current_user.userable, :name), disabled:true %>
-    <%= f.hidden_field "account_ids[]", :multiple => true, value: field.default_value(current_user.userable, :id) %>
+  <div class="field-unit__field <%= class_hide %> ">
+    <%= f.text_field attribute_name_ids, value: field.default_value(current_user.userable, :name), disabled:true %>
+    <%= f.hidden_field attribute_name_ids, :multiple => true, value: field.default_value(current_user.userable, :id) %>
   </div>
 
 <% end %>

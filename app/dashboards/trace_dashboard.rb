@@ -20,7 +20,7 @@ class TraceDashboard < Administrate::BaseDashboard
     active:                Field::Boolean.with_options(searchable: false),
     instrument_control:    Field::Boolean.with_options(searchable: false),
     magic_same:            Field::Boolean.with_options(searchable: false),
-    store:                 Field::BelongsTo,
+    # store:                 Field::BelongsTo,
     stores:                Field::HasMany,
     meta_host:             Field::String,
     kind:                  CheckboxField.with_options(collection_key: Trace.kinds.keys, default: :copy),
@@ -56,7 +56,6 @@ class TraceDashboard < Administrate::BaseDashboard
   name_id
   kind
   kind_copy
-  store
   stores
   accounts
   transactions
@@ -77,7 +76,6 @@ class TraceDashboard < Administrate::BaseDashboard
   capital_recomendation
   capital_multiplier
   contract_volume_max
-  store
   stores
   accounts
   customer_plans
@@ -109,7 +107,6 @@ class TraceDashboard < Administrate::BaseDashboard
   capital_recomendation
   capital_multiplier
   contract_volume_max
-  store
   stores
   accounts
   customer_plans

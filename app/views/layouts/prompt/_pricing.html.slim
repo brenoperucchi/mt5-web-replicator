@@ -1,0 +1,119 @@
+section.bg-gradient-to-r.from-gray-100/70.to-gray-100/50.relative.py-16.sm:py-24
+  .absolute.top-0.inset-x-0.hidden.sm:block
+    img.w-full.-scale-x-100[src="images/prompt/shapes/white-wave.svg" alt="svg"]
+  .py-5
+    .container.relative
+      .text-center
+        span.text-xs.bg-primary/10.text-primary/90.rounded-full.px-2.py-1
+          | Plans
+        h1[class="text-3xl/tight font-medium mb-4 mt-5"]
+          = I18n.t :title, scope: 'helpers.site.main.pricing'
+        p.text-gray-500
+          / = I18n.t :announce1, scope:'helpers.site.main.pricing', value: Plan.first.discount
+        /   span.text-primary
+        /     | works 
+        /   |  for everyone
+      .grid.xl:grid-cols-3.md:grid-cols-2.grid-cols-1.gap-7.mt-14
+        - Plan.active.all.order('id').each do |plan|
+          div[data-aos="fade-up" data-aos-duration="500"]
+            div[class="min-h-80 transition-all duration-300 pointer-events-auto hover:shadow-[0_0_1 5rem_0_rgba(0,0,0, 12)] hover:-translate-y-1"]
+              .border.border-gray-300.bg-white.rounded.w-full.h-full.text-center.p-5
+                span.text-lg.text-primary
+                  = I18n.t plan.name.downcase, scope: 'helpers.site.main.pricing.plan'
+                - if I18n.locale == :en
+                  - value_discount = number_with_precision (plan.amount_discount / @dolar), precision:2
+                - else
+                  - value_discount = number_with_precision plan.amount_discount, precision:2  
+                h1[class="text 3xl/tight font-semibold mt-3"]
+                  sup.text-gray-500.text-sm.font-normal
+                    = I18n.t :unit, scope:'number.currency.format'
+                  = number_with_precision plan.amount, precision:2
+                  sub.text-gray-500.text-sm.font-normal
+                    | /month
+                .border-b.border-gray-200.w-full.my-7
+                div
+                  .flex.flex-col.gap-4
+                    - plan.plan_items.active.order('id desc').each do |item|
+                      p.flex.items-center.text-gray-600.gap-4
+                        i.fa-solid.fa-check.text-green-500.text-lg
+                        = I18n.t item.name.downcase, limit:item.limit, scope:'helpers.site.main.pricing'
+                    p.flex.items-center.text-gray-600.gap-4
+                      i.fa-solid.fa-info.text-green-500.text-lg
+                      - if I18n.locale == :en
+                        - amount_extra = number_with_precision (plan.amount_extra / @dolar), precision:2
+                      - else
+                        - amount_extra = number_with_precision plan.amount_extra, precision:2
+                      = I18n.t :extra, amount:amount_extra, scope:'helpers.site.main.pricing'
+
+                .flex.mt-10
+                  a.bg-primary/10.text-primary/90.w-full.py-3.rounded-lg.border.border-transparent.hover:border.hover:border-primary/20.transition-all.duration-300[href="/demo_request"]
+                    | TESTE GRÁTIS
+        div[data-aos="fade-up" data-aos-duration="700"]
+          div[class="transition-all duration-300 pointer-events-auto hover:shadow-[0_0_1 5rem_0_rgba(0,0,0, 12)] hover:-translate-y-1"]
+            .border.border-gray-300.bg-white.rounded.w-full.h-full.text-center.p-5
+              span.text-lg.text-primary
+                = I18n.t :premium, scope: 'helpers.site.main.pricing.plan'
+
+              h1[class="text 3xl/tight font-semibold mt-3"]
+                sup.text-gray-500.text-sm.font-normal
+                  = I18n.t :title1, scope:'helpers.site.main.pricing.premium'
+              /     | $
+              /   |  99 
+              /   sub.text-gray-500.text-sm.font-normal
+              /     | /month
+              .border-b.border-gray-200.w-full.my-7
+              div
+                .flex.flex-col.gap-4
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    = I18n.t :charge, scope:'helpers.site.main.pricing'
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    = I18n.t :slave, limit:20, scope:'helpers.site.main.pricing'
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    = I18n.t :copy, limit:20, scope:'helpers.site.main.pricing'
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    = I18n.t :trace, limit:20, scope:'helpers.site.main.pricing'
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    | CLOUD VPS to 20 MetaTraders
+                .flex.mt-20
+                  a.bg-primary.text-white.w-full.py-3.rounded-lg.border.border-transparent.hover:shadow-lg.hover:shadow-primary/30.hover:border.hover:border-primary.focus:outline.focus:outline-primary/50.transition-all.duration-300[href="mailto:contato@imentore.com.br"]
+                    | Entre em contato
+        / div[data-aos="fade-up" data-aos-duration="900"]
+          div[class="transition-all duration-300 pointer-events-auto hover:shadow-[0_0_1 5rem_0_rgba(0,0,0, 12)] hover:-translate-y-1"]
+            .border.border-gray-300.bg-white.rounded.w-full.h-full.text-center.p-5
+              span.text-lg.text-primary
+                | Enterprise
+              h1[class="text 3xl/tight font-semibold mt-3"]
+                sup.text-gray-500.text-sm.font-normal
+                  | $
+                |  599 
+                sub.text-gray-500.text-sm.font-normal
+                  | /month
+              .border-b.border-gray-200.w-full.my-7
+              div
+                .flex.flex-col.gap-4
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    | Unlimited usage time
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    | Use for personal or a commercial
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    | Add Unlimited attendees
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    | 24x7 Technical support via phone
+                  p.flex.items-center.text-gray-600.gap-4
+                    i.fa-solid.fa-check.text-green-500.text-lg
+                    | Technical support via email
+                .flex.mt-20
+                  a.bg-primary/10.text-primary/90.w-full.py-3.rounded-lg.border.border-transparent.hover:border.hover:border-primary/20.transition-all.duration-300[href="#"]
+                    | Purchase Now
+
+  .absolute.bottom-0.inset-x-0.hidden.sm:block
+    img.w-full.scale-x-100.-scale-y-100[src="images/prompt/shapes/white-wave.svg" alt="svg"]

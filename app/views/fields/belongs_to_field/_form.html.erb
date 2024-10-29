@@ -32,8 +32,8 @@ that displays all possible records to associate with.
 
 <% content_for(:javascript) do %>
   <script type="text/javascript">
-    $(function() {
-      $('.field-unit__field select').selectize({});
-    });
+    window.onload = function() {
+        $('.field-unit__field select').selectize({});
+    };
   </script>
 <% end %>
