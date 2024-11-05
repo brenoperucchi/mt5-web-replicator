@@ -3,7 +3,7 @@ class AccountSerializer < ActiveModel::Serializer
              :api_server_hostname, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_time_max_seconds, :api_slippage, 
              :api_environment_local, :api_store_state, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
              :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, :api_send_orders_history, 
-             :api_send_orders_history_ranges, :api_close_all_orders
+             :api_close_all_orders, :api_milliseconds_delay
 
 
   def api_debug_mode
@@ -64,6 +64,10 @@ class AccountSerializer < ActiveModel::Serializer
 
   def api_event_on_tick
     object.api_event_on_tick.present? ? object.api_event_on_tick.to_b : Store.first.api_event_on_tick.to_b
+  end   
+
+  def api_milliseconds_delay
+    object.api_milliseconds_delay.present? ? object.api_milliseconds_delay : Store.first.api_milliseconds_delay
   end 
 
   def api_mfe_mae_display
@@ -86,13 +90,13 @@ class AccountSerializer < ActiveModel::Serializer
     object.api_close_all_orders.present? ? object.api_close_all_orders.to_b : Store.first.api_close_all_orders.to_b
   end
 
-  def api_send_orders_history_ranges
-    if object.api_send_orders_history_date_end.present? && object.api_send_orders_history_date_start.present?
-      "#{object.api_send_orders_history_date_start.to_datetime.beginning_of_day.to_i}.#{object.api_send_orders_history_date_end.to_datetime.end_of_day.to_i}"
-    else
-      "#{(Date.today.beginning_of_month).to_datetime.beginning_of_day.to_i}.#{(Date.today.end_of_month).to_datetime.end_of_day.to_i}"
-    end
-  end
+  # def api_send_orders_history_ranges
+  #   if object.api_send_orders_history_date_end.present? && object.api_send_orders_history_date_start.present?
+  #     "#{object.api_send_orders_history_date_start.to_datetime.beginning_of_day.to_i}.#{object.api_send_orders_history_date_end.to_datetime.end_of_day.to_i}"
+  #   else
+  #     "#{(Date.today.beginning_of_month).to_datetime.beginning_of_day.to_i}.#{(Date.today.end_of_month).to_datetime.end_of_day.to_i}"
+  #   end
+  # end
 
   def yaml
     yaml = YAML::load(File.open("#{Rails.root}/config/meta_versions.yml"))

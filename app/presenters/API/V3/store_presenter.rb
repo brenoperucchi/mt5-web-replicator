@@ -46,7 +46,7 @@ class	API::V3::StorePresenter < API::V3::BasePresenter
 		if account.nil?
 			return
 		else
-			@serializer = AccountSerializer.new(account, params: @params) 
+			@serializer = AccountSerializer.new(account, params: @params).try(:attributes)
 		end
 		
 

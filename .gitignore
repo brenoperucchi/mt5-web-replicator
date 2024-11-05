@@ -119,3 +119,4 @@ app/.DS_Store
 /config/credentials/develpoment.key
 public/mntpoint/signal_copy_trasmit.txt
 public/mntpoint/signal_copy_trasmit.txt.tmp
+app/.DS_Store

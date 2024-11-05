@@ -14,6 +14,7 @@ module API
         end      
 
         # api/v3/copy/post/store/imentore_copy/2_30_05/DarwinexDemo/3000064179/HEDGING
+        # api/v3/copy/post/store/imentore_copy/3_00_03/XPMT5DEMO/82033102/HEDGING
         desc "Return Store Config"
         get "/config/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           kind = params[:expert_name].include?('slave') ? 'slave' : 'copy'
@@ -26,17 +27,17 @@ module API
         end      
         
         # api/v3/copy/post/store/imentore_copy/2_30_05/DarwinexDemo/3000064179/HEDGING
-        desc "Return Store Config"
-        post "/config/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
-          logging = Logging.create(state: "CONFIG", request_url: request.url, params: params)
-          presenter = API::V2::StorePresenter.new(params, version, logging)
-          if presenter.prepare && presenter.enabled?(meta_version_accept)
-            status 201
-            return presenter.serializer
-          else
-            status 400
-          end
-        end      
+        # desc "Return Store Config"
+        # post "/config/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
+        #   logging = Logging.create(state: "CONFIG", request_url: request.url, params: params)
+        #   presenter = API::V2::StorePresenter.new(params, version, logging)
+        #   if presenter.prepare && presenter.enabled?(meta_version_accept)
+        #     status 201
+        #     return presenter.serializer
+        #   else
+        #     status 400
+        #   end
+        # end      
 
       end
     end

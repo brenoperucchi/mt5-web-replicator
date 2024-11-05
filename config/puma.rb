@@ -4,7 +4,7 @@ threads min_threads_count, max_threads_count
 
 if ENV.fetch("RAILS_ENV", "development") == "development"
   worker_timeout 1600 
-  threads 2,4
+  threads 1,2
 end
 port ENV.fetch("PORT") { 3000 }
 environment ENV.fetch("RAILS_ENV") { "development" }

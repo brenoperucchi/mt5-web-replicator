@@ -168,7 +168,6 @@ class Transaction < ApplicationRecord
         else  
           volume = contract_volume
         end
-        # binding.pry
         slave_attributes.merge!(lot: volume.to_f)
       end
       slave.set_sl_and_tp_order(*slave_attributes.values)

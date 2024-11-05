@@ -49,7 +49,7 @@ class UserDashboard < Administrate::BaseDashboard
   FORM_ATTRIBUTES = %i[
   email
   password
-  store_idt
+  store_id
   ].freeze
 
   # COLLECTION_FILTERS

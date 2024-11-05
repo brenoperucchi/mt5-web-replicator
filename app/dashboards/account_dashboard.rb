@@ -30,8 +30,6 @@ class AccountDashboard < Administrate::BaseDashboard
     created_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     deleted_at:           Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
-    api_send_orders_history_date_start: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"), 
-    api_send_orders_history_date_end:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"), 
 
     api_debug_mode:           Field::Boolean.with_options(searchable: false),
     api_debug_mode_level:     Field::Number.with_options(searchable: false),
@@ -44,6 +42,7 @@ class AccountDashboard < Administrate::BaseDashboard
     api_store_message:        Field::String.with_options(searchable: false),
     api_milliseconds_timer:   Field::Number.with_options(searchable: false),
     api_milliseconds_tick:    Field::Number.with_options(searchable: false),
+    api_milliseconds_delay:    Field::Number.with_options(searchable: false),
     api_event_on_timer:       Field::Boolean.with_options(searchable: false),
     api_event_on_tick:        Field::Boolean.with_options(searchable: false),
     api_mfe_mae_display:      Field::Boolean.with_options(searchable: false),
@@ -138,6 +137,7 @@ class AccountDashboard < Administrate::BaseDashboard
   api_reach_loss_set
   api_milliseconds_timer
   api_milliseconds_tick
+  api_milliseconds_delay
   ].freeze
 
 

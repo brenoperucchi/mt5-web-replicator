@@ -5,7 +5,7 @@ section.position-relative.overflow-hidden#pricing
       .col-lg-8.mx-auto.text-center
         - if Plan.first.discount != "0"
           h5.mb-0= I18n.t :announce1, scope:'helpers.site.main.pricing', value: Plan.first.discount
-          / span.small.text-muted = I18n.t :announce2, scope:'helpers.site.main.pricing'
+          span.small.text-muted = I18n.t :announce2, scope:'helpers.site.main.pricing'
         h2.display-5.mb-0.mt-5
           = I18n.t :title, scope: 'helpers.site.main.pricing'
     .row.mb-7

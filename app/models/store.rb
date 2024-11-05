@@ -16,7 +16,7 @@ class Store < ApplicationRecord
                                 :api_server_hostname, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, :api_time_max_seconds, :api_slippage, 
                                 :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, :api_event_on_timer,
                                 :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, :api_send_orders_history, 
-                                :api_send_orders_history_ranges, :api_close_all_orders
+                                :api_send_orders_history_ranges, :api_close_all_orders, :api_event_on_delay
                               ]
   enum state: {disable:0, enable:1}
   acts_as_taggable_on :tags
@@ -229,7 +229,6 @@ class Store < ApplicationRecord
         kind:1, kind_copy: 0, magic_same: 1, store: self, active_at: DateTime.current
       )
       trace.stores << self unless trace.stores.include?(self)
-      # binding.pry
       trace.save
     end
   end
@@ -259,15 +258,16 @@ class Store < ApplicationRecord
     methods = {
       api_debug_mode: false, # Valor padrão: false
       api_debug_mode_level: 1, # Valor padrão: 1
-      api_freeze_max_time: 16, # Valor padrão: 12
+      api_freeze_max_time: 30, # Valor padrão: 30
       api_time_to_check_server: 30, # Valor padrão: 30
       api_time_max_seconds: 30, # Valor padrão: 30
       api_slippage: 30, # Valor padrão: 30
-      api_environment_local: true, # Valor padrão: false
+      api_environment_local: false, # Valor padrão: false
       api_store_state: true, # Valor padrão: true
       api_store_message: nil, # Valor padrão: nil
-      api_milliseconds_timer: 2500, # Valor padrão: 3000
+      api_milliseconds_timer: 2000, # Valor padrão: 3000
       api_milliseconds_tick: 2000, # Valor padrão: 3000
+      api_milliseconds_delay: 550, # Valor padrão: 550
       api_event_on_timer: true, # Valor padrão: true
       api_event_on_tick: true, # Valor padrão: false
       api_mfe_mae_display: true, # Valor padrão: true

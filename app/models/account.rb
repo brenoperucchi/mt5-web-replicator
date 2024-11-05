@@ -9,7 +9,7 @@ class Account < ApplicationRecord
   
   # after_create :register_resource_plan
   # after_save :insert_instruments
-  after_create :set_advanced_attributes
+  after_create :set_settings
 
   # default_scope { where(deleted_at: nil) }
 
@@ -26,7 +26,8 @@ class Account < ApplicationRecord
   store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, 
                                :api_time_max_seconds, :api_slippage, :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, 
                                :api_event_on_timer, :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, 
-                               :api_send_orders_history, :api_send_orders_history_date_start, :api_send_orders_history_date_end, :api_close_all_orders]
+                               :api_send_orders_history, :api_close_all_orders, :api_milliseconds_delay]
+                               # :api_send_orders_history, :api_send_orders_history_date_start, :api_send_orders_history_date_end, :api_close_all_orders, :api_milliseconds_delay]
   belongs_to :store
   belongs_to :customer
   belongs_to :account_server, optional: true
@@ -64,11 +65,10 @@ class Account < ApplicationRecord
   #   store.register_resource_plan(self, self.kind)
   # end
 
-  def set_advanced_attributes
+  def set_settings()
     self.update(api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 30, api_time_to_check_server: 30, api_time_max_seconds: 30, api_slippage: 30, 
                 api_environment_local: false, api_store_state: true, api_milliseconds_timer: 2400, api_milliseconds_tick: 2400, api_event_on_timer: true, 
-                api_event_on_tick: false, api_mfe_mae_display: true,  api_send_orders_history: false, api_send_orders_history_date_start: nil, 
-                api_send_orders_history_date_end: nil, api_close_all_orders: false)
+                api_event_on_tick: false, api_mfe_mae_display: true,  api_send_orders_history: false, api_close_all_orders: false, api_milliseconds_delay: 550)
   end
 
   def contract_volume
@@ -190,14 +190,29 @@ class Account < ApplicationRecord
     contract_volume ||= (self.try(:contract_volume) == "0" or self.try(:contract_volume).nil?) ? 1 : self.try(:contract_volume).to_f
   end
 
-  def api_send_orders_history_date_start
-    @api_send_orders_history_date_start ||= DateTime.parse(self.settings["api_send_orders_history_date_start"] || DateTime.current.beginning_of_month.beginning_of_day.to_s)
+  # def api_send_orders_history_date_start
+  #   @api_send_orders_history_date_start ||= DateTime.parse(self.settings["api_send_orders_history_date_start"] || DateTime.current.beginning_of_month.beginning_of_day.to_s)
+  # end
+
+  # def api_send_orders_history_date_end  
+  #   @api_send_orders_history_date_end ||= DateTime.parse(self.settings["api_send_orders_history_date_end"] || DateTime.current.end_of_month.end_of_day.to_s)
+  # end                             
+
+
+
+  def self.settings_change(timer = nil, tick = nil)
+
+    Account.all.each do |account|
+      timer ||= account.api_milliseconds_timer
+      tick ||= account.api_milliseconds_tick
+
+      attributes = {api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 30, api_time_to_check_server: 30, api_time_max_seconds: 30, api_slippage: 30, 
+                      api_environment_local: false, api_store_state: account.api_store_state, api_milliseconds_timer: timer, api_milliseconds_tick: tick, api_event_on_timer: true, 
+                      api_event_on_tick: true, api_mfe_mae_display: true,  api_send_orders_history: false, api_close_all_orders: false, api_milliseconds_delay: 550}
+
+      account.update(attributes)
+    end
   end
-
-  def api_send_orders_history_date_end  
-    @api_send_orders_history_date_end ||= DateTime.parse(self.settings["api_send_orders_history_date_end"] || DateTime.current.end_of_month.end_of_day.to_s)
-  end                             
-
 
 
 end
