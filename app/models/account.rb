@@ -200,15 +200,17 @@ class Account < ApplicationRecord
 
 
 
-  def self.settings_change(timer = nil, tick = nil)
+  def self.settings_change(timer = nil, tick = nil, delay = nil)
 
     Account.all.each do |account|
       timer ||= account.api_milliseconds_timer
       tick ||= account.api_milliseconds_tick
+      delay ||= account.api_milliseconds_delay
 
       attributes = {api_debug_mode: false, api_debug_mode_level: 1, api_freeze_max_time: 30, api_time_to_check_server: 30, api_time_max_seconds: 30, api_slippage: 30, 
-                      api_environment_local: false, api_store_state: account.api_store_state, api_milliseconds_timer: timer, api_milliseconds_tick: tick, api_event_on_timer: true, 
-                      api_event_on_tick: true, api_mfe_mae_display: true,  api_send_orders_history: false, api_close_all_orders: false, api_milliseconds_delay: 550}
+                    api_environment_local: false, api_store_state: account.api_store_state, api_milliseconds_timer: timer, api_milliseconds_tick: tick, api_event_on_timer: true, 
+                    api_event_on_tick: true, api_mfe_mae_display: true,  api_send_orders_history: false, api_close_all_orders: false, api_milliseconds_delay: delay
+                   }
 
       account.update(attributes)
     end
