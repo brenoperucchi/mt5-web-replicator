@@ -25,15 +25,23 @@ class API::V3::SlavePresenter < API::V3::BasePresenter
 
     if not json.blank? and json.is_a?(Hash)
       action = json['metaState'] 
-      slave = account.slaves.not_deleted.where(comment: json['comment']).first
+      slave = account.slaves.not_deleted.where(comment: json['comment']).try(:first)
       serializer = API::V3::SlaveSerializer.new(json)
-
+      
+      logging = Logging.create(content: json, state: "INITIAL", loggerable: message, params: params, request_url: message.request_url, account: slave.try(:account), resourceable:slave)
+      
       unless slave.nil?
         check_order_duplicate(slave, json, action)        
         case action
         when "OPEN", "OPENED"
           slave.attributes = serializer.presenter_attributes
-          slave.execute
+          if slave.remove?
+            slave.execute
+            slave.save
+            slave.remove
+          else
+            slave.execute
+          end
           @version = slave.versions.last
         when "CLOSED", "DELETED", "HASCLOSED"
           slave.attributes = serializer.presenter_attributes.merge(profit:json['profit']).except(:price_open)
@@ -52,7 +60,8 @@ class API::V3::SlavePresenter < API::V3::BasePresenter
           logging_count  = slave.loggings.where(state: action, ancestry: slave.loggings.last.ancestry, account_id: slave.account.id, created_at:date_today.beginning_of_day..date_today.end_of_day).count
           if logging_count >= 2
             action = "NOSLTP"
-            skip_logging = true if slave.loggings.where(state: action, created_at:date_today.beginning_of_day..date_today.end_of_day).present?                    
+            # skip_logging = true if 
+            # slave.loggings.where(state: action, created_at:date_today.beginning_of_day..date_today.end_of_day).present?                    
             @version = slave.versions.last
           end
         when "NOTFIND"
@@ -67,12 +76,12 @@ class API::V3::SlavePresenter < API::V3::BasePresenter
           end
           @version = slave.versions.last
         end
-        logging_content = nil
-        slave.loggings.create(content:json, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, account: slave.account, loggerable: message, params: params, request_url: message.request_url) unless skip_logging
+        # logging_content = nil
+        logging.update(resourceable: slave, changeset: @version.try(:changeset), version:@version, state: action, parent: slave.loggings.first, loggerable: message)# unless skip_logging
       end
-      if slave.nil?
-        Logging.create(content: json, state: "ERRORSLAVE", loggerable: message, params: params, request_url: message.request_url)
-      end
+      # if slave.nil?
+      #   Logging.create(content: json, state: "ERRORSLAVE", loggerable: message, params: params, request_url: message.request_url)
+      # end
     end
     return true
   end

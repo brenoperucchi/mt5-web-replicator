@@ -43,7 +43,7 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
                       # transaction.update_slaves(serializer)
                       transaction.update_mfe_mae(serializer)
                       version = transaction.try(:versions).try(:last)
-                      transaction.loggings.create(content: serializer.obj, changeset: version.changeset, version: version, state: 'MODIFY', resourceable: order, account: account, parent: message.loggings.try(:first), request_url: message.try(:request_url), loggerable: message)
+                      transaction.loggings.create(content: serializer.obj, changeset: version.changeset, version: version, state: "MODIFY", resourceable: order, account: account, parent: message.loggings.try(:first), request_url: message.try(:request_url), loggerable: message)
                     end 
                   end
                 end
@@ -162,7 +162,6 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
             change = true
             profit_total += profit
           end
-          # binding.pry if profit_total != account.masters.not_error.sum(&:profit)
         else
           order = Order.find_by(symbol: symbol, content_id: positionID)
           ticket_master = 0

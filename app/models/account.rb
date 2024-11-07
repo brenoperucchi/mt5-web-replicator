@@ -201,7 +201,6 @@ class Account < ApplicationRecord
 
 
   def self.settings_change(timer = nil, tick = nil, delay = nil)
-
     Account.all.each do |account|
       timer ||= account.api_milliseconds_timer
       tick ||= account.api_milliseconds_tick

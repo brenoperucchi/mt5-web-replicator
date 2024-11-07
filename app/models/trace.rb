@@ -129,7 +129,7 @@ class Trace < ApplicationRecord
       end
 
       if order.valid? and not order.error?
-        transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account)
+        transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account, request_url: message.try(:request_url))
         transaction.execute unless transaction.executed?
         if transaction and not transaction.error?
           return true if account.netting? and order.slaves.count > 0 
@@ -146,9 +146,9 @@ class Trace < ApplicationRecord
             end
             if slave.save
               account_slave.orders << order unless account_slave.orders.exists?(order.id) 
-              slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave)
+              slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave, request_url: message.try(:request_url))
             else
-              message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order)
+              message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order, request_url: message.try(:request_url))
             end
           end
         end

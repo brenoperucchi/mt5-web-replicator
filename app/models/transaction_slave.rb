@@ -100,16 +100,13 @@ class TransactionSlave < ApplicationRecord
   end
 
   state_machine :initial => :pending do
-    # after_transition :pending => any - :pending, :do => :update_state
     after_transition [:remove,  :executed]            => :closed, :do => :update_state
-    after_transition [:pending]                       => :remove, :do => :delete_pending
-    # after_transition [:pending, :remove, :executed]   => :error,   :do => :update_state
 
     event :execute do
       transition [:error, :pending] => :executed
     end
     event :remove do
-      transition [:error, :pending, :executed] => :remove
+      transition [:error, :pending, :executed, :closed] => :remove
     end  
     event :close do
       transition [:pending, :remove, :executed, :error] => :closed
@@ -122,11 +119,6 @@ class TransactionSlave < ApplicationRecord
     end
     event :erro do
       transition [:pending, :remove, :executed, :closed] => :error
-    end
-
-    state :remove do
-      def delete_pending(state)
-      end
     end
     
     state :closed do
