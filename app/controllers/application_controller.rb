@@ -8,6 +8,7 @@ class ApplicationController < ActionController::Base
 	helper_method :current_store
 	before_action :set_current_user
 	before_action :set_locale
+	helper_method :current_layout
 
   # protect_from_forgery with: :exception
 
@@ -44,15 +45,23 @@ class ApplicationController < ActionController::Base
 
   def set_locale
   	locale = params[:locale]
+  	locale ||= request.env['HTTP_ACCEPT_LANGUAGE'].to_s.scan(/^[a-z]{2}/).first
 		case locale
 		when "en"
 			I18n.locale = 'en'
 		else
 			I18n.locale = 'pt-BR'
 		end
-		unless locale
-			I18n.locale = current_store ? current_store.language : locale 
+		
+		if locale.nil? && current_store
+			I18n.locale = current_store.language
 		end
+
+		I18n.locale
+  end
+
+  def current_layout
+  	self.class.send(:_layout)
   end
 
 end

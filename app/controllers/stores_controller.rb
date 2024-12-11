@@ -2,7 +2,6 @@ class StoresController < ApplicationController
 	prepend_before_action :check_captcha, only: [:create]
   respond_to :html, :xml, :json
 
-
 	layout "saasley"
 
 	def index
@@ -23,7 +22,7 @@ class StoresController < ApplicationController
 		store_name = "Sistema-#{Store.maximum(:id) + 1}"
 		url_name 	 = store_name.to_underscore
 		email 	   = store_params[:email]
-		@store.language = params[:locale].present? ? params[:locale] : 'pt-BR'
+		@store.language = set_locale
 		@store.url = url_name
 		@store.name = store_name
 		@store.plan = Plan.first

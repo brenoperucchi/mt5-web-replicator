@@ -86,9 +86,39 @@ pt-BR:
         app_name: Imentore Copy
         other1: Nosso sistema foca na replicação exata de ordens de robôs, entradas manuais e sinais de trading, proporcionando uma gestão de trading eficiente e integrada.
         other2: 30 dias para testes
+        layout:
+          title1: Replique Suas
+          title2: Operações
+          title3: MT4/MT5 de Qualquer lugar do Mundo
+          title4: Sistema de replicação de ordens, entradas manuais e sinais de trading, garantindo uma gestão de operações eficiente e integrada.
+          title5: 30 de teste gratuito.
+          title6: Não necessidade cartão de crédito para iniciar teste.
+          title7: Características do Sistema
+          title8: Tenha mais informações e gerenciamento de suas operações
+          title9: Replicações de Ordens via MetaTraders
+          title10: "Compatibilidade Completa: Copie suas estratégias automaticamente entre as plataformas MT4 e MT5 com facilidade."
+          title11: "Saídas Parciais: Execute saídas parciais com eficiência, diretamente no sistema de replicação."
+          title12: "Cópia de Ordens Pendentes ou a Mercado: Todas as ordens, sejam pendentes ou a mercado, são copiadas de forma automática."
+          title13: Dashboard de Informações
+          title14: "Estatísticas por Portfólio: Acompanhe o desempenho detalhado de cada portfólio em um único local."
+          title15: "Informações Operacionais: Visualize dados completos por operação, conta e Magic Number."
+          title16: Link para Dashboard de Exemplo
+          title17: Gestão de Portfólios 
+          title18: "Restrição de Magic Number: Bloqueie Magic Numbers específicos que não serão copiados, garantindo personalização."
+          title19: "Controle de Volume por Conta: Ajuste o volume de operação para cada conta individualmente, conforme a estratégia."
+          title20: "Controle de Contas Copy: Integre múltiplos robôs em diferentes contas, utilizando uma única estratégia para atender a diversos clientes simultaneamente."
+          title21: Controle Contas
+          title22: "Controle de Contas Copy: Integre múltiplos robôs em diferentes contas, utilizando uma única estratégia para atender a diversos clientes simultaneamente."
+          title23: "Restrição de Magic Number: Defina quais Magic Numbers não serão copiados em cada portfólio, garantindo controle detalhado."
+          title24: "Escolha de Magic Number: Escolha o Magic Number específico ou mantenha o original do copy, conforme sua necessidade."
+          title25: Gestão de Faturas
+          title26: "Planos de Cobrança Flexíveis: Ofereça planos com diferentes tipos de recorrência, permitindo mensalidades fixas ou cobrança por porcentagem de ganho."
+          title27: Gestão de Cobrança
+          title28: "Gestão Automática de Cobrança: Visualize e configure ao seu cliente de formas de cobrança Online (MercadoPago/Stripe) para clientes os seus clientes, garantindo uma administração financeira eficiente."
         portfolio: Compartilhe dashboards com seus clientes
         warning: Sistema em versão beta
         navbar:
+          home: Início
           request_support: Faça um teste
           sign_in: Acesse
         title:
@@ -96,7 +126,8 @@ pt-BR:
           imentore: imentore copy
           pricing: preços
           support: suporte
-          request_demo: Estamos em fase de testes, neste momento as serão selecionadas alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após o período de teste o cliente deverá optar por um plano com 10% de desconto na mensalidade no primeiro ano.
+          request_demo1: Iniciar Teste
+          request_demo2: Estamos em fase de testes, neste momento as serão selecionadas alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após o período de teste o cliente deverá optar por um plano com 10% de desconto na mensalidade no primeiro ano.
         telegram:
           title: Telegram 
           resume: "Incluímos no nosso serviço um bot inovador chamado Alfred, que se conecta ao seu grupo do Telegram. Alfred é projetado para monitorar de forma eficiente as operações de trading, oferecendo atualizações em tempo real e permitindo uma gestão mais dinâmica das suas atividades de trading diretamente pelo Telegram."
@@ -120,7 +151,8 @@ pt-BR:
           premium:
             title1: Temos serviços exclusivos para clientes premium que necesitam de um sistema com alta demanda. 
             title2: Entre em contato
-          title: Nossos planos.
+          title1: Planos
+          title2: Nossos planos.
           sign_in: Assine
           trace: "%{limit} Portfólio"
           copy: "%{limit} Contas Copy"

@@ -86,9 +86,39 @@ en:
         app_name: Imentore Copy
         other1: Copy Manager for Robots, manual entries and signals
         other2: 30 days for trial
+        layout:
+          title1: Replicate Operations Your MT4/MT5 
+          title2: Trades
+          title3: from Anywhere in the World
+          title4: Order replication system, manual entries and trading signals, ensuring efficient and integrated operations management.
+          title5: 30 day free trial.
+          title6: No credit card required to start trial.
+          title7: Features
+          title8: Get more information and management of your operations
+          title9: Order Replication via MetaTraders
+          title10: "Full Compatibility: Automatically copy your strategies between MT4 and MT5 platforms with ease."
+          title11: "Partial Exits: Efficiently execute partial exits directly in the replication system."
+          title12: "Copying Pending or Market Orders: All orders, whether pending or market, are copied automatically."
+          title13: Insights Dashboard
+          title14: "Portfolio Insights: Track detailed performance of each portfolio in one place."
+          title15: "Operational Insights: View comprehensive insights by trade, account, and Magic Number."
+          title16: Link to Sample Dashboard
+          title17: Portfolio Management
+          title18: "Magic Number Restriction: Block specific Magic Numbers that will not be copied, ensuring customization."
+          title19: "Volume Control by Account: Adjust the operation volume for each account individually, according to the strategy."
+          title20: "Copy Account Control: Integrate multiple robots in different accounts, using a single strategy to serve several clients simultaneously."
+          title21: Account Control
+          title22: "Copy Account Control: Integrate multiple robots in different accounts, using a single strategy to serve several clients simultaneously." 
+          title23: "Magic Number Restriction: Define which Magic Numbers will not be copied in each portfolio, ensuring detailed control."
+          title24: "Choose Magic Number: Choose the specific Magic Number or keep the original copy, according to your needs."
+          title25: Invoice Management
+          title26: "Flexible Billing Plans: Offer plans with different types of recurrence, allowing fixed monthly payments or billing by percentage of earnings."                 
+          title27: Charging Management
+          title28: "Automatic Billing Management: View and configure online billing methods (MercadoPago/Stripe) for your clients, ensuring efficient financial management."
         portfolio: Share dashboard with your customers
         warning: Beta version
         navbar:
+          home: Home
           request_support: Give a try!
           sign_in: Sign In
         title:
@@ -96,7 +126,8 @@ en:
           Imentore: Imentore copy
           pricing: prices
           support: support
-          request_demo: We are in the testing phase, at this time only a few customers will be selected to test and evaluate our system with all the features. After the trial period, the customer must opt for a plan with a 10% discount on the monthly fee for the first year.
+          request_demo1: Start Free Trial
+          request_demo2: We are in the testing phase, at this time only a few customers will be selected to test and evaluate our system with all the features. After the trial period, the customer must opt for a plan with a 10% discount on the monthly fee for the first year.
         telegram:
           title: Telegram
           resume: By connecting our robot Alfred to your group, you will be able to monitor the operations carried out.
@@ -113,20 +144,22 @@ en:
           resume3: The system will provide all log information entered both from the COPY account and from the SLAVES accounts.
         pricing:
           plan:
+            free: Free
             basic: Basic
             business: Business
             premium: Premium
           premium:
             title1: We have exclusive services for premium customers who require a high-demand system.
             title2: Get in touch
-          title: Our plans.
+          title1: Plans
+          title2: Our plans.
           sign_in: sign
           trace: "%{limit} Portfolio"
           copy: "%{limit} Copy Accounts"
           slave: "%{limit} Slave Accounts"
           charge: Automatic billing for customers
           telegram: "Robo Telegram Bot - Alfred"
-          extra: "%{amount} R$ for each extra resource"
+          extra: "%{amount} $ for each extra resource"
           announce1: "All plans %{value}% off for a limited time"
           announce2: discounts valid for 1 year.
           price: "%{value} "
@@ -601,6 +634,7 @@ en:
       error: error
       errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
     navigation:
+      files: Expert Advisors
       back_to_app: Back to site
     search:
       clear: Clear search

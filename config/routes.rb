@@ -104,7 +104,9 @@ Rails.application.routes.draw do
       resources :traces
       resources :transactions, only:[:show]
       resources :transaction_slaves, only:[:show]
-      resources :stores
+      resources :stores do
+        get :files, on: :collection
+      end
       resources :payments
       resources :orders
 

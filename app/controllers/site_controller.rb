@@ -2,7 +2,7 @@ class SiteController < ApplicationController
 	layout "prompt"
 
 	def index
-		@dolar = 5
+		@dolar = 6
 		@store = Store.new 
 	end
 
@@ -17,6 +17,5 @@ class SiteController < ApplicationController
 	def robos
 		render :robos, layout:'mintone'
 	end
-
 
 end

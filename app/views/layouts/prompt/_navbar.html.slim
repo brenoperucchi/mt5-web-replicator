@@ -1,0 +1,19 @@
+header#navbar.light.fixed.top-0.inset-x-0.flex.items-center.z-40.w-full.lg:bg-transparent.bg-white.transition-all.py-5
+  .container
+    nav.flex.items-center#logo-imentore
+      #top
+        #logo
+          h1
+            = link_to root_path(request.query_parameters)
+              = I18n.t :app_name, scope: 'helpers.site.main'
+      .hidden.lg:block.ms-auto
+        ul.navbar-nav.flex.gap-x-3.items-center.justify-center
+          li.nav-item
+            a.nav-link href="/"= I18n.t :home, scope: 'helpers.site.main.navbar'
+
+      / .hidden.lg:flex.items-center.ms-3
+      /   a.bg-primary.text-white.px-4.py-2.rounded.inline-flex.items-center.text-sm[href="/stores/new"]
+      /     = I18n.t :request_demo1, scope: 'helpers.site.main.title'
+      .lg:hidden.flex.items-center.ms-auto.px-2.5
+        button[type="button" data-fc-target="mobileMenu" data-fc-type="offcanvas"]
+          i.fa-solid.fa-bars.text-2xl.text-gray-500
