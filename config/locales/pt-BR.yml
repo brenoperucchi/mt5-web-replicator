@@ -1,5 +1,9 @@
 pt-BR:
   helpers:
+    pages:
+      files:
+        name: Arquivos MT5
+        tutorial_link: Tutorial de Instalação
     controller:
       app_controller:
         admin:
@@ -173,6 +177,7 @@ pt-BR:
         create_one: "Crie uma agora!"
         title1: Seja bem vindo!
         title2: Preencha os dados para o acesso ao sistema
+
     select:
       prompt: Por favor selecione
     submit:

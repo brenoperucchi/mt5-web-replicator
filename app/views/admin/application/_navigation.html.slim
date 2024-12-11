@@ -8,4 +8,4 @@ nav.navigation[role="navigation"]
     = link_to(display_resource_name(resource).capitalize, resource_index_route(resource), class: "navigation__link navigation__link--#{nav_link_state(resource)}") if accessible_action?(model_from_resource(resource), :index)
 
 
-  = link_to(t("administrate.navigation.files"), (files_control_stores_path), class: "button button--alt button--nav") if defined?(root_url)
+  = link_to(t("helpers.pages.files.name"), (files_control_stores_path), class: "button button--alt button--nav") if defined?(root_url)

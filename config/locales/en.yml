@@ -1,5 +1,9 @@
 en:
   helpers:
+    pages:
+      files:
+        name: MT5 Files
+        tutorial_link: Installation Tutorial
     controller:
       app_controller:
         admin:
@@ -634,7 +638,6 @@ en:
       error: error
       errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
     navigation:
-      files: Expert Advisors
       back_to_app: Back to site
     search:
       clear: Clear search

@@ -1,5 +1,9 @@
 module Control
   class Control::StoresController < Control::BaseController
+
+    def files
+      @url = current_store.language == "pt-BR" ? "https://imentore.freshdesk.com/support/solutions/articles/151000020358" : "https://imentore.freshdesk.com/support/solutions/articles/151000203441"
+    end
     # Overwrite any of the RESTful controller actions to implement custom behavior
     # For example, you may want to send an email after a foo is updated.
     #
