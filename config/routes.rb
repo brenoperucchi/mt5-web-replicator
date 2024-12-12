@@ -166,6 +166,7 @@ Rails.application.routes.draw do
   get  "support",           to:"site#support"
   get  "demo_request",      to:"site#demo_request"
   get  "robos",             to:"site#robos"
+  get  "partner",           to:"site#partner"
 
   root :to => "site#index" 
   # root 'admin/orders#index'

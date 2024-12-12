@@ -1,0 +1,50 @@
+= render "layouts/#{current_layout}/navbar" 
+section.bg-gray-100.lg:pt-28.sm:pb-36.pb-16.pt-36.relative
+  .container
+    .flex.justify-center
+      .lg:w-7/12.text-center
+        h1[class="text-5xl/relaxed text-gray-700"]
+          = I18n.t(:title1, scope: 'helpers.pages.partner')
+  .absolute.-bottom-1.w-full
+    svg.w-full.h-full[viewbox="0 0 1440 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"]
+      g#shape-b[stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"]
+        g#curve[fill="#fff"]
+          path#Path[d="M0,30.013 C239.659,10.004 479.143,0 718.453,0 C957.763,0 1198.28,10.004 1440,30.013 L1440,40 L0,40 L0,30.013 Z"]
+section.lg.relative
+  .container
+    .lg:flex.align-items-center
+      .lg
+        .mb-12[class="relative bg-clip-border rounded-[0.1875rem]"]
+          .py-1
+            h2.text-3xl.font-bold.text-gray-800.mb-4 
+              = I18n.t(:title2, scope: 'helpers.pages.partner')           
+            p.text-gray-700.mb-6
+              == I18n.t(:title3, scope: 'helpers.pages.partner')            
+
+            p.text-gray-700.mb-6
+              = I18n.t(:title4, scope: 'helpers.pages.partner')           
+
+            h3.text-2xl.font-semibold.text-gray-800.mt-6.mb-2
+              = I18n.t(:title5, scope: 'helpers.pages.partner')           
+
+            ul.list-disc.list-inside.text-gray-700.mb-6
+              li 
+                strong.text-gray-800 
+                  = I18n.t(:title6, scope: 'helpers.pages.partner')
+                '
+                = I18n.t(:title7, scope: 'helpers.pages.partner')
+              li 
+                strong.text-gray-800
+                  = I18n.t(:title8, scope: 'helpers.pages.partner')
+                '
+                = I18n.t(:title9, scope: 'helpers.pages.partner')
+              li 
+                strong.text-gray-800
+                  = I18n.t(:title10, scope: 'helpers.pages.partner')
+                '
+                = I18n.t(:title11, scope: 'helpers.pages.partner')
+            div.mt-8
+              p.text-gray-700.mb-2 
+                = I18n.t(:title12, scope: 'helpers.pages.partner')
+              a.text-blue-500.font-bold.hover:underline href="mailto:#{I18n.t(:email, scope: 'helpers.pages.partner')}" = I18n.t(:email, scope: 'helpers.pages.partner')
+              p.text-gray-700.font-medium = I18n.t(:name, scope: 'helpers.pages.partner')

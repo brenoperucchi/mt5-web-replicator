@@ -18,4 +18,7 @@ class SiteController < ApplicationController
 		render :robos, layout:'mintone'
 	end
 
+	def partner
+	end
+
 end

@@ -11,9 +11,9 @@ header#navbar.light.fixed.top-0.inset-x-0.flex.items-center.z-40.w-full.lg:bg-tr
           li.nav-item
             a.nav-link href="/"= I18n.t :home, scope: 'helpers.site.main.navbar'
 
-      / .hidden.lg:flex.items-center.ms-3
-      /   a.bg-primary.text-white.px-4.py-2.rounded.inline-flex.items-center.text-sm[href="/stores/new"]
-      /     = I18n.t :request_demo1, scope: 'helpers.site.main.title'
+      .hidden.lg:flex.items-center.ms-3
+        a.bg-primary.text-white.px-4.py-2.rounded.inline-flex.items-center.text-sm[href="/partner"]
+          = I18n.t :partner, scope: 'helpers.site.main.title'
       .lg:hidden.flex.items-center.ms-auto.px-2.5
         button[type="button" data-fc-target="mobileMenu" data-fc-type="offcanvas"]
           i.fa-solid.fa-bars.text-2xl.text-gray-500

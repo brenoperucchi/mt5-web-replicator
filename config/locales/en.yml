@@ -4,6 +4,21 @@ en:
       files:
         name: MT5 Files
         tutorial_link: Installation Tutorial
+      partner:
+        title1: Become Our Partner
+        title2: We're Looking for Partners and Associates
+        title3: "<strong>iMentore</strong> is a robust and innovative order replication solution for <strong>MetaTrader 4 and 5</strong>. Focused on efficiency, portfolio control and advanced risk management, our platform serves traders and investors who seek maximum performance in their investments."
+        title4: "We are looking for commercial partners, associates and developers interested in taking iMentore to new international markets."
+        title5: "What We're Looking For:"
+        title6: "International Expansion:"
+        title7: "Access to brokers, traders and investors in other countries, expanding our global presence."
+        title8: "Commercial Partnership:"
+        title9: "Brokers and market agents who want to offer their clients a solid order replication tool, strengthening loyalty and satisfaction." 
+        title10: "Technical Collaboration:"
+        title11: "Programmers and developers ready to continually improve our technology, adding value and competitiveness to the product."
+        title12: "Let's talk!"
+        email: "breno@imentore.com"
+        name: "Breno Perucchi"
     controller:
       app_controller:
         admin:
@@ -130,6 +145,7 @@ en:
           Imentore: Imentore copy
           pricing: prices
           support: support
+          partner: Become Partner
           request_demo1: Start Free Trial
           request_demo2: We are in the testing phase, at this time only a few customers will be selected to test and evaluate our system with all the features. After the trial period, the customer must opt for a plan with a 10% discount on the monthly fee for the first year.
         telegram:

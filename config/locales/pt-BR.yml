@@ -4,6 +4,21 @@ pt-BR:
       files:
         name: Arquivos MT5
         tutorial_link: Tutorial de Instalação
+      partner:
+        title1: Seja Nosso Parceiro
+        title2: Buscamos Parceiros e Sócios
+        title3: "O <strong>iMentore</strong> é uma solução robusta e inovadora de replicação de ordens para <strong>MetaTrader 4 e 5</strong>. Focada em eficiência, controle de portfólio e manejo avançado de risco, nossa plataforma atende traders e investidores que buscam a máxima performance em seus investimentos."
+        title4: "Estamos em busca de parceiros comerciais, sócios e desenvolvedores interessados em levar o iMentore para novos mercados internacionais."
+        title5: "O que Procuramos:"
+        title6: "Expansão Internacional:"
+        title7: "Acesso a corretoras, traders e investidores em outros países, ampliando nossa presença global."
+        title8: "Parceria Comercial:"
+        title9: "Corretoras e agentes de mercado que desejam oferecer a seus clientes uma ferramenta sólida de replicação de ordens, fortalecendo a fidelização e a satisfação."
+        title10: "Colaboração Técnica:"
+        title11: "Programadores e desenvolvedores prontos para aprimorar continuamente nossa tecnologia, agregando valor e competitividade ao produto."
+        title12: "Vamos conversar!"
+        email: "breno@imentore.com"
+        name: "Breno Perucchi"
     controller:
       app_controller:
         admin:
@@ -130,6 +145,7 @@ pt-BR:
           imentore: imentore copy
           pricing: preços
           support: suporte
+          partner: Seja Parceiro
           request_demo1: Iniciar Teste
           request_demo2: Estamos em fase de testes, neste momento as serão selecionadas alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após o período de teste o cliente deverá optar por um plano com 10% de desconto na mensalidade no primeiro ano.
         telegram:
