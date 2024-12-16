@@ -1,220 +1,185 @@
+// theme.js
+
 import AOS from 'aos';
 import Swiper from 'swiper';
 
-/*
-Template Name: Prompt - Tailwind CSS Multipurpose Landing Page Template
-Version: 1.1.0
-Author: coderthemes
-Email: support@coderthemes.com
-*/
+function initTheme() {
+  function normalizarUrl(url) {
+    const base = window.location.origin;
+    const u = new URL(url, base);
+    u.hash = '';
+    u.search = '';
+    u.pathname = u.pathname.replace(/index\.html$/, '');
+    if (u.pathname === '') u.pathname = '/';
+    return u.toString();
+  }
 
-function init() {
+  const paginaAtual = normalizarUrl(window.location.href);
 
-    // Animation on Scroll (Plugin)
+  function marcarLinkAtivoMenuPrincipal() {
+    const links = document.querySelectorAll('#navbar .navbar-nav a');
+    links.forEach(link => {
+      const hrefNormalizado = normalizarUrl(link.getAttribute('href') || '');
+      if (hrefNormalizado === paginaAtual) {
+        link.classList.add('active');
+        let parent = link.parentElement;
+        for (let i = 0; i < 5; i++) {
+          if (!parent) break;
+          if (parent.classList?.contains('nav-item')) {
+            const dropdown = parent.querySelector('[data-fc-type="dropdown"]');
+            if (dropdown) dropdown.classList.add('active');
+          }
+          parent = parent.parentElement;
+        }
+      }
+    });
+  }
+
+  function marcarLinkAtivoMenuMobile() {
+    const links = document.querySelectorAll('#mobileMenu .navbar-nav a');
+    links.forEach(link => {
+      const hrefNormalizado = normalizarUrl(link.getAttribute('href') || '');
+      if (hrefNormalizado === paginaAtual) {
+        link.classList.add('active');
+        const navItem = link.closest('.nav-item');
+        if (navItem) {
+          const collapseElement = navItem.querySelector('[data-fc-type="collapse"]');
+          if (collapseElement) {
+            collapseElement.classList.add('active');
+            if (window.frost && frost.Collapse) {
+              const collapse = frost.Collapse.getInstanceOrCreate(collapseElement);
+              collapse.show();
+              const parentCollapse = link.parentElement?.parentElement;
+              if (parentCollapse && parentCollapse.style) {
+                parentCollapse.style.height = null;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function ativarStickyNav() {
+    const navbar = document.getElementById('navbar');
+    if (!navbar) return;
+    function verificarScroll() {
+      const scrollPos = document.documentElement.scrollTop || document.body.scrollTop;
+      if (scrollPos >= 75) {
+        navbar.classList.add('nav-sticky');
+      } else {
+        navbar.classList.remove('nav-sticky');
+      }
+    }
+    window.addEventListener('scroll', verificarScroll);
+    verificarScroll();
+  }
+
+  function initBackToTop() {
+    const btn = document.querySelector('[data-toggle="back-to-top"]');
+    if (!btn) return;
+    function verificarScrollTop() {
+      if (window.pageYOffset > 72) {
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      } else {
+        btn.classList.remove('flex');
+        btn.classList.add('hidden');
+      }
+    }
+    window.addEventListener('scroll', verificarScrollTop);
+    verificarScrollTop();
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  function initAOS() {
     AOS.init();
+  }
 
-    // Topnav Active Menu
-    function initTopnav() {
-
-        // Menu Active
-        const pageUrl = window.location.href.split(/[?#]/)[0];
-        const navbarLinks = Array.from(document.querySelectorAll('#navbar .navbar-nav a'));
-
-        navbarLinks.forEach((link) => {
-            if (link.href === pageUrl) {
-                link.classList.add('active');
-
-                const parentMenu = link.parentElement.parentElement.parentElement;
-                if (parentMenu?.classList.contains('nav-item')) {
-                    const dropdownElement = parentMenu.querySelector('[data-fc-type="dropdown"]');
-                    dropdownElement?.classList.add('active');
-                }
-
-                const parentParentMenu = link.parentElement.parentElement.parentElement.parentElement.parentElement;
-                if (parentParentMenu?.classList.contains('nav-item')) {
-                    const dropdownElement = parentParentMenu.querySelector('[data-fc-type="dropdown"]');
-                    dropdownElement?.classList.add('active');
-                }
-            }
-        });
+  function initSwipers() {
+    if (document.querySelector('#swiper_one')) {
+      new Swiper('#swiper_one', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: { delay: 2500, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        rewind: true,
+        navigation: { nextEl: '.button-next', prevEl: '.button-prev' },
+      });
     }
-
-    // Mobile Menu Active
-    function initMobileNav() {
-        const pageUrl = window.location.href.split(/[?#]/)[0];
-        const navbarLinks = Array.from(document.querySelectorAll('#mobileMenu .navbar-nav a'));
-
-        navbarLinks.forEach((link) => {
-            if (link.href === pageUrl) {
-                link.classList.add('active');
-                const parentMenu = link.parentElement.parentElement.parentElement;
-                const parentCollapse = link.parentElement.parentElement;
-                if (parentMenu?.classList.contains('nav-item')) {
-                    const collapseElement = parentMenu.querySelector('[data-fc-type="collapse"]');
-                    collapseElement.classList.add('active');
-                    if (collapseElement) {
-                        const collapse = frost.Collapse.getInstanceOrCreate(collapseElement);
-                        collapse.show();
-                        if (parentCollapse) {
-                            parentCollapse.style.height = null;
-                        }
-                    }
-                }
-            }
-        });
+    if (document.querySelector('#swiper_two')) {
+      new Swiper('#swiper_two', {
+        slidesPerView: 1,
+        loop: true,
+        autoHeight: true,
+        spaceBetween: 30,
+        navigation: { nextEl: '.button-next', prevEl: '.button-prev' },
+        breakpoints: {
+          768: { slidesPerView: 2 },
+        },
+      });
     }
+  }
 
-    // Topbar Sticky
-    function initStickyNav() {
-        // Sticky Navbar
-        function windowScroll() {
-            const navbar = document.getElementById("navbar");
-            if (navbar) {
-                if (document.body.scrollTop >= 75 || document.documentElement.scrollTop >= 75) {
-                    navbar.classList.add("nav-sticky");
-
-                } else {
-                    navbar.classList.remove("nav-sticky");
-                }
-            }
+  function initTypewriter() {
+    class Typewriter {
+      constructor(el, words, period) {
+        this.el = el;
+        this.words = words;
+        this.period = period || 2000;
+        this.txt = '';
+        this.loopNum = 0;
+        this.isDeleting = false;
+        this.tick();
+      }
+      tick() {
+        const i = this.loopNum % this.words.length;
+        const fullTxt = this.words[i];
+        if (this.isDeleting) {
+          this.txt = fullTxt.substring(0, this.txt.length - 1);
+        } else {
+          this.txt = fullTxt.substring(0, this.txt.length + 1);
         }
-        window.addEventListener("scroll", (ev) => {
-            ev.preventDefault();
-            windowScroll();
-        });
-
-    }
-
-    // Back To Top
-    function initBacktoTop() {
-
-        const mybutton = document.querySelector('[data-toggle="back-to-top"]');
-
-        window.addEventListener('scroll', function () {
-            if (window.pageYOffset > 72) {
-                mybutton.classList.add('flex');
-                mybutton.classList.remove('hidden');
-
-            } else {
-                mybutton.classList.remove('flex');
-                mybutton.classList.add('hidden');
-            }
-        });
-
-        if (mybutton) {
-            mybutton.addEventListener('click', function (e) {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
+        this.el.innerHTML = `<span class="wrap">${this.txt}</span>`;
+        let delta = 200 - Math.random() * 100;
+        if (this.isDeleting) delta /= 2;
+        if (!this.isDeleting && this.txt === fullTxt) {
+          delta = this.period;
+          this.isDeleting = true;
+        } else if (this.isDeleting && this.txt === '') {
+          this.isDeleting = false;
+          this.loopNum++;
+          delta = 500;
         }
+        setTimeout(() => this.tick(), delta);
+      }
     }
 
-    // Swiper ( One card ) (Plugin)
-    function initswiperOne() {
-        new Swiper("#swiper_one", {
-            slidesPerView: 1,
-            spaceBetween: 30,
-            loop: true,
-            autoplay: {
-                delay: 2500,
-                disableOnInteraction: false,
-            },
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-            },
-            rewind: true,
-            navigation: {
-                nextEl: ".button-next",
-                prevEl: ".button-prev",
-            },
-            breakpoints: {
-                320: {
-                    slidesPerView: 1,
-                },
-            },
-        });
-    };
+    const elements = document.querySelectorAll('.typewrite');
+    elements.forEach(el => {
+      const dataType = el.getAttribute('data-type');
+      const dataPeriod = el.getAttribute('data-period');
+      if (dataType) {
+        const words = JSON.parse(dataType);
+        new Typewriter(el, words, parseInt(dataPeriod, 10));
+      }
+    });
+  }
 
-    // Swiper ( Two card ) (Plugin)
-    function initswiperTwo() {
-        new Swiper("#swiper_two", {
-            slidesPerView: 1,
-            loop: true,
-            autoHeight: true,
-            spaceBetween: 30,
-            navigation: {
-                nextEl: ".button-next",
-                prevEl: ".button-prev",
-            },
-            breakpoints: {
-                576: {
-                    slidesPerView: 1,
-                },
-                768: {
-                    slidesPerView: 2,
-                },
-            },
-        });
-    };
+  // Execução de todas as funções
+  initAOS();
+  marcarLinkAtivoMenuPrincipal();
+  marcarLinkAtivoMenuMobile();
+  ativarStickyNav();
+  initBackToTop();
+  initSwipers();
+  initTypewriter();
+}
 
-    // Text Animation 
-    function initTypewrite() {
-        var TxtType = function (el, toRotate, period) {
-            this.toRotate = toRotate;
-            this.el = el;
-            this.loopNum = 0;
-            this.period = parseInt(period, 10) || 2000;
-            this.txt = '';
-            this.tick();
-            this.isDeleting = false;
-        };
-
-        TxtType.prototype.tick = function () {
-            var i = this.loopNum % this.toRotate.length;
-            var fullTxt = this.toRotate[i];
-            if (this.isDeleting) {
-                this.txt = fullTxt.substring(0, this.txt.length - 1);
-            } else {
-                this.txt = fullTxt.substring(0, this.txt.length + 1);
-            }
-            this.el.innerHTML = '<span class="wrap">' + this.txt + '</span>';
-            var that = this;
-            var delta = 200 - Math.random() * 100;
-            if (this.isDeleting) {
-                delta /= 2;
-            }
-            if (!this.isDeleting && this.txt === fullTxt) {
-                delta = this.period;
-                this.isDeleting = true;
-            } else if (this.isDeleting && this.txt === '') {
-                this.isDeleting = false;
-                this.loopNum++;
-                delta = 500;
-            }
-            setTimeout(function () {
-                that.tick();
-            }, delta);
-        };
-
-        var elements = document.getElementsByClassName('typewrite');
-        for (var i = 0; i < elements.length; i++) {
-            var toRotate = elements[i].getAttribute('data-type');
-            var period = elements[i].getAttribute('data-period');
-            if (toRotate) {
-                new TxtType(elements[i], JSON.parse(toRotate), period);
-            }
-        }
-    }
-
-    initMobileNav();
-    initTopnav();
-    initStickyNav();
-    initBacktoTop();
-    initswiperOne();
-    initswiperTwo();
-    window.onload = initTypewrite();
-
-};
-
-init();
+// Exporta a função initTheme, sem listener do DOM
+export { initTheme };

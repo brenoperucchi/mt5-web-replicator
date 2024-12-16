@@ -29,5 +29,8 @@
       /*"follow_symlinks": true,*/
       "path": ".",
     },
+    {
+			"path": "/Users/brenoperucchi/Downloads/06 - Html Sites/Prompt_Tailwind_v1.1.0"
+		},
   ],
 }

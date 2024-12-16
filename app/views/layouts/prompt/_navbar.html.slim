@@ -10,10 +10,191 @@ header#navbar.light.fixed.top-0.inset-x-0.flex.items-center.z-40.w-full.lg:bg-tr
         ul.navbar-nav.flex.gap-x-3.items-center.justify-center
           li.nav-item
             a.nav-link href="/"= I18n.t :home, scope: 'helpers.site.main.navbar'
-
+          / li.nav-item
+            a.nav-link.after:absolute.hover:after:-bottom-10.after:inset-0[href="javascript:void(0);" data-fc-trigger="hover" data-fc-target="innerPageDropdownMenu" data-fc-type="dropdown" data-fc-placement="bottom"]
+              |  Pages 
+              i.fa-solid.fa-angle-down.ms-2.align-middle
+            #innerPageDropdownMenu.hidden.opacity-0.mt-4.fc-dropdown-open:opacity-100.fc-dropdown-open:translate-y-0.translate-y-3.origin-center.transition-all.bg-white.rounded-lg.shadow-lg.border.p-2.w-48.space-y-1.5
+              .nav-item
+                a.nav-link.after:absolute.after:inset-0.after:-end-10[data-fc-offset="8" data-fc-placement="right-start" data-fc-trigger="hover" data-fc-type="dropdown" type="button"]
+                  |  Account 
+                  i.fa-solid.fa-angle-right.ms-auto.align-middle
+                .ms-2.hidden.w-48.opacity-0.fc-dropdown-open:opacity-100.fc-dropdown-open:translate-y-0.translate-y-3.origin-center.transition-all.bg-white.rounded-lg.shadow-lg.border.p-2.space-y-1.5
+                  .nav-item
+                    a.nav-link[href="account-dashboard"]
+                      | Dashboard
+                  .nav-item
+                    a.nav-link[href="account-settings"]
+                      | Settings
+                  .nav-item
+                    a.nav-link[href="account-login"]
+                      | Login
+                  .nav-item
+                    a.nav-link[href="account-signup"]
+                      | Sign Up
+                  .nav-item
+                    a.nav-link[href="account-forget-password"]
+                      | Forget Password
+                  .nav-item
+                    a.nav-link[href="account-confirm"]
+                      | Confirm Account
+              .nav-item
+                a.nav-link.after:absolute.after:inset-0.after:-end-10[data-fc-offset="8" data-fc-placement="right-start" data-fc-trigger="hover" data-fc-type="dropdown" type="button"]
+                  |  Blog 
+                  i.fa-solid.fa-angle-right.ms-auto.align-middle
+                .ms-2.hidden.w-48.opacity-0.fc-dropdown-open:opacity-100.fc-dropdown-open:translate-y-0.translate-y-3.origin-center.transition-all.bg-white.rounded-lg.shadow-lg.border.p-2.space-y-1.5
+                  .nav-item
+                    a.nav-link[href="blog"]
+                      | Blog
+                  .nav-item
+                    a.nav-link[href="blog-post"]
+                      | Blog Post
+              hr.-mx-2.my-2
+              .nav-item
+                a.nav-link[href="company"]
+                  | Company
+              .nav-item
+                a.nav-link[href="career"]
+                  | Career
+              .nav-item
+                a.nav-link[href="pricing"]
+                  | Pricing
+              .nav-item
+                a.nav-link.after:absolute.after:inset-0.after:-end-10[data-fc-offset="8" data-fc-placement="right-start" data-fc-trigger="hover" data-fc-type="dropdown" type="button"]
+                  |  Portfolio 
+                  i.fa-solid.fa-angle-right.ms-auto.align-middle
+                .ms-2.hidden.w-48.opacity-0.fc-dropdown-open:opacity-100.fc-dropdown-open:translate-y-0.translate-y-3.origin-center.transition-all.bg-white.rounded-lg.shadow-lg.border.p-2.space-y-1.5
+                  .nav-item
+                    a.nav-link[href="portfolio-grid"]
+                      | Portfolio Grid
+                  .nav-item
+                    a.nav-link[href="portfolio-masonry"]
+                      | Portfolio Masonry
+                  .nav-item
+                    a.nav-link[href="portfolio-item"]
+                      | Portfolio Item
+              hr.-mx-2.my-2
+              .nav-item
+                a.nav-link[href="help"]
+                  | Help
       .hidden.lg:flex.items-center.ms-3
         a.bg-primary.text-white.px-4.py-2.rounded.inline-flex.items-center.text-sm[href="/partner"]
           = I18n.t :partner, scope: 'helpers.site.main.title'
       .lg:hidden.flex.items-center.ms-auto.px-2.5
         button[type="button" data-fc-target="mobileMenu" data-fc-type="offcanvas"]
           i.fa-solid.fa-bars.text-2xl.text-gray-500
+#mobileMenu.fc-offcanvas-open:translate-x-0.translate-x-full.fixed.top-0.end-0.transition-all.duration-200.transform.h-full.w-full.max-w-md.z-50.bg-white.border-s.hidden
+  .flex.flex-col.h-full.divide-y-2.divide-gray-200
+    .p-6.flex.items-center.justify-between
+      a[href="/"]
+        / img.h-8[src="assets/images/logo-dark.png" alt="Logo"]
+      button.flex.items-center.px-2[data-fc-dismiss]
+        i.fa-solid.fa-xmark.text-xl
+    .p-6.overflow-scroll.h-full
+      ul.navbar-nav.flex.flex-col.gap-2[data-fc-type="accordion"]
+        li.nav-item
+          a.nav-link[href="/"]
+            | Home
+        / li.nav-item
+        /   a.nav-link[href="javascript:void(0)" data-fc-type="collapse"]
+        /     |  Landing 
+        /     i.fa-solid.fa-angle-down.ms-auto.align-middle.transition-all.fc-collapse-open:rotate-180
+        /   ul[class="hidden overflow-hidden transition-[height] duration-300 space-y-2"]
+        /     li.nav-item.mt-2
+        /       a.nav-link[href="home-app"]
+        /         | App
+        /     li.nav-item
+        /       a.nav-link[href="home-saas"]
+        /         | Saas Modern
+        /     li.nav-item
+        /       a.nav-link[href="home-saas2"]
+        /         | Saas Classic
+        /     li.nav-item
+        /       a.nav-link[href="home-startup"]
+        /         | Startup
+        /     li.nav-item
+        /       a.nav-link[href="home-software"]
+        /         | Software
+        /     li.nav-item
+        /       a.nav-link[href="home-agency"]
+        /         | Agency
+        /     li.nav-item
+        /       a.nav-link[href="home-coworking"]
+        /         | Coworking
+        /     li.nav-item
+        /       a.nav-link[href="home-crypto"]
+        /         | Crypto
+        /     li.nav-item
+        /       a.nav-link[href="home-marketing"]
+        /         | Marketing
+        /     li.nav-item
+        /       a.nav-link[href="home-portfolio"]
+        /         | Portfolio
+        / li.nav-item
+        /   a.nav-link[href="javascript:void(0)" data-fc-type="collapse"]
+        /     |  Pages 
+        /     i.fa-solid.fa-angle-down.ms-auto.align-middle.transition-all.fc-collapse-open:rotate-180
+        /   ul[class="hidden overflow-hidden transition-[height] duration-300 space-y-2"]
+        /     li.nav-item.mt-2
+        /       a.nav-link[href="company"]
+        /         | Company
+        /     li.nav-item
+        /       a.nav-link[href="career"]
+        /         | Career
+        /     li.nav-item
+        /       a.nav-link[href="pricing"]
+        /         | Pricing
+        /     li.nav-item
+        /       a.nav-link[href="help"]
+        /         | Help
+        / li.nav-item
+        /   a.nav-link[href="javascript:void(0)" data-fc-type="collapse"]
+        /     |  Blog Page 
+        /     i.fa-solid.fa-angle-down.ms-auto.align-middle.transition-all.fc-collapse-open:rotate-180
+        /   ul[class="hidden overflow-hidden transition-[height] duration-300 space-y-2"]
+        /     li.nav-item.mt-2
+        /       a.nav-link[href="blog"]
+        /         | Blog
+        /     li.nav-item
+        /       a.nav-link[href="blog-post"]
+        /         | Blog Post
+        / li.nav-item
+        /   a.nav-link[href="javascript:void(0)" data-fc-type="collapse"]
+        /     |  Portfolio 
+        /     i.fa-solid.fa-angle-down.ms-auto.align-middle.transition-all.fc-collapse-open:rotate-180
+        /   ul[class="hidden overflow-hidden transition-[height] duration-300 space-y-2"]
+        /     li.nav-item.mt-2
+        /       a.nav-link[href="portfolio-grid"]
+        /         | Portfolio Grid
+        /     li.nav-item
+        /       a.nav-link[href="portfolio-masonry"]
+        /         | Portfolio Masonry
+        /     li.nav-item
+        /       a.nav-link[href="portfolio-item"]
+        /         | Portfolio Item
+        /     li.nav-item
+        /       a.nav-link[href="account-confirm"]
+        /         | Confirm Account
+        / li.nav-item
+        /   a.nav-link[href="javascript:void(0)" data-fc-type="collapse"]
+        /     |  Account 
+        /     i.fa-solid.fa-angle-down.ms-auto.align-middle.transition-all.fc-collapse-open:rotate-180
+        /   ul[class="hidden overflow-hidden transition-[height] duration-300 space-y-2"]
+        /     li.nav-item.mt-2
+        /       a.nav-link[href="account-login"]
+        /         | Login
+        /     li.nav-item
+        /       a.nav-link[href="account-signup"]
+        /         | Sign Up
+        /     li.nav-item
+        /       a.nav-link[href="account-forget-password"]
+        /         | Forget Password
+        /     li.nav-item
+        /       a.nav-link[href="account-confirm"]
+        /         | Confirm Account
+        li.nav-item
+          a.nav-link[href="/partner"]
+            = I18n.t :partner, scope: 'helpers.site.main.title'
+    / .p-6.flex.items-center.justify-center
+    /   a.bg-primary.w-full.text-white.p-3.rounded.flex.items-center.justify-center.text-sm[href="https://1.envato.market/prompt-tailwind" target="_blank"]
+    /     | Download

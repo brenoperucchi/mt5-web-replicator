@@ -4,14 +4,13 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
     = render 'layouts/meta'
     / = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
     = csrf_meta_tags
-    = stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload'
-    = javascript_pack_tag 'application', 'data-turbolinks-track': 'reload'
-    = javascript_pack_tag 'prompt', 'data-turbolinks-track': 'reload'
-
+    = stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'preload'
+    = javascript_pack_tag 'prompt', 'data-turbolinks-track': 'preload'
     / = javascript_include_tag "https://sdk.mercadopago.com/js/v2"
     / = content_for :header
     / script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
   body.text-gray-800
+    = render "layouts/#{current_layout}/navbar" 
     = yield
 
     footer.bg-gray-100
@@ -51,9 +50,6 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                     circle[cx="4" cy="4" r="2"]
     button.fixed.text-sm.rounded-full.z-10.bottom-5.end-5.h-9.w-9.text-center.bg-primary/20.text-primary.flex.justify-center.items-center[data-toggle="back-to-top"]
       i.fa-solid.fa-arrow-up.text-base
-    
-
-/ = javascript_pack_tag 'prompt', 'data-turbolinks-track': 'reload'
 
 css:
   #top h1 a {
@@ -73,3 +69,5 @@ css:
   .ml-10{
     margin-left: 10px;
   }
+
+= yield :scripts
