@@ -221,16 +221,22 @@ class Store < ApplicationRecord
       trace_name = "Trace Example #{Trace.maximum(:id).to_i + 1}"
       
       account = self.accounts.create(
-        customer:customer, state:1, kind:1, meta_mode:0, meta_margin_mode:1, name:123456, contract_volume:0
+        customer:customer, state:1, kind:1, meta_mode:0, meta_margin_mode:1, name:123456, contract_volume:0, instrument_control: true
+      )
+
+      account_slave = self.accounts.create(
+        customer:customer, state:1, kind:0, meta_mode:0, meta_margin_mode:1, name:654321, contract_volume:0, instrument_control: true
       )
 
       trace = self.traces.new(
         name: trace_name, name_id: 0, contract_volume_max: 0, customer_plans: [customer_plan], accounts: [account], 
-        kind:1, kind_copy: 0, magic_same: 1, store: self, active_at: DateTime.current
+        kind:1, kind_copy: 0, magic_same: 1, store: self, active_at: DateTime.current, instrument_control: true
       )
       trace.stores << self unless trace.stores.include?(self)
       trace.save
     end
+
+    instruments.create(symbol: "WINZ24", name: "Bra50Dec24", account: account)
   end
 
   private
