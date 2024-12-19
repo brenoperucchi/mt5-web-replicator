@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_12_19_175544) do
+ActiveRecord::Schema.define(version: 2024_12_19_180142) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -271,7 +271,7 @@ ActiveRecord::Schema.define(version: 2024_12_19_175544) do
     t.string "state"
     t.string "response"
     t.string "content"
-    t.integer "content_id"
+    t.bigint "content_id"
     t.datetime "active_at"
     t.datetime "ready_at"
     t.datetime "execute_at"
