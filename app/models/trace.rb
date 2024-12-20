@@ -115,12 +115,7 @@ class Trace < ApplicationRecord
       elsif account.hedging?
         order = Order.create_with(trace: self, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: current_store).find_or_create_by(content_id: ticket, trace:self, store: current_store)
         # order = account.orders.create_with(trace: supelf, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: account.try(:store)).find_or_create_by(content_id: ticket, trace:self)
-        Rails.logger.info "DEBUG: ticket = #{ticket} (class: #{ticket.class})"
-        Rails.logger.info "DEBUG: copy_attributes = #{copy_attributes.inspect}"
-
         transaction = Transaction.create_with(copy_attributes).find_or_create_by(ticket: ticket, trace:self)
-        Rails.logger.info "DEBUG: transaction attributes = #{transaction.attributes.inspect}"
-
       end
       if transaction.valid?
         transaction.orders << order unless transaction.orders.exists?(order.id)

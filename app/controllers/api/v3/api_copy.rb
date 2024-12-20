@@ -31,13 +31,17 @@ module API
             desc "Return Store Config"
             post "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
               # logging = Logging.create(state: "CONFIG", request_url: request.url, params: params)
-              presenter = API::V3::StorePresenter.new(params, version, request)
-              if presenter.prepare && presenter.enabled?(meta_version_accept)
-                status 201
-                return presenter.serializer
-              else
-                status 400
-              end
+              presenter = API::V3::StorePresenter.new(params, version, request, meta_version_accept)
+              presenter.prepare
+              presenter.execute
+              status presenter.status
+              return presenter.serializer
+              # if presenter.enabled?
+              #   status 201
+              #   return presenter.serializer
+              # else
+              #   status 400
+              # end
             end      
 
             desc "Return Store Config"

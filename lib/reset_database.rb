@@ -14,16 +14,18 @@ module ResetDatabase
 
   def self.delete_logging
     # Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
-    Message::Message.joins('LEFT JOIN messages_traces ON messages_traces.message_id = messages.id').joins('LEFT JOIN messages_orders ON messages_orders.message_id = messages.id').where('messages_traces.trace_id IS NULL').where('messages_orders.order_id IS NULL').delete_all
+    messages = Message::Message.joins('LEFT JOIN messages_traces ON messages_traces.message_id = messages.id').joins('LEFT JOIN messages_orders ON messages_orders.message_id = messages.id').where('messages_traces.trace_id IS NULL').where('messages_orders.order_id IS NULL')
+    messages.delete_all
     date1 = DateTime.current - 12.months
-    date2 = DateTime.current - 6.months
+    date2 = DateTime.current - 4.months
     conditions = (date1.beginning_of_day..date2.end_of_day)
-    Logging.where(state: "START",         created_at: conditions).delete_all
-    Logging.where(state: "MODIFY",        created_at: conditions).delete_all
-    Logging.where(state: "COPY/MODIFY",   created_at: conditions).delete_all
-    Logging.where(state: "COPY/CLOSE",    created_at: conditions).delete_all
-    Logging.where(state: "ORDERS_CLOSED", created_at: conditions).delete_all
-    Logging.where(state: "ORDERS_OPEN",   created_at: conditions).delete_all
+    Logging.where(state: "START",             created_at: conditions).delete_all
+    Logging.where(state: "MODIFY",            created_at: conditions).delete_all
+    Logging.where(state: "ACCOUNTNOTFOUND",   created_at: conditions).delete_all
+    Logging.where(state: "COPY/MODIFY",       created_at: conditions).delete_all
+    Logging.where(state: "COPY/CLOSE",        created_at: conditions).delete_all
+    Logging.where(state: "ORDERS_CLOSED",     created_at: conditions).delete_all
+    Logging.where(state: "ORDERS_OPEN",       created_at: conditions).delete_all
     Message::Message.where(state: "executed", created_at: conditions).delete_all
     # TransactionSlave.pending.where("created_at < ?",180.days.ago).destroy_all
     # TransactionSlave.remove.where("created_at < ?", 180.days.ago).destroy_all

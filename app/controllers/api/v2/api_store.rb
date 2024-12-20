@@ -46,7 +46,8 @@ module API
           else
             account = Account.find_by(name: account_name, state: :enable, kind: kind, account_server:account_server)
             if account.nil?
-              Logging.create(content:params.to_json, state: "ACCOUNTNOTFOUND") if Logging.where(content:params.to_json, state: "ACCOUNTNOTFOUND",  created_at:date_today.beginning_of_day..date_today.end_of_day).count < 2
+              # Logging.create(content:params.to_json, state: "ACCOUNTNOTFOUND") if Logging.where(content:params.to_json, state: "ACCOUNTNOTFOUND",  created_at:date_today.beginning_of_day..date_today.end_of_day).count < 2
+              Logging.create(content: account_name, params: params.to_json, state: "ACCOUNTNOTFOUND") if Logging.where(content: account_name, state: "ACCOUNTNOTFOUND",  created_at:date_today.beginning_of_day..date_today.end_of_day).count < 1
               status 400
               return
             end

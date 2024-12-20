@@ -49,7 +49,7 @@ module API
           resource :store do
             desc "Return Store Config"
             post "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
-              presenter = API::V3::StorePresenter.new(params, version, request)
+              presenter = API::V3::StorePresenter.new(params, version, request, meta_version_accept)
               if presenter.prepare && presenter.enabled?(meta_version_accept)
                 status 201
                 body presenter.serializer
