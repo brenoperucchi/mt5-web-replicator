@@ -48,6 +48,9 @@ class StoresController < ApplicationController
 		    format.html { render :new }
 		    format.json { render json: @store.errors, status: :unprocessable_entity }
 		  end
+		  Rails.logger.info "Params: #{store_params.inspect}"
+		  Rails.logger.info "Stores: #{@store.inspect}"
+		  Rails.logger.info "Errors: #{@store.errors.inspect}"
 		end
 		
 	end
