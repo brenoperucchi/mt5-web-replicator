@@ -9,6 +9,7 @@ postgres: &postgres
   encoding: unicode
   pool: 200
   timeout: 15000
+  port: 5434
 
 
 default: &default
@@ -37,7 +38,7 @@ test:
 
 
 development:
-  <<: *postgres
+  <<: *default
   database: signalforex
   username: signalforex
   password: <%= Rails.application.credentials[:secret_database] %>
