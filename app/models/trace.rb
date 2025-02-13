@@ -30,7 +30,7 @@ class Trace < ApplicationRecord
   has_and_belongs_to_many :messages, class_name: "Message::Message"
 
   has_many :instruments, class_name: "Instrument", foreign_key: "trace_id", dependent: :destroy
-  
+
   has_many :store_traces
   has_many :stores, through: :store_traces, source: :store,  dependent: :destroy
   # belongs_to :store, optional: true

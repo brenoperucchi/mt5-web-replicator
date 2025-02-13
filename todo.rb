@@ -12,11 +12,11 @@
 
 ## TODO
 
-- Separar Message por tipo de acao Open/Close
-- Message Close verificar Orders
+# Separar Message por tipo de acao Open/Close
+# Message Close verificar Orders
 
-- SL e TP devem ser ajustar SymbolDigit no Copy 
-	-> Verificar as possiveis alteracoes no Slave
+# SL e TP devem ser ajustar SymbolDigit no Copy 
+# -> Verificar as possiveis alteracoes no Slave
 
-- COPY
-	-> Adicionar novamente ao opção Remove('closed_info') para resgatar info de order fechadas. 
+# - COPY
+# 	-> Adicionar novamente ao opção Remove('closed_info') para resgatar info de order fechadas. 

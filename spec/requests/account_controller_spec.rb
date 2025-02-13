@@ -25,6 +25,7 @@ RSpec.describe 'Store Controller', type: :request do
     @stripe = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @stripe, store: @store)
     @store_name = "Sistema-#{Store.maximum(:id).to_i + 1}" 
+    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
 
     # @stripe = create(:payment_method, :mercadopago)
 	end
@@ -35,7 +36,12 @@ RSpec.describe 'Store Controller', type: :request do
   
   
   def valid_attributes
-    { "name"=>"#{@store_name}", "email"=>"store1@email.com", "password"=>"123123", "url"=>"store1", "plan_id"=>"1" }
+    # { "name"=>"#{@store_name}", "email"=>"store1@email.com", "password"=>"123123", "url"=>"store1", "plan_id"=>"1" }
+    {"data": {"filename":"store","type":"text/html; charset=utf-8","name":"data","tempfile":"#\u003cFile:0x00007f55fbf0afc0\u003e","head":"Content-Disposition: attachment; name=\"data\"; filename=\"store\"\r\nContent-Type: text/html; charset=utf-8\r\n"},"expert_name":"imentore_copy","expert_version":"3_00_03","account_server_name":"XPMT5DEMO","account_id":"515623078","account_mode":"HEDGING"}
+  end
+
+  def url_request
+    "/api/v3/copy/post/store/imentore_copy/3_00_03/#{account.account_server.name}/#{@account.name}/HEDGING"
   end
 
   # This should return the minimal set of values that should be in the session
@@ -50,7 +56,7 @@ RSpec.describe 'Store Controller', type: :request do
     describe "with valid params" do
       it "creates a new Order" do
         expect {
-          post '/stores' , params: {:store => valid_attributes} #, valid_session
+          post url_request , params: {:store => valid_attributes} #, valid_session
           @store.reload
         }.to change(Store, :count).by(1)
         @store = Store.last
@@ -60,7 +66,7 @@ RSpec.describe 'Store Controller', type: :request do
         expect(@store.name).to be == @store_name
         expect(@store.payment_id).to eq(1)
         expect(@store.payment_id).to eq(1)
-        expect(@store.accounts.count).to eq(2)
+        expect(@store.accounts.count).to eq(1)
         expect(@store.traces.last.stores).to be_present
 
       end

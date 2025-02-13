@@ -89,7 +89,9 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
     message.loggings.create(content:message.content, state: "COPY/CLOSE", changeset: account.name, account: account, request_url: message.request_url, params: params)        
     if account
       historyOrders.each do |json|
-        Transaction.executed.where(ticket: json["ticketMaster"], account: account).each do |transaction|          
+        transactions = Transaction.executed.where(ticket: json["ticketMaster"], account: account)
+        transactions += Transaction.closed.where(ticket: json["ticketMaster"], account: account, closed_at: nil)          
+        transactions.uniq.each do |transaction|
           position = positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
           if position.blank?
             transaction_closed(transaction, json, :copy_close)
@@ -100,9 +102,8 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
       
     if positionOrders.present?    
       account.transactions.executed.each do |transaction|
-        ticket_id = transaction.ticket.to_s
         unless positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
-          order_params = historyOrders.detect{|json| json["ticketMaster"] == ticket_id} || {}
+          order_params = historyOrders.detect{|json| json["ticketMaster"] == transaction.ticket} || {}
           transaction_closed(transaction, order_params, :copy_close) if order_params.present?
         end
       end        
@@ -118,8 +119,10 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
 
   def transaction_closed(transaction, copy_params, kind)
     copySerializer = API::V3::CopySerializer.new(copy_params)
+
     if transaction and transaction.can_close?
       # transaction.order.messages << self
+      
       transaction.trace.messages << message
       transaction.attributes = copySerializer.closed_attributes
       transaction.save

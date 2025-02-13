@@ -9,8 +9,13 @@ class Message::V3::MetaCopy < Message::Message
     before_transition :pending => :executed, :do => :execute_copy
 
     event :execute do
-        transition :pending => :executed
+      transition :pending => :executed
     end
+
+    event :restart do
+      transition :executed => :pending
+    end
+
     event :erro do
       transition [:pending, :executed] => :error
     end    

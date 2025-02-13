@@ -85,6 +85,10 @@ module API::V3
       obj['priceOpen']
     end
 
+    def price_request
+      obj['priceRequest']
+    end
+
     def price_closed
       obj['priceClose']
     end

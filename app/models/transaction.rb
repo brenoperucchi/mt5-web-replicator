@@ -105,14 +105,14 @@ class Transaction < ApplicationRecord
     state :executed do
       def update_state(state)
         if self.restrict_magic_number?
-          self.telegram_message(:OPEN)
+          # self.telegram_message(:OPEN)
         end
       end
     end
 
     state :closed do
       def update_state(state)
-        self.telegram_message(:CLOSED)
+        # self.telegram_message(:CLOSED)
         self.slaves.not_deleted.map(&:remove)
         self.orders.map(&:close)
         return true

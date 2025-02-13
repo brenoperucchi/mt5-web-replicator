@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '2.7.8'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '6.1.7.9'
+gem 'rails', '6.1.7.10'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '>= 6.4.3'
@@ -66,7 +66,7 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.1'
   gem "better_errors"
   gem "binding_of_caller"
-  gem 'pry', '~> 0.14.1'  
+  gem 'pry', '~> 0.14.1'
   gem 'pry-byebug'
   gem "debug", ">= 1.0.0"
   # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
@@ -129,10 +129,10 @@ gem "net-http"
 gem 'money-rails', '~> 1.12'
 
 #API
-gem 'grape'  
+gem 'grape'
 gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
-gem 'rack-cors' 
+gem 'rack-cors'
 gem 'eventmachine'
 gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
@@ -155,7 +155,7 @@ gem 'administrate-field-active_storage'
 gem "image_processing"
 # ADMINISTRATE
 
-gem 'rtesseract'  
+gem 'rtesseract'
 gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
 gem 'lucky_case'
 gem 'ruby_linear_regression'

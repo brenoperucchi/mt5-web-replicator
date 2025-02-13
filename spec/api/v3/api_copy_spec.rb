@@ -11,9 +11,10 @@ RSpec.describe 'OrdersHistory API', type: :request do
     @admin = create(:customer, :admin, user:@user_admin)
     @customer = create(:customer, :customer, user:@user_customer)
     @account_server = create(:account_server)
-    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2], instrument_control:true, account_server: @account_server)
-    @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging', account_server: @account_server)
+    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging',   trace_ids: [1,2], instrument_control:true, account_server: @account_server)
+    @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging',     trace_ids: [1,2], account_server: @account_server,)
     @account_copy2 = create(:account, :copy2, store: @store, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [1,2], account_server: @account_server)
+    @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging',     trace_ids: [1,2], account_server: @account_server)
     
     # post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
     #   params: {"imentore_copy"=>"{\"orders_open\":{
@@ -31,15 +32,46 @@ RSpec.describe 'OrdersHistory API', type: :request do
         params: { data: file }
 
       slaves = TransactionSlave.where(ticket_master: 2029093177)
-      expect(slaves.count).to be == 1
+      expect(slaves.count).to be == 4
       expect(slaves.first.state).to be == "pending"
 
       expect(Order.find_by(content_id: 2029093177).present?).to be true
-      expect(Order.find_by(content_id: 2029093177).slaves.count).to be == 1
+      expect(Order.find_by(content_id: 2029093177).slaves.count).to be == 2
       expect(Order.find_by(content_id: 2029093177).slaves.first.comment).to be == "2029093177"
       expect(Order.find_by(content_id: 2029093177).slaves.first.ticket_slave).to be == -1
       expect(Order.find_by(content_id: 2029093177).slaves.first.profit).to be == 0
     end
+
+    it 'Verify Transaction State maintain Executed and Order state modify Closed' do
+      post '/api/v3/copy/post/orders/imentore_copy/3_00_02/broker_name/10100/HEDGING',
+        params: { data: file }
+
+      transactions = Transaction.where(ticket: 2029093177, trace_id: 1)
+      slaves = TransactionSlave.where(ticket_master: 2029093177, trace_id: 1)
+      
+      expect(transactions.count).to be == 1
+      expect(transactions.first.state).to be == "executed"
+      expect(transactions.first.orders.first.state).to be == "executed"
+      
+      expect(slaves.count).to be == 2
+      expect(slaves.first.state).to be == "pending"
+      
+      slave1 = slaves.first
+      slave2 = slaves.last
+      slave1.execute
+      slave2.execute
+      expect(slave1.state).to be == "executed"
+      expect(slave2.state).to be == "executed"
+      
+      slave1.close
+      slave2.close
+      transactions.reload
+      
+      transaction = Transaction.where(ticket: 2029093177, trace_id: 1).first
+      expect(transaction.state).to be == "executed"
+      expect(transaction.orders.first.state).to be == "closed"
+    end
+    
   end
 
 end    
