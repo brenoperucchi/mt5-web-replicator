@@ -9,6 +9,7 @@ postgres: &postgres
   encoding: unicode
   pool: 200
   timeout: 15000
+  port: 5432
 
 default: &default
   adapter: postgresql
