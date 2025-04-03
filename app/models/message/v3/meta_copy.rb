@@ -12,7 +12,7 @@ class Message::V3::MetaCopy < Message::Message
       transition :pending => :executed
     end
 
-    event :restart do
+    event :reset do
       transition :executed => :pending
     end
 
@@ -30,7 +30,7 @@ class Message::V3::MetaCopy < Message::Message
       copyPresenter.opening
       copyPresenter.closing 
       copyPresenter.pending
-      # copyPresenter.conciliate
+      copyPresenter.conciliate
     end
   end
 

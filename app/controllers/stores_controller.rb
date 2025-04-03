@@ -19,7 +19,7 @@ class StoresController < ApplicationController
 
 		@store.state = "enable"
 		password   = 123123
-		store_name = "Sistema-#{Store.maximum(:id) + 1}"
+		store_name = "Sistema-#{Store.maximum(:id).to_i + 1}"
 		url_name 	 = store_name.to_underscore
 		email 	   = store_params[:email]
 		@store.language = set_locale
@@ -48,9 +48,9 @@ class StoresController < ApplicationController
 		    format.html { render :new }
 		    format.json { render json: @store.errors, status: :unprocessable_entity }
 		  end
-		  Rails.logger.info "Params: #{store_params.inspect}"
-		  Rails.logger.info "Stores: #{@store.inspect}"
-		  Rails.logger.info "Errors: #{@store.errors.inspect}"
+		  # Rails.logger.info "Params: #{store_params.inspect}"
+		  # Rails.logger.info "Stores: #{@store.inspect}"
+		  # Rails.logger.info "Errors: #{@store.errors.inspect}"
 		end
 		
 	end

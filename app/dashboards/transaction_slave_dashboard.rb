@@ -17,6 +17,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     position_id:        Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
+    fee:                Field::String.with_options(searchable: false),
     ordertype:          Field::String,
     symbol:             Field::String,
     price_request:      Field::String,
@@ -39,6 +40,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
     closed_at_master:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    conciliated_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     }.freeze
 
   # COLLECTION_ATTRIBUTES
@@ -53,11 +55,14 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   symbol
   price_open
   price_closed
-  account
   profit
+  fee
+  trace
+  account
   open_at
   closed_at
   updated_at
+  conciliated_at
   ].freeze
 
   # SHOW_PAGE_ATTRIBUTES
@@ -78,6 +83,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   loggings
   lot
   profit
+  fee
   ordertype
   price_request
   price_open
@@ -92,6 +98,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   closed_at_master
   created_at
   updated_at
+  conciliated_at
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -108,6 +115,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   ordertype
   lot
   profit
+  fee
   price_request
   price_open
   price_closed
@@ -120,6 +128,7 @@ class TransactionSlaveDashboard < Administrate::BaseDashboard
   closed_at
   created_at
   updated_at
+  conciliated_at
   ].freeze
 
   # COLLECTION_FILTERS

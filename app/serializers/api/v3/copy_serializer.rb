@@ -17,6 +17,7 @@ module API
           ticket_deal: ticket_deal,
           profit: profit,
           entry: entry,
+          fee: fee,
           # time_trader: time_trader,
           # mae: mae,
           # mfe: mfe,
@@ -25,9 +26,10 @@ module API
 
       def closed_attributes
         {
-          price_closed: price_closed,
+          fee: fee,
           profit: profit,
-          closed_at: closed_at,
+          price_closed: price_closed,
+          closed_at: closed_at
         }
       end
 
@@ -35,18 +37,19 @@ module API
       def transaction_attributes
         {
           lot: lot,
-          take_profit: take_profit,
-          stop_loss: stop_loss,
+          fee: fee,
           profit: profit,
-          price_request: price_open
+          price_request: price_open,
+          take_profit: take_profit,
+          stop_loss: stop_loss
         }.compact
       end
 
-      def slave_attributes
+      def slave_attributes # A ORDEM DEPENDE PARA O `transaction.set_sl_and_tp_order``
         {
           take_profit: take_profit, 
           stop_loss: stop_loss, 
-          price_request: price_open, 
+          price_request: price_open,
           lot: lot
         }.compact
       end
@@ -135,13 +138,21 @@ module API
       def take_profit
         obj['takeProfit']
       end
-
+      
+      ## TODO VER ISSO URGENTE!
+      ## TODO VER ISSO URGENTE!
       def ticket
-        obj['ticketMaster']
+        obj['ticketMaster'] || obj['ticket']
       end
+      ## TODO VER ISSO URGENTE!
+      ## TODO VER ISSO URGENTE!
 
       def profit
         obj['profit']
+      end
+
+      def fee
+        obj['fee'] + obj['swap'] + obj['commission']
       end
 
       def mfe

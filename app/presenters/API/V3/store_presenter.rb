@@ -32,14 +32,20 @@ class	API::V3::StorePresenter < API::V3::BasePresenter
 	end
 
 	def prepare
-		@account = Account.find_by(name: account_name, state: :enable, kind: kind, account_server:nil)
-		
-		if account
-		  account.update(account_server: account_server)
+		@account = Account.find_by(name: account_name, kind: kind, account_server:nil)
+
+		if @account 
+		  @account.update(account_server: account_server)
 		  @logging = logging.update(content:params.to_json, account: account)
-		else
-		  @account = Account.find_by(name: account_name, state: :disable, kind: kind, account_server:account_server)
-	    logging.update(content: account_name, params: params.to_json, state: "ACCOUNTNOTFOUND", account: @account) if Logging.where(content: account_name, state: "ACCOUNTNOTFOUND",  created_at:date_today.beginning_of_day..date_today.end_of_day, account: @account).count < 1
+		end
+		@account = Account.find_by(name: account_name, kind: kind, account_server:account_server)
+		if @account.nil? 
+			state = "ACCOUNTNOTFOUND"
+		elsif @account&.disable?
+			state = "ACCOUNTDISABLED"
+		end
+		if @account.nil? || @account&.disable?
+			logging.update(content: account_name, params: params.to_json, state: state, account: @account) if Logging.where(content: account_name, state: state,  created_at:date_today.beginning_of_day..date_today.end_of_day, account: @account).count < 1
 		end
 	end	
 
@@ -50,7 +56,8 @@ class	API::V3::StorePresenter < API::V3::BasePresenter
 			attributes = {meta_version_accept: meta_version_accept, account: self.try(:account).nil?, expert_name: kind, account_serializer: @serializer}
 			result = account.loggings.find_by(state: "START", created_at:date_today.beginning_of_day..date_today.end_of_day)
 			if account && account.store.enable? && meta_version_accept
-			  logging.update(content:attributes.to_json, state: "START", account:account) unless result
+				account.loggings.create(content:attributes, state: "START", resourceable: account.store) unless result
+			  # logging.update(content:attributes.to_json, state: "START", account:account) unless result
 			  @status = 201
 			  @serializer = AccountSerializer.new(account, params: @params).try(:attributes)
 			else 

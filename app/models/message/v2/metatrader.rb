@@ -75,7 +75,6 @@ class Message::V2::Metatrader < Message::Message
       # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
       if account.enable?
         # params_copy = {imentore_copy: {orders_open: params_copy("orders_open")}}.merge(params_hash).to_json
-        
         traces = account.traces.copy.active
         if traces.present? #and not content.blank? and content.is_a?(Hash)
           # message = Message::Metatrader.create(content: self.content, content_at: Time.zone.now, store: account.store, traces:traces)
@@ -99,7 +98,9 @@ class Message::V2::Metatrader < Message::Message
               unless orders.present? and account.try(:enable?)
                 begin
                   self.traces << trace unless self.trace_ids.include?(trace.id)
-                  trace.create_order(copy_params, account, self, copy_params["symbol"], API_VERSION) 
+                  # trace.create_order(copy_params, account, self, copy_params["symbol"], API_VERSION) 
+                  trace_service = Model::TraceService.new(trace, copy_params, account, self, copy_params["symbol"], API_VERSION)
+                  trace_service.create_order
                 rescue ActiveRecord::RecordNotUnique
                   self.loggings.create(content:"Duplicate Slave Ticket #{ticket} - Trace #{trace.id} #{trace.name} - Account #{account.name}", state: 'ERROR', resourceable: account, parent:self.loggings.last)
                 end

@@ -6,7 +6,7 @@ class TransactionSlave < ApplicationRecord
 
   StateMachine::Machine.ignore_method_conflicts = true
 
-  has_paper_trail 
+  has_paper_trail on: [:create, :update]
   # versions: {
   #   class_name: 'Track'
   # }
@@ -37,11 +37,15 @@ class TransactionSlave < ApplicationRecord
   scope :loss,                ->{where('transaction_slaves.profit < 0')}
   scope :buy,                 ->{where(ordertype: 0)}
   scope :sell,                ->{where(ordertype: 1)}
+  scope :conciliated,         ->{where.not(conciliated_at: nil)}
+  scope :not_conciliated,     ->{where(conciliated_at: nil)}
+  # scope :not_limit_pending,   ->{where('transaction_slaves.ordertype >= 2 AND transaction_slaves.profit = 0')}
 
   validates_presence_of :symbol
-  validates_uniqueness_of :ticket_master, scope: [:account_id, :ticket_slave, :order_id], on: :create, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :ticket_master, scope: [:account_id, :ticket_slave, :order_id], on: :create, if: Proc.new { account.try(:hedging?)}, 
+                          unless: Proc.new {symbol == 'conciliated'}
   validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id, :order_id], on: :create, allow_blank: false, allow_nil: false, 
-                          if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0}
+                          if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || symbol == 'conciliated'}
   # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   after_create :restrict_magic_number?#, :check_duplicate
@@ -111,9 +115,9 @@ class TransactionSlave < ApplicationRecord
     event :close do
       transition [:pending, :remove, :executed, :error] => :closed
     end  
-    event :conciliate do
-      transition [:pending, :remove, :executed, :error] => :conciliated
-    end  
+    # event :conciliate do
+    #   transition [:pending, :remove, :executed, :error] => :conciliated
+    # end  
     event :deleted do
       transition [:pending, :remove, :executed, :closed] => :deleted
     end
@@ -131,7 +135,8 @@ class TransactionSlave < ApplicationRecord
   end
 
   def restrict_magic_number?
-    order.restrict_magic_number(self)
+    TradeHelperService.restrict_magic_number(self, self.account)
+    # order.restrict_magic_number(self)
   end
 
   def set_sl_and_tp_order(take_profit, stop_loss, price_request, lot)
@@ -140,7 +145,8 @@ class TransactionSlave < ApplicationRecord
   end
 
   def api_request_attributes
-    order.api_request_attributes(self)
+    # order.api_request_attributes(self)
+    TradeHelperService.api_request_attributes(self, self.account)
   end
 
   def seconds_ago
@@ -152,5 +158,16 @@ class TransactionSlave < ApplicationRecord
     
     result = seconds_ago1 > seconds_ago2 ? seconds_ago1 : seconds_ago2
   end
+  
+  def mark_as_conciliated
+    update(conciliated_at: Time.current)
+  end
 
+  def mark_as_unconciliated
+    update(conciliated_at: nil, fee:0)
+  end
+
+  def conciliated?
+    conciliated_at.present?
+  end
 end

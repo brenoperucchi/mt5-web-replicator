@@ -29,20 +29,34 @@ module API
           end
 
           def content
-            content = File.open(params[:data][:tempfile]).try(:read)
-            content.gsub!("\u0000", "")
-            return content.to_s
+            if params[:data].present?
+              content = File.open(params[:data][:tempfile]).try(:read) 
+              content.gsub!("\u0000", "")
+              content = sanitize_encoding(content)
+              return content.to_s
+            end
           end
 
+          def sanitize_encoding(str)
+            begin
+              str.force_encoding('iso-8859-1').encode('utf-8')
+            rescue => e
+              return str
+            end
+          end
+          
+          # def error_response(message:, status:, headers: nil, backtrace: nil, original_exception: nil)
+          #   error!({ error: message }, status, headers)
+          # end
         end
 
-        rescue_from ActiveRecord::RecordNotFound do |e|
-          error_response(message: e.message, status: 404)
-        end
+        # rescue_from ActiveRecord::RecordNotFound do |e|
+        #   error_response(message: e.message, status: 404)
+        # end
 
-        rescue_from ActiveRecord::RecordInvalid do |e|
-          error_response(message: e.message, status: 422)
-        end
+        # rescue_from ActiveRecord::RecordInvalid do |e|
+        #   error_response(message: e.message, status: 422)
+        # end
       end
     end
   end

@@ -13,6 +13,7 @@ class TransactionDashboard < Administrate::BaseDashboard
     position_id:        Field::String,
     state:              Field::String,
     profit:             Field::String.with_options(searchable: false),
+    fee:                Field::String.with_options(searchable: false),
     mfe_max:            Field::String.with_options(searchable: false),
     mae_min:            Field::String.with_options(searchable: false),
     ordertype:          Field::String,
@@ -29,11 +30,14 @@ class TransactionDashboard < Administrate::BaseDashboard
     closed_at:          Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     created_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at:         Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
+    conciliated_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     trace:              Field::BelongsTo,
     message:            Field::BelongsTo.with_options(class_name:'Message::Message'),
     account:            Field::BelongsTo,
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
     orders:             Field::HasMany,
+    traces:             Field::HasMany,
+    # transaction_traces: Field::HasMany.with_options(class_name:'Transaction'),
     loggings:           Field::HasMany,
     versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
   }.freeze
@@ -50,7 +54,9 @@ class TransactionDashboard < Administrate::BaseDashboard
   price_open
   price_closed
   account
+  trace
   profit
+  fee
   open_at
   closed_at
   ].freeze
@@ -65,11 +71,13 @@ class TransactionDashboard < Administrate::BaseDashboard
   position_id
   orders
   trace
+  traces
   account
   loggings
   versions
   slaves
   profit
+  fee
   mfe_max
   mae_min
   ordertype
@@ -85,6 +93,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   closed_at
   created_at
   updated_at
+  conciliated_at
   ].freeze
 
   # FORM_ATTRIBUTES
@@ -95,6 +104,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   ticket
   state
   profit
+  fee
   ordertype
   symbol
   price_request
@@ -108,6 +118,7 @@ class TransactionDashboard < Administrate::BaseDashboard
   open_at
   created_at
   closed_at
+  conciliated_at
   ].freeze
 
   # COLLECTION_FILTERS

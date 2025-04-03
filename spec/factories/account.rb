@@ -39,7 +39,7 @@ FactoryBot.define do
     end
 
     trait :slave_netting do
-      name {30010} 
+      name {30010}  
       kind {'slave'}  # 'slave' or 'copy'
       meta_mode { 'demo' }
       meta_margin_mode { 'netting' }

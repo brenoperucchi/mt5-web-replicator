@@ -20,14 +20,14 @@ require 'rails_helper'
 
 RSpec.describe 'Store Controller', type: :request do
 	before(:context) do
-	  @plan1  = create(:plan, :plan1)
-    @store  = create(:store, plan: @plan1)
-    @stripe = create(:payment_method, :stripe)
-    @payment = create(:payment, payment_method: @stripe, store: @store)
-    @store_name = "Sistema-#{Store.maximum(:id).to_i + 1}" 
-    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @plan_method = create(:payment_method, :mercadopago)
+    @payment = create(:payment, payment_method: @plan_method)
+    @plan1 = create(:plan, :plan1)
+    
+    @account_name = "123456"
+    @account_server_name = "ServerName"
+    @store_name = "Sistema-#{Store.maximum(:id).to_i + 1}"
 
-    # @stripe = create(:payment_method, :mercadopago)
 	end
 
   # This should return the minimal set of attributes required to create a valid
@@ -36,12 +36,21 @@ RSpec.describe 'Store Controller', type: :request do
   
   
   def valid_attributes
-    # { "name"=>"#{@store_name}", "email"=>"store1@email.com", "password"=>"123123", "url"=>"store1", "plan_id"=>"1" }
-    {"data": {"filename":"store","type":"text/html; charset=utf-8","name":"data","tempfile":"#\u003cFile:0x00007f55fbf0afc0\u003e","head":"Content-Disposition: attachment; name=\"data\"; filename=\"store\"\r\nContent-Type: text/html; charset=utf-8\r\n"},"expert_name":"imentore_copy","expert_version":"3_00_03","account_server_name":"XPMT5DEMO","account_id":"515623078","account_mode":"HEDGING"}
+    { "email"=>"store1@email.com", "name" => @account_name, "plan_id"=>@plan1.id }
+    # {"data": {"filename":"store","type":"text/html; charset=utf-8","name":"data","tempfile":"#\u003cFile:0x00007f55fbf0afc0\u003e","head":"Content-Disposition: attachment; name=\"data\"; filename=\"store\"\r\nContent-Type: text/html; charset=utf-8\r\n"},"expert_name":"imentore_copy","expert_version":"3_00_03","account_server_name":"XPMT5DEMO","account_id":"515623078","account_mode":"HEDGING"}
   end
 
+  def valid_attributes_store2
+    { 'name': 'TraceExample1', 'customer_plan_id': '1', 'account': { 'store_id': '1', 'name': '12345678', 'kind': 'slave',
+                                                           'customer_attributes': { 'store_id': '1', 'name': 'Joao Cliente', 'user_attributes': { 'email': 'teste@cliente.com', 'store_id': '1' } },
+                                                           'settings': { 'contract_volume': '1' }, 'meta_margin_mode': 'hedging', 'meta_mode': 'demo' }, "store_name": 'store2' }
+  end
+
+
   def url_request
-    "/api/v3/copy/post/store/imentore_copy/3_00_03/#{account.account_server.name}/#{@account.name}/HEDGING"
+    # "/api/v3/copy/post/store/imentore_copy/3_00_03/#{@account_server_name}/#{@account_name}/HEDGING"
+    "/stores"
+    
   end
 
   # This should return the minimal set of values that should be in the session
@@ -56,8 +65,7 @@ RSpec.describe 'Store Controller', type: :request do
     describe "with valid params" do
       it "creates a new Order" do
         expect {
-          post url_request , params: {:store => valid_attributes} #, valid_session
-          @store.reload
+          post url_request, params: {:store => valid_attributes} #, valid_session
         }.to change(Store, :count).by(1)
         @store = Store.last
         count = Store.count
@@ -66,14 +74,52 @@ RSpec.describe 'Store Controller', type: :request do
         expect(@store.name).to be == @store_name
         expect(@store.payment_id).to eq(1)
         expect(@store.payment_id).to eq(1)
-        expect(@store.accounts.count).to eq(1)
+        expect(@store.accounts.count).to eq(2)
         expect(@store.traces.last.stores).to be_present
-
+        
       end
       it "creates a new Order" do
         expect {
           post '/stores' , params: {:store => valid_attributes} #, valid_session
         }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      end
+      
+      it "redirects to the created store" do
+        post url_request, params: {:store => valid_attributes}
+        expect(response).to redirect_to('/control/accounts')
+      end
+      
+      # it "assigns a newly created store as @store" do
+      #   post url_request, params: {:store => valid_attributes}
+      #   expect(assigns(:store)).to be_a(Store)
+      #   expect(assigns(:store)).to be_persisted
+      # end
+      
+      describe "POST create /stores/create" do#, focus:true do
+        it 'Store 2 with date Proportional' do
+          expect {
+            post url_request, params: {:store => valid_attributes} #, valid_session
+          }.to change(Store, :count).by(1)
+          @store = Store.last
+          count = Store.count
+          expect(response).to have_http_status 302
+          expect(Store.all.count).to eq(count)
+          expect(@store.name).to be == @store_name
+          expect(@store.payment_id).to eq(1)
+          expect(@store.payment_id).to eq(1)
+          expect(@store.accounts.count).to eq(2)
+          expect(@store.traces.last.stores).to be_present
+        
+          user_customer = create(:user, :customer, store: @store)
+          customer = create(:customer, :customer, user: user_customer)
+          account_server = create(:account_server, name: "darwinexdemo")
+          account = create(:account, :slave1, name: 3000064180, store: @store, customer: customer, meta_margin_mode: 'hedging', trace_ids: @store.trace_ids, account_server: account_server)
+          
+          get "/api/v3/slave/post/orders/imentore_slave/3_00_04/darwinexdemo/3000064180/HEDGING"
+          expect(response).to have_http_status(201)
+          expect(response.status).to be == 201
+          # expect(response.content_type).to include("application/json")
+        end
       end
     end
   end

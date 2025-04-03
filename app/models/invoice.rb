@@ -4,7 +4,7 @@ class Invoice < ApplicationRecord
   include LibEnums
   include ActionView::Helpers::NumberHelper
 
-  has_paper_trail 
+  has_paper_trail on: [:create, :update]
 
   delegate :stripe_product_id, :stripe_customer_id, to: :store
   delegate :email, to: :invoiceable, allow_nil: true

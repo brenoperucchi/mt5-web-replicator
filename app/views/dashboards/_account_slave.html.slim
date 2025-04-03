@@ -1,6 +1,11 @@
 - @account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
 - @account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
 
+/ p
+/   = @account.search_date_begin
+/ p
+/   = @account.search_date_end
+
 .row
   .col-md-12
     .card.table-card.latest-activity-card
@@ -13,7 +18,8 @@
       .card-body
         .table-responsive
           table.table.table-hover.table-borderless#slaves
-            - type = @account.slave? ? :slaves : :transactions
+            - type = :slaves
+            - @slave_collections = @account.data_scope(type, nil, :all, @trace).order(open_at: 'DESC')
             thead
               tr
                 / - if @account.copy?
@@ -39,40 +45,44 @@
             tbody
               tr
                 td OPERATIONS
-                td = @account.data_scope(type, nil, :all, @trace).count
+                td = @slave_collections.count
                 td TOTAL PROFIT
                 td= number_with_precision @account.data_scope(:transactions, nil, :all, @trace).to_a.sum(&:profit), precision:2
-                td= number_with_precision @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit), precision:2
+                td= number_with_precision @slave_collections.to_a.sum(&:profit), precision:2
                 td - 
                 td - 
                 td - 
                 td - 
                 td -
                 td -
-              - @account.data_scope(type, nil, :all, @trace).order(open_at: 'DESC').each do |slave|
+              - @slave_collections.each do |slave|
+                - if slave.master.nil?
+                  - data_href = nil
+                - else
+                  - data_href = transaction_dashboard_path(@account.store.url, @trace.name, slave.account.id, slave&.master&.id, datefilter:params[:datefilter])
                 / - open_at_slave = slave.loggings.where(state:["OPEN", "OPENED"]).try(:first).try(:created_at)
-                tr[data-href="#{transaction_dashboard_path(@account.store.url, @trace.name, slave.account.id, slave.master.id, datefilter:params[:datefilter])}"]
+                tr[data-href="#{}"]
                   td = slave.ticket_slave
                   td = slave.symbol
                   td = slave.state
-                  td = number_with_precision slave.master.profit, precision:2
+                  td = number_with_precision slave&.master&.profit, precision:2
                   td = number_with_precision slave.profit, precision:2
                   td = slave.ordertype
-                  td = slave.master.price_open
+                  td = slave.master&.price_open
                   td = slave.price_open
-                  td = slave.master.price_closed
+                  td = slave.master&.price_closed
                   td = slave.price_closed
                   td = slave.lot.to_f.round(3)
-                  td = l(slave.master.open_at, format: :short5) if slave.master.open_at.present?
+                  td = l(slave.master&.open_at, format: :short5) if slave.master&.open_at.present?
                   td = l(slave.open_at, format: :short5) if slave.open_at.present?
-                  td = l(slave.master.closed_at, format: :short5) if slave.master.closed_at.present?
+                  td = l(slave.master&.closed_at, format: :short5) if slave.master&.closed_at.present?
                   td = l(slave.closed_at, format: :short5) if slave.closed_at.present?
               tr
                 td OPERATIONS
-                td = @account.data_scope(type, nil, :all, @trace).count
+                td = @slave_collections.count
                 td TOTAL PROFIT
                 td= number_with_precision @account.data_scope(:transactions, nil, :all, @trace).to_a.sum(&:profit), precision: 2
-                td= number_with_precision @account.data_scope(type, nil, :all, @trace).to_a.sum(&:profit), precision: 2
+                td= number_with_precision @slave_collections.to_a.sum(&:profit), precision: 2
                 td - 
                 td - 
                 td - 

@@ -9,8 +9,8 @@ RSpec.describe API::V2::APICopy do
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, user:@user_admin)
     @customer = create(:customer, :customer, user:@user_customer)
-    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
-    @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces: [@trace])
+    @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces:[@trace])
     @ticket_master = 10000001
     
     post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 

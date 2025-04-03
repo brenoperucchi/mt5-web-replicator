@@ -1,0 +1,37 @@
+{
+    "PositionOrders":
+    [
+        {
+            "ticketMaster": 1111111111,
+            "ticketSlave": 0,
+            "ticketDeal": 0,
+            "positionID": 0,
+            "type": 1,
+            "entry": 1,
+            "traceID": 0,
+            "slaveID": 0,
+            "magicNumber": 0,
+            "transactionID": 0,
+            "slipPage": 0,
+            "symbolDigits": 0,
+            "timeZone": 0,
+            "profit": 0.05000,
+            "priceOpen": 0.88879,
+            "priceClose": 0.88886,
+            "volume": 0.00000,
+            "stopLoss": 0.00000,
+            "takeProfit": 0.01,
+            "commission": -0.04,
+            "fee": 0.00,
+            "swap": 0.00,
+            "mae": 0.00,
+            "mfe": 0.00,
+            "state": "closed",
+            "symbol": "WINJ25",
+            "comment": "",
+            "openAt": "2026.04.15 19:58:46",
+            "timeGMT": "2026.04.15 19:58:46",
+            "timeTrader": "2026.04.15 19:58:46"
+       }
+    ]
+}

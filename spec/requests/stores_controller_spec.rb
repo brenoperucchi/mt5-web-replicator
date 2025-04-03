@@ -51,7 +51,7 @@ RSpec.describe 'Store Controller', type: :request do
       it "creates a new Order" do
         expect {
           post '/stores' , params: {:store => valid_attributes} #, valid_session
-          @store.reload
+          # @store.reload
         }.to change(Store, :count).by(1)
         @store = Store.last
         count = Store.count

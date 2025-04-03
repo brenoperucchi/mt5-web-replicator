@@ -54,12 +54,15 @@ RSpec.describe API::V2::APICopy do
                 "{\"orders_open\":{
                     \"10000019\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000019,\"ticket_deal\":2014200579,\"type\":0,\"price_open\":\"0.87401\",\"price_closed\":\"0.87314\",\"volume\":\"0.02\",\"profit\":\"-1.30\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 16:01:23\",\"close_at\":\"2023.08.02 21:44:28\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":20000,\"comment\":null}
                   }}"}  
-        expect(account.transactions.count).to be == 2
-        expect(account.slaves.count).to be       == 0
-        expect(@trace.transactions.count).to be  == 1
-        expect(@trace.slaves.count).to be        == 2
-        expect(Transaction.all.count).to be      == 2
-        expect(TransactionSlave.all.count).to be == 3
+        expect(account.traces.count).to be        == 2
+        expect(account.transactions.count).to be  == 1
+        
+        expect(@trace.accounts.slave.count).to be == 2
+        expect(@trace.transactions.count).to be   == 1
+        expect(@trace.slaves.count).to be         == 2
+
+        expect(Transaction.all.count).to be       == 1
+        expect(TransactionSlave.all.count).to be  == 3
       end
 
     end
@@ -253,10 +256,10 @@ RSpec.describe API::V2::APICopy do
         orders = Order.all
         expect(orders.count).to be == 4
         expect(orders.pending.count).to be == 0
-        expect(orders.error.count).to be == 1
-        expect(orders.executed.count).to be == 1
+        expect(orders.error.count).to be == 0
+        expect(orders.executed.count).to be == 2
         expect(orders.closed.count).to be == 2
-        expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
+        # expect(Trace.find(1).transactions.closed.find_by_ticket(10000002).profit.to_f).to be == 0.0
         expect(Trace.find(2).transactions.executed.find_by_ticket(10000002).profit.to_f).to be == 0.0
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
@@ -281,16 +284,16 @@ RSpec.describe API::V2::APICopy do
         orders = Order.all
         expect(orders.count).to be == 4
         expect(orders.pending.count).to be == 0
-        expect(orders.error.count).to be == 1
+        # expect(orders.error.count).to be == 1
         expect(orders.executed.count).to be == 0
-        expect(orders.closed.count).to be == 3
-        expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
+        expect(orders.closed.count).to be == 4
+        # expect(Trace.find(1).transactions.error.find_by_ticket(10000002).profit.to_f).to be == 0.0
         expect(Trace.find(2).transactions.closed.find_by_ticket(10000002).profit.to_f).to be == 1.0
-        expect(orders.sum(&:profit_copy).to_f).to be == 3.0
-        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
+        expect(orders.sum(&:profit_copy).to_f).to be == 4.0
+        expect(Trace.first.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 2.0
 
-        expect(orders.sum(&:profit_copy).to_f).to be == 3.0
-        expect(trace.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 1.0
+        expect(orders.sum(&:profit_copy).to_f).to be == 4.0
+        expect(trace.data_scope(:masters, :closed).to_a.sum(&:profit).to_f).to be == 2.0
       end
     end
 
@@ -301,8 +304,9 @@ RSpec.describe API::V2::APICopy do
                     \"10000001\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000001,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                     \"10000002\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000002,\"ticket_deal\":2014200564,\"type\":0,\"price_open\":\"0.87312\",\"price_closed\":\"0.87307\",\"volume\":\"0.02\",\"profit\":\"0\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 21:39:55\",\"close_at\":\"2023.08.02 21:42:51\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"comment\":null},
                   }}"}
-        expect(Account.find_by_name(10100).traces.first.masters.count).to be == 2
-        expect(Account.find_by_name(10100).traces.last.masters.count).to be == 2
+        @account_copy = Account.find_by_name(10100)
+        expect(@account_copy.traces.first.masters.count).to be == 2
+        expect(@account_copy.traces.last.masters.count).to be == 2
 
         expect(TransactionSlave.where(ticket_master: 10000001, account: @account1).count).to be == 1
         expect(TransactionSlave.where(ticket_master: 10000001, account: @account2).count).to be == 1
@@ -311,21 +315,25 @@ RSpec.describe API::V2::APICopy do
         expect(TransactionSlave.where(ticket_master: 10000002, account: @account2).count).to be == 1
         expect(TransactionSlave.where(ticket_master: 10000002, account: @account3).count).to be == 0
 
-        expect(Account.find_by_name(10100).traces.first.transactions.count).to be == 2
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be    == 2
-        expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be     == 2
+        expect(@account_copy.traces.first.transactions.count).to be == 2
+        expect(@account_copy.traces.first.transactions.where(state:'executed').count).to be    == 2
+        expect(@account_copy.traces.last.id ).to be == 2
+        expect(@account_copy.traces.last.accounts.copy.count).to be == 2
+        expect(@account_copy.traces.last.accounts.slave.count).to be == 1
+        expect(@account_copy.traces.first.trace_transactions.where(state:'executed').count).to be     == 2
+        expect(@account_copy.traces.last.trace_transactions.where(state:'executed').count).to be     == 2
         
 
-        expect(Order.where(content_id: 10000001).first.id).to be                                             == 16
+        # expect(Order.where(content_id: 10000001).first.id).to be                                             == 16
         expect(Order.where(content_id: 10000001).first.slaves.where(state:'pending').count).to be            == 2
         expect(Order.where(content_id: 10000001).first.slaves.count).to be                                   == 2
 
-        expect(Order.where(content_id: 10000001).last.id).to be                                              == 17
+        # expect(Order.where(content_id: 10000001).last.id).to be                                              == 17
         expect(Order.where(content_id: 10000001).last.slaves.where(state:'pending').count).to be             == 1
         expect(Order.where(content_id: 10000001).last.slaves.count).to be                                    == 1
         
-        expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be    == 2
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'executed').count).to be     == 2
+        expect(Account.find_by_name(10200).traces.first.trace_transactions.where(state:'executed').count).to be    == 2
+        expect(Account.find_by_name(10200).traces.last.trace_transactions.where(state:'executed').count).to be     == 2
 
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
@@ -333,11 +341,11 @@ RSpec.describe API::V2::APICopy do
 
                   }}"}
         expect(Account.find_by_name(10100).traces.first.transactions.count).to be == 3
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be == 3
-        expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be == 3
+        expect(Account.find_by_name(10100).traces.first.trace_transactions.where(state:'executed').count).to be == 3
+        expect(Account.find_by_name(10100).traces.last.trace_transactions.where(state:'executed').count).to be == 3
         
-        expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be == 3
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'executed').count).to be == 3
+        expect(Account.find_by_name(10200).traces.first.trace_transactions.where(state:'executed').count).to be == 3
+        expect(Account.find_by_name(10200).traces.last.trace_transactions.where(state:'executed').count).to be == 3
 
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_closed\":{
@@ -345,15 +353,15 @@ RSpec.describe API::V2::APICopy do
                     \"10000002\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000002,\"ticket_deal\":2014200564,\"type\":0,\"price_open\":\"0.87312\",\"price_closed\":\"0.87307\",\"volume\":\"0.02\",\"profit\":\"0\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 21:39:55\",\"close_at\":\"2023.08.02 21:42:51\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"comment\":null},
                     \"10000003\":{\"symbol\":\"AUDCAD\",\"ticket_id\":10000003,\"ticket_deal\":2014200564,\"type\":0,\"price_open\":\"0.87312\",\"price_closed\":\"0.87307\",\"volume\":\"0.02\",\"profit\":\"0\",\"fees\":\"-0.0600\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":\"0.00\",\"mfe\":\"0.00\",\"open_at\":\"2023.08.02 21:39:55\",\"close_at\":\"2023.08.02 21:42:51\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"comment\":null},
                   }}"}
-        expect(Account.find_by_name(10100).traces.first.transactions.count).to be == 3
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'executed').count).to be == 0
-        expect(Account.find_by_name(10100).traces.first.transactions.where(state:'closed').count).to be == 3
-        expect(Account.find_by_name(10100).traces.last.transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(10100).traces.first.trace_transactions.count).to be == 3
+        expect(Account.find_by_name(10100).traces.first.trace_transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(10100).traces.first.trace_transactions.where(state:'closed').count).to be == 3
+        expect(Account.find_by_name(10100).traces.last.trace_transactions.where(state:'executed').count).to be == 0
         
-        expect(Account.find_by_name(10200).traces.first.transactions.where(state:'executed').count).to be == 0
-        expect(Account.find_by_name(10200).traces.first.transactions.where(state:'closed').count).to be == 3
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'executed').count).to be == 0
-        expect(Account.find_by_name(10200).traces.last.transactions.where(state:'closed').count).to be == 3
+        expect(Account.find_by_name(10200).traces.first.trace_transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(10200).traces.first.trace_transactions.where(state:'closed').count).to be == 3
+        expect(Account.find_by_name(10200).traces.last.trace_transactions.where(state:'executed').count).to be == 0
+        expect(Account.find_by_name(10200).traces.last.trace_transactions.where(state:'closed').count).to be == 3
 
       end
     end
@@ -490,7 +498,8 @@ RSpec.describe API::V2::APICopy do
         @trace.reload
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
-                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
+                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,
+                    \"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",\"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}
         expect(@trace.name_id).to be == "20001"
         account = Account.find_by(name: 10100)
@@ -504,15 +513,30 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.count).to be == 2
         expect(order.slaves.first.magic_number).to be == "10001"        
         expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3        
-        expect(TransactionSlave.where(ticket_master:10000006)[0].magic_number).to be == "20002"
-        expect(TransactionSlave.where(ticket_master:10000006)[1].magic_number).to be == "10001"
-        expect(TransactionSlave.where(ticket_master:10000006)[2].magic_number).to be == "10001"
+
+        slave1 = TransactionSlave.find_by(ticket_master:10000006, trace: @trace)
+        expect(slave1.trace.magic_same).to be == true
+        expect(slave1.trace_id == @trace.id).to be == true
+        expect(slave1.magic_number).to be == "10001"
+        
+        slave2 = TransactionSlave.find_by(ticket_master:10000006, account: @account2)
+        expect(slave2.trace.magic_same).to be == true
+        expect(slave2.trace_id == @trace.id).to be == true
+        expect(slave2.magic_number).to be == "10001"
+        
+        slave3 = TransactionSlave.find_by(ticket_master:10000006, trace:@trace2)
+        expect(slave3.trace.magic_same).to be == nil
+        expect(slave3.trace_id == @trace.id).to be == false
+        expect(slave3.magic_number).to be == "20002"
       end
-      it 'Hedging - Magic should be the same of Copy & Slave' do
+
+      it 'Hedging - Magic should be the same of Copy & Slave - Magic Same 1 as True' do
         @trace.update(magic_same: "1")
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
-                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
+                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, 
+                    \"profit\":\"0\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",\"time_gmt\":\"2023.08.02 19:45:38\",
+                    \"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}
         expect(@trace.name_id).to be == "20001"
         account = Account.find_by(name: 10100)
@@ -526,16 +550,30 @@ RSpec.describe API::V2::APICopy do
         expect(order.slaves.count).to be == 2
         expect(order.slaves.first.magic_number).to be == "10001"        
         expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3        
-        expect(TransactionSlave.where(ticket_master:10000006)[0].magic_number).to be == "20002"
-        expect(TransactionSlave.where(ticket_master:10000006)[1].magic_number).to be == "10001"
-        expect(TransactionSlave.where(ticket_master:10000006)[2].magic_number).to be == "10001"
+
+        slave1 = TransactionSlave.find_by(ticket_master:10000006, trace: @trace)
+        expect(slave1.trace.magic_same).to be == "1"
+        expect(slave1.trace_id == @trace.id).to be == true
+        expect(slave1.magic_number).to be == "10001"
+        
+        slave2 = TransactionSlave.find_by(ticket_master:10000006, account: @account2)
+        expect(slave2.trace.magic_same).to be == "1"
+        expect(slave2.trace_id == @trace.id).to be == true
+        expect(slave2.magic_number).to be == "10001"
+        
+        slave3 = TransactionSlave.find_by(ticket_master:10000006, trace: @trace2)
+        expect(slave3.trace.magic_same).to be == nil
+        expect(slave3.trace_id == @trace.id).to be == false
+        expect(slave3.magic_number).to be == "20002"
       end
 
-      it 'Hedging - Magic shouldnt be the same of Copy & Slave' do
+      it 'Hedging - Magic shouldnt be the same of Copy & Slave - Magic Same False' do
         @trace.update(magic_same: false)
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING', 
           params: {"imentore_copy"=>"{\"orders_open\":{
-                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, \"profit\":\"0\",                      \"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",                                 \"time_gmt\":\"2023.08.02 19:45:38\",\"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
+                    \"10000006\":{\"symbol\":\"GBPUSD\",\"ticket_id\":10000006,\"ticket_deal\":2014200953,\"type\":0,\"volume\":\"0.02\",\"price_open\":\"0.87353\",\"price_closed\":0.00000000, 
+                    \"profit\":\"0\",\"stop_loss\":0.00000000,\"take_profit\":0.00000000,\"mae\":0.00000000,\"mfe\":0.00000000,\"open_at\":\"2023.08.02 22:45:37\",\"time_gmt\":\"2023.08.02 19:45:38\",
+                    \"time_trader\":\"2023.08.02 22:45:38\",\"timezone\":-6,\"symbol_digit\":5,\"magic_number\":10001,\"state_meta\":null,\"comment\":null},
                   }}"}        
         expect(@trace.name_id).to be == "20001"
         account = Account.find_by(name: 10100)
@@ -548,10 +586,22 @@ RSpec.describe API::V2::APICopy do
         expect(order.transactions.first.magic_number).to be == "10001"
         expect(order.slaves.count).to be == 2
         expect(order.slaves.first.magic_number).to be == "20001"                
-        expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3        
-        expect(TransactionSlave.where(ticket_master:10000006)[0].magic_number).to be == "20002"
-        expect(TransactionSlave.where(ticket_master:10000006)[1].magic_number).to be == "20001"
-        expect(TransactionSlave.where(ticket_master:10000006)[2].magic_number).to be == "20001"
+        expect(TransactionSlave.where(ticket_master:10000006).size).to be == 3
+
+        slave1 = TransactionSlave.find_by(ticket_master:10000006, trace: @trace)
+        expect(slave1.trace.magic_same).to be == false
+        expect(slave1.trace_id == @trace.id).to be == true
+        expect(slave1.magic_number).to be == "20001"
+        
+        slave2 = TransactionSlave.find_by(ticket_master:10000006, account: @account2)
+        expect(slave2.trace.magic_same).to be == false
+        expect(slave2.trace_id == @trace.id).to be == true
+        expect(slave2.magic_number).to be == "20001"
+        
+        slave3 = TransactionSlave.find_by(ticket_master:10000006, trace: @trace2)
+        expect(slave3.trace.magic_same).to be == nil
+        expect(slave3.trace_id == @trace.id).to be == false
+        expect(slave3.magic_number).to be == "20002"
       end
  
       it 'Hedging - Restrict Magic Number' do

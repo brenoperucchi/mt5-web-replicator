@@ -17,9 +17,14 @@ class Transaction < ApplicationRecord
   belongs_to :deal, optional:true
 
   has_many :loggings, as: :resourceable, dependent: :destroy
+
+  has_many :transaction_traces, dependent: :destroy, foreign_key: :master_id
+  has_many :traces, through: :transaction_traces, source: :trace, dependent: :destroy
+  # has_many :traces, through: :transaction_traces, source: :trace
   
   has_many :order_transactions, dependent: :destroy
   has_many :orders, through: :order_transactions, source: :order, dependent: :destroy
+  has_many :traces_orders, through: :orders, source: :trace
   # has_many :orders
 
   has_many :slaves,   through: :orders,    source: :slaves
@@ -28,7 +33,7 @@ class Transaction < ApplicationRecord
   has_many :statistics, as: :statisticable, dependent: :destroy
   has_one :mfe, -> { where(kind: 'mfe') }, class_name: 'Statistic', as: :statisticable
 
-  validates_uniqueness_of :ticket, scope: [:account_id, :trace_id], on: :create, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :ticket, scope: [:account_id, :trace_id, :order_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   # enum state: { pending: 0, executed: 1, closed: 2, error: 3 }
 
@@ -47,8 +52,11 @@ class Transaction < ApplicationRecord
   scope :sell,                  ->{where(ordertype: 1)}
   scope :gain,                  ->{where('transactions.profit >= 0')}
   scope :loss,                  ->{where('transactions.profit < 0')}
+  scope :not_limit_pending,   ->{where('transactions.ordertype >= 2').where.not(profit:0)}
 
   scope :pending_executed,  ->{where(state: [:pending, :executed])}
+  scope :not_conciliated,   ->{where(conciliated_at: nil)}
+  scope :conciliated,       ->{where.not(conciliated_at: nil)}
 
   # before_create :set_symbol
   after_create  :validate_restriction
@@ -93,7 +101,7 @@ class Transaction < ApplicationRecord
     event :close do
       transition [:pending, :executed] => :closed
     end
-    event :restart do
+    event :reset do
       transition [:executed, :error, :closed] => :pending
     end
     
@@ -124,7 +132,7 @@ class Transaction < ApplicationRecord
     chat_id = self.account.store.telegram_bot_chat_id
     if chat_id.present?
       content = self.telegram_message_prepare(state)
-      TelegramJob.perform_async(chat_id, content)
+      # TelegramJob.perform_async(chat_id, content)
     end
   end
 
@@ -137,7 +145,7 @@ class Transaction < ApplicationRecord
         chat_id = self.account.store.telegram_bot_chat_id
         if chat_id.present?
           content = self.telegram_message_prepare(:MODIFY)
-          TelegramJob.perform_async(chat_id, content)
+          # TelegramJob.perform_async(chat_id, content)
         end
       end
     end
@@ -221,22 +229,23 @@ class Transaction < ApplicationRecord
   end
 
   def restrict_magic_number?
-    restrict_magic_number(self) or trace.restrict_magic_number(self)
+    # restrict_magic_number(self) or trace.restrict_magic_number(self)
+    TradeHelperService.restrict_magic_number(self, self.account) or traces.any? { |trace| TradeHelperService.restrict_magic_number(self, trace) }
   end
 
-  def restrict_magic_number(resource)
-    unless resource.account.magics_accept.blank?
-      trace_magic_number = self.try(:trace).try(:name_id)
-      magic_numbers = Order.magic_numbers_split(resource.account.magics_accept)
-      changeset = resource.try(:versions).try(:last).try(:changeset)
-      version = resource.try(:version)
-      unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
-        resource.erro!
-      end
-    end
-    resource.error?
-  end  
+  # def restrict_magic_number(resource)
+  #   unless resource.account.magics_accept.blank?
+  #     trace_magic_number = self.try(:trace).try(:name_id)
+  #     magic_numbers = Order.magic_numbers_split(resource.account.magics_accept)
+  #     changeset = resource.try(:versions).try(:last).try(:changeset)
+  #     version = resource.try(:version)
+  #     unless magic_numbers.detect{|x| x == resource.magic_number}
+  #       resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
+  #       resource.erro!
+  #     end
+  #   end
+  #   resource.error?
+  # end  
 
   def validate_restriction
     # restrict_nil_instrument? 
@@ -244,12 +253,14 @@ class Transaction < ApplicationRecord
   end
 
   def api_request_attributes
-    order.api_request_attributes(self)
+    # order.api_request_attributes(self)
+    TradeHelperService.api_request_attributes(self, self)
   end
 
   def self.api_request_attributes(scope)
     return if scope.nil?
-    self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 60.days)).collect{|t| t.api_request_attributes}.join('/')
+      TradeHelperService.api_request_attributes_scope(order, self, scope)
+      # self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 60.days)).collect{|t| t.api_request_attributes}.join('/')
   end
 
   def mfe_max
@@ -266,6 +277,14 @@ class Transaction < ApplicationRecord
   
   def mae_created_at
      self.statistics.mae_min.try(:created_at)
+  end
+
+  def mark_as_conciliated
+    update(conciliated_at: Time.current)
+  end
+
+  def conciliated?
+    conciliated_at.present?
   end
 
 end

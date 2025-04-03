@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_12_19_184546) do
+ActiveRecord::Schema.define(version: 2025_03_20_194221) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -215,6 +215,21 @@ ActiveRecord::Schema.define(version: 2024_12_19_184546) do
     t.index ["user_id"], name: "index_loggings_on_user_id"
   end
 
+  create_table "magic_numbers", force: :cascade do |t|
+    t.string "name"
+    t.string "magicable_type"
+    t.bigint "magicable_id"
+    t.bigint "trace_id", null: false
+    t.bigint "store_id"
+    t.datetime "active_at"
+    t.datetime "disable_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["magicable_type", "magicable_id"], name: "index_magic_numbers_on_magicable"
+    t.index ["store_id"], name: "index_magic_numbers_on_store_id"
+    t.index ["trace_id"], name: "index_magic_numbers_on_trace_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.text "content"
     t.string "content_id"
@@ -284,6 +299,7 @@ ActiveRecord::Schema.define(version: 2024_12_19_184546) do
     t.bigint "account_id"
     t.bigint "store_id"
     t.bigint "deal_id"
+    t.datetime "conciliated_at"
     t.index ["account_id"], name: "index_orders_on_account_id"
     t.index ["content_id"], name: "index_orders_on_content_id"
     t.index ["deal_id"], name: "index_orders_on_deal_id"
@@ -568,7 +584,7 @@ ActiveRecord::Schema.define(version: 2024_12_19_184546) do
   create_table "transaction_slaves", force: :cascade do |t|
     t.bigint "ticket_master"
     t.decimal "profit", default: "0.0"
-    t.string "ordertype"
+    t.integer "ordertype"
     t.string "symbol"
     t.string "price_request"
     t.string "price_open"
@@ -595,6 +611,8 @@ ActiveRecord::Schema.define(version: 2024_12_19_184546) do
     t.bigint "store_id"
     t.integer "entry"
     t.bigint "position_id"
+    t.datetime "conciliated_at"
+    t.decimal "fee"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
     t.index ["order_id"], name: "idx_transaction_slaves_order_id"
     t.index ["state", "closed_at"], name: "idx_transaction_slaves_state_closed_at"
@@ -602,12 +620,21 @@ ActiveRecord::Schema.define(version: 2024_12_19_184546) do
     t.index ["transaction_id"], name: "index_transaction_slaves_on_transaction_id"
   end
 
+  create_table "transaction_traces", force: :cascade do |t|
+    t.bigint "master_id", null: false
+    t.bigint "trace_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["master_id"], name: "index_transaction_traces_on_master_id"
+    t.index ["trace_id"], name: "index_transaction_traces_on_trace_id"
+  end
+
   create_table "transactions", force: :cascade do |t|
     t.string "state"
     t.bigint "ticket"
     t.decimal "profit", default: "0.0"
     t.bigint "order_id"
-    t.string "ordertype"
+    t.integer "ordertype"
     t.string "symbol"
     t.string "price_request"
     t.string "price_open"
@@ -631,6 +658,8 @@ ActiveRecord::Schema.define(version: 2024_12_19_184546) do
     t.bigint "ticket_deal"
     t.integer "entry"
     t.bigint "position_id"
+    t.datetime "conciliated_at"
+    t.decimal "fee"
     t.index ["account_id"], name: "index_transactions_on_account_id"
     t.index ["message_id"], name: "index_transactions_on_message_id"
     t.index ["order_id"], name: "index_transactions_on_order_id"

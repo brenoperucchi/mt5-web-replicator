@@ -20,6 +20,9 @@ class Message::V3::MetaSlave < Message::Message
     event :erro do
       transition [:pending, :executed] => :error
     end    
+    event :reset do
+      transition [:pending, :executed, :conciliated] => :pending
+    end    
   end
 
   validates_presence_of :account
@@ -27,25 +30,20 @@ class Message::V3::MetaSlave < Message::Message
 
   def execute_slave
     if self.valid?
-      slavePresenter = presenter
-      slavePresenter.execute_status
-      slavePresenter.slaves
-      self.response = slavePresenter.response
+      presenter.execute_status
     end
   end  
-
+  
   def execute_conciliated
-    if self.valid?
-      slavePresenter = presenter
-      slavePresenter.slaves
-      # slavePresenter.conciliate
-      self.response = slavePresenter.response
-    end
+    presenter.conciliate
   end
-
-
+  
   def presenter
     API::V3::SlavePresenter.new(params, self, account)
+  end
+
+  def response
+    presenter.slaves
   end
 
 end

@@ -65,6 +65,16 @@ class Message::Message < ApplicationRecord
     cleaned_str
   end
 
+  def execute_again_conciliated
+    account.update(api_send_orders_history: true)
+    self.update(state: "pending")
+    self.execute_conciliated
+  end
 
+  def execute_again
+    account.update(api_send_orders_history: true)
+    self.update(state: "pending")
+    self.execute
+  end
 
 end

@@ -31,9 +31,12 @@ class Trace < ApplicationRecord
 
   has_many :instruments, class_name: "Instrument", foreign_key: "trace_id", dependent: :destroy
 
-  has_many :store_traces
+  has_many :store_traces, validate: true
   has_many :stores, through: :store_traces, source: :store,  dependent: :destroy
   # belongs_to :store, optional: true
+
+  has_many :transaction_traces, dependent: :destroy
+  has_many :trace_transactions, through: :transaction_traces, source: :master, dependent: :destroy
 
   scope :active,   ->{ where.not(active_at:nil)}
   scope :not_deleted,  -> { where(deleted_at:nil) }
@@ -42,20 +45,88 @@ class Trace < ApplicationRecord
   has_many :permissions#, dependent: :destroy
   has_many :accounts,       through: :permissions#, source: :slave
   has_many :customer_plans, through: :permissions#, source: :slave
-
+  
+  has_many :magic_numbers, as: :magicable, dependent: :destroy
   
   has_one :permission#, dependent: :destroy
   has_one :customer_plan,  through: :permission, source: :customer_plan
 
   # accepts_nested_attributes_for :payment
 
-  # validates_presence_of   [:name, :name_id]
+  validates_presence_of   [:name, :name_id]
   validates_presence_of   [:contract_volume_max, :customer_plans]
-  validates_uniqueness_of [:name_id], scope: :store_id, unless: Proc.new { |trace| trace.magic_same.to_b }
-  validates_uniqueness_of [:name], scope: :store_id
+  # validates :name_id, uniqueness: { scope: [:store_id, :store_id] , message: "should be unique per store"} #, if: -> { stores.any? } }
+  # validates_uniqueness_of [:name_id], scope: :store_id, unless: Proc.new { |trace| trace.magic_same.to_b }
+  # validates_uniqueness_of [:name], scope: :store_id
   validates :capital_recomendation, format: { with: /\A\d+([.,]\d{3})*([.,]\d+)?\z/, message: 'must be a number' }, allow_blank: true
 
-  validate  :associated_with_customer_plan_and_amount_greater_than_zero, on: :update
+  validate  :validate_customer_plan_and_amount_greater_than_zero, on: :update
+  validate  :validate_store_id_and_named_id
+
+  after_save :magic_number_commit
+  before_save :normalize_name
+
+  # after_create :set_default_settings
+
+  # def set_default_settings
+  #   self.settings ||= {}
+  #   self.settings['capital_recomendation'] ||= "0"
+  # end
+
+  def settings
+    super || {}
+  end
+
+  def settings=(value)
+    super(value || {})
+  end
+
+  def validate_store_id_and_named_id
+    # Skip validation if name_id is blank or magic_same is true
+    return if name_id.blank? || magic_same.to_b
+    
+    # Skip validation for new records with no stores yet
+    # return if new_record? && store_ids.blank?
+    
+    # Validate presence of stores
+    if store_ids.blank? && store_traces.blank?
+      errors.add(:store_traces, "must have at least one store")
+      return
+    end
+    
+    # For each store, check if there's another trace with the same name_id
+    store_ids.each do |store_id|
+      existing_traces = Trace.joins(:store_traces)
+                             .where(store_traces: {store_id: store_id})
+                             .where(name_id: name_id)
+                             .where.not(id: id) # Exclude the current trace
+      
+      if existing_traces.exists?
+        errors.add(:name_id, "must be unique for store ID #{store_id}")
+      end
+    end
+  end
+
+  def normalize_name
+    unless self.manual?
+      self.name = name.to_s.gsub(/[^0-9A-Za-z]/, '') if name.present? 
+    end
+  end
+
+  def magic_number_commit
+    magic_numbers_split = TradeHelperService.magic_numbers_split(magics_accept) || []
+    magic_numbers_split.each do |number|
+      magic_number = magic_numbers.find_or_create_by(name: number, trace:self)
+      if magic_number.active_at.nil? and magic_number.disable_at.present?
+        magic_number.update(active_at: Time.current, disable_at: nil)
+      end
+    end
+    magic_numbers.each do |magic_number|
+      unless magic_numbers_split.include?(magic_number.name.to_s)
+        magic_number.update(disable_at: Time.current, active_at: nil)
+      end
+    end
+  end
 
   def capital_recomedation=(value)
     value = value.to_s.gsub(".", "").gsub(",", ".")
@@ -93,96 +164,7 @@ class Trace < ApplicationRecord
     data_scope(:masters)
   end
 
-  def create_order(order_params, account, message, symbol, api_version)
-    copySerializer = Class.const_get("API::#{api_version.try(:upcase)}::CopySerializer").new(order_params)
-    
-    instrument = check_instrument(account, symbol)
-      
-    copy_attributes = copySerializer.copy_attributes.merge(symbol: instrument, message: message, trace: self, account:account)
-    ticket = copySerializer.ticket
-
-    self.stores.each do |current_store|
-      slaves = self.accounts.slave.enable.where(store: current_store)
-
-      next unless slaves.present?
-      if account.netting?
-        order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
-        if order.nil?
-          order = account.orders.create(messages: [message], message: message, trace: self, content_id: ticket, symbol: instrument, account:account, store:current_store) 
-        end
-        transaction = Transaction.find_by(symbol: instrument, account: account, trace:self)
-        transaction ||= Transaction.create(copy_attributes.merge(account:account))
-      elsif account.hedging?
-        order = Order.create_with(trace: self, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: current_store).find_or_create_by(content_id: ticket, trace:self, store: current_store)
-        # order = account.orders.create_with(trace: supelf, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: account.try(:store)).find_or_create_by(content_id: ticket, trace:self)
-        transaction = Transaction.create_with(copy_attributes).find_or_create_by(ticket: ticket, trace:self)
-      end
-      if transaction.valid?
-        transaction.orders << order unless transaction.orders.exists?(order.id)
-        account.orders << order unless account.orders.exists?(order.id)
-      end
-
-      transaction.update_mfe_mae(copySerializer) 
-      
-      if order.valid?
-        order.execute
-      end
-
-      if order.valid? and not order.error?
-        transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account, request_url: message.try(:request_url))
-        transaction.execute unless transaction.executed?
-        if transaction and not transaction.error?
-          return true if account.netting? and order.slaves.count > 0 
-          slaves.each do |account_slave|
-            
-            instrument = check_instrument(account, symbol, account_slave)
-            serializer = "API::#{api_version.try(:upcase)}::SlaveSerializer".classify.safe_constantize.new(order_params)
-            slave_attributes = serializer.trace_attributes(instrument, account_slave, transaction, self, current_store)            
-            slave = order.slaves.new(slave_attributes.merge(position_id:nil, ticket_deal:nil))
-            slave.magic_number = check_magic_number(slave_attributes[:magic_number])
-            if self.prop_firm?
-              slave.comment      = "#{account_slave.id}#{slave.magic_number}_#{slave.comment}"
-              slave.magic_number = "#{account_slave.id}#{slave.magic_number}".to_i
-            end
-            if slave.save
-              account_slave.orders << order unless account_slave.orders.exists?(order.id) 
-              slave.loggings.create(loggerable:message, content:order_params, changeset: slave.try(:versions).try(:last).try(:changeset), state: "CREATE", parent: message.loggings.first, account: account_slave, request_url: message.try(:request_url))
-            else
-              message.loggings.create(content: "Error create Slave - Order #{order.id} - Account #{account_slave.id}", changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, resourceable:order, request_url: message.try(:request_url))
-            end
-          end
-        end
-      end
-    end
-  end
-
-  def check_magic_number(magic_number)
-    self.magic_same.to_b ? magic_number : self.name_id
-  end
-
-  def check_instrument(account, symbol, account_slave=nil)
-    if account_slave and self.instrument_control.to_b
-      instrument = account_slave.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) if account_slave.instrument_control.to_b
-      instrument ||= account.instruments.find_by(symbol: symbol.try(:upcase)).try(:name) if account.instrument_control.to_b
-    end
-    instrument || symbol
-  end
-
-
-  def restrict_magic_number(resource)
-    unless self.magics_accept.blank?
-      magic_numbers = Order.magic_numbers_split(self.magics_accept)
-      changeset = resource.try(:versions).try(:last).try(:changeset)
-      version = resource.try(:version)
-      unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{self.class.name} ##{resource.id} has magic number #{resource.magic_number} and the trace: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:resource.message.loggings.first)
-        resource.erro!
-      end
-    end
-    resource.error?
-  end
-
-  def next_charged
+    def next_charged
     days = DateTime.current.day > 15 ? 15 : 0
     (DateTime.current + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
   end
@@ -272,35 +254,8 @@ class Trace < ApplicationRecord
         transactions_analyzed: analyzed_transactions.uniq,
       }
     end
-    # profit_reach_target = values.sum{|entry| entry[:profit_date]}
-    # values <<  {profit_total: profit_reach_target}
     values
   end
-
-  # def test_parameters
-  #   data ||= self.data_scope.where(state: [:closed, :executed])
-  #   grouped_data = data.joins(:mfe)
-  #                  .select(:id, :ticket, :profit, :open_at, :closed_at, "statistics.amount AS mfe_value, statistics.created_at AS mfe_created_at")
-  #                  .order(open_at: :asc, id: :asc)
-  #                  .group_by { |x| x[:open_at].to_date }
-  #                  .sort
-
-  #   results = []
-
-  #   target = (2..30).map{|x| x*10}
-
-  #   target.each do |mfe_target|
-  #     target.each do |loss_set|
-  #       result = mfe_analyze(mfe_target, loss_set, grouped_data)
-  #       # self.search_date_begin = Date.parse("2023-10-01")
-  #       # self.search_date_end   = Date.parse("2023-12-30")
-  #       performance_metric = mfe_calculate_performance_metric(result)
-  #       results << { mfe_target: mfe_target, loss_set: loss_set, performance: performance_metric }
-  #     end
-  #   end
-
-  #   results.max_by { |r| r[:performance] }
-  # end
 
   require 'thread'
 
@@ -355,7 +310,7 @@ class Trace < ApplicationRecord
 
   private 
 
-  def associated_with_customer_plan_and_amount_greater_than_zero
+  def validate_customer_plan_and_amount_greater_than_zero
     if self.customer_plan.nil?
       errors.add(:base, 'Trace must be associated with a CustomerPlan')
     # elsif customer_plans.any? { |cp| cp.amount <= 0 }

@@ -9,7 +9,7 @@ class PaymentMethod::Stripe
 		# @customer, @item, @logging @invoice.invoiceable = customer, item, logging, invoiceable
 	end
 
-	def checkout
+	def checkout(invoice = nil)
 	  return false if @invoice.state != 'pending'
 	  changes = false;
 

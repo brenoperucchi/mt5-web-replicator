@@ -9,9 +9,9 @@ RSpec.describe API::V2::APICopy do
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, user:@user_admin)
     @customer = create(:customer, :customer, user:@user_customer)
-    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
-    @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
-    @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @account_copy = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces: [@trace])
+    @account1 = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces: [@trace])
+    @account2 = create(:account, :slave2, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces: [@trace])
     @ticket_master = 10000001
     travel_to DateTime.parse("2023-08-02 16:45:40 -03 -0300")
     freeze_time
@@ -42,6 +42,7 @@ RSpec.describe API::V2::APICopy do
         expect(@account_copy.magics_accept).to be == "2000 2001"
         open_at = Time.zone.now.to_i.to_s
         open_at = open_at + ".00000000"
+
         expect(Order.all.count).to be == 14
 
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',

@@ -351,7 +351,12 @@
                   - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
                   - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
                   tr[data-href="#{account_dashboard_path(@current_store.url, @trace.name, account.id, datefilter:params[:datefilter])}"]
-                    - type = account.slave? ? :slaves : :transactions
+                    - if account.slave?
+                      - type = :slaves
+                      - @data_scope_executed_closed = account.data_scope(type, [:executed, :closed], nil, @trace)
+                    - else
+                      - type = :transactions
+                      - @data_scope_executed_closed = account.data_scope(type, [:executed, :closed], nil, @trace)&.not_limit_pending
                     td = "#{account.name} - #{account.kind}"
                     td
                     td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
@@ -362,8 +367,8 @@
                     td = number_with_precision account.data_scope(type, :closed, nil, @trace).to_a.sum(&:profit), precision: 2
                     td = number_with_precision account.data_scope(type, :error, nil, @trace).to_a.sum(&:profit), precision: 2
                     td 
-                    td = account.data_scope(type, [:executed, :closed], nil, @trace).count
-                    td = number_with_precision account.data_scope(type, [:executed, :closed], nil, @trace).to_a.sum(&:profit), precision: 2       
+                    td = @data_scope_executed_closed.count
+                    td = number_with_precision @data_scope_executed_closed.to_a.sum(&:profit), precision: 2       
 
 = render "magics", trace: @trace, account: @account
 

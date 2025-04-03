@@ -211,14 +211,14 @@ en:
         created_at: created_at
         updated_at: updated_at
       customer:
-        name: name
+        name: Name
         user_id: User
         store_id: System
         customer_plan_id: Customer Plan
         role: Role system
         role_control: Customer
       account:
-        name: Name
+        name: MetaTrader Account Number
         state: State
         customer_id: Customer
         kind: Account Kind (copy/slave)

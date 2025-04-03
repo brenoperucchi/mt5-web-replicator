@@ -28,8 +28,8 @@ RSpec.describe 'Store Controller', type: :request do
     @user_admin     = create(:user, :admin, store: @store)
     @admin          = create(:customer, :admin, user:@user_admin)
     @customer       = create(:customer, :customer, user:@user_customer)
-    @account_copy   = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging')
-    @account_slave  = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging')
+    @account_copy   = create(:account, :copy, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces: [@trace])
+    @account_slave  = create(:account, :slave1, store: @store, customer:@customer, meta_margin_mode: 'hedging', traces: [@trace])
 
   end
   # This should return the minimal set of attributes required to create a valid

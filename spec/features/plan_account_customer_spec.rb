@@ -90,7 +90,7 @@ RSpec.describe "PlanAccountCustomer" do
         # expect(@trace.customer_plan.amount.to_f).to be == 5
         travel_to Date.parse("2022-11-17")
         @customer_plan.calculate_amount(nil, nil, @trace)
-        expect(number_with_precision @customer_plan.amount_proportional).to be == "7.47"
+        expect(number_with_precision @customer_plan.amount_proportional).to be == "7,467"
       end
 
       it "Customer Plan Amount < Min Amount" do

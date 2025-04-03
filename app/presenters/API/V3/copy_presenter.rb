@@ -20,7 +20,7 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
         jsons.each do |json|
           next if json.empty?
 
-          next if (state == "COPY/PENDING") and (json['type'].to_i < 2)
+          next if (state == "COPY/PENDING") and (json['type'].to_i < 2) # TODO MELHORAR ISTO! SE NÃO CRIAR NADA CRIAR UM REGISTRO NO LOG
 
           # state_meta = json["state_meta"]
           traces.active.not_deleted.each do |trace|
@@ -28,9 +28,15 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
             if not @orders.present?
               begin
                 message.traces << trace unless message.trace_ids.include?(trace.id)
-                trace.create_order(json, account, message, json["symbol"], API_VERSION) 
+                trace_service = Model::TraceService.new(trace, json, account, message, json["symbol"], API_VERSION)
+                # unless trace.create_order(json, account, message, json["symbol"], API_VERSION) 
+                unless trace_service.create_order
+                  message.loggings.create(content:"Error create_order - Trace #{trace.id} #{trace.name} - Trace Errors #{trace.try(:errors).try(:full_messages)} - Account #{account.name}", state: 'ERROR', resourceable: account, parent:message.loggings.last)
+                end
               rescue ActiveRecord::RecordNotUnique
                 message.loggings.create(content:"RecordNotUnique - Duplicate Slave Ticket #{json["ticketMaster"]} - Trace #{trace.id} #{trace.name} - Account #{account.name}", state: 'ERROR', resourceable: account, parent:message.loggings.last)
+              rescue Exception => e
+                message.loggings.create(content:"Error create_order - Trace #{trace.id} #{trace.name} - Trace Errors #{e.message} - Account #{account.name}", state: 'ERROR', resourceable: account, parent:message.loggings.last)
               end
             elsif @orders.present? 
               @orders.each do |order|
@@ -131,8 +137,8 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
       
       if not transaction.error?
         if transaction.close 
-          transaction.slaves.each do |slave|
-            slave.loggings.create(content: "Automatically remove by close_orders: #{kind} - #{transaction.id}", state: "REMOVE", account: slave.account, changeset: slave.try(:versions).try(:last).try(:changeset), parent:message.loggings.first, loggerable: slave.order.messages.last)
+          transaction.slaves.each do |transaction|
+            transaction.loggings.create(content: "Automatically remove by close_orders: #{kind} - #{transaction.id}", state: "REMOVE", account: transaction.account, changeset: transaction.try(:versions).try(:last).try(:changeset), parent:message.loggings.first, loggerable: transaction.order.messages.last)
           end
         end
       else
@@ -141,70 +147,207 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
     end
   end
 
-
   def conciliate
-    profit_total = 0
-    transactions = account.masters.not_error
-    copy_profit = transactions.map(&:profit).compact.sum.round(2)
-      
-    if account.api_send_orders_history and json["HistoryOrdersProfit"].to_f != copy_profit
-      historyOrders.group_by{|h| [h["positionID"],h["symbol"]]}.each do |(positionID, symbol), jsons|
-        change = false
-        json_last = jsons.last
-        transaction = Transaction.find_by(symbol: symbol, ticket: positionID, account: account)
-        profit = jsons.sum{|j| j["profit"]}.round(2)
-        volume = jsons.sum{|j| j["volume"]}
+    conciliate_inittial
+    if account.api_send_orders_history
+      message.loggings.create(content: json, state: "COPY/CONCILIATE", params: params, request_url: message.request_url, account: account, resourceable:account)
+      trace_ajust_profit
+      account.update(api_send_orders_history: false)
+    end
+  end
+
+
+  private
+
+  def conciliate_inittial
+    historyOrders.group_by{|h| [h["positionID"],h["symbol"]]}.each do |(positionID, symbol), jsons|
+      conciliate_position(positionID, symbol, jsons)
+    end
+  end
+
+  def trace_ajust_profit
+    trace = find_or_create_trace
+    profit = calculate_slaves_by(trace, :profit)
+    fee    = calculate_slaves_by(trace, :fee)
+    time   = @account.store.created_at.strftime("%Y.%m.%d %T")
+    
+    json_last = { "ticketMaster" => -1, "ticketSlave" => -1, "ticketDeal" => -1, "positionID" => -1, "type" => 0, "entry" => 0, "traceID" => 0,
+             "slaveID" => 0, "magicNumber" => 0, "transactionID" => 0, "slipPage" => 0, "symbolDigits" => 0, "timeZone" => 0, "profit" => profit,
+             "priceOpen" => 0, "priceClose" => 0, "priceRequest" => 0, "stopLoss" => 0, "takeProfit" => 0, "volume" => 0, "commission" => 0.00,
+             "fee" => fee, "swap" => 0.00, "mae" => 0.00, "mfe" => 0.00, "state" => "closed", "metaAction" => "", "metaState" => "", "metaMessage" => "",
+             "symbol" => "conciliated", "comment" => "-#{trace.id}#{@account.id}--#{-1}", "openAt" => time, "closeAt" => time, "timeGMT" => time, "timeTrader" => time
+           }
+
+    profit_conciliated = -1 * (profit - json["HistoryOrdersProfit"].to_f)&.round(2) 
+    fee_conciliated    = -1 * (fee    - json["HistoryOrdersFee"].to_f)&.round(2) 
+    volume             = json_last["volume"].to_f
+
+    # order = find_or_create_order(json_last)
+        
+    order = find_or_create_order(json_last, trace)
+    transaction = account.transactions.conciliated.find_by(symbol: 'conciliated', ticket: -1, account: account)
+    if transaction.present?
+      if profit_conciliated !=0 || fee_conciliated != 0
         serializer = API::V3::CopySerializer.new(json_last)
-
-        if transaction
-          if profit != transaction.try(:profit).to_f
-            transaction.profit = profit
-            transaction.lot = volume
-            transaction.closed_at = serializer.closed_at if transaction.closed_at.nil?
-            transaction.save
-            change = true
-            profit_total += profit
-          end
-        else
-          order = Order.find_by(symbol: symbol, content_id: positionID)
-          ticket_master = 0
-          if order
-            trace = order.trace
-            comment = json_last["comment"]
-          else
-            comment = "conciliate_order"
-            trace = Trace.create_with(name: "manual_orders", name_id: -1, store: account.store, kind: 2, contract_volume_max: 1, customer_plans: [account.store.customer_plans.first])
-                        .find_or_create_by(name: "manual_orders", name_id: -1)
-            order = Order.create(symbol: symbol, content: json_last, content_id: ticket_master, account: account, state: 'conciliated', store: account.store, trace: trace)
-          end
-          serializer = API::V3::CopySerializer.new(json_last)
-          attributes = serializer.trace_attributes(symbol, account, nil, trace)
-                         .merge(state: "closed", profit: profit, comment: comment, open_at: json_last["openAt"], closed_at: json_last["closeAt"], price_open: json_last['priceOpen'], lot: volume)
-          transaction = order.transactions.create(attributes)
-          change = true
-        end
-        if change
-          transaction.loggings.create(state: "conciliated", content: json_last, resourceable: transaction, changeset: transaction.versions.try(:last).try(:changeset), version: transaction.versions.try(:last), parent: transaction.loggings.try(:first), request_url: message.request_url, account: account)
-        end
+        update_existing_transaction(transaction, profit_conciliated, fee_conciliated, volume, serializer, order)
       end
-      account.update(api_send_orders_history: false) if account.api_send_orders_history
     else
-      transactions = account.masters.not_error
-      copy_profit = transactions&.map(&:profit).compact.sum.round(2).to_f
+      create_new_transaction(json_last, profit_conciliated, fee_conciliated, volume)
+    end
+  end
 
-      if(json["HistoryOrdersCount"].to_i == historyOrders.count)
-        if json["HistoryOrdersProfit"].to_f != copy_profit #and json["HistoryOrdersCount"].to_i == transactions.count
-          transactions.update_all(profit: 0)
-          account.loggings.create(state: "conciliated_account_zero", content: json, request_url: message.request_url)
+  def conciliate_position(positionID, symbol, jsons)
+    json_last    = jsons.last
+    profit       = jsons.sum {|j| j["profit"].to_f }&.round(2)
+    fee          = jsons.sum {|j| j["fee"].to_f }&.round(2) 
+    commission   = jsons.sum {|j| j["commission"].to_f }&.round(2) 
+    swap         = jsons.sum {|j| j["swap"].to_f }&.round(2) 
+    volume       = jsons.sum {|j| j["volume"].to_f }&.round(2) 
+    fee          = fee + commission + swap
+    transactions = Transaction.where(symbol: symbol, ticket: positionID, account: account)
+    
+    if transactions.present?
+      transactions.each do |transaction|    
+        serializer = API::V3::CopySerializer.new(json_last)
+        if transaction && !transaction.conciliated?
+          order = find_or_create_order(json_last, transaction.trace)
+          update_existing_transaction(transaction, profit, fee, volume, serializer, order)
         end
-        account.update(api_send_orders_history: false) if account.api_send_orders_history
       end
+    else
+      create_new_transaction(json_last, profit, fee, volume)
+    end
+  end
 
-      if(json["HistoryOrdersProfit"].to_f != copy_profit and account.api_send_orders_history == false)
-        account.update(api_send_orders_history: true)
+  def update_existing_transaction(transaction, profit, fee, volume, serializer, order)
+    trace = transaction.trace
+    trace ||= order.trace
+    trace ||= find_or_create_trace
+
+  
+    # if profit != transaction.try(:profit).to_f || transaction.lot.to_f != volume
+    if profit != transaction.try(:profit).to_f || transaction.lot.to_f != volume || transaction.fee.to_f != fee
+      transaction.profit = profit.to_f
+      transaction.fee    = fee.to_f
+      transaction.lot    = volume.to_f
+      transaction.state  = 'closed'
+      transaction.trace  = trace
+      transaction.closed_at      = serializer.closed_at if transaction.closed_at.nil?
+      transaction.conciliated_at = Time.current
+      
+      if transaction.save
+        order.transactions << transaction unless order.transactions.exists?(transaction.id)
+        account.orders << order unless account.orders.exists?(order.id) 
+        message.orders << order unless message.orders.exists?(order.id) 
+        log_conciliation(transaction, serializer.obj)
       end
     end
+    return true
+  end
 
+  def create_new_transaction(json_last, profit, fee, volume)
+    trace = find_or_create_trace
+    order = find_or_create_order(json_last, trace)
+    symbol = json_last["symbol"]
+    serializer = API::V3::CopySerializer.new(json_last)
+
+    # Explicitly ensure the correct account instance is passed
+    attributes = serializer.trace_attributes(symbol, nil, nil, order.trace)
+                 .merge(
+                   state: "closed",
+                   profit: profit,
+                   lot: volume,
+                   fee: fee,
+                   account_id: account.id,
+                   price_open: json_last['priceOpen'],
+                   open_at: json_last["openAt"],
+                   closed_at: json_last["closeAt"],
+                   conciliated_at: Time.current,
+                   comment: json_last["comment"] || "conciliate_order",
+                 )
+
+    transaction = order.transactions.new(attributes)
+    if transaction.save
+      order.transactions << transaction unless order.transactions.exists?(transaction.id)
+      account.orders << order unless account.orders.exists?(order.id) 
+      message.orders << order unless message.orders.exists?(order.id) 
+      log_conciliation(transaction, json_last)
+    end
+    return true
+  end
+
+  def find_or_create_trace
+    trace_name = "conciliated##{@account.name}"
+    trace_name_id = "-1#{@account.id}".to_i
+    trace = Trace.joins(:store_traces).where(name: trace_name, name_id: trace_name_id).where(store_traces: { store_id: account.store.id }).take
+    trace ||= Trace.new(
+         kind: 2,
+         contract_volume_max: 1,
+         name: trace_name,
+         name_id: trace_name_id,
+         stores: [account.store],
+         customer_plans: [account.store.customer_plans.first]
+       )
+    if trace.save
+      trace.accounts << account unless trace.accounts.exists?(account.id)
+      trace.stores << account.store unless trace.stores.exists?(account.store.id)
+    end    
+    trace
+  end
+  
+  def find_or_create_order(json_last, trace = nil)
+    symbol = json_last["symbol"]
+    content_id = json_last["positionID"]
+    
+    trace ||= find_or_create_trace
+    order = Order.find_by(symbol: json_last['symbol'], content_id: content_id, account: @account)
+    order ||= Order.create(
+      symbol: symbol,
+      content: json_last,
+      content_id: content_id,
+      account: account,
+      state: 'closed',
+      store: account.store,
+      trace: trace,
+      message: message,
+      conciliated_at: Time.current
+    )
+  end
+
+  def log_conciliation(transaction, content)
+    begin
+      transaction.loggings.create(
+        state: "conciliated",
+        content: content,
+        changeset: transaction.versions.try(:last).try(:changeset),
+        version: transaction.versions.try(:last),
+        parent: transaction.loggings.try(:first),
+        request_url: message.request_url,
+        account_id: account.id
+      )
+    rescue ActiveRecord::RecordNotSaved => e
+      transaction.loggings.create(
+        state: "conciliated_error",
+        content: e.message,
+        changeset: transaction.versions.try(:last).try(:changeset),
+        version: transaction.versions.try(:last)
+      )
+    end
+  end
+
+  def calculate_slaves_by(trace, kind = :profit)
+    profit = 0
+    fee    = 0
+    @account.traces.each do |trace|
+      profit += trace.transactions.sum(:profit)&.to_f
+      fee    += trace.transactions.sum(:fee)&.to_f
+    end
+  
+    if kind == :profit
+      return profit.round(2)
+    else
+      return fee.round(2)
+    end
   end
 
 end

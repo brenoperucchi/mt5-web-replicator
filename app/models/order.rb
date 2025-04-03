@@ -13,7 +13,7 @@ class Order < ApplicationRecord
 
   has_many :loggings, as: :resourceable,  dependent: :destroy
   
-  has_many :order_transactions, dependent: :destroy
+  has_many :order_transactions#, dependent: :destroy
   has_many :transactions,-> { distinct }, through: :order_transactions, source: :master, dependent: :destroy
   
   has_many :masters, class_name: 'Transaction', dependent: :destroy
@@ -27,7 +27,8 @@ class Order < ApplicationRecord
   scope :executed,    ->{ where(state: 'executed')}
   scope :closed,      ->{ where(state: 'closed')}
   scope :pending,     ->{ where(state: 'pending')}
-  scope :conciliated, ->{ where(state: 'conciliated')}
+  scope :conciliated, ->{ where.not(conciliated_at: nil)}
+  scope :not_conciliated, ->{ where(conciliated_at: nil)}
 
   validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id, :store_id], on: :create, if: Proc.new { state != "conciliated" }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 
@@ -144,53 +145,6 @@ class Order < ApplicationRecord
     end
   end
 
-  # def restrict_symbol?
-  #   if self.trace.store.tag_list.map(&:downcase).include?(symbol.downcase)
-  #     self.message_response = "Restrict Store Symbol"
-  #     self.erro
-  #     return false
-  #   else
-  #     return true
-  #   end
-  # end
-
-  def restrict_magic_number(resource)
-    unless resource.account.magics_accept.blank?
-      trace_magic_number = self.try(:trace).try(:name_id)
-      magic_numbers = Order.magic_numbers_split(resource.account.magics_accept)
-      changeset = resource.try(:versions).try(:last).try(:changeset)
-      version = resource.try(:version)
-      unless magic_numbers.detect{|x| x == resource.magic_number}
-        resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
-        resource.erro!
-      end
-    end
-    resource.error?
-  end  
-
-  def api_request_attributes(resource)
-    # magicnumber = resource.try(:trace).try(:name_id)
-    ticket_master = resource.try(:ticket) || resource.try(:ticket_master)
-    ticket_slave = resource.try(:ticket_slave) || 0
-    master_id  = resource.try(:master).try(:id) || 0
-    deal_ticket = resource.try(:ticket_deal).blank? ? 0 : resource.ticket_deal
-    seconds_ago = resource.try(:seconds_ago) || 0
-    openprice = price_open(resource)
-    order_trace = self.trace_id
-    openat = Rails.env.test? ? 0 : resource.try(:master).try(:open_at).to_i
-    comment = resource.try(:comment).to_s.gsub(/[^0-9A-Za-z]/, '_')
-    contract_volume = resource.try(:account).try(:contract_volume)
-    "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{order_trace}|#{resource.id}|#{resource.magic_number}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}|#{contract_volume}"
-  end
-
-  def price_open(resource)
-    (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
-  end
-
-  def order_pending?
-    self.content.upcase.include?('STOP') or self.content.upcase.include?('LIMIT')
-  end
-
   def ocr_text(url:nil, file:nil)
     if file
       path = Rails.root
@@ -205,14 +159,6 @@ class Order < ApplicationRecord
       # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")
       # result = resource.convert url: "http://benincasouza.tplinkdns.com:8080/#{path}"
     end
-  end
-
-
-  def self.magic_numbers_split(magic_numbers)
-    delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
-    magic_numbers = magic_numbers.try(:split, (Regexp.union(delimiters))).try(:flatten)
-    magic_numbers.reject! { |item| item.blank? } if magic_numbers
-    (magic_numbers.blank? or magic_numbers.nil?) ? nil : magic_numbers
   end
 
   def calcule_lot(value)

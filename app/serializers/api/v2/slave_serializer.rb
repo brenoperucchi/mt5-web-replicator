@@ -1,5 +1,7 @@
 module API::V2
   class SlaveSerializer < ActiveModel::Serializer
+
+    attr_accessor :ticket_master, :state, :comment
     
     def api_attributes
       {
@@ -100,9 +102,9 @@ module API::V2
     end
 
     def comment
-      obj['comment']
+      @comment ||= obj['comment']
     end
-
+    
     # def ticket_deal
     #   obj['deal_ticket']
     # end
