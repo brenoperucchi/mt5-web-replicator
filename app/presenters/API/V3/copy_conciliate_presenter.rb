@@ -218,19 +218,46 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
   def find_or_create_trace
     trace_name = "conciliated##{@account.name}"
     trace_name_id = "-1#{@account.id}".to_i
-    trace = Trace.joins(:store_traces).where(name: trace_name, name_id: trace_name_id).where(store_traces: { store_id: account.store.id }).take
-    trace ||= Trace.new(
-         kind: 2,
-         contract_volume_max: 1,
-         name: trace_name,
-         name_id: trace_name_id,
-         stores: [account.store],
-         customer_plans: [account.store.customer_plans.first]
-       )
-    if trace.save
-      trace.accounts << account unless trace.accounts.exists?(account.id)
-      trace.stores << account.store unless trace.stores.exists?(account.store.id)
-    end    
+    
+    # Add validation for required data
+    unless @account && @account.name && @account.store
+      Rails.logger.error("[ERROR] Invalid account data for trace creation: " + 
+        {account_id: @account&.id, account_name: @account&.name, store_id: @account&.store&.id}.to_json)
+      return nil
+    end
+    
+    trace = Trace.joins(:store_traces)
+              .where(name: trace_name, name_id: trace_name_id)
+              .where(store_traces: { store_id: account.store.id })
+              .take
+              
+    if trace.nil?
+      # Log attempt to create new trace
+      Rails.logger.info("[DEBUG] Creating new trace: #{trace_name}")
+      
+      begin
+        trace = Trace.new(
+          kind: 2,
+          contract_volume_max: 1,
+          name: trace_name,
+          name_id: trace_name_id,
+          stores: [account.store],
+          customer_plans: [account.store.customer_plans.first]
+        )
+        
+        unless trace.save
+          Rails.logger.error("[ERROR] Failed to save trace: #{trace.errors.full_messages.join(', ')}")
+          return nil
+        end
+        
+        trace.accounts << account unless trace.accounts.exists?(account.id)
+        trace.stores << account.store unless trace.stores.exists?(account.store.id)
+      rescue => e
+        Rails.logger.error("[ERROR] Exception creating trace: #{e.message}")
+        return nil
+      end
+    end
+    
     trace
   end
   
@@ -238,19 +265,78 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
     symbol = json_last["symbol"]
     content_id = json_last["positionID"]
     
-    trace ||= find_or_create_trace
-    order = Order.find_by(symbol: json_last['symbol'], content_id: content_id, account: @account)
-    order ||= Order.create(
+    # Log input parameters
+    debug_info = {
+      method: "find_or_create_order",
       symbol: symbol,
-      content: json_last,
       content_id: content_id,
-      account: account,
-      state: 'closed',
-      store: account.store,
-      trace: trace,
-      message: message,
-      conciliated_at: Time.current
-    )
+      account_id: account&.id,
+      trace_param: trace&.id,
+      json_last_sample: json_last.slice("symbol", "positionID", "profit", "fee").to_json
+    }
+    
+    # Ensure we have a valid trace
+    if trace.nil?
+      Rails.logger.info("[DEBUG] trace is nil, attempting to find_or_create_trace: #{debug_info.to_json}")
+      trace = find_or_create_trace
+      debug_info[:trace_after_find_or_create] = trace&.id
+      
+      # If trace is still nil after find_or_create_trace, this is the root cause
+      if trace.nil?
+        error_message = "Failed to create or find trace for order"
+        Rails.logger.error("[ERROR] #{error_message}: #{debug_info.to_json}")
+        
+        # Create an error log record for later investigation
+        Logging.create(
+          content: debug_info,
+          state: "TRACE_CREATION_ERROR",
+          params: @params,
+          request_url: message&.request_url,
+          account: account,
+          resourceable: account
+        ) if defined?(Logging)
+        
+        # Reraise a more informative error
+        raise ActiveRecord::RecordInvalid.new("Trace cannot be nil when creating Order (account_id: #{account&.id}, symbol: #{symbol})")
+      end
+    end
+    
+    # Now find or create the order with proper trace validation
+    order = Order.find_by(symbol: json_last['symbol'], content_id: content_id, account: @account)
+    
+    unless order
+      begin
+        order = Order.create!(
+          symbol: symbol,
+          content: json_last,
+          content_id: content_id,
+          account: account,
+          state: 'closed',
+          store: account.store,
+          trace: trace,  # This should now always have a value
+          message: message,
+          conciliated_at: Time.current
+        )
+        Rails.logger.info("[DEBUG] Successfully created Order: #{order.id}")
+      rescue => e
+        error_info = debug_info.merge(error: e.message, backtrace: e.backtrace.first(5))
+        Rails.logger.error("[ERROR] Order creation failed: #{error_info.to_json}")
+        
+        # Create an error log record
+        message.loggings.create(
+          content: error_info,
+          state: "ORDER_CREATION_ERROR",
+          params: @params,
+          request_url: message.request_url,
+          account: account,
+          resourceable: account
+        ) if message&.respond_to?(:loggings)
+        
+        raise # Re-raise the exception
+      end
+    end
+    
+    order
   end
 
   def log_conciliation(transaction, content)
