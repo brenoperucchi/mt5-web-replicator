@@ -152,7 +152,15 @@ module API
       end
 
       def fee
-        obj['fee'] + obj['swap'] + obj['commission']
+        obj['fee'] || 0
+      end
+
+      def swap
+        obj['swap'] || 0
+      end
+
+      def commission
+        obj['commission'] || 0
       end
 
       def mfe

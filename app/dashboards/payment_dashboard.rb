@@ -10,7 +10,7 @@ class PaymentDashboard < Administrate::BaseDashboard
   ATTRIBUTE_TYPES = {
     id:             Field::Number,
     api_token:      Field::String,
-    webook_url:     Field::String,
+    webook_url:     Field::String.with_options(searchable: false),
     store:          Field::BelongsTo,
     payment_method: Field::BelongsTo,
     customer_plans: Field::HasMany,

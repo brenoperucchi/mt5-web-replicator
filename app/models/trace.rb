@@ -164,7 +164,7 @@ class Trace < ApplicationRecord
     data_scope(:masters)
   end
 
-    def next_charged
+  def next_charged
     days = DateTime.current.day > 15 ? 15 : 0
     (DateTime.current + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
   end

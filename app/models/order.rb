@@ -22,15 +22,15 @@ class Order < ApplicationRecord
   has_many :accounts, through: :balances, source: :account,    autosave: true
 
   scope :image_to_process, ->{ joins(:image_attachment).where.not(image_attachment:nil).where(execute_at: nil).where(ready_at:nil).where.not(state: 'error') }
-  scope :ready,       ->{ where(state: 'prepared').where.not(state:'error')}
-  scope :error,       ->{ where(state: 'error')}
-  scope :executed,    ->{ where(state: 'executed')}
-  scope :closed,      ->{ where(state: 'closed')}
-  scope :pending,     ->{ where(state: 'pending')}
-  scope :conciliated, ->{ where.not(conciliated_at: nil)}
-  scope :not_conciliated, ->{ where(conciliated_at: nil)}
+  scope :ready,            ->{ where(state: 'prepared').where.not(state:'error')}
+  scope :error,            ->{ where(state: 'error')}
+  scope :executed,         ->{ where(state: 'executed')}
+  scope :closed,           ->{ where(state: 'closed')}
+  scope :pending,          ->{ where(state: 'pending')}
+  scope :conciliated,      ->{ where.not(conciliated_at: nil)}
+  scope :not_conciliated,  ->{ where(conciliated_at: nil)}
 
-  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id, :store_id], on: :create, if: Proc.new { state != "conciliated" }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
+  validates_uniqueness_of :content_id,  scope: [:account_id, :trace_id, :store_id], on: :create, if: Proc.new { self.content_id != -1 }#, allow_blank: false, allow_nil: false#, if: Proc.new { account.try(:hedging?) }
 
   has_one_attached :image
 

@@ -59,7 +59,7 @@ class Account < ApplicationRecord
   # validates_uniqueness_of :name, scope: :store_id, if: Proc.new { |b| b.account_server_id.present? }
 
   accepts_nested_attributes_for :customer
-
+  
   # def register_resource_plan
   #   store.register_resource_plan(self, self.kind)
   # end

@@ -30,9 +30,16 @@ class Message::V3::MetaCopy < Message::Message
       copyPresenter.opening
       copyPresenter.closing 
       copyPresenter.pending
-      copyPresenter.conciliate
+      copyConciliatePresenter = API::V3::CopyConciliatePresenter.new(params, self, account)
+      copyConciliatePresenter.conciliate
     end
   end
+
+  def execute_conciliated
+    presenter = API::V3::CopyConciliatePresenter.new(params, self, account)
+    presenter.conciliate
+  end
+  
 
   def presenter
     API::V3::CopyPresenter.new(params, self, account)

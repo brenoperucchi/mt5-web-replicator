@@ -110,7 +110,7 @@ Rails.application.routes.draw do
       resources :payments
       resources :orders
 
-      # root "orders#index"
+      root "accounts#index"
     end
 
     namespace :admin do

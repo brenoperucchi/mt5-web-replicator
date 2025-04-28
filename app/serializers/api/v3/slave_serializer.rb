@@ -86,6 +86,22 @@ module API::V3
       obj['volume']
     end
 
+    def profit
+      obj['profit']
+    end
+
+    def fee
+      obj['fee'] || 0
+    end
+
+    def swap
+      obj['swap'] || 0
+    end
+
+    def commission
+      obj['commission'] || 0
+    end
+
     def price_open
       obj['priceOpen']
     end

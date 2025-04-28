@@ -35,6 +35,7 @@ class Message::V3::MetaSlave < Message::Message
   end  
   
   def execute_conciliated
+    presenter = API::V3::SlaveConciliatePresenter.new(params, self, account)
     presenter.conciliate
   end
   

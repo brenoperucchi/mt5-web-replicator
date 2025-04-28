@@ -10,7 +10,6 @@ class TransactionSlave < ApplicationRecord
   # versions: {
   #   class_name: 'Track'
   # }
-    
 
   belongs_to :account
   belongs_to :trace
@@ -43,9 +42,11 @@ class TransactionSlave < ApplicationRecord
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :ticket_slave, :order_id], on: :create, if: Proc.new { account.try(:hedging?)}, 
-                          unless: Proc.new {symbol == 'conciliated'}
+                          unless: Proc.new {conciliated_at.present?}
+                          # unless: Proc.new {symbol == 'conciliated'}
   validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id, :order_id], on: :create, allow_blank: false, allow_nil: false, 
-                          if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || symbol == 'conciliated'}
+                          if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || conciliated_at.present?}
+                          # if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || symbol == 'conciliated'}
   # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   after_create :restrict_magic_number?#, :check_duplicate
