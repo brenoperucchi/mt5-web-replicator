@@ -218,38 +218,39 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
   def find_or_create_trace
     trace_name = "conciliated##{@account.name}"
     trace_name_id = "-1#{@account.id}".to_i
-    
+
     # Add validation for required data
     unless @account && @account.name && @account.store
       Rails.logger.error("[ERROR] Invalid account data for trace creation: " + 
         {account_id: @account&.id, account_name: @account&.name, store_id: @account&.store&.id}.to_json)
       return nil
     end
-    
+
     trace = Trace.joins(:store_traces)
               .where(name: trace_name, name_id: trace_name_id)
               .where(store_traces: { store_id: account.store.id })
               .take
-              
+
     if trace.nil?
       # Check for customer plan before creating trace
       if account.store.customer_plans.empty?
         Rails.logger.error("[ERROR] No customer plans found for account #{account.id} (store #{account.store.id})")
         return nil
       end
-      
+
       # Log attempt to create new trace
       Rails.logger.info("[DEBUG] Creating new trace: #{trace_name}")
-      
+
       begin
         customer_plan = account.store.customer_plans.first
-        
+
         # Add validation for customer plan
-        if customer_plan.nil?
-          Rails.logger.error("[ERROR] Customer plan is nil for account #{account.id}")
+        if customer_plan.nil? || !customer_plan.valid?
+          Rails.logger.error("[ERROR] Customer plan is invalid for account #{account.id}: " +
+            {customer_plan_id: customer_plan&.id, errors: customer_plan&.errors&.full_messages}.to_json)
           return nil
         end
-        
+
         trace = Trace.new(
           kind: 2,
           contract_volume_max: 1,
@@ -258,26 +259,25 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
           stores: [account.store],
           customer_plans: [customer_plan]
         )
-        
+
         unless trace.save
           Rails.logger.error("[ERROR] Failed to save trace: #{trace.errors.full_messages.join(', ')}")
-          # Log additional details to help diagnose the Portfolio Plan issue
           Rails.logger.error("[ERROR] Customer plan details: ID=#{customer_plan.id}, Valid=#{customer_plan.valid?}, Errors=#{customer_plan.errors.full_messages.join(', ')}")
           return nil
         end
-        
+
         trace.accounts << account unless trace.accounts.exists?(account.id)
         trace.stores << account.store unless trace.stores.exists?(account.store.id)
       rescue => e
         Rails.logger.error("[ERROR] Exception creating trace: #{e.message}")
-        Rails.logger.error("[ERROR] Backtrace: #{e.backtrace.first(5).join("\n")}")
+        Rails.logger.error("[ERROR] Backtrace: #{e.backtrace.first(5).join('\n')}")
         return nil
       end
     end
-    
+
     trace
   end
-  
+
   def find_or_create_order(json_last, trace = nil)
     symbol = json_last["symbol"]
     content_id = json_last["positionID"]
