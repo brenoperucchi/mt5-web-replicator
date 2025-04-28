@@ -232,21 +232,37 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
               .take
               
     if trace.nil?
+      # Check for customer plan before creating trace
+      if account.store.customer_plans.empty?
+        Rails.logger.error("[ERROR] No customer plans found for account #{account.id} (store #{account.store.id})")
+        return nil
+      end
+      
       # Log attempt to create new trace
       Rails.logger.info("[DEBUG] Creating new trace: #{trace_name}")
       
       begin
+        customer_plan = account.store.customer_plans.first
+        
+        # Add validation for customer plan
+        if customer_plan.nil?
+          Rails.logger.error("[ERROR] Customer plan is nil for account #{account.id}")
+          return nil
+        end
+        
         trace = Trace.new(
           kind: 2,
           contract_volume_max: 1,
           name: trace_name,
           name_id: trace_name_id,
           stores: [account.store],
-          customer_plans: [account.store.customer_plans.first]
+          customer_plans: [customer_plan]
         )
         
         unless trace.save
           Rails.logger.error("[ERROR] Failed to save trace: #{trace.errors.full_messages.join(', ')}")
+          # Log additional details to help diagnose the Portfolio Plan issue
+          Rails.logger.error("[ERROR] Customer plan details: ID=#{customer_plan.id}, Valid=#{customer_plan.valid?}, Errors=#{customer_plan.errors.full_messages.join(', ')}")
           return nil
         end
         
@@ -254,6 +270,7 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
         trace.stores << account.store unless trace.stores.exists?(account.store.id)
       rescue => e
         Rails.logger.error("[ERROR] Exception creating trace: #{e.message}")
+        Rails.logger.error("[ERROR] Backtrace: #{e.backtrace.first(5).join("\n")}")
         return nil
       end
     end
@@ -287,17 +304,19 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
         Rails.logger.error("[ERROR] #{error_message}: #{debug_info.to_json}")
         
         # Create an error log record for later investigation
-        Logging.create(
-          content: debug_info,
-          state: "TRACE_CREATION_ERROR",
-          params: @params,
-          request_url: message&.request_url,
-          account: account,
-          resourceable: account
-        ) if defined?(Logging)
+        if defined?(Logging)
+          Logging.create(
+            content: debug_info,
+            state: "TRACE_CREATION_ERROR",
+            params: @params,
+            request_url: message&.request_url,
+            account: account,
+            resourceable: account
+          )
+        end
         
-        # Reraise a more informative error
-        raise ActiveRecord::RecordInvalid.new("Trace cannot be nil when creating Order (account_id: #{account&.id}, symbol: #{symbol})")
+        # Use RuntimeError instead of ActiveRecord::RecordInvalid to avoid errors method call
+        raise RuntimeError.new("Trace cannot be created when creating Order (account_id: #{account&.id}, symbol: #{symbol})")
       end
     end
     
@@ -323,14 +342,16 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
         Rails.logger.error("[ERROR] Order creation failed: #{error_info.to_json}")
         
         # Create an error log record
-        message.loggings.create(
-          content: error_info,
-          state: "ORDER_CREATION_ERROR",
-          params: @params,
-          request_url: message.request_url,
-          account: account,
-          resourceable: account
-        ) if message&.respond_to?(:loggings)
+        if message&.respond_to?(:loggings)
+          message.loggings.create(
+            content: error_info,
+            state: "ORDER_CREATION_ERROR",
+            params: @params,
+            request_url: message.request_url,
+            account: account,
+            resourceable: account
+          )
+        end
         
         raise # Re-raise the exception
       end
