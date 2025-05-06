@@ -12,7 +12,7 @@ class Message::V3::MetaSlave < Message::Message
     # before_transition [:pending, :executed] => :conciliated, :do => :execute_conciliated
     
     event :execute do
-        transition :pending => :executed
+        transition :pending => :executedt
     end
     event :conciliate do
       transition [:pending, :executed] => :conciliated
