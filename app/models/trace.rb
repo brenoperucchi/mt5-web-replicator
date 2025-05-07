@@ -33,7 +33,7 @@ class Trace < ApplicationRecord
 
   has_many :store_traces, validate: true
   has_many :stores, through: :store_traces, source: :store,  dependent: :destroy
-  # belongs_to :store, optional: true
+  belongs_to :store, optional: true
 
   has_many :transaction_traces, dependent: :destroy
   has_many :trace_transactions, through: :transaction_traces, source: :master, dependent: :destroy
@@ -53,11 +53,15 @@ class Trace < ApplicationRecord
 
   # accepts_nested_attributes_for :payment
 
-  validates_presence_of   [:name, :name_id]
+  # validates_presence_of   [:name, :name_id]
   validates_presence_of   [:contract_volume_max, :customer_plans]
-  # validates :name_id, uniqueness: { scope: [:store_id, :store_id] , message: "should be unique per store"} #, if: -> { stores.any? } }
-  # validates_uniqueness_of [:name_id], scope: :store_id, unless: Proc.new { |trace| trace.magic_same.to_b }
-  # validates_uniqueness_of [:name], scope: :store_id
+  
+  validates :name, uniqueness: { scope: :store_id , message: "should be unique per store" }
+  validates :name_id, uniqueness: { scope: :store_id , message: "should be unique per store" }, unless: -> { magic_same.to_b } 
+
+  # Custom validation for name + name_id combination per store
+  # validate :unique_name_and_name_id_combination_per_store
+  
   validates :capital_recomendation, format: { with: /\A\d+([.,]\d{3})*([.,]\d+)?\z/, message: 'must be a number' }, allow_blank: true
 
   validate  :validate_customer_plan_and_amount_greater_than_zero, on: :update
@@ -81,52 +85,7 @@ class Trace < ApplicationRecord
     super(value || {})
   end
 
-  def validate_store_id_and_named_id
-    # Skip validation if name_id is blank or magic_same is true
-    return if name_id.blank? || magic_same.to_b
-    
-    # Skip validation for new records with no stores yet
-    # return if new_record? && store_ids.blank?
-    
-    # Validate presence of stores
-    if store_ids.blank? && store_traces.blank?
-      errors.add(:store_traces, "must have at least one store")
-      return
-    end
-    
-    # For each store, check if there's another trace with the same name_id
-    store_ids.each do |store_id|
-      existing_traces = Trace.joins(:store_traces)
-                             .where(store_traces: {store_id: store_id})
-                             .where(name_id: name_id)
-                             .where.not(id: id) # Exclude the current trace
-      
-      if existing_traces.exists?
-        errors.add(:name_id, "must be unique for store ID #{store_id}")
-      end
-    end
-  end
 
-  def normalize_name
-    unless self.manual?
-      self.name = name.to_s.gsub(/[^0-9A-Za-z]/, '') if name.present? 
-    end
-  end
-
-  def magic_number_commit
-    magic_numbers_split = TradeHelperService.magic_numbers_split(magics_accept) || []
-    magic_numbers_split.each do |number|
-      magic_number = magic_numbers.find_or_create_by(name: number, trace:self)
-      if magic_number.active_at.nil? and magic_number.disable_at.present?
-        magic_number.update(active_at: Time.current, disable_at: nil)
-      end
-    end
-    magic_numbers.each do |magic_number|
-      unless magic_numbers_split.include?(magic_number.name.to_s)
-        magic_number.update(disable_at: Time.current, active_at: nil)
-      end
-    end
-  end
 
   def capital_recomedation=(value)
     value = value.to_s.gsub(".", "").gsub(",", ".")
@@ -309,6 +268,79 @@ class Trace < ApplicationRecord
   end
 
   private 
+  
+  def validate_store_id_and_named_id
+    # Skip validation if name_id is blank or magic_same is true
+    return if name_id.blank? || magic_same.to_b
+    
+    # Skip validation for new records with no stores yet
+    # return if new_record? && store_ids.blank?
+    
+    # Validate presence of stores
+    if store_ids.blank? && store_traces.blank?
+      errors.add(:store_traces, "must have at least one store")
+      return
+    end
+    
+    # For each store, check if there's another trace with the same name_id
+    store_ids.each do |store_id|
+      existing_traces = Trace.joins(:store_traces)
+                             .where(store_traces: {store_id: store_id})
+                             .where(name_id: name_id)
+                             .where.not(id: id) # Exclude the current trace
+      
+      if existing_traces.exists?
+        errors.add(:name_id, "must be unique for store ID #{store_id}")
+      end
+    end
+  end
+  
+  def normalize_name
+    unless self.manual?
+      self.name = name.to_s.gsub(/[^0-9A-Za-z]/, '') if name.present? 
+    end
+  end
+  
+  def magic_number_commit
+    magic_numbers_split = TradeHelperService.magic_numbers_split(magics_accept) || []
+    magic_numbers_split.each do |number|
+      magic_number = magic_numbers.find_or_create_by(name: number, trace:self)
+      if magic_number.active_at.nil? and magic_number.disable_at.present?
+        magic_number.update(active_at: Time.current, disable_at: nil)
+      end
+    end
+    magic_numbers.each do |magic_number|
+      unless magic_numbers_split.include?(magic_number.name.to_s)
+        magic_number.update(disable_at: Time.current, active_at: nil)
+      end
+    end
+  end
+
+  def unique_name_and_name_id_combination_per_store
+    # Don't validate if key parts are missing
+    return if name.blank? || name_id.blank?
+
+    # Get associated store_ids (handle new and existing records)
+    current_store_ids = self.store_ids.presence || self.store_traces.map(&:store_id)
+    return if current_store_ids.blank? # Cannot validate without stores
+
+    current_store_ids.each do |s_id|
+      # Build query to find conflicts for this specific store_id
+      query = Trace.joins(:store_traces)
+                  .where(name: self.name, name_id: self.name_id, store_traces: { store_id: s_id })
+
+      # Exclude self if updating
+      query = query.where.not(id: self.id) if self.persisted?
+
+      # If a conflicting record exists, add the error
+      if query.exists?
+        errors.add(:base, "Combination of name ('#{name}') and name_id ('#{name_id}') already exists for store ID #{s_id}")
+        # Optionally add errors to specific fields:
+        # errors.add(:name, "combination with name_id '#{name_id}' already exists for store ID #{s_id}")
+        # errors.add(:name_id, "combination with name '#{name}' already exists for store ID #{s_id}")
+      end
+    end
+  end
 
   def validate_customer_plan_and_amount_greater_than_zero
     if self.customer_plan.nil?
