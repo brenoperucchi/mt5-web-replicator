@@ -133,6 +133,7 @@ gem 'grape'
 gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
 gem 'rack-cors'
+gem "rack", ">= 2.2.14"
 gem 'eventmachine'
 gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
