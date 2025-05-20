@@ -324,7 +324,7 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     if json_last['symbol'] == 'conciliated'
       content_id = -1
     else
-      content_id = normalize_comment(json_last['comment'])&.last&.to_i&.abs || json_last["positionID"]
+      content_id = (normalize_comment(json_last['comment'])&.last || json_last["positionID"])&.to_i&.abs
     end
 
     debug_info = {
