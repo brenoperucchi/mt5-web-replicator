@@ -154,6 +154,7 @@ Rails.application.routes.draw do
     	resources :transaction_slaves
       resources :users
       resources :upload_files
+      resources :system_alerts
       
       # resources :sign_traces
       

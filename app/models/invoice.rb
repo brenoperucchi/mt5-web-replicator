@@ -73,16 +73,31 @@ class Invoice < ApplicationRecord
   end
 
   def payment_status(response_status=nil)
-    response_status ||= self.response[:response].dig("order_status")
-    case response_status
-    when 'approved', 'paid'
-      self.paid!
-    when 'rejected'
-      self.denied!
-    when 'refunded', 'charged_back'
-      self.refunded!
+    # Log the current state and response for debugging
+    Rails.logger.debug("Invoice#payment_status - Current State: #{state}, Response Status: #{response_status}")
+    Rails.logger.debug("Invoice Response: #{response.inspect}")
+    
+    # Make sure response_status is present - try different ways to get it
+    response_status ||= self.response.dig(:response, "status") || 
+                        self.response.dig("response", "status") || 
+                        self.response.dig("response", :status)
+    
+    Rails.logger.debug("Final Response Status: #{response_status}")
+    
+    # Update invoice state based on response status
+    if response_status.present?
+      case response_status.to_s
+      when 'approved', 'paid'
+        self.update_column(:state, Invoice.states[:paid]) unless paid?
+        Rails.logger.debug("Updated to paid state")
+      when 'rejected'
+        self.update_column(:state, Invoice.states[:denied]) unless denied?
+        Rails.logger.debug("Updated to denied state")
+      when 'refunded', 'charged_back'
+        self.update_column(:state, Invoice.states[:refunded]) unless refunded?
+        Rails.logger.debug("Updated to refunded state")
+      end
     end
-
   end
 
   def customer_calculate(customer, date, month_proporcional = nil)
@@ -100,7 +115,6 @@ class Invoice < ApplicationRecord
     data_profit = account.data_profit(:slaves, trace)
     plan_usage = account.add_account_trace_to_planusage(trace, trace.customer_plan)#.each do |plan_usage|
     plan_usage.amount_calculate(date, month_proporcional, data_profit)
-    
     customer_plan = plan_usage.usageable
 
     self.payment = customer_plan.payment

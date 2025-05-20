@@ -21,9 +21,9 @@ module Model
       ticket = copySerializer.ticket
 
       trace.stores.each do |current_store|
-        slaves = trace.accounts.slave.enable.where(store: current_store)
-
-        next unless slaves.present?
+        account_slaves = trace.accounts.slave.enable.where(store: current_store)
+        # binding.pry
+        next unless account_slaves.present?
         if account.netting?
           order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)
           if order.nil?
@@ -47,7 +47,7 @@ module Model
           else
             content_msg = "Error create Transaction - Account #{account_slave.id}"
             message.loggings.create(content: content_msg, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "ERROR", parent: message.loggings.first, account: account, request_url: message.try(:request_url))
-          end  
+          end
         end
 
         transaction.update_mfe_mae(copySerializer) 
@@ -55,14 +55,14 @@ module Model
         if order.valid?
           order.execute
         end
-
+          
         if order.valid? and not order.error?
           transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account, request_url: message.try(:request_url))
           transaction.execute unless transaction.executed?
-          if transaction and not transaction.error?
+          # if transaction and not transaction.error?
+          if transaction and !TradeHelperService.resource_restricted?(transaction, trace) and not TradeHelperService.resource_restricted?(transaction, account) 
             return true if account.netting? and order.slaves.count > 0 
-            slaves.each do |account_slave|
-              
+            account_slaves.each do |account_slave|
               instrument = check_instrument(account, symbol, account_slave)
               serializer = "API::#{api_version.try(:upcase)}::SlaveSerializer".classify.safe_constantize.new(order_params, trace: trace)
               serializer.comment = "#{trace.id}-#{ticket}"

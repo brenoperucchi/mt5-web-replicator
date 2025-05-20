@@ -24,6 +24,10 @@ RSpec.configure do |config|
   config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
 
+  # Adicione isto ao spec_helper.rb para obter mais informações sobre falhas
+  config.backtrace_exclusion_patterns = []
+  config.fail_fast = true  # Para parar no primeiro erro
+
   # config.filter_run_when_matching :focus
 
 

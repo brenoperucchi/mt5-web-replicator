@@ -34,6 +34,11 @@ module API
               content.gsub!("\u0000", "")
               content = sanitize_encoding(content)
               return content.to_s
+            elsif params["orders"].present?
+              content = params["orders"]
+              content.gsub!("\u0000", "")
+              content = sanitize_encoding(content)
+              return content.to_s
             end
           end
 

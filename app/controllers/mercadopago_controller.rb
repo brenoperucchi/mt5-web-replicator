@@ -8,20 +8,40 @@ class MercadopagoController < ApplicationController
     store = Store.find(params[:store_id])
     payment = Payment.find_by(id: params[:payment_id])
     logging = Logging.create(content:params, state: "WEBHOOK PENDING", loggerable:store)
+    
+    # Guard clause for missing payment
+    if payment.nil?
+      logging.update(state: 'PAYMENT NOTFIND', content: params)
+      head 400
+      return
+    end
+    
+    # Normal flow for non-test environments
     payment_method = payment.payment_method.provider(payment)
     payment_method.check_payment(params)
     response = payment_method.response
     invoice = payment_method.invoice
-    if invoice && payment && response
+    
+    if invoice && response
       response_status = response.dig(:response, "status")
-      if invoice and invoice.try(:to_paid?)
-        invoice.payment_status(response_status)
-        logging.update(content:params.merge(response:response), state: response_status, changeset: invoice.try(:versions).try(:last).try(:changeset), loggerable:invoice)
-      end
+      
+      # Debug statement to help understand the response
+      Rails.logger.debug("MercadoPago Response: #{response.inspect}")
+      Rails.logger.debug("Invoice: #{invoice.inspect}")
+      Rails.logger.debug("Response Status: #{response_status}")
+      
+      # Normal flow for production - Make sure to update and reload
+      invoice.payment_status(response_status)
+      invoice.reload # Make sure to reload to reflect the change
+      
+      logging.update(content:params.merge(response:response), state: response_status, 
+                    changeset: invoice.try(:versions).try(:last).try(:changeset), 
+                    loggerable:invoice)
+      
       head 201
     else
       logging.update(state: 'INVOICE NOTFIND', content: params) if invoice.nil?
-      logging.update(state: 'PAYMENT NOTFIND', content: params) if invoice.nil?
+      logging.update(state: 'RESPONSE NOTFIND', content: params) if response.nil?
       head 400
     end
   end

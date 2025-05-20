@@ -64,6 +64,22 @@ class Account < ApplicationRecord
   #   store.register_resource_plan(self, self.kind)
   # end
 
+  class << self
+    def ransackable_scopes(_auth_object = nil)
+      %i[account_search]
+    end
+  end
+  
+
+  def self.account_search(value)
+    account = Account.find(value)
+    if account
+      where(name: account.name)
+    else
+      all
+    end
+  end
+
   def set_settings
     self.update(self.class.default_settings)
   end
@@ -105,14 +121,18 @@ class Account < ApplicationRecord
 
   def add_account_trace_to_planusage(trace, customer_plan)
     plan_usage = customer_plan.plan_usages.where(handle: "AccountTracePlan", resourceable: self, disable_at: nil).take
-    permission = Permission.where(trace: trace, customer_plan: customer_plan).last
-
-    plan = permission.customer_plan || store.customer_plans.first
+    permission = Permission.where(trace: trace, customer_plan: customer_plan)&.last
+    
+    plan = permission&.customer_plan || store&.customer_plans.first
     plan.customers << customer unless plan.customers.exists?(customer.id)
     plan.accounts << self unless plan.accounts.exists?(self.id)
+    # self.update(customer_plan_id: customer_plan.id) unless customer_plan.present?
 
     if plan_usage.nil?
       plan_usage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
+      if permission.nil?
+        permission = permissions.where(trace: trace, customer_plan: nil).take
+      end
       unless plan_usage.errors.any?
         permission.update(plan_usage: plan_usage, customer_plan: plan)
       end
@@ -121,13 +141,13 @@ class Account < ApplicationRecord
   end
 
 
-  def self.account_search(current_user)
-    if current_user.userable.administrator?
-      self.all.map{|x| [x.name, x.id]}   
-    else
-      self.control_store(current_user.store).order('name desc').map{|x| [x.name, x.id]} 
-    end
-  end
+  # def self.account_search(current_user)
+  #   if current_user.userable.administrator?
+  #     self.all.map{|x| [x.name, x.id]}   
+  #   else
+  #     self.control_store(current_user.store).order('name desc').map{|x| [x.name, x.id]} 
+  #   end
+  # end
 
   def admin_label
     name.upcase

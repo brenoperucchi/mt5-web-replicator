@@ -24,15 +24,18 @@ RSpec.describe 'Store Controller', type: :request do
     travel_to Date.parse('2023-06-01')
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, stores: [@store], instrument_control: true)
+    @plan_method = create(:payment_method, :mercadopago)
+    @payment = create(:payment, :mercadopago, payment_method: @plan_method, store: @store)
+    @customer_plan = create(:customer_plan, :premium, payment: @payment, store:@store)
+    @trace = create(:trace, :copy, stores: [@store], instrument_control: true, customer_plans: [@customer_plan])
     @plan2 = create(:plan, :plan2)
     @store2 = create(:store, :store2, plan_id: @plan2.id)
-    @trace2 = create(:trace, :copy2, stores: [@store2], instrument_control: true)
+    @trace2 = create(:trace, :copy2, stores: [@store2], instrument_control: true, customer_plans: [@customer_plan])
     @user_customer = create(:user, :customer, store: @store2)
-    @customer = create(:customer, :customer, user:@user_customer)
+    @customer = create(:customer, :customer, user:@user_customer, customer_plans:[@customer_plan])
     @account_copy = create(:account, :copy, store: @store2, customer:@customer, meta_margin_mode: 'hedging', trace_ids: [@trace2.id], instrument_control:true)
 
-    @customer_plan = @store.customer_plans.first
+    @customer_plan = @trace.customer_plans.first
 
     @payment_mpago = @store.payments.first
     @payment_stripe = @store.payments.last
@@ -71,7 +74,11 @@ RSpec.describe 'Store Controller', type: :request do
       expect(@store.sinvoices.all.count).to be == 1
       invoice = @store.sinvoices.first
       invoice.items.update_all(invoice_id: 41)
-      invoice.update_columns(id: 41)
+      invoice.update_columns(id: 41, state: Invoice.states[:to_paid], payment_id: @payment_mpago.id)
+      
+      # Initialize response hash to avoid nil errors
+      invoice.update(response: {})
+      
       expect {
         post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
           params: {"api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627", "data.id"=>"1319796651", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"77964627"}}
@@ -98,7 +105,7 @@ RSpec.describe 'Store Controller', type: :request do
       expect(account.customer.customer_plans.first.name).to be == 'plan1'
     end
     it 'Promition_page and promotion_use TRUE' do
-      @customer_plan = @store.customer_plans.first
+      @customer_plan = @trace.customer_plans.first
       @customer_plan.discount_behavior = 'promition_page'
       @customer_plan.amount_discount = '30%'
       @customer_plan.promotion_use = true
@@ -132,7 +139,7 @@ RSpec.describe 'Store Controller', type: :request do
     end
 
     it 'Promition_page and promotion_use False' do
-      @customer_plan = @store.customer_plans.first
+      @customer_plan = @trace.customer_plans.first
       @customer_plan.discount_behavior = 'promition_page'
       @customer_plan.amount_discount = '10'
       @customer_plan.promotion_use = false
@@ -162,7 +169,7 @@ RSpec.describe 'Store Controller', type: :request do
     end
 
     it 'Always and promotion_use False' do
-      @customer_plan = @store.customer_plans.first
+      @customer_plan = @trace.customer_plan
       @customer_plan.discount_behavior = 'always'
       @customer_plan.amount_discount = '50'
       @customer_plan.promotion_use = false
@@ -193,7 +200,7 @@ RSpec.describe 'Store Controller', type: :request do
     end
 
     it 'None Promotion_use TRUE' do
-      @customer_plan = @store.customer_plans.first
+      @customer_plan = @trace.customer_plans.first
       @customer_plan.discount_behavior = 'none'
       @customer_plan.amount_discount = '50'
       @customer_plan.promotion_use = true
@@ -225,7 +232,7 @@ RSpec.describe 'Store Controller', type: :request do
   end
   describe 'Contract Trace on dashboards' do
     it 'Store 1 with date Proportional' do
-      @customer_plan = @store.customer_plans.first
+      @customer_plan = @trace.customer_plans.first
       @customer_plan.traces << @trace
       unfreeze_time
       travel_to Date.parse('2023-06-15').beginning_of_day
@@ -271,6 +278,7 @@ RSpec.describe 'Store Controller', type: :request do
       account = Account.find_by_name('12345678')
       customer_plan = @trace2.customer_plan
       expect(account.store_id).to be == 2
+      expect(customer_plan.amount).to be == 100
       expect(customer_plan.amount_discount).to be == 30
       expect(customer_plan.fixed?).to be true
       expect(customer_plan.percent?).not_to be true

@@ -71,13 +71,14 @@
                   accounts = current_user.userable.administrator? ? Account.all.map{|t| [t.name, t.id]} : current_user.store.accounts.map{|t| [t.name, t.id]}
                   namespace = local_assigns[:namespace] || :admin 
                   attribute_types = {
-                  name: Administrate::Field::Select.with_options(collection: accounts), 
+                  account_search: Administrate::Field::Select.with_options(collection: accounts), 
                   state: Administrate::Field::Select.with_options(collection: states),
                   store_id: Administrate::Field::Select.with_options(collection: Store.all.map{|t| ["#{t.name} - ##{t.id}", t.id]}), 
                 } %>
 
         <% if defined?(attribute_types_custom) %>
         <% attribute_types = attribute_types_custom.merge(attribute_types.merge) %>
+        <% attribute_labels = { account_search: 'Account'} %>
         <% end %>
         <%= render('administrate_ransack/filters', attribute_types: attribute_types, options: { tags: 'select' }, namespace: namespace ) %>
       </div>

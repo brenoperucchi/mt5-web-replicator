@@ -65,8 +65,10 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
       profit = (profit_orders - account_profit)&.round(2)
       fee    = (fee_orders - account_fee)&.round(2)
 
-      # orders_total = profit_orders + fee
-      # account_total = account_profit + account_fee
+      orders_total = profit_orders + fee
+      account_total = account_profit + account_fee
+
+      # binding.pry if year_month == "202504"
 
       if profit.zero? && fee.zero? 
         next
@@ -117,11 +119,20 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
              "fee" => fee, "swap" => 0.00, "mae" => 0.00, "mfe" => 0.00, "state" => "closed", "metaAction" => "", "metaState" => "", "metaMessage" => "",
              "symbol" => "conciliated", "comment" => "-#{trace.id}#{@account.id}--#{-1}", "openAt" => time, "closeAt" => time, "timeGMT" => time, "timeTrader" => time
            }
-           
+    
+    conciliated_profit  = Transaction.where(symbol: 'conciliated', ticket: -1, account: account).sum(&:profit).to_f
+    conciliated_fee  = Transaction.where(symbol: 'conciliated', ticket: -1, account: account).sum(&:fee).to_f
+
     json_last["profit"] = (json['HistoryOrdersProfit'].to_f - profit)&.round(2)
     json_last["fee"]    = (json['HistoryOrdersFee'].to_f - fee)&.round(2)
     volume              = json_last["volume"].to_f
-        
+    
+    profit_account =  (profit + fee).round(2)
+    profit_orders = (json['HistoryOrdersProfit'].to_f + json['HistoryOrdersFee'].to_f).round(2)
+    
+    total_amount_json = json_last["profit"].to_f + json_last["fee"].to_f
+    total_amount = profit_orders - profit_account + conciliated_profit + conciliated_fee
+    
     order = find_or_create_order(json_last, trace)
 
     transaction = account.transactions.find_by(symbol: "conciliated", ticket: -1, account: account)
@@ -131,8 +142,30 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
         update_existing_transaction(transaction, json_last, order)
       end
     else
-      create_new_transaction(json_last, trace, order)
+      transaction = create_new_transaction(json_last, trace, order)
     end
+
+
+    if transaction.profit != json_last["profit"] || transaction.fee != json_last["fee"]
+      Rails.logger.error("[ERROR] Transação não atualizada: #{transaction.id}")
+      SystemAlert.create(
+        message: "Transação não atualizada: #{transaction.id}",
+        serverity: "info",
+        source: "transaction",
+        source_id: transaction.id,
+        alertable: transaction,
+        details: {
+          account_id: account.id,
+          trace_id: transaction.trace_id,
+          volume: transaction.lot,
+          profit: json_last["profit"],
+          fee: json_last["fee"],
+          historyOrdersProfit: transaction.historyOrdersProfit,
+          historyOrdersFee: transaction.historyOrdersFee
+        }
+      )
+    end
+
   end
 
   def conciliate_position(positionID, symbol, jsons)
@@ -212,7 +245,7 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
       message.orders << order unless message.orders.exists?(order.id) 
       log_conciliation(transaction, json_last)
     end
-    return true
+    transaction
   end
 
   def find_or_create_trace
@@ -384,21 +417,14 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
   def calculate_by_account(kind = :profit, range = nil)
     profit = 0
     fee    = 0
-    account.traces.each do |trace|
-      if range.present?
-        profit += trace.transactions.where(closed_at: range).sum{|t| t.profit.to_f}&.round(2)
-        fee    += trace.transactions.where(closed_at: range).sum{|t| t.fee.to_f}&.round(2)
-      else
-        profit += trace.transactions.sum{|t| t.profit.to_f}&.round(2)
-        fee    += trace.transactions.sum{|t| t.fee.to_f}&.round(2)
-      end
-    end
-  
+    query = account.transactions.where.not(symbol: "conciliated")
+    query = query.where(closed_at: range) if range.present?
+    
     if kind == :profit
-      return profit.round(2)
+      query.sum{|s| s.profit.to_f}&.round(2)
     else
-      return fee.round(2)
-    end
+      query.sum{|s| s.fee.to_f}&.round(2)
+    end  
   end
 
   def calculate_by_account_total(kind = :profit, range = nil)

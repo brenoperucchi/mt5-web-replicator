@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_03_20_194221) do
+ActiveRecord::Schema.define(version: 2025_05_02_033112) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -522,6 +522,21 @@ ActiveRecord::Schema.define(version: 2025_03_20_194221) do
     t.bigint "payment_id"
     t.index ["payment_id"], name: "index_stores_on_payment_id"
     t.index ["plan_id"], name: "index_stores_on_plan_id"
+  end
+
+  create_table "system_alerts", force: :cascade do |t|
+    t.text "message"
+    t.string "severity"
+    t.string "source"
+    t.integer "source_id"
+    t.string "alertable_type"
+    t.bigint "alertable_id"
+    t.string "status"
+    t.datetime "resolved_at"
+    t.jsonb "details"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["alertable_type", "alertable_id"], name: "index_system_alerts_on_alertable"
   end
 
   create_table "taggings", id: :serial, force: :cascade do |t|

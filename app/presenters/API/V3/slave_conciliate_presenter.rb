@@ -124,13 +124,13 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     json_last["profit"]   = jsons.sum { |j| j["profit"].to_f }&.round(2)
     json_last["fee"]      = jsons.sum { |j| j["fee"].to_f + j["commission"].to_f + j["swap"].to_f }.round(2)
     json_last["volume"]   = jsons.sum { |j| j["volume"].to_f }&.round(2) 
-
+    
     
     trace_id  = normalize_comment(json_last['comment'])&.first&.to_i&.abs
     trace     = Trace.find_by(id: trace_id) || find_or_create_trace
     slaves    = TransactionSlave.where(symbol: symbol, ticket_slave: positionID, account: account)
     results   = []
-
+    
     if slaves.present?
       slaves.each do |slave|    
         serializer = API::V3::SlaveSerializer.new(json_last)
@@ -257,6 +257,69 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     transaction = Transaction.find_by(trace_id: trace.id, ticket: ticket)   
   end
 
+  def find_or_create_trace
+    trace_name = "conciliated##{@account.name}"
+    trace_name_id = "-1#{@account.id}".to_i
+
+    # Add validation for required data
+    unless @account && @account.name && @account.store
+      Rails.logger.error("[ERROR] Invalid account data for trace creation: " + 
+        {account_id: @account&.id, account_name: @account&.name, store_id: @account&.store&.id}.to_json)
+      return nil
+    end
+
+    trace = Trace.joins(:store_traces)
+              .where(name: trace_name, name_id: trace_name_id)
+              .where(store_traces: { store_id: account.store.id })
+              .take
+
+    if trace.nil?
+      # Check for customer plan before creating trace
+      if account.store.customer_plans.empty?
+        Rails.logger.error("[ERROR] No customer plans found for account #{account.id} (store #{account.store.id})")
+        return nil
+      end
+
+      # Log attempt to create new trace
+      Rails.logger.info("[DEBUG] Creating new trace: #{trace_name}")
+
+      begin
+        customer_plan = account.store.customer_plans.first
+
+        # Add validation for customer plan
+        if customer_plan.nil? || !customer_plan.valid?
+          Rails.logger.error("[ERROR] Customer plan is invalid for account #{account.id}: " +
+            {customer_plan_id: customer_plan&.id, errors: customer_plan&.errors&.full_messages}.to_json)
+          return nil
+        end
+
+        trace = Trace.new(
+          kind: 2,
+          contract_volume_max: 1,
+          name: trace_name,
+          name_id: trace_name_id,
+          stores: [account.store],
+          customer_plans: [customer_plan]
+        )
+
+        unless trace.save
+          Rails.logger.error("[ERROR] Failed to save trace: #{trace.errors.full_messages.join(', ')}")
+          Rails.logger.error("[ERROR] Customer plan details: ID=#{customer_plan.id}, Valid=#{customer_plan.valid?}, Errors=#{customer_plan.errors.full_messages.join(', ')}")
+          return nil
+        end
+
+        trace.accounts << account unless trace.accounts.exists?(account.id)
+        trace.stores << account.store unless trace.stores.exists?(account.store.id)
+      rescue => e
+        Rails.logger.error("[ERROR] Exception creating trace: #{e.message}")
+        Rails.logger.error("[ERROR] Backtrace: #{e.backtrace.first(5).join('\n')}")
+        return nil
+      end
+    end
+
+    trace
+  end
+
   def find_or_create_order(json_last, trace)
     if json_last['symbol'] == 'conciliated'
       content_id = -1
@@ -264,43 +327,40 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
       content_id = normalize_comment(json_last['comment'])&.last&.to_i&.abs || json_last["positionID"]
     end
 
-    Order.find_by(symbol: json_last['symbol'], content_id: content_id, account: @account) || create_new_order(json_last['symbol'], content_id, json_last, trace)
-  end
+    debug_info = {
+      method: "find_or_create_order",
+      symbol: json_last['symbol'],
+      content_id: content_id,
+      account_id: @account&.id,
+      trace_id: trace&.id,
+      json_last_sample: json_last.slice("symbol", "positionID", "profit", "fee").to_json
+    }
 
-  def find_or_create_trace
-    trace_name = "conciliated##{@account.name}"
-    trace_name_id = "-1#{@account.id}".to_i
-    trace = Trace.joins(:store_traces).where(name: trace_name, name_id: trace_name_id).where(store_traces: { store_id: account.store.id }).take
-    if trace.nil?
-      trace = Trace.new(
-          kind: 2,
-          contract_volume_max: 1,
-          name: trace_name,
-          name_id: trace_name_id,
-          stores: [account.store],
-          customer_plans: [account.store.customer_plans.first]
+    Rails.logger.info("[DEBUG] Attempting to find or create order: #{debug_info.to_json}")
+
+    order = Order.find_by(symbol: json_last['symbol'], content_id: content_id, account: @account)
+
+    unless order
+      begin
+        order = Order.create!(
+          symbol: json_last['symbol'],
+          content: json_last,
+          content_id: content_id,
+          account: @account,
+          state: 'closed',
+          store: account.store,
+          trace: trace,
+          message: message,
+          conciliated_at: Time.current
         )
-      if trace.save
-        trace.accounts << account unless trace.accounts.exists?(account.id)
-        trace.stores << account.store unless trace.stores.exists?(account.store.id)
-      end    
+        Rails.logger.info("[DEBUG] Successfully created Order: #{order.id}")
+      rescue => e
+        error_info = debug_info.merge(error: e.message, backtrace: e.backtrace.first(5))
+        Rails.logger.error("[ERROR] Order creation failed: #{error_info.to_json}")
+        raise
+      end
     end
-    trace
-  end
 
-  def create_new_order(symbol, content_id, json_last, trace)
-    order = Order.new(
-        symbol: symbol,
-        content: json_last,
-        content_id: content_id,
-        account: @account,
-        state: 'closed',
-        store: account.store,
-        trace: trace,
-        message: message,
-        conciliated_at: Time.current
-      )
-    order.save
     order
   end
 
@@ -325,10 +385,10 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     query = query.where(closed_at: range) if range.present?
 
     if kind == :profit
-      query.sum(:profit).round(2) # Usar sum direto do DB
+      query.sum{|s| s.profit.to_f}&.round(2)
     else
       # Assumindo que 'fee' é uma coluna numérica
-      query.sum(:fee).round(2) # Usar sum direto do DB 
+      query.sum{|s| s.fee.to_f}&.round(2)
     end
   end
 
@@ -339,9 +399,9 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     query = query.where(closed_at: range) if range.present?
     
     if kind == :profit
-      query.sum(:profit).round(2)
+      query.sum{|s| s.profit.to_f}&.round(2)
     else
-      query.sum(:fee).round(2)
+      query.sum{|s| s.fee.to_f}&.round(2)
     end
   end
 end

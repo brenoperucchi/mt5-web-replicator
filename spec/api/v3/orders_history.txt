@@ -2,7 +2,7 @@
     "HistoryOrders":
     [
         {
-            "ticket": 2026206651,
+            "ticketMaster": 2026206651,
             "ticketSlave": -1,
             "ticketDeal": 1,
             "positionID": 2026206651,
@@ -36,7 +36,7 @@
         },
                 {
             "symbol": "AUDCAD",
-            "ticket": 10000001,
+            "ticketMaster": 10000001,
             "ticketSlave": -1,
             "ticketDeal": 2,
             "positionID": 10000001,
@@ -61,7 +61,7 @@
         },
         {
             "symbol": "AUDCAD",
-            "ticket": 10000002,
+            "ticketMaster": 10000002,
             "ticketSlave": -1,
             "ticketDeal": 3,
             "positionID": 10000002,
@@ -87,7 +87,7 @@
         },
         {
             "symbol": "AUDCAD",
-            "ticket": 10000015,
+            "ticketMaster": 10000015,
             "ticketSlave": -1,
             "ticketDeal": 4,
             "positionID": 10000015,
@@ -112,7 +112,7 @@
         },
         {
             "symbol": "EURUSD",
-            "ticket": 99000013,
+            "ticketMaster": 99000013,
             "ticketSlave": -1,
             "ticketDeal": 5,
             "positionID": 99000013,
@@ -137,7 +137,7 @@
         },
         {
             "symbol": "EURUSD",
-            "ticket": 98000010,
+            "ticketMaster": 98000010,
             "ticketSlave": -1,
             "ticketDeal": 6,
             "positionID": 98000010,
@@ -159,12 +159,46 @@
             "symbol_digit": 5,
             "magicNumber": 10001,
             "comment": "98000010"
+        },
+        {
+            "symbol": "EURUSD",
+            "ticketMaster": 2029093177,
+            "ticketSlave": -1,
+            "ticketDeal": 7,
+            "positionID": 2029093177,
+            "type": 0,
+            "entry": 0,
+            "traceID": 0,
+            "slaveID": 0,
+            "magicNumber": 0,
+            "transactionID": 0,
+            "slipPage": 0,
+            "symbolDigits": 5,
+            "timeZone": -6,
+            "profit": 1.89000,
+            "priceOpen": 1.09195,
+            "priceClose": 0.00000,
+            "volume": 0.00000,
+            "stopLoss": 0.00000,
+            "takeProfit": 0.01,
+            "commission": 0.00,
+            "fee": 0.00,
+            "swap": 0.00,
+            "mae": 0.00,
+            "mfe": 1.89,
+            "state": "(null)",
+            "comment": "",
+            "openAt": "2024.08.12 08:49:27",
+            "closeAt": "1970.01.01 00:00:00",
+            "timeGMT": "2024.08.12 15:12:33",
+            "timeTrader": "2024.08.12 18:12:33"
         }
+
     ],
     "PositionOrders":
     [
         {
-            "ticket": 2029093177,
+            "ticketMaster": 2029093177,
             "ticketSlave": -1,
             "ticketDeal": 7,
             "positionID": 2029093177,
@@ -197,7 +231,7 @@
             "timeTrader": "2024.08.12 18:12:33"
         },
         {
-            "ticket": 2029103706,
+            "ticketMaster": 2029103706,
             "ticketSlave": -1,
             "ticketDeal": 8,
             "positionID": 2029103706,

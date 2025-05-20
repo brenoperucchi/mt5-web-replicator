@@ -19,6 +19,7 @@ module API
             # message.request = request
             begin
               message.execute
+              message.execute_conciliated
               body message.response
               status 201
               return true
@@ -39,7 +40,7 @@ module API
             message = Message::V3::MetaSlave.new(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
             # slavePresenter = API::V3::SlavePresenter.new(params, message, account)
             # begin
-              # message.execute_conciliated
+              message.execute_conciliated
               body message.response
               status 201
               return true

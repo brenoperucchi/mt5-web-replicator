@@ -4,7 +4,10 @@ RSpec.describe API::V2::APICopy do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @trace = create(:trace, :copy, stores: [@store])
+    @plan_method = create(:payment_method, :mercadopago)
+    @payment = create(:payment, payment_method: @plan_method, store: @store)
+    @customer_plan = create(:customer_plan, payment: @payment, store:@store)
+    @trace = create(:trace, :copy, stores: [@store], customer_plans:[@customer_plan])
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, user:@user_admin)

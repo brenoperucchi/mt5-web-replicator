@@ -19,6 +19,7 @@ module API
               message = Message::V3::MetaCopy.create(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
               # message.request = request
               if account && message.execute
+                message.execute_conciliated
                 status 201
                 return true
               end

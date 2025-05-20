@@ -36,7 +36,7 @@ class ProfitCalculationService
     
     # Soma através do método profit (carregando em memória)
     # Nota: Este método pode ser afetado por duplicações via associações
-    memory_sum = transactions.includes(:orders).sum(&:profit) # Usar includes para simular o carregamento via associação
+    memory_sum = transactions.includes(:orders).sum{|o| o.profit.to_f} # Usar includes para simular o carregamento via associação
     puts "Soma na memória (via includes): #{memory_sum}"
     
     # Diferença
@@ -89,8 +89,8 @@ class ProfitCalculationService
       db_total = db_records.sum(:profit).to_f
       db_count = db_records.count
       
-      memory_records = all_transactions.select { |t| t.profit >= range[:min] && t.profit < range[:max] }
-      memory_total = memory_records.sum(&:profit)
+      memory_records = all_transactions.select { |t| t.profit.to_f >= range[:min] && t.profit.to_f < range[:max] }
+      memory_total = memory_records.sum{|m| m.profit.to_f}
       memory_count = memory_records.size
       
       range_diff = memory_total - db_total

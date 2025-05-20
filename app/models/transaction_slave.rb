@@ -49,7 +49,7 @@ class TransactionSlave < ApplicationRecord
                           # if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || symbol == 'conciliated'}
   # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
-  after_create :restrict_magic_number?#, :check_duplicate
+  after_create :accept_magic_number?#, :check_duplicate
 
 
   class << self
@@ -135,8 +135,8 @@ class TransactionSlave < ApplicationRecord
     
   end
 
-  def restrict_magic_number?
-    TradeHelperService.restrict_magic_number(self, self.account)
+  def accept_magic_number?
+    TradeHelperService.resource_restricted?(self, self.account)
     # order.restrict_magic_number(self)
   end
 
