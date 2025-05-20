@@ -324,7 +324,14 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     if json_last['symbol'] == 'conciliated'
       content_id = -1
     else
-      content_id = (normalize_comment(json_last['comment'])&.last || json_last["positionID"])&.to_i&.abs
+      comment_part = normalize_comment(json_last['comment'])&.last
+      # Verifica se comment_part é uma string que representa um inteiro positivo.
+      if comment_part.present? && comment_part.match?(/\A[1-9]\d*\z/)
+        content_id = comment_part.to_i.abs
+      else
+        # Se não, usa positionID.
+        content_id = json_last["positionID"]&.to_i&.abs
+      end
     end
 
     debug_info = {
