@@ -330,7 +330,7 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
         content_id = comment_part.to_i.abs
       else
         # Se não, usa positionID.
-        content_id = json_last["positionID"]&.to_i&.abs
+        content_id = json_last["positionID"]&.to_i
       end
     end
 
