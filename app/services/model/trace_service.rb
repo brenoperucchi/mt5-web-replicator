@@ -22,7 +22,6 @@ module Model
 
       trace.stores.each do |current_store|
         account_slaves = trace.accounts.slave.enable.where(store: current_store)
-        # binding.pry
         next unless account_slaves.present?
         if account.netting?
           order = account.orders.where(symbol: instrument).where.not(state: [:closed, :pending]).try(:last)

@@ -56,8 +56,8 @@ class Trace < ApplicationRecord
   # validates_presence_of   [:name, :name_id]
   validates_presence_of   [:contract_volume_max, :customer_plans]
   
-  validates :name, uniqueness: { scope: :store_id , message: "should be unique per store" }
-  validates :name_id, uniqueness: { scope: :store_id , message: "should be unique per store" }, unless: -> { magic_same.to_b } 
+  validates :name, uniqueness: { scope: :store_id }
+  validates :name_id, uniqueness: { scope: :store_id }, unless: -> { magic_same.to_b } 
 
   # Custom validation for name + name_id combination per store
   # validate :unique_name_and_name_id_combination_per_store

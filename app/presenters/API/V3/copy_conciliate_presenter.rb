@@ -68,8 +68,6 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
       orders_total = profit_orders + fee
       account_total = account_profit + account_fee
 
-      # binding.pry if year_month == "202504"
-
       if profit.zero? && fee.zero? 
         next
       else
@@ -249,7 +247,7 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
   end
 
   def find_or_create_trace
-    trace_name = "conciliated##{@account.name}"
+    trace_name = "conciliated##{@account.name}##{@account&.account_server&.id}"
     trace_name_id = "-1#{@account.id}".to_i
 
     # Add validation for required data
@@ -259,10 +257,11 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
       return nil
     end
 
-    trace = Trace.joins(:store_traces)
-              .where(name: trace_name, name_id: trace_name_id)
-              .where(store_traces: { store_id: account.store.id })
-              .take
+    trace = Trace.where(name: trace_name, name_id: trace_name_id).take
+    # trace = Trace.joins(:store_traces)
+    #           .where(name: trace_name, name_id: trace_name_id)
+    #           .where(store_traces: { store_id: account.store.id })
+    #           .take
 
     if trace.nil?
       # Check for customer plan before creating trace

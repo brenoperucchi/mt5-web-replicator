@@ -45,23 +45,24 @@ RSpec.describe 'OrdersHistory API', type: :request do
       post '/api/v3/copy/post/orders/imentore_copy/3_00_02/broker_name/10100/HEDGING',
         params: { data: file }
 
-      slaves = TransactionSlave.where(ticket_master: 2029093177)
+      slaves = TransactionSlave.where(ticket_master: 2029103706)
+      order = Order.where(content_id: 2029103706).first
       expect(slaves.count).to be == 4
       expect(slaves.first.state).to be == "pending"
 
-      expect(Order.find_by(content_id: 2029093177).present?).to be true
-      expect(Order.find_by(content_id: 2029093177).slaves.count).to be == 2
-      expect(Order.find_by(content_id: 2029093177).slaves.first.comment).to be == "1-2029093177"
-      expect(Order.find_by(content_id: 2029093177).slaves.first.ticket_slave).to be == -1
-      expect(Order.find_by(content_id: 2029093177).slaves.first.profit).to be == 0
+      expect(order.present?).to be true
+      expect(order.slaves.count).to be == 2
+      expect(order.slaves.first.comment).to be == "1-2029103706"
+      expect(order.slaves.first.ticket_slave).to be == -1
+      expect(order.slaves.first.profit).to be == 0
     end
 
     it 'Verify Transaction State maintain Executed and Order state modify Closed' do
       post '/api/v3/copy/post/orders/imentore_copy/3_00_02/broker_name/10100/HEDGING',
         params: { data: file }
 
-      transactions = Transaction.where(ticket: 2029093177, trace_id: 1)
-      slaves = TransactionSlave.where(ticket_master: 2029093177, trace_id: 1)
+      transactions = Transaction.where(ticket: 2029103706, trace_id: 1)
+      slaves = TransactionSlave.where(ticket_master: 2029103706, trace_id: 1)
       
       expect(transactions.count).to be == 1
       expect(transactions.first.state).to be == "executed"
@@ -81,7 +82,7 @@ RSpec.describe 'OrdersHistory API', type: :request do
       slave2.close
       transactions.reload
       
-      transaction = Transaction.where(ticket: 2029093177, trace_id: 1).first
+      transaction = Transaction.where(ticket: 2029103706, trace_id: 1).first
       expect(transaction.state).to be == "executed"
       expect(transaction.orders.first.state).to be == "closed"
     end

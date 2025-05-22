@@ -25,7 +25,6 @@ class TradeHelperService
   
 
   # def self.restrict_magic_number(klass, resource)
-  #   binding.pry
   #   unless resource.magics_accept.blank?
   #     resource_name_id = resource.try(:name)
   #     resource_name = resource.try(:name)
@@ -47,7 +46,6 @@ class TradeHelperService
         version = resource.try(:version)
         # Usar name ao invés de name_id para Account, que não tem o método name_id
         name_id = register.respond_to?(:name_id) ? register.name_id : register.name
-        # binding.pry
         resource.loggings.create(content:"#{resource.class.name}##{resource.id} has magic number #{resource.magic_number} and the #{register.class.name}##{register.id} - #{name_id}##{register.name} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:resource.try(:message))
         resource.erro if resource.can_erro?
         return true

@@ -91,9 +91,21 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
     end
   end
 
+  # Processes transaction closings for copy trading
+  #
+  # This method handles the closing of transactions related to copy trading:
+  # 1. First logs the closing action with the message and account information
+  # 2. Then processes closings through three sequential mechanisms:
+  #
+  # @return [Boolean] Returns true when all closings have been processed
   def closing
+    # Log the closing action with account information
     message.loggings.create(content:message.content, state: "COPY/CLOSE", changeset: account.name, account: account, request_url: message.request_url, params: params)        
+    
     if account
+      # CLOSING MECHANISM 1:
+      # Process transactions found in history but not in current positions
+      # Closes any executed or pending-close transactions that aren't in the active positions list
       historyOrders.each do |json|
         transactions = Transaction.executed.where(ticket: json["ticketMaster"], account: account)
         transactions += Transaction.closed.where(ticket: json["ticketMaster"], account: account, closed_at: nil)          
@@ -107,6 +119,9 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
     end
       
     if positionOrders.present?    
+      # CLOSING MECHANISM 2:
+      # Process executed transactions that are not in the current positions list
+      # Ensures any transactions that were executed but no longer appear in positions are closed
       account.transactions.executed.each do |transaction|
         unless positionOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
           order_params = historyOrders.detect{|json| json["ticketMaster"] == transaction.ticket} || {}
@@ -115,11 +130,25 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
       end        
     end
 
+    # # CLOSING MECHANISM 3:
+    # # Process all remaining executed transactions that match positions
+    # # Final pass to ensure all transactions are properly closed based on latest data
     # account.transactions.executed.each do |transaction|
-    #   ticket_id = transaction.ticket.to_s
-    #   order_params = historyOrders.detect{|json| json["ticketMaster"] == ticket_id} || {}
-    #   transaction_closed(transaction, order_params, :copy_close) if order_params.present?
+    #   if historyOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
+    #     order_params = historyOrders.detect{|json| json["ticketMaster"] == transaction.ticket} || {}
+    #     transaction_closed(transaction, order_params, :copy_close) if order_params.present?
+    #   end
     # end
+    
+    # # ——— Mecanismos 2 e 3 unificados ———
+    # # fecha todo executed que existir em historyOrders, independentemente de estar em positionOrders
+    # history_map = historyOrders.index_by { |h| h["ticketMaster"].to_s }
+    # account.transactions.executed.each do |tx|
+    #   if (params_for_tx = history_map[tx.ticket.to_s])
+    #     transaction_closed(tx, params_for_tx, :copy_close)
+    #   end
+    # end
+    
     return true
   end
 
