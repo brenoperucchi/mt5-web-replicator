@@ -32,7 +32,7 @@
     "swiper-bundle": "^0.0.1-security",
     "tailwindcss": "^3.4.13",
     "turbolinks": "^5.2.0",
-    "webpack": "^5.53.0",
+    "webpack": "^5.104.1",
     "webpack-cli": "^5.1.4"
   },
   "version": "0.1.0",
