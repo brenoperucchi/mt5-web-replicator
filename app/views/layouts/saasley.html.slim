@@ -1,0 +1,88 @@
+doctype html
+html lang="en" 
+  head
+    meta name="facebook-domain-verification" content="mkjxfzrvqoh8h3lzqf98qtsuxnpdki"
+    meta name="description" content="A Imentore oferece um sistema avançado de replicação de ordens para trading, especializado em copiar entradas de robôs, sinais de Telegram e operações manuais. Integre suas estratégias de trading com eficiência e precisão com nosso serviço inovador."
+    meta property="og:title" content="Imentore Copy"
+    meta property="og:url" content="https://www.imentore.com.br/"
+    meta property="og:description" content="Descubra a Imentore: revolucione seu trading com nosso sistema de replicação de ordens, abrangendo robôs, sinais de Telegram e entradas manuais. Facilite sua gestão de trading com tecnologia de ponta e integração simplificada."
+    meta property="og:type" content="website"
+    meta property="og:image" content="http://www.imentore.com.br/site_thumbnail.png"
+    meta charset="UTF-8" /
+    meta content="IE=edge" http-equiv="X-UA-Compatible" /
+    meta content="width=device-width, initial-scale=1.0" name="viewport" /
+    title = title = I18n.t :app_name, scope: 'helpers.site.main'
+    /! :Page styles:
+    / link href="/images/saasley/glightbox.min.css" rel="stylesheet" /
+    /! :AOS Animation:
+    / link href="/images/saasley/aos.css" rel="stylesheet" /
+    /! :Google fonts:
+    link href="https://fonts.googleapis.com" rel="preconnect" /
+    link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" /
+    link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Poppins:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" /
+    /! :Material symbols sharp icons:
+    link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet" /
+    /! :Main style:
+    / link href="/images/saasley/theme.min.css" rel="stylesheet" /
+    = stylesheet_link_tag  'saasley', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "saasley"
+    css:
+      .bottom-image {
+        position: fixed;
+        bottom: 0px;
+        right: 0px;
+      }
+    script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
+    script
+      | window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-7S7H2CT4GH');gtag('config', 'AW-1036376326'); 
+  body
+    = yield
+    /! :Footer:
+    footer.footer.bg-dark.text-white.position-relative.overflow-hidden#request_demo
+      .container.pt-9.pt-lg-11.pb-4.position-relative.z-index-1
+        .row
+          .col-md-6.col-lg-3.mb-5
+            .mb-4
+              a.text-reset.d-table.width-120 href="/" 
+                / img.img-fluid alt="" src="/images/saasley/img/logo-white.svg" /
+                h4
+                  = title = I18n.t :app_name, scope: 'helpers.site.main'
+                small.text-muted
+                  a[href="mailto:contato@imentore.com.br?subject=Contact Imentore"] 
+                    | contato@.imentore.com.br
+
+            / p.text-muted
+            /   | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec pellentesque
+            /   | efficitur turpis, vitae dictum dolor tristique in.
+          .col-md-3.mx-auto.col-lg-2.mb-5
+          /   ul.list-unstyled
+          /     li
+          /       a href="#"  About
+          /     li
+          /       a href="#"  Career
+          /     li
+          /       a href="#"  Terms
+          /     li
+          /       a href="#"  Privacy
+          / .col-md-3.mx-auto.col-lg-2.mb-5
+          /   ul.list-unstyled
+          /     li
+          /       a href="#"  Blog
+          /     li
+          /       a href="#"  Press Kit
+          /     li
+          /       a href="#"  Support
+          /     li
+          /       a href="#"  Contact
+
+    /! :Theme script:
+    - if params['locale'] == "en"
+      a[class='bottom-image' aria-label="Chat on WhatsApp" href="https://wa.me/5548988227539?text=I%20am%20interested%20in%20knowing%20the%20product."] 
+        img alt="Fale via WhatsApp" src="/fonts/WhatsAppButtonGreenLarge.svg" 
+    - else
+      a[class='bottom-image' aria-label="Chat on WhatsApp" href="https://wa.me/5548988227539?text=Tenho%20interesse%20em%20conhecer%20o%20produto."] 
+        img alt="Chat on WhatsApp" src="/fonts/WhatsAppButtonGreenLarge.svg" 
+  
+    = javascript_include_tag "saasley/theme.bundle.js" 
+
+= render "layouts/google_analytics"

@@ -1,0 +1,17 @@
+class InvoicePolicy < ApplicationPolicy
+  class Scope < Scope
+    def resolve
+      scope.all
+    end
+
+    def resolve_admin
+      scope.where(owner: user)
+    end
+
+  end
+
+  def invoice_send?
+    true
+  end
+
+end

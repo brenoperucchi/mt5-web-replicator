@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <title>Web Management Forex/B3/Crypto</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <%= csrf_meta_tags %>
+    <%= stylesheet_link_tag 'stisla',       media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application' %>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="main-wrapper main-wrapper-1" >
+        <!-- Main Content -->
+        <div class="main-content" style='padding-left:100px;padding-right: 100px;padding-top: 30px;'>
+          <%= render 'layouts/stisla/navbar'%>
+          <%= render 'layouts/stisla/body'%>
+          <%= yield %>
+          <footer class="main-footer">
+            <%= content_for :footer %>
+            <div class="footer-left">
+              Copyright &copy; 2022 <div class="bullet"></div> By Breno Perucchi
+            </div>
+            <div class="footer-right">
+            </div>
+          </footer>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

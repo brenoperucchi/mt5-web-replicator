@@ -1,0 +1,687 @@
+pt-BR:
+  helpers:
+    pages:
+      files:
+        name: Arquivos MT5
+        tutorial_link: Tutorial de Instalação
+      partner:
+        title1: Seja Nosso Parceiro
+        title2: Buscamos Parceiros e Sócios
+        title3: "O <strong>iMentore</strong> é uma solução robusta e inovadora de replicação de ordens para <strong>MetaTrader 4 e 5</strong>. Focada em eficiência, controle de portfólio e manejo avançado de risco, nossa plataforma atende traders e investidores que buscam a máxima performance em seus investimentos."
+        title4: "Estamos em busca de parceiros comerciais, sócios e desenvolvedores interessados em levar o iMentore para novos mercados internacionais."
+        title5: "O que Procuramos:"
+        title6: "Expansão Internacional:"
+        title7: "Acesso a corretoras, traders e investidores em outros países, ampliando nossa presença global."
+        title8: "Parceria Comercial:"
+        title9: "Corretoras e agentes de mercado que desejam oferecer a seus clientes uma ferramenta sólida de replicação de ordens, fortalecendo a fidelização e a satisfação."
+        title10: "Colaboração Técnica:"
+        title11: "Programadores e desenvolvedores prontos para aprimorar continuamente nossa tecnologia, agregando valor e competitividade ao produto."
+        title12: "Vamos conversar!"
+        email: "breno@imentore.com"
+        name: "Breno Perucchi"
+    controller:
+      app_controller:
+        admin:
+          must_be_logged: 'Você deve estar logado'
+        after_sign_error: "Contacte o suporte - error #001."
+      session:
+        bad_login_email: "*** Email inválido: %{email}"
+        bad_login_password: "*** Senha incorreta para o email: %{email}"
+    dashboards:
+      dashboards: Portfólios
+      admin: Administrador
+      filter: Filtro
+      filters: Filtros
+      site: imentore.com.br
+      contract: Contratar
+      finish: Finalizar
+      pay: Comprar
+      more_information: Lâmina de Informações
+      info_dashboard: Dashboard de Informações 
+      description: Descrição 
+      pages:
+        finish:
+          title: "Your registration has been completed successfully. Please wait for contact from your integrator %{name}.
+                             Otherwise, you can contact us through official channels or by email: %{email}"
+        contract:
+          fixed: Fixo
+          percent: Percentual
+          form_title: "Formulário para contratação do Portfolio %{name}"
+          customer_plan:
+            charge_recurrence:
+              monthly: Mensal
+              semester: Semestral
+              annual: Anual
+        show:
+          profit_factor: Fator de Lucro
+          oper_gain: Operações positivas
+          oper_loss: Operações negativas
+          profit_trade: Taxa de acerto
+          profit_drawdown: Lucro / Max DD
+          profit_net: Lucro
+          pay_off: Payoff 
+          max_dd: Max DD
+          mfe_mae: MFE & MAE
+          mfe_max: Max MFE
+          mae_min: Min MAE
+          curve_capital: Curva de capital
+          average_gain: Média de Ganho por operações
+          average_loss: Média de Perda por operações 
+          days:
+            zero: ""
+            one: "1 dia"
+            other: "%{count} dias"
+          months:
+            zero: ""
+            one: "1 mês"
+            other: "%{count} meses"
+          drawdown_days: 
+            zero: ""
+            one: "1 dia de drawdown"
+            other: "%{count} dias drawdowns"
+          drawdown: Drawdown
+          dates: "%{date1} à %{date2}"
+          orders_open: Ordens Abertas
+          orders_errors: Ordens Error
+          orders_closed: Ordens Fechadas
+          buy: Compras
+          sell: Vendas
+          capital_amount: Evolução do capital
+          total: Total
+    site:
+      signup_demo:
+        title: Nosso sistema foca na replicação exata de ordens de robôs, entradas manuais e sinais de trading, proporcionando uma gestão de trading eficiente e integrada.
+        title2: Comece hoje
+        title3: Não é necessário nenhum tipo de pagamento
+        title4: Regras importantes para o uso do sistema
+        resume_title: Leia atentamente todos os itens
+        rules1: "O sistema inicialmente irá permitir operações em conta demo. Somente após o periódo de teste de 30 dias de avaliação e com aprovação de nossa equipe que o sistema irá permitir o uso em conta reais, por isso valide dentro deste período."
+        rules2: "Caso o seu uso seja a partir de um robô de alta frequência (scalper), confirme se o tempo de abrir e fechar as operações entre o Copy e Slave estão de acordo com os seus parametros."
+        rules3: "Tenha sempre um grupo (telegram/whatsapp) com os seus clientes, pois caso aconteça algum problema na conexão servidor e cliente, você poderá informar sobre as informações de ordens fechadas ou abertas"
+        rules4: "Use, teste e valide!"
+        submit: "Iniciar Teste"
+        placeholder_email: Digite seu e-mail
+      main:
+        app_name: Imentore Copy
+        other1: Nosso sistema foca na replicação exata de ordens de robôs, entradas manuais e sinais de trading, proporcionando uma gestão de trading eficiente e integrada.
+        other2: 30 dias para testes
+        layout:
+          title1: Replique Suas
+          title2: Operações
+          title3: MT4/MT5 de Qualquer lugar do Mundo
+          title4: Sistema de replicação de ordens, entradas manuais e sinais de trading, garantindo uma gestão de operações eficiente e integrada.
+          title5: 30 de teste gratuito.
+          title6: Não necessidade cartão de crédito para iniciar teste.
+          title7: Características do Sistema
+          title8: Tenha mais informações e gerenciamento de suas operações
+          title9: Replicações de Ordens via MetaTraders
+          title10: "Compatibilidade Completa: Copie suas estratégias automaticamente entre as plataformas MT4 e MT5 com facilidade."
+          title11: "Saídas Parciais: Execute saídas parciais com eficiência, diretamente no sistema de replicação."
+          title12: "Cópia de Ordens Pendentes ou a Mercado: Todas as ordens, sejam pendentes ou a mercado, são copiadas de forma automática."
+          title13: Dashboard de Informações
+          title14: "Estatísticas por Portfólio: Acompanhe o desempenho detalhado de cada portfólio em um único local."
+          title15: "Informações Operacionais: Visualize dados completos por operação, conta e Magic Number."
+          title16: Link para Dashboard de Exemplo
+          title17: Gestão de Portfólios 
+          title18: "Restrição de Magic Number: Bloqueie Magic Numbers específicos que não serão copiados, garantindo personalização."
+          title19: "Controle de Volume por Conta: Ajuste o volume de operação para cada conta individualmente, conforme a estratégia."
+          title20: "Controle de Contas Copy: Integre múltiplos robôs em diferentes contas, utilizando uma única estratégia para atender a diversos clientes simultaneamente."
+          title21: Controle Contas
+          title22: "Controle de Contas Copy: Integre múltiplos robôs em diferentes contas, utilizando uma única estratégia para atender a diversos clientes simultaneamente."
+          title23: "Restrição de Magic Number: Defina quais Magic Numbers não serão copiados em cada portfólio, garantindo controle detalhado."
+          title24: "Escolha de Magic Number: Escolha o Magic Number específico ou mantenha o original do copy, conforme sua necessidade."
+          title25: Gestão de Faturas
+          title26: "Planos de Cobrança Flexíveis: Ofereça planos com diferentes tipos de recorrência, permitindo mensalidades fixas ou cobrança por porcentagem de ganho."
+          title27: Gestão de Cobrança
+          title28: "Gestão Automática de Cobrança: Visualize e configure ao seu cliente de formas de cobrança Online (MercadoPago/Stripe) para clientes os seus clientes, garantindo uma administração financeira eficiente."
+        portfolio: Compartilhe dashboards com seus clientes
+        warning: Sistema em versão beta
+        navbar:
+          home: Início
+          request_support: Faça um teste
+          sign_in: Acesse
+        title:
+          main: Sistema de Replicação de Ordens
+          imentore: imentore copy
+          pricing: preços
+          support: suporte
+          partner: Seja Parceiro
+          request_demo1: Iniciar Teste
+          request_demo2: Estamos em fase de testes, neste momento as serão selecionadas alguns clientes para testar e avaliar o nosso sistema como todos os recursos. Após o período de teste o cliente deverá optar por um plano com 10% de desconto na mensalidade no primeiro ano.
+        telegram:
+          title: Telegram 
+          resume: "Incluímos no nosso serviço um bot inovador chamado Alfred, que se conecta ao seu grupo do Telegram. Alfred é projetado para monitorar de forma eficiente as operações de trading, oferecendo atualizações em tempo real e permitindo uma gestão mais dinâmica das suas atividades de trading diretamente pelo Telegram."
+          resume2: "Alfred Bot permite que você compartilhe facilmente suas operações de trading no seu grupo do Telegram. Essa funcionalidade não só promove a transparência nas operações, mas também facilita a comunicação e o compartilhamento de estratégias entre os membros do grupo."
+          resume3: "Além disso, Alfred está sempre ativo para notificar você e os membros do seu grupo sobre importantes atualizações de trading. Ele informa automaticamente quando uma ordem é aberta, fechada ou sofre alterações, garantindo que todos no grupo estejam sempre informados e atualizados sobre as últimas movimentações do mercado."
+        payment:
+          title: Cobrança Automática
+          resume: O sistema possui um mecanismo de cobrança automática, garantindo que as taxas dos serviços sejam cobradas de forma eficiente. Além disso, ele é capaz de notificar ou até mesmo desabilitar automaticamente os clientes que estiverem em situação de inadimplência, assegurando uma gestão financeira mais tranquila e automatizada.
+          resume2: "Nosso sistema oferece uma solução de cobrança automatizada altamente personalizável. Você pode configurar planos de cobrança diferenciados para atender às necessidades específicas de diferentes portfólios ou clientes. A plataforma permite a definição de cobranças tanto por um valor fixo específico quanto por uma porcentagem dos lucros obtidos pelo cliente, oferecendo flexibilidade e conveniência tanto para o gestor quanto para o cliente."
+          resume3: "Atualmente, o sistema está integrado com o Mercado Pago e a STRIPE, garantindo um processo de pagamento seguro e eficiente. Essas integrações permitem uma maior variedade de opções de pagamento, facilitando transações financeiras e aprimorando a experiência do usuário."
+        copy: 
+          resume1: O sistema copiará as entradas de um robô, sinais telegram, ou mesmo entradas de um Trader manual.  
+          resume2: Na entradas manuais o cliente poderá continuar usando o seu sistema de trader favorito (Profit, Tryd...), basta que na mesma conta tenha acesso ao Metatrader.
+          resume3: O sistema dará todas informações Log entradas tanto da conta COPY quanto das contas SLAVES.
+        pricing:
+          plan:
+            free: Gratuito
+            basic: Básico
+            business: Negócio
+            premium: Premium
+          premium:
+            title1: Temos serviços exclusivos para clientes premium que necesitam de um sistema com alta demanda. 
+            title2: Entre em contato
+          title1: Planos
+          title2: Nossos planos.
+          sign_in: Assine
+          trace: "%{limit} Portfólio"
+          copy: "%{limit} Contas Copy"
+          slave: "%{limit} Contas Slaves"
+          charge: Cobrança automatica para clientes
+          telegram: "Robo Telegram Bot - Alfred"
+          extra: "%{amount} R$ por cada recurso extra"
+          announce1: "Todos os planos com %{value}% de desconto por tempo limitado"
+          announce2: descontos válidos por 1 ano.
+          price: "%{value} "
+          month: Por mês
+        management: 
+          title: Gestão & Portfólios 
+          resume: O sistema oferece a capacidade de criar diversos portfólios usando diferentes robôs, cada um identificado por um Magic Number único. Isso permite uma organização eficiente, onde diferentes estratégias de trading podem ser implementadas e gerenciadas separadamente, atendendo às necessidades específicas de cada cliente.
+          resume2: 
+      session:
+        dont_have_account: "Ainda não tem uma conta?"
+        create_one: "Crie uma agora!"
+        title1: Seja bem vindo!
+        title2: Preencha os dados para o acesso ao sistema
+
+    select:
+      prompt: Por favor selecione
+    submit:
+      create: Criar %{model}
+      submit: Salvar %{model}
+      update: Atualizar %{model}
+  activerecord:
+    attributes:
+      customer_plan:
+        id: #ID
+        name: Nome
+        kind: Tipo
+        amount: Valor
+        customers: Clientes
+        store_id: Sistema
+        created_at: criado
+        updated_at: atualizado
+      customer:
+        name: Nome
+        user_id: Usuário
+        store_id: Sistema
+        customer_plan_id: Plano
+        role: Regra Principal
+        role_control: Regra Cliente
+      account:
+        name: Metatrader Conta
+        state: Status
+        kind: Copy/Slave
+        customer_id: Cliente
+        meta_mode: MetaTrader Modo
+        meta_margin_mode: Meta Margem
+        magics_accept: Magic Number Aceito
+        instrument_control: Controle de Ativo
+        traces: Portfólio
+        transactions: Copy
+      trace:
+        id: #ID
+        name: Nome
+        name_id: Magic Number Portfólio
+        active: Ativo
+        magic_same: Slaves mesmo Magic Number
+        magics_accept: Magic Number Aceito
+        kind: Tipo
+        take_profit_limit: Limite TakeProfit
+        instrument_control: Controle de Ativo
+        capital_recomendation: Capital Recomendado
+        capital_multiplier: Multiplicador de Capital
+        contract_volume_max: Contrato Volume Max
+        restrict_dashboard: Restrição Dashboard
+        customer_plans: Plano do Portfolio
+        accounts: Conta
+        orders: Ordens
+        messages: Mensagem
+        transactions: Copy
+        instruments: Ativos
+        created_at: criado
+        updated_at: atualizado
+      user:
+        metatrader_account: Login Acesso (email / conta metatrader)
+      store:
+        name: Nome
+        state: Status
+        plan_id: Plano
+        url: Endereço URL
+        language: Idioma
+        tag_list: Restrição de Ativos
+        volume_default: Volume Default
+        stripe_api_secret: Stripe API (secret)
+        stripe_webhook_secret: Stripe Webhook (secret)
+        dashboard_restrict: Restrição Dashboard
+        dashboard_date_filter: Filtro Data
+      instrument:
+        id: #ID
+        account: Conta
+        symbol: Ativo
+        name: Ativo troca
+        volumes: Volumes
+        created_at: Criado
+        updated_at: Atualizado
+      order:
+        id: #ID
+        state: Status
+        symbol: Ativo
+        content_id: Ticket
+        trace: Portfólio
+        account: Contas
+        message: Mensagem 
+        profit_copy: Lucro Copy
+        profit_slave: Lucro Slaves
+        created_at: criado
+        updated_at: atualizado
+        transactions: Copy
+        slaves: Slaves
+      transaction:
+        id: #ID
+        trace: Portfólio
+        order: Ordem
+        ticket: Ticket
+        state: Status
+        profit: Lucro
+        ordertype: Tipo Ordem
+        symbol: Ativo
+        price_request: Preço Inicial
+        price_open: Preço Aberto
+        price_closed: Preço Fechado
+        stop_loss: Stop Loss
+        take_profit: Take Profit
+        comment: Comentário
+        lot: Volume
+        magic_number: Magic Number
+        response: response
+        response_error: response_error
+        open_at: Abertura
+        created_at: Criado
+        updated_at: Atualizado
+        message: Mensagem
+        loggings: Logs
+        account: Contas
+        slaves: Slaves
+      transaction_slave:
+        id: #ID
+        trace: Portfólio
+        order: Ordem
+        ticket_slave: Ticket Slave
+        ticket_master: Ticket Master
+        state: Status
+        profit: Lucro
+        ordertype: Tipo Ordem
+        symbol: Ativo
+        price_request: Preço Inicial
+        price_open: Preço Aberto
+        price_closed: Preço Fechado
+        stop_loss: Stop Loss
+        take_profit: Take Profit
+        comment: Comentário
+        lot: Volume
+        magic_number: Magic Number
+        response: response
+        response_error: response_error
+        open_at: Abertura
+        created_at: Criado
+        updated_at: Atualizado
+        message: Mensagem
+        loggings: Logs
+        account: Contas
+        slaves: Slaves
+      invoice:
+        id: #ID 
+        name: Nome 
+        state: Status
+        email: e-mail
+        payment_link: Link Pagamaneto 
+        stripe_product_id: Stripe Product ID
+        stripe_customer_id: Stripe Customer ID
+        stripe_invoice_id: Stripe Invoice ID
+        amount: valor 
+        items: items
+        invoiceable: Invoiceable
+        created_at: Criado
+        updated_at: Atualizado
+      message:
+        state: Status
+        trace: Portfólio
+        content_id: ID
+        content: Conteúdo
+        orders: Ordens
+        content_at: conteúdo em 
+        created_at: criado
+    models:
+      customer_plan:
+        one: Cliente - Plano
+        other: Clientes - Planos
+      customer:
+        one: Cliente
+        other: Clientes
+      account:
+        one: Conta
+        other: Contas
+      account_server:
+        one: Conta Server
+        other: Contas Server
+      trace:
+        one: Portfólio
+        other: Portfólios
+      store:
+        one: Sistema
+        other: Sistema
+      instrument:
+        one: Ativo
+        other: Ativos
+      transaction:
+        one: Copy
+        other: Copys
+      transaction_slave:
+        one: Slave
+        other: Slaves
+      invoice_item:
+        one: Fatura Item
+        other: Faturas Items
+      invoice:
+        one: Fatura
+        other: Faturas
+      user:
+        one: Usuário
+        other: Usuários
+      order:
+        one: Ordem
+        other: Ordens
+      payment:
+        one: Sistema Pagamento
+        other: Sistema Pagamentos
+      payment_method:
+        one: Sistema Payment
+        other: Sistema Payments
+
+    errors:
+      models:
+        store:
+          attributes:
+            password:
+              invalid_password: inválido
+      messages:
+        record_invalid: 'A validação falhou: %{errors}'
+        restrict_dependent_destroy:
+          has_one: Não é possível excluir o registro pois existe um %{record} dependente
+          has_many: Não é possível excluir o registro pois existem %{record} dependentes
+  date:
+    abbr_day_names:
+    - dom
+    - seg
+    - ter
+    - qua
+    - qui
+    - sex
+    - sáb
+    abbr_month_names:
+    - 
+    - jan
+    - fev
+    - mar
+    - abr
+    - mai
+    - jun
+    - jul
+    - ago
+    - set
+    - out
+    - nov
+    - dez
+    day_names:
+    - domingo
+    - segunda-feira
+    - terça-feira
+    - quarta-feira
+    - quinta-feira
+    - sexta-feira
+    - sábado
+    formats:
+      default: "%d/%m/%Y"
+      long: "%d de %B de %Y"
+      short: "%d de %B"
+      short2: "%d %b %H:%M:%S"
+      short3: "%d de %b %Y"
+      short4: "%d %b %Y"
+      month: "%B"
+
+    month_names:
+    - 
+    - janeiro
+    - fevereiro
+    - março
+    - abril
+    - maio
+    - junho
+    - julho
+    - agosto
+    - setembro
+    - outubro
+    - novembro
+    - dezembro
+    order:
+    - :day
+    - :month
+    - :year
+  datetime:
+    distance_in_words:
+      about_x_hours:
+        one: aproximadamente 1 hora
+        other: aproximadamente %{count} horas
+      about_x_months:
+        one: aproximadamente 1 mês
+        other: aproximadamente %{count} meses
+      about_x_years:
+        one: aproximadamente 1 ano
+        other: aproximadamente %{count} anos
+      almost_x_years:
+        one: quase 1 ano
+        other: quase %{count} anos
+      half_a_minute: meio minuto
+      less_than_x_seconds:
+        one: menos de 1 segundo
+        other: menos de %{count} segundos
+      less_than_x_minutes:
+        one: menos de um minuto
+        other: menos de %{count} minutos
+      over_x_years:
+        one: mais de 1 ano
+        other: mais de %{count} anos
+      x_seconds:
+        one: 1 segundo
+        other: "%{count} segundos"
+      x_minutes:
+        one: 1 minuto
+        other: "%{count} minutos"
+      x_days:
+        one: 1 dia
+        other: "%{count} dias"
+      x_months:
+        one: 1 mês
+        other: "%{count} meses"
+      x_years:
+        one: 1 ano
+        other: "%{count} anos"
+    prompts:
+      second: Segundo
+      minute: Minuto
+      hour: Hora
+      day: Dia
+      month: Mês
+      year: Ano
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      accepted: deve ser aceito
+      blank: não pode ficar em branco
+      confirmation: não é igual a %{attribute}
+      empty: não pode ficar vazio
+      equal_to: deve ser igual a %{count}
+      even: deve ser par
+      exclusion: não está disponível
+      greater_than: deve ser maior que %{count}
+      greater_than_or_equal_to: deve ser maior ou igual a %{count}
+      inclusion: não está incluído na lista
+      invalid: não é válido
+      less_than: deve ser menor que %{count}
+      less_than_or_equal_to: deve ser menor ou igual a %{count}
+      model_invalid: 'A validação falhou: %{errors}'
+      not_a_number: não é um número
+      not_an_integer: não é um número inteiro
+      odd: deve ser ímpar
+      other_than: deve ser diferente de %{count}
+      present: deve ficar em branco
+      required: é obrigatório(a)
+      taken: já está em uso
+      too_long:
+        one: 'é muito longo (máximo: 1 caracter)'
+        other: 'é muito longo (máximo: %{count} caracteres)'
+      too_short:
+        one: 'é muito curto (mínimo: 1 caracter)'
+        other: 'é muito curto (mínimo: %{count} caracteres)'
+      wrong_length:
+        one: não possui o tamanho esperado (1 caracter)
+        other: não possui o tamanho esperado (%{count} caracteres)
+    template:
+      body: 'Por favor, verifique o(s) seguinte(s) campo(s):'
+      header:
+        one: 'Não foi possível gravar %{model}: 1 erro'
+        other: 'Não foi possível gravar %{model}: %{count} erros'
+  number:
+    currency:
+      format:
+        delimiter: "."
+        format: "%u %n"
+        precision: 2
+        separator: ","
+        significant: false
+        strip_insignificant_zeros: false
+        unit: R$
+    format:
+      delimiter: "."
+      precision: 3
+      separator: ","
+      significant: false
+      strip_insignificant_zeros: false
+    human:
+      decimal_units:
+        format: "%n %u"
+        units:
+          billion:
+            one: bilhão
+            other: bilhões
+          million:
+            one: milhão
+            other: milhões
+          quadrillion:
+            one: quatrilhão
+            other: quatrilhões
+          thousand: mil
+          trillion:
+            one: trilhão
+            other: trilhões
+          unit: ''
+      format:
+        delimiter: ''
+        precision: 3
+        significant: true
+        strip_insignificant_zeros: true
+      storage_units:
+        format: "%n %u"
+        units:
+          byte:
+            one: Byte
+            other: Bytes
+          eb: EB
+          gb: GB
+          kb: KB
+          mb: MB
+          pb: PB
+          tb: TB
+    percentage:
+      format:
+        delimiter: "."
+        format: "%n%"
+    precision:
+      format:
+        delimiter: "."
+  support:
+    array:
+      last_word_connector: " e "
+      two_words_connector: " e "
+      words_connector: ", "
+  time:
+    am: ''
+    formats:
+      default: "%a, %d de %B de %Y, %H:%M:%S %z"
+      long: "%d de %B de %Y, %H:%M"
+      short: "%d de %B, %H:%M"
+      short2: "%d %b %H:%M:%S"
+      short3: "%d de %b %Y"
+      short4: "%d %b %Y"
+      short5: "%d %b %H:%M:%S"
+      short6: "%d/%m/%Y"
+      short7: "%B %Y"
+      short8: "%d/%m - %H:%M"
+    pm: ''
+
+  administrate_ransack:
+    filters:
+      'clear_filters': Clear filters
+      'no': 'No'
+      'search': Search
+      'yes': 'Yes'
+  administrate:
+    namespace_alternate: control
+    actions:
+      confirm: Você tem certeza?
+      destroy: Deletar
+      edit: Editar
+      edit_resource: Editar %{name}
+      show_resource: Visualizar %{name}
+      new_resource: Criar %{name}
+      back: Voltar
+    controller:
+      create:
+        success: "%{resource} foi criado com sucesso."
+        failure: "%{resource} com error ao criar."
+      destroy:
+        success: "%{resource} foi deletado com sucesso."
+        failure: "%{resource} com error ao remover."
+      update:
+        success: "%{resource} foi atualizado com sucesso."
+        failure: "%{resource} com error ao atualizar."
+      restore:
+        success: "%{resource} foi restaurado com sucesso."
+        failure: "%{resource} com error ao restaurar."
+    fields:
+      nested_has_many:
+          remove: Remover
+          add: Adicionar
+      has_many:
+        more: "Exibindo %{count} de %{total_count}"
+        none: Nenhum
+    form:
+      error: erro
+      errors: "%{pluralized_errors} impediram %{resource_name} de ser gravado:"
+    navigation:
+      back_to_app: Voltar ao site
+      dashboard: Dashboards
+    search:
+      clear: Limpar pesquisa
+      label: Pesquisa %{resource}

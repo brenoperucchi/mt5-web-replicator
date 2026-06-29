@@ -1,0 +1,36 @@
+{
+  "tab_size": 2,
+  "folders":
+  [
+    {
+      "file_exclude_patterns":
+      [
+        "*.pyc",
+        "Rakefile",
+        "config.ru",
+        ".gitkeep"
+      ],
+      "folder_exclude_patterns":
+      [
+        ".svn",
+        ".git",
+        ".hg",
+        ".vscode",
+        ".ruby-lsp",
+        ".bundle",
+        "vendor/plugins",
+        "public/assets",
+        "public/uploads",
+        "node_modules",
+        "tmp",
+        "log",
+        "doc"
+      ],
+      /*"follow_symlinks": true,*/
+      "path": ".",
+    },
+    {
+			"path": "/Users/brenoperucchi/Downloads/06 - Html Sites/Prompt_Tailwind_v1.1.0"
+		},
+  ],
+}

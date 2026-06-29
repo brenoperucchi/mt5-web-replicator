@@ -1,0 +1,164 @@
+require 'lib_enums'
+require 'reset_database'
+module ResetDatabase
+  # def self.reset_database
+  #   Transaction.delete_all
+  #   TransactionSlave.delete_all
+  #   Order.delete_all
+  #   Deal.delete_all
+  #   Message.delete_all
+  #   Balance.delete_all
+  #   Logging.delete_all
+  #   Message.delete_all
+  # end
+
+  def self.delete_logging
+    # Logging.where(state: "OPEN", loggerable_type:'TransactionSlave').delete_all
+    messages = Message::Message.joins('LEFT JOIN messages_traces ON messages_traces.message_id = messages.id').joins('LEFT JOIN messages_orders ON messages_orders.message_id = messages.id').where('messages_traces.trace_id IS NULL').where('messages_orders.order_id IS NULL')
+    messages.delete_all
+    date1 = DateTime.current - 12.months
+    date2 = DateTime.current - 4.months
+    conditions = (date1.beginning_of_day..date2.end_of_day)
+    Logging.where(state: "START",             created_at: conditions).delete_all
+    Logging.where(state: "MODIFY",            created_at: conditions).delete_all
+    Logging.where(state: "ACCOUNTNOTFOUND",   created_at: conditions).delete_all
+    Logging.where(state: "COPY/MODIFY",       created_at: conditions).delete_all
+    Logging.where(state: "COPY/CLOSE",        created_at: conditions).delete_all
+    Logging.where(state: "ORDERS_CLOSED",     created_at: conditions).delete_all
+    Logging.where(state: "ORDERS_OPEN",       created_at: conditions).delete_all
+    Message::Message.where(state: "executed", created_at: conditions).delete_all
+    # TransactionSlave.pending.where("created_at < ?",180.days.ago).destroy_all
+    # TransactionSlave.remove.where("created_at < ?", 180.days.ago).destroy_all
+
+
+    results = Logging
+      .group(:state, :loggerable_type, :loggerable_id)
+      .count
+      .select { |(state, loggerable_type, loggerable_id), count| 
+        count > 200 && state.present? && loggerable_type.present? && loggerable_id.present? 
+      }
+      .sort_by { |_, count| -count }
+
+    results.each do |(state, loggerable_type, loggerable_id), count|
+      logs_to_delete = Logging.where(state: state, loggerable_type:loggerable_type, loggerable_id: loggerable_id).offset(1)
+      logs_to_delete.delete_all
+    end
+
+
+    # date = DateTime.parse("2022-01-01")
+    # Logging.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
+    # Message::Message.where(created_at:date.beginning_of_year..date.end_of_year).delete_all
+  end
+
+
+  def self.transaction_slave_cleaning
+    map = TransactionSlave.select(:ticket_master,:account_id).group(:ticket_master,:account_id).having("count(*) > 1").size.map{|x| x[0]}
+    map.each do |x, z| 
+      slave = TransactionSlave.where(ticket_master: x, account_id: z, state: "deleted").take
+      slave.destroy unless slave.nil?
+      slave = TransactionSlave.where(ticket_master: x, account_id: z, state: "error").take
+      slave.destroy unless slave.nil?
+      slave = TransactionSlave.where(ticket_master: x, account_id: z, state: "closed", ticket_slave:-1).take
+      slave.destroy unless slave.nil?
+    end
+
+  end
+
+
+  def self.reset_trace(trace_id, account_id, store_id)
+    trace = Trace.find(trace_id)
+    account = Account.find(account_id)
+    store = Store.find(store_id)
+
+    new_trace = Trace.create(name: "Migrate Trace #{trace.name} ##{trace.id} - Account #{account.name} ID ##{account_id}", name_id: DateTime.current.to_i, kind:"copy", customer_plans: [Store.first.customer_plans.first], active: false, contract_volume_max:1, store:store)
+    Order.where(account_id: account_id, trace_id: trace_id).each do |o|
+      o.update(trace: new_trace)
+      o.transactions.update_all(trace_id: new_trace.id)
+      o.slaves.update_all(trace_id: new_trace.id)
+    end
+
+
+    # Trace.find(trace_id).masters.where(account_id: account_id).each do |t|
+    #   t.order.slaves.update_all(trace_id: new_trace.id)
+    #   t.order.update(trace:new_trace)
+    #   t.update(trace: new_trace)
+    # end
+  end
+
+  def self.migrate_db_production_to_development
+    Store.all.each do|s| 
+      s.update(url: s.url + "2") unless s.url.include?("2")
+    end
+    payments = Payment.all.order(id: :asc).limit(2)
+    payments.update_all(api_token: 'TEST-0000000000000000-000000-0000000000000000000000000000-00000000', webhook_token:'TEST-00000000-0000-0000-0000-000000000000') if payments.present?
+  end
+
+  def self.transaction_delete_loggings_closed
+    Transaction.all.each do |transaction|
+      closed_logging = transaction.loggings.where(state: "CLOSED").order(created_at: :desc)
+      if closed_logging.count > 1
+        closed_logging[1..-1].each do |logging|
+          logging.delete
+        end
+      end
+    end
+  end
+
+  def self.transactions_slaves_with_store_id
+    self.migrate_all_traces
+    orders = []
+    transactions = []
+    slaves = []
+    TransactionSlave.where(store_id:nil).each do |ts|
+      begin
+        store_id = ts.try(:account).try(:store_id) || ts.try(:order).try(:store_id) || ts.try(:trace).try(:store_id) || ts.try(:trace).stores.first.id
+        ts.update_column(:store_id, store_id)
+        if store_id.nil?
+          orders << ts.try(:order).try(:id)
+          transactions << ts.try(:master).try(:id)
+        end
+      rescue
+        orders << ts.try(:order).try(:id)
+        transactions << ts.try(:master).try(:id)
+        slaves << ts.try(:id)
+      end
+    end
+    
+    Order.where(id: orders.uniq.compact).map(&:destroy)
+    masters = Transaction.where(id: transactions.uniq.compact)
+    masters_count = masters.count
+    masters.map(&:destroy)
+    slaves2 = TransactionSlave.where(store_id: nil)
+    slaves2_count = slaves2.count
+    slaves2.map(&:destroy)
+
+    Order.where(id: orders.uniq.compact).map(&:destroy)
+    Transaction.where(id: transactions.uniq.compact).map(&:destroy)
+    TransactionSlave.where(store_id: nil).map(&:destroy)
+
+    puts "Orders => #{orders}"
+    puts "Transaction => #{transactions}"
+    puts "Transaction Deleted => #{masters_count}"
+    puts "Slaves => #{slaves}"
+    puts "Slaves Deleted => #{slaves2_count}"
+  end
+
+  def self.orders_migrate_to_transaction
+    orders = []
+    Order.all.each do |order|
+      begin
+        order.transaction_ids = order.master_ids.uniq.compact
+      rescue
+        orders << "Error: #{order.id}\n"
+      end
+    end
+    puts "Orders => #{orders}"
+  end
+
+  def self.migrate_all_traces
+    Trace.all.each do |trace|
+      trace.stores << Store.find_by(id:trace.store_id) if trace.store_id.present? and not trace.stores.exists?(trace.store)
+    end
+  end
+
+end

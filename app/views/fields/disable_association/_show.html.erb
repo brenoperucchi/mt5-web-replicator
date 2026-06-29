@@ -1,0 +1,14 @@
+
+
+<% if field.options[:type] == "has_many" %>
+	<% if field.options[:scope].nil? %>
+		<%= field.resource.send(field.options[:association]).map(&:name).join(', ') %>
+	<% else %>	
+		<%= field.resource.send(field.options[:scope]).try(field.options[:association]).map(&:name).join(', ') %>
+	<% end %>	
+
+<% else %>
+
+	<%= field.to_s %>
+
+<% end %>

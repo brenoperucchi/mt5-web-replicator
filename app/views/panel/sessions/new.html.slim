@@ -1,0 +1,44 @@
+section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
+  .container.position-relative
+    - if flash[:notice].present? or flash[:recaptcha_error].present?
+
+      .row.justify-content-center
+        .col-md-6.col-lg-5.col-xl-4
+        .alert.alert-danger[role="alert"]
+          = flash[:notice]
+          = flash[:recaptcha_error]
+
+    .row.justify-content-center
+      .col-md-6.col-lg-5.col-xl-4
+        h2.display-6
+          = I18n.t :title1, scope: 'helpers.site.session'
+        p.text-muted.mb-4
+          = I18n.t :title2, scope: 'helpers.site.session'
+        / = render layout: "auth_layout", locals: { title: "Sign in" }  do
+        = simple_form_for(resource, url: panel_user_session_path, method: :post, data: { turbo: false }) do |f|
+
+          .mb-3
+            / = f.label :email, class: "form-label"
+            = f.input :metatrader_account, autofocus: true, autocomplete: "email", input_html:{class: "form-control", value:params[:email]}
+
+          .mb-3
+            / .d-flex.justify-content-between.align-items-center.mb-2
+              = f.label :password, class: "form-label"
+            = f.input :password, autocomplete: "current-password", class: "form-control pe-5", id:"login_password"
+
+          .mb-3
+            - if devise_mapping.rememberable?
+              = f.input :remember_me, class: 'checkbox_class', as: :boolean
+              '
+              / = f.label :remember_me
+          .d-grid.mb-3
+            = f.submit "Sign in", class: "btn btn-primary"
+          / .mb-3
+          /   - if Rails.env.production?
+          /     = recaptcha_tags 
+        p.text-muted.small.mb-0
+          small
+            = I18n.t :dont_have_account, scope: 'helpers.site.session'
+          span.vr.mx-2.align-middle
+          a.text-decoration-underline[href="#{new_store_path(request.query_parameters)}"]
+            = I18n.t :create_one, scope: 'helpers.site.session'

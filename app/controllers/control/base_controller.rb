@@ -1,0 +1,75 @@
+require "sentient_store"
+
+module Control
+  class BaseController < Admin::ApplicationController
+    include SentientStore
+    include Administrate::Punditize
+
+    rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+
+
+    def create
+      resource = current_user.store.try(resource_name.to_s.pluralize.to_sym).try(:new, (resource_params))
+      authorize_resource(resource)
+
+      resource_deleted = resource.class.deleted.where(name: resource.name, store_id: current_user.store).take if resource.class.respond_to?(:deleted)
+
+      if resource_deleted and resource.respond_to?(:soft_destroy)
+        if resource_deleted.update_columns(deleted_at:nil) 
+          redirect_to(
+            after_resource_created_path(resource_deleted),
+            notice: translate_with_resource("restore.success"),
+          )
+        else
+          redirect_to(
+            after_resource_created_path(resource),
+            notice: translate_with_resource("restore.failure"),
+          )
+        end
+      elsif resource.save
+        redirect_to(
+          after_resource_created_path(resource),
+          notice: translate_with_resource("create.success"),
+        )
+      else
+        render :new, locals: {
+          page: Administrate::Page::Form.new(dashboard, resource),
+        }, status: :unprocessable_entity
+      end
+    end
+
+    def destroy
+      if requested_resource.respond_to?(:soft_destroy)
+        if requested_resource.soft_destroy
+          flash[:notice] = translate_with_resource("destroy.success")
+        else
+          flash[:error] = translate_with_resource("destroy.failure") + requested_resource.errors.full_messages.join("<br/>")
+        end
+        redirect_to after_resource_destroyed_path(requested_resource)
+      else
+        super
+      end
+    end
+    private
+
+    def user_not_authorized
+      flash[:alert] = "You are not authorized to perform this action."
+      redirect_back(fallback_location: user_session_path)
+    end
+
+
+    def new_resource
+      current_store.try(resource_name.to_s.pluralize.to_sym).try(:new)
+    end
+
+    # def dashboard
+    #   @dashboard ||= "#{namespace}::#{resource_name.to_s.classify}Dashboard".try(:classify).try(:constantize).try(:new)
+    #   # @dashboard ||= Control::AccountDashboard.new
+    # end
+
+    def scoped_resource
+      current_user.store.send("#{resource_name}".pluralize)
+    end
+
+  end
+end

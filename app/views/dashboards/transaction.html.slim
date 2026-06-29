@@ -1,0 +1,79 @@
+- content_for :breadcrumb do
+  li.breadcrumb-item
+    a href="#{dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+      = @trace.name
+  li.breadcrumb-item
+    a href="#{account_dashboard_path(@account.store.url, @trace.name, @account.id, params: request.query_parameters)}" 
+      = @account.name
+  li.breadcrumb-item
+    a href="#" 
+      = @transaction.try(:ticket)
+
+= render "filter"
+
+.row
+  .col-md-12
+    .card.table-card.latest-activity-card
+      .card-header
+        h5
+          | Copy  Ticket
+          '
+          = @transaction.ticket
+        .card-header-right
+      .card-body
+        .table-responsive
+          table.table.table-hover.table-borderless
+            thead
+              tr
+                th Ticket
+                th Account
+                th Symbol
+                th Kind
+                th State
+                th Profit
+                th Volume
+                th Type
+                th Price Open
+                th Price Closed
+                th OpenAt
+                th ClosetAt
+            tbody
+              tr
+                td = @transaction.ticket
+                td = @transaction.try(:account).try(:name)
+                td = @transaction.symbol
+                td = "COPY"
+                td = @transaction.state
+                td = number_with_precision @transaction.profit, precision:2
+                td = @transaction.lot.to_f.round(3)
+                td = @transaction.ordertype
+                td = @transaction.price_open
+                td = @transaction.price_closed
+                td = l(@transaction.open_at, format: :short2) if @transaction.open_at.present?
+                td = l(@transaction.closed_at, format: :short2) if @transaction.closed_at.present?
+              tr
+                td -
+                td - 
+                td - 
+                td -
+                td - 
+                td - 
+                td - 
+                td - 
+                td - 
+                td - 
+                td -
+              - @transaction.orders.find_by(store: @current_store).slaves.where(state: [:closed, :executed]).order(closed_at: 'DESC').each do |slave|
+                tr
+                  td = slave.ticket_slave
+                  td = slave.try(:account).try(:name)
+                  td = slave.symbol
+                  td = "SLAVE"
+                  td = slave.state
+                  td = number_with_precision slave.profit, precision:2
+                  td = slave.lot.to_f.round(3)
+                  td = slave.ordertype
+                  td = slave.price_open
+                  td = slave.price_closed
+                  td = l(slave.open_at, format: :short2) if slave.open_at.present?
+                  td = l(slave.closed_at, format: :short2) if slave.closed_at.present?

@@ -1,0 +1,350 @@
+section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
+  .container.position-relative
+    - if flash[:notice].present? or flash[:recaptcha_error].present?
+
+      .row.justify-content-center
+        .col-md-6.col-lg-5.col-xl-4
+        .alert.alert-danger[role="alert"]
+          = flash[:notice]
+          = flash[:recaptcha_error]
+
+    .row.justify-content-center
+      .col-md-12.col-lg-12.col-xl-12
+        h2.display-6
+          = I18n.t :title1, scope: 'helpers.site.session'
+          '
+          = @customer.name
+
+
+.row
+  .col-12
+    .card
+      .card-body
+        .d-md-flex.align-items-center.mb-9
+          div
+            h4.card-title.fw-semibold
+              | Faturas
+            / p.card-subtitle
+            /   | How to Check Your Order Status Online
+          / .ms-auto.mt-4.mt-md-0
+          /   ul.nav.nav-tabs[role="tablist"]
+          /     li.nav-item[role="presentation"]
+          /       a.nav-link.rounded.active[data-bs-toggle="tab" href="#home" role="tab" aria-selected="true"]
+          /         span
+          /           | Checkout
+          /     li.nav-item[role="presentation"]
+          /       a.nav-link.rounded[data-bs-toggle="tab" href="#profile" role="tab" aria-selected="false" tabindex="-1"]
+          /         span
+          /           | Paid
+          /     li.nav-item[role="presentation"]
+          /       a.nav-link.rounded[data-bs-toggle="tab" href="#messages" role="tab" aria-selected="false" tabindex="-1"]
+          /         span
+          /           | Packed
+        .tab-content.mt-3
+          #home.tab-pane.active[role="tabpanel"]
+            .table-responsive
+              table.table.align-middle.mb-0.text-nowrap
+                tbody
+                  - @invoices.order('due_at asc').each do |invoice|
+                    tr
+                      td.ps-0
+                        h6.mb-0.text-muted
+                          a.mb-2.text-info[data-bs-toggle="collapse" href="#collapse_invoice_#{invoice.id}" role="button" aria-expanded="false" aria-controls="collapse_invoice_#{invoice.id}"]
+                            i.fs-4.ti.ti-plus
+                      td.ps-0
+                        .d-flex.align-items-center.gap-3
+                          div
+                            h6.mb-0.fw-semibold
+                              = invoice.customer.name
+                            span.fs-2
+                              = invoice.customer.email
+                      td.ps-0
+                        span
+                          = I18n.l DateTime.parse(invoice.name[3..-1] + "-01") , format: :short8
+                      td.ps-0
+                        - if invoice.state == "paid"
+                          span.badge.bg-success-subtle.text-success.rounded-pill
+                            span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+                            | Pago 
+                        - elsif not invoice.paid? and DateTime.current <= invoice.due_at
+                          span.badge.bg-warning-subtle.text-warning.rounded-pill
+                            span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
+                            | Em Aberto 
+                        - elsif not invoice.paid? and DateTime.current > invoice.due_at 
+                          span.badge.bg-danger-subtle.text-danger.rounded-pill
+                            span.round-8.text-bg-danger.rounded-circle.d-inline-block.me-1
+                            | Atrasado
+                      td.ps-0
+                        h6.mb-0
+                          = number_to_currency invoice.amount
+                      td.ps-0
+                        h6.mb-0
+                          | Vencimento
+                        span.fs-2
+                          = I18n.l (invoice.due_at || DateTime.current), format: :short6
+                      td.text-end.ps-0
+                        - if invoice.to_paid? 
+                          = link_to invoice_send_panel_invoice_path(invoice), class: 'btn btn-sm btn-dark w-100' do
+                            / = I18n.t :payment, scope:'helpers.dashboards'
+                            | Pagamento
+                        - elsif invoice.pending?
+                          span.badge.bg-warning-subtle.text-warning.rounded-pill
+                            span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
+                            | Aguardando Conciliação
+
+                    tr
+                      td.ps-0.collapse[id="collapse_invoice_#{invoice.id}" colspan="6" class="p-0"]
+                        table.table.table-borderless[style="margin-left:00px"]
+                          tbody
+                            th.py-2 Descrição
+                            th.py-2 
+                            th.py-2 Conta
+                            th.py-2 Portfólio
+                            th.py-2 Valor
+                            th.py-2 Ação
+                            - invoice.items.each do |item|
+                              tr
+                                td.py-2[colspan=2]
+                                  table 
+                                    - item.description&.split("\n")&.each do |line|
+                                      tr
+                                        td.m-0
+                                          = line
+                                td.py-2
+                                  = item&.account.try(:name)
+                                td.py-2
+                                  = item&.trace.try(:name)
+                                td.py-2
+                                  = number_with_precision item.try(:amount), precision:2
+                                td
+                                  - if item&.plan_usage&.usageable&.percent?
+                                    = link_to item_conciliated_panel_invoice_path(invoice, item), class: 'btn btn-sm btn-dark w-100' do
+                                      | MT5 Conciliação
+
+
+                          
+                          
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Irpun Wicaksono
+          /                 span.fs-2
+          /                   | irpun@gmail.com
+          /           td.ps-0
+          /             span
+          /               | React Js - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $50.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-warning-subtle.text-warning.rounded-pill
+          /               span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
+          /               | progress 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Oyhan Ruhiyan
+          /                 span.fs-2
+          /                   | oyhan@gmail.com
+          /           td.ps-0
+          /             span
+          /               | Frontend Dev - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $49.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-success-subtle.text-success.rounded-pill
+          /               span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+          /               | delivered 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Dayat Santoso
+          /                 span.fs-2
+          /                   | dayat@gmail.com
+          /           td.ps-0
+          /             span
+          /               | UX Research - Power Courses
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $79.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-danger-subtle.text-danger.rounded-pill
+          /               span.round-8.text-bg-danger.rounded-circle.d-inline-block.me-1
+          /               | cancel 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Irpun Wicaksono
+          /                 span.fs-2
+          /                   | irpun@gmail.com
+          /           td.ps-0
+          /             span
+          /               | React Js - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $50.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-success-subtle.text-success.rounded-pill
+          /               span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+          /               | delivered 
+          / #profile.tab-pane[role="tabpanel"]
+          /   .table-responsive
+          /     table.table.table-hover.align-middle.mb-0.text-nowrap
+          /       tbody
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Oyhan Ruhiyan
+          /                 span.fs-2
+          /                   | oyhan@gmail.com
+          /           td.ps-0
+          /             span
+          /               | Frontend Dev - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $49.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-success-subtle.text-success.rounded-pill
+          /               span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+          /               | delivered 
+          /         tr
+          /           td.ps-0=
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Irpun Wicaksono
+          /                 span.fs-2
+          /                   | irpun@gmail.com
+          /           td.ps-0
+          /             span
+          /               | React Js - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $50.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-warning-subtle.text-warning.rounded-pill
+          /               span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
+          /               | progress 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Dayat Santoso
+          /                 span.fs-2
+          /                   | dayat@gmail.com
+          /           td.ps-0
+          /             span
+          /               | UX Research - Power Courses
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $79.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-danger-subtle.text-danger.rounded-pill
+          /               span.round-8.text-bg-danger.rounded-circle.d-inline-block.me-1
+          /               | cancel 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Irpun Wicaksono
+          /                 span.fs-2
+          /                   | irpun@gmail.com
+          /           td.ps-0
+          /             span
+          /               | React Js - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $50.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-success-subtle.text-success.rounded-pill
+          /               span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+          /               | delivered 
+          / #messages.tab-pane[role="tabpanel"]
+          /   .table-responsive
+          /     table.table.table-hover.align-middle.mb-0.text-nowrap
+          /       tbody
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Irpun Wicaksono
+          /                 span.fs-2
+          /                   | irpun@gmail.com
+          /           td.ps-0
+          /             span
+          /               | React Js - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $50.00
+          /           td.text-end.ps-0
+          /             a.badge.bg-success-subtle.text-success.rounded-pill[href="javascript:void(0)"]
+          /               span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+          /               | delivered 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Irpun Wicaksono
+          /                 span.fs-2
+          /                   | irpun@gmail.com
+          /           td.ps-0
+          /             span
+          /               | React Js - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $50.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-warning-subtle.text-warning.rounded-pill
+          /               span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
+          /               | progress 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Oyhan Ruhiyan
+          /                 span.fs-2
+          /                   | oyhan@gmail.com
+          /           td.ps-0
+          /             span
+          /               | Frontend Dev - Online Classes
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $49.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-success-subtle.text-success.rounded-pill
+          /               span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+          /               | delivered 
+          /         tr
+          /           td.ps-0
+          /             .d-flex.align-items-center.gap-3
+          /               div
+          /                 h6.mb-0.fw-semibold
+          /                   | Dayat Santoso
+          /                 span.fs-2
+          /                   | dayat@gmail.com
+          /           td.ps-0
+          /             span
+          /               | UX Research - Power Courses
+          /           td.ps-0
+          /             h6.mb-0
+          /               | $79.00
+          /           td.text-end.ps-0
+          /             span.badge.bg-danger-subtle.text-danger.rounded-pill
+          /               span.round-8.text-bg-danger.rounded-circle.d-inline-block.me-1
+          /               | cancel 

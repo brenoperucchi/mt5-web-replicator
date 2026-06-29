@@ -1,0 +1,81 @@
+---
+imentore_copy:
+  '2_07': disable
+  '2_08': disable
+  '2_09': disable
+  '2_10': disable
+  '2_11': disable
+  '2_12': disable
+  '2_13': disable
+  '2_20': disable
+  '2_21': disable
+  '2_22': disable
+  '2_23': disable
+  '2_24': disable
+  '2_30': disable
+  '3_00': OK
+  disable_msg: 'A versao |version| do Imentore Copy esta desabilitado em nosso sistema. Atualize seu expert. '
+imentore_slave:
+  '2_07': disable
+  '2_10': disable
+  '2_11': disable
+  '2_12': disable
+  '2_20': disable
+  '2_21': disable
+  '2_22': disable
+  '2_23': disable
+  '2_24': disable
+  '2_30': disable
+  '2_31': disable
+  '3_00': OK
+  disable_msg: 'A versao |version| do Imentore Slave esta desabilitado em nosso sistema. Atualize seu expert. '
+signal_slave:
+  '1_54': disable
+  '1_55': disable
+  '1_56': disable
+  '1_57': disable
+  '1_58': disable
+  '1_59': disable
+  '1_60': disable
+  '1_61': disable
+  '1_62': disable 
+  '1_63': disable
+  '1_64': disable
+  '1_65': disable
+  '1_66': disable
+  '1_67': disable
+  '1_68': disable
+  '1_69': disable
+  '2_00': disable
+  '2_01': disable
+  '2_02': disable
+  '2_03': disable
+  '2_04': disable
+  '2_05': disable
+  '2_06': disable
+  disable_msg: 'A versao |version| do SignalSlave esta desabilitado em nosso sistema. Atualize seu expert. '
+signal_copy:
+  '1_30': disable
+  '1_31': disable
+  '1_32': disable
+  '1_33': disable
+  '1_34': disable
+  '1_35': disable
+  '1_36': disable
+  '1_37': disable
+  '1_38': disable
+  '1_39': disable
+  '1_40': disable
+  '1_41': disable
+  '1_42': disable
+  '1_50': disable
+  '1_51': disable
+  '1_52': disable
+  '1_53': disable
+  '2_00': disable
+  '2_01': disable
+  '2_04': disable
+  '2_05': disable
+  '2_06': disable
+  '2_07': disable
+  disable_msg: 'A versao |version| do SignalCopy esta desabilitado em nosso sistema. Atualize seu expert. '

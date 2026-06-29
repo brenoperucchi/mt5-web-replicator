@@ -1,0 +1,26 @@
+<nav id="sidebar" class="order-last active">
+  <div class="custom-menu">
+    <button type="button" id="sidebarCollapse" class="btn btn-primary">
+    </button>
+  </div>
+  <div class="search">
+
+    <% 
+      traces   = current_user.userable.administrator? ? Trace.all.map{  |t| [t.name, t.id]} : current_user.store.traces.map{  |t| [t.name, t.id]}
+      accounts = current_user.userable.administrator? ? Account.all.map{|t| [t.name, t.id]} : current_user.store.accounts.map{|t| [t.name, t.id]}
+
+      namespace = local_assigns[:namespace] || :admin 
+      attribute_types = {
+      symbol: Administrate::Field::String,
+      profit_search: Administrate::Field::String,
+      account_id: Administrate::Field::Select.with_options(collection: accounts), 
+      trace_id: Administrate::Field::Select.with_options(collection: traces), 
+    } %>
+
+    <% if defined?(attribute_types_custom) %>
+      <% attribute_types = attribute_types.merge(attribute_types_custom) %>
+    <% end %>
+    <%= render('administrate_ransack/filters', attribute_labels: attribute_labels, attribute_types: attribute_types, options: { tags: 'select', states: states }, namespace: namespace )
+    %>
+  </div>
+</nav>

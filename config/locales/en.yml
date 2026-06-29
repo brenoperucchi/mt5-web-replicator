@@ -1,0 +1,660 @@
+en:
+  helpers:
+    pages:
+      files:
+        name: MT5 Files
+        tutorial_link: Installation Tutorial
+      partner:
+        title1: Become Our Partner
+        title2: We're Looking for Partners and Associates
+        title3: "<strong>iMentore</strong> is a robust and innovative order replication solution for <strong>MetaTrader 4 and 5</strong>. Focused on efficiency, portfolio control and advanced risk management, our platform serves traders and investors who seek maximum performance in their investments."
+        title4: "We are looking for commercial partners, associates and developers interested in taking iMentore to new international markets."
+        title5: "What We're Looking For:"
+        title6: "International Expansion:"
+        title7: "Access to brokers, traders and investors in other countries, expanding our global presence."
+        title8: "Commercial Partnership:"
+        title9: "Brokers and market agents who want to offer their clients a solid order replication tool, strengthening loyalty and satisfaction." 
+        title10: "Technical Collaboration:"
+        title11: "Programmers and developers ready to continually improve our technology, adding value and competitiveness to the product."
+        title12: "Let's talk!"
+        email: "breno@imentore.com"
+        name: "Breno Perucchi"
+    controller:
+      app_controller:
+        admin:
+          must_be_logged: 'You must be logged'
+        after_sign_error: "Talk to support - error #001."
+      session:
+        bad_login_email: "Bad email address given: %{email}"
+        bad_login_password: "*** Bad email address given: %{email}"
+    dashboards:
+      dashboards: Portfolios
+      admin: Administrator
+      filter: Filter
+      filters: Filters
+      site: imentore.com
+      contract: Contract
+      finish: Finish
+      pay: Pay
+      more_information: Info Blade
+      info_dashboard: Info Dashboard
+      description: Descrição
+      pages: 
+        finish:
+          title: "Your registration has been completed successfully. Please wait for contact from your integrator %{name}.
+                             Otherwise, you can contact us through official channels or by email: %{email}"
+        contract:
+          fixed: Fixed
+          percent: Percent
+          form_title: "Form for contracting the Portfolio %{name}"
+          customer_plan:
+            charge_recurrence:
+              monthly: Monthly
+              semester: Semester
+              annual: Annual
+        show:
+          profit_factor: Profit Factor
+          oper_gain: Gain
+          oper_loss: Loss
+          profit_trade: Success rate
+          profit_drawdown: Profit / Max DD
+          profit_net: Net Profit
+          pay_off: Payoff 
+          max_dd: Max DD
+          mfe_mae: MFE & MAE
+          mfe_max: Max MFE
+          mae_min: Min MAE
+          curve_capital: Capital Curve
+          average_gain: Average Gain by ordens
+          average_loss: Average Loss by ordens
+          days:
+            zero: ""
+            one: "1 day"
+            other: "%{count} days"
+          months:
+            zero: ""
+            one: "1 month"
+            other: "%{count} months"
+          drawdown_days: 
+            zero: ""
+            one: "1 drawdown day"
+            other: "%{count} drawdowns days"
+          drawdown: Drawdown
+          dates: "%{date1} to %{date2}"
+          orders_open: Open Orders
+          orders_errors: Errors Orders
+          orders_closed: Orders Closed 
+          buy: Buy
+          sell: Sell
+          capital_amount: Evolution of capital
+          total: Total
+    site:
+      signup_demo:
+        title: Better business planning for any kind of brand
+        title2: Get Started Today
+        title3: No credit card required
+        title4: Important rules for using the system.
+        resume_title: Read all items carefully
+        rules1: "The system will initially allow operations on a demo account. Only after the trial period of 30 days of evaluation and with approval from our team will the system allow the use of a real account, so validate within this period."
+        rules2: "If using a high-frequency robot (scalper), confirm that the opening and closing times for operations between Copy and Slave are in accordance with your parameters."
+        rules3: "Always have a group (telegram/whatsapp) with your customers, because if there is a problem with the server and client connection, you will be able to inform them about information on closed or open orders"
+        rules4: "Use, test and validate!"
+        submit: "Start Free Trail"
+        placeholder_email: Your work email
+      main:
+        app_name: Imentore Copy
+        other1: Copy Manager for Robots, manual entries and signals
+        other2: 30 days for trial
+        layout:
+          title1: Replicate Operations
+          title2: Trades
+          title3: from MT4/MT5 in Anywhere in the World
+          title4: Order replication system, manual entries and trading signals, ensuring efficient and integrated operations management.
+          title5: 30 day free trial.
+          title6: No credit card required to start trial.
+          title7: Features
+          title8: Get more information and management of your operations
+          title9: Order Replication via MetaTraders
+          title10: "Full Compatibility: Automatically copy your strategies between MT4 and MT5 platforms with ease."
+          title11: "Partial Exits: Efficiently execute partial exits directly in the replication system."
+          title12: "Copying Pending or Market Orders: All orders, whether pending or market, are copied automatically."
+          title13: Insights Dashboard
+          title14: "Portfolio Insights: Track detailed performance of each portfolio in one place."
+          title15: "Operational Insights: View comprehensive insights by trade, account, and Magic Number."
+          title16: Link to Sample Dashboard
+          title17: Portfolio Management
+          title18: "Magic Number Restriction: Block specific Magic Numbers that will not be copied, ensuring customization."
+          title19: "Volume Control by Account: Adjust the operation volume for each account individually, according to the strategy."
+          title20: "Copy Account Control: Integrate multiple robots in different accounts, using a single strategy to serve several clients simultaneously."
+          title21: Account Control
+          title22: "Copy Account Control: Integrate multiple robots in different accounts, using a single strategy to serve several clients simultaneously." 
+          title23: "Magic Number Restriction: Define which Magic Numbers will not be copied in each portfolio, ensuring detailed control."
+          title24: "Choose Magic Number: Choose the specific Magic Number or keep the original copy, according to your needs."
+          title25: Invoice Management
+          title26: "Flexible Billing Plans: Offer plans with different types of recurrence, allowing fixed monthly payments or billing by percentage of earnings."                 
+          title27: Charging Management
+          title28: "Automatic Billing Management: View and configure online billing methods (MercadoPago/Stripe) for your clients, ensuring efficient financial management."
+        portfolio: Share dashboard with your customers
+        warning: Beta version
+        navbar:
+          home: Home
+          request_support: Give a try!
+          sign_in: Sign In
+        title:
+          main: Copy Trades Manager
+          Imentore: Imentore copy
+          pricing: prices
+          support: support
+          partner: Become Partner
+          request_demo1: Start Free Trial
+          request_demo2: We are in the testing phase, at this time only a few customers will be selected to test and evaluate our system with all the features. After the trial period, the customer must opt for a plan with a 10% discount on the monthly fee for the first year.
+        telegram:
+          title: Telegram
+          resume: By connecting our robot Alfred to your group, you will be able to monitor the operations carried out.
+          resume2: Share your operations in your Telegram group with Alfred Bot
+          resume3: Alfred will notify when an order opens, closes or even changes to operations.
+        payment:
+          title: Automatic Billing
+          resume: The system will charge customers automatically.
+          resume2: The charge may be for a plan with a specific amount or a percentage of the customer's earnings.
+          resume3: The company's technology STRIPE will provide several reports and is fully integrated into our system.
+        copy:
+          resume1: The system will copy the inputs of a robot, telegram signals, or even inputs of a Manual Trader.
+          resume2: In manual entries, the client will be able to continue using his favorite trader system (Profit, Tryd, and others), just that the same account has access to Metatrader 5
+          resume3: The system will provide all log information entered both from the COPY account and from the SLAVES accounts.
+        pricing:
+          plan:
+            free: Free
+            basic: Basic
+            business: Business
+            premium: Premium
+          premium:
+            title1: We have exclusive services for premium customers who require a high-demand system.
+            title2: Get in touch
+          title1: Plans
+          title2: Our plans.
+          sign_in: sign
+          trace: "%{limit} Portfolio"
+          copy: "%{limit} Copy Accounts"
+          slave: "%{limit} Slave Accounts"
+          charge: Automatic billing for customers
+          telegram: "Robo Telegram Bot - Alfred"
+          extra: "%{amount} $ for each extra resource"
+          announce1: "All plans %{value}% off for a limited time"
+          announce2: discounts valid for 1 year.
+          price: "%{value} "
+          month: Monthly 
+        management:
+          title: Management & Portfolios
+          resume: Portfolio Management, Magic Number Restriction, Asset Control and many more
+          resume2:
+      session:
+        dont_have_account: "Don't Have an account yet?"
+        create_one: "Create one"
+        title1: Welcome Back!
+        title2: Fill the details to continue...
+    select:
+      prompt: Please select
+    submit:
+      create: Create %{model}
+      submit: Save %{model}
+      update: Update %{model}
+  activerecord:
+    attributes:
+      customer_plan:
+        id: #ID
+        name: name
+        kind: kind
+        amount: amount
+        customers: customers
+        store_id: System
+        created_at: created_at
+        updated_at: updated_at
+      customer:
+        name: Name
+        user_id: User
+        store_id: System
+        customer_plan_id: Customer Plan
+        role: Role system
+        role_control: Customer
+      account:
+        name: MetaTrader Account Number
+        state: State
+        customer_id: Customer
+        kind: Account Kind (copy/slave)
+        meta_mode: MetaTrader Mode
+        meta_margin_mode: Meta Margem
+        magics_accept: Accept Magic Number 
+        instrument_control: Instrument control
+        traces: Portfolio
+        transactions: Copy
+      trace:
+        id: #id
+        name: Name
+        name_id: Magic Number Portfolio
+        active: Active
+        magic_same: Slaves same MagicNumber
+        magics_accept: Magic Number Aceito
+        kind: kind
+        take_profit_limit: Take Profit limit
+        instrument_control: Instrument Control
+        capital_recomendation: Capital Recomendation
+        capital_multiplier: Capital Multiplier
+        contract_volume_max: Volume Max
+        customer_plans: Portfolio's Plans
+        accounts: Accounts
+        orders: Orders
+        messages: messages
+        transactions: Copy
+        instruments: Instruments
+        created_at: created_at
+        updated_at: updated_at
+      store:
+        name: name
+        state: state
+        plan_id: Plan
+        url: Url address
+        language: language
+        tag_list: Instrument Restriction 
+        volume_default: Default Volume
+        stripe_api_secret: Stripe API Secret
+        stripe_webhook_secret: Stripe Webhook Secret
+      instrument:
+        id: #id
+        account: Account
+        symbol: Symbol
+        name: Symbol Change
+        volumes: Volumes
+        created_at: created_at
+        updated_at: updated_at
+      order:
+        id: #ID
+        state: State
+        symbol: Symbol
+        content_id: Ticket
+        trace: Portfolio
+        account: Account
+        message: Message 
+        profit_copy: Profit Copy
+        profit_slave: Profit Slaves
+        created_at: created_at
+        updated_at: updated_at
+        transactions: Copy
+        slaves: Slaves
+      transaction:
+        id: #id
+        trace: Portfolio
+        order: Order
+        ticket: Ticket
+        state: State
+        profit: Profit
+        ordertype: Order type
+        symbol: Symbol
+        price_request: Request Price
+        price_closed: Close Price
+        price_open: Open Price
+        stop_loss: Stop loss
+        take_profit: Take profit
+        comment: comment
+        lot: lot
+        magic_number: magic_number
+        response: response
+        response_error: response_error
+        open_at: open_at
+        created_at: created_at
+        updated_at: updated_at
+        message: Message
+        loggings: Logs
+        account: Account
+        slaves: Slaves
+      transaction_slave:
+        id: #id
+        trace: Portfolio
+        order: Order
+        ticket_slave: Ticket Slave
+        ticket_master: Ticket Master
+        state: State
+        profit: Profit
+        ordertype: Order type
+        symbol: Symbol
+        price_request: Request Price
+        price_closed: Close Price
+        price_open: Open Price
+        stop_loss: Stop loss
+        take_profit: Take profit
+        comment: comment
+        lot: lot
+        magic_number: magic_number
+        response: response
+        response_error: response_error
+        open_at: open_at
+        created_at: created_at
+        updated_at: updated_at
+        message: Message
+        loggings: Logs
+        account: Account
+        slaves: Slaves
+      invoice:
+        id: #id
+        name: Name
+        state: State
+        email: Email
+        payment_link: Payment link
+        stripe_product_id: Stripe Product Id
+        stripe_customer_id: Stripe Customer Id
+        stripe_invoice_id: Stripe Invoice Id
+        amount: Amount
+        items: Items
+        invoiceable: Invoiceable
+        created_at: created_at
+        updated_at: updated_at
+      message:
+        state: State
+        trace: Portfolio
+        content_id: ID
+        content: Content
+        orders: Orders
+        content_at: content_at
+        created_at: created_at
+    models:
+      customer_plan:
+        one: Customer Plan
+        other: Customers Plans
+      customer:
+        one: Customer
+        other: Customers
+      account:
+        one: Account
+        other: Accounts
+      account_server:
+        one: Account Server
+        other: Accounts Server
+      trace:
+        one: Portfolio
+        other: Portfolios
+      store:
+        one: System
+        other: System
+      instrument:
+        one: Instrument
+        other: Instruments
+      transaction:
+        one: Copy
+        other: Copy
+      transaction_slave:
+        one: Slave
+        other: Slaves
+      invoice:
+        one: Invoice
+        other: Invoices
+      user:
+        one: User
+        other: Users
+      order:
+        one: Order
+        other: Orders
+      payment:
+        one: Payment
+        other: Payments
+      payment_method:
+        one: System Payment
+        other: System Payments
+
+    errors:
+      models:
+        store:
+          attributes:
+            password:
+              invalid_password: invalid
+      messages:
+        record_invalid: "Validation failed: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "Cannot delete record because a dependent %{record} exists"
+          has_many: "Cannot delete record because dependent %{record} exist"
+  date:
+    abbr_day_names:
+    - Sun
+    - Mon
+    - Tue
+    - Wed
+    - Thu
+    - Fri
+    - Sat
+    abbr_month_names:
+    - 
+    - Jan
+    - Feb
+    - Mar
+    - Apr
+    - May
+    - Jun
+    - Jul
+    - Aug
+    - Sep
+    - Oct
+    - Nov
+    - Dec
+    day_names:
+    - Sunday
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+    - Saturday
+    formats:
+      default: "%Y-%m-%d"
+      long: "%B %d, %Y"
+      short: "%b %d"
+      short2: "%d %b %H:%M:%S"
+      short3: "%d de %b %Y"
+      short4: "%d %b %Y"
+      month: "%B"
+
+    month_names:
+    - 
+    - January
+    - February
+    - March
+    - April
+    - May
+    - June
+    - July
+    - August
+    - September
+    - October
+    - November
+    - December
+    order:
+    - :year
+    - :month
+    - :day
+  datetime:
+    distance_in_words:
+      about_x_hours:
+        one: about 1 hour
+        other: about %{count} hours
+      about_x_months:
+        one: about 1 month
+        other: about %{count} months
+      about_x_years:
+        one: about 1 year
+        other: about %{count} years
+      almost_x_years:
+        one: almost 1 year
+        other: almost %{count} years
+      half_a_minute: half a minute
+      less_than_x_seconds:
+        one: less than 1 second
+        other: less than %{count} seconds
+      less_than_x_minutes:
+        one: less than a minute
+        other: less than %{count} minutes
+      over_x_years:
+        one: over 1 year
+        other: over %{count} years
+      x_seconds:
+        one: 1 second
+        other: "%{count} seconds"
+      x_minutes:
+        one: 1 minute
+        other: "%{count} minutes"
+      x_days:
+        one: 1 day
+        other: "%{count} days"
+      x_months:
+        one: 1 month
+        other: "%{count} months"
+      x_years:
+        one: 1 year
+        other: "%{count} years"
+    prompts:
+      second: Second
+      minute: Minute
+      hour: Hour
+      day: Day
+      month: Month
+      year: Year
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      accepted: must be accepted
+      blank: can't be blank
+      confirmation: doesn't match %{attribute}
+      empty: can't be empty
+      equal_to: must be equal to %{count}
+      even: must be even
+      exclusion: is reserved
+      greater_than: must be greater than %{count}
+      greater_than_or_equal_to: must be greater than or equal to %{count}
+      inclusion: is not included in the list
+      invalid: is invalid
+      less_than: must be less than %{count}
+      less_than_or_equal_to: must be less than or equal to %{count}
+      model_invalid: 'Validation failed: %{errors}'
+      not_a_number: is not a number
+      not_an_integer: must be an integer
+      odd: must be odd
+      other_than: must be other than %{count}
+      present: must be blank
+      required: must exist
+      taken: has already been taken
+      too_long:
+        one: is too long (maximum is 1 character)
+        other: is too long (maximum is %{count} characters)
+      too_short:
+        one: is too short (minimum is 1 character)
+        other: is too short (minimum is %{count} characters)
+      wrong_length:
+        one: is the wrong length (should be 1 character)
+        other: is the wrong length (should be %{count} characters)
+    template:
+      body: 'There were problems with the following fields:'
+      header:
+        one: 1 error prohibited this %{model} from being saved
+        other: "%{count} errors prohibited this %{model} from being saved"
+  number:
+    currency:
+      format:
+        delimiter: ","
+        format: "%u%n"
+        precision: 2
+        separator: "."
+        significant: false
+        strip_insignificant_zeros: false
+        unit: "$"
+    format:
+      delimiter: ","
+      precision: 2
+      separator: "."
+      significant: false
+      strip_insignificant_zeros: false
+    human:
+      decimal_units:
+        format: "%n %u"
+        units:
+          billion: Billion
+          million: Million
+          quadrillion: Quadrillion
+          thousand: Thousand
+          trillion: Trillion
+          unit: ''
+      format:
+        delimiter: ''
+        precision: 3
+        significant: true
+        strip_insignificant_zeros: true
+      storage_units:
+        format: "%n %u"
+        units:
+          byte:
+            one: Byte
+            other: Bytes
+          eb: EB
+          gb: GB
+          kb: KB
+          mb: MB
+          pb: PB
+          tb: TB
+    percentage:
+      format:
+        delimiter: ''
+        format: "%n%"
+    precision:
+      format:
+        delimiter: ''
+  support:
+    array:
+      last_word_connector: ", and "
+      two_words_connector: " and "
+      words_connector: ", "
+  time:
+    am: am
+    formats:
+      default: "%a, %d %b %Y %H:%M:%S %z"
+      long: "%B %d, %Y %H:%M"
+      short: "%d %b %H:%M"
+      short2: "%d %b %H:%M:%S"
+      short3: "%d of %b %Y"
+      short4: "%d %b %Y"
+      short5: "%b %d %H:%M:%S"
+      short6: "%m/%d/%Y"
+      short7: "%B %Y"
+      short8: "%m/%d - %H:%M"
+    pm: pm
+    
+  administrate:
+    namespace_alternate: control
+    actions:
+      confirm: Are you sure?
+      destroy: Destroy
+      edit: Edit
+      edit_resource: Edit %{name}
+      show_resource: Show %{name}
+      new_resource: New %{name}
+      back: Back
+    controller:
+      create:
+        success: "%{resource} was successfully created."
+        failure: "%{resource} failure on create."
+      destroy:
+        success: "%{resource} was successfully destroyed."
+        failure: "%{resource} failure on destroy."
+      update:
+        success: "%{resource} was successfully updated."
+        failure: "%{resource} failure on update."
+    fields:
+      nested_has_many:
+          remove: Remove
+          Add: Add
+      has_many:
+        more: Showing %{count} of %{total_count}
+        none: None
+    form:
+      error: error
+      errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
+    navigation:
+      back_to_app: Back to site
+    search:
+      clear: Clear search
+      label: Search %{resource}

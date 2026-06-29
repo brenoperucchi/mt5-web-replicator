@@ -1,0 +1,195 @@
+
+section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
+  .container.position-relative
+    - if flash[:notice].present? or flash[:recaptcha_error].present?
+
+      .row.justify-content-center
+        .col-md-6.col-lg-5.col-xl-4
+        .alert.alert-danger[role="alert"]
+          = flash[:notice]
+          = flash[:recaptcha_error]
+
+    .row.justify-content-center
+      .col-md-12.col-lg-12.col-xl-12
+        h2.display-6
+          = I18n.t :title1, scope: 'helpers.site.session'
+          '
+          = current_user.userable.name
+
+.row
+  .col-12
+    .card
+      .card-body
+        .d-md-flex.align-items-center.mb-9
+          div
+            h4.card-title.fw-semibold
+              | Portifólios
+            / p.card-subtitle
+            /   | How to Check Your Order Status Online
+          / .ms-auto.mt-4.mt-md-0
+          /   ul.nav.nav-tabs[role="tablist"]
+          /     li.nav-item[role="presentation"]
+          /       a.nav-link.rounded.active[data-bs-toggle="tab" href="#home" role="tab" aria-selected="true"]
+          /         span
+          /           | Checkout
+          /     li.nav-item[role="presentation"]
+          /       a.nav-link.rounded[data-bs-toggle="tab" href="#profile" role="tab" aria-selected="false" tabindex="-1"]
+          /         span
+          /           | Paid
+          /     li.nav-item[role="presentation"]
+          /       a.nav-link.rounded[data-bs-toggle="tab" href="#messages" role="tab" aria-selected="efalse" tabindex="-1"]
+          /         span
+          /           | Packed
+        .tab-content.mt-3
+          #home.tab-pane.active[role="tabpanel"]
+            .table-responsive
+              table.table.align-middle.mb-0.text-nowrap
+                tbody
+                  - current_user.userable.accounts.each do |account|
+                    - account.traces.each do |trace|
+                      / - amount = @account.data_scope(:slaves, nil, :all, trace).to_a.sum(&:profit) 
+                      - customer_plan = trace.customer_plan.calculate_amount(nil, account, trace)
+                      tr
+                        / td.ps-0
+                        /   h6.mb-0.text-muted
+                        /     a.mb-2.text-info[data-bs-toggle="collapse" href="#collapse_invoice_#{account.id}" role="button" aria-expanded="false" aria-controls="collapse_invoice_#{account.id}"]
+                        /       i.fs-4.ti.ti-plus
+                        td.ps-0
+                          .d-flex.align-items-center.gap-3
+                            div
+                              h6.mb-0.fw-semibold
+                                | Conta
+                                '
+                                = account.name
+                              span.fs-3
+                                | Portfólio: 
+                                '
+                                = trace.name
+                        td.ps-0
+                          .d-flex.align-items-center.gap-3
+                            div
+                              h6.mb-0.fw-semibold
+                                | Mês
+                              span.fs-3
+                                = I18n.l Date.today, format: :month
+                        td.ps-0
+                          .d-flex.align-items-center.gap-3
+                            div
+                              h6.mb-0.fw-semibold
+                                | Tipo
+
+                              span.fs-3
+                                = customer_plan.kind == "percent" ? "Percentual" : "Fixo"
+                        td.text-end.ps-0
+                          .d-flex.align-items-center.gap-3
+                            div
+                              h6.mb-0.fw-semibold
+                                | Lucro no Mês
+
+                              span.fs-3
+                                = number_to_currency account.amount_trace(trace)
+                        td.text-end.ps-0
+                          .d-flex.align-items-center.gap-3
+                            div
+                              h6.mb-0.fw-semibold
+                                | Próxima Fatura
+
+                              span.fs-3
+                                = number_to_currency customer_plan.amount_proportional
+                        td.text-end.ps-0
+                          h6.mb-0.fw-semibold
+                            = link_to panel_invoices_path, class: 'btn btn-sm btn-dark w-100' do
+                              | Faturas
+                          / span.fs-3
+                          /   = link_to dashboard_path(@current_store.url, trace.name, params:request.query_parameters), class: 'btn btn-sm btn-light w-100' do
+                          /     = I18n.t :info_dashboard, scope:'helpers.dashboards'                            
+                      /   td.ps-0
+                      /     - if invoice.state == "paid"
+                      /       span.badge.bg-success-subtle.text-success.rounded-pill
+                      /         span.round-8.text-bg-success.rounded-circle.d-inline-block.me-1
+                      /         | Pago 
+                      /     - elsif not invoice.paid? and DateTime.current <= invoice.due_at
+                      /       span.badge.bg-warning-subtle.text-warning.rounded-pill
+                      /         span.round-8.text-bg-warning.rounded-circle.d-inline-block.me-1
+                      /         | Em Aberto 
+                      /     - elsif not invoice.paid? and DateTime.current > invoice.due_at 
+                      /       span.badge.bg-danger-subtle.text-danger.rounded-pill
+                      /         span.round-8.text-bg-danger.rounded-circle.d-inline-block.me-1
+                      /         | Atrasado
+                      /   td.ps-0
+                      /     h6.mb-0
+                      /       = number_to_currency invoice.amount
+                      /   td.ps-0
+                      /     h6.mb-0
+                      /       = I18n.l (invoice.due_at || DateTime.current), format: :short6
+                      /   td.text-end.ps-0
+                      /     - unless invoice.paid?
+                      /       = link_to invoice_send_panel_account_invoice_path(@account, invoice), class: 'btn btn-dark w-100' do
+                      /         / = I18n.t :payment, scope:'helpers.dashboards'
+                      /         | Pagamento
+                      / tr
+                      /   td.ps-0.collapse[id="collapse_invoice_#{invoice.id}" colspan="5" class="p-0"]
+                      /     ul.list-group.list-group-flush[style="margin-left:40px"]
+                      /       - invoice.items.each do |item|
+                      /         li.list-group-item.d-flex.justify-content-between.align-items-center.m-1
+                      /           span
+                      /             = item.description
+                      /           span
+                      /             = number_to_currency item.amount
+/ .row
+/   .col-lg-12
+/     .row.d-flex.align-items-stretch
+/       - @account.customer.accounts.each do |account|
+/         - account.traces.each do |trace|
+/           - amount = @account.data_scope(:slaves, nil, :all, trace).to_a.sum(&:profit) 
+/           .col-lg-4.d-flex#ajax-container
+/             .card.w-100
+/               .card-body.details
+/                 h5.card-title
+/                   = account.name
+/                   | - 
+/                   = trace.name
+/                 / = render "contract_sidebar_plan_type", amount_proportional:amount_proportional, amount_min:amount_min, amount_plan:amount_plan, contract_volume:contract_volume, trace:@trace
+/                 .py-1.d-flex
+/                   / span.round-8.bg-dark.rounded-circle.me-6  
+/                   .ms-0
+/                 .py-1.d-flex
+/                   / span.round-8.bg-dark.rounded-circle.me-6  
+/                   .ms-0
+/                     h6.mb-0
+/                       = I18n.t trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
+/                   .ms-auto
+/                     span.fs-2
+/                       h6= number_with_precision(trace.customer_plan.amount, precision:2, significant:true)
+/                 .pt-1.d-flex
+/                   / span.round-8.bg-dark.rounded-circle.me-6  
+/                   .ms-0
+/                     h6.mb-0
+/                       | Lucro Mês
+/                   .ms-auto
+/                     span.fs-2
+/                       h6= number_with_precision(amount, precision:2)
+/                   / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
+/                 .pt-1.d-flex
+/                   / span.round-8.bg-dark.rounded-circle.me-6  
+/                   .ms-0
+/                     h6.mb-0
+/                       | Pagamento mensal
+/                   .ms-auto
+/                     span.fs-2
+/                       - if trace.customer_plan.try(:kind) == "percent"
+/                         - amount = trace.customer_plan.amount * amount/100
+/                       - else 
+/                         - amount = trace.customer_plan.amount 
+/                       h6= number_to_currency amount
+/                   / = link_to contract_dashboard_path(@trace), class: 'btn btn-dark w-100' do
+/                 div.d-flex.align-items-baseline.mb-2.mt-4
+/                   / button.btn.btn-primary.w-100
+/                   = link_to dashboard_path(@current_store.url, trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
+/                     = I18n.t :info_dashboard, scope:'helpers.dashboards'
+
+/                 div
+/                   / button.btn.btn-primary.w-100
+/                   = link_to create_invoice_panel_account_invoices_path(account, trace), class: 'btn btn-lg btn-dark w-100' do
+/                     | Pagamento
+/                     / = I18n.t :contract, scope:'helpers.dashboards'

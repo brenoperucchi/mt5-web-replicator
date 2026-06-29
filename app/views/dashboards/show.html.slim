@@ -1,0 +1,560 @@
+- chart_values =  @trace.dashboard_capital_accumulated(true)
+- chart_regression = AlgoStatistic.trend_line(chart_values)
+- chart_regression = [chart_regression[0], chart_regression[-1]]
+- content_for :header do
+  css:
+    /* CSS para o contêiner flexível */
+    .flex-container {
+        display: flex;
+        flex-wrap: wrap; /* Permite que os itens se ajustem em várias linhas, se necessário */
+    }
+
+    .flex-container .col-sm-8, .flex-container .col-md-6 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .flex-container .card {
+        flex-grow: 1; /* Faz com que cada card expanda para preencher o espaço disponível */
+        width: 100%; /* Garante que o card ocupe toda a largura da coluna */
+    }
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Distribui o espaço uniformemente */
+        height: 100%; /* Faz com que a .card-body ocupe toda a altura da .card */
+    }
+
+- content_for :breadcrumb do
+  li.breadcrumb-item
+    a href="#{dashboard_path(@current_store.url, @trace.name, params: request.query_parameters)}" 
+      = @trace.name
+
+= render "filter"
+
+.row
+  .col-xl-12.col-md-12
+    .row
+      .col-md-6.col-lg-4.d-flex.align-items-stretch
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.profit_factor(:masters, nil).round(2), precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.data_scope(:masters, :closed, :gain).to_a.sum(&:profit), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.data_scope(:masters, :closed, :loss).to_a.sum(&:profit), precision: 2 
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
+      .col-md-6.col-lg-4.d-flex.align-items-stretch
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :profit_trade, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = "#{@trace.profit_trade(:masters)} %"
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, :closed, :gain).to_a.count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_gain, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, :closed, :loss).to_a.count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :oper_loss, scope:'helpers.dashboards.pages.show'
+      .col-md-6.col-lg-4.d-flex.align-items-stretch
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :profit_drawdown, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.profit_drawdown, precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision(@trace.data_scope(:masters, :closed).to_a.sum(&:profit), precision: 2)
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :profit_net, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.drawdown, precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :max_dd, scope:'helpers.dashboards.pages.show'
+            .row[style="margin-top:3px;"]
+              .col-12.text-center
+                h6.text-muted
+                  - dates = @trace.drawdown_dates
+                  = I18n.t :drawdown_days, scope:'helpers.dashboards.pages.show', count: dates.try(:size)
+                  '
+                  - if dates.present?
+                    | - 
+                    '
+                    = I18n.t :dates, scope:'helpers.dashboards.pages.show', date1: i18n_l(dates.first), date2: i18n_l(dates.last)
+
+    .row.flex-container
+      .col-sm-8
+        .card
+          .card-body
+            .row
+              .col-lg-12.col-md-12
+                .d-flex.m-b-10.no-block
+                  h5
+                    = I18n.t :curve_capital, scope:'helpers.dashboards.pages.show'
+                    / '
+                    / = (I18n.t :days, scope:'helpers.dashboards.pages.show', count:@trace.dashboard_capital_accumulated.size).try(:downcase)
+              / .col-lg-6.col-md-6.text-right
+              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+              /     li
+              /       | Last week
+              /     li
+              /       | Last month
+              /     li
+              /       i.flaticon-calendar.text-primary.f-16
+            .clearfix
+            / #chart-dashboard_capital_accumulated[data-chart="#{@trace.dashboard_capital_accumulated.to_json}"]
+            #chart-dashboard_capital_accumulated[style="min-height: 335px;" 
+              data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
+              data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}",
+              data-chart-regressionlinear="#{chart_regression.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:linear]] unless x.blank?}}"]
+
+            .clearfix
+      .col-md-6.col-lg-4.align-items-stretch
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.pay_off, precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.average(:masters, [:closed], :gain), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = (I18n.t :average_gain, scope:'helpers.dashboards.pages.show').capitalize
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.average(:masters, [:closed], :loss), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = (I18n.t :average_loss, scope:'helpers.dashboards.pages.show').capitalize
+        .card.w-100
+          .card-body
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :mfe_mae, scope:'helpers.dashboards.pages.show'
+            / h2.text-center.fw-semibold
+            /   = number_with_precision @trace.pay_off, precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.mfe.try(:amount), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :mfe_max, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = number_with_precision @trace.mae.try(:amount), precision: 2
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :mae_min, scope:'helpers.dashboards.pages.show'
+
+
+    .row.flex-container
+      .col-sm-8
+        .card#chart
+          .card-body
+            .row
+              .col-lg-12.col-md-12
+                .d-flex.m-b-10.no-block
+                  h5
+                    = I18n.t :drawdown, scope:'helpers.dashboards.pages.show'
+                    / = " - "
+                    / = (I18n.t :days, scope:'helpers.dashboards.pages.show', count:@trace.dashboard_drawdown.size).try(:downcase)
+              / .col-lg-6.col-md-6.text-right
+              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+              /     li
+              /       | Last week
+              /     li
+              /       | Last month
+              /     li
+              /       i.flaticon-calendar.text-primary.f-16
+            .clearfix
+            #morris-area-chart-dashboard_drawdown[data-chart="#{@trace.dashboard_drawdown.to_json}"]
+            .clearfix
+      .col-md-6.col-lg-4
+        / .card.w-100
+        /   .card-body
+        /     h5.card-title.fw-semibold.text-center
+        /       = I18n.t :orders_errors, scope:'helpers.dashboards.pages.show'
+        /     h2.text-center.fw-semibold
+        /       = number_with_precision @trace.data_scope(:masters, [:error]).to_a.sum(&:profit), precision: 2
+        /     .d-flex.align-items-center.justify-content-between
+        /       .d-flex.align-items-center
+        /         span.round-8.bg-dark.rounded-circle.me-6
+        /         div
+        /           h6.fw-semibold.text-dark.fs-4.mb-0
+        /             = @trace.data_scope(:masters, [:error], :buy).count
+        /           p.fs-3.mb-0.fw-normal
+        /             = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+        /       .d-flex.align-items-center
+        /         span.round-8.bg-dark.rounded-circle.me-6
+        /         div
+        /           h6.fw-semibold.text-dark.fs-4.mb-0
+        /             = @trace.data_scope(:masters, [:error], :sell).count
+        /           p.fs-3.mb-0.fw-normal
+        /             = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+        .card.w-100#order_open
+          .card-body.details
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :orders_open, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.data_scope(:masters, :executed).to_a.sum(&:profit), precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:executed], :buy).size
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:executed], :sell).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+        .card.w-100#order_closed
+          .card-body.details
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :orders_closed, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.data_scope(:masters, [:closed]).to_a.sum(&:profit), precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:closed], :buy).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:closed], :sell).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+    .row
+      .col-lg-8
+        .card
+          .card-body
+            .row
+              .col-lg-12.col-md-12
+                .d-flex.m-b-10.no-block
+                  h5
+                    = I18n.t :capital_amount, scope:'helpers.dashboards.pages.show'
+                    = " - "
+                    = I18n.t :months, scope:'helpers.dashboards.pages.show', count: @trace.dashboard_monthy_amount.size
+                    / = I18n.t :drawdown_days, scope:'helpers.dashboards.pages.show', count: dates.try(:size)
+              / .col-lg-6.col-md-6.text-right
+              /   ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+              /     li
+              /       | Last week
+              /     li
+              /       | Last month
+              /     li
+              /       i.flaticon-calendar.text-primary.f-16
+            .clearfix
+            #morris-area-chart-dashboard_monthy_amount[data-chart="#{@trace.dashboard_monthy_amount.to_json}"]
+            .clearfix
+      .col-md-6.col-lg-4.align-items-stretch
+        .card.w-100
+          .card-body.details
+            h5.card-title.fw-semibold.text-center
+              = I18n.t :total, scope:'helpers.dashboards.pages.show'
+            h2.text-center.fw-semibold
+              = number_with_precision @trace.data_scope(:masters, [:executed, :closed]).to_a.sum(&:profit), precision: 2
+            .d-flex.align-items-center.justify-content-between
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:executed, :closed], :buy).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :buy, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:executed, :closed], :sell).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :sell, scope:'helpers.dashboards.pages.show'
+              .d-flex.align-items-center
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h6.fw-semibold.text-dark.fs-4.mb-0
+                    = @trace.data_scope(:masters, [:executed, :closed]).count
+                  p.fs-3.mb-0.fw-normal
+                    = I18n.t :total, scope:'helpers.dashboards.pages.show'
+
+  / - if user_signed_in?
+  .row
+    .col-md-12
+      .card.table-card.latest-activity-card
+        .card-header
+          h5 Accounts
+        .card-body
+          .table-responsive
+            table.table.table-hover.table-borderless#accounts
+              thead
+                tr
+                  th Account
+                  th 
+                  th Fator Lucro
+                  th Tx de Acerto
+                  th Lucro/MaxDD
+                  th 
+                  th Op Open 
+                  th Op Closes 
+                  th Op Error
+                  th 
+                  th Qtd Total
+                  th $ Total
+              tbody
+                - @accounts.each do |account|
+                  - account.search_date_begin = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+                  - account.search_date_end = session[:date_end].strip().to_datetime.change(offset: @timezone)
+                  tr[data-href="#{account_dashboard_path(@current_store.url, @trace.name, account.id, datefilter:params[:datefilter])}"]
+                    - if account.slave?
+                      - type = :slaves
+                      - @data_scope_executed_closed = account.data_scope(type, [:executed, :closed], nil, @trace)
+                    - else
+                      - type = :transactions
+                      - @data_scope_executed_closed = account.data_scope(type, [:executed, :closed], nil, @trace)&.not_limit_pending
+                    td = "#{account.name} - #{account.kind}"
+                    td
+                    td = number_with_precision account.profit_factor(type, @trace).round(2), precision: 2
+                    td = account.profit_trade(type, @trace)
+                    td = number_with_precision account.profit_drawdown(type, @trace), precision: 2
+                    td 
+                    td = number_with_precision account.data_scope(type, :executed, nil, @trace).to_a.sum(&:profit), precision: 2
+                    td = number_with_precision account.data_scope(type, :closed, nil, @trace).to_a.sum(&:profit), precision: 2
+                    td = number_with_precision account.data_scope(type, :error, nil, @trace).to_a.sum(&:profit), precision: 2
+                    td 
+                    td = @data_scope_executed_closed.count
+                    td = number_with_precision @data_scope_executed_closed.to_a.sum(&:profit), precision: 2       
+
+= render "magics", trace: @trace, account: @account
+
+- content_for :header do
+  = stylesheet_link_tag "mintone/morris.css"  
+  = javascript_include_tag "mintone/chart/jquery.sparkline.min.js"
+  = javascript_include_tag "mintone/chart/raphael-min.js"
+  = javascript_include_tag "mintone/chart/morris.js"
+
+- content_for :footer do
+  = javascript_include_tag "mintone/moment.min.js"
+  javascript:
+    $(document).ready(function(){
+      $(document).on("click", "table#accounts.table tr", function() {
+        var link  = $(this).data("href")
+            document.location.href=link;
+      });
+        "use strict";
+        var options_area = {
+          series: [
+            {
+              name: "Portfolio",
+              type: "area",
+              data: $('#chart-dashboard_capital_accumulated').data("chart-data"),
+              // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
+            },
+            {
+              name: "Profit",
+              type: "line",
+              data: $('#chart-dashboard_capital_accumulated').data("chart-profit"),
+            },
+            {
+              name: 'Trend Line',
+              type: "line",
+              data: $('#chart-dashboard_capital_accumulated').data("chart-regressionlinear"),
+              // data: $(this).data("chart-data"),
+            },
+          ],
+          chart: {
+            fontFamily: "DM Sans,sans-serif",
+            height: 350,
+            zoom: {
+              enabled: false,
+            },
+            toolbar: {
+              show: false,
+            },
+          },
+          grid: {
+            show: true,
+          },
+          colors: ["#615dff","#3dd9eb","#FFA836"],
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+              show: true,
+              curve: 'straight',
+              lineCap: 'butt',
+              // colors: undefined,
+              width: 4,
+          },
+          markers: {
+            size: 1
+          },
+          xaxis: {
+            type: "datetime",
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
+            },
+          },
+          fill: {
+            type:'solid',
+            opacity: [0.35, 1],
+          },
+          yaxis: {
+            opposite: true,
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
+            },
+          },
+          tooltip: {
+            theme: "light",
+            custom: function({series, seriesIndex, dataPointIndex, w}) {
+              var data1 = w.globals.initialSeries[0].data[dataPointIndex];
+              var data2 = w.globals.initialSeries[1].data[dataPointIndex];
+              var date = moment(new Date(data1[0])).format('D MMM');
+
+              var html = "<div class='apexcharts-tooltip-title' style='font-family: &quot;DM Sans&quot;, sans-serif; font-size: 12px;'>"+ date +"</div><div class='apexcharts-tooltip-series-group apexcharts-active' style='order: 1; display: flex;'> <span class='apexcharts-tooltip-marker' style='background-color: "+ w.globals.colors[0] +";'></span> <div class='apexcharts-tooltip-text' style='font-family: &quot;DM Sans&quot;, sans-serif; font-size: 12px;'> <div class='apexcharts-tooltip-y-group'> <span class='apexcharts-tooltip-text-y-label'>"+ w.globals.seriesNames[0] +" </span> <span class='apexcharts-tooltip-text-y-value'>"+ data1[1]+"</span> </div> <div class='apexcharts-tooltip-goals-group'> <span class='apexcharts-tooltip-text-goals-label'></span> <span class='apexcharts-tooltip-text-goals-value'></span> </div> <div class='apexcharts-tooltip-z-group'> <span class='apexcharts-tooltip-text-z-label'></span> <span class='apexcharts-tooltip-text-z-value'></span> </div> </div></div><div class='apexcharts-tooltip-series-group apexcharts-active' style='order: 1; display: flex;'> <span class='apexcharts-tooltip-marker' style='background-color: "+ w.globals.colors[1]+";'></span> <div class='apexcharts-tooltip-text' style='font-family: &quot;DM Sans&quot;, sans-serif; font-size: 12px;'> <div class='apexcharts-tooltip-y-group'> <span class='apexcharts-tooltip-text-y-label'>"+ w.globals.seriesNames[1]+"</span> <span class='apexcharts-tooltip-text-y-value'>"+data2[1]+"</span> </div> <div class='apexcharts-tooltip-goals-group'> <span class='apexcharts-tooltip-text-goals-label'></span> <span class='apexcharts-tooltip-text-goals-value'></span> </div> <div class='apexcharts-tooltip-z-group'> <span class='apexcharts-tooltip-text-z-label'></span> <span class='apexcharts-tooltip-text-z-value'></span> </div> </div></div>"
+
+              return html
+            }
+          },
+          legend: {
+            show: false,
+            horizontalAlign: "left",
+          },
+        };
+
+        // var chart_area_basic = new ApexCharts(
+        //   document.querySelector("#chart-area-basic"),
+        //   options_area
+        // );
+        // chart_area_basic.render();
+        var chart = new ApexCharts(
+           document.querySelector("#chart-dashboard_capital_accumulated"), options_area);
+        chart.render();
+        // var data_chart = $('#morris-area-chart-dashboard_capital_accumulated').data('chart');
+        // Morris.Line({
+        //     element: 'morris-area-chart-dashboard_capital_accumulated',
+        //     data: data_chart,
+        //     xkey: 'day',
+        //     ykeys: ['portfolio', 'profit', 'loss'],
+        //     labels: ['Portfolio', 'Profit', 'Loss'],
+        //     pointSize: 2,
+        //     fillOpacity: 0,
+
+        //     pointStrokeColors: [ '#3580B8', '#ffb74e', '#94313e'],
+        //     behaveLikeLine: true,
+        //     gridLineColor: '#e0e0e0',
+        //     lineWidth: 2,
+        //     hideHover: 'auto',
+        //     lineColors: [ '#3580B8', '#ffb74e', '#94313e'],
+        //     resize: true
+
+        // });
+        var data_chart = $('#morris-area-chart-dashboard_drawdown').data('chart');
+        Morris.Bar({
+            element: 'morris-area-chart-dashboard_drawdown',
+            data: data_chart,
+            xkey: 'day',
+            ykeys: ['drawdown'],
+            labels: ['Drawdown'],
+            pointSize: 2,
+            fillOpacity: 0,
+
+            pointStrokeColors: ['#3580B8', '#ffb74e', '#4886ff'],
+            behaveLikeLine: true,
+            gridLineColor: '#e0e0e0',
+            lineWidth: 2,
+            hideHover: 'auto',
+            lineColors: ['#3580B8', '#ffb74e', '#4886ff'],
+            resize: true
+
+        });
+        var data_chart = $("#morris-area-chart-dashboard_monthy_amount").data('chart');
+        Morris.Bar({
+            element: 'morris-area-chart-dashboard_monthy_amount',
+            data: data_chart,
+            xkey: 'date',
+            ykeys: ['profit', 'capital'],
+            labels: ['Profit', 'Capital'],
+            pointSize: 2,
+            fillOpacity: 0,
+
+            pointStrokeColors: ['#ffb74e', '#3580B8', '4886ff'],
+            behaveLikeLine: true,
+            gridLineColor: '#e0e0e0',
+            lineWidth: 2,
+            hideHover: 'auto',
+            barColors: ['#ffb74e', '#3580B8', '#4886ff'],
+            resize: true
+
+        });
+    });
+
+
+
+

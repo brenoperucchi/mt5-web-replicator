@@ -1,0 +1,199 @@
+= render "filter"
+
+.row
+  - @traces.reverse.each do |amount_profit, id|                   
+    - trace = Trace.find(id)
+    / - next if not @all_records and trace.capital_recomendation.blank?
+    - next if not request.fullpath.include?("all") || !trace.dashboard_restrict.to_b
+    - trace.search_date_begin      = session[:date_begin].strip().to_datetime.change(offset: @timezone)
+    - trace.search_date_end        = session[:date_end].strip().to_datetime.change(offset: @timezone)
+    - trace.store                  = @current_store
+    - chart_values                 = trace.dashboard_capital_accumulated(true)
+    - chart_regression             = AlgoStatistic.trend_line(chart_values)
+    - chart_regression             = [chart_regression[0], chart_regression[-1]]
+    
+    .col-lg-12.d-flex.align-items-strech
+      .card.w-100
+        .card-body
+          = link_to dashboard_path(@current_store.url, trace.name, params:request.query_parameters) do
+            .d-sm-flex.d-block.align-items-center.justify-content-between.mb-9
+              .mb-3.mb-sm-0
+                h5.card-title.fw-semibold
+                  = trace.name
+                / p.card-subtitle.mb-0
+                /   | Overview of Profit
+              / div
+              /   select.form-select
+              /     option[value="1"]
+              /       | March 2023
+              /     option[value="2"]
+              /       | April 2023
+              /     option[value="3"]
+              /       | May 2023
+              /     option[value="4"]
+              /       | June 2023
+          .row.align-items-center
+            .col-lg-9.col-md-9
+              / - values_profit = trace.data_scope(:masters, :closed).gain.to_a.map{|x| x.profit.to_f}.reverse[..10]
+              / - values_profit = values_profit.map(&:to_i).delete_if{|x| x == 0} if values_profit
+              / - values_loss = trace.data_scope(:masters, :closed).loss.to_a.map{|x| x.profit.to_f}.reverse[..10]
+              / - values_loss = values_loss.map(&:to_i).delete_if{|x| x == 0} if values_loss
+              #chart[style="min-height: 335px;" 
+                data-chart-data="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:portfolio] ]}}"
+                data-chart-profit="#{chart_values.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, (x[:profit] > 0 ? x[:profit] : x[:loss]) ]}}",
+                data-chart-regressionlinear="#{chart_regression.map{|x| [(DateTime.parse(x[:day]).to_datetime.to_f * 1000).to_i, x[:linear]] unless x.blank?}}"]
+            .col-lg-3.col-md-3
+              .d-flex.align-items-center.mb-4.pb-1
+                span.round-8.bg-dark.rounded-circle.me-6
+                div
+                  h4.mb-0.fs-7.fw-semibold
+                    = number_with_precision amount_profit, precision:2
+                  p.fs-3.mb-0
+                    = I18n.t :profit_net, scope:'helpers.dashboards.pages.show'
+              div
+                .d-flex.align-items-baseline.mb-4
+                  span.round-8.bg-dark.rounded-circle.me-6
+                  div
+                    p.fs-3.mb-1
+                      = I18n.t :profit_factor, scope:'helpers.dashboards.pages.show'
+                    h6.fs-5.fw-semibold.mb-0
+                      = number_with_precision trace.profit_factor(:masters).round(2), precision:2
+                .d-flex.align-items-baseline.mb-4.pb-1
+                  span.round-8.bg-dark.rounded-circle.me-6
+                  div
+                    p.fs-3.mb-1
+                      = I18n.t :pay_off, scope:'helpers.dashboards.pages.show'
+                    h6.fs-5.fw-semibold.mb-0
+                      = number_with_precision trace.pay_off, precision:2
+                div.d-flex.align-items-baseline.mb-4
+                  / button.btn.btn-primary.w-100
+                  = link_to dashboard_path(@current_store.url, trace.name, params:request.query_parameters), class: 'btn btn-light w-100' do
+                    = I18n.t :info_dashboard, scope:'helpers.dashboards'
+
+                div
+                  / button.btn.btn-primary.w-100
+                  = link_to contract_dashboard_path(@current_store.url, trace.name), class: 'btn btn-lg btn-dark w-100' do
+                    = I18n.t :contract, scope:'helpers.dashboards'
+
+- content_for :header do
+  = stylesheet_link_tag "modernize/apexcharts.css"
+  = javascript_include_tag "mintone/chart/jquery.sparkline.min.js"
+  = javascript_include_tag "mintone/chart/raphael-min.js"
+  = javascript_include_tag "mintone/chart/morris.js"
+
+
+- content_for :footer do
+  javascript:
+    $(document).ready(function(){ 
+
+      $("[id='chart']").each(function(index, value) {
+        // =====================================
+        // Profit
+        // =====================================
+        // Basic Area Chart -------> AREA CHART
+        var options_area = {
+          series: [
+            {
+              name: "Portfolio",
+              type: "area",
+              data: $(this).data("chart-data"),
+              // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
+            },
+            {
+              name: 'Trend Line',
+              type: "line",
+              data: $(this).data("chart-regressionlinear"),
+              // data: $(this).data("chart-data"),
+            },
+            // {
+            //   name: "Profit",
+            //   data: $(this).data("chart-profit"),
+            //   // data: [{ x: '05/06/2014', y: 54 }, { x: '05/08/2014', y: 17 } , { x: '05/28/2014', y: 26 }],
+            // },
+          ],
+          chart: {
+            fontFamily: "DM Sans,sans-serif",
+            height: 350,
+            zoom: {
+              enabled: false,
+            },
+            toolbar: {
+              show: false,
+            },
+          },
+          grid: {
+            show: true,
+          },
+          // colors: ["#FFA836", "#FFC30F"],
+          colors: ["#615dff", "#FFC30F"],
+          // colors: ["", "#3dd9eb"],
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+              show: true,
+              curve: 'straight',
+              lineCap: 'butt',
+              // colors: undefined,
+              width: 4,
+          },
+          fill: {
+            type:'solid',
+            opacity: [0.35, 1],
+          },
+
+          xaxis: {
+            type: "datetime",
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
+            },
+          },
+          yaxis: {
+            opposite: true,
+            labels: {
+              style: {
+                colors: [
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                  "#a1aab2",
+                ],
+              },
+            },
+          },
+          tooltip: {
+            shared: true,
+            theme: "light",
+          },
+          markers: {
+            size: 3
+          },
+          legend: {
+            show: false,
+            horizontalAlign: "left",
+          },
+        };
+
+        // var chart_area_basic = new ApexCharts(
+        //   document.querySelector("#chart-area-basic"),
+        //   options_area
+        // );
+        // chart_area_basic.render();
+        var chart = new ApexCharts(value, options_area);
+        chart.render();
+
+      }
+    )});

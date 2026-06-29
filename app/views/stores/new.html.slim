@@ -1,0 +1,146 @@
+= render "layouts/saasley/navbar" 
+/! ::Hero Default::
+section.pt-11.pt-lg-15.pb-lg-12.border-bottom.position-relative.overflow-hidden
+  .container.position-relative
+    .row
+      - if flash[:notice].present? or flash[:recaptcha_error].present?
+
+        .row.justify-content-center
+          .col-md-6.col-lg-5.col-xl-4
+          .alert.alert-danger[role="alert"]
+            = flash[:notice]
+            = flash[:recaptcha_error]
+    .row.align-items-center
+      .col-lg-6.text-center.text-lg-start.mx-auto.mx-lg-0.col-md-10
+        h1.mb-4.display-4.z-index-1.position-relative
+          = I18n.t :title, scope: 'helpers.site.signup_demo'
+        p.mb-4.mb-lg-5.lead
+          = I18n.t :title2, scope: 'helpers.site.signup_demo'
+        .position-relative.z-index-1                
+          = simple_form_for @store, url: stores_path, method: :post do |f|
+            .position-relative.mb-2.d-flex.flex-column.flex-sm-row.align-items-md-center
+              = f.input :email, placeholder: I18n.t(:placeholder_email, scope: 'helpers.site.signup_demo'), input_html:{class: "form-control flex-grow-1 me-sm-2 mb-2 mb-sm-0 shadow form-control-lg"}, label:false,wrapper: false
+              '
+              = f.button :submit, I18n.t(:submit, scope: 'helpers.site.signup_demo'), class: 'btn btn-primary btn-lg flex-shrink-0',wrapper: false
+            p.mb-0.small.opacity-50
+              = I18n.t :title3, scope: 'helpers.site.signup_demo'
+            - unless Rails.env.test?
+              .row.mb-3
+                .mb-3
+                  = recaptcha_tags 
+          
+      .col-lg-6.text-center.text-lg-start.mx-auto.mx-lg-0.col-md-10
+        h4.display-7.text-center = I18n.t :title4, scope: 'helpers.site.signup_demo'
+        p.text-center.mb-5= I18n.t :resume_title, scope: 'helpers.site.signup_demo'
+        / p.text-center.mb-5 Schedule a 30-minute product demo with expert Q&amp;A.
+        ul.list-unstyled.mb-5.aos-init.aos-animate data-aos="fade-up" data-aos-delay="200" 
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules1, scope: 'helpers.site.signup_demo'
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules2, scope: 'helpers.site.signup_demo'
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules3, scope: 'helpers.site.signup_demo'
+          li.d-flex.mb-3.align-items-start
+            span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+            = I18n.t :rules4, scope: 'helpers.site.signup_demo'
+
+/ section.position-relative.pt-12.pt-lg-15.pb-9
+/   svg.position-absolute.start-0.bottom-0.text-dark.h-auto.d-none.d-md-block fill="currentColor" height="276" viewbox=("0 0 1200 276") width="100%" xmlns="http://www.w3.org/2000/svg" 
+/     / path clip-rule="evenodd" d=("M0 132L50 102C100 72 200 12 300 18C400 24 500 96 600 90C700 84 800 0 900 0C1000 0 1100 84 1150 126L1200 168V276H1150C1100 276 1000 276 900 276C800 276 700 276 600 276C500 276 400 276 300 276C200 276 100 276 50 276H0V132Z") fill-rule="evenodd" 
+/   .container.position-relative
+/     .row
+/       - if flash[:notice].present? or flash[:recaptcha_error].present?
+
+/         .row.justify-content-center
+/           .col-md-6.col-lg-5.col-xl-4
+/           .alert.alert-danger[role="alert"]
+/             = flash[:notice]
+/             = flash[:recaptcha_error]
+/     .row
+/       .col-lg-6.col-md-8.mx-auto
+/         h2.display-5.text-center = I18n.t :title, scope: 'helpers.site.signup_demo'
+/         p.text-center.mb-5= I18n.t :resume_title, scope: 'helpers.site.signup_demo'
+/         / p.text-center.mb-5 Schedule a 30-minute product demo with expert Q&amp;A.
+/         ul.list-unstyled.mb-5.aos-init.aos-animate data-aos="fade-up" data-aos-delay="200" 
+/           li.d-flex.mb-3.align-items-start
+/             span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+/             = I18n.t :rules1, scope: 'helpers.site.signup_demo'
+/           li.d-flex.mb-3.align-items-start
+/             span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+/             = I18n.t :rules2, scope: 'helpers.site.signup_demo'
+/           li.d-flex.mb-3.align-items-start
+/             span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+/             = I18n.t :rules3, scope: 'helpers.site.signup_demo'
+/           li.d-flex.mb-3.align-items-start
+/             span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3> check_circle
+/             = I18n.t :rules4, scope: 'helpers.site.signup_demo'
+
+/         .card.border-0.rounded-4.shadow-lg.py-1.px-4
+/           .position-relative.z-index-1
+/             = simple_form_for @store, url: stores_path, method: :post do |f|
+/               .mb-3
+/                 = f.input :name
+/               .mb-3
+/                 = f.input :email, placeholder: 'user@gmail.com'
+/                 = f.input :password
+/               .mb-3
+/                 = f.input :url, placeholder: 'signal'
+/               .mb-3
+/                 = f.label :plan_id
+/                 = f.select :plan_id, Plan.all.pluck(:name, :id),{}, {class: 'teamSize form-select'}
+/               / - f.object.customers.new if f.object.customers.blank?
+/               / = f.simple_fields_for :customers do |ff| 
+/               /   = ff.input :name, label: 'Your username please', error: 'Username is mandatory, please specify one'
+/               /   - ff.object.build_user if ff.object.user.nil?
+/               /   = ff.simple_fields_for :user do |fff| 
+/               /     = fff.input :email, placeholder: 'user@domain.com'
+/               .mb-3
+/                 = recaptcha_tags 
+                
+/               = f.button :submit, class: 'button btn btn-primary'
+/             / form
+/             /   .mb-3
+/             /     label.form-label for="demo_f_name" 
+/             /       | First
+/             /       '
+/             /       | Name
+/             /     input#demo_f_name.form-control placeholder="John" type="text" /
+/             /   .mb-3
+/             /     label.form-label for="demo_l_name" 
+/             /       | Last
+/             /       '
+/             /       | Name
+/             /     input#demo_l_name.form-control placeholder="Doe" type="text" /
+/             /   .mb-3
+/             /     label.form-label for="demo_email" 
+/             /       | Work Email
+/             /       small.text-danger *
+/             /     input#demo_email.form-control placeholder="john@doe.com" required="" type="email" /
+/             /   .mb-3
+/             /     label.form-label for="demo_job_title" 
+/             /       | Job
+/             /       '
+/             /       | Title
+/             /     input#demo_job_title.form-control placeholder=("React Developer") type="text" /
+/             /   .mb-3
+/             /     label.form-label Team size
+/             /     select#teamSize.form-select name="teamSize" 
+/             /       option value="0-10"  0-10
+/             /       option value="10-25"  10-25
+/             /       option value="25-50"  25-50
+/             /       option value="50+"  50+
+/             /   .d-grid.mb-3
+/             /     button.btn.btn-primary type="submit" 
+/             /       | Submit
+/             /       '
+/             /       | Request
+/             p.mb-0.small.text-muted
+/               | We care about your privacy. To learn more, see our
+/               a.text-decoration-underline href="#!"  Privacy Policy
+/ - content_for :javascript do
+/   javascript:
+/     script[async src="https://www.googletagmanager.com/gtag/js?id=AW-1036376326"]
+/     |  window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'AW-1036376326'); 

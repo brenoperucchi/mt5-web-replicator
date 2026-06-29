@@ -1,0 +1,138 @@
+section.position-relative.overflow-hidden#pricing
+  .position-absolute.start-0.bottom-0.w-100.h-50.bg-style-1
+  .container.py-9.py-lg-6.position-relative.border-top
+    .row.mb-2.mb-lg-7
+      .col-lg-8.mx-auto.text-center
+        - if Plan.first.discount != "0"
+          h5.mb-0= I18n.t :announce1, scope:'helpers.site.main.pricing', value: Plan.first.discount
+          span.small.text-muted = I18n.t :announce2, scope:'helpers.site.main.pricing'
+        h2.display-5.mb-0.mt-5
+          = I18n.t :title, scope: 'helpers.site.main.pricing'
+    .row.mb-7
+      .row.align-items-center.justify-content-center
+        - Plan.all.order('id').each do |plan|
+          .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" data-aos-delay="100" 
+            .card.mb-4.mb-lg-0.shadow-lg.rounded-4.border-0.overflow-hidden
+              / span.badge.bg-warning.rounded-bottom-0.py-3.fs-6 60% de desconto no recurso extra
+              .px-4.py-4
+                h5.mb-2 = I18n.t plan.name.downcase, scope: 'helpers.site.main.pricing.plan'
+                /! <p class="mb-0 text-muted">For individuals or startup teams..</p
+              .card-body.pt-0.pb-4.px-4
+                h1.display-5.d-sm-inline-block
+                  span.fw-light.small = I18n.t :unit, scope:'number.currency.format'
+                  '
+                - if I18n.locale == :en
+                  - value_discount = number_with_precision (plan.amount_discount / @dolar), precision:2
+                - else
+                  - value_discount = number_with_precision plan.amount_discount, precision:2
+                h1.ms-sm-2.d-md-inline-block= I18n.t :price, value: value_discount, scope: 'helpers.site.main.pricing' 
+                - if I18n.locale == :en
+                  - if Plan.first.discount != "0"
+                    h5.ms-sm-2.d-sm-inline-block.text-muted.text-decoration-line-through= number_with_precision (plan.amount / @dolar), precision:2
+                - else
+                  - if Plan.first.discount != "0"
+                    h5.ms-sm-2.d-sm-inline-block.text-muted.text-decoration-line-through= number_with_precision plan.amount, precision:2
+                span.small.text-muted.font-monospace.mb-4.d-block 
+                  = I18n.t :month, value: value_discount, scope: 'helpers.site.main.pricing' 
+                form action="/demo_request"
+                  button.w-100.btn.btn-lg.btn-gradient-secondary.hover-lift
+                    = I18n.t :sign_in, scope: 'helpers.site.main.pricing'
+                ul.list-unstyled.mb-0.pt-4
+                  - plan.plan_items.order('id desc').each do |item|
+                    li.d-flex.align-items-center.mb-3
+                      - unless item.active
+                        span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3 cancel
+                      - else
+                        span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                      = I18n.t item.name.downcase, limit:item.limit, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  - if I18n.locale == :en
+                    - amount_extra = number_with_precision (plan.amount_extra / @dolar), precision:2
+                  - else
+                    - amount_extra = number_with_precision plan.amount_extra, precision:2
+                  = I18n.t :extra, amount:amount_extra, scope:'helpers.site.main.pricing'
+                  | 
+        .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" 
+          .card.mb-4.mb-lg-0.shadow-lg.rounded-4.border-0.overflow-hidden
+            span.badge.bg-dark.rounded-bottom-0.py-3.fs-6 = I18n.t :premium, scope: 'helpers.site.main.pricing.plan'
+            .px-4.py-4
+              h5.mb-2
+              p.text-muted.mb-0
+                = I18n.t :title1, scope:'helpers.site.main.pricing.premium'
+            .card-body.pt-0.pb-4.px-4
+              / h1.display-5
+              /   span.fw-light.small 
+              /   | --
+              / small.text-muted.font-monospace.mb-4.d-block Por Mês
+              a.w-100.btn.btn-lg.btn-gradient-primary.hover-lift[href="mailto:contato@imentore.com.br"]
+                = I18n.t :title2, scope:'helpers.site.main.pricing.premium'
+              ul.list-unstyled.mb-0.pt-4
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :telegram, limit:nil, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :charge, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :slave, limit:20, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :copy, limit:20, scope:'helpers.site.main.pricing'
+                li.d-flex.align-items-center.mb-3
+                  span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+                  = I18n.t :trace, limit:20, scope:'helpers.site.main.pricing'
+    /               li.d-flex.align-items-center.mb-3
+    /                 span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /                 | 1 Contas Master (demo)
+    /               li.d-flex.align-items-center.mb-3
+    /                 span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /                 | 2 Contas Slaves (demo)
+    /               li.d-flex.align-items-center.mb-3
+    /                 span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /                 | 1 Usuário Admin
+    /               li.d-flex.align-items-center.mb-3
+    /                 span.material-symbols-rounded.align-middle.text-warning.fs-4.me-3 cancel
+    /                 | 0 R$ por recurso extra
+    /     .col-lg-4.col-sm-10.mx-auto data-aos="fade-up" data-aos-delay="150" 
+    /       .card.shadow-lg.rounded-4.border-0.overflow-hidden
+    /         .px-4.py-4
+    /           h5.mb-2 Business
+    /           /!
+    /             | <p class="text-muted mb-0">For teams and companies that need to manage work across
+    /             | initiatives.</p
+    /         .card-body.pt-0.pb-4.px-4
+    /           h1.display-5
+    /             span.fw-light.small BR$
+    /             | 150
+    /           small.text-muted.font-monospace.mb-4.d-block Por Mês
+    /           form action="/demo_request"
+    /             button.w-100.btn.btn-lg.btn-gradient-secondary.hover-lift
+    /               = I18n.t :sign_in, scope: 'helpers.site.main.pricing'
+    /           ul.list-unstyled.mb-0.pt-4
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | Cobrança automatica para clientes
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | 1 Telegram Bot - Alfred
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | 2 Portfolio
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | 2 Contas Master
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | 4 Contas Slaves
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | 3 Usuários admin
+    /             li.d-flex.align-items-center.mb-3
+    /               span.material-symbols-rounded.align-middle.text-info.fs-4.me-3 check_circle
+    /               | 20 R$ por recurso extra
+    / / .text-center
+    / /   a href="#!" 
+    / /     | Learn More about Pricing
+    / /     span.material-symbols-rounded.align-middle.ms-1 arrow_forward

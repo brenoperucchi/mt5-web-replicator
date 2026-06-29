@@ -1,0 +1,30 @@
+- content_for(:title) { t("administrate.actions.edit_resource", name: page.page_title) }
+
+- if controller.try(:form_advanced)
+  / = render "admin/application/edit_advanced", resource: page.resource
+  ul#myTab.nav.nav-tabs[role="tablist"]
+    li.nav-item
+      a#home-tab.nav-link.active[data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true"]
+        = content_for(:title)
+    li.nav-item
+      a#profile-tab.nav-link[data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false"]
+        | Advanced
+  .tab-content
+    #home.tab-pane.active[role="tabpanel" aria-labelledby="home-tab"]
+      section.main-content__body
+        = render "form", page: page, advanced: false
+    #profile.tab-pane[role="tabpanel" aria-labelledby="profile-tab"]
+      section.main-content__body
+        = render "form", page: page, advanced: controller.form_advanced
+
+- else
+  header.main-content__header(role="banner")
+    h1.main-content__page-title
+      = content_for(:title)
+
+    div
+      - if accessible_action?(page.resource, :show)
+        = link_to(t("administrate.actions.show_resource", name: page.page_title), [namespace, page.resource], class: "button")
+
+  section.main-content__body
+    = render "form", page: page, advanced: false

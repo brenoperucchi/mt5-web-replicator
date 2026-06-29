@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  delivery_payment: one
+  traces: one
+
+two:
+  delivery_payment: two
+  traces: two

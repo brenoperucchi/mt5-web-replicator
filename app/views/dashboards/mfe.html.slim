@@ -1,0 +1,37 @@
+- mfe_target = params[:mfe_target].blank? ? 50 : params[:mfe_target].to_f
+- loss_set = params[:loss_set].blank? ? 50 : params[:loss_set].to_f
+/ - content_for :breadcrumb do
+/   li.breadcrumb-item
+/     a href="#{dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
+/       = @trace.name
+
+= render "filter"
+
+.row
+  /! [ form-element ] start
+  .col-sm-12
+    .card
+      .card-body.p-4
+        form
+          .row
+            .col-md-3
+              .form-group
+                / h5 &nbsp
+                .input-group.mb-3
+                  .input-group-prepend
+                    label.input-group-text for="inputGroupSelect01"  MFE Target
+                  input.form-control name="mfe_target" type="text" value="#{mfe_target}" placeholder="MFE Target"
+            .col-md-3
+              .input-group.mb-3
+                .input-group-prepend
+                  label.input-group-text for="inputGroupSelect01"  Loss Set
+                input.form-control name="loss_set" type="text" value="#{loss_set}" placeholder="Loss Set"  
+            .col-md-4.text-left[style="margin-top:0px;padding-right:30px;"]
+              button.btn.btn-primary type="submit"  Enviar
+
+- if params[:kind].blank?
+  = render "mfe_all", mfe_target:mfe_target, loss_set:loss_set
+- elsif params[:kind] == "month"
+  = render "mfe_month", mfe_target:mfe_target, loss_set:loss_set
+- elsif params[:kind] == "day"
+  = render "mfe_day", mfe_target:mfe_target, loss_set:loss_set

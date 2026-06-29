@@ -1,0 +1,71 @@
+- content_for :breadcrumb do
+  li.breadcrumb-item
+    a href="#{dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
+      = @trace.name
+  li.breadcrumb-item
+    a href="#{mfes_dashboard_path(current_store.url, @trace.name, params: request.query_parameters)}" 
+      | MFEs
+  li.breadcrumb-item
+    a href="#{mfe_by_dashboard_path(current_store.url, @trace.name, :month, params[:date][0..6], params: request.query_parameters)}" 
+      = params[:date][0..6]
+  li.breadcrumb-item
+    a href="#{mfe_by_dashboard_path(current_store.url, @trace.name, :day, params[:date], params: request.query_parameters)}" 
+      = params[:date]
+
+- date = params[:date] + "-01 00:00:00 -0300"
+- date = Date.parse(date)
+- @trace.search_date_begin      = date.beginning_of_day
+- @trace.search_date_end        = date.end_of_day
+
+- data = @trace.mfe_analyze(mfe_target, loss_set)
+/ - data = data.group_by{|x| x[:date].strftime("%Y-%m")}
+.row
+  .col-md-12
+    .card.table-card.latest-activity-card
+      .card-header
+        p Date: #{data[0][:date]}
+        p Reach Target: #{data[0][:reach_target]}
+        p Profit Target: #{data[0][:profit_target]}
+        p Profit Date: #{data[0][:profit_date]}
+        p Profit Original: #{data[0][:profit_original]}
+        .card-header-right
+      .card-body
+        .table-responsive
+          h2 Transações com sobreposição
+          table.table.table-hover.table-borderless#transactions
+            thead
+              tr
+                th Ticket
+                th Lucro
+                th MFE
+                th Aberto em
+                th Fechado em
+                th MfeCreated
+            tbody
+              - data[0][:transactions_overlapping].each do |ticket, data|
+                - data[:transactions].each do |transaction|
+                  tr
+                    td= transaction.ticket
+                    td= transaction.profit
+                    td= transaction.statistics.mfe_max.try(:amount).to_f
+                    td= l transaction.open_at, format: :short2 if transaction.open_at.present?
+                    td= l transaction.closed_at, format: :short2 if transaction.closed_at.present?
+                    td= l(transaction.mfe.created_at, format: :short2) if transaction.mfe.created_at.present?
+
+          h2 Transações Analisadas
+          table.table.table-hover.table-borderless#transactions
+            thead
+              tr
+                th Ticket
+                th Lucro
+                th Aberto em
+                th Fechado em
+                th MfeCreated
+            tbody
+              - data[0][:transactions_analyzed].each do |transaction|
+                tr
+                  td= transaction.ticket
+                  td= transaction.profit
+                  td= l transaction.open_at, format: :short2 if transaction.open_at.present?
+                  td= l transaction.closed_at, format: :short2 if transaction.closed_at.present?
+                  td= l(transaction.mfe.created_at, format: :short2) if transaction.mfe.created_at.present?

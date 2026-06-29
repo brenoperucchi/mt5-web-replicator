@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  symbol: MyString
+  name: MyString
+  trace: one
+  take_profit_1: 9.99
+
+two:
+  symbol: MyString
+  name: MyString
+  trace: two
+  take_profit_1: 9.99

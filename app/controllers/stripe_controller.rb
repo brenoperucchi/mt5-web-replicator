@@ -1,0 +1,97 @@
+class StripeController < ApplicationController
+	layout 'stripe'
+	skip_before_action :verify_authenticity_token, only: [:webhook]
+	# before_action :authenticate_user!#, :find_model
+
+
+	def checkout
+			Stripe.api_key = ENV.fetch('STRIPE_SECRET_KEY')
+
+		domain = 'http://localhost:80'
+
+
+		@store = current_user.store
+
+		if @store.plan  == "plan1"
+			line_item = {price: 'price_1Kd5q2FpK6wHohcR3fov9Ll7', quantity:1}
+		elsif @store.plan == "plan1"
+			line_item = {price: 'price_1KbnzhFpK6wHohcRF1kSP0Ze'}
+		end
+
+
+	  session = Stripe::Checkout::Session.create({
+	  	client_reference_id:'sub_1KbnotFpK6wHohcRfNuB9aiu',
+	    line_items: [line_item],
+	    mode: 'subscription',
+	    success_url: domain + '/success.html',
+	    cancel_url: domain + '/cancel.html',
+	  })
+	  redirect_to session.url
+	end
+
+	def webhook
+		store = Store.find(params[:store_id])
+		
+		invoice = Invoice.try(:find_by, stripe_invoice_id: params.dig(:data, :object, :id))
+		endpoint_secret = invoice.try(:invoiceable).try(:store).try(:stripe_webhook_secret)
+		
+		if invoice or endpoint_secret
+			payload = request.body.read
+			  event = nil
+		  begin
+		    event = Stripe::Event.construct_from(
+		      JSON.parse(payload, symbolize_names: true)
+		    )
+		  rescue JSON::ParserError => e
+		    # Invalid payload
+		    puts "⚠️  Webhook error while parsing basic request. #{e.message})"
+		    head 400
+		  end
+		  # Check if webhook signing is configured.
+		  if endpoint_secret
+		    # Retrieve the event by verifying the signature using the raw body and secret.
+		    signature = request.env['HTTP_STRIPE_SIGNATURE'];
+		    begin
+		      event = Stripe::Webhook.construct_event(
+		        payload, signature, endpoint_secret
+		      )
+		    rescue Stripe::SignatureVerificationError => e
+		      puts "⚠️  Webhook signature verification failed. #{e.message})"
+		      head 400
+		    end
+			end
+		  
+		  # Handle the event
+		  case event.type
+		  when 'invoice.payment_failed'
+		    # invoice = event.data.object # contains a Stripe::Invoice
+		    # Then define and call a method to handle the failed payment of an Invoice.
+		    # handle_failed_invoice(invoice);
+		  	head 200
+		  when 'invoice.finalized'
+		  	invoice.update(state: 'open')
+		  	head 200
+		  when 'payment_intent.succeeded'
+		    payment_intent = event.data.object
+		  	puts "🔔  Payment succeeded! (#{payment_intent.id}) - #{payment_intent.status}"
+		  	head 200
+		  when 'invoice.payment_succeeded'
+		  	invoice.update(state: 'paid')
+		  	head 200
+		  else
+		    puts "Unhandled event type: #{event.type}"
+			  head 400
+		  end
+			invoice.loggings.create(content:params, state: event.type.upcase, changeset: invoice.try(:versions).try(:last).try(:changeset))
+		else
+			if invoice.nil?
+				store.loggings.create(state:"INVOICE NOTFIND", content: params)
+			else
+				invoice.loggings.create(state:"INVOICE NOTFIND", content: params)
+			end
+			
+			puts "⚠️  Not find stripe invoice id: #{params[:data][:object][:id]})"
+			head 400
+		end
+	end
+end

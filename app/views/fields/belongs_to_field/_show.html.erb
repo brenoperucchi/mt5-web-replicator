@@ -1,0 +1,18 @@
+<% if field.options[:type] == "has_many" %>
+	
+	<%= field.resource.send(field.options[:attribute]).try(field.options[:association]).map(&:name).join(', ') %>
+
+<% else %>
+
+	<% if field.data %>
+  <% if valid_action?(:show, field.associated_class) && show_action?(:show, field.associated_class) %>
+    <%= link_to(
+      field.display_associated_resource,
+      [namespace, field.data],
+    ) %>
+  <% else %>
+    <%= field.display_associated_resource %>
+  <% end %>
+<% end %>
+
+<% end %>

@@ -1,0 +1,122 @@
+doctype html
+html[lang="en"]
+  head
+    = render 'layouts/meta'
+    = stylesheet_link_tag  'mintone', 'data-turbolinks-track': 'reload'
+    = javascript_include_tag "mintone"
+    = yield(:header)
+  body
+    .loader-bg
+      .loader-track
+        .loader-fill
+    .content-main.container
+      .pcoded-main-container
+        .pcoded-content
+          .page-header
+            .page-block
+              .row.align-items-center
+                .col-md-6
+                  .page-header-title
+                    -if @account
+                      h5.m-b-10 = "#{@trace.try(:name)} - #{@account.try(:name)}" || I18n.t(:dashboards, scope:'helpers.dashboards')
+                    - else
+                      h5.m-b-10 = @trace.try(:name) || I18n.t(:dashboards, scope:'helpers.dashboards')
+                  /! [ breadcrumb ] started
+                  ul.breadcrumb
+                    - if user_signed_in? and not current_user.try(:userable).try(:user?)
+                      li.breadcrumb-item
+                        a href="/admin" 
+                          i.feather.icon-home
+                          '
+                          = I18n.t :admin, scope:'helpers.dashboards'
+                    - else
+                      li.breadcrumb-item
+                        a href="/" 
+                          i.feather.icon-home
+                          '
+                          = I18n.t :site, scope:'helpers.dashboards'
+                    - if current_store
+                      li.breadcrumb-item
+                        = link_to dashboards_path(store_name, @current_store.url, params: request.query_parameters) do
+                          = I18n.t :dashboards, scope:'helpers.dashboards'
+                        / a href="/dashboards" 
+                    = yield(:breadcrumb)
+                  /! [ breadcrumb ] started
+                - unless action_name == "contract" or action_name == "finish_contract"
+                  .col-lg-6.text-right
+                    button#filter.btn.btn-primary.disabled.m-r-5[type="button"]
+                      i.feather.icon-plus
+                      = I18n.t :filter, scope:'helpers.dashboards'
+          - if flash[:notice].present? or flash[:recaptcha_error].present?
+            .row.justify-content-center
+              .col-md-6.col-lg-5.col-xl-4
+              .alert.alert-danger[role="alert"]
+                == flash[:notice]
+          = content_for?(:content) ? yield(:content) : yield
+    = yield :footer
+    
+= render "layouts/google_analytics"
+    
+javascript:
+  $(document).ready(function(){
+    $(function() {
+      if($('input[name="datefilter"]').length){
+
+        var start = moment($('input[name="datefilter"]').val().split(" - ")[0], "DD/MM/YYYY");
+        var end =   moment($('input[name="datefilter"]').val().split(" - ")[1], "DD/MM/YYYY");
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+        }
+
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            autoUpdateInput: false,
+            locale: {
+                format: 'DD/MM/YYYY',
+                cancelLabel: 'Clear'
+            },
+            ranges: {
+               'Today': [moment(), moment()],
+               'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+               'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+               'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+               'This Month': [moment().startOf('month'), moment().endOf('month')],
+               'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+          $('input[name="datefilter"]').val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+
+        });
+
+        $('#reportrange').on('cancel.daterangepicker', function(ev, picker) {
+          $('input[name="datefilter"]').val('');
+          $('#reportrange span').html('');
+        });
+
+        cb(start, end);
+      }
+    });
+  });
+  $(document).ready(function(){
+    $(".btn-primary#filter").click(function(){
+      // $.session.set("filterCollapse",true);
+      if($('.row.collapse').hasClass('show')){
+        $.session.set("filterCollapse",false);
+      } else{
+       $.session.set("filterCollapse",true);
+      }
+      $(".collapse").collapse('toggle');
+    });
+  });
+    (function($) {
+    "use strict";
+
+    if(($.session.get("filterCollapse")) == 'true'){
+      $(".collapse").collapse('show');
+    }
+
+  })(jQuery);

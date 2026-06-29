@@ -1,0 +1,11 @@
+- content_for :breadcrumb do
+  li.breadcrumb-item
+    a href="#{dashboard_path(@account.store.url, @trace.name, params: request.query_parameters)}" 
+      = @trace.name
+  li.breadcrumb-item
+    a href="#{account_dashboard_path(@account.store.url, @trace.name, @account.id, params: request.query_parameters)}" 
+      = @account.name
+
+= render "filter"
+
+= render "account_#{@account.kind}"

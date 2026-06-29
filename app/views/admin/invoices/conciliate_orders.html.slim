@@ -1,0 +1,29 @@
+.container.mt-5
+  h1 Negociações MetaTrader
+  table.table.table-striped
+    thead
+      tr
+        th Ticket ID
+        th Symbol
+        th Open Price
+        th Close Price
+        th Profit
+        th Open At
+        th Close At
+        th Comment
+    tbody
+      - @conciliate_orders.each do |key, value|
+        tr
+          td = value["ticket_id"]
+          td = value["symbol"]
+          td = value["price_open"]
+          td = value["price_closed"]
+          td = value["profit"]
+          td = value["open_at"]
+          td = value["close_at"]
+          td = value["comment"]
+      tr
+        td[colspan=5 style="text-align:right;"] 
+          | Total
+          '
+          = @orders_presenter&.conciliate_amount

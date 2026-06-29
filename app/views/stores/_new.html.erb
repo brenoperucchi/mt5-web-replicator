@@ -1,0 +1,114 @@
+<%= content_for :header do %>
+<style type="text/css">
+  .flex-wrap.flex {display: none!important;}
+</style>
+<% end %>
+
+
+<%
+  subtitle ||= ""
+  title ||= "Assinatura" %>
+<div class="items-start justify-center block h-full grid-cols-1 gap-4 lg:grid lg:items-center lg:grid-cols-2">
+  <div class="xl:w-full lg:w-7/12 relative w-full lg:mt-0 mt-12 md:px-8" role="list">
+      <img src="https://i.ibb.co/0n6DSS3/bgimg.png" class="absolute w-full -ml-12 mt-24" alt="background circle images" />
+      <div role="listitem" class="bg-white cursor-pointer shadow rounded-lg p-8 relative z-30">
+          <div class="md:flex items-center justify-between">
+              <h2 class="text-2xl font-semibold leading-6 text-gray-800">Mensalidade</h2>
+              <p class="text-2xl font-semibold md:mt-0 mt-4 leading-6 text-gray-800">R$80,00 <span class="font-normal text-base">/mensal</span></p>
+          </div>
+          <p class="md:w-80 text-base leading-6 mt-4 text-gray-600">Lorem ipsum dolor sit amet, consectetur adipisicing</p>
+      </div>
+      <div role="listitem" class="bg-white cursor-pointer shadow rounded-lg mt-3 flex relative z-30">
+          <div class="w-2.5 h-auto bg-indigo-700 rounded-tl-md rounded-bl-md"></div>
+          <div class="w-full p-8">
+              <div class="md:flex items-center justify-between">
+                  <h2 class="text-2xl font-semibold leading-6 text-gray-800">30% sobre o Lucro mensal</h2>
+                  <p class="text-2xl md:mt-0 mt-4 font-semibold leading-6 text-gray-800">FREE <span class="font-normal text-base">/mensal</span></p>
+              </div>
+              <p class="md:w-80 text-base leading-6 mt-4 text-gray-600">Unlimited products features and dedicated support channels</p>
+          </div>
+      </div>
+  </div>
+  <div>
+    <div class="relative z-20 px-6 mx-auto lg:px-12 max-w-lg">
+      <div class="mb-4 xl:mt-8">
+        <div class="mt-6 mb-4 lg:mt-0">
+          <%= link_to "Back", root_path, class: "text-gray-600 underline flex items-center hover:text-gray-700 hover:no-underline" %>
+        </div>
+
+        <% unless title.blank? %>
+          <h2 class="pt-6 font-sans text-3xl font-black leading-tight"><%= title %></h2>
+        <% end %>
+
+        <% unless subtitle.blank? %>
+          <p class="text-gray-600 mt-3"><%= subtitle %></p>
+        <% end %>
+      </div>
+
+      <%= form_for(@store, class: "contents", data: { turbo: false }) do |f| %>
+        <% if @store.errors.any? %>
+          <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-lg mt-3">
+            <h2><%= pluralize(@store.errors.count, "error") %> prohibited from being saved:</h2>
+
+            <ul>
+              <% @store.errors.each do |error| %>
+                <li><%= error.full_message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+
+          <% f.object.customers.new if f.object.customers.blank? %>
+          <%= f.fields_for :customers do |ff| %>
+          <div class="mb-6">
+            <%= ff.label :name, class: label_class %>
+            <%= ff.text_field :name, class: input_class %>
+          </div>
+          <% end %>
+
+          <div class="mb-6">
+            <%= f.label :plan, class: label_class %>
+            <%= f.select :plan, options_for_select([["Mensalidade", "plan1"], ["30% sobre o Lucro mensal", "plan2"]]), :prompt => "Selecione o plano", :class => 'mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm' %>
+          </div>
+
+
+          <% f.object.users.new if f.object.users.blank? %>
+          <%= f.fields_for :users do |ff| %>
+          <div class="mb-6">
+            <%= ff.label :email, class: label_class %>
+            <%= ff.email_field :email, class: input_class %>
+          </div>
+
+          <div class="mb-6">
+            <div class="flex">
+              <%= ff.label :password, class: label_class %>
+              <% if @minimum_password_length %>
+                <span class="pl-1 text-xs text-gray-600 mt-1"><em>(<%= @minimum_password_length %> characters minimum)</em></span>
+              <% end %>
+            </div>
+            <%= ff.password_field :password, autocomplete: "new-password", class: input_class %>
+          </div>
+
+          <div class="mb-6">
+            <%= ff.label :password_confirmation, class: label_class %>
+            <%= ff.password_field :password_confirmation, autocomplete: "new-password", class: input_class %>
+          </div>
+
+          <% end %>
+
+        <div class="mb-6">
+          <%= f.submit "Sign up", class: button_class(variant: "expanded", theme: "primary") %>
+        </div>
+
+      <% end %>
+      <%- if controller_name != 'sessions' %>
+        <%= link_to "Log in", new_session_path(:user) %><br />
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+
+

@@ -1,0 +1,297 @@
+.card
+  .card-body
+    .row
+      .col-md-3.col-sm-3
+        h5.card-title.float-left.align-self-center.text-uppercase
+          | tasks
+      .col-md-9.col-sm-9
+        .float-right.d-none.d-xl-inline-block.d-lg-inline-block
+          .search
+            span.fa.fa-search
+            input[placeholder="Search.."]
+          a.float-right.btn.waves-effect.waves-light.btn-rounded.btn-primary[data-toggle="modal" href="" data-target=".assign-members"]
+            | Add Task
+    .clearfix
+    .mt-3
+      ul.list-inline.m-b-30.text-uppercase.lp-5.font-medium.font-12
+        li
+          i.fa.fa-circle.m-r-5.f-10.text-primary
+          |  New
+        li
+          i.fa.fa-circle.m-r-5.f-10.text-warning
+          |  In process
+        li
+          i.fa.fa-circle.m-r-5.f-10.text-success
+          |  Done
+    .clearfix
+    .table-responsive
+      table.table.color-table.primary-table
+        thead
+          tr
+            th.w-20
+
+            th
+              | Task Name
+            th
+              | Assignee
+            th
+              | Date
+            th
+            th
+        tbody
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-warning
+            td
+              | Main menu, different variations 
+            td.font-bold
+              | Brian Summerhoold
+            td
+              | 26.06.2017, 04:02
+            td.text-success
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Assign member
+                a.dropdown-item[href="#"]
+                  | Edit task
+                a.dropdown-item.text-light-danger[href="#"]
+                  | Delete task
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-warning
+            td
+              | Left, tight sidebar
+            td.font-bold
+              | John Donovan
+            td
+              | 26.06.2017, 04:02
+            td.text-success
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-warning
+            td
+              | Left, tight sidebar
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-warning
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-primary
+            td
+              | Style guide
+            td.font-bold
+              | Content search
+            td
+              | 26.06.2017, 04:02
+            td.text-warning
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-primary
+            td
+              | Style guide
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-danger
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-primary
+            td
+              | Style guide
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-success
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-primary
+            td
+              | Style guide
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-success
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-success
+            td
+              | Style guide
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-warning
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-success
+            td
+              | Style guide
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-warning
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a.dropdown-item[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+          tr
+            td
+              ul.list-inline.text-uppercase.m-0.font-medium.font-12
+                li
+                  i.fa.fa-circle.f-10.text-success
+            td
+              | Style guide
+            td.font-bold
+              | Alice Brodwain
+            td
+              | 26.06.2017, 04:02
+            td.text-warning
+              i.fa.fa-exclamation-triangle[aria-hidden="true"]
+            td.text-light-blue
+              a[href="" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"]
+                i.fas.fa-ellipsis-v
+              .dropdown-menu
+                a[href="#"]
+                  | Edit
+                a.dropdown-item[href="#"]
+                  | Send Message
+                a.dropdown-item[href="#"]
+                  | Delete
+    .row
+      .col-md-6.page-n
+        | Show: 
+        a.active[href=""]
+          | 10
+        a[href="#"]
+          | 20
+        a[href="#"]
+          | 50
+      .col-md-6.text-right.page-n
+        | Prev 
+        a.active[href="#"]
+          | 1
+        a[href="#"]
+          | 2
+        a[href="#"]
+          | 3
+        |  ... 
+        a[href="#"]
+          | 10
+        a[href="#"]
+          | 11
+        a[href="#"]
+          | 12
+        a[href="#"]
+          | Next

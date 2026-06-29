@@ -1,0 +1,48 @@
+- capital_multiplier = @trace.capital_multiplier.present? ? @trace.capital_multiplier.to_i : 1
+- contract_volume = params.dig(:account, :settings, :contract_volume).try(:to_i) || params["contract_volume"].try(:to_i) || 1
+- capital_recomendation = (@trace.capital_recomendation.to_money('USD') * contract_volume * capital_multiplier).to_f
+- customer_plan = @trace.customer_plan.calculate_amount(contract_volume, nil, @trace)
+- amount_proportional = customer_plan.amount_proportional
+- amount_plan = customer_plan.try(:amount_use) || 0
+/ - amount_plan = amount_proportional if  amount_plan > amount_proportional  
+- amount_min = customer_plan.payment.try(:min_amount)
+  
+.card.w-100
+  .card-body.details
+    h5.card-title
+      | Detalhes
+    = render "contract_sidebar_plan_type", amount_proportional:amount_proportional, amount_min:amount_min, amount_plan:amount_plan, contract_volume:contract_volume, trace:@trace
+    .py-0.d-flex
+      / span.round-8.bg-dark.rounded-circle.me-6  
+      .ms-0
+        h6.mb-0
+          | Proxíma cobrança
+      .ms-auto
+        span.fs-2
+          h6= I18n.l @trace.next_charged, format: :short4
+    .py-0.d-flex
+      / span.round-8.bg-dark.rounded-circle.me-6  
+      .ms-0
+        h6.mb-0
+          | Tipo (fixo/percentual)
+      .ms-auto
+        span.fs-2
+          h6= I18n.t @trace.customer_plan.try(:kind), scope:'helpers.dashboards.pages.contract'
+    .pt-6.d-flex
+      / span.round-8.bg-dark.rounded-circle.me-6  
+      .ms-0
+        h6.mb-0
+          | Capital Recomendado
+      .ms-auto
+        span.fs-2
+          h6= number_with_precision(capital_recomendation, precision:2, significant:true)
+    - if @trace.id == 45
+      div.mt-4
+        / button.btn.btn-primary.w-100
+        = link_to "/files/lamina_portfolio_one.pdf", class: 'btn btn-light w-100', target: "_blank" do
+          = I18n.t :more_information, scope:'helpers.dashboards'
+    div
+      / button.btn.btn-primary.w-100
+      = link_to dashboard_path(@current_store.url, @trace.name, params:request.query_parameters), class: 'btn btn-dark w-100' do
+        = I18n.t :info_dashboard, scope:'helpers.dashboards'
+        

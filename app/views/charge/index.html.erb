@@ -1,0 +1,33 @@
+<h1>Choose a collaboration plan</h1>
+
+<div class="price-table-container">
+  <section>
+    <form action="/create_checkout" method="POST">
+      <input type="hidden" id="basicPrice" name="priceId">
+      <img
+        src="/images/stripe/starter.png"
+        width="120"
+        height="120"
+        />
+      <div class="name">Starter</div>
+      <div class="price">$12</div>
+      <div class="duration">per month</div>
+      <button id="basic-plan-btn">Select</button>
+    </form>
+  </section>
+  <section>
+    <form action="/create_checkout" method="POST">
+      <input type="hidden" id="proPrice" name="priceId">
+      <img
+        src="/images/stripe/professional.png"
+        width="120"
+        height="120"
+        />
+      <div class="name">Professional</div>
+      <div class="price">$18</div>
+      <div class="duration">per month</div>
+      <button id="pro-plan-btn">Select</button>
+    </form>
+  </section>
+</div>
+

@@ -1,0 +1,141 @@
+Termos de Uso
+Prezado Usuário, seja bem-vindo à plataforma Imentore Copy!
+
+Por favor, leia atentamente estes Termos de Uso antes de acessar a Plataforma ou utilizar nossos serviços. Caso tenha qualquer dúvida, estamos à disposição para ouvi-lo, entre em contato conosco através do e-mail contato@imentore.com.br. Sua opinião é muito importante para a Imentore Copy.
+
+Ao acessar ou utilizar a Plataforma, o Usuário concorda com estes Termos de Uso (“Termo” ou “Termos”). Caso o Usuário não concorde com o teor de qualquer uma das disposições deste documento, solicitamos que não utilize a Plataforma e/ou os serviços oferecidos.
+
+É muito importante a leitura atenta destes Termos de Uso no ato de seu cadastro na Imentore Copy, pois ao se cadastrar, você estará aceitando as nossas regras, as quais regerão o nosso relacionamento. A adesão à plataforma Imentore Copy e seus serviços, benefícios e funcionalidades são oferecidos a exclusivo critério da Imentore Copy (Imentore Copy Serviços Financeiros LTDA.), que se reserva o direito de alterar as regras a qualquer momento, no todo ou em parte, mediante aviso aos Usuários, na forma descrita nos Termos de Uso.
+
+1. Introdução
+Agradecemos pelo interesse na plataforma virtual desenvolvida e mantida pela Imentore Copy Serviços Financeiros LTDA. (“Imentore Copy”), pessoa jurídica de direito privado, inscrita no CNPJ sob o no 42.386.116/0001-50, sediada na Rua Manoel Feu Subtil, 60, Sala 202C, Enseada do Suá, Vitória-ES, CEP: 29050-400.
+
+A Imentore Copy desenvolveu e explora a plataforma inserida em seu domínio web – imentore.com.br – (“Site”), os quais são essenciais para a realização da prestação dos serviços a que se dispõe.
+
+O presente Termos de Uso (“Termo” ou “Termos”) estabelece a relação contratual entre os clientes que utilizam a Plataforma (“Usuários”), estabelecendo as regras de utilização e as responsabilidades de cada parte, em conformidade com a legislação brasileira, incluindo as disposições da Lei no 12.965/14 (“Marco Civil da Internet”).
+
+Antes de prosseguir, é fundamental que você leia e compreenda todos os Termos que regulam a utilização da Plataforma e de seus benefícios. Por isso, criamos este contrato virtual, que foi inclusive redigido de forma clara e em linguagem acessível.
+
+Serviço de Replicação de Ordens via Metatrader
+
+1.1. Descrição do Serviço: Este termo inclui a prestação de um serviço especializado de replicação de ordens de investimento diretamente no Metatrader do cliente. Este serviço permite que ordens de compra e venda de valores mobiliários sejam replicadas automaticamente no computador do cliente conectado a uma corretora de valores.
+
+1.2. Requisitos Técnicos: Para o adequado funcionamento do serviço, é necessário que o cliente mantenha uma conexão estável de internet e um computador operacionalmente compatível com o software Metatrader.
+
+Ao marcar a opção “Aceitar termos de uso”, você estará legalmente vinculado a todos os termos e condições aqui presentes. Caso você não concorde com qualquer das regras previstas, você deverá não aceitar esse Termo e não deverá utilizar a Plataforma Imentore Copy.
+Caso tenha qualquer dúvida sobre o conteúdo desses Termos de Uso, entre em contato com nosso suporte através do e-mail: contato@imentore.com.br. Será um prazer atendê-lo!
+
+2. A Plataforma e as estratégias de investimentos
+2.1. A Imentore Copy. A Imentore Copy é uma plataforma totalmente baseada em nuvem, que tem como missão fornecer para os investidores brasileiros uma grande variedade de estratégias e produtos financeiros, fazendo uso de tecnologias modernas e visando facilitar o acesso a soluções automatizadas de investimento.
+
+2.2. A Plataforma. A Imentore Copy desenvolveu e explora uma plataforma online para investimentos automatizados, que replicar ordens de compra e venda de valores mobiliários para o cliente em seu computador ligado uma corretara de valores, através de produtos e soluções automatizadas escolhidas e parametrizadas pelos próprios Usuários, sendo tais produtos elaborados e comercializados pela Imentore Copy ou por terceiros.
+
+2.3. A Plataforma não é em si um robô de investimentos, mas sim um ambiente online que permite que as estratégias disponíveis na plataforma possam transmitir ordens de compra e venda replicador direto ao computador do cliente, seguindo parâmetros configurados pelo próprio Usuário.
+
+2.4. As estratégias. Na Plataforma, portanto, podem ser executadas estratégias de investimentos criadas: (i) pelos Usuários, mediante a configuração na Plataforma de ordens de compra e venda de ativos conforme os parâmetros que desejarem; (ii) pela Imentore Copy ou por seus Parceiros, de acordo com parâmetros definidos por especialistas do mercado financeiro; e (iii) por terceiros, que não possuem relação com a Imentore Copy, mas desenvolvem de forma independente estratégias compatíveis com a Plataforma.
+
+2.5. Estratégias Criadas pelos Usuários. Por meio de contratação de produtos específicos, o Usuário terá acesso às funcionalidades desse produto, que lhe permitirão configurar suas próprias estratégias de investimentos.
+
+2.6. Estratégias da Imentore Copy ou de Parceiros. Além da criação de estratégias próprias, o Usuário poderá contratar outras elaboradas pela Imentore Copy ou por seus Parceiros, cujas parametrizações já vêm especificadas por analistas CNPI-T (certificados pela APIMEC). As estratégias de parceiros estarão sujeitas a cobranças além da assinatura da plataforma.
+
+2.7. Estratégias de Terceiros. Existem terceiros que, sem qualquer relação comercial ou jurídica com a Imentore Copy, fornecem estratégias de investimentos compatíveis com a nossa Plataforma. Essas estratégias são elaboradas sem a participação da Imentore Copy, e não possuímos qualquer controle ou ingerência sobre o conteúdo e sobre a procedência das mesmas. Se o Usuário desejar usar nossa Plataforma para executar essas estratégias de terceiros, deve estar ciente de que a Imentore Copy não possui qualquer responsabilidade sobre elas. Recomendamos fortemente que o Usuário verifique a seriedade e legalidade da atividade desses terceiros, antes de efetuar qualquer contratação.
+
+2.8. Riscos e Perdas. Cabe aqui destacar que investir em valores mobiliários é uma atividade arriscada, dado a elevada volatilidade e grande possibilidade de perdas, especialmente no curto e médio prazos. É, portanto, destinada a perfis arrojados de investidores, que estão dispostos a assumirem elevado risco. Se a atuação com valores mobiliários é, por si só, uma atividade arriscada, utilizar algoritmos de investimentos para o envio automatizado de ordens de compra e venda é uma atividade de altíssimo risco, sujeita a perdas consideráveis, e, por essa razão, deve ser destinada apenas a investidores experientes e com grande propensão ao risco. Dessa forma, a execução de estratégias de investimentos através da nossa Plataforma é voltada para Usuários experientes e arrojados, que estão cientes dos riscos e das possibilidades de perdas envolvidas neste tipo de atividade, inclusive decorrentes do próprio uso da tecnologia.
+
+2.9. O Ambiente de Simulação. Mesmo sendo voltada para Usuários experientes e arrojados, a Plataforma possui um ambiente de simulação, no qual as estratégias não operam no mercado real: ou seja, não há efetivamente envio das ordens para as corretoras, e, portanto, não há compra e venda de valores mobiliários e os ganhos ou perdas apresentados nesse ambiente são fictícios. A Imentore Copy recomenda fortemente que os Usuários tenham o costume de operar cada nova estratégia desenvolvida ou contratada no ambiente simulado, por um tempo relevante e suficiente para avaliar a forma de funcionamento e os riscos inerentes ao algoritmo em questão e à sua estratégia de investimento, antes de os submeter ao mercado real. Dessa forma, os Usuários podem visualizar e avaliar melhor as estratégias de investimentos escolhidas, eventualmente, realizar algum ajuste nas parametrizações. Não obstante, reforça-se que o Ambiente de Simulação pode apresentar resultados diferentes com relação ao mercado real, tendo em vista que a simulação perfeita é tecnicamente impossível – isto é, o Ambiente Simulado serve para que o Usuário tenha uma boa noção do funcionamento das estratégias, mas não refletirá exata e precisamente a sua atuação no mercado real.
+
+2.10. As Corretoras de Valores Mobiliários. Para operar efetivamente no mercado real, e não no Ambiente Simulado, o Usuário deverá possuir uma conta ativa e regular em uma das corretoras de valores mobiliários integradas à Plataforma (listadas no Site da Imentore Copy). O Usuário poderá optar por qualquer das corretoras integradas à Plataforma, sendo que a Imentore Copy não confere nenhuma preferência ou tratamento diferenciado aos Usuários em função da corretora escolhida. Caso o Usuário já tenha conta em outra corretora, ainda não integrada à Plataforma, poderá entrar em contato pelo e-mail contato@imentore.com.br para que a Imentore Copy verifique a possibilidade de integração, o que ocorrerá apenas na medida do possível. Desnecessário lembrar que a relação entre o Usuário e sua corretora é totalmente distinta e autônoma da relação entre o Usuário e a Imentore Copy: não temos qualquer responsabilidade ou ingerência nesta relação.
+
+2.11. A forma e as funcionalidades da Plataforma poderão mudar ocasionalmente sem aviso prévio, já que a Imentore Copy busca constantemente inovação tecnológica para o cumprimento dos seus propósitos. Da mesma forma, o modelo de exploração de cada funcionalidade da Plataforma pode ser alterado.
+
+3. Cadastro
+3.1. Primeiramente, o Usuário deve fazer um cadastro em nosso Site, fornecendo algumas informações. A Imentore Copy é obrigada a agir em conformidade com a legislação vigente, em especial a Lei nº 12.965/ 2014 (Marco Civil da Internet), e Lei nº 13.709/2018 (Lei Geral de Proteção de Dados Pessoais) e seus decretos, na coleta, armazenamento, compartilhamento, transmissão, disponibilização e tratamento de dados pessoais do Usuário.
+
+3.2. As informações prestadas no cadastro devem ser exatas, precisas e verdadeiras, e o Usuário se compromete a atualizar o cadastro sempre que houver alguma alteração nos seus dados.
+
+3.3. Após a conclusão do cadastro, o Usuário terá um login,uma senha e uma assinatura eletrônica. Este login, esta senha e esta assinatura eletrônica são de uso pessoal e intransferível, e de uso exclusivo, não podendo ser repassados a terceiros. O Usuário assume, portanto, total responsabilidade por sua guarda e sigilo, com a obrigação de evitar que sejam utilizados por terceiros. A assinatura eletrônica será exigida pela plataforma em todas as ações que envolvam a inicialização, parametrização e finalização das estratégias investimentos.
+
+3.4. O Usuário deverá mudar sua senha periodicamente, no máximo a cada 180 (cento e oitenta) dias. Recomendamos fortemente que não utilize senhas que facilitem a adivinhação por terceiros, como números de telefone, endereço, datas de nascimento, nomes de parentes, etc.
+
+3.5. Caso o Usuário tome conhecimento ou suspeite de qualquer utilização não autorizada no seu login, senha ou assinatura eletrônica, deverá imediatamente alterar sua senha e informar a Imentore Copy.
+
+3.6. Cada Usuário somente poderá criar e manter um único cadastro, sob pena de desativação de todos os cadastros referentes ao mesmo Usuário sem qualquer aviso prévio.
+
+4. Contratação de Produtos
+4.1. A Imentore Copy poderá, sob seu exclusivo critério, discricionariedade e conveniência, alterar, incluir ou remover produtos oferecidos, assim como suas periodicidades, preço e formas de pagamento.
+
+4.2. Uma vez realizada a contração de um produto, a não utilização do mesmo não isenta o Usuário do pagamento do plano contratado.
+
+4.3. Os planos dos produtos, com exceção do gratuito, ficam liberados para utilização após a confirmação do pagamento respectivo.
+
+4.4. Ao final do período contratado, caso não haja manifestação em contrário por parte do Usuário, a renovação do plano do produto se dará de forma automática, conforme os preços e condições vigentes na época da renovação, incluindo eventuais reajustes.
+
+4.4.1. O prazo contratado vencerá no mesmo dia da data da assinatura do mês subsequente caso a periodicidade seja mensal, três meses após a assinatura caso o plano seja trimestral, seis meses após a assinatura caso seja semestral e no mesmo dia do ano seguinte caso se trate de assinatura anual, seguindo o mesmo padrão em casos de planos com periodicidades diversas das anteriores.
+
+4.5. Em caso de inadimplência, transcorrido o prazo da cláusula 4.4 o Usuário será automaticamente transferido para o plano gratuito, caso haja. Na eventualidade de não haver um plano gratuito para o produto contratado o plano será desabilitado automaticamente.
+
+5. Obrigações e Responsabilidades
+5.1. Conforme o item 2.8, a Plataforma é destinada a Usuários experientes, arrojados, com propensão ao risco e com elevado conhecimento do mercado de valores mobiliários. Dessa forma, cada Usuário é responsável pelas decisões tomadas no âmbito da Plataforma. Não somos e nem poderíamos ser responsáveis por qualquer ação ou omissão dos Usuários tomada com base em informações, anúncios ou outros materiais veiculados.
+
+5.2. Em alguns casos, os Usuários podem movimentar elevadas quantias em ordens de compra e venda executadas por meio da Plataforma, e devem estar sempre cientes do risco. Em hipótese alguma a Imentore Copy será responsável por danos indiretos ou lucros cessantes dos Usuários.
+
+5.3. As estratégias de investimentos apenas executam ordens pré-programadas, mas o resultado dessas ordens segue a lógica do mercado: ou seja, se trata de investimentos variáveis, voláteis e totalmente imprevisíveis. Em hipótese alguma a Imentore Copy terá responsabilidade sobre as decisões ou operações que venham a ser realizadas como resultado da estratégia de investimentos parametrizada pelo Usuário, pela própria Imentore Copy e por seus Parceiros ou por terceiros.
+
+5.4. É importante lembrar que mesmo que esteja utilizando a Plataforma e as estratégias, o Usuários terá sempre acesso direto à sua corretora de valores mobiliários, podendo enviar diretamente e a qualquer tempo ordens de compra ou venda dos valores mobiliários que estiver negociando. Essa possibilidade é muito importante caso haja algum imprevisto na atuação das estratégias do Usuário ou da Plataforma, pois permite que medidas sejam tomadas pelo Usuário para assegurar determinado resultado ou evitar algum prejuízo em suas operações.
+
+5.5. A Imentore Copy não garante que as estratégias disponibilizadas necessariamente resultem em ganhos financeiros, ainda que estatisticamente haja histórico de lucros. Em sentido contrário, a Imentore Copy alerta para o elevado risco nas operações com valores mobiliários e reforça que qualquer análise pretérita não significa possibilidade de ganhos futuros.
+
+5.6. A Imentore Copy, em hipótese alguma, promete resultados de ganhos certos ou predeterminados.
+
+5.7. A Imentore Copy não se responsabiliza por comentários de terceiros em particular ou em quaisquer grupos de discussão. Nós também não nos responsabilizamos por opiniões e reclamações de Usuários sobre determinadas estratégias, de forma que a responsabilidade pelas opiniões será exclusiva de quem as emitiu.
+
+5.8. A existência de referências ou mesmo links para conteúdo de terceiros na Plataforma ou no site da Imentore Copy não induz endosso, apoio ou aprovação de qualquer opinião, iniciativa ou organização.
+
+5.9. É de responsabilidade do Usuário manter seu sistema protegido contra vírus e outros malwares. Dessa forma, não nos responsabilizamos por danos causados por vírus e malwaresem decorrência de acesso, utilização ou navegação no site na internet ou como consequência da transferência de dados, arquivos, imagens, textos ou áudio contidos nele. É de responsabilidade do Usuário a certificação de estar acessando sua conta em redes seguras.
+
+5.10. A Imentore Copy utilizará todos os meios técnicos disponíveis e viáveis para que a Plataforma fique sempre acessível de forma estável.
+
+5.11. O acesso à internet poderá eventualmente apresentar instabilidade, já que toda transmissão de dados através da rede mundial de computadores está sujeita a atrasos ou até mesmo interrupções, de forma que a Imentore Copy não se responsabiliza por quaisquer atrasos no acompanhamento de dados ou no envio de ordem, causados por questões técnicas ou serviços disponibilizados por terceiros.
+
+5.12. A Imentore Copy disponibiliza informações provenientes do mercado financeiro em tempo quase real como forma de auxiliar os Usuários a parametrizar e acompanhar suas Estratégias, no entanto, tais dados estão sujeitos a fatores externos que podem gerar atrasos ou incorreções da fonte respectiva, no que não poderá a Imentore Copy ser responsabilizada.
+
+5.13. A Imentore Copy, sempre que ocorra eventual interrupção nos seus serviços, envidará seus melhores esforços para avisar os Usuários e restabelecer a normalidade do seu funcionamento, sempre no menor tempo possível.
+
+6. Rescisão dos Planos
+6.1. O Usuário poderá, a qualquer momento e independente de motivação, cancelar a renovação automática do plano contratado de produtos diretamente através da Plataforma.
+
+6.2. A Imentore Copy poderá advertir, suspender ou cancelar, temporária ou definitivamente, a conta de um Usuário a qualquer momento, além de tomar as medidas legais cabíveis se: (1) o Usuário não cumprir qualquer dispositivo desses Termos de Uso; (2) o Usuário praticar atos fraudulentos, dolosos ou com evidente má-fé, a fim de obter vantagem indevida; (3) forem identificados atos do Usuário realizados com a finalidade de induzir ao erro para obter vantagem manifestamente ilícita; (4) não puder ser verificada a identidade do Usuário ou qualquer informação fornecida por ele seja inverídica; (5) alguma atitude do Usuário tiver o condão de causar danos a terceiros ou à própria Imentore Copy; (6) o Usuário divulgar ou postar conteúdo em desacordo com a legislação vigente, com os bons costumes, ou ofensivo ao direito de qualquer pessoa; (7) o Usuário adotar, no âmbito da relação com a Imentore Copy, bem como seus representantes e funcionários, condutas desrespeitosas, ofensivas, difamatórias, obscenas, ilegais ou realizar ameaças; e (8) praticar SPAM ou qualquer tipo de atitudes contrárias às boas práticas da internet e das redes sociais.
+
+7. Riscos Associados ao Uso da Tecnologia
+
+7.1. Riscos Tecnológicos: O cliente reconhece que o uso de tecnologias para investimentos, como a replicação automatizada de ordens, envolve riscos, incluindo falhas de software e hardware, que podem impactar o resultado das operações de investimento.
+7.2. Aceitação dos Riscos: Ao utilizar o serviço de replicação de ordens, o cliente aceita os riscos inerentes e reconhece que a Imentore Copy não será responsável por perdas decorrentes desses riscos tecnológicos.
+
+8. Comunicação Entre as Partes
+8.1. Caso o Usuário tenha qualquer dúvida, comentário, sugestão ou reclamação sobre serviços disponibilizados pela Plataforma, poderá entrar em contato conosco por meio de nossos canais de atendimento através do endereço https://ajuda.imentore.com.br na internet.
+
+9. Envio de Newsletters
+9.1. A Imentore Copy poderá enviar para o seu e-mail novidades e informações. O Usuário poderá cancelar o envio de newsletter no link disponível no canto inferior dos e-mails ou através do canal de atendimento disponível em https://ajuda.imentore.com.br na internet.
+
+10. Considerações Finais
+10.1. Esse Termos de Uso constitui documento jurídico integral e perfeito para regular a relação, e poderá ser modificado livremente e a qualquer tempo pela Imentore Copy. Dessa forma, será enviado um aviso aos Usuários informando sempre que ocorrerem mudanças. Os novos termos terão validade a partir da data em que forem veiculados no site da Imentore Copy, reservando-se ao Usuário o direito de permanecer cadastrado ou de solicitar a descontinuidade dos serviços. Caso o Usuário não manifeste sua discordância e/ou solicite a descontinuidade dos serviços, a Imentore Copy considerará, legitimamente, a concordância tácita aos novos Termos de Uso.
+
+10.2. A Imentore Copy poderá, a qualquer momento e a seu exclusivo critério, modificar a configuração da Plataforma, acrescentando ou eliminando funcionalidades, podendo também eliminar ou acrescentar quaisquer produtos do marketplace.
+
+10.3. Todo o conteúdo (incluindo, mas não se limitando a marcas, modelos, textos, programas de computador, sons, fotografias e outros materiais disponíveis no site da Imentore Copy), a aparência, a organização e a estrutura da Imentore Copy são protegidas pela legislação de propriedade intelectual e não infringem qualquer lei ou norma a que estejam subordinadas, contratos, documentos, acordos dos quais faz parte, bem como não infringem direitos de terceiros. A violação de tais direitos ensejará a respectiva indenização aos prejudicados, sem prejuízo de perdas e danos e honorários advocatícios.
+
+10.4. É vedado ao Usuário modificar, copiar, distribuir, transmitir, exibir, realizar, reproduzir, publicar, disponibilizar, licenciar ou criar obras derivadas a partir das informações coletadas na Plataforma, bem como transferir ou vender tais informações, software, produtos ou serviços, sob pena de violação do presente termo e infração legal.
+
+10.5. Os serviços oferecidos pela Imentore Copy estão disponíveis apenas para as pessoas que tenham capacidade legal para contratá-los.
+
+10.5.1. O Usuário declara e garante que possui capacidade para tanto, ou seja, é maior de idade ou está devidamente representado por seus pais ou representantes legais.
+
+10.5.2. Caso o Usuário seja pessoa jurídica, ele declara e garante que está representado por pessoa física com poderes suficientes para contratar a Imentore Copy, devidamente constantes em instrumento próprio, registrado no órgão competente.
+
+10.6. Se houver algum conflito de informações constantes neste contrato com outros documentos, prevalecerão sempre os termos deste contrato, que é o documento formal eleito para reger nossa relação
+
+10.7. Por fim, caso seja necessário dirimir qualquer dúvida ou controvérsia decorrente deste contrato, o foro eleito é o da Comarca de Vitória/ES, com renúncia de todos os outros, por mais privilegiados que sejam. Isto significa que, caso seja necessário discutirmos algo na Justiça, as ações devem ser propostas em Vitória/ES.
+
+10.8. Agora que você já leu todos os nossos Termos de Uso, poderá indicar se está de acordo com todos eles realizando o seu cadastro e se tornando um Usuário Imentore Copy!
+
+Imentore Copy Serviços Financeiros LTDA.
