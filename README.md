@@ -2,6 +2,12 @@
 
 Aplicacao Ruby on Rails para receber, organizar e replicar informacoes de trading vindas do MT5/MQL para um backend web. O projeto centraliza dashboards administrativos, contas, clientes, planos, faturas, integracoes de pagamento e APIs para gerenciar a distribuicao de ordens e eventos entre multiplas contas.
 
+## Repositorio relacionado
+
+- Cliente Python/MQL para MetaTrader: [`brenoperucchi/python-signal`](https://github.com/brenoperucchi/python-signal)
+
+Use os dois repositorios em conjunto quando precisar do fluxo completo: o `python-signal` roda perto do MetaTrader e fontes externas de sinais; este repositorio recebe, valida, organiza e gerencia os dados no backend web.
+
 ## Stack
 
 - Ruby 2.7.8
