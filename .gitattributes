@@ -1,0 +1,17 @@
+# GitHub Linguist language statistics
+#
+# This app is primarily Ruby/Rails. The directories below are bundled themes,
+# generated assets, fonts, images, and compiled frontend/vendor files that would
+# otherwise dominate the repository language chart.
+app/assets/** linguist-vendored
+app/javascript/images/** linguist-vendored
+app/javascript/packs/prompt/css/** linguist-vendored
+app/javascript/packs/prompt/fonts/** linguist-vendored
+app/javascript/packs/prompt/images/** linguist-vendored
+app/javascript/packs/prompt/js/glightbox/** linguist-vendored
+app/javascript/packs/stisla/** linguist-vendored
+public/fonts/** linguist-vendored
+public/images/** linguist-vendored
+public/*.png linguist-vendored
+public/*.jpg linguist-vendored
+public/*.ico linguist-vendored
