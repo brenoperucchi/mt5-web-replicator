@@ -1,40 +1,40 @@
 # MT5 Web Replicator
 
-Aplicacao Ruby on Rails para receber, organizar e replicar informacoes de trading vindas do MT5/MQL para um backend web. O projeto centraliza dashboards administrativos, contas, clientes, planos, faturas, integracoes de pagamento e APIs para gerenciar a distribuicao de ordens e eventos entre multiplas contas.
+Ruby on Rails application to receive, organize, and replicate trading information coming from MT5/MQL to a web backend. The project centralizes admin dashboards, accounts, customers, plans, invoices, payment integrations, and APIs to manage the distribution of orders and events across multiple accounts.
 
-## Repositorio relacionado
+## Related repository
 
-- Cliente Python/MQL para MetaTrader: [`brenoperucchi/python-signal`](https://github.com/brenoperucchi/python-signal)
+- Python/MQL client for MetaTrader: [`brenoperucchi/python-signal`](https://github.com/brenoperucchi/python-signal)
 
-Use os dois repositorios em conjunto quando precisar do fluxo completo: o `python-signal` roda perto do MetaTrader e fontes externas de sinais; este repositorio recebe, valida, organiza e gerencia os dados no backend web.
+Use both repositories together when you need the full flow: `python-signal` runs close to MetaTrader and external signal sources; this repository receives, validates, organizes, and manages the data on the web backend.
 
 ## Stack
 
 - Ruby 2.7.8
 - Rails 6.1.7.10
 - PostgreSQL
-- Redis e Sidekiq para jobs em background
-- Webpacker, Tailwind CSS, Bootstrap e Alpine.js
-- Devise, Pundit, Administrate, Pay, Stripe, Mercado Pago e Telegram Bot
+- Redis and Sidekiq for background jobs
+- Webpacker, Tailwind CSS, Bootstrap, and Alpine.js
+- Devise, Pundit, Administrate, Pay, Stripe, Mercado Pago, and Telegram Bot
 
-## Principais areas
+## Main areas
 
-- `app/controllers/api`: APIs versionadas para copy/slave/store, MT5 e integracoes externas.
-- `app/controllers/admin`, `app/controllers/control` e `app/controllers/panel`: interfaces administrativas e operacionais.
-- `app/models/message`: processamento de mensagens MetaTrader/Telegram.
-- `app/services`: regras auxiliares de trade e formatacao de dados para APIs.
-- `app/views/layouts`: landing pages, dashboard e layouts administrativos.
+- `app/controllers/api`: versioned APIs for copy/slave/store, MT5, and external integrations.
+- `app/controllers/admin`, `app/controllers/control`, and `app/controllers/panel`: administrative and operational interfaces.
+- `app/models/message`: MetaTrader/Telegram message processing.
+- `app/services`: auxiliary trade rules and data formatting for APIs.
+- `app/views/layouts`: landing pages, dashboard, and admin layouts.
 
-## Configuracao local
+## Local setup
 
-Instale as dependencias:
+Install dependencies:
 
 ```bash
 bundle install
 yarn install
 ```
 
-Prepare o banco:
+Prepare the database:
 
 ```bash
 bin/rails db:create
@@ -42,15 +42,15 @@ bin/rails db:migrate
 bin/rails db:seed
 ```
 
-Tambem e possivel usar o script padrao:
+You can also use the standard setup script:
 
 ```bash
 bin/setup
 ```
 
-## Variaveis e credenciais
+## Environment variables and credentials
 
-O projeto usa Rails credentials e variaveis de ambiente. Para desenvolvimento local, configure pelo menos:
+The project uses Rails credentials and environment variables. For local development, configure at least:
 
 ```bash
 DATABASE_PASSWORD=
@@ -61,17 +61,17 @@ TELEGRAM_API_HASH=
 TELEGRAM_API_NUMBER=
 ```
 
-As integracoes de pagamento tambem dependem das credenciais correspondentes de Stripe e Mercado Pago configuradas no cadastro de `Payment`/`PaymentMethod` ou em credentials, conforme o fluxo usado.
+Payment integrations also depend on the corresponding Stripe and Mercado Pago credentials, configured either in the `Payment`/`PaymentMethod` records or in credentials, depending on the flow used.
 
-## Rodando em desenvolvimento
+## Running in development
 
-Suba a aplicacao com Foreman:
+Start the application with Foreman:
 
 ```bash
 bin/dev
 ```
 
-Ou rode os processos separadamente:
+Or run the processes separately:
 
 ```bash
 bin/rails server
@@ -79,7 +79,7 @@ bin/webpack-dev-server
 bundle exec sidekiq
 ```
 
-## Testes
+## Tests
 
 ```bash
 bundle exec rspec
@@ -88,18 +88,22 @@ bin/rails test
 
 ## Deploy
 
-O projeto possui configuracao de Capistrano:
+The project has a Capistrano configuration:
 
 ```bash
 bundle exec cap production deploy
 ```
 
-Revise `config/deploy/*.rb`, variaveis do servidor e credentials antes de publicar uma nova versao.
+Review `config/deploy/*.rb`, server environment variables, and credentials before publishing a new release.
 
-## Checklist antes de tornar publico
+## Checklist before making it public
 
-- Remover chaves locais do Git, especialmente arquivos `config/credentials/*.key`.
-- Rotacionar qualquer segredo que ja tenha sido commitado em historico Git.
-- Limpar o historico do repositorio antes de alterar a visibilidade no GitHub.
-- Revisar seeds, fixtures e factories para garantir que contenham apenas dados ficticios.
-- Definir a licenca do projeto, caso ele seja distribuido publicamente.
+- Remove local keys from Git, especially `config/credentials/*.key` files.
+- Rotate any secret that has already been committed to Git history.
+- Clean up the repository history before changing visibility on GitHub.
+- Review seeds, fixtures, and factories to ensure they contain only fictitious data.
+- Define the project's license, in case it is distributed publicly.
+
+## Partnership
+
+Interested in continuing, co-maintaining, or partnering on this project? Get in touch at bperucchi@gmail.com to discuss collaboration, licensing terms, or a handover.
