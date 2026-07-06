@@ -12,39 +12,22 @@ telegram_attributes = {
   telegram_api_number: ENV.fetch('TELEGRAM_API_NUMBER', '5500000000000')
 }
 if Rails.env.development?
-  	
-  	store = Store.create({name:'Store 1', active_at: Time.current, volume_default: 0.10, state: :enable}.merge(telegram_attributes))
 
-  	store.traces.create({name: 'RoboSignal', name_id:'-481414224', active_at: Time.current, telegram_option:'query_name',
-						telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	store.traces.create({name: 'Perucchi Inc', name_id:'-340961920', active_at: Time.current, telegram_option:'query_name_id',
-						telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	# store.traces.create({name: 'PipsNation', name_id:'-1001340273590', active_at: nil, telegram_option:'query_name_id',
-			# 			telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	# store.traces.create({name: 'PipsMaster', name_id:'-1001136746513', active_at: nil, telegram_option:'query_name_id',
-			# 			telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	# store.traces.create({name: 'Canal Easy Trader Robot Dolar', name_id:'-1001454553108', active_at: nil, telegram_option:'query_name_id',
-			# 			telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	# store.traces.create({name: 'Canal Easy Trader Robot Indice', name_id:'-1001366232829', active_at: nil, telegram_option:'query_name_id',
-			# 			telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	store.traces.create(name: 'SignalCopy', name_id:'2000', active_at: Time.current, telegram_option:'query_name_id',
-						telegram_image:false, take_profit_limit: 2, kind: 'copy')
-  	store.traces.create({name: 'Tradexxfx', name_id:'-1001299578719', active_at: Time.current, telegram_option:'query_name_id',
-						telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	store.traces.create({name: 'CleverPips', name_id:'-1001319789685', active_at: Time.current, telegram_option:'query_name_id',
-						telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))
-  	store.traces.create({name: 'ScalpingVip', name_id:'-1001532685975', active_at: Time.current, telegram_option:'query_name_id',
-						telegram_image:false, take_profit_limit: 1, kind: 'telegram'}.merge(telegram_attributes))
-  	store.traces.create({name: 'Swing Trading ViP', name_id:'-1001159029077', active_at: nil, telegram_option:'query_name_id',
-						telegram_image:false, take_profit_limit: 2, kind: 'telegram'}.merge(telegram_attributes))  	
+  	plan = Plan.create!(name: 'Default Plan', amount: 0, amount_extra: 0)
 
+  	store = Store.create!({name:'Store 1', active_at: Time.current, volume_default: 0.10, state: :enable,
+					plan: plan, email: 'store1@example.com', url: 'store-1'}.merge(telegram_attributes))
 
-  store.accounts.create(name:3000032061, state: :enable, kind: :slave, trace_ids: [1,2,4])
-	store.accounts.create(name:3000032064, state: :enable, kind: :slave, trace_ids: [6])
-	store.accounts.create(name:3000032065, state: :enable, kind: :slave, trace_ids: [7])
-	store.accounts.create(name:3000032097, state: :enable, kind: :slave, trace_ids: [5])
-	store.accounts.create(name:3000032061, state: :enable, kind: :copy, trace_ids: [3])
+  # NOTE: the original trace/account seeding here was removed. Trace requires an existing
+  # CustomerPlan (which itself requires a Payment record), so it can't be bootstrapped from
+  # an empty database without also seeding the billing domain. See PR discussion for details.
 
+  admin_email    = ENV.fetch('SEED_ADMIN_EMAIL', 'admin@example.com')
+  admin_password = ENV.fetch('SEED_ADMIN_PASSWORD', 'password123')
+  admin_customer = Customer.new(name: 'Admin', role: 'administrator', role_control: 'owner')
+  admin_customer.build_user(email: admin_email, password: admin_password, store: store)
+  admin_customer.save!
+  puts "Admin user created: #{admin_email} / #{admin_password} (login at /users/sign_in)"
 
 elsif Rails.env.production?
   	store = Store.create({name:'Store 1', active_at: Time.current, volume_default: 0.10, state: :enable}.merge(telegram_attributes))
