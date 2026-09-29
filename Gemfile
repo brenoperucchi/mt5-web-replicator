@@ -157,7 +157,8 @@ gem "image_processing"
 # ADMINISTRATE
 
 gem 'rtesseract'
-gem 'state_machine', git: 'https://github.com/shopperplus/state_machine.git'
+# 0.8.x is the last line supporting Ruby 2.7; it forwards save(**options) correctly on Ruby 3.
+gem 'state_machines-activerecord', '~> 0.8.0'
 gem 'lucky_case'
 gem 'ruby_linear_regression'
 gem 'whenever', require: false
