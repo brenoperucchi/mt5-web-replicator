@@ -17,7 +17,13 @@ module Signalforex
 
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 6.1
+    config.load_defaults 7.2
+
+    # Rails 7.1 defaults this to false, but our administrate fork
+    # (lib/administrate/field/has_many_scope.rb) does `require "sentient_store.rb"`,
+    # loading app/models/concerns/sentient_store.rb through $LOAD_PATH. Keep the
+    # autoload paths on the load path until that require is removed upstream.
+    config.add_autoload_paths_to_load_path = true
     config.time_zone = 'America/Sao_Paulo'
     config.autoloader = :zeitwerk
     # config.active_record.use_yaml_unsafe_load = true
