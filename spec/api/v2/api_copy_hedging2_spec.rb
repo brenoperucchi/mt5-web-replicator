@@ -7,7 +7,7 @@ RSpec.describe API::V2::APICopy do
     @user_customer = create(:user, :customer, store: @store)
     @user_admin = create(:user, :admin, store: @store)
     @admin = create(:customer, :admin, user:@user_admin)
-    @plan_method = create(:payment_method, :mercadopago)
+    @plan_method = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @plan_method, store: @store)
     @customer_plan = create(:customer_plan, payment: @payment, store:@store)
     @customer = create(:customer, :customer, user:@user_customer, customer_plans:[@customer_plan])

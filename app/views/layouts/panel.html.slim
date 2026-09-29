@@ -3,7 +3,6 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
     = render 'layouts/meta'
     = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
     = javascript_include_tag "application", 'data-turbolinks-track': 'reload'
-    = javascript_include_tag "https://sdk.mercadopago.com/js/v2"
     = content_for :header
     script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
     script

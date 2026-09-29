@@ -8,7 +8,7 @@ require 'rails_helper'
 RSpec.describe Order, type: :model do
   let(:plan) { create(:plan, :plan1) }
   let(:store) { create(:store, plan_id: plan.id) }
-  let(:payment) { create(:payment, payment_method: create(:payment_method, :mercadopago), store: store) }
+  let(:payment) { create(:payment, payment_method: create(:payment_method, :stripe), store: store) }
   let(:customer_plan) { create(:customer_plan, payment: payment, store: store) }
   let(:trace) { create(:trace, :copy, stores: [store], customer_plans: [customer_plan]) }
   let(:customer) { create(:customer, :customer, user: create(:user, :customer, store: store)) }

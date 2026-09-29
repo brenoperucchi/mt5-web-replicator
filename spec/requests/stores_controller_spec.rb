@@ -26,7 +26,7 @@ RSpec.describe 'Store Controller', type: :request do
     @payment = create(:payment, payment_method: @stripe, store: @store)
     @store_name = "Sistema-#{Store.maximum(:id).to_i + 1}" 
 
-    # @stripe = create(:payment_method, :mercadopago)
+    # @stripe = create(:payment_method, :stripe)
 	end
 
   # This should return the minimal set of attributes required to create a valid

@@ -1,0 +1,24 @@
+.row
+  .col-lg-12
+    .row
+      - if @invoice.plan_usage.try(:trace).try(:desc_finish).present?
+        .col-lg-6.d-flex.align-items-strech
+          == @invoice.plan_usage.trace.desc_finish
+      .col-lg-6
+        .card.w-100.position-relative.overflow-hidden.mb-3
+          .card-body.p-4
+            - if @invoice.paid?
+              h4.card-title Payment confirmed
+              p Thank you! Your payment was received.
+            - elsif @invoice.refunded?
+              h4.card-title Payment refunded
+              p This invoice has been refunded.
+            - elsif @invoice.denied? || %w[failure cancel].include?(@kind)
+              h4.card-title Payment not completed
+              p The payment was cancelled or declined. You can try again from your invoices page.
+            - else
+              h4.card-title Payment processing
+              p We are waiting for the payment provider to confirm your payment.
+            p.mb-0 = "Invoice ##{@invoice.id} - #{number_with_precision(@invoice.amount, precision: 2)}"
+    .row
+      = link_to 'Back', panel_invoices_path, class: 'btn btn-dark w-100'

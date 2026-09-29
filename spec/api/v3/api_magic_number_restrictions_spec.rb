@@ -9,7 +9,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
     @admin = create(:customer, :admin, user: @user_admin)
     @customer = create(:customer, :customer, user: @user_customer)
     @account_server = create(:account_server)
-    @plan_method = create(:payment_method, :mercadopago)
+    @plan_method = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @plan_method, store: @store)
     @customer_plan = create(:customer_plan, payment: @payment, store:@store)
   end

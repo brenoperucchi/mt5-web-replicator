@@ -1,22 +1,12 @@
 module Panel
   class DashboardController < Panel::BaseController
-    before_action :authenticate_user!, except: [:back_url]
+    before_action :authenticate_user!
 
     layout 'panel'
 
     def index
     end
 
-    def back_url
-      @params = {payment_id: params[:payment_id], status: params[:status], external_reference: params[:external_reference], merchant_order_id: params[:merchant_order_id]}
-      @invoice = Invoice.find(params[:invoice_id])
-      @invoice.payment_method.check_payment_get(params[:payment_id])
-
-      respond_to do |wants|
-        wants.html { render :back_url }
-      end
-
-    end
     # For example, you may want to send an email after a foo is updated.
     #
     # def update

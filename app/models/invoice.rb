@@ -34,11 +34,16 @@ class Invoice < ApplicationRecord
   end
 
 
+  # Asks the payment provider for a hosted checkout URL and stores it as the
+  # invoice payment link. Returns the URL, or false when no provider is
+  # available for this invoice's payment method.
   def invoice_send
-    payment_method = self.payment.payment_method.provider(self.payment)
-    payment_method.checkout(self)
-    self.update(payment_link: redirect_url)
-    return payment_method
+    provider = payment_method
+    return false if provider.nil?
+
+    url = provider.checkout(self)
+    update(payment_link: url)
+    url.presence || false
   end
 
   def customer
@@ -47,7 +52,7 @@ class Invoice < ApplicationRecord
 
 
   def payment_method
-    self.payment.payment_method.provider(self.payment)
+    payment&.payment_method&.provider(payment)
   end
 
   def response
@@ -55,48 +60,18 @@ class Invoice < ApplicationRecord
   end
 
   def redirect_url
-    return false if response[:preference].empty?
-    if Rails.env.development? || Rails.env.test?
-      response[:preference]["sandbox_init_point"] || false
-    else
-      response[:preference]["init_point"] || false
-    end
+    payment_link.presence
   end
 
-  def check_payment
-    logging = loggings.where(state: 'opened').take
-    if logging
-      payment_method = payment.payment_method.provider(payment)
-      payment_method.check_payment(ActionController::Parameters.new(eval logging.content))
-    end
-    self.payment_status
-  end
-
-  def payment_status(response_status=nil)
-    # Log the current state and response for debugging
-    Rails.logger.debug("Invoice#payment_status - Current State: #{state}, Response Status: #{response_status}")
-    Rails.logger.debug("Invoice Response: #{response.inspect}")
-    
-    # Make sure response_status is present - try different ways to get it
-    response_status ||= self.response.dig(:response, "status") || 
-                        self.response.dig("response", "status") || 
-                        self.response.dig("response", :status)
-    
-    Rails.logger.debug("Final Response Status: #{response_status}")
-    
-    # Update invoice state based on response status
-    if response_status.present?
-      case response_status.to_s
-      when 'approved', 'paid'
-        self.update_column(:state, Invoice.states[:paid]) unless paid?
-        Rails.logger.debug("Updated to paid state")
-      when 'rejected'
-        self.update_column(:state, Invoice.states[:denied]) unless denied?
-        Rails.logger.debug("Updated to denied state")
-      when 'refunded', 'charged_back'
-        self.update_column(:state, Invoice.states[:refunded]) unless refunded?
-        Rails.logger.debug("Updated to refunded state")
-      end
+  # Applies a provider-neutral payment status (:paid, :denied, :refunded).
+  def payment_status(status)
+    case status.to_s
+    when 'paid'
+      self.update_column(:state, Invoice.states[:paid]) unless paid?
+    when 'denied'
+      self.update_column(:state, Invoice.states[:denied]) unless denied?
+    when 'refunded'
+      self.update_column(:state, Invoice.states[:refunded]) unless refunded?
     end
   end
 
@@ -123,11 +98,9 @@ class Invoice < ApplicationRecord
     timestamp = I18n.l DateTime.current, format: :short8
 
     if customer_plan.fixed?# and customer_plan.monthly?
-      # invoice.back_url = "mercadopago/back_urls/success/#{self.id}"
       amount = plan_usage.amount_proportional 
       description = "#{timestamp} - Contratos: #{account.contract_volume_use} * Valor #{number_with_precision plan_usage.amount_proportional}"
     elsif customer_plan.percent?
-      # invoice.back_url = "panel/dashboard/back_urls/success/#{self.id}"
       account.search_date_begin = date.beginning_of_month
       account.search_date_end = date.end_of_month
       data_profit = account.data_profit(:slaves, trace)
@@ -142,12 +115,10 @@ class Invoice < ApplicationRecord
     end
   end
 
+  # Where the payment provider sends the customer back after checkout.
+  # kind: :success, :failure, :pending or :cancel
   def back_urls(kind)
-    if self.invoiceable.owner? 
-      "https://#{store.domain_url}/mercadopago/back_urls/#{kind.to_s}/#{self.id}"
-    elsif self.invoiceable.customer?
-      "https://#{store.domain_url}/panel/dashboard/back_url/#{store.url}/#{kind.to_s}/#{self.id}"
-    end
+    "https://#{store.domain_url}/payments/#{self.id}/return/#{kind}"
   end
 
 

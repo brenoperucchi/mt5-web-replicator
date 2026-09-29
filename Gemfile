@@ -52,6 +52,7 @@ group :test do
   gem "database_cleaner"
   gem "factory_bot_rails"
   gem "minitest"
+  gem "webmock"
 end
 
 
@@ -104,7 +105,6 @@ gem "font-awesome-rails"
 gem 'jquery-rails'
 gem "rest-client"
 gem 'stripe', '~> 9'
-gem 'mercadopago-sdk'
 gem 'dotenv'
 gem 'stringio', '3.0.9'
 

@@ -3,16 +3,8 @@ Rails.application.routes.draw do
   resources :delivery_payments
   constraints subdomain: /.*/ do
     
-    get  "stripe/checkout",                           to: "stripe#checkout", as:'checkout_stripe'      
-    get  "stripe/webhook/:store_id/:payment_id",            to: "stripe#webhook"
-    post "stripe/webhook/:store_id/:payment_id",            to: "stripe#webhook"
-
-    get  "mercadopago/webhook/:store_id/:payment_id",       to: "mercadopago#webhook"
-    post "mercadopago/webhook/:store_id/:payment_id",       to: "mercadopago#webhook"
-    post "mercadopago/ipn/:store_id/:payment_id",           to: "mercadopago#ipn"
-    post "mercadopago/process_payment/:invoice_id",   to: "mercadopago#process_payment"
-    get  "mercadopago/finish/:invoice_id",            to: "mercadopago#finish",    as: 'finish_mercadopago'
-    get  "mercadopago/back_urls/:state/:invoice_id",  to: "mercadopago#back_urls"
+    post "payments/webhook/:payment_id",              to: "payments#webhook",         as: 'payments_webhook'
+    get  "payments/:invoice_id/return/:kind",         to: "payments#checkout_return", as: 'payments_return'
     
 
     resources :invoice_items
@@ -79,9 +71,7 @@ Rails.application.routes.draw do
         delete 'logout',  to: 'sessions#destroy', as: 'destroy_session'
       end
 
-      resources :dashboard, only: [:index] do
-        get 'back_url/:store_name/:state/:invoice_id' , to: 'dashboard#back_url', as: 'back_url', on: :collection
-      end
+      resources :dashboard, only: [:index]
       
       resources :invoices, only: [:index] do
         get  'invoice_send', to: 'invoices#invoice_send', on: :member, as: 'invoice_send'

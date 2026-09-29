@@ -13,10 +13,8 @@ FactoryBot.define do
     telegram_api_number {'5500000000000'}
 
     after(:create) do |store, evaluator|
-      payment_method = store.payment_methods.create(name: 'Mercado Pago', handle: 'mercado_pago')
-      payment_method.payments.first.update(api_token: 'TEST-0000000000000000-000000-0000000000000000000000000000-00000000', webhook_token: 'TEST-00000000-0000-0000-0000-000000000000')
-      payment_method = store.payment_methods.create(name: 'Stripe',       handle: 'stripe')
-      payment_method.payments.last.update(api_token: 'TEST-0000000000000000-000000-0000000000000000000000000000-00000000', webhook_token: 'TEST-00000000-0000-0000-0000-000000000000')
+      payment_method = store.payment_methods.create(name: 'Stripe', handle: 'stripe')
+      payment_method.payments.last.update(api_token: 'sk_test_x', webhook_token: 'whsec_test')
     end
 
 
@@ -38,10 +36,8 @@ FactoryBot.define do
 
 
       after(:create) do |store, evaluator|
-        payment_method = store.payment_methods.create(name: 'Mercado Pago', handle: 'mercado_pago')
-        payment_method.payments.first.update(api_token: 'TEST-0000000000000000-000000-0000000000000000000000000000-00000000', webhook_token: 'TEST-00000000-0000-0000-0000-000000000000')
-        payment_method = store.payment_methods.create(name: 'Stripe',       handle: 'stripe')
-        payment_method.payments.last.update(api_token: 'TEST-0000000000000000-000000-0000000000000000000000000000-00000000', webhook_token: 'TEST-00000000-0000-0000-0000-000000000000')
+        payment_method = store.payment_methods.create(name: 'Stripe', handle: 'stripe')
+        payment_method.payments.last.update(api_token: 'sk_test_x', webhook_token: 'whsec_test')
       end
 
       after(:create) do |store, evaluator|

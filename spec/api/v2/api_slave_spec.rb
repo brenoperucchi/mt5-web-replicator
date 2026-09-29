@@ -4,7 +4,7 @@ RSpec.describe 'OrdersHistory API', type: :request do
   before(:context) do
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @plan_method = create(:payment_method, :mercadopago)
+    @plan_method = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @plan_method, store: @store)
     @customer_plan = create(:customer_plan, payment: @payment, store:@store)
     @trace = create(:trace, :copy, stores: [@store], instrument_control: true, customer_plans:[@customer_plan])

@@ -4,7 +4,6 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
     = render 'layouts/meta'
     = stylesheet_link_tag  'modernize', 'data-turbolinks-track': 'reload'
     = javascript_include_tag "application", 'data-turbolinks-track': 'reload'
-    = javascript_include_tag "https://sdk.mercadopago.com/js/v2"
     = content_for :header
     script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
     script
@@ -45,7 +44,7 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
                         / a href="/dashboards" 
                     = content_for :breadcrumb
                 .col-lg-3.text-end
-                  - if action_name != "back_urls"
+                  - if action_name != "checkout_return"
                     .button.list-inline-item
                       button#filter.btn.btn-light[type="button"]
                         i.feather.icon-plus
