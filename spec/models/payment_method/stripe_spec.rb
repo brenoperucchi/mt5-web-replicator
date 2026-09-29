@@ -82,7 +82,7 @@ RSpec.describe PaymentMethod::Stripe do
       stub_stripe_checkout_session_retrieve(id: 'cs_old', status: 'expired', url: nil)
       create_stub = stub_stripe_checkout_session_create(id: 'cs_new', url: 'https://checkout.stripe.com/c/pay/cs_new')
       expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_new'
-      expect(a_request(:post, sessions_url).with(headers: { 'Idempotency-Key' => "invoice-#{invoice.id}-attempt-2" })).to have_been_made.once
+      expect(a_request(:post, sessions_url).with(headers: { 'Idempotency-Key' => "test-invoice-#{invoice.id}-attempt-2" })).to have_been_made.once
       expect(invoice.reload.response[:checkout_session_id]).to be == 'cs_new'
     end
 
@@ -99,7 +99,88 @@ RSpec.describe PaymentMethod::Stripe do
     it 'sends a stable idempotency key on the first attempt' do
       stub_stripe_checkout_session_create
       invoice.invoice_send
-      expect(a_request(:post, sessions_url).with(headers: { 'Idempotency-Key' => "invoice-#{invoice.id}-attempt-1" })).to have_been_made.once
+      expect(a_request(:post, sessions_url).with(headers: { 'Idempotency-Key' => "test-invoice-#{invoice.id}-attempt-1" })).to have_been_made.once
+    end
+
+    # mt5-2 rev-1 #1 / rev-2 N2: boleto-like async methods finish the session
+    # as complete/unpaid until the payment clears.
+    it 'does not open a second checkout while an async payment is pending (complete/unpaid)' do
+      invoice.update(response: { checkout_session_id: 'cs_async', checkout_attempt: 1 })
+      stub_stripe_checkout_session_retrieve(id: 'cs_async', status: 'complete', payment_status: 'unpaid', url: nil,
+                                            metadata: { invoice_id: invoice.id.to_s })
+      create_stub = stub_stripe_checkout_session_create
+      expect(invoice.invoice_send).to be false
+      expect(create_stub).not_to have_been_requested
+      expect(invoice.reload.state).not_to be == 'paid'
+      expect(invoice.response[:checkout_session_id]).to be == 'cs_async'
+    end
+
+    it 'allows a new attempt after the async payment of the current session failed' do
+      invoice.update(response: { checkout_session_id: 'cs_async', checkout_attempt: 1 })
+      invoice.update_columns(state: Invoice.states[:denied])
+      stub_stripe_checkout_session_retrieve(id: 'cs_async', status: 'complete', payment_status: 'unpaid', url: nil,
+                                            metadata: { invoice_id: invoice.id.to_s })
+      stub_stripe_checkout_session_create(id: 'cs_new', url: 'https://checkout.stripe.com/c/pay/cs_new')
+      expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_new'
+      expect(a_request(:post, sessions_url).with(headers: { 'Idempotency-Key' => "test-invoice-#{invoice.id}-attempt-2" })).to have_been_made.once
+    end
+
+    # mt5-2 rev-1 #1: a failed lookup says nothing about the previous session.
+    it 'does not create a session when the previous one cannot be retrieved' do
+      invoice.update(response: { checkout_session_id: 'cs_unknown', checkout_attempt: 1 })
+      stub_request(:get, "#{sessions_url}/cs_unknown")
+        .to_return(status: 500, headers: { 'Content-Type' => 'application/json' },
+                   body: { error: { type: 'api_error', message: 'boom' } }.to_json)
+      create_stub = stub_stripe_checkout_session_create
+      expect(invoice.invoice_send).to be false
+      expect(create_stub).not_to have_been_requested
+      expect(invoice.reload.response[:checkout_attempt]).to be == 1
+      expect(invoice.response[:checkout_session_id]).to be == 'cs_unknown'
+    end
+
+    # mt5-2 rev-1 #4: an open session is only reused for the same amount/currency.
+    context 'when the invoice amount changed since the open session was created' do
+      before do
+        invoice.update(response: { checkout_session_id: 'cs_old', checkout_attempt: 1,
+                                   checkout_amount_cents: 5333, checkout_currency: 'usd' })
+        stub_stripe_checkout_session_retrieve(id: 'cs_old', status: 'open', url: 'https://checkout.stripe.com/c/pay/cs_old')
+        invoice.update_columns(amount: 60)
+      end
+
+      it 'expires the old session and creates a new one with a new key' do
+        expire_stub = stub_request(:post, "#{sessions_url}/cs_old/expire")
+          .to_return(status: 200, headers: { 'Content-Type' => 'application/json' },
+                     body: { id: 'cs_old', object: 'checkout.session', status: 'expired' }.to_json)
+        stub_stripe_checkout_session_create(id: 'cs_new', url: 'https://checkout.stripe.com/c/pay/cs_new')
+
+        expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_new'
+        expect(expire_stub).to have_been_requested.once
+        expect(a_request(:post, sessions_url).with { |req|
+          req.headers['Idempotency-Key'] == "test-invoice-#{invoice.id}-attempt-2" &&
+            Rack::Utils.parse_nested_query(req.body).dig('line_items', '0', 'price_data', 'unit_amount') == '6000'
+        }).to have_been_made.once
+        expect(invoice.reload.response).to include(checkout_session_id: 'cs_new', checkout_amount_cents: 6000,
+                                                   checkout_currency: 'usd')
+      end
+
+      it 'does not issue a second checkout when the old session cannot be expired' do
+        stub_request(:post, "#{sessions_url}/cs_old/expire")
+          .to_return(status: 400, headers: { 'Content-Type' => 'application/json' },
+                     body: { error: { type: 'invalid_request_error', message: 'already complete' } }.to_json)
+        create_stub = stub_stripe_checkout_session_create
+        expect(invoice.invoice_send).to be false
+        expect(create_stub).not_to have_been_requested
+      end
+    end
+
+    it 'reuses the open session when amount and currency are unchanged' do
+      invoice.update(response: { checkout_session_id: 'cs_old', checkout_attempt: 1,
+                                 checkout_amount_cents: 5333, checkout_currency: 'usd' })
+      stub_stripe_checkout_session_retrieve(id: 'cs_old', status: 'open', url: 'https://checkout.stripe.com/c/pay/cs_old')
+      create_stub = stub_stripe_checkout_session_create
+      expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_old'
+      expect(create_stub).not_to have_been_requested
+      expect(a_request(:post, %r{/expire})).not_to have_been_made
     end
   end
 

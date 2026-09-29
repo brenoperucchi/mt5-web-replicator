@@ -80,13 +80,24 @@ provider in `app/models/payment_method/`); Stripe is the default and only provid
    - `checkout.session.async_payment_failed`
    - `checkout.session.expired`
    - `charge.refunded`
+
+   Register **one webhook endpoint per distinct webhook secret**, not one per `Payment`:
+   Stripe signs each endpoint with its own secret, so every `Payment` that leaves
+   `webhook_token` blank shares the single `STRIPE_WEBHOOK_SECRET` and is served by one
+   endpoint (any of those payments' ids). An endpoint processes an invoice only when the
+   invoice's `Payment` resolves to the same secret, so a store with its own credentials
+   never touches another store's invoices.
 3. Currency: `PAYMENT_CURRENCY` (ISO code, default `usd`). This deployment bills in BRL:
    `config/deploy.yml` sets `PAYMENT_CURRENCY: brl`.
 
 Webhooks are rejected (400) when no signing secret is configured. Invoice state only moves
 forward (paid from pending/to_paid/denied, denied from pending/to_paid, refunded from paid);
 an expired session leaves the invoice payable, and only a full `charge.refunded` marks it
-refunded. Checkout reuses the invoice's open session and never charges paid/refunded invoices.
+refunded. Checkout reuses the invoice's open session (expiring it first if the invoice amount
+or currency changed) and never charges paid/refunded invoices. While a session is `complete`
+but still `unpaid` (async methods such as boleto), or when Stripe cannot be reached to check
+the previous session, no new checkout is issued ("Invoice Not Sended!"); a new attempt is
+allowed after `async_payment_failed` or once the session expired.
 
 ### Migrating from MercadoPago
 

@@ -129,6 +129,52 @@ RSpec.describe 'Payments Controller', type: :request do
       expect(Logging.last.state).to be == 'INVOICE NOTFIND'
     end
 
+    # mt5-2 rev-2 N1: several stores' Stripe payments with blank tokens share
+    # the ENV secret, so only one endpoint can be registered for all of them.
+    context 'with payments sharing the ENV webhook secret' do
+      let(:store_b) { create(:store, :store2, plan_id: @plan1.id) }
+      let(:shared_a) { Payment.create!(payment_method: @payment.payment_method, store: @store) }
+      let(:shared_b) { Payment.create!(payment_method: @payment.payment_method, store: store_b) }
+
+      before do
+        allow(ENV).to receive(:[]).and_call_original
+        allow(ENV).to receive(:[]).with('STRIPE_WEBHOOK_SECRET').and_return('whsec_env')
+      end
+
+      def post_to(payment, type, object, secret:)
+        payload = stripe_event_payload(type, object)
+        post "/payments/webhook/#{payment.id}", params: payload,
+          headers: { 'Content-Type' => 'application/json', 'Stripe-Signature' => stripe_signature_header(payload, secret: secret) }
+      end
+
+      it "processes another store's invoice when both resolve to the same secret" do
+        inv_b = Invoice.create!(name: "payments-spec-#{SecureRandom.hex(3)}", store: store_b, payment: shared_b,
+                                invoiceable: @customer, amount: 49.9, state: :to_paid)
+        post_to(shared_a, 'checkout.session.completed', session_object(inv_b), secret: 'whsec_env')
+        expect(response).to have_http_status 200
+        expect(inv_b.reload.state).to be == 'paid'
+      end
+
+      it 'matches a refund of another store invoice by payment intent' do
+        inv_b = Invoice.create!(name: "payments-spec-#{SecureRandom.hex(3)}", store: store_b, payment: shared_b,
+                                invoiceable: @customer, amount: 49.9, state: :paid,
+                                response: { checkout_session_id: 'cs_b', payment_intent_id: 'pi_b' })
+        post_to(shared_a, 'charge.refunded', { id: 'ch_b', object: 'charge', payment_intent: 'pi_b', refunded: true, metadata: {} },
+                secret: 'whsec_env')
+        expect(inv_b.reload.state).to be == 'refunded'
+      end
+
+      it 'does not let a store with its own webhook secret process another store invoice' do
+        inv_b = Invoice.create!(name: "payments-spec-#{SecureRandom.hex(3)}", store: store_b, payment: shared_b,
+                                invoiceable: @customer, amount: 49.9, state: :to_paid)
+        # @payment has its own token (whsec_test), distinct from the ENV secret used by shared_b.
+        post_event('checkout.session.completed', session_object(inv_b))
+        expect(response).to have_http_status 200
+        expect(Logging.last.state).to be == 'INVOICE NOTFIND'
+        expect(inv_b.reload.state).to be == 'to_paid'
+      end
+    end
+
     it 'returns 400 for a payment whose provider no longer exists' do
       legacy = PaymentMethod.create!(name: 'Legacy', handle: 'mercado_pago')
       legacy_payment = Payment.create!(payment_method: legacy, store: @store)

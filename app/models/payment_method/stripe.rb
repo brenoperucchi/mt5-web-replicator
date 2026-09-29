@@ -28,9 +28,14 @@ class PaymentMethod::Stripe
   end
 
   # Returns a hosted Checkout URL for the invoice, or nil when it must not or
-  # could not be charged. Serialized per invoice with a row lock:
+  # could not be charged right now (Invoice#invoice_send then returns false).
+  # Serialized per invoice with a row lock:
   # - paid/refunded invoices are never charged again;
-  # - a still-open session is reused instead of creating a second one;
+  # - a still-open session is reused while its amount/currency match the
+  #   invoice; otherwise it is expired before a new one is created;
+  # - no new session is created while the previous one cannot be ruled out:
+  #   an async payment still pending (complete/unpaid), a failed lookup, or a
+  #   failed expire all return nil and keep the current attempt;
   # - new sessions use an idempotency key stable per attempt, so a retried
   #   request (timeout, double click) cannot create duplicate sessions.
   def checkout(invoice)
@@ -46,11 +51,12 @@ class PaymentMethod::Stripe
         next nil
       end
 
-      url = open_session_url(invoice)
-      next url if url
-      next nil if invoice.paid?
-
-      create_session(invoice, unit_amount)
+      verdict, url = previous_session(invoice, unit_amount)
+      case verdict
+      when :reuse then url
+      when :new   then create_session(invoice, unit_amount)
+      else nil
+      end
     end
   end
 
@@ -115,7 +121,9 @@ class PaymentMethod::Stripe
     if current || paid
       attrs = { payment_intent_id: session.try(:payment_intent).presence || invoice.response[:payment_intent_id] }
       attrs[:checkout_session_id] = session.id if current
-      invoice.update(response: invoice.response.merge(attrs).compact)
+      # update! so a failed save raises here instead of leaving dirty
+      # attributes that make the row lock in payment_status raise later.
+      invoice.update!(response: invoice.response.merge(attrs).compact)
     end
 
     if paid
@@ -125,18 +133,41 @@ class PaymentMethod::Stripe
     end
   end
 
-  def open_session_url(invoice)
+  # Decides what to do with the invoice's current session, if any:
+  # [:reuse, url] / [:new] / [:wait] (do not charge now).
+  def previous_session(invoice, unit_amount)
     session_id = invoice.response[:checkout_session_id]
-    return nil if session_id.blank?
+    return [:new] if session_id.blank?
 
     session = ::Stripe::Checkout::Session.retrieve(session_id, { api_key: api_key })
-    # A completed session whose webhook has not arrived yet: record it rather
-    # than opening a second payment for the same invoice.
-    apply_session(invoice, session) if session.status == 'complete'
-    session.url.presence if session.status == 'open'
+    case session.status
+    when 'open'
+      return [:reuse, session.url] if same_charge?(invoice, session, unit_amount) && session.url.present?
+
+      ::Stripe::Checkout::Session.expire(session_id, {}, { api_key: api_key })
+      [:new]
+    when 'complete'
+      # Record a completion whose webhook has not arrived yet.
+      apply_session(invoice, session)
+      return [:wait] if invoice.paid?
+      # complete/unpaid is an async payment (e.g. boleto) still clearing; only
+      # after it failed (async_payment_failed denies the invoice) may the
+      # customer try again.
+      invoice.denied? ? [:new] : [:wait]
+    else # expired
+      [:new]
+    end
   rescue ::Stripe::StripeError => e
-    Rails.logger.warn("Stripe: could not retrieve #{session_id} for Invoice##{invoice.id}: #{e.message}")
-    nil
+    # Inconclusive: the previous session may still be payable, so never open
+    # a second one; the next send retries with the same attempt.
+    Rails.logger.warn("Stripe: could not check/expire #{session_id} for Invoice##{invoice.id}: #{e.message}")
+    [:wait]
+  end
+
+  def same_charge?(invoice, session, unit_amount)
+    amount = invoice.response[:checkout_amount_cents] || session.try(:amount_total)
+    session_currency = invoice.response[:checkout_currency] || session.try(:currency)
+    amount.to_i == unit_amount && session_currency.to_s.downcase == currency
   end
 
   # The attempt number only moves forward when a new session is needed
@@ -167,9 +198,11 @@ class PaymentMethod::Stripe
     params[:customer_email] = email if email.present?
 
     session = ::Stripe::Checkout::Session.create(
-      params, { api_key: api_key, idempotency_key: "invoice-#{invoice.id}-attempt-#{attempt}" }
+      params, { api_key: api_key, idempotency_key: idempotency_key(invoice, attempt) }
     )
-    invoice.update(response: invoice.response.merge(checkout_session_id: session.id))
+    invoice.update!(response: invoice.response.merge(checkout_session_id: session.id,
+                                                     checkout_amount_cents: unit_amount,
+                                                     checkout_currency: currency))
     session.url
   rescue ::Stripe::StripeError => e
     Rails.logger.error("Stripe: checkout failed for Invoice##{invoice.id}: #{e.class}: #{e.message}")
@@ -181,8 +214,27 @@ class PaymentMethod::Stripe
     nil
   end
 
+  # Environment-prefixed so a restored backup or another environment sharing
+  # the Stripe account cannot replay a stored result for a different invoice.
+  def idempotency_key(invoice, attempt)
+    "#{Rails.env}-invoice-#{invoice.id}-attempt-#{attempt}"
+  end
+
+  # The signature proved the event comes from the Stripe account owning this
+  # endpoint's secret, so any invoice whose payment resolves to that same
+  # secret is ours (several stores' payments with blank tokens share the ENV
+  # secret, but only one endpoint can be registered for it). A payment with a
+  # distinct secret belongs to another account and is never touched.
   def invoice_from_session(session)
-    Invoice.find_by(id: session_invoice_id(session), payment_id: payment.id)
+    same_account(Invoice.find_by(id: session_invoice_id(session)))
+  end
+
+  def same_account(invoice)
+    return nil if invoice.nil?
+    return invoice if invoice.payment_id == payment.id
+
+    other = invoice.payment_method
+    invoice if other.is_a?(self.class) && other.webhook_secret.present? && other.webhook_secret == webhook_secret
   end
 
   def session_invoice_id(session)
@@ -191,14 +243,13 @@ class PaymentMethod::Stripe
 
   def invoice_from_charge(charge)
     invoice_id = charge.try(:metadata).try(:[], :invoice_id).presence
-    invoice = Invoice.find_by(id: invoice_id, payment_id: payment.id) if invoice_id
+    invoice = same_account(Invoice.find_by(id: invoice_id)) if invoice_id
     return invoice if invoice
 
     intent = charge.try(:payment_intent)
     return nil if intent.blank?
-    Invoice.where(payment_id: payment.id)
-           .where("response LIKE ?", "%#{Invoice.sanitize_sql_like(intent)}%")
-           .find { |inv| inv.response[:payment_intent_id] == intent }
+    Invoice.where("response LIKE ?", "%#{Invoice.sanitize_sql_like(intent)}%")
+           .find { |inv| inv.response[:payment_intent_id] == intent && same_account(inv) }
   end
 
   def customer_email(invoice)
