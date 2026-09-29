@@ -26,7 +26,7 @@ class StoresController < ApplicationController
 		@store.url = url_name
 		@store.name = store_name
 		@store.plan = Plan.first
-		@store.payment = Payment.first
+		@store.payment = Payment.available.order(:id).first
 
 		respond_to do |format|
 		  if @store.save

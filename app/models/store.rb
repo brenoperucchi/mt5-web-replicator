@@ -153,7 +153,7 @@ class Store < ApplicationRecord
     #date_today = DateTime.current
     #date_today = DateTime.current + 1.month
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
-    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: (self.payment || self.payments.first))
+    invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: billing_payment)
 
     usages = self.plan_usages.where(usageable_type:'Plan', resourceable_type: 'Store')
     usages.each do |usage|
@@ -194,16 +194,26 @@ class Store < ApplicationRecord
     url_domain = Store.domain_url
   end
 
+  # This store's first payment whose provider exists (never a legacy one).
+  def default_payment
+    payments.available.order(:id).first
+  end
+
+  # Payment used for the store's own monthly invoice.
+  def billing_payment
+    payment&.available? ? payment : default_payment
+  end
+
   def create_association_after_create(email, password)
     customer_name = "Customer-#{Store.maximum(:id).to_i + 1}"
     
-    PaymentMethod.all.each do |payment|
+    PaymentMethod.available.each do |payment|
       payment.stores << self unless payment.stores.include?(self)
     end
 
     customer_plan = self.customer_plans.create(
       name: 'Plan 1', amount: 10.00, kind: 'fixed', store: self,
-      payment: self.payments.first, due_at_dates: 5
+      payment: default_payment, due_at_dates: 5
     )
 
     customer = self.customers.new(
