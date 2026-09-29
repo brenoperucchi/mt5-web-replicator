@@ -250,8 +250,20 @@ docker run --rm -p 3000:80 -e SECRET_KEY_BASE=$(openssl rand -hex 64) \
 - Rotate any secret that has already been committed to Git history.
 - Clean up the repository history before changing visibility on GitHub.
 - Review seeds, fixtures, and factories to ensure they contain only fictitious data.
-- Define the project's license, in case it is distributed publicly.
+
+## License
+
+This project is **source-available** under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
+
+- **Free for noncommercial use.** You can read, run, test, modify and share it for personal use, study, research, evaluation, or at a nonprofit, school or public institution.
+- **Commercial use needs a separate license.** This includes running it for a business, offering it as a service, or using it to manage paying customers' accounts. Contact bperucchi@gmail.com to discuss terms.
+
+The same terms apply to the companion client, [`python-signal`](https://github.com/brenoperucchi/python-signal), once it is published under this license.
+
+## Contributing
+
+Pull requests are welcome. Before your first pull request can be merged, you will be asked to sign the [Contributor License Agreement](CLA.md) by leaving a comment on the pull request. It keeps the project able to offer commercial licenses while your contribution stays credited to you.
 
 ## Partnership
 
-Interested in continuing, co-maintaining, or partnering on this project? Get in touch at bperucchi@gmail.com to discuss collaboration, licensing terms, or a handover.
+Interested in collaborating on this project or building something on top of it commercially? Get in touch at bperucchi@gmail.com.
