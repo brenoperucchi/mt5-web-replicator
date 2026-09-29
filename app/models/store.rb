@@ -1,7 +1,7 @@
 require 'lib_enums'
 class Store < ApplicationRecord
   ENUMS       = %w(state)
-  LANGUAGE    = {Português:'pt-BR', English:'en'}
+  LANGUAGE    = {English:'en', Português:'pt-BR'} # first entry is what an unset store shows and saves
   DATE_FILTER = {'1 month':'1_month', '3 months':'3_months', '6 months':'6_months', '1_year':'1_year', '2_years':'2_years', '3_years':'3 years'}
 
   # include LibEnums
