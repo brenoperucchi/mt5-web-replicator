@@ -6,7 +6,6 @@ html[lang="#{current_store.try(:language) || "pt-br"}"]
     = csrf_meta_tags
     = stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'preload'
     = javascript_pack_tag 'prompt', 'data-turbolinks-track': 'preload'
-    / = javascript_include_tag "https://sdk.mercadopago.com/js/v2"
     / = content_for :header
     / script[async src="https://www.googletagmanager.com/gtag/js?id=G-7S7H2CT4GH"]
   body.text-gray-800

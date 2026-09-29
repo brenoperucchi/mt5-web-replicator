@@ -133,7 +133,7 @@ en:
           title25: Invoice Management
           title26: "Flexible Billing Plans: Offer plans with different types of recurrence, allowing fixed monthly payments or billing by percentage of earnings."                 
           title27: Charging Management
-          title28: "Automatic Billing Management: View and configure online billing methods (MercadoPago/Stripe) for your clients, ensuring efficient financial management."
+          title28: "Automatic Billing Management: View and configure online billing methods (Stripe) for your clients, ensuring efficient financial management."
         portfolio: Share dashboard with your customers
         warning: Beta version
         navbar:

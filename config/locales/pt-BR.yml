@@ -133,7 +133,7 @@ pt-BR:
           title25: Gestão de Faturas
           title26: "Planos de Cobrança Flexíveis: Ofereça planos com diferentes tipos de recorrência, permitindo mensalidades fixas ou cobrança por porcentagem de ganho."
           title27: Gestão de Cobrança
-          title28: "Gestão Automática de Cobrança: Visualize e configure ao seu cliente de formas de cobrança Online (MercadoPago/Stripe) para clientes os seus clientes, garantindo uma administração financeira eficiente."
+          title28: "Gestão Automática de Cobrança: Visualize e configure ao seu cliente de formas de cobrança Online (Stripe) para clientes os seus clientes, garantindo uma administração financeira eficiente."
         portfolio: Compartilhe dashboards com seus clientes
         warning: Sistema em versão beta
         navbar:
