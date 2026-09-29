@@ -28,8 +28,10 @@ class PaymentsController < ApplicationController
                      changeset: invoice.try(:versions).try(:last).try(:changeset))
       head :ok
     else
+      # Signed but irrelevant (unhandled event type or unknown invoice): ack it,
+      # otherwise the provider keeps retrying and may disable the endpoint.
       logging.update(state: 'INVOICE NOTFIND')
-      head :bad_request
+      head :ok
     end
   end
 

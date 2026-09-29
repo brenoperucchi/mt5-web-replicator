@@ -60,9 +60,10 @@ RSpec.describe 'Payments Controller', type: :request do
       expect(invoice.reload.state).to be == 'refunded'
     end
 
-    it 'returns 400 when the event references an unknown invoice' do
+    it 'acknowledges a signed event for an unknown invoice so Stripe stops retrying' do
       post_event('checkout.session.completed', session_object(invoice, client_reference_id: '0', metadata: { invoice_id: '0' }))
-      expect(response).to have_http_status 400
+      expect(response).to have_http_status 200
+      expect(Logging.last.state).to be == 'INVOICE NOTFIND'
     end
 
     it 'returns 400 for a payment whose provider no longer exists' do
