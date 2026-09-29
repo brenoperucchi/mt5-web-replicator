@@ -1,4 +1,3 @@
-require "sentient_store"
 
 class ApplicationController < ActionController::Base
 	include SentientStore

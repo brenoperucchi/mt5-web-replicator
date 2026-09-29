@@ -1,5 +1,4 @@
 require "administrate/base_dashboard"
-require 'traces_helper'
 
 class TraceDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES

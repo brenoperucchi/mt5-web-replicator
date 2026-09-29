@@ -1,4 +1,3 @@
-require 'lib_enums'
 class Account < ApplicationRecord
   attr_accessor :search_date_begin, :search_date_end, :search_magic_number
 

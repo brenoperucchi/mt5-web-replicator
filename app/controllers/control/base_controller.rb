@@ -1,4 +1,3 @@
-require "sentient_store"
 
 module Control
   class BaseController < Admin::ApplicationController

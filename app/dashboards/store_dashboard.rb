@@ -1,4 +1,3 @@
-require_relative '../../app/fields/has_many_scope_field.rb'
 require "administrate/base_dashboard"
 
 

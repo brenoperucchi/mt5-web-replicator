@@ -1,6 +1,4 @@
 require 'thread' # Importe a biblioteca de semáforos
-require 'lib_enums' # Path: lib/lib_enums.rb
-require 'algo_statistic' # Path: lib/algo_statistic.rb
 
 class Trace < ApplicationRecord
   attr_accessor :search_date_begin, :search_date_end, :search_magic_number, :store
@@ -12,7 +10,7 @@ class Trace < ApplicationRecord
   enum kind:      { telegram: 0, copy: 1, manual:2}
   enum kind_copy: { normal:   0, prop_firm:1 }
 
-  serialize :mfe_analyzed
+  serialize :mfe_analyzed, coder: YAML
 
   store :settings, accessors: [
                                 :telegram_option, :telegram_image, :take_profit_limit,

@@ -1,6 +1,4 @@
-require 'has_many_scope_field'
 require "administrate/base_dashboard"
-require 'traces_helper'
 
 class Control::TraceDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES

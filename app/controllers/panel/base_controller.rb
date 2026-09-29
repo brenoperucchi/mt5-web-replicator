@@ -1,4 +1,3 @@
-require "sentient_store"
 
 module Panel
   class BaseController < ApplicationController

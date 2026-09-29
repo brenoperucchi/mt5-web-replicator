@@ -1,4 +1,3 @@
-require 'lib_enums'
 class Store < ApplicationRecord
   ENUMS       = %w(state)
   LANGUAGE    = {English:'en', Português:'pt-BR'} # first entry is what an unset store shows and saves

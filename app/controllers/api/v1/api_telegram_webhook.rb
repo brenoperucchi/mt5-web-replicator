@@ -1,4 +1,3 @@
-require 'bot_telegram'
 require 'csv'
 require 'json'
 module API

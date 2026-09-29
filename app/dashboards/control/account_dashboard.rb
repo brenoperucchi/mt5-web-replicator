@@ -1,4 +1,3 @@
-require 'has_many_scope_field'
 require "administrate/base_dashboard"
 
 class Control::AccountDashboard < Administrate::BaseDashboard
