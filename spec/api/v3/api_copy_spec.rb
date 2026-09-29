@@ -121,7 +121,7 @@ RSpec.describe 'OrdersHistory API', type: :request do
         expect(@account2.reload.traces.count).to eq(2)
         
         # Enviando uma ordem com magic number 300 (não permitido no primeiro trace)
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         # Criando uma estrutura JSON compatível com o formato usado no arquivo orders_history.txt
         order_data = "{\"PositionOrders\":[

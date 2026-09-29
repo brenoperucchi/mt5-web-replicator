@@ -67,7 +67,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
         expect(@account2.reload.magics_accept).to be_nil
         
         # Enviando uma ordem com magic number 300 (não permitido em copy account)
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         # Criando uma estrutura JSON compatível com o formato da API V3
         order_data = "{\"PositionOrders\":[
@@ -101,7 +101,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
         @account_copy.update(magics_accept: "300")
         
         # Enviando uma ordem com magic number 300 (permitido agora pela conta copy, mas não pelo slave1)
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         order_data = "{\"PositionOrders\":[
               {\"symbol\":\"EURUSD\",\"ticketMaster\":40000002,\"ticketDeal\":2014200953,\"type\":0,\"volume\":\"0.01\",\"priceOpen\":\"1.10000\",
@@ -202,7 +202,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
         expect(@account2.reload.magics_accept).to be_nil
         
         # Enviando uma ordem com magic number 300 (não permitido por ambos os traces)
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         order_data = "{\"PositionOrders\":[
               {\"symbol\":\"EURUSD\",\"ticketMaster\":50000001,\"ticketDeal\":2014200953,\"type\":0,\"volume\":\"0.01\",\"priceOpen\":\"1.10000\",
@@ -235,7 +235,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
         @account1.update(magics_accept: "700, 800")
         
         # Enviando uma ordem com magic number 800 (permitido por todos)
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         order_data = "{\"PositionOrders\":[
               {\"symbol\":\"EURUSD\",\"ticketMaster\":50000002,\"ticketDeal\":2014200953,\"type\":0,\"volume\":\"0.01\",\"priceOpen\":\"1.10000\",
@@ -297,7 +297,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
       
       it 'verifies both trace and account restrictions are checked' do
         # Este teste foca especificamente na linha 63 do TraceService que contém o AND de verificações
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         order_data = "{\"PositionOrders\":[
               {\"symbol\":\"EURUSD\",\"ticketMaster\":60000001,\"ticketDeal\":2014200953,\"type\":0,\"volume\":\"0.01\",\"priceOpen\":\"1.10000\",
@@ -329,7 +329,7 @@ RSpec.describe 'Magic Number Restrictions API', type: :request do
         # Configurando o trace para restringir o magic number
         @trace.update(magics_accept: "888")
         
-        timestamp = Time.now.strftime('%Y.%m.%d %H:%M:%S')
+        timestamp = Time.zone.now.strftime('%Y.%m.%d %H:%M:%S')
         
         order_data = "{\"PositionOrders\":[
               {\"symbol\":\"EURUSD\",\"ticketMaster\":60000002,\"ticketDeal\":2014200953,\"type\":0,\"volume\":\"0.01\",\"priceOpen\":\"1.10000\",

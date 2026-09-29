@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: signalforex
+          POSTGRES_PASSWORD: signalforex
+          POSTGRES_DB: signalforex_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U signalforex"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      RAILS_ENV: test
+      DATABASE_PASSWORD: signalforex
+      DISABLE_SPRING: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: System packages
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends libvips tesseract-ocr
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Security audit
+        run: |
+          gem install bundler-audit --no-document
+          bundle-audit check --update
+
+      - name: Prepare database
+        run: bin/rails db:schema:load
+
+      - name: Zeitwerk
+        run: bin/rails zeitwerk:check
+
+      - name: Specs
+        run: bundle exec rspec --no-fail-fast
+
+      - name: Production asset build
+        run: SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production NODE_ENV=production bin/rails assets:precompile
