@@ -33,7 +33,7 @@ class Control::TransactionDashboard < Administrate::BaseDashboard
     trace:              Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     message:            Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     account:            Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
-    loggings:           Fields::HasManyScopeField.with_options(associated: :store, dashboard:'control'),
+    loggings:           HasManyScopeField.with_options(associated: :store, dashboard:'control'),
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
   }.freeze
 

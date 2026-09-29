@@ -15,7 +15,7 @@ module Signalforex
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 6.1
     config.time_zone = 'America/Sao_Paulo'
-    config.autoloader = :classic
+    config.autoloader = :zeitwerk
     # config.active_record.use_yaml_unsafe_load = true
 
     config.active_record.yaml_column_permitted_classes = [Symbol, Date, ActiveSupport::HashWithIndifferentAccess]
@@ -33,11 +33,7 @@ module Signalforex
     # config.autoload_paths << "#{Rails.root}/app/fields"
     # config.autoload_paths += Dir[Rails.root.join('app','controllers', 'concerns')]
     # config.autoload_paths += Dir[Rails.root.join('app','fields', '*')]
-    config.autoload_paths += %W(#{config.root}/app/controllers/concerns)
-    config.eager_load_paths += %W(#{config.root}/app/controllers/concerns)
 
-    config.autoload_paths += %W(#{config.root}/app/fields)
-    config.eager_load_paths += %W(#{config.root}/app/fields)
 
     # config.autoload_paths += %W(#{config.root}/app/controllers/control)
     # config.eager_load_paths += %W(#{config.root}/app/controllers/control)
@@ -47,8 +43,6 @@ module Signalforex
     
     # config.autoload_paths += %W(#{config.root}/app/models/presenters)
     # config.eager_load_paths += %W(#{config.root}/app/models/presenters)
-    config.autoload_paths += %W(#{config.root}/app/presenters/API)
-    config.eager_load_paths += %W(#{config.root}/app/presenters/API)
     # config.autoload_paths << "#{Rails.root}/app/controllers/concerns"
     # config.autoload_paths << "#{Rails.root}/app/presenters"
     # config.eager_load_paths << "#{Rails.root}/app/controllers/concerns"

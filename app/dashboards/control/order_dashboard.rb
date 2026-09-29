@@ -26,9 +26,9 @@ module Control
       trace:        Field::BelongsTo,
       store:        Field::BelongsTo,
       account:      Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
-      transactions: Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
+      transactions: HasManyScopeField.with_options(associated: :store, dashboard: :control),
       # slaves: Field::HasMany,
-      slaves:       Fields::HasManyScopeField.with_options(associated: :store, dashboard: :control),
+      slaves:       HasManyScopeField.with_options(associated: :store, dashboard: :control),
     }.freeze
 
     # COLLECTION_ATTRIBUTES
