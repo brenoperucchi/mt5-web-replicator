@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '3.1.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.1.5'
+gem 'rails', '~> 7.2.3'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '>= 6.4.3'
@@ -97,7 +97,7 @@ group :development do
 end
 
 gem 'wannabe_bool'
-gem 'acts-as-taggable-on', '~> 10.0'
+gem 'acts-as-taggable-on', '~> 11.0'
 gem 'ancestry'
 gem 'paper_trail', '~> 15.0'
 gem 'devise'
@@ -145,7 +145,7 @@ gem "administrate",                 git: 'https://github.com/brenoperucchi/admin
 gem 'administrate-field-image'
 gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git', branch: 'main'
 gem "administrate-field-nested_has_many"
-gem 'administrate_ransack',         git: "https://github.com/brenoperucchi/administrate_ransack.git", branch: 'master'
+gem 'administrate_ransack', '~> 0.7'
 gem "administrate-field-tinymce",   git: 'https://github.com/smedrick/administrate-field-tinymce.git'
 gem 'administrate-field-acts_as_taggable'
 gem 'administrate-field-active_storage'
