@@ -7,7 +7,7 @@ RSpec.describe 'Panel::InvoicesController', type: :request do
   let(:store) { create(:store, plan_id: plan.id) }
   let(:payment) { store.payments.first }
   let(:owner) { create(:customer, :customer, user: create(:user, :customer, store: store)) }
-  let(:other) { create(:customer, :customer2, user: create(:user, email: 'other@store.com', password: '123123', store: store)) }
+  let(:other) { create(:customer, :customer2, user: create(:user, email: 'other@store.com', password: SecureRandom.hex(8), store: store)) }
 
   def invoice_for(customer)
     Invoice.create!(name: 'INV-2026-09', state: :to_paid, amount: 10, store: store, payment: payment,
