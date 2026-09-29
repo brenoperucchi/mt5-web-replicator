@@ -258,7 +258,7 @@ This project is **source-available** under the [PolyForm Noncommercial License 1
 - **Free for noncommercial use.** You can read, run, test, modify and share it for personal use, study, research, evaluation, or at a nonprofit, school or public institution.
 - **Commercial use needs a separate license.** This includes running it for a business, offering it as a service, or using it to manage paying customers' accounts. Contact bperucchi@gmail.com to discuss terms.
 
-The same terms apply to the companion client, [`python-signal`](https://github.com/brenoperucchi/python-signal), once it is published under this license.
+The companion client, [`python-signal`](https://github.com/brenoperucchi/python-signal), is published under the same license.
 
 ## Contributing
 
