@@ -58,4 +58,34 @@ RSpec.describe 'billing:migrate_mercadopago_to_stripe' do
     expect(open_invoice.reload.payment).to be == legacy
     expect(Payment.where(store: store).count).to be == 1
   end
+
+  # mt5-2 rev-1 #3: the panel offers "Pagamento" for denied invoices too.
+  it 'repoints denied invoices and clears their payment link' do
+    denied = Invoice.create!(name: 'denied', store: store, payment: legacy, amount: 10, state: :denied,
+                             payment_link: 'https://mp/denied')
+    expect { run }.to output(/invoices_repointed=2/).to_stdout
+    expect(denied.reload.payment.payment_method.handle).to be == 'stripe'
+    expect(denied.payment_link).to be_nil
+  end
+
+  # mt5-2 rev-2 N3
+  it 'reports reused Stripe payments with credentials, flagging malformed ones, also in DRY_RUN' do
+    stripe_method = PaymentMethod.create!(name: 'Stripe', handle: 'stripe')
+    bad = Payment.create!(payment_method: stripe_method, store: store, api_token: 'TEST-000', webhook_token: 'whsec_ok')
+    later = Payment.create!(payment_method: stripe_method, store: store, api_token: 'sk_live_later')
+
+    output = capture_stdout { run(dry_run: '1') }
+    expect(output).to match(/Payment##{bad.id} .*api_token=INVALID.*webhook_token=ok/)
+    expect(output).not_to include("Payment##{later.id} ")
+    expect(output).not_to include('TEST-000') # never print secrets
+  end
+
+  def capture_stdout
+    old = $stdout
+    $stdout = StringIO.new
+    yield
+    $stdout.string
+  ensure
+    $stdout = old
+  end
 end

@@ -3,12 +3,15 @@ module Billing
   #
   # For each store it ensures a Stripe Payment exists (credentials left blank,
   # so the STRIPE_* ENV fallback applies) and repoints the store, its customer
-  # plans and its open invoices (pending/to_paid) from legacy payments to it,
-  # clearing the stale payment link of repointed invoices. Legacy
+  # plans and its open invoices (pending/to_paid, plus denied ones, which the
+  # panel offers to pay again) from legacy payments to it, clearing the stale
+  # payment link of repointed invoices. Reused Stripe payments that carry
+  # their own credentials are reported (never their values), flagging keys
+  # that do not look like Stripe keys. Legacy
   # PaymentMethod/Payment rows are kept: destroying them would cascade and
   # wipe history. Idempotent; with dry_run nothing is written.
   class MercadoPagoToStripe
-    OPEN_STATES = %w[pending to_paid].freeze
+    OPEN_STATES = %w[pending to_paid denied].freeze
 
     attr_reader :dry_run, :summary
 
@@ -16,6 +19,7 @@ module Billing
       @dry_run = dry_run
       @io = io
       @summary = Hash.new(0)
+      @reused_with_credentials = []
     end
 
     def call
@@ -38,7 +42,8 @@ module Billing
     private
 
     def migrate_store(store, stripe_method, legacy_ids)
-      stripe = stripe_method && Payment.find_by(store_id: store.id, payment_method_id: stripe_method.id)
+      stripe = stripe_method && Payment.order(:id).find_by(store_id: store.id, payment_method_id: stripe_method.id)
+      note_reused(stripe) if stripe
       if stripe.nil?
         summary[:stripe_payments_created] += 1
         return count_only(store, legacy_ids) if dry_run
@@ -72,11 +77,29 @@ module Billing
       Invoice.where(store_id: store.id, payment_id: legacy_ids, state: OPEN_STATES)
     end
 
+    def note_reused(stripe)
+      return if stripe.api_token.blank? && stripe.webhook_token.blank?
+      @reused_with_credentials << stripe
+    end
+
+    def credential_flag(value, prefixes)
+      return 'blank(ENV)' if value.blank?
+      value.start_with?(*prefixes) ? 'ok' : 'INVALID'
+    end
+
     def report
       prefix = dry_run ? '[DRY RUN] would have' : 'Done:'
       @io.puts "#{prefix} " + %i[stripe_payment_method_created stripe_payments_created stores_repointed
                                  customer_plans_repointed invoices_repointed]
                                 .map { |key| "#{key}=#{summary[key]}" }.join(', ')
+      return if @reused_with_credentials.empty?
+
+      @io.puts 'Reused Stripe payments with their own credentials (check them before going live):'
+      @reused_with_credentials.each do |stripe|
+        @io.puts "  Payment##{stripe.id} store=#{stripe.store_id} " \
+                 "api_token=#{credential_flag(stripe.api_token, %w[sk_ rk_])} " \
+                 "webhook_token=#{credential_flag(stripe.webhook_token, %w[whsec_])}"
+      end
     end
   end
 end

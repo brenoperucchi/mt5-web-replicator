@@ -109,8 +109,11 @@ bin/rails billing:migrate_mercadopago_to_stripe
 ```
 
 It ensures each store has a Stripe `Payment` (blank keys, so the `STRIPE_*` ENV fallback
-applies) and repoints the store, its customer plans and its open invoices to it. Legacy
-MercadoPago rows are kept for history. The task is idempotent.
+applies) and repoints the store, its customer plans and its open invoices (pending, to_paid
+and denied, clearing their old payment link) to it. Legacy MercadoPago rows are kept for
+history. The task is idempotent. It also lists (also with `DRY_RUN=1`) pre-existing Stripe
+`Payment` rows it reuses that carry their own credentials, flagging an `api_token` not
+starting with `sk_`/`rk_` or a `webhook_token` not starting with `whsec_`.
 
 ### Legacy pay gem tables
 
