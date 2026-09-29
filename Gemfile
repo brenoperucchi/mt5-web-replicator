@@ -37,7 +37,7 @@ gem 'bootsnap', '>= 1.6.0' #, require: false
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   # gem 'byebug'#, platforms: [:mri, :mingw, :x64_mingw]
-  gem 'sqlite3', '~> 1.4'
+  gem 'sqlite3', '~> 2.9'
 end
 
 
@@ -97,7 +97,7 @@ group :development do
 end
 
 gem 'wannabe_bool'
-gem 'acts-as-taggable-on', '~> 11.0'
+gem 'acts-as-taggable-on', '~> 12.0'
 gem 'ancestry'
 gem 'paper_trail', '~> 15.0'
 gem 'devise'
