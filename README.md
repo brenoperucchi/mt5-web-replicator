@@ -94,10 +94,45 @@ Webhooks are rejected (400) when no signing secret is configured. Invoice state 
 forward (paid from pending/to_paid/denied, denied from pending/to_paid, refunded from paid);
 an expired session leaves the invoice payable, and only a full `charge.refunded` marks it
 refunded. Checkout reuses the invoice's open session (expiring it first if the invoice amount
-or currency changed) and never charges paid/refunded invoices. While a session is `complete`
-but still `unpaid` (async methods such as boleto), or when Stripe cannot be reached to check
-the previous session, no new checkout is issued ("Invoice Not Sended!"); a new attempt is
-allowed after `async_payment_failed` or once the session expired.
+or currency changed) and never charges paid/refunded invoices.
+
+#### Checkout attempt lifecycle
+
+Each checkout attempt is tracked in `invoice.response`: `checkout_attempt`,
+`checkout_idempotency_key`, `checkout_amount_cents`, `checkout_currency`,
+`checkout_session_id` and `checkout_status`:
+
+- `creating`: the attempt (key + amount/currency) is saved *before* calling Stripe. If the
+  create fails inconclusively (network error, timeout, 5xx, 409/429) it stays `creating` and
+  the next send retries with the same key and parameters, so Stripe returns the same session.
+  If the invoice amount changed meanwhile, the recovered session is then expired and a new
+  attempt opened for the new amount. A definitive 4xx rejection closes it as `rejected`.
+- `open`: session published; reused while amount/currency match.
+- `processing`: `complete` but `unpaid` (async methods such as boleto). No new checkout is
+  issued ("Invoice Not Sended!") until this session is confirmed failed or paid.
+- `failed` (`async_payment_failed` of this session), `expired`, `rejected`: closed; the next
+  send opens exactly one new attempt. `paid`: closed for good.
+
+Statuses only move forward and are changed only by events/lookups of the *current* session;
+late events of an older session never release a new attempt (a late paid event still marks
+the invoice paid). The invoice's `denied` state is history, not attempt state: a migrated
+`denied` invoice gets one attempt and then follows the rules above. When Stripe cannot be
+reached to check or expire the current session, checkout also waits.
+
+#### Recovering an inconclusive attempt (operator)
+
+If an invoice stays stuck (lookups keep failing, e.g. the store's `Payment` was switched to
+another Stripe account while keeping the old session id, or a `processing` session whose
+failure webhook never arrived):
+
+1. Look up the attempt's `checkout_session_id` (or, for `creating`, the
+   `checkout_idempotency_key` in the request logs) in the **original** Stripe account.
+2. Confirm whether it was paid, failed or expired (check its PaymentIntent).
+3. Only then reconcile: mark the invoice paid, or set `checkout_status` to `failed`/`expired`
+   so the next send opens a new attempt.
+
+Never blindly clear `checkout_session_id`: an unresolved session may still be paid, and a
+new attempt would allow a double charge.
 
 ### Migrating from MercadoPago
 
@@ -114,6 +149,13 @@ and denied, clearing their old payment link) to it. Legacy MercadoPago rows are 
 history. The task is idempotent. It also lists (also with `DRY_RUN=1`) pre-existing Stripe
 `Payment` rows it reuses that carry their own credentials, flagging an `api_token` not
 starting with `sk_`/`rk_` or a `webhook_token` not starting with `whsec_`.
+
+Legacy store whose `payment_id` points to **another store's** Stripe `Payment` and that has
+no `Payment` of its own before migration: run the migration (it creates the store's own
+Stripe `Payment`), then verify that `store.billing_payment` resolves to that own payment
+(the cross-store FK is ignored by the fallback), and audit historical invoices/customer plans
+that still reference the other store's payment, since the guard only protects future charges.
+Never restore a global (cross-store) payment fallback as a fix.
 
 ### Legacy pay gem tables
 
