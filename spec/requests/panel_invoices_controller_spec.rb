@@ -25,6 +25,22 @@ RSpec.describe 'Panel::InvoicesController', type: :request do
       expect(a_request(:any, /api\.stripe\.com/)).not_to have_been_made
       expect(foreign.reload.payment_link).to be_blank
     end
+
+    # Rails 7.0 raise_on_open_redirects: the Stripe Checkout URL lives on another
+    # host, so the redirect must opt in with allow_other_host.
+    it "redirects the owner to the provider's external checkout URL" do
+      own = invoice_for(owner)
+      checkout_url = 'https://checkout.stripe.com/c/pay/cs_test_panel'
+      allow_any_instance_of(Invoice).to receive(:invoice_send) do |invoice|
+        invoice.update!(payment_link: checkout_url)
+        checkout_url
+      end
+      sign_in owner.user
+
+      get "/panel/invoices/#{own.id}/invoice_send"
+
+      expect(response).to redirect_to(checkout_url)
+    end
   end
 
   # mt5-2 rev-2 N4

@@ -15,7 +15,8 @@ module Panel
       # Scope to the signed-in customer: never start checkout on someone else's invoice.
       @invoice = current_user.userable.invoices.find(params[:id])
       if @invoice.invoice_send
-        redirect_to @invoice.payment_link, :notice => "Invoice Sended!"
+        # payment_link is the Stripe Checkout URL we created server-side (external host).
+        redirect_to @invoice.payment_link, notice: "Invoice Sended!", allow_other_host: true
       else
         redirect_to panel_invoices_path, :alert => "Invoice Not Sended!"
       end

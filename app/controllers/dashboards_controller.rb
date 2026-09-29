@@ -83,7 +83,8 @@ class DashboardsController < ApplicationController
         @invoice = @account.customer.invoices.first
         @invoice.invoice_send
         if @invoice.redirect_url
-          redirect_to @invoice.redirect_url
+          # payment_link is the Stripe Checkout URL we created server-side (external host).
+          redirect_to @invoice.redirect_url, allow_other_host: true
         else
           render :finish
         end
