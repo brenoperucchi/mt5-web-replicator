@@ -28,7 +28,7 @@ Use both repositories together when you need the full flow: `python-signal` runs
 
 ## Requirements
 
-- Ruby 3.1.7 (e.g. via rbenv or asdf)
+- Ruby 3.3.10 (e.g. via rbenv or asdf), or just Docker
 - PostgreSQL (the app connects with the password in `DATABASE_PASSWORD`; see `config/database.yml`)
 - Node.js and Yarn (Shakapacker assets)
 - Redis (Sidekiq jobs and Action Cable)
@@ -118,13 +118,27 @@ first failure. Use `bundle exec rspec --no-fail-fast` to see every failure.
 
 ## Deploy
 
-The project has a Capistrano configuration:
+The app ships as a Docker image (`Dockerfile`) and deploys with [Kamal](https://kamal-deploy.org) (`config/deploy.yml`):
+
+- `web`: Puma behind kamal-proxy (TLS via Let's Encrypt, health check on `/up`)
+- `worker`: Sidekiq
+- `cron`: runs `Invoice.generate_month_customers` every minute
+- accessories: PostgreSQL 16 and Redis 7; Active Storage uploads live in the `mt5_web_replicator_storage` volume
+
+1. Fill the `<...>` placeholders in `config/deploy.yml` (server IP, domain, registry user).
+2. Export the variables referenced in `.kamal/secrets` (or point them at a password manager).
+3. `bin/kamal setup` for the first deploy, then `bin/kamal deploy`.
+
+The web container runs `db:prepare` on boot, so the first boot also creates the database and runs `db:seed`
+(set `SEED_ADMIN_PASSWORD`, required in production).
+
+To try the production image locally:
 
 ```bash
-bundle exec cap production deploy
+docker build -t mt5_web_replicator .
+docker run --rm -p 3000:80 -e SECRET_KEY_BASE=$(openssl rand -hex 64) \
+  -e DATABASE_URL=postgres://user:pass@host:5432/db -e REDIS_URL=redis://host:6379/0 mt5_web_replicator
 ```
-
-Review `config/deploy/*.rb`, server environment variables, and credentials before publishing a new release.
 
 ## Checklist before making it public
 

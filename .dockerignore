@@ -1,0 +1,28 @@
+# See https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
+/.git/
+/.gitignore
+/.github/
+
+# Secrets and local environment
+/.env*
+!/.env.example
+/.kamal/secrets*
+/config/master.key
+/config/credentials/*.key
+
+# Runtime and build output
+/log/*
+/tmp/*
+/storage/*
+/public/packs
+/public/packs-test
+/public/assets
+/node_modules/
+/coverage/
+
+# Tests and editor files
+/spec/
+/test/
+/.bundle
+*.sublime-*

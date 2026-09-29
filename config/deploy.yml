@@ -1,0 +1,84 @@
+# Kamal 2 deploy configuration. First deploy: `bin/kamal setup`, then `bin/kamal deploy`.
+# Replace the <...> placeholders; secrets come from .kamal/secrets (never commit real values).
+service: mt5_web_replicator
+
+image: <registry-user>/mt5_web_replicator
+
+servers:
+  web:
+    - <server-ip>
+  worker:
+    hosts:
+      - <server-ip>
+    cmd: bundle exec sidekiq -C config/sidekiq.yml
+  # Replaces the old whenever/cron job (config/schedule.rb ran this every minute).
+  cron:
+    hosts:
+      - <server-ip>
+    cmd: ./bin/rails runner "loop { Invoice.generate_month_customers; sleep 60 }"
+
+# kamal-proxy terminates TLS (Let's Encrypt) and health-checks /up.
+proxy:
+  ssl: true
+  host: <app-domain>
+  app_port: 80
+
+registry:
+  username: <registry-user>
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+builder:
+  arch: amd64
+
+env:
+  clear:
+    APP_DOMAIN: <app-domain>
+    REDIS_URL: redis://mt5_web_replicator-redis:6379/0
+    PAYMENT_CURRENCY: usd
+    RAILS_MAX_THREADS: 5
+    WEB_CONCURRENCY: 2
+  secret:
+    - SECRET_KEY_BASE
+    - DATABASE_URL
+    - STRIPE_SECRET_KEY
+    - STRIPE_WEBHOOK_SECRET
+    - SMTP_ADDRESS
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
+    - TELEGRAM_API_ID
+    - TELEGRAM_API_HASH
+    - SEED_ADMIN_EMAIL
+    - SEED_ADMIN_PASSWORD
+
+# Active Storage uses the local disk service; keep uploads across deploys.
+volumes:
+  - "mt5_web_replicator_storage:/rails/storage"
+
+asset_path: /rails/public/assets
+
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole"
+
+accessories:
+  db:
+    image: postgres:16
+    host: <server-ip>
+    port: "127.0.0.1:5432:5432"
+    env:
+      clear:
+        POSTGRES_USER: signalforex
+        POSTGRES_DB: signalforex
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      - data:/var/lib/postgresql/data
+  redis:
+    image: redis:7
+    host: <server-ip>
+    port: "127.0.0.1:6379:6379"
+    directories:
+      - data:/data

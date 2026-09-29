@@ -15,7 +15,7 @@ preload_app!
 
 plugin :tmp_restart
 
-on_worker_boot do
+before_worker_boot do
   ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
 end
 
