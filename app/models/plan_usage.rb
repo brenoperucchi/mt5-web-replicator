@@ -1,7 +1,7 @@
 class PlanUsage < ApplicationRecord
   attr_accessor :amount, :proportional, :usage_seconds, :description, :amount_proportional, :amount_profit
 
-  serialize :plan_serializer, JSON
+  serialize :plan_serializer, coder: JSON
 
   belongs_to :usageable,    polymorphic: true
   belongs_to :resourceable, polymorphic: true
