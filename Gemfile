@@ -121,6 +121,8 @@ gem 'recaptcha'
 gem 'link_thumbnailer'
 gem 'imgix'
 gem "net-http"
+# Used by dashboards/_contract_sidebar to parse Trace#capital_recomendation (String#to_money).
+gem 'money-rails', '~> 1.12'
 
 #API
 gem 'grape'
