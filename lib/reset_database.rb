@@ -1,4 +1,3 @@
-require 'lib_enums'
 require 'reset_database'
 module ResetDatabase
   # def self.reset_database

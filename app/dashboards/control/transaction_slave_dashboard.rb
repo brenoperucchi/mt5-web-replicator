@@ -1,5 +1,4 @@
 require "administrate/base_dashboard"
-require 'has_many_scope_field'
 
 class Control::TransactionSlaveDashboard < Administrate::BaseDashboard
   # ATTRIBUTE_TYPES

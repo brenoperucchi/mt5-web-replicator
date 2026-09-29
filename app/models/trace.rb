@@ -1,6 +1,4 @@
 require 'thread' # Importe a biblioteca de semáforos
-require 'lib_enums' # Path: lib/lib_enums.rb
-require 'algo_statistic' # Path: lib/algo_statistic.rb
 
 class Trace < ApplicationRecord
   attr_accessor :search_date_begin, :search_date_end, :search_magic_number, :store

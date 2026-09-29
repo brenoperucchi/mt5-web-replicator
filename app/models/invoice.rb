@@ -1,4 +1,3 @@
-require 'lib_enums'
 class Invoice < ApplicationRecord
 
   include LibEnums
