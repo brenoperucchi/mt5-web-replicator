@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 # Production image, built and deployed by Kamal (config/deploy.yml).
 #   docker build -t mt5_web_replicator .
-#   docker run -d -p 80:80 -e RAILS_MASTER_KEY=<config/credentials/production.key> -e DATABASE_URL=... mt5_web_replicator
+#   docker run -d -p 80:80 -e SECRET_KEY_BASE=... -e DATABASE_URL=... mt5_web_replicator
+# Configuration comes from ENV only; Rails credentials are not needed.
 
 ARG RUBY_VERSION=3.3.10
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base

@@ -15,7 +15,9 @@ servers:
   cron:
     hosts:
       - <server-ip>
-    cmd: ./bin/rails runner "loop { Invoice.generate_month_customers; sleep 60 }"
+    # Loops forever; each run is wrapped in the Rails executor and errors are
+    # reported without stopping the loop (see bin/billing-cron).
+    cmd: ./bin/billing-cron
 
 # kamal-proxy terminates TLS (Let's Encrypt) and health-checks /up.
 proxy:
@@ -35,7 +37,7 @@ env:
   clear:
     APP_DOMAIN: <app-domain>
     REDIS_URL: redis://mt5_web_replicator-redis:6379/0
-    PAYMENT_CURRENCY: usd
+    PAYMENT_CURRENCY: brl # this deployment bills in BRL; the code default is usd
     RAILS_MAX_THREADS: 5
     WEB_CONCURRENCY: 2
   secret:

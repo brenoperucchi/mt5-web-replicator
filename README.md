@@ -60,7 +60,7 @@ See `.env.example` for the full list with a short explanation of each. The essen
 | `SECRET_KEY_BASE` | Required in production (or use Rails credentials) |
 | `REDIS_URL` | Redis for Sidekiq / Action Cable |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe fallback keys (see below) |
-| `PAYMENT_CURRENCY` | Checkout currency, default `usd` |
+| `PAYMENT_CURRENCY` | Checkout currency, default `usd` (`config/deploy.yml` sets `brl`) |
 | `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` | reCAPTCHA on public forms |
 | `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, `TELEGRAM_API_NUMBER` | Telegram settings used when seeding the store |
 
@@ -80,7 +80,31 @@ provider in `app/models/payment_method/`); Stripe is the default and only provid
    - `checkout.session.async_payment_failed`
    - `checkout.session.expired`
    - `charge.refunded`
-3. Currency: `PAYMENT_CURRENCY` (ISO code, default `usd`).
+3. Currency: `PAYMENT_CURRENCY` (ISO code, default `usd`). This deployment bills in BRL:
+   `config/deploy.yml` sets `PAYMENT_CURRENCY: brl`.
+
+Webhooks are rejected (400) when no signing secret is configured. Invoice state only moves
+forward (paid from pending/to_paid/denied, denied from pending/to_paid, refunded from paid);
+an expired session leaves the invoice payable, and only a full `charge.refunded` marks it
+refunded. Checkout reuses the invoice's open session and never charges paid/refunded invoices.
+
+### Migrating from MercadoPago
+
+MercadoPago is no longer supported. To move existing stores to Stripe:
+
+```bash
+DRY_RUN=1 bin/rails billing:migrate_mercadopago_to_stripe   # preview
+bin/rails billing:migrate_mercadopago_to_stripe
+```
+
+It ensures each store has a Stripe `Payment` (blank keys, so the `STRIPE_*` ENV fallback
+applies) and repoints the store, its customer plans and its open invoices to it. Legacy
+MercadoPago rows are kept for history. The task is idempotent.
+
+### Legacy pay gem tables
+
+Migration `20260929000000_drop_pay_tables` drops empty `pay_*` tables and renames any that
+still hold rows to `legacy_pay_*`, so no data is lost. Drop them manually once no longer needed.
 
 After checkout Stripe sends the customer back to `/payments/<invoice_id>/return/<kind>`.
 
@@ -89,6 +113,8 @@ After checkout Stripe sends the customer back to `/payments/<invoice_id>/return/
 English is the default locale; `pt-BR` is available. The locale is chosen per request
 from `?locale=`, then the browser's `Accept-Language`, then the store's *language*
 setting, then the default (`en`). Translations live in `config/locales/`.
+Stores created before English became the default have their language backfilled to `pt-BR`
+(migration `20260929120000_backfill_store_language`).
 
 ## Running in development
 
@@ -122,11 +148,12 @@ The app ships as a Docker image (`Dockerfile`) and deploys with [Kamal](https://
 
 - `web`: Puma behind kamal-proxy (TLS via Let's Encrypt, health check on `/up`)
 - `worker`: Sidekiq
-- `cron`: runs `Invoice.generate_month_customers` every minute
+- `cron`: `bin/billing-cron` runs `Invoice.generate_month_customers` every minute (errors are reported and the loop keeps going)
 - accessories: PostgreSQL 16 and Redis 7; Active Storage uploads live in the `mt5_web_replicator_storage` volume
 
 1. Fill the `<...>` placeholders in `config/deploy.yml` (server IP, domain, registry user).
 2. Export the variables referenced in `.kamal/secrets` (or point them at a password manager).
+   `POSTGRES_PASSWORD` goes into `DATABASE_URL`, so keep it URL-safe (`openssl rand -hex 32`).
 3. `bin/kamal setup` for the first deploy, then `bin/kamal deploy`.
 
 The web container runs `db:prepare` on boot, so the first boot also creates the database and runs `db:seed`
