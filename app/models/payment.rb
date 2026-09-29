@@ -15,11 +15,8 @@ class Payment < ApplicationRecord
     
   # end
 
+  # Endpoint to register in the provider dashboard (e.g. Stripe webhooks).
   def webook_url
-    if Rails.env.production?
-      "https://#{Store.domain_url}/#{self.payment_method.handle.classify.downcase}/webhook/#{store.id}/#{self.id}"
-    else
-      "https://#{Store.domain_url}/#{self.payment_method.handle.classify.downcase}/webhook/#{store.id}/#{self.id}"
-    end
+    "https://#{Store.domain_url}/payments/webhook/#{self.id}"
   end
 end

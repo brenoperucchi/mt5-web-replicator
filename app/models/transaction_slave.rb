@@ -4,7 +4,7 @@ class TransactionSlave < ApplicationRecord
 
   include LibEnums
 
-  StateMachine::Machine.ignore_method_conflicts = true
+  StateMachines::Machine.ignore_method_conflicts = true
 
   has_paper_trail on: [:create, :update]
   # versions: {

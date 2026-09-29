@@ -20,7 +20,7 @@ require 'rails_helper'
 
 RSpec.describe 'Store Controller', type: :request do
 	before(:context) do
-    @plan_method = create(:payment_method, :mercadopago)
+    @plan_method = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @plan_method)
     @plan1 = create(:plan, :plan1)
     

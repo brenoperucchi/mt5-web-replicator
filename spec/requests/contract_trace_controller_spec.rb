@@ -24,8 +24,8 @@ RSpec.describe 'Store Controller', type: :request do
     travel_to Date.parse('2023-06-01')
     @plan1 = create(:plan, :plan1)
     @store = create(:store, plan_id: @plan1.id)
-    @plan_method = create(:payment_method, :mercadopago)
-    @payment = create(:payment, :mercadopago, payment_method: @plan_method, store: @store)
+    @plan_method = create(:payment_method, :stripe)
+    @payment = create(:payment, :stripe, payment_method: @plan_method, store: @store)
     @customer_plan = create(:customer_plan, :premium, payment: @payment, store:@store)
     @trace = create(:trace, :copy, stores: [@store], instrument_control: true, customer_plans: [@customer_plan])
     @plan2 = create(:plan, :plan2)
@@ -37,9 +37,12 @@ RSpec.describe 'Store Controller', type: :request do
 
     @customer_plan = @trace.customer_plans.first
 
-    @payment_mpago = @store.payments.first
-    @payment_stripe = @store.payments.last
+    @payment_stripe = @store.payments.first
 
+  end
+
+  before do
+    stub_stripe_checkout_session_create
   end
   # This should return the minimal set of attributes required to create a valid
   # Order. As you add validations to Order, be sure to
@@ -64,27 +67,29 @@ RSpec.describe 'Store Controller', type: :request do
   end
 
   describe 'Contract Trace on dashboards' do
-    it 'Verify MercadoLivre Redirect' do
-      expect(@store.payment_methods.first.handle).to be == 'mercado_pago'
-      expect(@trace.customer_plans.first.payment.payment_method.handle).to be == 'mercado_pago'
+    it 'Redirects to Stripe Checkout and marks the invoice paid on webhook' do
+      expect(@store.payment_methods.first.handle).to be == 'stripe'
+      expect(@trace.customer_plans.first.payment.payment_method.handle).to be == 'stripe'
       expect do
         post "/dashboard/#{@store.url}/#{@trace.name}/contract", params: valid_attributes # , valid_session
         @store.reload
       end.to change(Account, :count).by(1)
+      expect(response).to redirect_to('https://checkout.stripe.com/c/pay/cs_test_123')
       expect(@store.sinvoices.all.count).to be == 1
       invoice = @store.sinvoices.first
-      invoice.items.update_all(invoice_id: 41)
-      invoice.update_columns(id: 41, state: Invoice.states[:to_paid], payment_id: @payment_mpago.id)
-      
-      # Initialize response hash to avoid nil errors
-      invoice.update(response: {})
-      
+      invoice.update_columns(state: Invoice.states[:to_paid])
+      expect(invoice.response[:checkout_session_id]).to be == 'cs_test_123'
+
+      payload = stripe_event_payload('checkout.session.completed',
+        { id: 'cs_test_123', object: 'checkout.session', payment_status: 'paid', status: 'complete',
+          payment_intent: 'pi_test_123', client_reference_id: invoice.id.to_s, metadata: { invoice_id: invoice.id.to_s } })
+
       expect {
-        post "/mercadopago/webhook/#{@store.id}/#{@payment_mpago.id}", 
-          params: {"api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"0", "data.id"=>"1319796651", "payment_id"=>"1", "mercadopago"=>{"action"=>"webhook", "api_version"=>"v1", "data"=>{"id"=>"1319796651"}, "date_created"=>"2023-07-12T21:44:01Z", "id"=>"1", "live_mode"=>false, "type"=>"payment", "user_id"=>"0"}}
+        post "/payments/webhook/#{invoice.payment_id}", params: payload,
+          headers: { 'Content-Type' => 'application/json', 'Stripe-Signature' => stripe_signature_header(payload) }
         invoice.reload
       }.to change(invoice, :state).from("to_paid").to("paid")
-      expect(response).to have_http_status 201
+      expect(response).to have_http_status 200
     end
 
     it 'Promition_page and promotion_use TRUE' do

@@ -1,3 +1,4 @@
+require 'logger' # concurrent-ruby >= 1.3.5 no longer requires this transitively, which activesupport 6.1 depends on.
 require 'active_support/testing/time_helpers'
 require 'database_cleaner'
 require 'debug'

@@ -185,12 +185,9 @@ class Store < ApplicationRecord
     end
   end
 
+  # Public host used for payment webhooks and checkout return URLs.
   def self.domain_url
-    if Rails.env.production?
-      "www.imentore.com.br"
-    else
-      "signallocal.imentore.com.br:8443"
-    end
+    ENV.fetch("APP_DOMAIN") { Rails.env.production? ? "www.imentore.com.br" : "signallocal.imentore.com.br:8443" }
   end
 
   def domain_url

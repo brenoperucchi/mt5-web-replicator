@@ -133,7 +133,7 @@ pt-BR:
           title25: Gestão de Faturas
           title26: "Planos de Cobrança Flexíveis: Ofereça planos com diferentes tipos de recorrência, permitindo mensalidades fixas ou cobrança por porcentagem de ganho."
           title27: Gestão de Cobrança
-          title28: "Gestão Automática de Cobrança: Visualize e configure ao seu cliente de formas de cobrança Online (MercadoPago/Stripe) para clientes os seus clientes, garantindo uma administração financeira eficiente."
+          title28: "Gestão Automática de Cobrança: Visualize e configure ao seu cliente de formas de cobrança Online (Stripe) para clientes os seus clientes, garantindo uma administração financeira eficiente."
         portfolio: Compartilhe dashboards com seus clientes
         warning: Sistema em versão beta
         navbar:
@@ -685,3 +685,21 @@ pt-BR:
     search:
       clear: Limpar pesquisa
       label: Pesquisa %{resource}
+  flash:
+    dashboards:
+      contract_failed: "Erro na contratação do Portfolio."
+  invoice_items:
+    fixed_description: "%{timestamp} - Contratos: %{contracts} * Valor %{amount}"
+    percent_description: "%{timestamp} - Sistema: %{profit} * Percentual Plan %{percent}%"
+  payments:
+    checkout_return:
+      paid_title: Pagamento confirmado
+      paid_body: Obrigado! Seu pagamento foi recebido.
+      refunded_title: Pagamento estornado
+      refunded_body: Esta fatura foi estornada.
+      not_completed_title: Pagamento não concluído
+      not_completed_body: O pagamento foi cancelado ou recusado. Você pode tentar novamente pela página de faturas.
+      processing_title: Pagamento em processamento
+      processing_body: Estamos aguardando a confirmação do pagamento pelo provedor.
+      invoice_summary: "Fatura #%{id} - %{amount}"
+      back: Voltar

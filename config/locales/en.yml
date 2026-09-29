@@ -133,7 +133,7 @@ en:
           title25: Invoice Management
           title26: "Flexible Billing Plans: Offer plans with different types of recurrence, allowing fixed monthly payments or billing by percentage of earnings."                 
           title27: Charging Management
-          title28: "Automatic Billing Management: View and configure online billing methods (MercadoPago/Stripe) for your clients, ensuring efficient financial management."
+          title28: "Automatic Billing Management: View and configure online billing methods (Stripe) for your clients, ensuring efficient financial management."
         portfolio: Share dashboard with your customers
         warning: Beta version
         navbar:
@@ -143,6 +143,7 @@ en:
         title:
           main: Copy Trades Manager
           Imentore: Imentore copy
+          imentore: Imentore copy
           pricing: prices
           support: support
           partner: Become Partner
@@ -241,6 +242,7 @@ en:
         capital_recomendation: Capital Recomendation
         capital_multiplier: Capital Multiplier
         contract_volume_max: Volume Max
+        restrict_dashboard: Restrict Dashboard
         customer_plans: Portfolio's Plans
         accounts: Accounts
         orders: Orders
@@ -259,6 +261,10 @@ en:
         volume_default: Default Volume
         stripe_api_secret: Stripe API Secret
         stripe_webhook_secret: Stripe Webhook Secret
+        dashboard_restrict: Restrict Dashboard
+        dashboard_date_filter: Date Filter
+      user:
+        metatrader_account: Login (email / MetaTrader account)
       instrument:
         id: #id
         account: Account
@@ -384,6 +390,9 @@ en:
       transaction_slave:
         one: Slave
         other: Slaves
+      invoice_item:
+        one: Invoice Item
+        other: Invoice Items
       invoice:
         one: Invoice
         other: Invoices
@@ -623,6 +632,12 @@ en:
       short8: "%m/%d - %H:%M"
     pm: pm
     
+  administrate_ransack:
+    filters:
+      'clear_filters': Clear filters
+      'no': 'No'
+      'search': Search
+      'yes': 'Yes'
   administrate:
     namespace_alternate: control
     actions:
@@ -643,10 +658,14 @@ en:
       update:
         success: "%{resource} was successfully updated."
         failure: "%{resource} failure on update."
+      restore:
+        success: "%{resource} was successfully restored."
+        failure: "%{resource} failure on restore."
     fields:
       nested_has_many:
           remove: Remove
           Add: Add
+          add: Add
       has_many:
         more: Showing %{count} of %{total_count}
         none: None
@@ -655,6 +674,25 @@ en:
       errors: "%{pluralized_errors} prohibited this %{resource_name} from being saved:"
     navigation:
       back_to_app: Back to site
+      dashboard: Dashboards
     search:
       clear: Clear search
       label: Search %{resource}
+  flash:
+    dashboards:
+      contract_failed: "Could not subscribe to this portfolio."
+  invoice_items:
+    fixed_description: "%{timestamp} - Contracts: %{contracts} * Amount %{amount}"
+    percent_description: "%{timestamp} - System: %{profit} * Plan percentage %{percent}%"
+  payments:
+    checkout_return:
+      paid_title: Payment confirmed
+      paid_body: Thank you! Your payment was received.
+      refunded_title: Payment refunded
+      refunded_body: This invoice has been refunded.
+      not_completed_title: Payment not completed
+      not_completed_body: The payment was cancelled or declined. You can try again from your invoices page.
+      processing_title: Payment processing
+      processing_body: We are waiting for the payment provider to confirm your payment.
+      invoice_summary: "Invoice #%{id} - %{amount}"
+      back: Back

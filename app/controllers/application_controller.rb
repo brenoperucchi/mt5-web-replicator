@@ -43,21 +43,16 @@ class ApplicationController < ActionController::Base
     Current.user = current_user
   end
 
+  # Locale precedence: ?locale= param, then the browser's Accept-Language,
+  # then the store's configured language, then I18n.default_locale (English).
   def set_locale
-  	locale = params[:locale]
-  	locale ||= request.env['HTTP_ACCEPT_LANGUAGE'].to_s.scan(/^[a-z]{2}/).first
-		case locale
-		when "en"
-			I18n.locale = 'en'
-		else
-			I18n.locale = 'pt-BR'
-		end
-		
-		if locale.nil? && current_store
-			I18n.locale = current_store.language
-		end
-
-		I18n.locale
+    requested = params[:locale].presence || request.env['HTTP_ACCEPT_LANGUAGE'].to_s.scan(/^[a-z]{2}/).first
+    locale = case requested.to_s
+             when 'en' then 'en'
+             when 'pt', 'pt-BR' then 'pt-BR'
+             end
+    locale ||= current_store&.language.presence
+    I18n.locale = I18n.available_locales.map(&:to_s).include?(locale.to_s) ? locale : I18n.default_locale
   end
 
   def current_layout

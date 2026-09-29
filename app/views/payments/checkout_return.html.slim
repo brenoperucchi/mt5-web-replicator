@@ -1,0 +1,24 @@
+.row
+  .col-lg-12
+    .row
+      - if @invoice.plan_usage.try(:trace).try(:desc_finish).present?
+        .col-lg-6.d-flex.align-items-strech
+          == @invoice.plan_usage.trace.desc_finish
+      .col-lg-6
+        .card.w-100.position-relative.overflow-hidden.mb-3
+          .card-body.p-4
+            - if @invoice.paid?
+              h4.card-title = t('payments.checkout_return.paid_title')
+              p = t('payments.checkout_return.paid_body')
+            - elsif @invoice.refunded?
+              h4.card-title = t('payments.checkout_return.refunded_title')
+              p = t('payments.checkout_return.refunded_body')
+            - elsif @invoice.denied? || %w[failure cancel].include?(@kind)
+              h4.card-title = t('payments.checkout_return.not_completed_title')
+              p = t('payments.checkout_return.not_completed_body')
+            - else
+              h4.card-title = t('payments.checkout_return.processing_title')
+              p = t('payments.checkout_return.processing_body')
+            p.mb-0 = t('payments.checkout_return.invoice_summary', id: @invoice.id, amount: number_with_precision(@invoice.amount, precision: 2))
+    .row
+      = link_to t('payments.checkout_return.back'), panel_invoices_path, class: 'btn btn-dark w-100'

@@ -7,6 +7,7 @@
 # # Permitted locales available for the application
 # I18n.available_locales = [:en, :pt]
  
-# Set default locale to something other than :en
-I18n.default_locale = "pt-BR"
+# English is the default; pt-BR stays available (per-store via Store#language,
+# or per-request via ?locale= / Accept-Language).
+I18n.default_locale = :en
 I18n.available_locales = %i[en pt-BR]

@@ -7,7 +7,7 @@ RSpec.describe "PlanAccountCustomer" do
     @plan1 = create(:plan, :plan1)
     @plan2 = create(:plan, :plan2)
     @store = create(:store, plan_id: @plan1.id)
-    @plan_method = create(:payment_method, :mercadopago)
+    @plan_method = create(:payment_method, :stripe)
     @payment = create(:payment, payment_method: @plan_method, store: @store)
     @customer_plan = create(:customer_plan, :premium, payment: @payment, store:@store)
     @trace = create(:trace, :copy, stores: [@store], customer_plans:[@customer_plan])
@@ -93,7 +93,9 @@ RSpec.describe "PlanAccountCustomer" do
         # expect(@trace.customer_plan.amount.to_f).to be == 5
         travel_to Date.parse("2022-11-17")
         @customer_plan.calculate_amount(nil, nil, @trace)
-        expect(number_with_precision @customer_plan.amount_proportional).to be == "7,467"
+        # pt-BR number format (precision 3, comma separator) is what this assertion pins.
+        formatted = I18n.with_locale(:"pt-BR") { number_with_precision @customer_plan.amount_proportional }
+        expect(formatted).to be == "7,467"
       end
 
       it "Customer Plan Amount < Min Amount" do
