@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/brenoperucchi/administrate-field-tag.git
-  revision: 0921d6a88ad9140d7f56f9eb52bde9434aef62c8
+  revision: 2a1e72ee6b4d4da0c04e6135369ee6bf1c9b00b9
   branch: main
   specs:
     administrate-field-tag (0.0.1)
