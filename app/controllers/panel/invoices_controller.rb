@@ -22,7 +22,8 @@ module Panel
     end
 
     def item_conciliated
-      item = InvoiceItem.find(params[:item_id])
+      # Scope to the signed-in customer's invoice: never expose another customer's orders.
+      item = current_user.userable.invoices.find(params[:id]).items.find(params[:item_id])
       if item && item.loggings.where(state: "CONCILIATE").present?
         
         logging = item.loggings.where(state: "CONCILIATE").last

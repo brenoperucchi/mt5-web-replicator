@@ -30,4 +30,24 @@ RSpec.describe Store, 'payment provider selection' do
     store.create_invoice_month
     expect(store.invoices.last.payment).to be == stripe
   end
+
+  # mt5-2 rev-1 #2
+  it "never bills a store through another store's payment" do
+    other = Store.create!(name: 'Other', email: 'other@store.com', url: 'other', plan: @plan)
+    foreign = Payment.create!(payment_method: @stripe, store: other, api_token: 'sk_other')
+    store = Store.create!(name: 'Legacy FK', email: 'legacyfk@store.com', url: 'legacyfk', plan: @plan)
+    own = Payment.create!(payment_method: @stripe, store: store)
+    store.update_column(:payment_id, foreign.id)
+
+    expect(store.reload.billing_payment).to be == own
+    store.create_invoice_month
+    expect(store.invoices.last.payment).to be == own
+  end
+
+  it 'points a new store at its own default payment' do
+    store = Store.create!(name: 'Own', email: 'own@store.com', url: 'own', plan: @plan)
+    store.create_association_after_create('owner@own.com', '123123')
+    expect(store.reload.payment).to be_present
+    expect(store.payment.store_id).to be == store.id
+  end
 end

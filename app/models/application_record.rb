@@ -12,8 +12,10 @@ class ApplicationRecord < ActiveRecord::Base
   ].freeze
 
   # Associations that lead to credentials (payments -> api_token/webhook_token,
-  # users -> password data). No admin/control filter searches through them.
-  RANSACK_ASSOCIATION_DENYLIST = %w[payments users tokens].freeze
+  # users/user -> password data) or across stores into other stores' customer
+  # PII (e.g. order.trace.stores.customers.user.email). No admin/control
+  # filter searches through them.
+  RANSACK_ASSOCIATION_DENYLIST = %w[payments users user tokens stores customers].freeze
 
   # Ransack 4 requires explicit allowlists. Search is only exposed through the
   # authenticated admin/ and control/ dashboards, so allow every column and

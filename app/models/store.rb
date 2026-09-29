@@ -199,9 +199,12 @@ class Store < ApplicationRecord
     payments.available.order(:id).first
   end
 
-  # Payment used for the store's own monthly invoice.
+  # Payment used for the store's own monthly invoice. store.payment is only
+  # trusted when it belongs to this store: a legacy/cross-store FK would bill
+  # through another store's credentials and webhook.
   def billing_payment
-    payment&.available? ? payment : default_payment
+    own = payment if payment&.store_id == id && payment.available?
+    own || default_payment
   end
 
   def create_association_after_create(email, password)
@@ -210,6 +213,8 @@ class Store < ApplicationRecord
     PaymentMethod.available.each do |payment|
       payment.stores << self unless payment.stores.include?(self)
     end
+    # Point the store at its own payment (never another store's).
+    update_column(:payment_id, default_payment&.id)
 
     customer_plan = self.customer_plans.create(
       name: 'Plan 1', amount: 10.00, kind: 'fixed', store: self,
