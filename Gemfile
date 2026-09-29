@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '3.1.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '6.1.7.10'
+gem 'rails', '~> 7.0.8'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '>= 6.4.3'
@@ -46,7 +46,7 @@ group :test do
   gem 'capybara', '>= 2.15'
   gem 'selenium-webdriver'
   #custom
-  gem 'rspec-rails', '~> 4.0.1'
+  gem 'rspec-rails', '~> 6.1'
   gem 'guard-rspec'
   gem 'terminal-notifier' , git:"https://github.com/d-a-l-l/terminal-notifier.git"
   gem "database_cleaner"
@@ -96,9 +96,9 @@ group :development do
 end
 
 gem 'wannabe_bool'
-gem 'acts-as-taggable-on', '~> 7.0'
+gem 'acts-as-taggable-on', '~> 9.0'
 gem 'ancestry'
-gem 'paper_trail', '13.0.0'
+gem 'paper_trail', '~> 15.0'
 gem 'devise'
 gem "font-awesome-rails"
 gem 'jquery-rails'
