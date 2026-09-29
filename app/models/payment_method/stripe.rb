@@ -29,15 +29,27 @@ class PaymentMethod::Stripe
 
   # Returns a hosted Checkout URL for the invoice, or nil when it must not or
   # could not be charged right now (Invoice#invoice_send then returns false).
-  # Serialized per invoice with a row lock:
+  #
+  # Each checkout attempt is tracked in invoice.response:
+  #   checkout_attempt, checkout_idempotency_key, checkout_amount_cents,
+  #   checkout_currency, checkout_session_id and checkout_status, one of
+  #   creating   - persisted before calling Stripe; the create may have
+  #                succeeded remotely even if its response was lost
+  #   open       - session published to the customer
+  #   processing - complete/unpaid (async payment still clearing)
+  #   failed / expired / rejected / paid - closed
+  # The status is per attempt: the invoice's `denied` state is history and
+  # never, by itself, allows a new attempt.
+  #
+  # Decided under the invoice row lock:
   # - paid/refunded invoices are never charged again;
-  # - a still-open session is reused while its amount/currency match the
-  #   invoice; otherwise it is expired before a new one is created;
-  # - no new session is created while the previous one cannot be ruled out:
-  #   an async payment still pending (complete/unpaid), a failed lookup, or a
-  #   failed expire all return nil and keep the current attempt;
-  # - new sessions use an idempotency key stable per attempt, so a retried
-  #   request (timeout, double click) cannot create duplicate sessions.
+  # - a `creating` attempt is retried with the same key and parameters (Stripe
+  #   replays the same session) until it succeeds or is definitively rejected;
+  # - an open session is reused while its amount/currency match the invoice,
+  #   otherwise it is expired first;
+  # - a new attempt starts only when there is none or the current one is
+  #   confirmed failed/expired/rejected; anything inconclusive (pending async
+  #   payment, lookup/expire error) returns nil and keeps the current attempt.
   def checkout(invoice)
     invoice.with_lock do
       if invoice.paid? || invoice.refunded?
@@ -51,10 +63,15 @@ class PaymentMethod::Stripe
         next nil
       end
 
+      # Recover a create whose outcome is unknown before deciding anything.
+      next nil if invoice.response[:checkout_status] == 'creating' && !perform_create(invoice)
+
       verdict, url = previous_session(invoice, unit_amount)
       case verdict
       when :reuse then url
-      when :new   then create_session(invoice, unit_amount)
+      when :new
+        start_attempt(invoice, unit_amount)
+        perform_create(invoice)
       else nil
       end
     end
@@ -109,18 +126,29 @@ class PaymentMethod::Stripe
 
   private
 
-  # Only the invoice's current session may move it to a negative state or
-  # replace the stored session id. A paid session is honored even if it is an
-  # older one (the customer may have paid a still-open older link); the
-  # transition rules in Invoice#payment_status keep refunded invoices refunded.
+  STATUS_RANK = { 'creating' => 0, 'open' => 1, 'processing' => 2,
+                  'failed' => 3, 'expired' => 3, 'rejected' => 3, 'paid' => 4 }.freeze
+
+  # Only the invoice's current session may change the attempt status or deny
+  # the invoice; events of an older session never release a new attempt. A
+  # paid session is honored even if it is an older one (the customer may have
+  # paid a still-open older link); the transition rules in
+  # Invoice#payment_status keep refunded invoices refunded.
   def apply_session(invoice, session, event_type = nil)
     current_id = invoice.response[:checkout_session_id]
-    current = current_id.blank? || current_id == session.id
+    current = current_id.present? && current_id == session.id
     paid = %w[paid no_payment_required].include?(session.payment_status)
 
     if current || paid
       attrs = { payment_intent_id: session.try(:payment_intent).presence || invoice.response[:payment_intent_id] }
-      attrs[:checkout_session_id] = session.id if current
+      if current
+        status = if paid then 'paid'
+                 elsif DENIED_EVENTS.include?(event_type) then 'failed'
+                 elsif EXPIRED_EVENTS.include?(event_type) || session.status == 'expired' then 'expired'
+                 elsif session.status == 'complete' then 'processing'
+                 end
+        attrs[:checkout_status] = advance(invoice.response[:checkout_status], status)
+      end
       # update! so a failed save raises here instead of leaving dirty
       # attributes that make the row lock in payment_status raise later.
       invoice.update!(response: invoice.response.merge(attrs).compact)
@@ -133,10 +161,23 @@ class PaymentMethod::Stripe
     end
   end
 
+  # Attempt statuses only move forward (a late `completed` cannot reopen a
+  # failed attempt as processing).
+  def advance(from, to)
+    return from if to.nil?
+    return to if from.nil?
+    STATUS_RANK.fetch(to, 0) > STATUS_RANK.fetch(from, 0) ? to : from
+  end
+
+  def set_status(invoice, status)
+    invoice.update_column(:response, invoice.response.merge(checkout_status: advance(invoice.response[:checkout_status], status)))
+  end
+
   # Decides what to do with the invoice's current session, if any:
   # [:reuse, url] / [:new] / [:wait] (do not charge now).
   def previous_session(invoice, unit_amount)
     session_id = invoice.response[:checkout_session_id]
+    # No session: first attempt, or the last create was definitively rejected.
     return [:new] if session_id.blank?
 
     session = ::Stripe::Checkout::Session.retrieve(session_id, { api_key: api_key })
@@ -145,16 +186,17 @@ class PaymentMethod::Stripe
       return [:reuse, session.url] if same_charge?(invoice, session, unit_amount) && session.url.present?
 
       ::Stripe::Checkout::Session.expire(session_id, {}, { api_key: api_key })
+      set_status(invoice, 'expired')
       [:new]
     when 'complete'
       # Record a completion whose webhook has not arrived yet.
       apply_session(invoice, session)
       return [:wait] if invoice.paid?
-      # complete/unpaid is an async payment (e.g. boleto) still clearing; only
-      # after it failed (async_payment_failed denies the invoice) may the
-      # customer try again.
-      invoice.denied? ? [:new] : [:wait]
+      # complete/unpaid is an async payment still clearing; only a failure
+      # confirmed for THIS session (async_payment_failed) allows a retry.
+      invoice.response[:checkout_status] == 'failed' ? [:new] : [:wait]
     else # expired
+      set_status(invoice, 'expired')
       [:new]
     end
   rescue ::Stripe::StripeError => e
@@ -170,14 +212,29 @@ class PaymentMethod::Stripe
     amount.to_i == unit_amount && session_currency.to_s.downcase == currency
   end
 
-  # The attempt number only moves forward when a new session is needed
-  # (a previous one exists but is no longer open, or Stripe rejected the
-  # request); a retry after a network failure reuses the same key.
-  def create_session(invoice, unit_amount)
-    attempt = [invoice.response[:checkout_attempt].to_i, 1].max
-    attempt += 1 if invoice.response[:checkout_session_id].present?
-    invoice.update_column(:response, invoice.response.merge(checkout_attempt: attempt))
+  # Persists the next attempt (key and charge parameters) BEFORE calling
+  # Stripe, so a lost response is retried with exactly the same request.
+  def start_attempt(invoice, unit_amount)
+    attempt = invoice.response[:checkout_attempt].to_i + 1
+    invoice.update_column(:response, invoice.response.merge(
+      checkout_attempt: attempt,
+      checkout_idempotency_key: idempotency_key(invoice, attempt),
+      checkout_amount_cents: unit_amount,
+      checkout_currency: currency,
+      checkout_previous_session_id: invoice.response[:checkout_session_id],
+      checkout_session_id: nil,
+      checkout_status: 'creating'
+    ).compact)
+  end
 
+  # Creates the session of the current `creating` attempt with its stored key
+  # and parameters. Returns the URL, or nil. An inconclusive error (network,
+  # timeout, 5xx, 409/429) keeps the attempt `creating` for a same-key retry;
+  # a definitive 4xx rejection closes it (Stripe replays a rejected key, so the
+  # next checkout needs a new attempt).
+  def perform_create(invoice)
+    r = invoice.response
+    unit_amount = r[:checkout_amount_cents].to_i
     params = {
       mode: 'payment',
       client_reference_id: invoice.id.to_s,
@@ -186,7 +243,7 @@ class PaymentMethod::Stripe
       line_items: [{
         quantity: 1,
         price_data: {
-          currency: currency,
+          currency: r[:checkout_currency],
           unit_amount: unit_amount,
           product_data: { name: title(invoice) },
         },
@@ -197,21 +254,21 @@ class PaymentMethod::Stripe
     email = customer_email(invoice)
     params[:customer_email] = email if email.present?
 
-    session = ::Stripe::Checkout::Session.create(
-      params, { api_key: api_key, idempotency_key: idempotency_key(invoice, attempt) }
-    )
-    invoice.update!(response: invoice.response.merge(checkout_session_id: session.id,
-                                                     checkout_amount_cents: unit_amount,
-                                                     checkout_currency: currency))
+    key = r[:checkout_idempotency_key].presence || idempotency_key(invoice, r[:checkout_attempt].to_i)
+    session = ::Stripe::Checkout::Session.create(params, { api_key: api_key, idempotency_key: key })
+    invoice.update!(response: invoice.response.merge(checkout_session_id: session.id, checkout_status: 'open'))
     session.url
   rescue ::Stripe::StripeError => e
     Rails.logger.error("Stripe: checkout failed for Invoice##{invoice.id}: #{e.class}: #{e.message}")
-    # Stripe replays the stored result of a key, so a rejected request needs a
-    # fresh key next time; a connection error may be retried with the same one.
-    unless e.is_a?(::Stripe::APIConnectionError)
-      invoice.update_column(:response, invoice.response.merge(checkout_attempt: attempt + 1))
+    if definitive_rejection?(e)
+      invoice.update_column(:response, invoice.response.merge(checkout_status: 'rejected'))
     end
     nil
+  end
+
+  def definitive_rejection?(error)
+    status = error.http_status.to_i
+    (400..499).cover?(status) && ![409, 429].include?(status)
   end
 
   # Environment-prefixed so a restored backup or another environment sharing
