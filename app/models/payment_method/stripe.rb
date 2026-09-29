@@ -2,7 +2,11 @@ class PaymentMethod::Stripe
 
 
   PAID_EVENTS    = %w[checkout.session.completed checkout.session.async_payment_succeeded].freeze
-  DENIED_EVENTS  = %w[checkout.session.async_payment_failed checkout.session.expired].freeze
+  # An expired session changes nothing: the invoice stays payable (a new
+  # session is created on the next checkout). A failed async payment denies it,
+  # but only when it is the invoice's current session.
+  DENIED_EVENTS  = %w[checkout.session.async_payment_failed].freeze
+  EXPIRED_EVENTS = %w[checkout.session.expired].freeze
   REFUND_EVENTS  = %w[charge.refunded].freeze
 
   attr_reader :payment
@@ -54,21 +58,32 @@ class PaymentMethod::Stripe
   def handle_webhook(request)
     payload = request.raw_post
     signature = request.headers['Stripe-Signature']
+    secret = webhook_secret
+    # An empty secret is a known HMAC key: anyone could forge events with it.
+    raise PaymentMethod::SignatureError, 'webhook secret not configured' if secret.blank?
+
     begin
-      event = ::Stripe::Webhook.construct_event(payload, signature, webhook_secret.to_s)
+      event = ::Stripe::Webhook.construct_event(payload, signature, secret)
     rescue ::Stripe::SignatureVerificationError, JSON::ParserError => e
       raise PaymentMethod::SignatureError, e.message
     end
 
     object = event.data.object
     case event.type
-    when *PAID_EVENTS, *DENIED_EVENTS
+    when *PAID_EVENTS, *DENIED_EVENTS, *EXPIRED_EVENTS
       invoice = invoice_from_session(object)
       apply_session(invoice, object, event.type) if invoice
       invoice
     when *REFUND_EVENTS
       invoice = invoice_from_charge(object)
-      invoice&.payment_status(:refunded)
+      if invoice
+        if object.try(:refunded) == true
+          invoice.payment_status(:refunded)
+        else
+          Rails.logger.info("Stripe: partial refund on Invoice##{invoice.id} " \
+                            "(amount_refunded=#{object.try(:amount_refunded)}); state unchanged")
+        end
+      end
       invoice
     end
   end
@@ -87,15 +102,24 @@ class PaymentMethod::Stripe
 
   private
 
+  # Only the invoice's current session may move it to a negative state or
+  # replace the stored session id. A paid session is honored even if it is an
+  # older one (the customer may have paid a still-open older link); the
+  # transition rules in Invoice#payment_status keep refunded invoices refunded.
   def apply_session(invoice, session, event_type = nil)
-    invoice.update(response: invoice.response.merge(
-      checkout_session_id: session.id,
-      payment_intent_id: session.try(:payment_intent).presence || invoice.response[:payment_intent_id]
-    ).compact)
+    current_id = invoice.response[:checkout_session_id]
+    current = current_id.blank? || current_id == session.id
+    paid = %w[paid no_payment_required].include?(session.payment_status)
 
-    if session.payment_status == 'paid' || session.payment_status == 'no_payment_required'
+    if current || paid
+      attrs = { payment_intent_id: session.try(:payment_intent).presence || invoice.response[:payment_intent_id] }
+      attrs[:checkout_session_id] = session.id if current
+      invoice.update(response: invoice.response.merge(attrs).compact)
+    end
+
+    if paid
       invoice.payment_status(:paid)
-    elsif DENIED_EVENTS.include?(event_type) || session.status == 'expired'
+    elsif current && DENIED_EVENTS.include?(event_type)
       invoice.payment_status(:denied)
     end
   end

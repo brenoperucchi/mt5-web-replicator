@@ -83,7 +83,7 @@ section.position-relative.pt-12.pt-lg-15.pb-9.pb-lg-12
                         span.fs-2
                           = I18n.l (invoice.due_at || DateTime.current), format: :short6
                       td.text-end.ps-0
-                        - if invoice.to_paid? 
+                        - if invoice.to_paid? or invoice.denied?
                           = link_to invoice_send_panel_invoice_path(invoice), class: 'btn btn-sm btn-dark w-100' do
                             / = I18n.t :payment, scope:'helpers.dashboards'
                             | Pagamento

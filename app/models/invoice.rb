@@ -63,15 +63,30 @@ class Invoice < ApplicationRecord
     payment_link.presence
   end
 
-  # Applies a provider-neutral payment status (:paid, :denied, :refunded).
+  # Allowed provider-driven transitions: target state => states it may come
+  # from. Anything else (e.g. paid -> denied, refunded -> paid) is ignored so
+  # late or out-of-order webhooks cannot move an invoice backwards.
+  PAYMENT_TRANSITIONS = {
+    'paid'     => %w[pending to_paid denied],
+    'denied'   => %w[pending to_paid],
+    'refunded' => %w[paid],
+  }.freeze
+
+  # Applies a provider-neutral payment status (:paid, :denied, :refunded)
+  # under a row lock, so concurrent webhooks are serialized. Returns true when
+  # the invoice ends in the requested state.
   def payment_status(status)
-    case status.to_s
-    when 'paid'
-      self.update_column(:state, Invoice.states[:paid]) unless paid?
-    when 'denied'
-      self.update_column(:state, Invoice.states[:denied]) unless denied?
-    when 'refunded'
-      self.update_column(:state, Invoice.states[:refunded]) unless refunded?
+    status = status.to_s
+    return false unless PAYMENT_TRANSITIONS.key?(status)
+
+    with_lock do
+      next true if state == status
+      unless PAYMENT_TRANSITIONS[status].include?(state)
+        Rails.logger.info("Invoice##{id}: ignored payment status #{state} -> #{status}")
+        next false
+      end
+      update_column(:state, Invoice.states[status])
+      true
     end
   end
 
