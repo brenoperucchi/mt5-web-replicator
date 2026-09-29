@@ -1,17 +1,17 @@
 class ContactMailer < ApplicationMailer
-  default from: 'contato@imentore.com.br'
+  default from: -> { ENV.fetch('MAIL_FROM', 'contato@imentore.com.br') }
   # Subject can be set in your I18n file at config/locales/en.yml
   # with the following lookup:
   #
   #   en.contact_mailer.email.subject
   #
   def email(user, password=nil)
-    if Rails.env.production?
-      delivery_options = { user_name: "contact@imentore.com",
-                           password: "3e2w1q",
-                           address: "mail.imentore.com",
-                           port: "587" }
-     end
+    if Rails.env.production? && ENV['SMTP_ADDRESS'].present?
+      delivery_options = { user_name: ENV['SMTP_USERNAME'],
+                           password: ENV['SMTP_PASSWORD'],
+                           address: ENV['SMTP_ADDRESS'],
+                           port: ENV.fetch('SMTP_PORT', '587') }
+    end
 
 
     @user = user

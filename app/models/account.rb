@@ -164,12 +164,12 @@ class Account < ApplicationRecord
 
   def api_server_hostname(params)
     if params[:EnvironmentLocal] == "0"
-      'signalforex.imentore.com.br'
+      ENV.fetch('API_HOSTNAME', 'signalforex.imentore.com.br')
     elsif params[:EnvironmentLocal] == "1"
       if params[:expert_name] == 'signal_copy'
-        'signallocal.imentore.com.br:8080'
+        ENV.fetch('API_HOSTNAME_LOCAL_COPY', 'signallocal.imentore.com.br:8080')
       else
-        'signallocal.imentore.com.br:80'
+        ENV.fetch('API_HOSTNAME_LOCAL', 'signallocal.imentore.com.br:80')
       end
     end    
   end
