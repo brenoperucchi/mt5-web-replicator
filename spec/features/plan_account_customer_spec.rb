@@ -93,7 +93,9 @@ RSpec.describe "PlanAccountCustomer" do
         # expect(@trace.customer_plan.amount.to_f).to be == 5
         travel_to Date.parse("2022-11-17")
         @customer_plan.calculate_amount(nil, nil, @trace)
-        expect(number_with_precision @customer_plan.amount_proportional).to be == "7,467"
+        # pt-BR number format (precision 3, comma separator) is what this assertion pins.
+        formatted = I18n.with_locale(:"pt-BR") { number_with_precision @customer_plan.amount_proportional }
+        expect(formatted).to be == "7,467"
       end
 
       it "Customer Plan Amount < Min Amount" do

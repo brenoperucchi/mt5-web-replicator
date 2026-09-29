@@ -93,7 +93,7 @@ class DashboardsController < ApplicationController
     else
       filters
       
-      flash[:notice] = "Error na contração de Portfolio"
+      flash[:notice] = I18n.t('flash.dashboards.contract_failed')
       render :contract
     end
   end

@@ -21,8 +21,8 @@ module Admin
     end
 
     def set_locale!
-      locale = current_user.try(:store).language.blank? ? 'pt-BR' : current_user.try(:store).language
-      I18n.locale = locale
+      locale = current_user.try(:store).try(:language).presence
+      I18n.locale = I18n.available_locales.map(&:to_s).include?(locale.to_s) ? locale : I18n.default_locale
     end
 
 

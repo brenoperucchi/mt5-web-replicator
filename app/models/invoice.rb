@@ -95,17 +95,22 @@ class Invoice < ApplicationRecord
     self.payment = customer_plan.payment
     # self.plan_usage = plan_usage
 
-    timestamp = I18n.l DateTime.current, format: :short8
+    # Item descriptions are persisted, so write them in the store's language.
+    item_locale = store.try(:language).presence_in(I18n.available_locales.map(&:to_s)) || I18n.default_locale
+    timestamp = I18n.l DateTime.current, format: :short8, locale: item_locale
 
     if customer_plan.fixed?# and customer_plan.monthly?
       amount = plan_usage.amount_proportional 
-      description = "#{timestamp} - Contratos: #{account.contract_volume_use} * Valor #{number_with_precision plan_usage.amount_proportional}"
+      description = I18n.t('invoice_items.fixed_description', locale: item_locale, timestamp: timestamp,
+                           contracts: account.contract_volume_use, amount: number_with_precision(plan_usage.amount_proportional))
     elsif customer_plan.percent?
       account.search_date_begin = date.beginning_of_month
       account.search_date_end = date.end_of_month
       data_profit = account.data_profit(:slaves, trace)
       amount = data_profit * (customer_plan.amount_use.to_f / 100)
-      description = "#{timestamp} - Sistema: #{number_with_precision data_profit} * Percentual Plan #{number_with_precision customer_plan.amount_use.to_f, significant:true, precision: 2}%"
+      description = I18n.t('invoice_items.percent_description', locale: item_locale, timestamp: timestamp,
+                           profit: number_with_precision(data_profit),
+                           percent: number_with_precision(customer_plan.amount_use.to_f, significant: true, precision: 2))
     end
   
     if self.save
