@@ -53,6 +53,18 @@ elsif Rails.env.production?
 end
 
 
+# Default payment provider: Stripe. Idempotent, so db:seed can be re-run safely.
+# Keys may be left blank here: PaymentMethod::Stripe falls back to the
+# STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET env vars when the Payment row has none.
+# Register the webhook in Stripe at https://<domain>/payments/webhook/<payment id>.
+stripe_method = PaymentMethod.find_or_create_by!(handle: 'stripe') { |pm| pm.name = 'Stripe' }
+stripe_payment = Payment.find_or_create_by!(payment_method: stripe_method, store: Store.first) do |payment|
+  payment.api_token     = ENV['STRIPE_SECRET_KEY'].presence
+  payment.webhook_token = ENV['STRIPE_WEBHOOK_SECRET'].presence
+end
+puts "Stripe payment ##{stripe_payment.id} ready (webhook path: /payments/webhook/#{stripe_payment.id})"
+
+
 
 
 # Store.first.traces.each do |trace|

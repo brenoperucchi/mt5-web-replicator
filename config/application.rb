@@ -6,6 +6,10 @@ require 'rails/all'
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Load .env (see .env.example). The plain `dotenv` gem (2.x) does not load it
+# automatically; variables already set in the real environment win.
+Dotenv.load if defined?(Dotenv)
+
 module Signalforex
   class Application < Rails::Application
 
