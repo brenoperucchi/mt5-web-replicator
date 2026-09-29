@@ -14,7 +14,7 @@ Use both repositories together when you need the full flow: `python-signal` runs
 - Rails 7.0 (Zeitwerk)
 - PostgreSQL
 - Redis and Sidekiq for background jobs
-- Webpacker, Tailwind CSS, Bootstrap, and Alpine.js
+- Shakapacker (webpack), Tailwind CSS, Bootstrap, and Alpine.js
 - Devise, Pundit, Administrate, Stripe (payments), and Telegram Bot
 - I18n: English by default, Brazilian Portuguese (`pt-BR`) available
 
@@ -30,7 +30,7 @@ Use both repositories together when you need the full flow: `python-signal` runs
 
 - Ruby 3.1.7 (e.g. via rbenv or asdf)
 - PostgreSQL (the app connects with the password in `DATABASE_PASSWORD`; see `config/database.yml`)
-- Node.js and Yarn (Webpacker assets)
+- Node.js and Yarn (Shakapacker assets)
 - Redis (Sidekiq jobs and Action Cable)
 
 ## Local setup
