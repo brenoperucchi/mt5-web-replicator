@@ -102,9 +102,12 @@ Each checkout attempt is tracked in `invoice.response`: `checkout_attempt`,
 `checkout_idempotency_key`, `checkout_amount_cents`, `checkout_currency`,
 `checkout_session_id` and `checkout_status`:
 
-- `creating`: the attempt (key + amount/currency) is saved *before* calling Stripe. If the
-  create fails inconclusively (network error, timeout, 5xx, 409/429) it stays `creating` and
-  the next send retries with the same key and parameters, so Stripe returns the same session.
+- `creating`: the attempt (key, amount/currency, the full create payload in
+  `checkout_create_params` and the creating `checkout_payment_id`) is saved *before* calling
+  Stripe. If the create fails inconclusively (network error, timeout, 5xx, 409/429, or an
+  idempotency conflict) it stays `creating` and the next send retries with the same key, the
+  stored payload and that Payment's credentials, so Stripe returns the same session even if
+  the customer's name/email or the store URLs changed meanwhile.
   If the invoice amount changed meanwhile, the recovered session is then expired and a new
   attempt opened for the new amount. A definitive 4xx rejection closes it as `rejected`.
 - `open`: session published; reused while amount/currency match.
@@ -125,14 +128,32 @@ If an invoice stays stuck (lookups keep failing, e.g. the store's `Payment` was 
 another Stripe account while keeping the old session id, or a `processing` session whose
 failure webhook never arrived):
 
-1. Look up the attempt's `checkout_session_id` (or, for `creating`, the
-   `checkout_idempotency_key` in the request logs) in the **original** Stripe account.
-2. Confirm whether it was paid, failed or expired (check its PaymentIntent).
-3. Only then reconcile: mark the invoice paid, or set `checkout_status` to `failed`/`expired`
-   so the next send opens a new attempt.
+Editing `checkout_status` alone does **not** unblock it: while `checkout_session_id` is set,
+every send retrieves that session with the *current* credentials, and a 404/error keeps
+waiting. Recover in one of two ways:
 
-Never blindly clear `checkout_session_id`: an unresolved session may still be paid, and a
-new attempt would allow a double charge.
+1. **Preferred:** restore access to the original Stripe account (put its keys back on the
+   store's `Payment`). The next send, the customer return (`sync`) or a webhook then
+   reconciles the session and updates the status on its own.
+2. **Explicit reconciliation**, when the original account cannot be used again:
+   1. Look up the attempt's `checkout_session_id` (or, for `creating`, the
+      `checkout_idempotency_key` in the request logs) in the **original** Stripe account.
+   2. Confirm the financial result (check its PaymentIntent): paid, failed, or expired
+      without payment.
+   3. Only then record it, which stores the outcome, note and old session under
+      `checkout_reconciled` and detaches the session:
+
+      ```ruby
+      invoice = Invoice.find(ID)
+      invoice.response.slice(:checkout_session_id, :checkout_status, :checkout_idempotency_key)
+      invoice.reconcile_checkout!(outcome: 'failed', note: 'pi_... requires_payment_method in old account, checked by NAME')
+      # outcome: 'paid' (also marks the invoice paid), 'failed' or 'expired'
+      ```
+
+      After `failed`/`expired` the next send opens exactly one new attempt.
+
+Never blindly clear `checkout_session_id` (or call `reconcile_checkout!` on a guess): an
+unresolved session may still be paid, and a new attempt would allow a double charge.
 
 ### Migrating from MercadoPago
 

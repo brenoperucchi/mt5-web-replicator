@@ -43,8 +43,9 @@ class PaymentMethod::Stripe
   #
   # Decided under the invoice row lock:
   # - paid/refunded invoices are never charged again;
-  # - a `creating` attempt is retried with the same key and parameters (Stripe
-  #   replays the same session) until it succeeds or is definitively rejected;
+  # - a `creating` attempt is retried with the same key, the stored create
+  #   payload and the original Payment's credentials (Stripe replays the same
+  #   session) until it succeeds or is definitively rejected;
   # - an open session is reused while its amount/currency match the invoice,
   #   otherwise it is expired first;
   # - a new attempt starts only when there is none or the current one is
@@ -134,30 +135,38 @@ class PaymentMethod::Stripe
   # paid session is honored even if it is an older one (the customer may have
   # paid a still-open older link); the transition rules in
   # Invoice#payment_status keep refunded invoices refunded.
+  #
+  # The whole decision runs under the invoice row lock, on the row re-read by
+  # with_lock (SELECT ... FOR UPDATE): overlapping webhooks may each hold an
+  # instance loaded before the other saved, and deciding on that stale copy
+  # would overwrite a recorded failure or a newer attempt (scout mt5-2).
+  # Invoice#payment_status re-enters the same lock inside this transaction.
   def apply_session(invoice, session, event_type = nil)
-    current_id = invoice.response[:checkout_session_id]
-    current = current_id.present? && current_id == session.id
-    paid = %w[paid no_payment_required].include?(session.payment_status)
+    invoice.with_lock do
+      current_id = invoice.response[:checkout_session_id]
+      current = current_id.present? && current_id == session.id
+      paid = %w[paid no_payment_required].include?(session.payment_status)
 
-    if current || paid
-      attrs = { payment_intent_id: session.try(:payment_intent).presence || invoice.response[:payment_intent_id] }
-      if current
-        status = if paid then 'paid'
-                 elsif DENIED_EVENTS.include?(event_type) then 'failed'
-                 elsif EXPIRED_EVENTS.include?(event_type) || session.status == 'expired' then 'expired'
-                 elsif session.status == 'complete' then 'processing'
-                 end
-        attrs[:checkout_status] = advance(invoice.response[:checkout_status], status)
+      if current || paid
+        attrs = { payment_intent_id: session.try(:payment_intent).presence || invoice.response[:payment_intent_id] }
+        if current
+          status = if paid then 'paid'
+                   elsif DENIED_EVENTS.include?(event_type) then 'failed'
+                   elsif EXPIRED_EVENTS.include?(event_type) || session.status == 'expired' then 'expired'
+                   elsif session.status == 'complete' then 'processing'
+                   end
+          attrs[:checkout_status] = advance(invoice.response[:checkout_status], status)
+        end
+        # update! so a failed save raises here instead of leaving dirty
+        # attributes that make the nested row lock in payment_status raise.
+        invoice.update!(response: invoice.response.merge(attrs).compact)
       end
-      # update! so a failed save raises here instead of leaving dirty
-      # attributes that make the row lock in payment_status raise later.
-      invoice.update!(response: invoice.response.merge(attrs).compact)
-    end
 
-    if paid
-      invoice.payment_status(:paid)
-    elsif current && DENIED_EVENTS.include?(event_type)
-      invoice.payment_status(:denied)
+      if paid
+        invoice.payment_status(:paid)
+      elsif current && DENIED_EVENTS.include?(event_type)
+        invoice.payment_status(:denied)
+      end
     end
   end
 
@@ -212,8 +221,9 @@ class PaymentMethod::Stripe
     amount.to_i == unit_amount && session_currency.to_s.downcase == currency
   end
 
-  # Persists the next attempt (key and charge parameters) BEFORE calling
-  # Stripe, so a lost response is retried with exactly the same request.
+  # Persists the next attempt BEFORE calling Stripe: its key, the full create
+  # payload and the Payment whose credentials send it, so a lost response is
+  # retried with exactly the same request (no secrets are stored).
   def start_attempt(invoice, unit_amount)
     attempt = invoice.response[:checkout_attempt].to_i + 1
     invoice.update_column(:response, invoice.response.merge(
@@ -221,20 +231,15 @@ class PaymentMethod::Stripe
       checkout_idempotency_key: idempotency_key(invoice, attempt),
       checkout_amount_cents: unit_amount,
       checkout_currency: currency,
+      checkout_create_params: create_params(invoice, unit_amount, currency),
+      checkout_payment_id: payment.try(:id),
       checkout_previous_session_id: invoice.response[:checkout_session_id],
       checkout_session_id: nil,
       checkout_status: 'creating'
     ).compact)
   end
 
-  # Creates the session of the current `creating` attempt with its stored key
-  # and parameters. Returns the URL, or nil. An inconclusive error (network,
-  # timeout, 5xx, 409/429) keeps the attempt `creating` for a same-key retry;
-  # a definitive 4xx rejection closes it (Stripe replays a rejected key, so the
-  # next checkout needs a new attempt).
-  def perform_create(invoice)
-    r = invoice.response
-    unit_amount = r[:checkout_amount_cents].to_i
+  def create_params(invoice, unit_amount, currency)
     params = {
       mode: 'payment',
       client_reference_id: invoice.id.to_s,
@@ -243,7 +248,7 @@ class PaymentMethod::Stripe
       line_items: [{
         quantity: 1,
         price_data: {
-          currency: r[:checkout_currency],
+          currency: currency,
           unit_amount: unit_amount,
           product_data: { name: title(invoice) },
         },
@@ -253,17 +258,46 @@ class PaymentMethod::Stripe
     }
     email = customer_email(invoice)
     params[:customer_email] = email if email.present?
+    params
+  end
 
+  # Creates the session of the current `creating` attempt with its stored key
+  # and payload, using the credentials of the Payment that started it.
+  # Returns the URL, or nil. An inconclusive error (network, timeout, 5xx,
+  # 409/429, idempotency conflict) keeps the attempt `creating` for a
+  # same-key retry; a definitive 4xx rejection closes it (Stripe replays a
+  # rejected key, so the next checkout needs a new attempt).
+  def perform_create(invoice)
+    r = invoice.response
+    # Attempts persisted before the payload was stored rebuild it once.
+    params = r[:checkout_create_params].presence ||
+             create_params(invoice, r[:checkout_amount_cents].to_i, r[:checkout_currency])
     key = r[:checkout_idempotency_key].presence || idempotency_key(invoice, r[:checkout_attempt].to_i)
-    session = ::Stripe::Checkout::Session.create(params, { api_key: api_key, idempotency_key: key })
+    session = ::Stripe::Checkout::Session.create(params, { api_key: attempt_api_key(r), idempotency_key: key })
     invoice.update!(response: invoice.response.merge(checkout_session_id: session.id, checkout_status: 'open'))
     session.url
+  rescue ::Stripe::IdempotencyError => e
+    # Same key, different parameters: says nothing about whether the original
+    # create succeeded, so the attempt stays `creating` until reconciled.
+    Rails.logger.error("Stripe: IDEMPOTENCY CONFLICT for Invoice##{invoice.id} key #{key}: #{e.message} " \
+                       "- attempt kept `creating`; reconcile manually (see README)")
+    nil
   rescue ::Stripe::StripeError => e
     Rails.logger.error("Stripe: checkout failed for Invoice##{invoice.id}: #{e.class}: #{e.message}")
     if definitive_rejection?(e)
       invoice.update_column(:response, invoice.response.merge(checkout_status: 'rejected'))
     end
     nil
+  end
+
+  # The key of the Payment that started the attempt (it may have been
+  # switched since); falls back to the current one.
+  def attempt_api_key(response)
+    pid = response[:checkout_payment_id]
+    return api_key if pid.blank? || pid == payment.try(:id)
+
+    original = Payment.find_by(id: pid)
+    original ? self.class.new(original).api_key : api_key
   end
 
   def definitive_rejection?(error)

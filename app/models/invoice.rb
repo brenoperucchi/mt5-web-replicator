@@ -92,6 +92,32 @@ class Invoice < ApplicationRecord
     end
   end
 
+  CHECKOUT_RECONCILE_OUTCOMES = %w[paid failed expired].freeze
+
+  # Operator-only recovery (see README "Recovering an inconclusive attempt"):
+  # records the financial outcome of the current checkout attempt, confirmed
+  # by hand in the ORIGINAL Stripe account, and only then detaches its session
+  # so the next send can open a new attempt. Never call it on a guess.
+  def reconcile_checkout!(outcome:, note:)
+    outcome = outcome.to_s
+    raise ArgumentError, "outcome must be one of #{CHECKOUT_RECONCILE_OUTCOMES.join('/')}" unless CHECKOUT_RECONCILE_OUTCOMES.include?(outcome)
+    raise ArgumentError, 'note is required' if note.blank?
+
+    with_lock do
+      r = response
+      update!(response: r.merge(
+        checkout_status: outcome,
+        checkout_previous_session_id: r[:checkout_session_id] || r[:checkout_previous_session_id],
+        checkout_session_id: nil,
+        checkout_reconciled: { outcome: outcome, note: note.to_s, at: Time.current.iso8601,
+                               session_id: r[:checkout_session_id], idempotency_key: r[:checkout_idempotency_key],
+                               previous_status: r[:checkout_status] }
+      ))
+      payment_status(:paid) if outcome == 'paid'
+    end
+    self
+  end
+
   def customer_calculate(customer, date, month_proporcional = nil)
     customer.accounts.slave.each do |account|
       account.traces.each do |trace|

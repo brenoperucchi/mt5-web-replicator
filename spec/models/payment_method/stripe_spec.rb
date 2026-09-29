@@ -282,6 +282,58 @@ RSpec.describe PaymentMethod::Stripe do
       end
     end
 
+    # Scout consultation mt5-2, blocker: two webhook handlers may load the
+    # invoice before either saves. The decision must be made on the row read
+    # under lock, never on a stale in-memory instance.
+    context 'with stale invoice instances (overlapping webhooks)' do
+      def session_obj(id, status: 'complete', payment_status: 'unpaid')
+        ::Stripe::Checkout::Session.construct_from(
+          id: id, object: 'checkout.session', status: status, payment_status: payment_status,
+          client_reference_id: invoice.id.to_s, metadata: { invoice_id: invoice.id.to_s })
+      end
+
+      def apply(inst, id, type)
+        provider.send(:apply_session, inst, session_obj(id), type)
+      end
+
+      it 'a late completed/unpaid applied through a stale instance does not undo a recorded failure' do
+        invoice.update(response: { checkout_session_id: 'cs_2', checkout_attempt: 2, checkout_status: 'open',
+                                   checkout_amount_cents: 5333, checkout_currency: 'usd',
+                                   checkout_idempotency_key: key(2) })
+        invoice.update_columns(state: Invoice.states[:to_paid])
+        a = Invoice.find(invoice.id)
+        b = Invoice.find(invoice.id)
+
+        apply(a, 'cs_2', 'checkout.session.async_payment_failed')
+        apply(b, 'cs_2', 'checkout.session.completed')
+
+        invoice.reload
+        expect(invoice.response[:checkout_status]).to be == 'failed'
+        expect(invoice.state).to be == 'denied'
+
+        retrieve_as('cs_2', status: 'complete')
+        stub_stripe_checkout_session_create(id: 'cs_3', url: 'https://checkout.stripe.com/c/pay/cs_3')
+        expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_3'
+        expect(creates_with(3)).to have_been_made.once
+        expect(creates_with(4)).not_to have_been_made
+      end
+
+      it 'a stale instance loaded while S1 was current does not overwrite S2' do
+        invoice.update(response: { checkout_session_id: 'cs_1', checkout_attempt: 1, checkout_status: 'open',
+                                   checkout_amount_cents: 5333, checkout_currency: 'usd',
+                                   checkout_idempotency_key: key(1) })
+        invoice.update_columns(state: Invoice.states[:to_paid])
+        stale = Invoice.find(invoice.id)
+
+        s2 = { checkout_session_id: 'cs_2', checkout_attempt: 2, checkout_status: 'open',
+               checkout_amount_cents: 5333, checkout_currency: 'usd', checkout_idempotency_key: key(2) }
+        invoice.update!(response: invoice.response.merge(s2))
+
+        apply(stale, 'cs_1', 'checkout.session.completed')
+        expect(invoice.reload.response).to include(s2)
+      end
+    end
+
     # Scout analysis mt5-1, follow-up F1: a lost create response is retried
     # with the same key and parameters, never with a new attempt.
     context 'when the create response is lost after renewing an expired session' do
@@ -334,6 +386,33 @@ RSpec.describe PaymentMethod::Stripe do
                                                    checkout_amount_cents: 6000)
       end
 
+      # Scout consultation mt5-2, follow-up 1: the whole create payload is
+      # frozen with the attempt, not just key/amount/currency.
+      it 'retries with the original payload even if the customer email changed meanwhile' do
+        allow_any_instance_of(Invoice).to receive(:email).and_return('changed@example.com')
+        stub_stripe_checkout_session_create(id: 'cs_new', url: 'https://checkout.stripe.com/c/pay/cs_new')
+        retrieve_as('cs_new', status: 'open', url: 'https://checkout.stripe.com/c/pay/cs_new')
+        expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_new'
+
+        bodies = WebMock::RequestRegistry.instance.requested_signatures.hash.keys
+                   .select { |sig| sig.method == :post && sig.uri.path == '/v1/checkout/sessions' }
+                   .select { |sig| sig.headers['Idempotency-Key'] == key(2) }
+                   .map { |sig| Rack::Utils.parse_nested_query(sig.body) }
+        expect(creates_with(2)).to have_been_made.twice
+        expect(bodies.uniq.size).to be == 1
+        expect(bodies.first['customer_email']).not_to be == 'changed@example.com'
+        expect(creates_with(3)).not_to have_been_made
+      end
+
+      it 'keeps the attempt creating on an idempotency conflict instead of rejecting it' do
+        stub_request(:post, sessions_url)
+          .to_return(status: 400, headers: { 'Content-Type' => 'application/json' },
+                     body: { error: { type: 'idempotency_error', message: 'Keys for idempotent requests can only be used with the same parameters' } }.to_json)
+        expect(invoice.invoice_send).to be false
+        expect(invoice.reload.response).to include(checkout_attempt: 2, checkout_status: 'creating')
+        expect(creates_with(3)).not_to have_been_made
+      end
+
       it 'keeps the same key across a 5xx answer' do
         stub_request(:post, sessions_url)
           .to_return(status: 500, headers: { 'Content-Type' => 'application/json' },
@@ -352,6 +431,53 @@ RSpec.describe PaymentMethod::Stripe do
         expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_new'
         expect(creates_with(3)).to have_been_made.once
       end
+    end
+  end
+
+  # Scout consultation mt5-2, follow-up 2: editing checkout_status alone does
+  # not unblock a session the current credentials cannot retrieve.
+  describe 'Invoice#reconcile_checkout!' do
+    let(:sessions_url) { "#{StripeHelpers::STRIPE_API}/checkout/sessions" }
+
+    before do
+      invoice.update(response: { checkout_session_id: 'cs_lost', checkout_attempt: 1, checkout_status: 'processing',
+                                 checkout_idempotency_key: "test-invoice-#{invoice.id}-attempt-1" })
+      stub_request(:get, "#{sessions_url}/cs_lost")
+        .to_return(status: 404, headers: { 'Content-Type' => 'application/json' },
+                   body: { error: { type: 'invalid_request_error', message: 'No such checkout.session' } }.to_json)
+    end
+
+    it 'waits while the session is unreachable, even after only editing the status' do
+      invoice.update!(response: invoice.response.merge(checkout_status: 'failed'))
+      create_stub = stub_stripe_checkout_session_create
+      expect(invoice.invoice_send).to be false
+      expect(create_stub).not_to have_been_requested
+    end
+
+    it 'records a confirmed failure and then allows exactly one new attempt' do
+      invoice.reconcile_checkout!(outcome: 'failed', note: 'boleto expired unpaid in old account')
+      expect(invoice.reload.response).to include(checkout_session_id: nil, checkout_status: 'failed',
+                                                 checkout_previous_session_id: 'cs_lost')
+      expect(invoice.response[:checkout_reconciled]).to include(outcome: 'failed', session_id: 'cs_lost',
+                                                                previous_status: 'processing')
+      stub_stripe_checkout_session_create(id: 'cs_new', url: 'https://checkout.stripe.com/c/pay/cs_new')
+      expect(invoice.invoice_send).to be == 'https://checkout.stripe.com/c/pay/cs_new'
+      expect(a_request(:post, sessions_url).with(headers: { 'Idempotency-Key' => "test-invoice-#{invoice.id}-attempt-2" })).to have_been_made.once
+    end
+
+    it 'marks the invoice paid for a confirmed payment and never charges again' do
+      invoice.update_columns(state: Invoice.states[:to_paid])
+      invoice.reconcile_checkout!(outcome: :paid, note: 'paid in old account, pi_123')
+      expect(invoice.reload.state).to be == 'paid'
+      create_stub = stub_stripe_checkout_session_create
+      expect(invoice.invoice_send).to be false
+      expect(create_stub).not_to have_been_requested
+    end
+
+    it 'requires a known outcome and a note' do
+      expect { invoice.reconcile_checkout!(outcome: 'open', note: 'x') }.to raise_error(ArgumentError)
+      expect { invoice.reconcile_checkout!(outcome: 'failed', note: '') }.to raise_error(ArgumentError)
+      expect(invoice.reload.response[:checkout_session_id]).to be == 'cs_lost'
     end
   end
 
