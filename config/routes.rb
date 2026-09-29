@@ -14,8 +14,6 @@ Rails.application.routes.draw do
     get  "mercadopago/finish/:invoice_id",            to: "mercadopago#finish",    as: 'finish_mercadopago'
     get  "mercadopago/back_urls/:state/:invoice_id",  to: "mercadopago#back_urls"
     
-    get "subscription", to: "pay#subscription"
-    get "billing",      to: "pay#billing"
 
     resources :invoice_items
     resources :stores

@@ -103,7 +103,6 @@ gem 'devise'
 gem "font-awesome-rails"
 gem 'jquery-rails'
 gem "rest-client"
-gem 'pay', '6.8.1'
 gem 'stripe', '~> 9'
 gem 'mercadopago-sdk'
 gem 'dotenv'
@@ -111,8 +110,6 @@ gem 'stringio', '3.0.9'
 
 # # To use Braintree + PayPal, also include:
 # gem 'braintree', '>= 4.4', '< 5.0'
-# gem 'paddle_pay', '~> 0.1'
-gem 'receipts', '~> 2'
 gem 'next_rails'
 gem 'telegram-bot-ruby'
 gem 'sidekiq', '7.1.3'
@@ -124,7 +121,6 @@ gem 'recaptcha'
 gem 'link_thumbnailer'
 gem 'imgix'
 gem "net-http"
-gem 'money-rails', '~> 1.12'
 
 #API
 gem 'grape'

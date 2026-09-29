@@ -36,7 +36,6 @@ class Customer < ApplicationRecord
   delegate :store, to: :user, allow_nil: true
   delegate :email, to: :user, allow_nil: true
 
-  pay_customer
   accepts_nested_attributes_for :user
 
   validates_presence_of :name
