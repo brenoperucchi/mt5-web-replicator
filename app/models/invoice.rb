@@ -42,8 +42,10 @@ class Invoice < ApplicationRecord
     return false if provider.nil?
 
     url = provider.checkout(self)
+    return false if url.blank?
+
     update(payment_link: url)
-    url.presence || false
+    url
   end
 
   def customer

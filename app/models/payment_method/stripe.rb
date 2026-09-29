@@ -27,30 +27,31 @@ class PaymentMethod::Stripe
     ENV.fetch('PAYMENT_CURRENCY', 'usd').downcase
   end
 
-  # Creates a hosted Checkout Session and returns its URL.
+  # Returns a hosted Checkout URL for the invoice, or nil when it must not or
+  # could not be charged. Serialized per invoice with a row lock:
+  # - paid/refunded invoices are never charged again;
+  # - a still-open session is reused instead of creating a second one;
+  # - new sessions use an idempotency key stable per attempt, so a retried
+  #   request (timeout, double click) cannot create duplicate sessions.
   def checkout(invoice)
-    params = {
-      mode: 'payment',
-      client_reference_id: invoice.id.to_s,
-      metadata: { invoice_id: invoice.id },
-      payment_intent_data: { metadata: { invoice_id: invoice.id } },
-      line_items: [{
-        quantity: 1,
-        price_data: {
-          currency: currency,
-          unit_amount: (invoice.amount.to_d * 100).round.to_i,
-          product_data: { name: title(invoice) },
-        },
-      }],
-      success_url: "#{invoice.back_urls(:success)}?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: invoice.back_urls(:cancel),
-    }
-    email = customer_email(invoice)
-    params[:customer_email] = email if email.present?
+    invoice.with_lock do
+      if invoice.paid? || invoice.refunded?
+        Rails.logger.info("Stripe: Invoice##{invoice.id} is #{invoice.state}; checkout refused")
+        next nil
+      end
 
-    session = ::Stripe::Checkout::Session.create(params, { api_key: api_key })
-    invoice.update(response: invoice.response.merge(checkout_session_id: session.id))
-    session.url
+      unit_amount = (invoice.amount.to_d * 100).round.to_i
+      if unit_amount < 1
+        Rails.logger.warn("Stripe: Invoice##{invoice.id} amount #{invoice.amount.inspect} is below the minimum; no session created")
+        next nil
+      end
+
+      url = open_session_url(invoice)
+      next url if url
+      next nil if invoice.paid?
+
+      create_session(invoice, unit_amount)
+    end
   end
 
   # Verifies the Stripe signature and applies the event. Returns the updated
@@ -122,6 +123,62 @@ class PaymentMethod::Stripe
     elsif current && DENIED_EVENTS.include?(event_type)
       invoice.payment_status(:denied)
     end
+  end
+
+  def open_session_url(invoice)
+    session_id = invoice.response[:checkout_session_id]
+    return nil if session_id.blank?
+
+    session = ::Stripe::Checkout::Session.retrieve(session_id, { api_key: api_key })
+    # A completed session whose webhook has not arrived yet: record it rather
+    # than opening a second payment for the same invoice.
+    apply_session(invoice, session) if session.status == 'complete'
+    session.url.presence if session.status == 'open'
+  rescue ::Stripe::StripeError => e
+    Rails.logger.warn("Stripe: could not retrieve #{session_id} for Invoice##{invoice.id}: #{e.message}")
+    nil
+  end
+
+  # The attempt number only moves forward when a new session is needed
+  # (a previous one exists but is no longer open, or Stripe rejected the
+  # request); a retry after a network failure reuses the same key.
+  def create_session(invoice, unit_amount)
+    attempt = [invoice.response[:checkout_attempt].to_i, 1].max
+    attempt += 1 if invoice.response[:checkout_session_id].present?
+    invoice.update_column(:response, invoice.response.merge(checkout_attempt: attempt))
+
+    params = {
+      mode: 'payment',
+      client_reference_id: invoice.id.to_s,
+      metadata: { invoice_id: invoice.id },
+      payment_intent_data: { metadata: { invoice_id: invoice.id } },
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: currency,
+          unit_amount: unit_amount,
+          product_data: { name: title(invoice) },
+        },
+      }],
+      success_url: "#{invoice.back_urls(:success)}?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: invoice.back_urls(:cancel),
+    }
+    email = customer_email(invoice)
+    params[:customer_email] = email if email.present?
+
+    session = ::Stripe::Checkout::Session.create(
+      params, { api_key: api_key, idempotency_key: "invoice-#{invoice.id}-attempt-#{attempt}" }
+    )
+    invoice.update(response: invoice.response.merge(checkout_session_id: session.id))
+    session.url
+  rescue ::Stripe::StripeError => e
+    Rails.logger.error("Stripe: checkout failed for Invoice##{invoice.id}: #{e.class}: #{e.message}")
+    # Stripe replays the stored result of a key, so a rejected request needs a
+    # fresh key next time; a connection error may be retried with the same one.
+    unless e.is_a?(::Stripe::APIConnectionError)
+      invoice.update_column(:response, invoice.response.merge(checkout_attempt: attempt + 1))
+    end
+    nil
   end
 
   def invoice_from_session(session)

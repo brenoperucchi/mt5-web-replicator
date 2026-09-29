@@ -391,5 +391,15 @@ RSpec.describe 'Store Controller', type: :request do
       expect(permission).not_to be_nil
     end
 
+
+    it 'renders finish instead of raising when Stripe rejects the checkout' do
+      stub_request(:post, 'https://api.stripe.com/v1/checkout/sessions')
+        .to_return(status: 401, headers: { 'Content-Type' => 'application/json' },
+                   body: { error: { type: 'invalid_request_error', message: 'Invalid API Key provided' } }.to_json)
+      expect do
+        post "/dashboard/#{@store.url}/#{@trace.name}/contract", params: valid_attributes
+      end.to change(Account, :count).by(1)
+      expect(response).to have_http_status 200
+    end
   end
 end
