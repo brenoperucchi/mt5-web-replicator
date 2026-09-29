@@ -15,7 +15,7 @@ class Invoice < ApplicationRecord
   
   store :settings, accessors: [:email, :payment_link, :back_url]
 
-  serialize :response
+  serialize :response, coder: YAML
 
   # belongs_to :ownerable, polymorphic: true
   belongs_to :store

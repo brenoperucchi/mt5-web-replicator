@@ -6,8 +6,8 @@ class Message::Message < ApplicationRecord
 
   store :settings, accessors:[:request_url]
 
-  serialize :content
-  serialize :params
+  serialize :content, coder: YAML
+  serialize :params, coder: YAML
   
   # has_many :orders
   has_and_belongs_to_many :orders, -> { distinct }
