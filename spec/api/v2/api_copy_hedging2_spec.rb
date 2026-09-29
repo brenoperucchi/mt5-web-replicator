@@ -369,8 +369,8 @@ RSpec.describe API::V2::APICopy do
       it 'Hedging - Seconds_Ago not difference' do
         unfreeze_time
         travel_to DateTime.now
-        order_date = DateTime.now.strftime("%Y.%m.%d %H:%M:%S")
-        order_date_gmt = (DateTime.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
+        order_date = Time.zone.now.strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = (Time.zone.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
@@ -391,8 +391,8 @@ RSpec.describe API::V2::APICopy do
         unfreeze_time
         travel_to DateTime.now
         freeze_time
-        order_date = (DateTime.now - 40.seconds).strftime("%Y.%m.%d %H:%M:%S")
-        order_date_gmt = (DateTime.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
+        order_date = (Time.zone.now - 40.seconds).strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = (Time.zone.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
@@ -413,8 +413,8 @@ RSpec.describe API::V2::APICopy do
         unfreeze_time
         travel_to DateTime.now
         freeze_time
-        order_date = (DateTime.now - 20.seconds).strftime("%Y.%m.%d %H:%M:%S")
-        order_date_gmt = (DateTime.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
+        order_date = (Time.zone.now - 20.seconds).strftime("%Y.%m.%d %H:%M:%S")
+        order_date_gmt = (Time.zone.now + 3.hours).strftime("%Y.%m.%d %H:%M:%S")
         post '/api/v2/copy/post/imentore_copy/2_21/broker_name/10100/HEDGING',
             params: {"imentore_copy"=>
                 "{\"orders_open\":{
