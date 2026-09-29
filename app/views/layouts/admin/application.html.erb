@@ -44,8 +44,9 @@ By default, it renders:
     </main>
   </div>
 
-  <%= yield :javascript %>
   <%= render "javascript" %>
+  <%# Page scripts use jQuery, which the Administrate javascript above loads. %>
+  <%= yield :javascript %>
 
 
 </body>

@@ -1,5 +1,8 @@
 require 'sidekiq/web'
 Rails.application.routes.draw do
+  # Health check for the Kamal proxy and load balancers.
+  get "up" => "rails/health#show", as: :rails_health_check
+
   resources :delivery_payments
   constraints subdomain: /.*/ do
     

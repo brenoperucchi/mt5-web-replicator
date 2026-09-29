@@ -42,8 +42,10 @@ class Invoice < ApplicationRecord
     return false if provider.nil?
 
     url = provider.checkout(self)
+    return false if url.blank?
+
     update(payment_link: url)
-    url.presence || false
+    url
   end
 
   def customer
@@ -63,16 +65,57 @@ class Invoice < ApplicationRecord
     payment_link.presence
   end
 
-  # Applies a provider-neutral payment status (:paid, :denied, :refunded).
+  # Allowed provider-driven transitions: target state => states it may come
+  # from. Anything else (e.g. paid -> denied, refunded -> paid) is ignored so
+  # late or out-of-order webhooks cannot move an invoice backwards.
+  PAYMENT_TRANSITIONS = {
+    'paid'     => %w[pending to_paid denied],
+    'denied'   => %w[pending to_paid],
+    'refunded' => %w[paid],
+  }.freeze
+
+  # Applies a provider-neutral payment status (:paid, :denied, :refunded)
+  # under a row lock, so concurrent webhooks are serialized. Returns true when
+  # the invoice ends in the requested state.
   def payment_status(status)
-    case status.to_s
-    when 'paid'
-      self.update_column(:state, Invoice.states[:paid]) unless paid?
-    when 'denied'
-      self.update_column(:state, Invoice.states[:denied]) unless denied?
-    when 'refunded'
-      self.update_column(:state, Invoice.states[:refunded]) unless refunded?
+    status = status.to_s
+    return false unless PAYMENT_TRANSITIONS.key?(status)
+
+    with_lock do
+      next true if state == status
+      unless PAYMENT_TRANSITIONS[status].include?(state)
+        Rails.logger.info("Invoice##{id}: ignored payment status #{state} -> #{status}")
+        next false
+      end
+      update_column(:state, Invoice.states[status])
+      true
     end
+  end
+
+  CHECKOUT_RECONCILE_OUTCOMES = %w[paid failed expired].freeze
+
+  # Operator-only recovery (see README "Recovering an inconclusive attempt"):
+  # records the financial outcome of the current checkout attempt, confirmed
+  # by hand in the ORIGINAL Stripe account, and only then detaches its session
+  # so the next send can open a new attempt. Never call it on a guess.
+  def reconcile_checkout!(outcome:, note:)
+    outcome = outcome.to_s
+    raise ArgumentError, "outcome must be one of #{CHECKOUT_RECONCILE_OUTCOMES.join('/')}" unless CHECKOUT_RECONCILE_OUTCOMES.include?(outcome)
+    raise ArgumentError, 'note is required' if note.blank?
+
+    with_lock do
+      r = response
+      update!(response: r.merge(
+        checkout_status: outcome,
+        checkout_previous_session_id: r[:checkout_session_id] || r[:checkout_previous_session_id],
+        checkout_session_id: nil,
+        checkout_reconciled: { outcome: outcome, note: note.to_s, at: Time.current.iso8601,
+                               session_id: r[:checkout_session_id], idempotency_key: r[:checkout_idempotency_key],
+                               previous_status: r[:checkout_status] }
+      ))
+      payment_status(:paid) if outcome == 'paid'
+    end
+    self
   end
 
   def customer_calculate(customer, date, month_proporcional = nil)

@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# Billing scheduler for the Kamal `cron` role (replaces the old whenever job).
+# Runs Invoice.generate_month_customers every INTERVAL seconds (default 60).
+#
+# Loads the app directly instead of `rails runner "loop { ... }"`: the runner
+# wraps the whole script in one executor, so the loop would never release
+# connections or reload per-request state, and one exception killed it.
+require_relative '../config/environment'
+
+interval = Integer(ENV.fetch('BILLING_CRON_INTERVAL', '60'))
+$stdout.sync = true
+running = true
+%w[TERM INT].each { |signal| trap(signal) { running = false } }
+
+while running
+  begin
+    Rails.application.executor.wrap { Invoice.generate_month_customers }
+  rescue StandardError => e
+    Rails.error.report(e, handled: true, context: { job: 'billing-cron' })
+    Rails.logger.error("billing-cron: #{e.class}: #{e.message}")
+    warn "billing-cron: #{e.class}: #{e.message}"
+  end
+  interval.times { break unless running; sleep 1 }
+end

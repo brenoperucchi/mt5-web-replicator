@@ -5,12 +5,18 @@ default: &default
   source_entry_path: packs
   public_root_path: public
   public_output_path: packs
-  cache_path: tmp/webpacker
+  cache_path: tmp/shakapacker
   webpack_compile_output: true
 
   # Additional paths webpack should look up modules
   # ['app/assets', 'engine/foo/app/assets']
   additional_paths: []
+
+  # Webpacker 6 only used top-level files in packs/ as entries.
+  nested_entries: false
+
+  # Shakapacker 9 defaults to SWC; keep Babel, which babel.config.js configures.
+  javascript_transpiler: babel
 
   # Reload manifest.json on all requests so we reload latest compiled packs
   cache_manifest: false

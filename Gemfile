@@ -10,11 +10,13 @@ ruby '3.3.10'
 gem 'rails', '~> 7.2.3'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
-gem 'puma', '>= 6.4.3'
+gem 'puma', '~> 7.0'
+# Deploy with Docker containers (see config/deploy.yml).
+gem 'kamal', '~> 2.0', require: false
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5'
-# Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
-gem 'webpacker', '~> 6.0.0.rc.6'
+# Transpile app-like JavaScript. Read more: https://github.com/shakacode/shakapacker
+gem 'shakapacker', '9.7.0'
 # Turbolinks makes navigating your web application faster. Read more: https://github.com/turbolinks/turbolinks
 gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -79,18 +81,7 @@ group :development do
   gem 'rexml', '>= 3.3.8'
   gem 'rubocop'
   gem 'foreman'
-  gem 'capistrano', '~> 3.6'
-  gem 'capistrano-rails'
-  gem 'capistrano-bundler'
-  gem 'capistrano-rbenv'
-  gem 'capistrano3-puma', '6.0.0.beta.1'
-  gem 'sshkit-sudo'
-  # gem 'capistrano-sidekiq'#, git: 'http://github.com/seuros/capistrano-sidekiq'
-  gem 'capistrano-sidekiq', '2.3.0'
-  gem 'capistrano-yarn'
   gem "rename"
-  gem 'bcrypt_pbkdf', '~> 1'
-  gem 'ed25519', '~> 1.2'
   gem "lol_dba"
   # gem 'html2slim', '0.2.3', path: 'vendor/html2slim'
   gem 'html2slim', '0.2.3', git: 'https://github.com/brenoperucchi/html2slim.git'
@@ -157,7 +148,8 @@ gem 'rtesseract'
 gem 'state_machines-activerecord', '~> 0.8.0'
 gem 'lucky_case'
 gem 'ruby_linear_regression'
-gem 'whenever', require: false
+# Required by ruby_linear_regression but not declared by it; no longer a default gem since Ruby 3.1.
+gem 'matrix'
 #gem "nokogiri", ">= 1.18.8"
 
 # gem 'ocr_space', path: "vendor/ocr_space"

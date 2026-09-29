@@ -7,6 +7,13 @@ class Payment < ApplicationRecord
 
   has_many :tokens, as: :resourceable, dependent: :destroy
 
+  # Payments whose payment method has a provider adapter (e.g. Stripe).
+  scope :available, -> { joins(:payment_method).merge(PaymentMethod.available) }
+
+  def available?
+    payment_method.present? && payment_method.available?
+  end
+
 
   delegate :name, to: :payment_method, allow_nil: true
 

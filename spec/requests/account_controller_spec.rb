@@ -72,8 +72,7 @@ RSpec.describe 'Store Controller', type: :request do
         expect(response).to have_http_status 302
         expect(Store.all.count).to eq(count)
         expect(@store.name).to be == @store_name
-        expect(@store.payment_id).to eq(1)
-        expect(@store.payment_id).to eq(1)
+        expect(@store.payment.store_id).to eq(@store.id)
         expect(@store.accounts.count).to eq(2)
         expect(@store.traces.last.stores).to be_present
         
@@ -105,8 +104,7 @@ RSpec.describe 'Store Controller', type: :request do
           expect(response).to have_http_status 302
           expect(Store.all.count).to eq(count)
           expect(@store.name).to be == @store_name
-          expect(@store.payment_id).to eq(1)
-          expect(@store.payment_id).to eq(1)
+          expect(@store.payment.store_id).to eq(@store.id)
           expect(@store.accounts.count).to eq(2)
           expect(@store.traces.last.stores).to be_present
         
