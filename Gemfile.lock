@@ -255,7 +255,8 @@ GEM
     faraday-multipart (1.0.4)
       multipart-post (~> 2)
     faraday-net_http (3.0.2)
-    ffi (1.17.0)
+    ffi (1.17.0-x86_64-darwin)
+    ffi (1.17.0-x86_64-linux-gnu)
     font-awesome-rails (4.7.0.8)
       railties (>= 3.2, < 8.0)
     foreman (0.88.1)
@@ -338,10 +339,10 @@ GEM
       nokogiri (>= 1.6)
       rake (>= 0.9)
       video_info (>= 2.6)
-    listen (3.1.5)
-      rb-fsevent (~> 0.9, >= 0.9.4)
-      rb-inotify (~> 0.9, >= 0.9.7)
-      ruby_dep (~> 1.2)
+    listen (3.10.0)
+      logger
+      rb-fsevent (~> 0.10, >= 0.10.3)
+      rb-inotify (~> 0.9, >= 0.9.10)
     logger (1.6.1)
     lol_dba (2.4.0)
       actionpack
@@ -370,7 +371,6 @@ GEM
     mime-types-data (3.2024.1001)
     mini_magick (4.13.2)
     mini_mime (1.1.5)
-    mini_portile2 (2.8.7)
     minitest (5.25.1)
     monetize (1.13.0)
       money (~> 6.12)
@@ -569,7 +569,6 @@ GEM
       ffi (~> 1.12)
       logger
     ruby2_keywords (0.0.5)
-    ruby_dep (1.5.0)
     ruby_linear_regression (0.1.5)
     rubyzip (2.3.2)
     sass (3.7.4)
@@ -622,8 +621,8 @@ GEM
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
-    sqlite3 (1.7.3)
-      mini_portile2 (~> 2.8.0)
+    sqlite3 (1.7.3-x86_64-darwin)
+    sqlite3 (1.7.3-x86_64-linux)
     sshkit (1.23.2)
       base64
       net-scp (>= 1.1.2)
@@ -743,7 +742,7 @@ DEPENDENCIES
   jbuilder (~> 2.7)
   jquery-rails
   link_thumbnailer
-  listen (>= 3.0.5, < 3.2)
+  listen (~> 3.3)
   lol_dba
   lucky_case
   mercadopago-sdk
@@ -796,7 +795,7 @@ DEPENDENCIES
   whenever
 
 RUBY VERSION
-   ruby 2.7.8p225
+   ruby 3.1.7p261
 
 BUNDLED WITH
    2.4.22
