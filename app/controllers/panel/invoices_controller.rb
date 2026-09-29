@@ -12,7 +12,8 @@ module Panel
     end
 
     def invoice_send
-      @invoice = Invoice.find(params[:id])
+      # Scope to the signed-in customer: never start checkout on someone else's invoice.
+      @invoice = current_user.userable.invoices.find(params[:id])
       if @invoice.invoice_send
         redirect_to @invoice.payment_link, :notice => "Invoice Sended!"
       else
