@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '3.1.7'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.0.8'
+gem 'rails', '~> 7.1.5'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '>= 6.4.3'
@@ -97,7 +97,7 @@ group :development do
 end
 
 gem 'wannabe_bool'
-gem 'acts-as-taggable-on', '~> 9.0'
+gem 'acts-as-taggable-on', '~> 10.0'
 gem 'ancestry'
 gem 'paper_trail', '~> 15.0'
 gem 'devise'
