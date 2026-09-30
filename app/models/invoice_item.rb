@@ -1,5 +1,5 @@
 class InvoiceItem < ApplicationRecord
-  enum state: {normal: 0, conciliate:1, conciliated:2, error:3}
+  enum :state, {normal: 0, conciliate:1, conciliated:2, error:3}
 
   # store :settings, accessors: [:name]
 

@@ -5,8 +5,8 @@ class Customer < ApplicationRecord
 
   store :settings, accessors: [:stripe_product_id, :stripe_customer_id]#, :email, :password]
 
-  enum role: {administrator:0, customer:1}
-  enum role_control: {owner:0, admin:1, user:2}
+  enum :role, {administrator:0, customer:1}
+  enum :role_control, {owner:0, admin:1, user:2}
 
   include LibControl
   include LibEnums

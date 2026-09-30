@@ -1,7 +1,7 @@
 class Statistic < ApplicationRecord
   belongs_to :statisticable, polymorphic: true
 
-  enum kind:  {mfe: 0, mae: 1}
+  enum :kind, {mfe: 0, mae: 1}
 
   def self.mfe_max(range = nil)
     if range.nil?

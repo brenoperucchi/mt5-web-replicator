@@ -7,7 +7,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby '3.3.10'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 7.2.3'
+gem 'rails', '~> 8.1.0'
 # Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '~> 7.0'
@@ -48,7 +48,7 @@ group :test do
   gem 'capybara', '>= 2.15'
   gem 'selenium-webdriver'
   #custom
-  gem 'rspec-rails', '~> 6.1'
+  gem 'rspec-rails', '~> 8.0'
   gem 'guard-rspec'
   gem 'terminal-notifier' , git:"https://github.com/d-a-l-l/terminal-notifier.git"
   gem "database_cleaner"
@@ -88,9 +88,9 @@ group :development do
 end
 
 gem 'wannabe_bool'
-gem 'acts-as-taggable-on', '~> 12.0'
+gem 'acts-as-taggable-on', '~> 13.0'
 gem 'ancestry'
-gem 'paper_trail', '~> 15.0'
+gem 'paper_trail', '~> 17.0'
 gem 'devise'
 gem "font-awesome-rails"
 gem 'jquery-rails'
@@ -116,7 +116,7 @@ gem "net-http"
 gem 'money-rails', '~> 1.12'
 
 #API
-gem 'grape'
+gem 'grape', '~> 2.2' # grape 2.x emits the Rails 8.1 ActiveSupport::Configurable deprecation; 3.x+ needs grape-active_model_serializers 2.x and breaks API specs -- upgrade separately
 gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
 gem 'rack-cors'

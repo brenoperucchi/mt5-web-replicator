@@ -1,8 +1,8 @@
 class CustomerPlan < ApplicationRecord
   attr_accessor :active, :amount_proportional, :amount_profit
   
-  enum kind: {fixed: 0, percent: 1}#, _scopes:false
-  enum charge_recurrence: {monthly: 1, bimester: 2, semester: 6, annual:12}
+  enum :kind, {fixed: 0, percent: 1}#, _scopes:false
+  enum :charge_recurrence, {monthly: 1, bimester: 2, semester: 6, annual:12}
   ENUM_discount_behavior = %w(none promition_page always)
 
   store :settings, accessors: [:meta_margin_mode, :meta_mode, :amount_discount, :discount_behavior, :promotion_use, :due_at_dates]
