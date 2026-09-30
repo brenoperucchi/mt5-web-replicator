@@ -8,25 +8,6 @@ module API
       include API::V2::Defaults
 
       resource :copy do 
-        # ##Copy Version >= 2.12 
-        # get "/get/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
-        #   account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
-        #   if account
-        #     map = account.transactions.api_request_attributes(:closed_info)
-        #   end
-        #   content_type 'text/plain'
-        #   body map
-        # end        
-
-        # ##Copy Version <= 2.11
-        # get "/get/:expert_name/:expert_version/:action/:account_server_name/:account_id/:account_mode" do
-        #   account = Account.find_by(name: params[:account_id], kind: :copy, state: :enable)
-        #   if account
-        #     map = account.transactions.api_request_attributes(:closed_info)
-        #   end
-        #   content_type 'text/plain'
-        #   body map
-        # end
 
         post "/post/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'text/plain'
@@ -55,7 +36,6 @@ module API
           resource :store do
             desc "Return Store Config"
             post "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
-              # logging = Logging.create(state: "CONFIG", request_url: request.url, params: params)
               presenter = API::V2::StorePresenter.new(params, version, request)
               if presenter.prepare && presenter.enabled?(meta_version_accept)
                 status 201

@@ -9,7 +9,6 @@ class ApplicationPolicy
   end
 
   def index?
-    # @user.userable.role == "administrator" or @user.userable.role_control == "owner" or @user.userable.role_control == "admin"
     true
   end
 

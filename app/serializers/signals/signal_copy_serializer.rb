@@ -2,7 +2,6 @@ require 'lucky_case/string'
 module Signals
   class SignalCopySerializer < Signals::BaseSerializer
 
-
     def content
       YAML.load(object.read_attribute(:content))
     end
@@ -15,22 +14,8 @@ module Signals
       object.content.scan(/(\d*\.\d+)/).flatten
     end
 
-
     def ordertype
       content['order_type'].to_i
-      # when "0"
-      #   "OP_BUY"
-      # when '1'
-      #   'OP_SELL'
-      # when '2'
-      #   'OP_BUY_LIMIT'
-      # when '3'
-      #   'OP_BUY_STOP'
-      # when '4'
-      #   'OP_SELL_LIMIT'
-      # when '5'
-      #   'OP_SELL_STOP'
-      # end
     end
 
     def ticket

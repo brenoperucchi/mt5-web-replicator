@@ -15,7 +15,6 @@ class Control::CustomerDashboard < Administrate::BaseDashboard
     customer_plan:        Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
     role:                 DisableTextField.with_options(value:"customer", type: 'hide'),
     role_control:         CheckboxField.with_options(object:"customer", collection_key: :CONTROL_ROLE, default: :admin),
-    # store_id:             DisableTextField.with_options(default: :current_store),
     store_id:             DisableTextField.with_options(default: :current_store, type: 'hide'),
     accounts:             DisableAssociation.with_options(type: 'has_many', association: :accounts),
     invoices:             DisableAssociation.with_options(type: 'has_many', association: :invoices),

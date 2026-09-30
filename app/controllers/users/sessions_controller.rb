@@ -5,12 +5,6 @@ class Users::SessionsController < Devise::SessionsController
 
   layout "saasley"
 
-  # def auth_options
-  #   { scope: resource_name } #, recall: "new" }
-  # end
-
-  # before_action :configure_sign_in_params, only: [:create]
-
   # GET /resource/sign_in
   # def new
   #   super
@@ -18,7 +12,6 @@ class Users::SessionsController < Devise::SessionsController
   def new
 
     self.resource = resource_class.new(sign_in_params)
-    # super
   end
 
   # POST /resource/sign_in
@@ -27,7 +20,6 @@ class Users::SessionsController < Devise::SessionsController
   # end
 
   def create
-    # self.resource = warden.authenticate!
     self.resource = User.where(email: sign_in_params["email"]).take
     if warden.authenticated?
       sign_in(resource)
@@ -40,7 +32,6 @@ class Users::SessionsController < Devise::SessionsController
         flash[:notice] = I18n.t(:bad_login_password, scope: 'helpers.controller.session', email: sign_in_params["email"])
       end
       self.resource ||= resource_class.new
-      # render :new
       redirect_to user_session_url(email: sign_in_params["email"])
     end
   end
@@ -50,8 +41,6 @@ class Users::SessionsController < Devise::SessionsController
   #   super
   # end
 
-  # protected
-
   # If you have extra params to permit, append them to the sanitizer.
   # def configure_sign_in_params
   #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
@@ -59,9 +48,6 @@ class Users::SessionsController < Devise::SessionsController
   private
 
   def check_captcha
-    # if Rails.env.production?
-    #   alert_recaptcha unless verify_recaptcha 
-    # end
   end
 
   def alert_recaptcha

@@ -2,14 +2,12 @@ module API
   module V2
     class CopySerializer < ActiveModel::Serializer
 
-      # attr_accessor :lot
       
       def copy_attributes
         {
           ordertype: ordertype,
           lot: lot,
           price_open: price_open,
-          # price_closed: price_closed,
           magic_number: magic_number,
           stop_loss: stop_loss,
           take_profit: take_profit,
@@ -18,9 +16,6 @@ module API
           comment: obj['comment'],
           ticket_deal: obj['ticket_deal'],
           profit: profit,
-          # time_trader: time_trader,
-          # mae: mae,
-          # mfe: mfe,
         }
       end
 
@@ -50,7 +45,6 @@ module API
           lot: lot
         }.compact
       end
-
 
       def mfe_attributes
         { 

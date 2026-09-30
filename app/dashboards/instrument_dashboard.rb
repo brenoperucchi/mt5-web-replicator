@@ -14,7 +14,6 @@ class InstrumentDashboard < Administrate::BaseDashboard
     store: Field::BelongsTo,
     symbol: Field::String,
     name: Field::String,
-    # volumes: Field::String.with_options(searchable: false),
     created_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
     updated_at: Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
   }.freeze

@@ -1,5 +1,4 @@
 include ActiveModel::Serialization
-# require 'open-uri'
 require 'json'
 module API
   module V2
@@ -63,7 +62,6 @@ module API
               if invoice
                 invoice_item = invoice.items.find_by(state: :conciliate, account:account)
                 if invoice_item
-                  # invoice.items.where(state: :conciliate, account:account).destroy_all
                   invoice.loggings.where(state: "CONCILIATE", account: account).destroy_all
                   invoice_item.conciliate_metatrader(presenter)
                   if invoice_item.save

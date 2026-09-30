@@ -22,14 +22,12 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
 
           next if (state == "COPY/PENDING") and (json['type'].to_i < 2) # TODO MELHORAR ISTO! SE NÃO CRIAR NADA CRIAR UM REGISTRO NO LOG
 
-          # state_meta = json["state_meta"]
           traces.active.not_deleted.each do |trace|
             @orders = trace.orders.where(content_id: json["ticketMaster"], account: account)
             if not @orders.present?
               begin
                 message.traces << trace unless message.trace_ids.include?(trace.id)
                 trace_service = Model::TraceService.new(trace, json, account, message, json["symbol"], API_VERSION)
-                # unless trace.create_order(json, account, message, json["symbol"], API_VERSION) 
                 unless trace_service.create_order
                   message.loggings.create(content:"Error create_order - Trace #{trace.id} #{trace.name} - Trace Errors #{trace.try(:errors).try(:full_messages)} - Account #{account.name}", state: 'ERROR', resourceable: account, parent:message.loggings.last)
                 end
@@ -46,7 +44,6 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
                     message.orders << order unless message.order_ids.include?(order.id)
                     message.traces << trace unless message.trace_ids.include?(trace.id)
                     if transaction.update_modify_meta(serializer)
-                      # transaction.update_slaves(serializer)
                       transaction.update_mfe_mae(serializer)
                       version = transaction.try(:versions).try(:last)
                       transaction.loggings.create(content: serializer.obj, changeset: version.changeset, version: version, state: "MODIFY", resourceable: order, account: account, parent: message.loggings.try(:first), request_url: message.try(:request_url), loggerable: message)
@@ -130,24 +127,7 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
       end        
     end
 
-    # # CLOSING MECHANISM 3:
-    # # Process all remaining executed transactions that match positions
-    # # Final pass to ensure all transactions are properly closed based on latest data
-    # account.transactions.executed.each do |transaction|
-    #   if historyOrders.detect{|json| json["ticketMaster"] == transaction.ticket} 
-    #     order_params = historyOrders.detect{|json| json["ticketMaster"] == transaction.ticket} || {}
-    #     transaction_closed(transaction, order_params, :copy_close) if order_params.present?
-    #   end
-    # end
     
-    # # ——— Mecanismos 2 e 3 unificados ———
-    # # fecha todo executed que existir em historyOrders, independentemente de estar em positionOrders
-    # history_map = historyOrders.index_by { |h| h["ticketMaster"].to_s }
-    # account.transactions.executed.each do |tx|
-    #   if (params_for_tx = history_map[tx.ticket.to_s])
-    #     transaction_closed(tx, params_for_tx, :copy_close)
-    #   end
-    # end
     
     return true
   end
@@ -156,7 +136,6 @@ class API::V3::CopyPresenter < API::V3::BasePresenter
     copySerializer = API::V3::CopySerializer.new(copy_params)
 
     if transaction and transaction.can_close?
-      # transaction.order.messages << self
       
       transaction.trace.messages << message
       transaction.attributes = copySerializer.closed_attributes

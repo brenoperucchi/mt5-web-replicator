@@ -4,7 +4,6 @@ module Signals
 
     def action?
       content = self.object.content.downcase
-      # if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
       if (content.include?('sell') or content.include?('buy')) and (content.include?('now') or content.include?('limit') or content.include?('stop'))
         return 'open_order', nil
       elsif content.include?("close") or content.include?("kill")
@@ -23,10 +22,6 @@ module Signals
     def values
       object.content.scan(/(\d*\.\d+)/).flatten
     end
-
-    # def symbol
-    #   object.content.split[0].upcase
-    # end
 
     def type
       type_order = object.content.split[1].downcase

@@ -1,5 +1,4 @@
 include ActiveModel::Serialization
-# require 'open-uri'
 require 'json'
 module API
   module V1
@@ -63,10 +62,6 @@ module API
                     end
                   end
                   slave.attributes = api_attributes
-                  # if slave.closed? and slave.loggings.count < 4 and slave.loggings.detect(&:detect_closed?).nil?
-                  #   slave.state = :executed
-                  #   slave.master.state = :executed
-                  # end
                   if action == "CLOSED" or action == "HASCLOSED"
                     slave.close
                   else

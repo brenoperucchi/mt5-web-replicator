@@ -7,7 +7,6 @@ module API
           ordertype: ordertype,
           lot: lot,
           price_open: price_open,
-          # price_closed: price_closed,
           magic_number: magic_number,
           stop_loss: stop_loss,
           take_profit: take_profit,
@@ -18,9 +17,6 @@ module API
           profit: profit,
           entry: entry,
           fee: fee,
-          # time_trader: time_trader,
-          # mae: mae,
-          # mfe: mfe,
         }
       end
 
@@ -32,7 +28,6 @@ module API
           closed_at: closed_at
         }
       end
-
 
       def transaction_attributes
         {
@@ -85,7 +80,6 @@ module API
           closed_at: nil
         }.compact
       end
-
 
       def obj
         if object.is_a?(Hash)

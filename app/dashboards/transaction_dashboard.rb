@@ -37,7 +37,6 @@ class TransactionDashboard < Administrate::BaseDashboard
     slaves:             Field::HasMany.with_options(class_name:'TransactionSlave'),
     orders:             Field::HasMany,
     traces:             Field::HasMany,
-    # transaction_traces: Field::HasMany.with_options(class_name:'Transaction'),
     loggings:           Field::HasMany,
     versions:           Field::HasMany.with_options(class_name:'PaperTrail::Version'),
   }.freeze

@@ -15,7 +15,6 @@ class Control::AccountDashboard < Administrate::BaseDashboard
     meta_margin_mode:     CheckboxField.with_options(object:"customer", collection_key: Account.meta_margin_modes.keys.reverse, default: :hedging),
     meta_mode:            CheckboxField.with_options(object:"customer", collection_key: Account.meta_modes.keys, default: :demo),
     contract_volume:      Field::String.with_options(searchable: false),
-    # stock_kind:           CheckboxField.with_options(object:"account", collection_key: Account.stock_kinds.keys, default: :b3, searchable: false),
     traces:               HasManyScopeField.with_options(associated: :store, dashboard:'control', scoped: :not_deleted),
     slaves:               HasManyScopeField.with_options(dashboard:'control', direction: :desc, sort_by: :created_at),
     instruments:          HasManyScopeField.with_options(associated: :store, dashboard:'control'),

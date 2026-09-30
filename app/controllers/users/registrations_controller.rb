@@ -2,7 +2,6 @@
 
 class Users::RegistrationsController < Devise::RegistrationsController
   layout "saasley"
-  # before_action :configure_sign_in_params, only: [:create]
 
   # GET /resource/sign_in
   def new
@@ -18,8 +17,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # def destroy
   #   super
   # end
-
-  # protected
 
   # If you have extra params to permit, append them to the sanitizer.
   # def configure_sign_in_params

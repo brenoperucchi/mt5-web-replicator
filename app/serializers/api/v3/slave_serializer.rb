@@ -5,7 +5,6 @@ module API::V3
     
     def presenter_attributes
       {
-        # symbol: symbol,
         ticket_master: ticket_master,
         ticket_slave: ticket_slave,
         position_id: obj['positionID'],
@@ -40,7 +39,6 @@ module API::V3
         stop_loss: stop_loss,
         take_profit: take_profit,
         profit: 0,
-        # comment: ticket_master,
         comment: comment,
         magic_number: magic_number,
         account: account_slave,
@@ -137,10 +135,6 @@ module API::V3
     def comment
       @comment ||= obj['comment']
     end
-
-    # def ticket_deal
-    #   obj['deal_ticket']
-    # end
 
     def closed_at
       update_time_zone(obj['closeAt'])

@@ -4,12 +4,6 @@ module API
 
 			attr_accessor :content, :json, :historyOrders, :positionOrders, :params
 
-			# def content
-			# 	content = File.open(params["data"]["tempfile"]).try(:read)
-			# 	@content = content.gsub!("\u0000", "")
-			# end
-
-
 			def json
 				@json = @message.content.present? ? JSON.parse(@message.content) : {}
 			end

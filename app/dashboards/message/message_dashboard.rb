@@ -21,7 +21,6 @@ module Message
       orders:       Field::HasMany,
       slaves:       Field::HasMany.with_options(class_name: 'TransactionSlave'),
       all_loggings: Field::HasMany.with_options(class_name: 'Logging', limit:30),
-      # message: Field::HasOne,
       updated_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       created_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),
       content_at:   Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

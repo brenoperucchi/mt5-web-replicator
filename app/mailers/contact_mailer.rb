@@ -13,10 +13,8 @@ class ContactMailer < ApplicationMailer
                            port: ENV.fetch('SMTP_PORT', '587') }
     end
 
-
     @user = user
     @password = password
-    # @message = message
     mail to: user.email, delivery_method_options: delivery_options, subject: "Seja Bem Vindo ao Imentore Copy"
   end
 end

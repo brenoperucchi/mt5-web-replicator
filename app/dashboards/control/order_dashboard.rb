@@ -26,7 +26,6 @@ module Control
       store:        Field::BelongsTo,
       account:      Field::BelongsToField.with_options(associated: :store, dashboard:'control'),
       transactions: HasManyScopeField.with_options(associated: :store, dashboard: :control),
-      # slaves: Field::HasMany,
       slaves:       HasManyScopeField.with_options(associated: :store, dashboard: :control),
     }.freeze
 

@@ -23,11 +23,9 @@ module API
       end
 
       resource :account do 
-        ##Copy Version >= 2.12 
         post "/:kind/post/logfile/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
           content_type 'application/json'
 
-          # Logging.create(content:params, state: "COPY")
           account = Account.find_by(name: params[:account_id], kind: params[:kind], state: :enable)
           if account and account.enable?
             if params[:logfile] && params[:logfile][:tempfile]

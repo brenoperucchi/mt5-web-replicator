@@ -4,6 +4,5 @@ class OrderSerializer < ActiveModel::Serializer
     def trace
       object.trace.name
     end
-  # has_one :sign_trace
 
 end

@@ -2,16 +2,11 @@
 class ApplicationController < ActionController::Base
 	include SentientStore
 	protect_from_forgery with: :null_session
-	# include SentientStoreController
 	before_action :current_store
 	helper_method :current_store
 	before_action :set_current_user
 	before_action :set_locale
 	helper_method :current_layout
-
-  # protect_from_forgery with: :exception
-
-	# layout "application"
 
 	def after_sign_in_path_for(resource)
 		if resource.userable.try(:administrator?)

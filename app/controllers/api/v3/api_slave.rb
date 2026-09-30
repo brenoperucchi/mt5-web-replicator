@@ -1,5 +1,4 @@
 include ActiveModel::Serialization
-# require 'open-uri'
 require 'json'
 module API
   module V3
@@ -16,7 +15,6 @@ module API
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
             message = Message::V3::MetaSlave.create(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
-            # message.request = request
             begin
               message.execute
               message.execute_conciliated
@@ -38,15 +36,10 @@ module API
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
             message = Message::V3::MetaSlave.new(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
-            # slavePresenter = API::V3::SlavePresenter.new(params, message, account)
-            # begin
               message.execute_conciliated
               body message.response
               status 201
               return true
-            # rescue => e
-              # status 400
-            # end
           end
           status 400
         end
@@ -59,7 +52,6 @@ module API
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
             message = Message::V3::MetaSlave.new(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
-            # slavePresenter = API::V3::SlavePresenter.new(params, message, account)
             begin
               message.execute_conciliated
               body message.response
@@ -82,13 +74,6 @@ module API
               presenter.execute
               status presenter.status
               return presenter.serializer
-              # presenter = API::V3::StorePresenter.new(params, version, request)
-              # if presenter.prepare && presenter.enabled?(meta_version_accept)
-              #   status 201
-              #   body presenter.serializer
-              # else
-              #   status 400
-              # end
             end      
             get "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
               presenter = API::V3::StorePresenter.new(params, version, request, meta_version_accept)
@@ -96,13 +81,6 @@ module API
               presenter.execute
               status presenter.status
               return presenter.serializer
-              # presenter = API::V3::StorePresenter.new(params, version, request)
-              # if presenter.prepare && presenter.enabled?(meta_version_accept)
-              #   status 201
-              #   body presenter.serializer
-              # else
-              #   status 400
-              # end
             end      
           end
         end

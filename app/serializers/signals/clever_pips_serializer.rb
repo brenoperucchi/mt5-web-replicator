@@ -4,7 +4,6 @@ module Signals
 
     def action?
       content = self.object.content.downcase
-      # if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
       if content.include?('sell') or content.include?('buy')
         return 'open_order', nil
       elsif content.include?("break") or content.include?("entrie") or (content.include?("entry") and content.include?("sl")) or (content.include?("be") and content.include?("sl"))
@@ -23,7 +22,6 @@ module Signals
     def values
       object.content.scan(/(\d*\.\d+)/).flatten
     end
-
 
     def break_even
       values.empty? ? object.root.serializer.price_request : values.first
@@ -58,9 +56,6 @@ module Signals
       # REV 7
       object.content.scan(/(?:TP\d?)(?:[^\d]*)(\d*\.\d+)/i).flatten
                            
-      #REV 6 - (TP\d?:? *)([[:digit:].]+)
-      #REV 8 - ^(?:(?<direction>buy|sell)? *(?<pair>[a-z]{6}) *(?(1)|(?<direction>buy|sell)) *@ *(?<entry>[\d.]+)|\G(?!\A)(?:sl:? *(?<sl>[\d.]+)|tp\d?:? *(?<tp>[\d.]+)) *(?:\((?<pips>[\d.]+)\))?)\s*
-      #REV 9 - ^(?:(?<direction>buy|sell)? *(?<pair>[a-z]{6}) *(?(1)|(?<direction>buy|sell)) *@ *(?<entry>[\d.]+)|\G(?!\A)(?<type>sl|tp)\d?:? *(?<price>[\d.]+) *(?:\((?<pips>[\d.]+)\))?)\s*
     end
 
     def price_request

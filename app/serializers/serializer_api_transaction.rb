@@ -5,7 +5,6 @@ class SerializerAPITransaction < ActiveModel::Serializer
       ordertype: ordertype,
       lot: lot,
       price_open: price_open,
-      # price_closed: price_closed,
       magic_number: magic_number,
       stop_loss: stop_loss,
       take_profit: take_profit,
@@ -14,9 +13,6 @@ class SerializerAPITransaction < ActiveModel::Serializer
       comment: obj['comment'],
       ticket_deal: ticket_deal,
       profit: obj['profit'],
-      # time_trader: time_trader,
-      # mae: mae,
-      # mfe: mfe,
     }
   end  
 
@@ -36,9 +32,6 @@ class SerializerAPITransaction < ActiveModel::Serializer
       open_at: open_at,
       comment: obj['comment'],
       profit: obj['profit'],
-      # time_trader: time_trader,
-      # mae: mae,
-      # mfe: mfe,
     }
   end
 
@@ -132,6 +125,5 @@ class SerializerAPITransaction < ActiveModel::Serializer
     time_gmt = DateTime.parse(time_open + time_zone.to_sign) 
     time_gmt.in_time_zone
   end
-
 
 end
