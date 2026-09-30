@@ -6,9 +6,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '3.3.10'
 
-# Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 8.1.0'
-# Use sqlite3 as the database for Active Record
 # Use Puma as the app server
 gem 'puma', '~> 7.0'
 # Deploy with Docker containers (see config/deploy.yml).
@@ -21,27 +19,17 @@ gem 'shakapacker', '9.7.0'
 gem 'turbolinks', '~> 5'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 2.7'
-# Use Redis adapter to run Action Cable in production
-# gem 'redis', '~> 4.0'
-# Use Active Model has_secure_password
-# gem 'bcrypt', '~> 3.1.7'
 
 gem 'bundler', '2.4.22'
 gem 'pg'
-
-# Use Active Storage variant
-# gem 'image_processing', '~> 1.2'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'rake', '>= 13.0.6'
 gem 'bootsnap', '>= 1.6.0' #, require: false
 
 group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  # gem 'byebug'#, platforms: [:mri, :mingw, :x64_mingw]
   gem 'sqlite3', '~> 2.9'
 end
-
 
 group :test do
   # Adds support for Capybara system testing and selenium driver
@@ -57,7 +45,6 @@ group :test do
   gem "webmock"
 end
 
-
 group :development do
   # Access an interactive console on exception pages or by calling 'console' anywhere in the code.
   gem 'web-console', '>= 3.3.0'
@@ -70,11 +57,6 @@ group :development do
   gem 'pry', '~> 0.14.1'
   gem 'pry-byebug'
   gem "debug", ">= 1.0.0"
-  # gem 'pry-rails'#, :group => :development, github: "TigerWolf/pry-rails"
-  # gem 'pry-byebug'
-  # gem 'pry-nav'
-  # gem 'pry-stack_explorer'
-  # gem 'annotate'
 
   gem 'ruby-debug-ide'
   gem 'debase',' >= 0.2.5.beta2'
@@ -83,7 +65,6 @@ group :development do
   gem 'foreman'
   gem "rename"
   gem "lol_dba"
-  # gem 'html2slim', '0.2.3', path: 'vendor/html2slim'
   gem 'html2slim', '0.2.3', git: 'https://github.com/brenoperucchi/html2slim.git'
 end
 
@@ -99,15 +80,12 @@ gem 'stripe', '~> 9'
 gem 'dotenv'
 gem 'stringio', '3.0.9'
 
-# # To use Braintree + PayPal, also include:
-# gem 'braintree', '>= 4.4', '< 5.0'
 gem 'next_rails'
 gem 'telegram-bot-ruby', require: false # only loaded when ENABLE_TELEGRAM=1 (see BotTelegram)
 gem 'sidekiq', '7.1.3'
 gem 'pundit'
 gem 'simple_form'
 gem 'sd_notify'
-# gem 'newrelic_rpm'
 gem 'recaptcha'
 gem 'link_thumbnailer'
 gem 'imgix'
@@ -125,13 +103,6 @@ gem 'eventmachine'
 gem 'slim'
 gem "tinymce-rails", '~> 4.4', '>= 4.4.3'
 
-# ADMINISTRATE
-# gem "administrate",         path: "vendor/administrate"
-# gem 'administrate-field-tag',       path: 'vendor/administrate-field-tag/'
-# gem 'administrate_ransack', path: "vendor/administrate_ransack"
-# gem "administrate",         git: 'https://github.com/thoughtbot/administrate.git', tag:'v0.18.0'
-# gem "administrate", path: "vendor/administrate"
-# gem 'administrate-field-scoped_has_many', path: "vendor/administrate-field-scoped_has_many"
 gem "administrate",                 git: 'https://github.com/brenoperucchi/administrate.git', branch: '0.18.0'
 gem 'administrate-field-image'
 gem 'administrate-field-tag',       git: 'https://github.com/brenoperucchi/administrate-field-tag.git', branch: 'main'
@@ -141,7 +112,6 @@ gem "administrate-field-tinymce",   git: 'https://github.com/smedrick/administra
 gem 'administrate-field-acts_as_taggable'
 gem 'administrate-field-active_storage'
 gem "image_processing"
-# ADMINISTRATE
 
 gem 'rtesseract'
 # 0.8.x is the last line supporting Ruby 2.7; it forwards save(**options) correctly on Ruby 3.
@@ -150,12 +120,3 @@ gem 'lucky_case'
 gem 'ruby_linear_regression'
 # Required by ruby_linear_regression but not declared by it; no longer a default gem since Ruby 3.1.
 gem 'matrix'
-#gem "nokogiri", ">= 1.18.8"
-
-# gem 'ocr_space', path: "vendor/ocr_space"
-# gem 'state_machine', git: 'https://github.com/Edfinity/state_machine.git'
-# gem 'state_machine',   git: 'https://github.com/brenoperucchi/state_machine'
-# gem 'state_machine', path: 'vendor/state_machine3'
-# Stylesheet inlining for email **
-# gem 'inky-rb', require: 'inky'
-# gem 'premailer-rails'
