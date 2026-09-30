@@ -1,0 +1,96 @@
+# Local trial stack: `docker compose up`, then open http://localhost:3000
+#
+# Zero config: every value below has a LOCAL-TRIAL-ONLY default. Override any
+# of them in a `.env` file next to this one (compose reads it automatically)
+# or in your shell, e.g. `PORT=3100 docker compose up`.
+# Never use these defaults (secret key, passwords) for a real deployment;
+# production is deployed with Kamal (config/deploy.yml).
+#
+# Uses the prebuilt image from GHCR; `docker compose up --build` builds it
+# from this checkout instead. Reset everything with `docker compose down -v`.
+name: mt5-web-replicator
+
+x-app: &app
+  image: ghcr.io/brenoperucchi/mt5-web-replicator:${IMAGE_TAG:-latest}
+  build: .
+  restart: unless-stopped
+  environment:
+    # Local-trial default only; generate your own with `bin/rails secret`.
+    SECRET_KEY_BASE: ${SECRET_KEY_BASE:-local-trial-only-8f2c1d0e9b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b}
+    DATABASE_URL: postgres://signalforex:${POSTGRES_PASSWORD:-signalforex}@db:5432/signalforex
+    REDIS_URL: redis://redis:6379/0
+    APP_DOMAIN: ${APP_DOMAIN:-localhost:3000}
+    # Billing is left unconfigured in the trial; Stripe is only called when a
+    # customer pays an invoice. Set real test keys here to try checkout.
+    STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+    STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    # Seeded once, when the database is first created (see db/seeds.rb).
+    SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+    SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-password123}
+    SEED_DEMO: ${SEED_DEMO:-1}
+    SEED_DEMO_EMAIL: ${SEED_DEMO_EMAIL:-demo@example.com}
+    SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-password123}
+    RAILS_MAX_THREADS: ${RAILS_MAX_THREADS:-5}
+    WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: signalforex
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-signalforex}
+      POSTGRES_DB: signalforex
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "signalforex"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  # The entrypoint runs `db:prepare` (create + schema + seeds on first boot).
+  web:
+    <<: *app
+    ports:
+      - "${PORT:-3000}:80"
+    volumes:
+      - storage:/rails/storage
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+
+  worker:
+    <<: *app
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    volumes:
+      - storage:/rails/storage
+    depends_on:
+      web:
+        condition: service_healthy
+
+  cron:
+    <<: *app
+    command: ./bin/billing-cron
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  redis-data:
+  storage:
