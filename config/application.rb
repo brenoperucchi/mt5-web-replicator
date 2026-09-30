@@ -17,7 +17,7 @@ module Signalforex
 
 
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.2
+    config.load_defaults 8.0
 
     config.time_zone = 'America/Sao_Paulo'
     config.autoloader = :zeitwerk
