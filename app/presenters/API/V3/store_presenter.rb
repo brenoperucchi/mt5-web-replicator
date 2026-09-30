@@ -57,7 +57,6 @@ class	API::V3::StorePresenter < API::V3::BasePresenter
 			result = account.loggings.find_by(state: "START", created_at:date_today.beginning_of_day..date_today.end_of_day)
 			if account && account.store.enable? && meta_version_accept
 				account.loggings.create(content:attributes, state: "START", resourceable: account.store) unless result
-			  # logging.update(content:attributes.to_json, state: "START", account:account) unless result
 			  @status = 201
 			  @serializer = AccountSerializer.new(account, params: @params).try(:attributes)
 			else 

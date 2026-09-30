@@ -50,18 +50,8 @@ module API
             end
           end
           
-          # def error_response(message:, status:, headers: nil, backtrace: nil, original_exception: nil)
-          #   error!({ error: message }, status, headers)
-          # end
         end
 
-        # rescue_from ActiveRecord::RecordNotFound do |e|
-        #   error_response(message: e.message, status: 404)
-        # end
-
-        # rescue_from ActiveRecord::RecordInvalid do |e|
-        #   error_response(message: e.message, status: 422)
-        # end
       end
     end
   end

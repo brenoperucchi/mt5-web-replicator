@@ -11,7 +11,6 @@ class Control::InstrumentDashboard < Administrate::BaseDashboard
     id:         Field::Number,
     symbol:     Field::String,
     name:       Field::String,
-    # volumes:    Field::String.with_options(searchable: false),
     store_id:   DisableTextField.with_options(default: :current_store, type: 'hide'),
     trace:      Field::BelongsToField.with_options(associated: :store),
     account:    Field::BelongsToField.with_options(associated: :store),

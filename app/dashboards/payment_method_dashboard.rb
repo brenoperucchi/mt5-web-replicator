@@ -11,7 +11,6 @@ class PaymentMethodDashboard < Administrate::BaseDashboard
     id:             Field::Number,
     name:           Field::String,
     handle:         Field::String,
-    # payments:       Field::NestedHasMany.with_options(class_name: 'Payment', skip:[:payment_method]),
     customer_plans: Field::HasMany,
     stores:         Field::HasMany,
     created_at:     Field::DateTime,

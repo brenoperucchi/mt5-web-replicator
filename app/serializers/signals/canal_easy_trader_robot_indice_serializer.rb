@@ -5,7 +5,6 @@ module Signals
 
     def action?
       content = self.object.content.downcase
-      # if (object.content.include?('sell') or object.content.include?('buy')) and object.content.include?('now') and object.root?
       if (content.include?('venda') or content.include?('compra')) and not content.include?('start')
         return 'open_order', nil
       elsif content.include?("break") or content.include?("entrie")
@@ -43,12 +42,6 @@ module Signals
       elsif object.content.downcase.include?('compra')
         'buy'
       end
-      # if object.content.downcase.include?('stop')
-      #   type_order += '_stop'
-      # elsif object.content.downcase.include?('limit')
-      #   type_order += '_limit'
-      # end
-      # type_order
     end
 
     def value(arg)

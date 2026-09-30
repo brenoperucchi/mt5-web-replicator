@@ -61,7 +61,6 @@ class	API::V2::APISlavePresenter
 	          if action == "NOSLTP" or action == "NOTCLOSED"
 	            @version = slave.versions.last
 	          else
-	            # slave.attributes = serializer.api_attributes
 	            slave.erro
 	            @version = slave.versions.last
 	          end

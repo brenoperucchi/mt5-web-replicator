@@ -13,7 +13,6 @@ module Control
       content: Field::Text.with_options(searchable: true),
       loggerable:Field::Polymorphic,
       resourceable:Field::Polymorphic,
-      # user:Field::BelongsTo,
       account: Field::BelongsTo.with_options(searchable: false),
       changeset: Field::String.with_options(searchable: true),
       state: Field::String.with_options(searchable: false),

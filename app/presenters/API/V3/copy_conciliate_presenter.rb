@@ -55,7 +55,6 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
       profit_orders = orders.sum { |o| o["profit"].to_f }.round(2)
       fee_orders    = orders.sum { |o| o["fee"].to_f + o["commission"].to_f + o["swap"].to_f }.round(2)
       volume = orders.sum { |o| o["volume"].to_f }.round(2)
-      # date_month = Date.strptime(year_month, "%Y%m")
       date_month = DateTime.strptime("#{year_month}01 -0300", "%Y%m%d %z")
       range = (date_month.beginning_of_month...date_month.next_month.beginning_of_month)
 
@@ -94,7 +93,6 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
       
       next if fee.zero? && profit.zero? && transaction&.profit.to_f == profit && transaction&.fee.to_f == fee && transaction&.lot.to_f == volume 
       if transaction.present?
-        # serializer = API::V3::CopySerializer.new(json_last)
         update_existing_transaction(transaction, json_last, order)
       else
         create_new_transaction(json_last, trace, order)
@@ -106,7 +104,6 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
     trace = find_or_create_trace
     profit = calculate_by_account(:profit)
     fee    = calculate_by_account(:fee)
-    # time   = DateTime.now.strftime("%Y.%m.%d %T")
     time   = @account.store.created_at.strftime("%Y.%m.%d %T")
     current_month = DateTime.now.strftime("%Y-%m")
     symbol_name = "#{trace.id}-#{current_month}"
@@ -136,13 +133,11 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
     transaction = account.transactions.find_by(symbol: "conciliated", ticket: -1, account: account)
     if transaction.present?
       if json_last["profit"] != 0 || json_last["fee"] != 0
-        # serializer = API::V3::CopySerializer.new(json_last)
         update_existing_transaction(transaction, json_last, order)
       end
     else
       transaction = create_new_transaction(json_last, trace, order)
     end
-
 
     if transaction.profit != json_last["profit"] || transaction.fee != json_last["fee"]
       Rails.logger.error("[ERROR] Transação não atualizada: #{transaction.id}")
@@ -194,8 +189,6 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
     trace ||= find_or_create_trace
 
   
-    # if profit != transaction.try(:profit).to_f || transaction.lot.to_f != volume
-    # if json_last.profit.to_f != transaction.try(:profit).to_f || transaction.lot.to_f != json_last["volume"].to_f || transaction.fee.to_f != json_last["fee"].to_f
     if json_last["profit"].to_f != transaction.try(:profit).to_f || transaction.lot.to_f != json_last["volume"].to_f || transaction.fee.to_f != json_last["fee"].to_f
       transaction.profit = json_last["profit"].to_f
       transaction.fee    = json_last["fee"].to_f
@@ -258,10 +251,6 @@ class API::V3::CopyConciliatePresenter < API::V3::BasePresenter
     end
 
     trace = Trace.where(name: trace_name, name_id: trace_name_id).take
-    # trace = Trace.joins(:store_traces)
-    #           .where(name: trace_name, name_id: trace_name_id)
-    #           .where(store_traces: { store_id: account.store.id })
-    #           .take
 
     if trace.nil?
       # Check for customer plan before creating trace

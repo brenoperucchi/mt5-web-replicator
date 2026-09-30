@@ -95,7 +95,6 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
       next if fee.zero? && profit.zero? && slave&.profit.to_f == profit && slave&.fee.to_f == fee && slave&.lot.to_f == volume 
       
       if slave.present?
-        # serializer = API::V3::SlaveSerializer.new(json_last)
         update_existing_slave(slave, json_last, order)
       else
         
@@ -115,8 +114,6 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
       message.conciliate
       message.loggings.create(content: json, state: "SLAVE/CONCILIATE", params: params, request_url: message.request_url, account: account, resourceable:account)
     end
-    # Rails.logger.info "COUNT: #{count}"
-    # Rails.logger.info "Conciliate by month: #{orders.count}"
   end
 
   def conciliate_position(positionID, symbol, jsons)
@@ -167,7 +164,6 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     order = find_or_create_order(json_last, trace)
     slave = trace.slaves.find_by(symbol: 'conciliated', ticket_slave: -1, account: account)
     if slave.present?
-      # serializer = API::V3::SlaveSerializer.new(json_last)
       update_existing_slave(slave, json_last, order)
     else
       create_new_slave(json_last, trace, order)
@@ -179,7 +175,6 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     trace ||= slave.trace
     trace ||= find_or_create_trace
 
-    # if slave.profit.to_f != serializer.profit.to_f || slave.lot.to_f != 0 || slave.fee.to_f != 0
     if slave.profit.to_f != json_last["profit"].to_f || slave.lot.to_f != json_last["volume"].to_f || slave.fee.to_f != json_last["fee"].to_f
       serializer = API::V3::SlaveSerializer.new(json_last)
       slave.profit = json_last["profit"]&.round(2)

@@ -13,7 +13,6 @@ class StoresController < ApplicationController
 		@store = Store.new(email: params.dig(:store, :email))
 	end
 
-
 	def create
 		@store = Store.new(store_params)
 
@@ -32,7 +31,6 @@ class StoresController < ApplicationController
 		  if @store.save
 		  	
 		  	if @store.create_association_after_create(email, password)
-			  	# @store.customers.first.update(user_id: @store.users.first.id, role: 'customer')
 			  	user = @store.users.first
 			  	sign_in(user)
 			  	ContactMailer.email(user, password).deliver_now
@@ -44,13 +42,9 @@ class StoresController < ApplicationController
 					format.json { render json: @store.errors, status: :unprocessable_entity }
 			  end
 		  else
-		  	# @store.errors.add(:password, :invalid_password) if store_params[:password].blank?
 		    format.html { render :new }
 		    format.json { render json: @store.errors, status: :unprocessable_entity }
 		  end
-		  # Rails.logger.info "Params: #{store_params.inspect}"
-		  # Rails.logger.info "Stores: #{@store.inspect}"
-		  # Rails.logger.info "Errors: #{@store.errors.inspect}"
 		end
 		
 	end

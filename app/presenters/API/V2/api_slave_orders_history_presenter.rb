@@ -2,11 +2,9 @@ class	API::V2::APISlaveOrdersHistoryPresenter
 	attr_accessor :start_month, :end_month, :json
 
 	def initialize(content)
-		# content = content[:imentore_slave]
 		@orders = []
 		parse_message(content)
 	end
-
 
 	def parse_message(content)
 		content = content.gsub("\u0000", "")
@@ -16,7 +14,6 @@ class	API::V2::APISlaveOrdersHistoryPresenter
 
 		@orders = @json["orders_closed"] if @json["orders_closed"].present?
 	end
-
 
 	def orders
 		@orders = @orders&.sort_by { |key, value| DateTime.parse(value["open_at"]) }

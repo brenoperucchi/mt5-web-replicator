@@ -1,5 +1,4 @@
 class DashboardsController < ApplicationController
-  # skip_before_action :after_sign_in_path_for
   before_action :set_trace, except: [:index]
   before_action :set_store
   before_action :filters, except: :create
@@ -7,18 +6,7 @@ class DashboardsController < ApplicationController
 
   respond_to :html, :xml, :json
 
-
-  # before_action :authenticate_user
-  # layout 'stisla'
   layout 'modernize'
-  # layout 'mintone'
-
-  # before_action :sign_up!
-
-
-  # def sign_up!
-  # 	redirect_to new_user_session_path if !user_signed_in?
-  # end
 
   def account_admin
     @accounts = @trace.accounts.where(kind: :copy)
@@ -35,8 +23,6 @@ class DashboardsController < ApplicationController
   end
 
   def mfe
-    # @dates = @trace.mfe_analyze
-    # respond_with
   end
 
   def transaction
@@ -52,7 +38,6 @@ class DashboardsController < ApplicationController
   end
 
   def contract
-    # @contract_volume = params.dig([:account][:settings][:contract_volume]) || 1
     @trace.customer_plan.promotion_use = true if params[:promotion] == "promotion"
     respond_to do |wants|
       wants.js { render layout: false }
@@ -68,7 +53,6 @@ class DashboardsController < ApplicationController
     customer_plan = CustomerPlan.find(params[:customer_plan_id])
     @account = @trace.accounts.new(account_params)
     @account.state = "enable"
-    # @account.customer.store = current_store
     @account.customer.role = "customer"
     @account.customer.role_control = "user"
     @account.customer.user.password = password
@@ -102,7 +86,6 @@ class DashboardsController < ApplicationController
   def dashboard_restrict
     flash[:notice] = nil
 
-
     unless @current_store.nil?
       if @current_store.dashboard_restrict == "enable" and (not user_signed_in? or @current_store.users.find_by(id:current_user.try(:id)).nil?)
         sign_out current_user
@@ -111,8 +94,6 @@ class DashboardsController < ApplicationController
         @traces = @current_store.traces.active.map do |trace| 
           trace.search_date_begin 				= session[:date_begin].strip().to_datetime.change(offset: @timezone) 
           trace.search_date_end 					= session[:date_end].strip().to_datetime.change(offset: @timezone) 
-          # trace.dashboard_magic_number 	  = trace.magic_number_restrict?
-
 
           [trace.data_profit.to_f, trace.id]
         end
@@ -134,7 +115,6 @@ class DashboardsController < ApplicationController
   def show
     @trace.search_date_begin 				= session[:date_begin].strip().to_datetime.change(offset: @timezone) 
     @trace.search_date_end 					= session[:date_end].strip().to_datetime.change(offset: @timezone) 
-    # @trace.dashboard_magic_number 	= session[:dashboard_magic_number]
 
     @accounts = @trace.accounts.where(kind: :copy)
     @accounts += @trace.accounts.where(kind: :slave, store: @current_store).order('kind desc')
@@ -170,8 +150,6 @@ class DashboardsController < ApplicationController
   def set_store
     @current_store = Store.find_by(url: params[:store_name].downcase) if params[:store_name].present?
     @current_store ||= current_store
-    # @current_store ||= @trace.try(:store)
-    # @current_store ||= Trace.find_by(name: params[:name]).try(:stores).try(:first)
   end
 
   def set_trace
@@ -182,13 +160,9 @@ class DashboardsController < ApplicationController
   end
 
   def filters
-    # if params[:datefilter].present?
-    # session[:dashboard_magic_number] = params[:dashboard_magic_number].present? ? true : false
 
     
-    # dates = "#{date_today} - #{date_today}"
     @timezone = params[:timezone].present? ? params[:timezone] : Time.zone.formatted_offset
-    # session[:dates] = params[:datefilter]
     if params[:datefilter].blank?# and session[:date_begin].nil? and session[:date_end].nil?
       dates = dashboard_date_filter_set
       session[:dates] = dates
@@ -208,7 +182,6 @@ class DashboardsController < ApplicationController
       end
     end
   end
-
 
   def dashboard_date_filter_set
     date_today = Date.today
@@ -230,6 +203,5 @@ class DashboardsController < ApplicationController
     end
     
   end
-
 
 end

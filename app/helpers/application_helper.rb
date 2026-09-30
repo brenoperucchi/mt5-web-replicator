@@ -12,7 +12,6 @@ module ApplicationHelper
     dashboard_path(store.url, trace.name, params: request.query_parameters)
   end
 
-
   def i18n_l(date, format=:default)
     return nil if date.nil?
     I18n.l date, format:format
@@ -22,11 +21,9 @@ module ApplicationHelper
      {host: Rails.application.routes.default_url_options[:host]}
   end
 
-
   def administrate_url_helper(path)
     begin
       polymorphic_path(path)
-      # Rails.application.routes.url_helpers.method_defined?(path)
     rescue NoMethodError
       nil
     end
@@ -34,9 +31,6 @@ module ApplicationHelper
 
 	def show_svg(path)
 	 return "/images/#{path}"
-	  # File.open("#{Rails.root}/app/assets/images/#{path}", "rb") do |file|
-	  #   raw file.read
-	  # end
 	end	
 
 	  def flash_classes(flash_type)

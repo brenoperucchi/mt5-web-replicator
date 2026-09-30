@@ -11,7 +11,6 @@ class UserDashboard < Administrate::BaseDashboard
     id:             Field::Number,
     email:          Field::String,
     password:       Field::Password,
-    # store:          Field::BelongsTo,
     store_id:       DisableTextField.with_options(default: :current_store),
     userable:       Field::Polymorphic,
     created_at:     Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

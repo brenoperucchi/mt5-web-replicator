@@ -7,7 +7,6 @@ module API
           ordertype: ordertype,
           lot: lot,
           price_open: price_open,
-          # price_closed: price_closed,
           magic_number: magic_number,
           stop_loss: stop_loss,
           take_profit: take_profit,
@@ -16,9 +15,6 @@ module API
           comment: obj['comment'],
           ticket_deal: obj['ticket_deal'],
           profit: obj['profit'],
-          # time_trader: time_trader,
-          # mae: mae,
-          # mfe: mfe,
         }
       end
 
@@ -41,10 +37,6 @@ module API
       def price_open
         obj['open_price']
       end
-
-      # def price_closed
-      #   obj['close_price']
-      # end
 
       def magic_number
         obj['magicnumber']
@@ -100,7 +92,6 @@ module API
         time_gmt = DateTime.parse(time_open + time_zone.to_sign) 
         time_gmt.in_time_zone
       end
-
 
     end
   end

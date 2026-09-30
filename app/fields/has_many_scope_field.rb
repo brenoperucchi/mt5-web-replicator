@@ -16,10 +16,8 @@ class HasManyScopeField < Administrate::Field::HasMany
         data = data.send(options[:scoped]) if data.respond_to?(options[:scoped])
       end
     end
-    # data = data.respond_to?(:not_deleted) ? data.not_deleted : data
     data
   end
-
 
   def associated_resource_options(current_store = nil)
     candidate_resources(current_store).map do |resource|
@@ -38,12 +36,10 @@ class HasManyScopeField < Administrate::Field::HasMany
     @order ||= Administrate::Order.new(sort_by, direction)
   end
 
-
   def resources(page = 1, order = self.order)
     resources = order.apply(data).page(page).per(limit)
     includes.any? ? resources.includes(*includes) : resources
   end
-
 
   def data(current_user=nil)
     data = resource.send(attribute.to_s.pluralize)
@@ -61,7 +57,6 @@ class HasManyScopeField < Administrate::Field::HasMany
     if options.key?(:associated) 
       if resource.respond_to?(options[:associated])
         data = current_store.send(attribute.to_s.pluralize)
-        # data = resource.send(options[:associated]).send(attribute.to_s.pluralize)
       else
         data = resource.send(attribute.to_s.pluralize)
       end
