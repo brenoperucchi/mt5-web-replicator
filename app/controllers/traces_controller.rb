@@ -1,2 +1,0 @@
-class TracesController < ApplicationController
-end
