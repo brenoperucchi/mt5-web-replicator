@@ -9,20 +9,11 @@
 
     <%= stylesheet_pack_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_pack_tag "application" %>
   </head>
 
   <body class="<%= @body_class || 'layout-default' %>">
     <!-- Header Layout -->
     <div class="mdk-header-layout js-mdk-header-layout">
-
-      <!-- Header -->
-      <div id="header" class="mdk-header js-mdk-header m-0" data-fixed>
-        <div class="mdk-header__content">
-          <%= render 'layouts/navbar'%>
-        </div>
-      </div>
-      <!-- // END Header -->
 
       <!-- Header Layout Content -->
       <div class="mdk-header-layout__content">
