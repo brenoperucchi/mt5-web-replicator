@@ -1,5 +1,4 @@
 class Permission < ApplicationRecord
-  # attr_reader :name
 
   belongs_to :account, optional:true
   belongs_to :trace, optional:true

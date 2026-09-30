@@ -3,8 +3,6 @@ class Store < ApplicationRecord
   LANGUAGE    = {English:'en', Português:'pt-BR'} # first entry is what an unset store shows and saves
   DATE_FILTER = {'1 month':'1_month', '3 months':'3_months', '6 months':'6_months', '1_year':'1_year', '2_years':'2_years', '3_years':'3 years'}
 
-  # include LibEnums
-
   attr_reader :resource_system
   attr_accessor :password
 
@@ -31,7 +29,6 @@ class Store < ApplicationRecord
   has_many :store_traces, dependent: :destroy
   has_many :traces, through: :store_traces, source: :trace, dependent: :destroy
 
-  # has_many :traces,   dependent: :destroy
   has_many :users,    dependent: :destroy
   has_many :orders,   dependent: :destroy 
 
@@ -71,14 +68,12 @@ class Store < ApplicationRecord
   end
 
   def register_resources_usages(resource, name)
-    # plan.verify_plan_has_items(self)
     resource_handle = name.capitalize
     usageable = plan.plan_items.where(name: resource_handle).take
     usageable ||= plan
     klass = resource.class.name.classify.downcase.pluralize
     klass_count = self.send(klass).count
     
-    # if self.plan_usages.where(usageable:resource).count < klass_count
     if resource.plan_usages.blank? and not resource.try(:deleted_at)
       usage_olders = self.plan_usages.where.not(active_at: nil, disable_at:nil).where(resourceable: resource)
       usage_olders.update_all(active_at:nil) if usage_olders.present?
@@ -93,10 +88,6 @@ class Store < ApplicationRecord
       resource.plan_usages.create(usageable:resource.customer_plan,  active_at: DateTime.current, handle:name, store: self)
     end
   end
-
-  # def email
-  #   users.first.email    
-  # end
 
   def disable_store
     plan_older = self.plan_usages.where.not(active_at:nil).where(resourceable:self)
@@ -148,9 +139,6 @@ class Store < ApplicationRecord
 
   def create_invoice_month(proporcional=false, month=nil)
     date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
-    # date_today = DateTime.current - 1.month
-    #date_today = DateTime.current
-    #date_today = DateTime.current + 1.month
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
     invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: billing_payment)
 
@@ -296,6 +284,5 @@ class Store < ApplicationRecord
       end
     end
   end
-
 
 end

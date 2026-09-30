@@ -7,7 +7,6 @@ class Invoice < ApplicationRecord
 
   delegate :stripe_product_id, :stripe_customer_id, to: :store
   delegate :email, to: :invoiceable, allow_nil: true
-  # delegate :trace, to: :plan_usage, allow_nil: true
   
   enum :kind, {system:0, client:1}
   enum :state, {pending: 0, to_paid:1, paid: 2, denied:3, refunded:4}
@@ -16,7 +15,6 @@ class Invoice < ApplicationRecord
 
   serialize :response, coder: YAML
 
-  # belongs_to :ownerable, polymorphic: true
   belongs_to :store
   belongs_to :payment
   belongs_to :plan_usage, optional:true
@@ -27,11 +25,9 @@ class Invoice < ApplicationRecord
 
   accepts_nested_attributes_for :items, reject_if: :all_blank, allow_destroy: true
 
-
   def balance_update
     self.update(amount: items.to_a.sum(&:amount))  
   end
-
 
   # Asks the payment provider for a hosted checkout URL and stores it as the
   # invoice payment link. Returns the URL, or false when no provider is
@@ -50,7 +46,6 @@ class Invoice < ApplicationRecord
   def customer
     self.invoiceable if respond_to?(:invoiceable) and self.invoiceable.is_a?(Customer)
   end
-
 
   def payment_method
     payment&.payment_method&.provider(payment)
@@ -135,7 +130,6 @@ class Invoice < ApplicationRecord
     customer_plan = plan_usage.usageable
 
     self.payment = customer_plan.payment
-    # self.plan_usage = plan_usage
 
     # Item descriptions are persisted, so write them in the store's language.
     item_locale = store.try(:language).presence_in(I18n.available_locales.map(&:to_s)) || I18n.default_locale
@@ -168,7 +162,6 @@ class Invoice < ApplicationRecord
     "https://#{store.domain_url}/payments/#{self.id}/return/#{kind}"
   end
 
-
   def self.generate_month_customers(date = nil)
     timestamp = I18n.l DateTime.current, format: :short8
     puts "#{timestamp} - Runner Invoice.generate_month"
@@ -191,7 +184,6 @@ class Invoice < ApplicationRecord
     items.each do |item|
       next if item.account.nil?
       if item.can_conciliated?
-        # item.conciliated!
       elsif item.can_conciliate? and not items.conciliate.exists?
         item.conciliate! if item.conciliate_metatrader_on
       end

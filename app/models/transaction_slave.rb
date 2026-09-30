@@ -7,9 +7,6 @@ class TransactionSlave < ApplicationRecord
   StateMachines::Machine.ignore_method_conflicts = true
 
   has_paper_trail on: [:create, :update]
-  # versions: {
-  #   class_name: 'Track'
-  # }
 
   belongs_to :account
   belongs_to :trace
@@ -38,26 +35,20 @@ class TransactionSlave < ApplicationRecord
   scope :sell,                ->{where(ordertype: 1)}
   scope :conciliated,         ->{where.not(conciliated_at: nil)}
   scope :not_conciliated,     ->{where(conciliated_at: nil)}
-  # scope :not_limit_pending,   ->{where('transaction_slaves.ordertype >= 2 AND transaction_slaves.profit = 0')}
 
   validates_presence_of :symbol
   validates_uniqueness_of :ticket_master, scope: [:account_id, :ticket_slave, :order_id], on: :create, if: Proc.new { account.try(:hedging?)}, 
                           unless: Proc.new {conciliated_at.present?}
-                          # unless: Proc.new {symbol == 'conciliated'}
   validates_uniqueness_of :ticket_slave,  scope: [:account_id, :transaction_id, :order_id], on: :create, allow_blank: false, allow_nil: false, 
                           if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || conciliated_at.present?}
-                          # if: Proc.new { account.try(:hedging?) }, unless: Proc.new { ticket_slave == 0 || symbol == 'conciliated'}
-  # validates_uniqueness_of :ticket_master, scope: [:account_id, :transaction_id], on: :create, if: Proc.new { account.try(:hedging?) }
 
   after_create :accept_magic_number?#, :check_duplicate
-
 
   class << self
     def ransackable_scopes(_auth_object = nil)
       %i[profit_search ticker_master_search ticket_slave_search state_search]
     end
   end
-
 
   def self.profit_search(value)
     self.where(profit:0..value.to_f)
@@ -85,21 +76,6 @@ class TransactionSlave < ApplicationRecord
     master.try(:closed_at)
   end
 
-  # def check_duplicate
-  #   self.class.check_duplicate(self.ticket_master, self.account)
-  # end
-
-  # def self.check_duplicate(ticket, account)
-  #   slaves = self.where(ticket_master: ticket, account: account)
-  #   # execute_slaves = self.where(ticket_master: ticket, account: account, state: [:closed, :executed]).where.not(ticket_slave: nil)
-  #   if slaves.count > 1 and slaves.pending.count > 0
-  #       slave = slaves.pending.last
-  #       slave.deleted
-  #       slave.loggings.create(content:"Slave ID #{slave.id} - Account #{account.name} Duplicate", changeset: slave.try(:versions).try(:last).try(:changeset), version:slave.versions.last, state: 'ERROR', loggerable: slave.order.message, parent:slave.master.loggings.first.parent)
-  #       slave.order.erro
-  #   end
-  # end
-
   def profit
     read_attribute(:profit).nil? ? 0 : read_attribute(:profit)
   end
@@ -116,9 +92,6 @@ class TransactionSlave < ApplicationRecord
     event :close do
       transition [:pending, :remove, :executed, :error] => :closed
     end  
-    # event :conciliate do
-    #   transition [:pending, :remove, :executed, :error] => :conciliated
-    # end  
     event :deleted do
       transition [:pending, :remove, :executed, :closed] => :deleted
     end
@@ -137,7 +110,6 @@ class TransactionSlave < ApplicationRecord
 
   def accept_magic_number?
     TradeHelperService.resource_restricted?(self, self.account)
-    # order.restrict_magic_number(self)
   end
 
   def set_sl_and_tp_order(take_profit, stop_loss, price_request, lot)
@@ -146,7 +118,6 @@ class TransactionSlave < ApplicationRecord
   end
 
   def api_request_attributes
-    # order.api_request_attributes(self)
     TradeHelperService.api_request_attributes(self, self.account)
   end
 

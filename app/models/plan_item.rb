@@ -2,7 +2,6 @@ class PlanItem < ApplicationRecord
   attr_accessor :active, :amount_extra
 
   belongs_to :plan
-  # belongs_to :store, optional:true
   has_many :plan_stores, dependent: :destroy
   has_many :stores, through: :plan_stores, source: :store, dependent: :destroy
   

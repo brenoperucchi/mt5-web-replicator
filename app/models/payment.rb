@@ -14,13 +14,9 @@ class Payment < ApplicationRecord
     payment_method.present? && payment_method.available?
   end
 
-
   delegate :name, to: :payment_method, allow_nil: true
 
-  # def method(invoice)
-  #   "PaymentMethod::#{payment_method.handle.classify}".safe_constantize.new(invoice, self)
     
-  # end
 
   # Endpoint to register in the provider dashboard (e.g. Stripe webhooks).
   def webook_url

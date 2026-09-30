@@ -1,5 +1,4 @@
 class Customer < ApplicationRecord
-  # attr_accessor :user_email
   
   CONTROL_ROLE = %w(admin user)
 
@@ -12,11 +11,6 @@ class Customer < ApplicationRecord
   include LibEnums
 
   scope :not_deleted, -> { where(deleted_at:nil) }
-
-  # before_update :register_plan_update
-  # after_create :register_plan_create
-
-  # belongs_to :store
 
   has_one  :user,        as: :userable, dependent: :destroy
   has_many :plan_usages, as: :resourceable#, dependent: :destroy
@@ -41,17 +35,6 @@ class Customer < ApplicationRecord
   validates_presence_of :name
   validates :role_control, inclusion:["user", "admin"], :if => proc { |obj| obj.customer? && !obj.owner? }
   
-  # validates_presence_of [:customer_plan, :role_control], :if => proc { |obj| obj.customer? && obj.owner? }
-  # def register_plan_update
-  #   if customer_plan_id_changed? or self.plan_usages.empty?
-  #     store.register_resource_plan_customer(self, self.class.name.capitalize) if Current.user.try(:userable).try(:role) == "customer"
-  #   end
-  # end
-
-  # def register_plan_create
-  #   plan = CustomerPlan.find_by(id:self.customer_plan_id)
-  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "CustomerPlan", store: self.store)
-  # end
 
   def create_invoice(date = nil, month_proporcional = false)
     date ||= DateTime.current

@@ -1,16 +1,11 @@
 class Account < ApplicationRecord
   attr_accessor :search_date_begin, :search_date_end, :search_magic_number
 
-  # include Balance::Base
   include LibEnums
   include LibControl
   include AlgoStatistic
   
-  # after_create :register_resource_plan
-  # after_save :insert_instruments
   after_create :set_settings
-
-  # default_scope { where(deleted_at: nil) }
 
   scope :deleted,       -> { where.not(deleted_at:nil) }
   scope :not_deleted,   -> { where(deleted_at:nil) }
@@ -55,13 +50,9 @@ class Account < ApplicationRecord
   validates_presence_of :name
   validates :name, format: { with: /\A\d+\z/} #, message: "Integer only. No sign allowed." }
   validates_uniqueness_of :name, scope: [:store_id, :account_server_id, :kind], if: Proc.new { |b| b.store_id.present? }
-  # validates_uniqueness_of :name, scope: :store_id, if: Proc.new { |b| b.account_server_id.present? }
 
   accepts_nested_attributes_for :customer
   
-  # def register_resource_plan
-  #   store.register_resource_plan(self, self.kind)
-  # end
 
   class << self
     def ransackable_scopes(_auth_object = nil)
@@ -95,18 +86,8 @@ class Account < ApplicationRecord
     self.settings[:contract_volume].present? ? self.settings[:contract_volume] : "0"
   end
 
-
   def register_plan_update
-    # if self.trace_ids.include?()
-    # if tr_changed? or self.plan_usages.empty?
-      # store.register_resource_plan_customer(self, self.class.name.capitalize) if Current.user.try(:userable).try(:role) == "customer"
-    # end
   end
-
-  # def register_plan_create
-  #   plan = CustomerPlan.find_by(id:self.customer_plan_id)
-  #   self.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "CustomerPlan", store: self.store)
-  # end
 
   def create_invoice(trace, month_proporcional = false, month=nil)
     date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
@@ -125,7 +106,6 @@ class Account < ApplicationRecord
     plan = permission&.customer_plan || store&.customer_plans.first
     plan.customers << customer unless plan.customers.exists?(customer.id)
     plan.accounts << self unless plan.accounts.exists?(self.id)
-    # self.update(customer_plan_id: customer_plan.id) unless customer_plan.present?
 
     if plan_usage.nil?
       plan_usage = plan.plan_usages.create(usageable: plan, resourceable:self, active_at:DateTime.current, handle: "AccountTracePlan", store: self.store, plan_serializer:plan.attributes, trace: trace)
@@ -139,15 +119,6 @@ class Account < ApplicationRecord
     return plan_usage
   end
 
-
-  # def self.account_search(current_user)
-  #   if current_user.userable.administrator?
-  #     self.all.map{|x| [x.name, x.id]}   
-  #   else
-  #     self.control_store(current_user.store).order('name desc').map{|x| [x.name, x.id]} 
-  #   end
-  # end
-
   def admin_label
     name.upcase
   end
@@ -156,10 +127,6 @@ class Account < ApplicationRecord
   def soft_destroy_custom
     self.trace_ids = nil
   end
-
-  # def soft_restore
-  #   self.update(deleted_at: nil)
-  # end
 
   def api_server_hostname(params)
     if params[:EnvironmentLocal] == "0"
@@ -209,20 +176,9 @@ class Account < ApplicationRecord
     instrument_control.to_b ? instruments.find_by(symbol: symbol.try(:upcase)).try(:name) : symbol
   end
 
-
   def contract_volume_use
     contract_volume ||= (self.try(:contract_volume) == "0" or self.try(:contract_volume).nil?) ? 1 : self.try(:contract_volume).to_f
   end
-
-  # def api_send_orders_history_date_start
-  #   @api_send_orders_history_date_start ||= DateTime.parse(self.settings["api_send_orders_history_date_start"] || DateTime.current.beginning_of_month.beginning_of_day.to_s)
-  # end
-
-  # def api_send_orders_history_date_end  
-  #   @api_send_orders_history_date_end ||= DateTime.parse(self.settings["api_send_orders_history_date_end"] || DateTime.current.end_of_month.end_of_day.to_s)
-  # end                             
-
-
 
   def self.settings_change(timer = nil, tick = nil, delay = nil)
     Account.all.each do |account|
@@ -252,6 +208,5 @@ class Account < ApplicationRecord
     @account.search_date_end   = DateTime.parse("2025-03-10T00:00:00-03:00")
     @account = @account.data_scope(type, nil, :all, @trace).where.not(ticket_deal:0).order(open_at: 'DESC').order_limit
   end
-
 
 end

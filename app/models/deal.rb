@@ -9,9 +9,6 @@ class Deal < ApplicationRecord
   has_many :masters, :through => :orders, :source => :transactions
   has_many :slaves,  :through => :orders, :source => :slaves
 
-  # has_many :masters,  :class_name => "Transaction",      :foreign_key => "deal_id",  dependent: :destroy
-  # has_many :slaves,   :class_name => "TransactionSlave", :foreign_key => "deal_id",  dependent: :destroy
-
   def ordertype
     case masters.try(:first).try(:ordertype)
     when "0"
@@ -23,20 +20,7 @@ class Deal < ApplicationRecord
     end
   end
   
-  # def profit_copy
-  #   masters.closed.sum(&:profit)
-  # end
 
-  # def profit_slave
-  #   slaves.closed.sum(&:profit)
-  # end
-
-  # def operation_copy
-  #   masters.closed.count
-  # end
   
-  # def operation_slave
-  #   slaves.closed.count
-  # end
 
 end

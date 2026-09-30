@@ -2,7 +2,6 @@ class Message::V1::Metatrader < Message::Message
   self.table_name = "messages"
   self.inheritance_column = :_type_disabled
 
-
   state_machine :initial => :pending do
     after_transition :pending => :executed, :do => lambda { |message| message.create_orders }
     after_transition :pending => :executed, :do => lambda { |message| message.close_orders }
@@ -47,7 +46,6 @@ class Message::V1::Metatrader < Message::Message
       orders.reverse.each do |order_params|
         ticket = order_params['ticket_id']
         
-        # orders = self.trace.orders.where(content_id: ticket, state: :executed)
         self.traces.active.not_deleted.each do |trace|
           api_transaction = SerializerAPITransaction.new(order_params)
           orders = trace.orders.where(content_id: ticket)
