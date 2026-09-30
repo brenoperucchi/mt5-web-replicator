@@ -1,2 +1,0 @@
-class SystemAlertsController < ApplicationController
-end
