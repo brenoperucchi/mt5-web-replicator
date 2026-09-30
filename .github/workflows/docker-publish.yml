@@ -44,15 +44,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # workflow_run events carry the default branch's latest sha in github.sha;
+      # tag the image with the commit CI actually tested.
+      - id: sha
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: echo "short=${SHA::7}" >> "$GITHUB_OUTPUT"
+
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          # Read sha/ref from the checkout above (the commit CI tested).
-          context: git
           images: ${{ env.IMAGE }}
           tags: |
             type=raw,value=latest,enable=${{ github.event_name != 'push' }}
-            type=sha,prefix=sha-,format=short,enable=${{ github.event_name != 'push' }}
+            type=raw,value=sha-${{ steps.sha.outputs.short }},enable=${{ github.event_name != 'push' }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
