@@ -9,13 +9,13 @@ module Control
     # on pages throughout the dashboard.
     ATTRIBUTE_TYPES = {
       id:             Field::Number,
-      api_token:      Field::String,
+      api_token:      SecretField,
       webook_url:     Field::String.with_options(searchable: false),
       store:          Field::BelongsTo,
       payment_method: Field::BelongsTo,
       customer_plans: HasManyScopeField.with_options(associated: :store, dashboard: :control),
       invoices:       HasManyScopeField.with_options(associated: :store, dashboard: :control),
-      webhook_token:  Field::String,
+      webhook_token:  SecretField,
       min_amount:     Field::Number,
       created_at:     Field::DateTime,
       updated_at:     Field::DateTime,

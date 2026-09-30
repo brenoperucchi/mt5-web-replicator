@@ -16,7 +16,7 @@ class Control::TraceDashboard < Administrate::BaseDashboard
     instrument_control:       Field::Boolean.with_options(searchable: false),
     magic_same:               Field::Boolean.with_options(searchable: false),
     telegram_api_id:          Field::String.with_options(searchable: false),
-    telegram_api_hash:        Field::String.with_options(searchable: false),
+    telegram_api_hash:        SecretField,
     telegram_api_number:      Field::String.with_options(searchable: false),
     magics_accept:            Field::String.with_options(searchable: false),
     meta_host:                Field::String,

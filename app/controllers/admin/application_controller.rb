@@ -90,6 +90,23 @@ module Admin
     def set_current_user
       Current.user = current_user
     end
+
+    # Secret fields render an empty password input; a blank submission means
+    # "keep the current value", so drop those keys before assigning.
+    def resource_params
+      permitted = super
+      secret_attributes.each do |attr|
+        permitted.delete(attr) if permitted.key?(attr) && permitted[attr].blank?
+      end
+      permitted
+    end
+
+    def secret_attributes
+      dashboard.class::ATTRIBUTE_TYPES.filter_map do |attr, type|
+        klass = type.respond_to?(:deferred_class) ? type.deferred_class : type
+        attr.to_s if klass.is_a?(Class) && klass <= SecretField
+      end
+    end
     
   end
 end
