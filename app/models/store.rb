@@ -117,7 +117,7 @@ class Store < ApplicationRecord
   end
 
   def telegram_bot_token
-    if not telegram_bot_status == "enable" and not self.settings[:telegram_bot_token].present? and not telegram_bot_chat_id.present?
+    if BotTelegram.enabled? and not telegram_bot_status == "enable" and not self.settings[:telegram_bot_token].present? and not telegram_bot_chat_id.present?
       self.update(telegram_bot_token: "token#{SecureRandom.hex(3)}")
     end
     self.settings[:telegram_bot_token]

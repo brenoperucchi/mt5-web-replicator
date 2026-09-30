@@ -15,14 +15,14 @@ Use both repositories together when you need the full flow: `python-signal` runs
 - PostgreSQL
 - Redis and Sidekiq for background jobs
 - Shakapacker (webpack), Tailwind CSS, Bootstrap, and Alpine.js
-- Devise, Pundit, Administrate, Stripe (payments), and Telegram Bot
+- Devise, Pundit, Administrate, and Stripe (payments)
 - I18n: English by default, Brazilian Portuguese (`pt-BR`) available
 
 ## Main areas
 
 - `app/controllers/api`: versioned APIs for copy/slave/store, MT5, and external integrations.
 - `app/controllers/admin`, `app/controllers/control`, and `app/controllers/panel`: administrative and operational interfaces.
-- `app/models/message`: MetaTrader/Telegram message processing.
+- `app/models/message`: MetaTrader message processing (Telegram parts are dormant, see Roadmap).
 - `app/services`: auxiliary trade rules and data formatting for APIs.
 - `app/views/layouts`: landing pages, dashboard, and admin layouts.
 
@@ -62,7 +62,6 @@ See `.env.example` for the full list with a short explanation of each. The essen
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe fallback keys (see below) |
 | `PAYMENT_CURRENCY` | Checkout currency, default `usd` (`config/deploy.yml` sets `brl`) |
 | `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` | reCAPTCHA on public forms |
-| `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, `TELEGRAM_API_NUMBER` | Telegram settings used when seeding the store |
 
 ## Payments (Stripe)
 
@@ -250,6 +249,18 @@ docker run --rm -p 3000:80 -e SECRET_KEY_BASE=$(openssl rand -hex 64) \
 - Rotate any secret that has already been committed to Git history.
 - Clean up the repository history before changing visibility on GitHub.
 - Review seeds, fixtures, and factories to ensure they contain only fictitious data.
+
+## Roadmap / Future features
+
+- **Telegram signal ingestion** (disabled; enable with `ENABLE_TELEGRAM=1` — experimental).
+  Traces of kind `telegram` read trading signals posted in Telegram channels (a companion
+  Python/TDLib client polled `/api/*/stores/telegram/python` for the stores' `telegram_api_*`
+  credentials and pushed chat history back), parsed them into `Messages::Telegram` records
+  and turned them into orders replicated to the slave accounts; a Telegram bot ("Alfred")
+  could also post open/modify/close notifications to a store's group. The code is kept but
+  nothing runs unless the flag is on: the `telegram-bot-ruby` gem isn't loaded, the
+  `/telegram/python` endpoints return 404, the webhook API isn't mounted and no Telegram
+  ENV vars or credentials are needed (the optional ones are listed in `.env.example`).
 
 ## License
 

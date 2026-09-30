@@ -21,7 +21,7 @@ class Control::StoreDashboard < Administrate::BaseDashboard
     contact_whatsapp:       Field::String.with_options(searchable: false),
     telegram_bot_chat_id:   Field::String.with_options(searchable: false),
     telegram_bot_status:    Field::String.with_options(searchable: false),
-    telegram_bot_token:     Field::String.with_options(searchable: false),
+    telegram_bot_token:     SecretField,
     resource_system:        Field::Text,
     tag_list:               Field::Tag.with_options(class_name: 'Store', attribute_name: :tag_list),
     created_at:             Field::DateTime.with_options(format: "%d/%m/%Y %H:%M:%S"),

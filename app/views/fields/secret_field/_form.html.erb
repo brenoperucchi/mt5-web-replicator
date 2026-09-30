@@ -1,0 +1,7 @@
+<div class="field-unit__label">
+  <%= f.label field.attribute %>
+</div>
+<div class="field-unit__field">
+  <%= f.password_field field.attribute, value: "", autocomplete: "new-password",
+        placeholder: field.data.present? ? "#{field.masked} (leave blank to keep)" : field.masked %>
+</div>

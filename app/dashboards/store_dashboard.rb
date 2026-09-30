@@ -20,7 +20,7 @@ class StoreDashboard < Administrate::BaseDashboard
     contact_whatsapp:       Field::String.with_options(searchable: false),
     telegram_bot_chat_id:   Field::String.with_options(searchable: false),
     telegram_bot_status:    Field::String.with_options(searchable: false),
-    telegram_bot_token:     Field::String.with_options(searchable: false),
+    telegram_bot_token:     SecretField,
     plan:                   Field::BelongsTo,
     payment:                Field::BelongsTo,
     plan_items:             Field::HasMany,
