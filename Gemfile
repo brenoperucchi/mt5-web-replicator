@@ -116,7 +116,7 @@ gem "net-http"
 gem 'money-rails', '~> 1.12'
 
 #API
-gem 'grape'
+gem 'grape', '~> 2.2' # grape 2.x emits the Rails 8.1 ActiveSupport::Configurable deprecation; 3.x+ needs grape-active_model_serializers 2.x and breaks API specs -- upgrade separately
 gem 'grape-active_model_serializers'
 gem 'grape_on_rails_routes'
 gem 'rack-cors'
