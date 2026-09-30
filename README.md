@@ -2,6 +2,45 @@
 
 Ruby on Rails application to receive, organize, and replicate trading information coming from MT5/MQL to a web backend. The project centralizes admin dashboards, accounts, customers, plans, invoices, payment integrations, and APIs to manage the distribution of orders and events across multiple accounts.
 
+## Quick start (Docker)
+
+Try it locally with nothing but Docker:
+
+```bash
+git clone https://github.com/brenoperucchi/mt5-web-replicator.git
+cd mt5-web-replicator
+docker compose up
+```
+
+Open <http://localhost:3000> once the `web` container reports healthy (first boot creates
+the database and loads demo data, about a minute). Logins:
+
+| Role | Email | Password | Start at |
+| --- | --- | --- | --- |
+| Admin (store owner) | `admin@example.com` | `password123` | <http://localhost:3000/admin>, <http://localhost:3000/control> |
+| Demo customer | `demo@example.com` | `password123` | <http://localhost:3000/panel> |
+
+Sign in at <http://localhost:3000/users/sign_in>. What to explore:
+
+- **Admin** (`/admin`): orders, transactions, accounts, traces, customers, plans, invoices.
+- **Control panel** (`/control`): accounts, portfolios (`/control/traces`), orders,
+  slave trades, invoices.
+- **Customer panel** (`/panel`): the demo customer's dashboard and invoices.
+- **Portfolio page** (`/dashboard/store-1/DemoSignal`): public stats of the demo portfolio.
+
+The demo data (`SEED_DEMO=1`, see `db/seeds/demo.rb`) is a copy portfolio "DemoSignal" with
+one master account and two slave accounts, 13 EURUSD/GBPUSD/XAUUSD/US500 trades over the last
+30 days (10 closed, 3 open) replicated to both slaves through the same v3 API flow the
+MetaTrader clients use, and two invoices (one paid, one due). Stripe is not configured, so
+paying an invoice won't work unless you set `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`.
+
+- Stop: `docker compose down`. Reset everything (database, uploads): `docker compose down -v`.
+- Port 3000 busy? `PORT=3100 docker compose up` (and `APP_DOMAIN=localhost:3100`).
+- The image is prebuilt on GHCR (`ghcr.io/brenoperucchi/mt5-web-replicator`, built from
+  `master` after CI passes); `docker compose up --build` builds it from your checkout instead.
+- Every default in `docker-compose.yml` (secret key, passwords, demo logins) is for a
+  **local trial only**. Deploy for real with Kamal (see [Deploy](#deploy)).
+
 ## Related repository
 
 - Python/MQL client for MetaTrader: [`brenoperucchi/python-signal`](https://github.com/brenoperucchi/python-signal)
@@ -48,7 +87,8 @@ the shell take precedence). `.env.example` documents every variable the app read
 In development, `db:seed` creates a store, a plan, an admin user
 (`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`, defaults `admin@example.com` / `password123`)
 and a default Stripe payment row. Traces and customer plans are not seeded; create them
-from the admin once the store exists.
+from the admin once the store exists, or run `SEED_DEMO=1 bin/rails db:seed` for the demo
+dataset described in [Quick start](#quick-start-docker).
 
 ## Environment variables and credentials
 

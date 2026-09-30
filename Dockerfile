@@ -58,6 +58,9 @@ RUN rm -rf node_modules
 
 FROM base
 
+LABEL org.opencontainers.image.source="https://github.com/brenoperucchi/mt5-web-replicator" \
+      org.opencontainers.image.licenses="PolyForm-Noncommercial-1.0.0"
+
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 

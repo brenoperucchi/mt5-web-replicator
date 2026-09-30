@@ -6,6 +6,7 @@
 #   SEED_STORE_NAME / SEED_STORE_URL        first store
 #   TELEGRAM_API_ID / _HASH / _NUMBER       optional; only for the experimental Telegram feature
 #   STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
+#   SEED_DEMO=1 (+ SEED_DEMO_EMAIL / SEED_DEMO_PASSWORD)  demo dataset, db/seeds/demo.rb
 
 # Telegram is disabled by default (ENABLE_TELEGRAM); only store its settings
 # when they're actually provided.
@@ -26,9 +27,10 @@ store = Store.find_by(url: store_url) || Store.create!({
   active_at: Time.current, volume_default: 0.10, state: :enable, plan: plan
 }.merge(telegram_attributes))
 
-# NOTE: traces and accounts aren't seeded. Trace requires an existing
-# CustomerPlan (which itself requires a Payment record); create them from the
-# admin once the store and its payment are in place.
+# NOTE: traces and accounts aren't seeded unless SEED_DEMO=1 (see the end of
+# this file). Trace requires an existing CustomerPlan (which itself requires a
+# Payment record); create them from the admin once the store and its payment
+# are in place.
 
 admin_email = ENV.fetch('SEED_ADMIN_EMAIL', 'admin@example.com')
 if User.exists?(email: admin_email)
@@ -51,3 +53,11 @@ stripe_payment = Payment.find_or_create_by!(payment_method: stripe_method, store
   payment.webhook_token = ENV['STRIPE_WEBHOOK_SECRET'].presence
 end
 puts "Stripe payment ##{stripe_payment.id} ready (webhook path: /payments/webhook/#{stripe_payment.id})"
+
+# Optional demo dataset (portfolio, accounts, trades, invoices) so every screen
+# has content in a local trial. docker-compose.yml turns it on by default.
+if ENV['SEED_DEMO'] == '1'
+  require_relative 'seeds/demo'
+  admin_customer = User.find_by!(email: admin_email).userable
+  DemoSeed.run(store: store, payment: stripe_payment, admin: admin_customer)
+end
