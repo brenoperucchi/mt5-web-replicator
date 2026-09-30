@@ -7,8 +7,8 @@ class Trace < ApplicationRecord
   include AlgoStatistic
   include LibControl
 
-  enum kind:      { telegram: 0, copy: 1, manual:2}
-  enum kind_copy: { normal:   0, prop_firm:1 }
+  enum :kind, { telegram: 0, copy: 1, manual:2}
+  enum :kind_copy, { normal:   0, prop_firm:1 }
 
   serialize :mfe_analyzed, coder: YAML
 

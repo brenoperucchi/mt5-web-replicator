@@ -3,8 +3,8 @@ class SystemAlert < ApplicationRecord
   belongs_to :alertable, polymorphic: true, optional: true
 
   # Enums para status e severidade
-  enum status: { active: 'active', in_progress: 'in_progress', resolved: 'resolved', ignored: 'ignored' }
-  enum severity: { info: 'info', warning: 'warning', error: 'error', critical: 'critical' }
+  enum :status, { active: 'active', in_progress: 'in_progress', resolved: 'resolved', ignored: 'ignored' }
+  enum :severity, { info: 'info', warning: 'warning', error: 'error', critical: 'critical' }
 
   # Escopos
   scope :unresolved, -> { where(status: ['active', 'in_progress']) }

@@ -17,7 +17,7 @@ class Store < ApplicationRecord
                                 :api_event_on_tick, :api_debug_mode_level, :api_mfe_mae_display, :api_reach_mfe_target, :api_reach_loss_set, :api_send_orders_history, 
                                 :api_close_all_orders, :api_event_on_delay, :api_orders_to_conciliate
                               ]
-  enum state: {disable:0, enable:1}
+  enum :state, {disable:0, enable:1}
   acts_as_taggable_on :tags
   
   before_update :register_plan_update

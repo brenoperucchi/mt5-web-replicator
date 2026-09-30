@@ -1,6 +1,6 @@
 class TransactionSlave < ApplicationRecord
   
-  enum state: {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, conciliated:7}
+  enum :state, {pending:0, executed:1, remove:2, closed:3, deleted:4, error:5, disabled:6, conciliated:7}
 
   include LibEnums
 

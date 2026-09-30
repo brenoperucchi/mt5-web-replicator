@@ -9,8 +9,8 @@ class Invoice < ApplicationRecord
   delegate :email, to: :invoiceable, allow_nil: true
   # delegate :trace, to: :plan_usage, allow_nil: true
   
-  enum kind:  {system:0, client:1}
-  enum state: {pending: 0, to_paid:1, paid: 2, denied:3, refunded:4}
+  enum :kind, {system:0, client:1}
+  enum :state, {pending: 0, to_paid:1, paid: 2, denied:3, refunded:4}
   
   store :settings, accessors: [:email, :payment_link, :back_url]
 

@@ -16,11 +16,11 @@ class Account < ApplicationRecord
   scope :not_deleted,   -> { where(deleted_at:nil) }
   scope :control_store, ->(store) { where(store: store )}
 
-  enum state:            {disable: 0, enable: 1}
-  enum kind:             {slave: 0,   copy: 1}
-  enum meta_mode:        {demo: 0,    real: 1}
-  enum meta_margin_mode: {netting: 0, hedging: 1}
-  enum stock_kind:       {b3: 0,      forex: 1, usa:2, others:4}
+  enum :state, {disable: 0, enable: 1}
+  enum :kind, {slave: 0,   copy: 1}
+  enum :meta_mode, {demo: 0,    real: 1}
+  enum :meta_margin_mode, {netting: 0, hedging: 1}
+  enum :stock_kind, {b3: 0,      forex: 1, usa:2, others:4}
 
   store :settings, accessors: [:magics_accept, :instrument_control, :contract_volume, :api_debug_mode, :api_freeze_max_time, :api_time_to_check_server, 
                                :api_time_max_seconds, :api_slippage, :api_environment_local, :api_store_state, :api_store_message, :api_milliseconds_timer, :api_milliseconds_tick, 
