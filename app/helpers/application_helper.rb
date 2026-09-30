@@ -1,6 +1,17 @@
 module ApplicationHelper
   include Rails.application.routes.url_helpers
 
+  # Link for the marketing page's featured portfolio. Uses FEATURED_TRACE_ID when
+  # set, else the given default, else any trace with a store; "#" on an empty
+  # database so a fresh install still renders the home page.
+  def featured_trace_path(default_id)
+    trace = Trace.find_by(id: ENV.fetch("FEATURED_TRACE_ID", default_id)) || Trace.joins(:stores).first
+    store = trace&.stores&.first
+    return "#" unless store
+
+    dashboard_path(store.url, trace.name, params: request.query_parameters)
+  end
+
 
   def i18n_l(date, format=:default)
     return nil if date.nil?
