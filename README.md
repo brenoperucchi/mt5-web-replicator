@@ -9,8 +9,8 @@ Ruby on Rails application to receive, organize, and replicate trading informatio
 Use both repositories together when you need the full flow: `python-signal` runs close to MetaTrader and external signal sources; this repository receives, validates, organizes, and manages the data on the web backend.
 
 ## Stack
-
-- Ruby 3.1.7
+- Ruby 3.3.10
+- Rails 8.1 (Zeitwerk, `load_defaults 8.1`), Sprockets + Shakapacker for assets
 - Rails 7.0 (Zeitwerk)
 - PostgreSQL
 - Redis and Sidekiq for background jobs
