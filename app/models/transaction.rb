@@ -1,4 +1,3 @@
-require 'telegram/bot'
 
 class Transaction < ApplicationRecord
   include Telegram::Util
@@ -208,6 +207,7 @@ class Transaction < ApplicationRecord
   end
 
   def telegram_message(state)
+    return unless BotTelegram.enabled?
     chat_id = self.account.store.telegram_bot_chat_id
     if chat_id.present?
       content = self.telegram_message_prepare(state)
@@ -220,7 +220,7 @@ class Transaction < ApplicationRecord
     self.assign_attributes(serializer.transaction_attributes)
 
     if not self.error?
-      if self.changed?
+      if self.changed? && BotTelegram.enabled?
         chat_id = self.account.store.telegram_bot_chat_id
         if chat_id.present?
           content = self.telegram_message_prepare(:MODIFY)

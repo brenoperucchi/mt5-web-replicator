@@ -33,6 +33,7 @@ module API
           status 200
         end      
         get "/telegram/python" do
+          error!('Not Found', 404) unless BotTelegram.enabled?
           Store.enable
         end      
 

@@ -102,7 +102,7 @@ gem 'stringio', '3.0.9'
 # # To use Braintree + PayPal, also include:
 # gem 'braintree', '>= 4.4', '< 5.0'
 gem 'next_rails'
-gem 'telegram-bot-ruby'
+gem 'telegram-bot-ruby', require: false # only loaded when ENABLE_TELEGRAM=1 (see BotTelegram)
 gem 'sidekiq', '7.1.3'
 gem 'pundit'
 gem 'simple_form'

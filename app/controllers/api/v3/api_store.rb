@@ -10,6 +10,7 @@ module API
       resource :stores do
         desc "Return all signs"
         get "/telegram/python" do
+          error!('Not Found', 404) unless BotTelegram.enabled?
           Store.enable
         end      
 

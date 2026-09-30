@@ -4,14 +4,16 @@
 # Environment variables (see .env.example):
 #   SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD  admin login (password required in production)
 #   SEED_STORE_NAME / SEED_STORE_URL        first store
-#   TELEGRAM_API_ID / _HASH / _NUMBER       store Telegram credentials (optional)
+#   TELEGRAM_API_ID / _HASH / _NUMBER       optional; only for the experimental Telegram feature
 #   STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET
 
+# Telegram is disabled by default (ENABLE_TELEGRAM); only store its settings
+# when they're actually provided.
 telegram_attributes = {
-  telegram_api_id: ENV.fetch('TELEGRAM_API_ID', '000000'),
-  telegram_api_hash: ENV.fetch('TELEGRAM_API_HASH', 'test_telegram_api_hash'),
-  telegram_api_number: ENV.fetch('TELEGRAM_API_NUMBER', '5500000000000')
-}
+  telegram_api_id: ENV['TELEGRAM_API_ID'],
+  telegram_api_hash: ENV['TELEGRAM_API_HASH'],
+  telegram_api_number: ENV['TELEGRAM_API_NUMBER']
+}.compact_blank
 
 plan = Plan.find_or_create_by!(name: 'Default Plan') do |p|
   p.amount = 0
