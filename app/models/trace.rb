@@ -51,7 +51,6 @@ class Trace < ApplicationRecord
 
   # accepts_nested_attributes_for :payment
 
-  # validates_presence_of   [:name, :name_id]
   validates_presence_of   [:contract_volume_max, :customer_plans]
   
   validates :name, uniqueness: { scope: :store_id }
@@ -68,13 +67,6 @@ class Trace < ApplicationRecord
   after_save :magic_number_commit
   before_save :normalize_name
 
-  # after_create :set_default_settings
-
-  # def set_default_settings
-  #   self.settings ||= {}
-  #   self.settings['capital_recomendation'] ||= "0"
-  # end
-
   def settings
     super || {}
   end
@@ -83,13 +75,10 @@ class Trace < ApplicationRecord
     super(value || {})
   end
 
-
-
   def capital_recomedation=(value)
     value = value.to_s.gsub(".", "").gsub(",", ".")
     self.settings['capital_recomendation'] = value
   end
-
 
   def soft_destroy_custom
     self.update_column(:active_at, nil)
@@ -109,14 +98,6 @@ class Trace < ApplicationRecord
 
   alias_method :active?, :active
 
-  # def off 
-  #   self.update_column(:active_at, nil)
-  # end
-
-  # def self.disable
-  #   Trace.all.map(&:off)
-  # end
-
   def masters_transactions
     data_scope(:masters)
   end
@@ -126,12 +107,7 @@ class Trace < ApplicationRecord
     (DateTime.current + days + CustomerPlan.charge_recurrences[customer_plan.charge_recurrence.to_s].months).beginning_of_month
   end
 
-
   def mfe_analyze(mfe_target = 50, loss_set = 50, grouped_data = nil)
-    # if Rails.env.development?
-    #   self.search_date_begin = Date.parse("2024-01-01")
-    #   self.search_date_end = Date.parse("2024-01-30")
-    # end
     values = []
     data ||= self.data_scope.where(state: [:closed, :executed]) if grouped_data.nil?
     grouped_data ||= data.joins(:mfe)
@@ -217,8 +193,6 @@ class Trace < ApplicationRecord
   require 'thread'
 
   def test_parameters_parallel(target = nil)
-    # self.search_date_begin = Date.parse("2023-12-01")
-    # self.search_date_end = Date.parse("2024-01-30")
 
     data ||= self.data_scope.where(state: [:closed, :executed])
     grouped_data = data.joins(:mfe)
@@ -254,7 +228,6 @@ class Trace < ApplicationRecord
     self.update(mfe_analyzed: results)
     mfe_best_result
   end
-
 
   def mfe_calculate_performance_metric(result)
     result.map{|x| x[:profit_date]}.sum
@@ -333,9 +306,6 @@ class Trace < ApplicationRecord
       # If a conflicting record exists, add the error
       if query.exists?
         errors.add(:base, "Combination of name ('#{name}') and name_id ('#{name_id}') already exists for store ID #{s_id}")
-        # Optionally add errors to specific fields:
-        # errors.add(:name, "combination with name_id '#{name_id}' already exists for store ID #{s_id}")
-        # errors.add(:name_id, "combination with name '#{name}' already exists for store ID #{s_id}")
       end
     end
   end
@@ -343,7 +313,6 @@ class Trace < ApplicationRecord
   def validate_customer_plan_and_amount_greater_than_zero
     if self.customer_plan.nil?
       errors.add(:base, 'Trace must be associated with a CustomerPlan')
-    # elsif customer_plans.any? { |cp| cp.amount <= 0 }
     elsif customer_plan.amount_use <= 0 || customer_plan.amount.nil?
       errors.add(:base, 'Associated CustomerPlan must have an amount greater than 0')
     end

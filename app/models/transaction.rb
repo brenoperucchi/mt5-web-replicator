@@ -2,14 +2,8 @@
 class Transaction < ApplicationRecord
   include Telegram::Util
 
-  # attr_accessor :mfe, :mae, :time_trader
-
   has_paper_trail 
-  # versions: {
-  #   class_name: 'Track'
-  # }
 
-  # belongs_to :order, optional:true
   belongs_to :message, class_name: 'Message::Message', foreign_key: :message_id, optional:true
   belongs_to :account, optional:true
   belongs_to :trace, optional:true
@@ -20,12 +14,10 @@ class Transaction < ApplicationRecord
 
   has_many :transaction_traces, dependent: :destroy, foreign_key: :master_id
   has_many :traces, through: :transaction_traces, source: :trace, dependent: :destroy
-  # has_many :traces, through: :transaction_traces, source: :trace
   
   has_many :order_transactions, dependent: :destroy
   has_many :orders, through: :order_transactions, source: :order, dependent: :destroy
   has_many :traces_orders, through: :orders, source: :trace
-  # has_many :orders
 
   has_many :slaves,   through: :orders,    source: :slaves
   has_many :accounts, through: :orders,    source: :accounts
@@ -34,8 +26,6 @@ class Transaction < ApplicationRecord
   has_one :mfe, -> { where(kind: 'mfe') }, class_name: 'Statistic', as: :statisticable
 
   validates_uniqueness_of :ticket, scope: [:account_id, :trace_id, :order_id], on: :create, if: Proc.new { account.try(:hedging?) }
-
-  # enum state: { pending: 0, executed: 1, closed: 2, error: 3 }
 
   scope :pending,               ->{where(state: :pending)}
   scope :ordered,               ->{where(state: [:pending, :executed])}
@@ -59,11 +49,7 @@ class Transaction < ApplicationRecord
   scope :not_conciliated,   ->{where(conciliated_at: nil)}
   scope :conciliated,       ->{where.not(conciliated_at: nil)}
 
-  # before_create :set_symbol
   after_create  :validate_restriction
-  # Desabilitando o callback que causa problemas nos testes
-  # after_create  :ensure_order_association
-  # validate :restrict_symbol?, :restrict_nil_instrument?, on: :create
 
   # Método para verificar se uma transação está órfã (sem associação com orders)
   def orphaned?
@@ -162,13 +148,10 @@ class Transaction < ApplicationRecord
     
   end
 
-
   state_machine :initial => :pending do
     after_transition :pending => :executed,                    :do => :update_state
     after_transition [:pending, :executed] => :closed,         :do => :update_state
     after_transition [:pending, :executed, :closed] => :error, :do => :update_state
-    # after_transition :executed => :closed, :do => :break_even
-    # after_transition [:executed, :ordered] => :pending, :do => :update_state
 
     event :execute do
       transition :pending => :executed
@@ -244,7 +227,6 @@ class Transaction < ApplicationRecord
     end
   end
 
-
   def update_slaves(serializer, transaction_lot)
     self.slaves.each do |slave| 
       contract_volume = slave.try(:account).try(:contract_volume)
@@ -265,7 +247,6 @@ class Transaction < ApplicationRecord
     attributes = serializer.mfe_attributes
 
     if attributes.present?
-      # date_today = month.nil? ? DateTime.current : DateTime.current + eval(month)
       statistic_name = "#{serializer.time_trader.to_date.strftime("%Y-%m-%d")}"
       
       statistic = self.statistics.find_or_create_by(name: statistic_name, kind: :mfe)
@@ -277,7 +258,6 @@ class Transaction < ApplicationRecord
   end  
 
   def meta_ordertype
-    # "OP_" + ordertype.upcase
     case ordertype.downcase
     when "buy"
       0
@@ -294,12 +274,6 @@ class Transaction < ApplicationRecord
     end
   end
 
-  # # Método profit modificado para garantir cálculo consistente
-  # def profit
-  #   raw_value = read_attribute(:profit)
-  #   raw_value.nil? ? 0 : raw_value.to_f
-  # end
-
   def set_symbol
     if order.trace.telegram?
       ## TODO - CHANGE FOR SEARCHING FOR EXACTLY SYMBOL ON INSTRUMENTS
@@ -310,38 +284,19 @@ class Transaction < ApplicationRecord
   end
 
   def accept_magic_number?
-    # restrict_magic_number(self) or trace.restrict_magic_number(self)
     TradeHelperService.resource_restricted?(self, self.account) 
   end
 
-  # def restrict_magic_number(resource)
-  #   unless resource.account.magics_accept.blank?
-  #     trace_magic_number = self.try(:trace).try(:name_id)
-  #     magic_numbers = Order.magic_numbers_split(resource.account.magics_accept)
-  #     changeset = resource.try(:versions).try(:last).try(:changeset)
-  #     version = resource.try(:version)
-  #     unless magic_numbers.detect{|x| x == resource.magic_number}
-  #       resource.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{resource.magic_number} and the account: #{resource.try(:account).try(:name)} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:message)
-  #       resource.erro!
-  #     end
-  #   end
-  #   resource.error?
-  # end  
-
   def validate_restriction
-    # restrict_nil_instrument? 
-    # restrict_symbol?
   end
 
   def api_request_attributes
-    # order.api_request_attributes(self)
     TradeHelperService.api_request_attributes(self, self)
   end
 
   def self.api_request_attributes(scope)
     return if scope.nil?
       TradeHelperService.api_request_attributes_scope(order, self, scope)
-      # self.send(scope).where('closed_at >=? OR closed_at is NULL', (Time.zone.now - 60.days)).collect{|t| t.api_request_attributes}.join('/')
   end
 
   def mfe_max

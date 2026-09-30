@@ -1,5 +1,4 @@
 class Order < ApplicationRecord
-  # has_paper_trail
   attr_accessor :image_url, :profit_copy, :profit_slave
 
   belongs_to :trace
@@ -58,7 +57,6 @@ class Order < ApplicationRecord
     after_transition :executed => :closed, :do => :update_state
 
     event :prepare do
-      # transition :pending => :prepared, :if => lambda { |order| order.restrict_symbol? }
     end
     event :execute do
       transition [:pending, :prepared] => :executed
@@ -106,7 +104,6 @@ class Order < ApplicationRecord
     end
   end
 
-
   def message_action(action, value=0)
     case action
     when "open_order"
@@ -149,15 +146,11 @@ class Order < ApplicationRecord
     if file
       path = Rails.root
       image_path = "#{path}/public/output.jpg"
-      # image_path = ActiveStorage::Blob.service.path_for(self.image.key)
       system("#{path}/lib/textcleaner -c '0,140,0,0' -g -t 30 -s 2 -u -p 5 -T #{image_path} #{image_path}")
       image = RTesseract.new(image_path)
       return image.to_s.gsub(/[^A-Za-z]+/, "") #.to_s.scan(/([A-Z]{1,3} *\/ *[A-Z]{1,3})/)
 
     elsif url
-      # path = rails_blob_path(self.image, disposition: "attachment", only_path: true)
-      # resource = OcrSpace::Resource.new(apikey: "14ce99dd8788957")
-      # result = resource.convert url: "http://benincasouza.tplinkdns.com:8080/#{path}"
     end
   end
 
@@ -165,7 +158,6 @@ class Order < ApplicationRecord
     decimal = 10 ** (value.to_s.split('.').last.size)
     (self.trace.lots.to_f * value * decimal).round / decimal.to_f
   end
-
 
   def profit_copy
     profits = transactions.to_a

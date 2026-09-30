@@ -1,5 +1,4 @@
 class TradeHelperService
-  # attr_accessor :trace
   
   def self.magic_numbers_split(magic_numbers)
     delimiters = [',', ' ', "'",'-','_','.','/', ":", ";"]
@@ -18,25 +17,11 @@ class TradeHelperService
     trace_id = resource.trace_id
     openat = Rails.env.test? ? 0 : resource.try(:master).try(:open_at).to_i
     comment = resource.try(:comment)
-    # comment = "#{trace_id}-#{ticket_master}"
     contract_volume = resource.try(:account).try(:contract_volume)
     "#{resource.ordertype}|#{ticket_master}|#{ticket_slave}|#{trace_id}|#{resource.id}|#{resource.magic_number}|#{master_id}|#{openprice}|#{resource.lot}|#{resource.stop_loss}|#{resource.take_profit}|#{resource.state}|#{resource.symbol}|#{deal_ticket}|#{seconds_ago}|#{comment}|#{openat}|#{contract_volume}"
   end 
   
 
-  # def self.restrict_magic_number(klass, resource)
-  #   unless resource.magics_accept.blank?
-  #     resource_name_id = resource.try(:name)
-  #     resource_name = resource.try(:name)
-  #     magic_numbers = magic_numbers_split(resource.magics_accept)
-  #     changeset = resource.try(:versions).try(:last).try(:changeset)
-  #     if magic_numbers.detect{|x| x == klass.magic_number}.nil?
-  #       klass.loggings.create(content:"#{resource.class.name} ##{resource.id} has magic number #{klass.magic_number} and the #{resource.class.name}#{resource.class.id}: #{resource_name_id}##{resource_name} only accepted: #{magic_numbers.join(" - ")}", changeset: changeset, version:version, state: 'ERROR', parent:klass.message)
-  #       klass.error!
-  #     end
-  #   end
-  #   klass.error?
-  # end 
   
   def self.resource_restricted?(resource, register)
     if register.magics_accept.present?

@@ -32,7 +32,6 @@ module Model
           transaction ||= Transaction.create(copy_attributes.merge(account:account))
         elsif account.hedging?
           order = Order.create_with(trace: trace, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: current_store).find_or_create_by(content_id: ticket, trace:trace, store: current_store)
-          # order = account.orders.create_with(trace: supelf, messages: [message], message: message, content_id: ticket, symbol:instrument, account: account, store: account.try(:store)).find_or_create_by(content_id: ticket, trace:trace)
           transaction = Transaction.create_with(copy_attributes).find_or_create_by(ticket: ticket)
         end
         if transaction.valid?
@@ -58,7 +57,6 @@ module Model
         if order.valid? and not order.error?
           transaction.loggings.create(loggerable:message, content:order_params, changeset: transaction.try(:versions).try(:last).try(:changeset), state: "OPEN", parent: message.loggings.first, account: account, request_url: message.try(:request_url))
           transaction.execute unless transaction.executed?
-          # if transaction and not transaction.error?
           if transaction and !TradeHelperService.resource_restricted?(transaction, trace) and not TradeHelperService.resource_restricted?(transaction, account) 
             return true if account.netting? and order.slaves.count > 0 
             account_slaves.each do |account_slave|

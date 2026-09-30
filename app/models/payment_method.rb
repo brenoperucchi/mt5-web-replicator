@@ -2,15 +2,12 @@ class PaymentMethod < ApplicationRecord
   # Raised by providers when a webhook payload fails signature verification.
   class SignatureError < StandardError; end
 
-  # belongs_to :store
-
   has_many :invoices
   has_many :customer_plans
 
   has_many :payments, dependent: :destroy
   has_many :stores, through: :payments, source: :store
   
-  # has_many :payment
 
   accepts_nested_attributes_for :payments
 

@@ -16,7 +16,6 @@ class Message::V2::Metatrader < Message::Message
   def close_orders(logging)
     account = Account.find_by(name: params_url("account_id"), kind: :copy)
     if params_copy("orders_closed").try(:present?)
-      # params_copy = {imentore_copy: {orders_closed: params_copy("orders_closed")}}.merge(params_hash).to_json
 
       loggings.create(content:params_copy("orders_closed"), state: "ORDERS_CLOSED", changeset: account.name, account: account, parent:logging, resourceable: account)
 
@@ -26,7 +25,6 @@ class Message::V2::Metatrader < Message::Message
         end
       end
     end
-    # logging = self.loggings.last
       
       if params_copy("orders_open").present?    
         account.transactions.executed.each do |transaction|
@@ -42,14 +40,12 @@ class Message::V2::Metatrader < Message::Message
         transaction_closed(transaction, params_copy("orders_closed")[ticket_id], logging, :orders_open) if params_copy("orders_closed").present? and params_copy("orders_closed")[ticket_id].present?
       end
 
-
     return true
   end
 
   def transaction_closed(transaction, copy_params, logging, kind)
     copySerializer = API::V2::CopySerializer.new(copy_params)
     if transaction and transaction.can_close?
-      # transaction.order.messages << self
       transaction.trace.messages << self
       transaction.attributes = copySerializer.closed_attributes
       transaction.save
@@ -74,15 +70,12 @@ class Message::V2::Metatrader < Message::Message
     if params_copy("orders_open").try(:present?) and account
       # TODO - Aceitar registro de message de copy mesmo se conta desabilitada 
       if account.enable?
-        # params_copy = {imentore_copy: {orders_open: params_copy("orders_open")}}.merge(params_hash).to_json
         traces = account.traces.copy.active
         if traces.present? #and not content.blank? and content.is_a?(Hash)
           # message = Message::Metatrader.create(content: self.content, content_at: Time.zone.now, store: account.store, traces:traces)
           # TODO - Colocar uma trava se account estiver desabilitado
 
-          # content = YAML.load(self.content)
           account_mode = params_url("account_mode")
-          # account_copy = Account.find_by(name: params_url("account_id"))
           loggings.create(content:params_copy("orders_open"), state: "ORDERS_OPEN", changeset: account.name, account:  account, parent:logging, resourceable: account)
           changed = true
 
@@ -93,12 +86,10 @@ class Message::V2::Metatrader < Message::Message
             state_meta = copy_params["state_meta"]
             traces.active.not_deleted.each do |trace|
               orders = trace.orders.where(content_id: ticket)
-              # next if Order.where(content_id: ticket, account: account, trace: trace).take.present?
 
               unless orders.present? and account.try(:enable?)
                 begin
                   self.traces << trace unless self.trace_ids.include?(trace.id)
-                  # trace.create_order(copy_params, account, self, copy_params["symbol"], API_VERSION) 
                   trace_service = Model::TraceService.new(trace, copy_params, account, self, copy_params["symbol"], API_VERSION)
                   trace_service.create_order
                 rescue ActiveRecord::RecordNotUnique
@@ -113,7 +104,6 @@ class Message::V2::Metatrader < Message::Message
                     order.transactions.each do|transaction|     
                       if ["SLTPLOT", "PROFIT"].any?{|state| state_meta.try(:include?, state)}
                         transaction.update_modify_meta(copySerializer) 
-                        # transaction.update_slaves(copySerializer)
                         transaction.update_mfe_mae(copySerializer)
                       end
                     end

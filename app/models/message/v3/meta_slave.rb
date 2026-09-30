@@ -9,7 +9,6 @@ class Message::V3::MetaSlave < Message::Message
 
   state_machine :initial => :pending do
     before_transition :pending => :executed, :do => :execute_slave
-    # before_transition [:pending, :executed] => :conciliated, :do => :execute_conciliated
     
     event :execute do
         transition :pending => :executed
@@ -26,7 +25,6 @@ class Message::V3::MetaSlave < Message::Message
   end
 
   validates_presence_of :account
-
 
   def execute_slave
     if self.valid?

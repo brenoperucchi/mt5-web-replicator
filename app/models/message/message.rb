@@ -9,7 +9,6 @@ class Message::Message < ApplicationRecord
   serialize :content, coder: YAML
   serialize :params, coder: YAML
   
-  # has_many :orders
   has_and_belongs_to_many :orders, -> { distinct }
   has_and_belongs_to_many :traces, -> { distinct }
 
@@ -20,9 +19,6 @@ class Message::Message < ApplicationRecord
 
   belongs_to :store,   optional: true
   belongs_to :account, optional: true
-  # belongs_to :trace, optional: true
-
-  # before_destroy { Order.where(id:[order_ids]).destroy_all }
 
   def kind
     loggings.try(:first).try(:state)
@@ -31,11 +27,6 @@ class Message::Message < ApplicationRecord
   def all_loggings
     loggings.try(:first).try(:subtree)
   end
-
-  # def presenter
-  #   api_version = self.class.const_get('API_VERSION')
-  #   "API::#{api_version.try(:upcase)}::OrdersPresenter".classify.safe_constantize.new(content)
-  # end
 
   def params_copy(key = nil)
     if self.content.is_a?(String)
@@ -47,7 +38,6 @@ class Message::Message < ApplicationRecord
       end
     end
   end
-
 
   def params_url(key = nil)
     if self.content.is_a?(String)
