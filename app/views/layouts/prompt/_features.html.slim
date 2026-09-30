@@ -85,18 +85,18 @@ section.overflow-hidden
                   = I18n.t(:title12, scope: 'helpers.site.main.layout')
 
       .xl:pt-16.xl.py-16
-        - trace = Trace.find(42)
+        - featured_href = featured_trace_path(42)
         .grid.lg:grid-cols-2.grid-cols-1.gap-6.items-center
           .relative
             .hidden.sm:block
               div[class=" after:w-20 after:h-20 after:absolute after:-top-8 after:-start-8 2xl:after:end-0 after:bg-[url('prompt/images/pattern/dot5.svg')]"]
               div[class=" before:w-20 before:h-20 before:absolute before:-bottom-8 before:-end-8 before:bg-[url('prompt/images/pattern/dot2.svg')]"]
-            = link_to dashboard_path(trace.stores.first.url, trace.name, params:request.query_parameters) do
+            = link_to featured_href do
               img[src="/images/prompt/home-2.png" alt="saas1" data-aos="fade-right" data-aos-duration="400"]
           .lg:ms-24
             div[data-fc-type="accordion" data-aos="fade-up" data-aos-duration="500"]
               button.pt-2.inline-flex.items-center.gap-x-4.w-full.font-medium.text-left.text-gray-800.transition-all.hover:text-gray-500.dark:text-gray-200.dark:hover:text-gray-400[data-fc-type="collapse"]
-                = link_to dashboard_path(trace.stores.first.url, trace.name, params:request.query_parameters), class:"hover:text-primary transition-all" do
+                = link_to featured_href, class:"hover:text-primary transition-all" do
                   h1.font-medium.mb-4.mt-2
                     = I18n.t(:title13, scope: 'helpers.site.main.layout')
               .w-full.overflow-hidden.duration-300
@@ -105,7 +105,7 @@ section.overflow-hidden
                 p.text-gray-700.dark:text-gray-300.mt-3
                   = I18n.t(:title15, scope: 'helpers.site.main.layout')
                 p.text-gray-700.dark:text-gray-300.mt-3
-                  = link_to dashboard_path(trace.stores.first.url, trace.name, params:request.query_parameters), class:"hover:text-primary transition-all" do
+                  = link_to featured_href, class:"hover:text-primary transition-all" do
                     = I18n.t(:title16, scope: 'helpers.site.main.layout')
 
       .xl:pt-16.xl.py-16
