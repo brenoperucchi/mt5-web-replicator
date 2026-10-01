@@ -1,5 +1,12 @@
 # MT5 Web Replicator
 
+[![CI](https://github.com/brenoperucchi/mt5-web-replicator/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/brenoperucchi/mt5-web-replicator/actions/workflows/ci.yml)
+[![Docker publish](https://github.com/brenoperucchi/mt5-web-replicator/actions/workflows/docker-publish.yml/badge.svg?branch=master)](https://github.com/brenoperucchi/mt5-web-replicator/actions/workflows/docker-publish.yml)
+[![Ruby](https://img.shields.io/badge/ruby-3.3.10-CC342D?logo=ruby&logoColor=white)](.ruby-version)
+[![Rails](https://img.shields.io/badge/rails-8.1-D30001?logo=rubyonrails&logoColor=white)](Gemfile)
+[![Docker image](https://img.shields.io/badge/image-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/brenoperucchi/mt5-web-replicator/pkgs/container/mt5-web-replicator)
+[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-blue)](LICENSE.md)
+
 Ruby on Rails application to receive, organize, and replicate trading information coming from MT5/MQL to a web backend. The project centralizes admin dashboards, accounts, customers, plans, invoices, payment integrations, and APIs to manage the distribution of orders and events across multiple accounts.
 
 ## Quick start (Docker)
