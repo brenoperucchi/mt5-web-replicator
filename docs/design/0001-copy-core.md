@@ -1,10 +1,10 @@
 # 0001: Rails-agnostic copy core (standalone Copy Server)
 
 - **Status:** Draft, for review (Phase 0 of #77)
-- **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket), #64 (shared API core), #66 (latency/slippage), brenoperucchi/python-signal#4 (slave symbol mapping)
+- **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket), #64 (shared API core), #66 (latency/slippage)
 - **Reviewers:** the mt5 reviewers. Each numbered **Decision (Dn)** below can be approved or rejected on its own.
 
-All code citations are `path:line` against `master` at `1bd5b5b` (this repo) and `main` / PR #4 head of `python-signal`.
+All code citations are `path:line` against `master` at `1bd5b5b` (this repo) and `main` of `python-signal`.
 
 ---
 
@@ -69,7 +69,7 @@ Alternatives considered:
 
 **Recommendation:** `git filter-repo` on a fresh clone of `python-signal` with `--path MQL/ --path-rename MQL/:ea/` (and `Python/` to `client/`), then `git merge --allow-unrelated-histories` into the target repo. In this repo, move Rails into `web/` with a single plain `git mv` commit (history is still followed with `git log --follow`; `filter-repo` on the main repo is *not* needed and would rewrite every SHA referenced by PRs and issues).
 
-- Authorship is preserved. `python-signal` has 6 commits: 5 by Breno Perucchi and 1 by Oseni Ibrahim (`f2861ab`, symbol mapping, PR #4). Merge PR #4 in `python-signal` **before** the import so Oseni's commit lands with his authorship and his CLA signature remains on record (`cla-signatures` branch exists there).
+- Authorship is preserved: `git filter-repo` keeps every commit's author and date, so history imported from `python-signal` stays attributed to whoever wrote it.
 - `git subtree add` is the alternative. It also keeps history, but in a squashed or prefixed form that is awkward to `blame`, and nothing is gained since we will not sync back.
 
 Old repo: archive `python-signal` (read-only) with a README pointer "moved to `<new-name>/ea`". Leave its releases in place, since installed users may download from them.
@@ -92,7 +92,7 @@ GHCR: keep publishing `ghcr.io/brenoperucchi/mt5-web-replicator` as an alias tag
 
 **Recommendation:** one coordinated change set, in this order:
 
-1. Merge python-signal#4. Tag the last state of both repos (`pre-monorepo`).
+1. Tag the last state of both repos (`pre-monorepo`).
 2. Rename this repo on GitHub (redirects are automatic), rename the image.
 3. Import `python-signal` into `ea/` + `client/` (D2), move Rails to `web/`, split CI (D3). One PR, reviewed as "moves only".
 4. Rename the EA files and `Imentore*` identifiers in a **separate** PR, so the move PR stays a pure move. The URL segment `imentore_copy`/`imentore_slave` stays accepted by the server forever (it is in every installed EA's request path, `ImentoreLib-13.mqh:241-242`, and in `config/meta_versions.yml`).
@@ -440,14 +440,14 @@ All secrets via env or Docker secrets (`ADMIN_TOKEN`, `TOKEN_PEPPER`, `WEBHOOK_S
 
 ## 7. Conciliation and symbol mapping
 
-### 7.1 Symbol mapping (python-signal#4)
+### 7.1 Symbol mapping
 
-PR #4 resolves symbols **on the slave** (mapping input, prefix/suffix, auto-detect; `ImentoreSlave-3.00-04.mq5:30-33`, `ResolveSlaveSymbol` used at `ImentoreLib-13.mqh:1291`). That is the right place for *discovery*, since only the terminal knows which symbols its broker has.
+Today the slave EA uses the master's symbol name as-is (`ImentoreLib-13.mqh:1278`), so a follower broker that names an instrument differently (`EURUSD.m`, `GOLD` for `XAUUSD`) can't copy it; Rails only has the per-account `Instrument` rename (`trace_service.rb:90-96`). Symbol mapping is implemented from scratch in the core; no external contribution is reused.
 
-**Recommendation (D9):** two layers, server wins when set:
+**Recommendation (D9):** resolve on the server:
 1. Server `symbol_maps` (per slave, or global) is applied before the row is sent: field 12 carries the slave symbol. Admin-managed, visible, auditable. Replaces Rails `Instrument` + `instrument_control` (`trace_service.rb:90-96`).
-2. EA-side resolution (PR #4) stays as fallback for anything the server did not map. Since it receives an already-mapped name, an exact match short-circuits it.
-3. The slave reports the resolved local symbol in its update; the server stores it as `slave_orders.symbol_local`. Later a v4 EA can upload its symbol list and the server can suggest maps.
+2. Unmapped symbols are sent as-is (today's behavior); the admin sees `symbol not found` from the slave's update and adds a map. A future v4 EA can upload its broker's symbol list so the server can suggest maps (discovery stays a server feature, not EA logic).
+3. The slave reports the symbol it actually traded in its update; the server stores it as `slave_orders.symbol_local`.
 
 ### 7.2 Conciliation (#79)
 
@@ -455,7 +455,7 @@ The bug: `SlaveConciliatePresenter#conciliate_position` matches by `symbol` + `t
 
 **Recommendation (D10):** in the core, conciliation matches **only by identity**: `(slave_id, ticket_slave)` (position id), falling back to `correlation` (comment) when the ticket is not yet known. Symbol is compared only as a consistency check, logged on mismatch. `UNIQUE(slave_id, ticket_slave)` makes this the natural key.
 
-Also fix #79 in Rails *now*, independently (match by `ticket_slave` + `account`, add a `symbol_local` column, regression spec where history reports `GOLD` for master `XAUUSD`), because Rails is the running backend until Phase 3, and PR #4 will hit it first. The same fixture then becomes a golden test (Section 4.5), where the Rails behavior after the fix is the golden one.
+Also fix #79 in Rails *now*, independently (match by `ticket_slave` + `account`, add a `symbol_local` column, regression spec where history reports `GOLD` for master `XAUUSD`), because Rails is the running backend until Phase 3, and any symbol mapping will hit it first. The same fixture then becomes a golden test (Section 4.5), where the Rails behavior after the fix is the golden one.
 
 Conciliation also computes latency (`slave open_at − master open_at`, both normalized via `time_gmt`) and slippage (`slave price_open − master price_open` in points) and stores them on `slave_orders` (#66). Time-zone handling follows `slave_serializer.rb:147-160`.
 
@@ -489,7 +489,7 @@ Rails keeps `Trace` as the commercial product ("a signal you subscribe to"); sub
 
 | Phase | Scope | Exit criteria |
 |---|---|---|
-| **0** | This document approved; #79 fixed in Rails; python-signal#4 merged | Decisions D1–D11 approved or amended; open questions answered or deferred explicitly |
+| **0** | This document approved; #79 fixed in Rails | Decisions D1–D11 approved or amended; open questions answered or deferred explicitly |
 | **0.5** | Monorepo + rename (D1–D4) | One repo, CI green for `web/`, `ea/`; `python-signal` archived; Rails image still deploys |
 | **1** | Copy Server core: E1–E7, accounts/links/master_positions/slave_orders, SQLite, Docker, admin API (token), golden tests | All golden scenarios pass; demo master + 2 slaves (hedging and netting) copy, modify and close for 48 h on a demo broker with zero unmatched slaves; `docker compose up` gives a working server with no Rails |
 | **2** | Server-side symbol maps, lot modes, conciliation by ticket, latency/slippage, enrollment + tokens in a new EA build | Golden tests updated deliberately; #66 numbers visible via API; a new EA build passes enrollment; mapped-symbol conciliation scenario passes |
@@ -518,7 +518,7 @@ There are no active deployments today, so no live cutover is needed. Still provi
 - **R3. Comment as correlation key.** MT5 brokers may truncate comments (31 chars) or overwrite them; prop-firm prefixes make them longer (`trace_service.rb:71`). Today's design has the same risk; the core reduces reliance on it once `ticket_slave` is known.
 - **R4. SQLite with multiple workers.** Mitigated by refusing to start with >1 worker on SQLite.
 - **R5. Monorepo move breaks Kamal/CI paths** (`config/deploy.yml`, Dockerfile context). Mitigation: the move PR changes paths only, and a deploy dry-run is part of its checklist.
-- **R6. Licensing.** Both repos use PolyForm Noncommercial + CLA; Oseni's contribution was made under python-signal's CLA. Confirm the CLA wording covers relocation into a renamed repo (it should, since it grants rights to the maintainer, not to a repo).
+- **R6. Licensing.** Both repos use PolyForm Noncommercial + CLA. Confirm the CLA wording covers relocation into a renamed/merged repo (it should, since it grants rights to the maintainer, not to a repo), and only import history whose contributors signed it.
 
 ### Open questions (for the owner and reviewers)
 
@@ -541,13 +541,13 @@ There are no active deployments today, so no live cutover is needed. Still provi
 | # | Decision | Recommendation |
 |---|---|---|
 | D1 | Repo layout | Monorepo: `ea/ server/ web/ client/ installer/ docs/` |
-| D2 | History migration | `git filter-repo` import of python-signal + `git mv` Rails to `web/`; merge PR #4 first |
+| D2 | History migration | `git filter-repo` import of python-signal + `git mv` Rails to `web/` |
 | D3 | CI | Path-filtered workflows per directory, one CLA bot, two GHCR images |
 | D4 | Sequencing | Tag → rename → move PR → EA rename PR → archive; Phase 1 in parallel after move |
 | D5 | Stack | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 (sync), Alembic |
 | D6 | Storage | SQLite WAL default, Postgres optional; never JSON files |
 | D7 | Deploy/config | Single image, compose, env-only config, TLS at proxy |
 | D8 | Auth | Per-account tokens via one-time enrollment code; v3 compat mode for old EAs; admin bearer tokens |
-| D9 | Symbol mapping | Server `symbol_maps` first, EA-side PR #4 as fallback |
+| D9 | Symbol mapping | Server-side `symbol_maps`, implemented from scratch |
 | D10 | Conciliation | Match by `ticket_slave` / correlation, never symbol; fix #79 in Rails now |
 | D11 | Rails contract | Webhooks out + admin API in; Rails pushes authorization, never on the hot path |
