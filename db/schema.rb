@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_09_29_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_02_045211) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "account_servers", force: :cascade do |t|
     t.string "name"
@@ -541,6 +541,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_09_29_120000) do
     t.bigint "position_id"
     t.datetime "conciliated_at", precision: nil
     t.decimal "fee"
+    t.string "symbol_local"
     t.index ["account_id"], name: "index_transaction_slaves_on_account_id"
     t.index ["order_id"], name: "idx_transaction_slaves_order_id"
     t.index ["state", "closed_at"], name: "idx_transaction_slaves_state_closed_at"

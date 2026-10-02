@@ -125,12 +125,16 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
     
     trace_id  = normalize_comment(json_last['comment'])&.first&.to_i&.abs
     trace     = Trace.find_by(id: trace_id) || find_or_create_trace
-    slaves    = TransactionSlave.where(symbol: symbol, ticket_slave: positionID, account: account)
+    # Match by position id + account only (issue #79). TransactionSlave.symbol
+    # holds the MASTER symbol, while the slave history reports the LOCAL broker
+    # symbol (e.g. XAUUSD vs GOLD / EURUSD.m), so symbol cannot be part of the key.
+    # Ticket ids are unique per broker account, hence the account scoping.
+    slaves    = TransactionSlave.where(ticket_slave: positionID, account: account)
     results   = []
     
     if slaves.present?
       slaves.each do |slave|    
-        serializer = API::V3::SlaveSerializer.new(json_last)
+        track_symbol_local(slave, symbol)
         if slave && !slave.conciliated?
           order = slave.order || find_or_create_order(json_last, trace)
           results << update_existing_slave(slave, json_last, order)
@@ -141,6 +145,15 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
       results << create_new_slave(json_last, trace, order)
     end
     return results
+  end
+
+  # Symbol is only a consistency check: log a mismatch and remember the local
+  # symbol reported by the follower broker so admins can see it.
+  def track_symbol_local(slave, symbol)
+    return if symbol.blank? || slave.symbol.to_s.casecmp?(symbol.to_s)
+
+    Rails.logger.warn("[CONCILIATE] Symbol mismatch on TransactionSlave##{slave.id} (account #{account&.id}, ticket_slave #{slave.ticket_slave}): master=#{slave.symbol} local=#{symbol}")
+    slave.update_column(:symbol_local, symbol) if slave.symbol_local != symbol
   end
 
   def conciliate_by_total
