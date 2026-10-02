@@ -333,6 +333,48 @@ slave update ─► by correlation:
    MODIFY/NOTMODIFY/NOSLTP/NOTCLOSED → audit only (+ escalation rule)
 ```
 
+Master → slave copy, end to end (Phase 1, v3 protocol; endpoint ids from Section 4.2):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant M as Master EA (ImentoreCopy)
+    participant S as Copy Server
+    participant DB as SQLite/Postgres
+    participant SL as Slave EA (ImentoreSlave)
+    participant R as Rails (optional)
+
+    M->>S: E1 POST copy/post/orders (snapshot: PositionOrders, HistoryOrders)
+    S->>DB: inbound_messages (raw) + diff vs master_positions (one transaction)
+    S->>DB: master_positions(open) + slave_orders(pending) per enabled copy_link
+    S->>DB: events(outbox): position.opened
+    S-->>M: 201 "true"
+
+    loop every poll interval
+        SL->>S: E3 POST slave/post/orders (slave snapshot)
+        S->>DB: load pending/open slave_orders for this slave
+        S-->>SL: 201 pipe rows (symbol resolved via symbol_maps, comment = correlation)
+    end
+
+    SL->>SL: resolve symbol, OrderSend
+    SL->>S: E5 POST slave/post/update (metaState OPENED, comment, positionID, price)
+    S->>DB: slave_orders → executed (ticket_slave, latency_ms, slippage_points)
+    S-->>SL: 201 rows
+
+    M->>S: E1 snapshot: position gone, present in HistoryOrders
+    S->>DB: master_positions → closed, slave_orders → closing
+    SL->>S: E3 poll
+    S-->>SL: 201 rows (state = close)
+    SL->>SL: PositionClose
+    SL->>S: E5 update (metaState CLOSED)
+    S->>DB: slave_orders → closed; events(outbox): position.closed
+
+    opt Rails enabled
+        S-)R: signed webhook (outbox delivery, retried)
+        R-->>S: 2xx
+    end
+```
+
 Hedging vs netting: on hedging accounts a master position id maps to one slave position. On netting masters (`trace_service.rb:26-32`), the master reports one position per symbol whose volume changes; Phase 1 reproduces today's behavior (one slave order per symbol, no re-sizing on partial adds). Partial close/add for netting is listed as a Phase 2 item (Q7).
 
 ### 5.3 Lot scaling (Phase 2)
