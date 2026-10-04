@@ -1,10 +1,49 @@
 # 0001: Rails-agnostic copy core (standalone Copy Server)
 
-- **Status:** Draft, for review (Phase 0 of #77)
+- **Status:** Draft, revision 2 (after review round mt5-3), Phase 0 of #77
 - **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket), #64 (shared API core), #66 (latency/slippage)
 - **Reviewers:** the mt5 reviewers. Each numbered **Decision (Dn)** below can be approved or rejected on its own.
 
-All code citations are `path:line` against `master` at `1bd5b5b` (this repo) and `main` of `python-signal`.
+Rails citations are `path:line` against `master` at `4e64c5e`; EA citations against `python-signal` `main` at `2e7b827` (`EA/` = `MQL/Imentore/MT5/`, `Lib` = `EA/Lib/ImentoreLib-13.mqh`, `Slave` = `EA/ImentoreSlave-3.00-04.mq5`).
+
+---
+
+## 0. Changes since review mt5-3
+
+Owner decisions of 2026-10-04 changed the premise. python-signal is not imported (new EA and server are written here; python-signal is archived as legacy), and **no EA is installed or pointing at a live server.** v3 wire compatibility is dropped. The Copy Server speaks a new **v4** protocol (Section 4) with a new EA build; v3 is kept only as a reference for business rules (Section 5.5, Appendix A). Netting is limited to one copy per symbol per slave in Phase 1; lots are computed server-side from symbol specs the EA reports; market orders execute at market on both sides.
+
+| Finding | Resolution |
+|---|---|
+| rev-1 #1 (`state=close` ignored by EA) | Obsolete as wire issue: v4 sends explicit `action: close` commands (4.4). The legacy `pending/executed/remove` vocabulary is recorded in Appendix A. |
+| rev-1 #2 (lot rounding does not exist) | Decision 4: EA reports `volume_min/step/max`, `contract_size`; server rounds down to step, clamps (5.4). |
+| rev-1 #3 (ticket mixes identities) | Identity model with order / deal / position ticket / `position_id` (5.2); netting per decision 3. |
+| rev-1 #4 (`copy_links` loses trace) | `copy_groups` + `UNIQUE(group_id, master_id, slave_id)` (5.1). |
+| rev-1 #5 (`enrolled` semantics) | No open/legacy mode; bearer token always required (6.2). `V3_COMPAT_MODE` removed. |
+| rev-1 #6 (IP rate limit blocks polling) | Per-route/role limits sized for 2 s polling of many terminals behind one IP; strict only for enroll/unknown (6.4). |
+| rev-1 #7 (PR #4 symbol precedence) | Obsolete: the new EA does no local mapping; it trades the symbol the server sends, exact name only (7.1). |
+| rev-1 #8 (one worker ≠ serialization) | `BEGIN IMMEDIATE` writes, busy_timeout, whole-transaction retry, conciliation off hot path (D6). |
+| rev-1 #9 (dedup drops legit updates) | Idempotency keys from the EA + transition idempotency only for terminal states (5.6). |
+| rev-1 #10, #11 (golden masking / recorder) | Obsolete: no byte-level golden recorder. Rails specs become behavior scenarios (8). |
+| rev-1 #12 (CI path filters) | `server.yml` triggers on `docs/protocol/**`, `ea/**` contract sources, `web/` API sources (D3). |
+| rev-1 #13 (catalog errors) | Moved to Appendix A as legacy facts (18 fields, field 4 = `TransactionSlave.id`, timeout `0`, E1 500). |
+| rev-2 A1 (non-201 loops forever) | Documented as legacy EA defect (Appendix A); v4 EA has bounded retries and 4xx/5xx handling (4.2). "201 always" not adopted. |
+| rev-2 A2 (field 11 vocabulary) | As rev-1 #1. |
+| rev-2 A3 (lot premise, netting resizing) | Decision 4 (5.4); netting decision 3 (5.3). Today's 1:1 resize is described in Appendix A. |
+| rev-2 A4 (store JSON byte limits) | Obsolete: v4 config is real JSON parsed by a JSON library in the EA. |
+| rev-2 A5 (BUY anchored to master price) | Decision 5: both sides at market with slippage guard (4.4). Rails bug fixed separately. |
+| rev-2 A6 (netting uniqueness) | Partial unique index for hedging only; netting = one copy per symbol, enforced at config (5.2, 5.3). |
+| rev-2 A7 (SQLite locking) | As rev-1 #8. |
+| rev-2 A8 (raw storage volume) | Store on state change + sampled heartbeat; per-type retention; size estimate (5.7). |
+| rev-2 A9 (30-deal history window) | Close by absence: K=3 snapshots and T=10 s, configurable; history enriches only (5.5). |
+| rev-2 A10 (`open` default) | Obsolete: no installed base, token always required. |
+| rev-2 A11 (prefix/suffix before exact) | As rev-1 #7. |
+| rev-2 A12 (OPENED after master close) | Rule: record ticket/price, stay `closing` (5.5). |
+| rev-2 A13 (E8 log upload) | v4 `POST /v4/logs` with cap, 413 handled by EA (stop sending) (4.3); Q6. |
+| rev-2 A14 (recorder feasibility) | As rev-1 #10/#11. |
+| rev-2 A15 (wrong citations) | Fixed; byte-compat citations dropped. Verified against `4e64c5e`/`2e7b827`. |
+| rev-2 A16 (merge method, MT4) | Obsolete (owner decision 2026-10-04): python-signal history is not imported; the new EA is written fresh in `ea/mt5`, python-signal is archived with legacy EAs and MT4 (D2). |
+| rev-2 A17 (token storage) | Per-terminal `MQL5\Files`, keyed by (server, login, role), not `FILE_COMMON` (6.2). |
+| rev-2 A18 (`eval` in Rails) | Listed in 6.1; being fixed separately. |
 
 ---
 
@@ -14,91 +53,72 @@ All code citations are `path:line` against `master` at `1bd5b5b` (this repo) and
 
 Copy trading runs entirely inside the Rails app:
 
-- The master EA (`ImentoreCopy-3.00-04.mq5`) uploads a JSON snapshot of its positions, pending orders and history every ~2 s (`ImentoreCopy-3.00-04.mq5:69-71`, timer at `:80`), to `POST /api/v3/copy/post/orders/...` (`app/controllers/api/v3/api_copy.rb:15`).
-- Rails stores the raw body as a `Message::V3::MetaCopy` (`app/models/message/v3/meta_copy.rb`), then `API::V3::CopyPresenter` diffs it against `Transaction`s and, for every new master ticket, `Model::TraceService#create_order` fans out one `TransactionSlave` per enabled slave account in each trace/store (`app/services/model/trace_service.rb:23-83`).
-- Each slave EA polls `POST /api/v3/slave/post/orders/...` (`api_slave.rb:88`), receives a `/`-separated list of pipe-delimited rows (`app/presenters/API/V3/slave_presenter.rb:170-173`, row format in `app/services/trade_helper_service.rb:10-22`), executes locally, and reports each result to `POST /api/v3/slave/post/update/...` with a `metaState` (`api_slave.rb:67`, state machine in `slave_presenter.rb:176-240`).
-- Both EAs fetch runtime config from `.../post/store/...` (`api_copy.rb:30-49`, `api_slave.rb:123-141`, `app/presenters/API/V3/store_presenter.rb`).
+- The master EA (`EA/ImentoreCopy-3.00-04.mq5`) uploads a JSON snapshot of positions, pending orders and the last 30 history deals every ~2 s to `POST /api/v3/copy/post/orders/...` (`app/controllers/api/v3/api_copy.rb:15`).
+- Rails stores the raw body as `Message::V3::MetaCopy`, `API::V3::CopyPresenter` diffs it against `Transaction`s, and `Model::TraceService#create_order` fans out one `TransactionSlave` per enabled slave in each trace (`app/services/model/trace_service.rb:23-83`).
+- Each slave EA polls `slave/post/orders` (`api_slave.rb:33-45`), receives pipe-delimited rows, executes locally, and reports each result to `slave/post/update` with a `metaState` (`api_slave.rb:12-29`; state machine in `slave_presenter.rb:19-83`).
 
-All of that is entangled with `Store`, `Customer`, `Trace`, `Permission`, `CustomerPlan` and billing (`app/models/account.rb:24-48`, `app/models/trace.rb:22-54`; `Trace` even validates presence of `customer_plans`, `trace.rb:54`). Someone who just wants to copy between their own two accounts must run Rails + Postgres + Redis + seeds (`docker-compose.yml`) and model a "store" and a "plan".
+All of it is entangled with `Store`, `Customer`, `Trace`, `Permission`, `CustomerPlan` and billing (`app/models/account.rb`, `app/models/trace.rb`). Copying between two of your own accounts needs Rails + Postgres + Redis + seeds.
 
 ### 1.2 Goals
 
-1. **Individuals first:** one small container that copies trades from one master to N slaves the user owns. No customers, plans or billing required.
-2. **Installed EAs keep working.** Phase 1 speaks the existing v3 protocol byte-for-byte where the EA depends on it.
-3. **Multi-customer business stays possible** through Rails as an *optional* client of the Copy Server (Phase 3).
-4. Fix the known weaknesses before anything is reused: shared secrets compiled into EAs, unauthenticated admin, no TLS, in-memory sessions, JSON-file storage, no tests.
+1. **Individuals first:** one small container that copies one master to N slaves the user owns. No customers, plans or billing.
+2. **A clean v4 protocol and a new EA written in this repo** with authenticated, idempotent, JSON request/response and bounded retries. No legacy wire format.
+3. **Preserve the business rules** v3 encodes (fan-out, netting/hedging, magic restrictions, instrument rename, metaState handling, close races, conciliation), proven by scenario tests ported from the Rails specs.
+4. Multi-customer business stays possible through Rails as an *optional* client (Phase 3).
+5. Fix known weaknesses: shared secrets in EAs, unauthenticated endpoints, no TLS, in-memory sessions, JSON-file storage.
 
-### 1.3 Non-goals (for this design)
+### 1.3 Non-goals
 
-- A new EA protocol (v4). We reserve room for it (Section 4.6) but Phase 1 is v3-compatible only.
-- MT4, cTrader or other platforms.
-- Signal marketplace, Telegram signals (`/api/v3/stores/telegram/python`, `api_store.rb:157`) and billing. These stay in Rails.
-- Replacing the EA-side execution logic (retry, slippage, MFE/MAE). The server stays a coordinator; the terminal executes.
+- v3 wire compatibility (dropped 2026-10-04; nothing is installed).
+- MT4 (stays in archived python-signal), cTrader, other platforms.
+- Signal marketplace, Telegram signals, billing. These stay in Rails.
+- Moving execution out of the terminal. The server coordinates; the EA executes.
 
 ---
 
-## 2. Repository consolidation (monorepo)
-
-The owner's direction: merge `python-signal` into the same repo as the Copy Server and the Rails app, done together with the rename (#78).
+## 2. Repository layout
 
 ### D1. Layout
 
+The new EA and the new Copy Server are written directly in this repository. Legacy EAs are reference only and are not migrated.
+
 ```
-<new-name>/
-├── ea/                 # from python-signal/MQL (EAs, Lib/*.mqh, JAson)
-│   ├── mt5/            #   current maintained EAs only (Copy, Slave, Lib)
-│   └── legacy/         #   2.x / 3.00-0[23] kept until tagged, then removed
-├── server/             # NEW: Copy Server (FastAPI, Python 3.12)
-│   ├── app/  tests/  pyproject.toml  Dockerfile
-├── web/                # this Rails app, moved as-is (Gemfile, app/, spec/, config/deploy.yml ...)
-├── client/             # python-signal/Python (existing Python client) until retired
-├── installer/          # Windows installer (StockInstaller-derived, Section 2.5)
-├── docs/               # design docs, protocol reference
-├── docker-compose.yml  # server only by default; `--profile web` adds Rails+Postgres+Redis
-├── LICENSE.md  CLA.md  README.md
-└── .github/workflows/  # one workflow per directory (D3)
+mt5-web-replicator/ (renamed per #78)
+├── ea/mt5/             # NEW MQL5 EA (master + slave v4 client, Lib); written fresh
+├── server/             # NEW Copy Server (FastAPI, Python 3.12): app/ tests/ pyproject.toml Dockerfile
+├── web/                # this Rails app, moved as-is
+├── installer/          # Windows installer (later, Q10)
+├── docs/               # design docs; docs/protocol/v4 (OpenAPI + scenario fixtures)
+├── docker-compose.yml  # server by default; `--profile web` adds Rails+Postgres+Redis
+└── .github/workflows/
 ```
 
-**Recommendation:** adopt this layout. `web/` is moved, not rewritten.
+**Recommendation:** adopt. `web/` is moved with a single plain `git mv` commit (no `filter-repo` on this repo, so PR/issue SHAs stay valid; per-file history via `git log --follow`). Fallback if the Kamal move is judged risky: keep Rails at root and add `server/` + `ea/` beside it.
 
-Alternatives considered:
-- *Keep three repos and pin versions.* Rejected: the protocol is the coupling point, and contract tests (Section 4.5) want the EA source, the Rails specs' payloads and the server in one checkout and one PR.
-- *Keep Rails at the root and add `server/` + `ea/` beside it.* Less churn now, but makes Rails look like the product when it becomes optional. Acceptable fallback if the move of `web/` is judged too risky for Kamal (`config/deploy.yml` builds from root today).
+### D2. python-signal becomes legacy (no history import)
 
-### D2. History-preserving migration
-
-**Recommendation:** `git filter-repo` on a fresh clone of `python-signal` with `--path MQL/ --path-rename MQL/:ea/` (and `Python/` to `client/`), then `git merge --allow-unrelated-histories` into the target repo. In this repo, move Rails into `web/` with a single plain `git mv` commit (history is still followed with `git log --follow`; `filter-repo` on the main repo is *not* needed and would rewrite every SHA referenced by PRs and issues).
-
-- Authorship is preserved: `git filter-repo` keeps every commit's author and date, so history imported from `python-signal` stays attributed to whoever wrote it.
-- `git subtree add` is the alternative. It also keeps history, but in a squashed or prefixed form that is awkward to `blame`, and nothing is gained since we will not sync back.
-
-Old repo: archive `python-signal` (read-only) with a README pointer "moved to `<new-name>/ea`". Leave its releases in place, since installed users may download from them.
+Owner decision 2026-10-04: **python-signal history is not imported.** No `filter-repo`/`subtree`, no merge-commit or path-rename requirements. python-signal is archived read-only with a README pointer to this repo. The legacy EAs (`ImentoreCopy`/`ImentoreSlave` 3.x, 2.x, MT4) and the Python client stay there; nothing inside python-signal is renamed. The new EA borrows only ideas (e.g. MFE/MAE, slippage guard) from them, citing the source file when it does.
 
 ### D3. CI per directory
 
-Use `paths:` filters so each job runs only when its tree changes:
-
 | Workflow | Trigger paths | Jobs |
 |---|---|---|
-| `web.yml` | `web/**` | today's `ci.yml` (RSpec, rubocop), with `working-directory: web` |
-| `server.yml` | `server/**`, `web/spec/api/**` | ruff, mypy, pytest (incl. contract tests reading `web/spec/api/v3/*`) |
-| `ea.yml` | `ea/**` | syntax/lint only (as `python-signal/.github/workflows/ci.yml` does for Python today); compiling MQL5 needs MetaEditor on Windows, out of scope for CI |
-| `docker-publish.yml` | tags + main | two images: `ghcr.io/<owner>/<new-name>-server`, `ghcr.io/<owner>/<new-name>-web` |
-| `cla.yml` | PRs | single CLA bot for the whole repo (same `CLA.md`) |
+| `web.yml` | `web/**` | RSpec, rubocop (`working-directory: web`) |
+| `server.yml` | `server/**`, `docs/protocol/**`, `ea/mt5/**` (v4 client structs), `web/app/controllers/api/**`, `web/app/presenters/API/**`, `web/spec/api/**`, the workflow file itself | ruff, mypy, pytest incl. scenario tests and OpenAPI schema check |
+| `ea.yml` | `ea/**`, `docs/protocol/**` | lint; a check that the EA's v4 request/response struct names match the OpenAPI schema (generated header). MQL compilation needs MetaEditor on Windows, out of scope |
+| `docker-publish.yml` | tags + main | `-server` and `-web` images |
+| `cla.yml` | PRs | one CLA bot |
 
-GHCR: keep publishing `ghcr.io/brenoperucchi/mt5-web-replicator` as an alias tag of `-web` for one release, then stop. README badges (`README.md:7`) are regenerated once, after the rename.
+Fixtures are never regenerated automatically in CI; changing an expected outcome is a reviewed diff.
 
 ### D4. Sequencing relative to the rename (#78)
 
-**Recommendation:** one coordinated change set, in this order:
+1. Decide the new name (Q1); rename this repo and image (GitHub redirects are automatic). The name applies to the new EA and project only.
+2. Move Rails to `web/`, split CI. One PR, "moves only", with a deploy dry-run.
+3. Add `server/` and `ea/mt5/` (new code) in feature PRs.
+4. Archive python-signal with the pointer README.
 
-1. Tag the last state of both repos (`pre-monorepo`).
-2. Rename this repo on GitHub (redirects are automatic), rename the image.
-3. Import `python-signal` into `ea/` + `client/` (D2), move Rails to `web/`, split CI (D3). One PR, reviewed as "moves only".
-4. Rename the EA files and `Imentore*` identifiers in a **separate** PR, so the move PR stays a pure move. The URL segment `imentore_copy`/`imentore_slave` stays accepted by the server forever (it is in every installed EA's request path, `ImentoreLib-13.mqh:241-242`, and in `config/meta_versions.yml`).
-5. Archive `python-signal`.
-
-Phase 1 server work can start in parallel on a branch under `server/` once step 3 lands. It does not depend on step 4.
+Phase 1 work can start under `server/` and `ea/mt5/` after step 2 (or before, if the fallback layout is chosen).
 
 ---
 
@@ -109,21 +129,21 @@ Phase 1 server work can start in parallel on a branch under `server/` once step 
 ```mermaid
 flowchart LR
   subgraph Terminals["MT5 terminals (Windows)"]
-    M["Master EA<br/>(ImentoreCopy 3.00)"]
-    S1["Slave EA #1"]
-    S2["Slave EA #N"]
+    M["Master EA (v4 build)"]
+    S1["Slave EA #1 (v4)"]
+    S2["Slave EA #N (v4)"]
   end
 
   subgraph CS["Copy Server (one container)"]
     direction TB
-    V3["v3 adapter<br/>/api/v3/{copy,slave}/post/..."]
-    EN["Enrollment + auth<br/>/api/core/enroll, tokens"]
-    CORE["Copy engine<br/>diff snapshot → events<br/>fan-out, lot scaling,<br/>symbol map, filters"]
-    REC["Conciliation"]
-    ADM["Admin API + minimal UI<br/>/api/core/admin/*"]
+    API["v4 API<br/>/v4/* JSON, bearer token,<br/>Idempotency-Key"]
+    EN["Enrollment + tokens"]
+    CORE["Copy engine<br/>diff → events, fan-out,<br/>lot calc, symbol map, filters,<br/>absence-based close"]
+    REC["Conciliation (batched worker)"]
+    ADM["Admin API /admin/*"]
     HOOK["Webhook outbox"]
-    DB[("SQLite (default)<br/>Postgres (optional)")]
-    V3 --> CORE
+    DB[("SQLite WAL (default)<br/>Postgres (optional)")]
+    API --> CORE
     EN --> DB
     CORE --> DB
     REC --> DB
@@ -131,267 +151,271 @@ flowchart LR
     CORE --> HOOK
   end
 
-  M -- "snapshot every ~2s" --> V3
-  S1 -- "poll orders / report update" --> V3
-  S2 -- "poll orders / report update" --> V3
-
-  RP["Reverse proxy (TLS)<br/>kamal-proxy / Caddy"] --- CS
-  HOOK -. "signed webhooks" .-> R["Rails (optional)<br/>customers, plans, billing, panel"]
+  M -- "snapshot ~2s" --> API
+  S1 -- "poll commands / report results" --> API
+  S2 -- "poll commands / report results" --> API
+  RP["Reverse proxy (TLS)"] --- CS
+  HOOK -. "signed webhooks" .-> R["Rails (optional)"]
   R -. "admin API (service token)" .-> ADM
 ```
 
-- **v3 adapter:** parses the multipart `data` file or `orders` field exactly like `app/controllers/api/v3/defaults.rb:31-51` (NUL stripping, Latin-1 to UTF-8 fallback), resolves the account from the path, and translates it into core commands. It owns all v3 quirks (pipe rows, `201` + plain text).
-- **Copy engine:** pure Python, no I/O framework imports. Input: a snapshot or a slave report. Output: state changes and outbound "slave orders". This is the piece #64 asks for in Rails (`app/services/copy/*`); here it is born separate.
-- **Conciliation:** the history-based reconciliation now in `CopyConciliatePresenter`/`SlaveConciliatePresenter` (~840 lines), rewritten against ticket identity (Section 7).
-- **Webhook outbox:** events persisted in the same transaction as the state change, delivered asynchronously with retry (Section 8).
+- **Copy engine:** pure Python, no framework imports. Input: a snapshot or a slave report. Output: state changes and slave commands. This is what #64 asks for, born separate.
+- **Conciliation:** a background job reading slave history uploads in batches, outside request transactions (D6).
+- **Webhook outbox:** events written in the same transaction as the state change, delivered asynchronously.
 
-### D5. Language and framework: Python 3.12 + FastAPI
+### D5. Python 3.12 + FastAPI
 
-**Recommendation:** FastAPI + Pydantic v2 + SQLAlchemy 2 (sync engine) + Alembic, served by uvicorn.
-
-Why:
-- The owner already runs a FastAPI license server with the handshake we want to reuse (`MT5Dividend/vendor/server/main.py:399` authenticate, `:491` validate, `:579` revoke) and per-account config resolution (`get_account_config`, `main.py:267`). Patterns and operator knowledge carry over.
-- `python-signal` already has a Python client, so the monorepo stays two languages (Ruby, Python) plus MQL.
-- Pydantic models give us the protocol schema as code, which the contract tests and a future v4 OpenAPI doc both use.
-- The load is small: one master at 0.5 req/s plus N slaves at 0.5–1 req/s each. Python is not a bottleneck; the DB write path is.
-
-Alternatives: *Go* (single static binary, faster) was rejected for now because nobody maintains Go here and the reusable code is Python. *Keep it in Rails and make Rails slim* (#64 only) does not meet goal 1. *Litestar/Flask* offer no advantage over the FastAPI code we already have.
-
-Sync SQLAlchemy is deliberate: SQLite write serialization makes async DB access pointless, and sync code is easier to test.
+FastAPI + Pydantic v2 + SQLAlchemy 2 (sync) + Alembic, uvicorn. Reasons: the owner already runs a FastAPI license server (`MT5Dividend/vendor/server/main.py`), the repo stays Ruby + Python + MQL, and Pydantic models generate the v4 OpenAPI document that the EA struct check uses (D3). Load is small (one master at 0.5 req/s, N slaves at ~0.5–1 req/s). Alternatives: Go (nobody maintains it here), slim Rails only (#64; fails goal 1).
 
 ### D6. Persistence: SQLite by default, Postgres optional
 
-**Recommendation:** SQLAlchemy models with SQLite in WAL mode (`/data/copy.db` on a Docker volume) as default; `DATABASE_URL=postgresql://...` switches to Postgres. CI runs the test suite on both.
+SQLite WAL at `/data/copy.db`; `DATABASE_URL=postgresql://...` switches to Postgres. CI runs the suite on both. Not JSON files (`main.py` read-modify-writes `accounts.json`; no atomicity, no unique constraints).
 
-- One master and a handful of slaves produce a few writes per second. SQLite in WAL with `busy_timeout` handles that with headroom, and it is one file to back up.
-- Postgres for people who run many masters, or who run it next to Rails anyway.
+**Write serialization (rev-1 #8, rev-2 A7).** One uvicorn worker is not one writer: sync routes run in a thread pool, and a deferred transaction that reads (the diff) then writes can fail with `SQLITE_BUSY_SNAPSHOT` without honoring `busy_timeout`. Therefore:
 
-**Why not JSON files** (what `main.py` does, `:184-206`, read-modify-write of `accounts.json` on every admin call): no atomicity across the snapshot→fan-out step, lost updates under concurrent requests (uvicorn workers), no unique constraints for idempotency, no indexes for ticket lookups. The copy path needs exactly those guarantees.
-
-Single process writer: run uvicorn with **one worker** on SQLite (documented and enforced at startup); multiple workers only with Postgres.
+- pysqlite driver in autocommit (`isolation_level=None`); a SQLAlchemy `begin` event issues **`BEGIN IMMEDIATE`** for every write session, so the write lock is taken *before* the diff read.
+- `PRAGMA busy_timeout=5000`, `journal_mode=WAL`, `synchronous=NORMAL`, `foreign_keys=ON`, `auto_vacuum=INCREMENTAL`.
+- On `SQLITE_BUSY` after the timeout, **retry the whole transaction** (unit-of-work function re-run, max 3, jittered), then return `503` with `Retry-After`. The v4 EA retries with the same idempotency key (4.2).
+- One session per request; no external I/O inside a transaction (webhook delivery, log writes are outside).
+- **Conciliation and pruning run off the hot path** in a single background thread, in batches of ≤200 rows per transaction, so they never hold the lock for long.
+- One uvicorn worker on SQLite, enforced at startup; multiple workers only with Postgres (which uses `SERIALIZABLE` retry or row locks `SELECT ... FOR UPDATE` on the master row, same unit-of-work retry).
 
 ### D7. Deployment and configuration
 
-- One Docker image `server/Dockerfile` (python:3.12-slim, non-root, `HEALTHCHECK` on `/healthz`).
-- Root `docker-compose.yml`: service `copy-server` plus volume `copy-data`. `--profile web` adds today's Rails stack, unchanged.
-- TLS is terminated by a reverse proxy (Section 6.2); the container listens on plain HTTP inside the network only.
-- Configuration by environment only (12-factor). No secrets in images or code:
+One image (python:3.12-slim, non-root, `HEALTHCHECK /healthz`), compose service + volume. TLS at the reverse proxy; plain HTTP only on localhost. Env-only config:
 
 | Var | Default | Notes |
 |---|---|---|
 | `DATABASE_URL` | `sqlite:////data/copy.db` | |
-| `ADMIN_TOKEN` | *(required, no default)* | bootstrap admin credential; refuse to start if unset outside `ENV=dev` |
-| `TOKEN_PEPPER` | *(required)* | HMAC key for hashing account tokens at rest |
-| `V3_COMPAT_MODE` | `open` | `open` = accept unauthenticated v3 like today; `enrolled` = require a known, enabled account (Section 6) |
-| `WEBHOOK_URL`, `WEBHOOK_SECRET` | unset | Rails integration, optional |
-| `PUBLIC_HOSTNAME` | unset | returned as `api_server_hostname` in store config |
+| `ADMIN_TOKEN` | *(required)* | bootstrap admin; refuses to start if unset outside `ENV=dev` |
+| `TOKEN_PEPPER` | *(required)* | HMAC key for token hashes at rest |
+| `CLOSE_ABSENT_SNAPSHOTS`, `CLOSE_ABSENT_SECONDS` | `3`, `10` | absence-based close (5.5) |
+| `RAW_SNAPSHOT_RETENTION_H`, `EVENT_RETENTION_D` | `48`, `30` | 5.7 |
+| `WEBHOOK_URL`, `WEBHOOK_SECRET` | unset | Rails, optional |
 
 ---
 
-## 4. Protocol compatibility (Phase 1)
+## 4. Protocol v4
 
-### 4.1 Transport facts the EAs rely on
+### 4.1 Principles
 
-From `ImentoreLib-13.mqh:223-300` (`ApiData`):
+- HTTPS, `Content-Type: application/json` both ways, UTF-8. Schema = Pydantic models, published as `docs/protocol/v4/openapi.json`.
+- **`Authorization: Bearer <account token>` on every call except `/v4/enroll`.** The token determines account and role; there is no identity in the path and no unauthenticated mode.
+- **`Idempotency-Key`** header (UUID generated by the EA per logical operation, reused on retry) on every mutating call. Stored 24 h per account with the response; a replay returns the stored response.
+- Normal HTTP status codes: `200/201` success, `400` malformed, `401` bad/missing token, `403` revoked/disabled, `404` unknown resource, `409` conflict (e.g. idempotency key reused with a different body), `413` too large, `422` validation, `429` rate limited (with `Retry-After`), `5xx`/`503` server.
+- Every response carries `server_time` (UTC ms) so the EA can compute clock offset.
 
-- **Always `POST`**, `multipart/form-data` with a fixed boundary, one part named `data` with a `filename` and `Content-Type: text/html; charset=utf-8` (`:229-238`). The JSON is the *file content*. Rails also accepts a form field `orders` (`defaults.rb:37`); the server must accept both.
-- **No auth header, no cookie, no token.** Identity is entirely the URL path (`:241-242`):
-  `{apiServerUrl}/api/{apiVersion}/{copy|slave}/post/{name}/{expert_name}/{expert_version}/{account_server}/{login}/{HEDGING|NETTING}`.
-- `apiServerUrl` is **compiled in** (`ImentoreLib-13.mqh:1740-1746`): `localhost:8080`/`:8081` when `InputEnvironmentLocal`, otherwise a fixed HTTPS host. Pointing an installed EA at a new server therefore requires DNS (keep the hostname) or a rebuild. This matters for migration (Section 9).
-- Status handling: **only `201` is success** (`:290-292`) and the body is then split on `/` into `ResponseData`. `403` = "account disabled" message (`:285-289`). `-1` = URL not whitelisted in MT5. Any other code (including `200`!) is treated as failure and retried with backoff, up to 10 s between attempts (`:247-258`).
-- 5 s request timeout (`:225`).
+### 4.2 EA retry and error handling (new build)
 
-### 4.2 Endpoints to implement
+The legacy `ApiData` (`Lib:210-292`) loops `while (status != 201)` forever: a 403 only prints a message and continues, every other non-201 is retried indefinitely (the first ~10 attempts with no delay), with the same body, blocking the single-threaded EA (rev-2 A1). **v4 must not repeat this.** The new EA's HTTP client:
 
-| # | Method + path (after `/api/v3`) | EA caller | Request | Success response | Failure codes | Source |
-|---|---|---|---|---|---|---|
-| E1 | `POST copy/post/orders/:expert/:ver/:server/:login/:mode` | master, every ~2 s and on trade events (`ImentoreCopy-3.00-04.mq5:93,332,352,573`) | `{HistoryOrders[], PositionOrders[], PendingOrders[], ApiSendOrdersHistory?}` | `201`, body `true` | `400` if account unknown/disabled or processing failed | `api_copy.rb:15-26` |
-| E2 | `POST\|GET copy/post/store/...` | master on init and every `api_time_to_check_server` | none | `201` + JSON object (AccountSerializer attributes) | `401` store disabled or EA version not accepted, `403` account not found/disabled | `api_copy.rb:30-49`, `store_presenter.rb:277-294` |
-| E3 | `POST slave/post/orders/...` | slave poll (`ImentoreSlave-3.00-04.mq5:99,176`) | slave snapshot (same JSON shape; history used for conciliation) | `201` + pipe rows joined by `/` | `400` | `api_slave.rb:88-100`, `slave_presenter.rb:170-173` |
-| E4 | `GET slave/post/orders/...` | legacy, same as E3 | | same | `400` | `api_slave.rb:104-120` |
-| E5 | `POST slave/post/update/...` | slave after each action (`ImentoreSlave-3.00-04.mq5:1529`) | one order object incl. `metaState`, `comment`, `positionID`, `ticketDeal`, `volume`, prices | `201` + pipe rows (same as E3) | `400` | `api_slave.rb:67-84` |
-| E6 | `POST\|GET slave/post/store/...` | slave config | | as E2 | as E2 | `api_slave.rb:123-141` |
-| E7 | `GET stores/config/...` | older EAs | | JSON | `400` | `api_store.rb:165-173` |
-| E8 | `POST {copy\|slave}/post/{LogFileName}/...` | EA log upload (`ImentoreLib-13.mqh:992`) | log text | none exists in Rails today: returns 404/405 | | **new**: accept and store with size cap, or keep returning 404 (open question Q6) |
+| Response | EA behavior |
+|---|---|
+| 2xx | success |
+| 400 / 409 / 413 / 422 | **no retry**; log, drop that request, raise a visible alert on the chart; continue the timer loop |
+| 401 | stop trading, show "re-enroll", stop calling except `/v4/enroll` |
+| 403 | stop trading, show server message; re-check `/v4/config` every 5 min |
+| 429 / 503 | honor `Retry-After`, else backoff |
+| other 5xx, timeout, network | retry with exponential backoff (1, 2, 4, 8 s, jitter), **max 5 attempts**, same `Idempotency-Key`; then give up and let the next timer tick produce fresh state |
 
-Not ported: `GET stores/telegram/python` (Rails-only feature).
+Requests have a real timeout (5 s passed to `WebRequest`; the legacy code declares 5000 but passes `0`). A failing call never blocks the next snapshot beyond the retry budget.
 
-### 4.3 The slave row format (E3/E5 body)
+### 4.3 Endpoints
 
-Rows are joined with `/` and each row is 18 pipe-separated fields (`trade_helper_service.rb:21`); the EA requires at least 17 (`ImentoreLib-13.mqh:1288`):
-
-```
-0 ordertype | 1 ticket_master | 2 ticket_slave | 3 trace_id | 4 slave_id | 5 magic_number |
-6 master_id | 7 price_open ("0" for market) | 8 lot | 9 stop_loss | 10 take_profit | 11 state |
-12 symbol | 13 ticket_deal | 14 seconds_ago | 15 comment | 16 open_at (epoch) | 17 contract_volume
-```
-
-Server-side invariants to preserve:
-- Rows include slaves in `opened` scope with a master link, closed within the last 31 days or still open (`slave_presenter.rb:171`).
-- `comment` is `"{trace_id}-{ticket_master}"` (`trace_service.rb:65`); for prop-firm traces it is prefixed `"{account_id}{magic}_"` and the magic is rewritten (`trace_service.rb:70-73`). Slaves report back by this comment and the server finds the slave by it (`slave_presenter.rb:183`). **The comment is the de-facto correlation key in v3.**
-- Lot: the server sends the master `volume` as-is (`slave_serializer.rb:83-85`) plus `contract_volume`. The EA computes `min_lot * contract_volume` when `contract_volume != 0`, else uses the master lot (`ImentoreSlave-3.00-04.mq5:1481-1488`). Phase 1 keeps this split; Phase 2 moves scaling server-side (Section 5.3) and sends `contract_volume=0` with an already-scaled lot.
-- `/` and `|` inside symbol or comment break the format. Today nothing escapes them; the server will reject such values on input.
-
-### 4.4 Server-side behavior to preserve
-
-| Behavior | Today | Where |
+| Route | Caller | Request → Response |
 |---|---|---|
-| Account lookup by `(account_server lower-cased, login, kind, enabled)`; unknown server names are auto-created | `find_or_create_by(name: ...downcase)` | `api_copy.rb:17-18` |
-| Store config binds a server to an account seen first without one | `account_server: nil` then update | `store_presenter.rb:260-264` |
-| EA version gate | `config/meta_versions.yml` by `expert_name` + first 4 chars of version | `defaults.rb:24-29` |
-| New master ticket → one order per trace/store, one slave row per enabled slave | `create_order` | `trace_service.rb:23-83` |
-| Netting accounts: one order per symbol; skip fan-out if slaves exist | | `trace_service.rb:26-32,61` |
-| SL/TP/price/profit change on an open master position → `MODIFY` on master transaction, slaves pick it up via row fields | | `copy_presenter.rb:39-53` |
-| Master position gone + in history → close master, mark slaves for close | three closing mechanisms | `copy_presenter.rb:98-156`, `:66-89` for pendings |
-| Magic number allow-list per trace and per account blocks fan-out | `resource_restricted?` | `trade_helper_service.rb:26-50`, `trace_service.rb:60` |
-| Instrument rename per slave account when `instrument_control` | `check_instrument` | `trace_service.rb:90-96` |
-| Slave `metaState` handling: `OPEN/OPENED` execute, `CLOSED/HASCLOSED` close, `DELETED`, `MODIFY`, `NOTMODIFY` (escalates to `NOSLTP` after 2/day), `NOTFIND`/`ERRORDEAL`/`TIMEMAX`/`REACHMFE`/`REACHLOSS` → error | | `slave_presenter.rb:194-235` |
-| Duplicate cleanup by comment | `check_order_duplicate` destroys duplicates | `slave_presenter.rb:242-254` |
-| `ApiSendOrdersHistory: true` triggers full conciliation, then turns the flag off | | `slave_conciliate_presenter.rb:13-24` |
-| Every request stored raw before processing | `Message::V3::MetaCopy.create(content:, params:, request_url:)` | `api_copy.rb:19` |
+| `POST /v4/enroll` (no token) | EA, once | `{code, broker_server, login, role, margin_mode, ea_version}` → `201 {token, account_id}` |
+| `GET /v4/config` | both, on init + every 60 s | → `200 {enabled, message, poll_ms, debug, send_history, symbols_wanted[]}` |
+| `PUT /v4/symbols` | slave on init + daily, master on init | `{symbols:[{name, volume_min, volume_step, volume_max, contract_size, digits, point, trade_mode}]}` → `204` |
+| `POST /v4/master/snapshot` | master, ~2 s and on trade events | `{seq, taken_at, positions[], pending[], history[]}` → `200 {accepted, seq}` |
+| `GET /v4/slave/commands?after=<cursor>` | slave poll, ~2 s | → `200 {commands[], cursor}` |
+| `POST /v4/slave/results` | slave after each action | `{results:[{command_id, status, order, deal, position_ticket, position_id, symbol, volume, price, sl, tp, executed_at, error_code, message}]}` → `200` |
+| `POST /v4/slave/snapshot` | slave, every ~10 s | positions + recent history (for absence checks and conciliation) → `200` |
+| `POST /v4/logs` | EA in debug mode | text, cap 256 KB per call; `413` above it (EA stops sending until next config) → `204` |
+| `POST /v4/token/rotate` | EA | → `200 {token}` |
 
-Behaviors we propose **not** to copy (each needs reviewer sign-off):
-- `meta_version_accept` checks `.present?`, so a version marked `disable` in `meta_versions.yml` is still accepted (`defaults.rb:28`, yaml values like `'2_30': disable`). The server will treat `disable` as rejected. Confirm that's intended (Q5).
-- `check_order_duplicate` hard-deletes rows (`destroy_all`). The server will mark them `superseded` and keep them in the audit log.
-- Failures inside `MetaSlave#execute` are swallowed and return `400` with no body (`api_slave.rb:79-81`). The server will log the exception with the message id.
+Snapshot `positions[]` items: `position_ticket, position_id (POSITION_IDENTIFIER), symbol, type, volume, price_open, sl, tp, magic, comment, time_msc`. `history[]` items: `deal, order, position_id, entry, symbol, volume, price, profit, commission, swap, time_msc`.
 
-### 4.5 Contract (golden) tests
+### 4.4 Slave commands
 
-Goal: **same input → same resulting state and response**, Rails vs. Copy Server.
-
-1. **Fixtures:** reuse `spec/api/v3/orders_history.txt` (266 lines, real EA payload), `spec/api/v2/orders_history.json`, and the inline payloads in `spec/api/v2/api_copy_orders_spec.rb`, `api_copy_hedging*_spec.rb`, `api_slave_spec.rb`, `spec/api/v3/api_magic_number_restrictions_spec.rb`. Move them to `docs/protocol/v3/fixtures/` (shared by `web/` and `server/`); the Rails specs read from there.
-2. **Recorder (one-off, in `web/`):** a rake task that runs each scenario through the Rails stack (the same way `db/seeds/demo.rb` feeds `Message::V3::MetaCopy`/`MetaSlave`) and writes a normalized **golden file** per step: HTTP status, response body (pipe rows parsed into fields), and a projection of state (`Transaction`, `TransactionSlave` keyed by ticket and comment: state, lot, symbol, SL/TP, closed?).
-3. **Server tests** replay the same steps against the FastAPI `TestClient` and compare with the golden files. Non-deterministic fields (ids, timestamps, `seconds_ago`, `open_at`; Rails already zeroes `open_at` in test, `trade_helper_service.rb:18`) are masked.
-4. Golden files are checked in. A deliberate behavior change (Section 4.4 "not copied" list) updates the golden file in the same PR, so the diff is reviewable.
-
-Exit criterion for Phase 1: all golden scenarios pass, plus E2E with a real master and slave on a demo broker.
-
-### 4.6 Room for v4
-
-Core endpoints live under `/api/core/...` (JSON, bearer token, idempotency key header). A future EA can speak those directly; v3 stays an adapter. Not designed further here.
-
----
-
-## 5. Data model for the core
-
-### 5.1 Tables
-
-```
-accounts            id, broker_server, login, role(master|slave), margin_mode(hedging|netting),
-                    label, enabled, ea_name, ea_version, last_seen_at, token_hash, token_issued_at,
-                    UNIQUE(broker_server_norm, login, role)
-copy_links          id, master_id → accounts, slave_id → accounts, enabled,
-                    lot_mode(master|multiplier|fixed|min_lot_x), lot_value,
-                    symbol_filter(json allow/deny), magic_allow(json), magic_mode(same|fixed),
-                    magic_value, comment_prefix, max_slippage_points, copy_pending, copy_sl_tp,
-                    UNIQUE(master_id, slave_id)
-symbol_maps         id, slave_id (nullable = global), master_symbol, slave_symbol,
-                    UNIQUE(slave_id, master_symbol)
-master_positions    id, master_id, ticket(position id), symbol, type, volume, price_open, sl, tp,
-                    magic, state(open|pending|closed), opened_at, closed_at, last_snapshot_id,
-                    UNIQUE(master_id, ticket)
-slave_orders        id, link_id → copy_links, master_position_id, slave_id,
-                    correlation (v3 comment "{link}-{ticket}"), symbol_master, symbol_local,
-                    lot, sl, tp, state(pending|executed|closing|closed|deleted|error|superseded),
-                    ticket_slave(position id), ticket_deal, price_open, price_close, profit, fee,
-                    last_meta_state, opened_at, closed_at, conciliated_at,
-                    latency_ms, slippage_points (for #66),
-                    UNIQUE(link_id, master_position_id), UNIQUE(slave_id, ticket_slave)
-inbound_messages    id, account_id, kind(copy_snapshot|slave_poll|slave_update|store|log),
-                    request_path, content (raw), content_sha256, received_at,
-                    state(pending|executed|error), error
-events (outbox)     id, type, payload(json), created_at, delivered_at, attempts
-admin_users / api_tokens   id, name, token_hash, scopes, created_at, revoked_at
+```json
+{"command_id": "c_01J...", "action": "open|modify|close|cancel",
+ "copy_id": 812, "symbol": "GOLD", "side": "buy|sell|buy_limit|...",
+ "volume": 0.20, "price": null, "sl": 2310.5, "tp": 2380.0,
+ "max_slippage_points": 30, "magic": 4242, "comment": "c812",
+ "issued_at": 1759561234567, "expires_at": 1759561264567}
 ```
 
-Mapping from Rails:
+- Commands are durable rows; the server re-sends a command until a result for that `command_id` arrives or it expires. `close` is explicit; the EA never infers close from a state string.
+- **Market orders (BUY and SELL)** carry `price: null` and execute at the current market price with `deviation = max_slippage_points`. Limit/stop orders carry the master's price. (Today's Rails anchors market BUY to the master price because `0 == "0"` is false in `trade_helper_service.rb:61-63`; that is a Rails bug fixed separately, not a rule to port.)
+- `expires_at` replaces the legacy `seconds_ago`/TIMEMAX check: the EA refuses an `open` past expiry and reports `status: expired`.
+- `comment` is short (`c<copy_id>`, ≤ 31 chars) and only a fallback; the server correlates by `command_id` and then by `position_id`.
 
-| Rails | Core | Note |
-|---|---|---|
-| `Account` (`kind: copy/slave`, `meta_margin_mode`, `account.rb:14-18`) | `accounts` | `store`, `customer` dropped |
-| `Trace` + `Permission` + `StoreTrace` | `copy_links` (pairwise) | a trace is "one master → many slaves with shared settings"; Rails can keep traces and sync them as links |
-| `Trace`/`Account` settings `magics_accept`, `instrument_control`, `magic_same`, `kind_copy: prop_firm`, `contract_volume` | columns on `copy_links` | |
-| `Instrument` (`account.rb:39`, `check_instrument`) | `symbol_maps` | |
-| `MagicNumber` (`trace.rb:47`) | `copy_links.magic_allow` | |
-| `Order` + `Transaction` | `master_positions` | `Order` exists for the store/billing fan-out; the core does not need it |
-| `TransactionSlave` | `slave_orders` | |
-| `Message::Message` (`messages` table) | `inbound_messages` | |
-| `Logging` | `events` + structured logs | |
-
-### 5.2 Lifecycle
-
-```
-master snapshot ─► diff vs master_positions
-   new ticket          → master_positions(open) + slave_orders(pending) per enabled link
-   changed SL/TP       → update; slave rows carry new SL/TP (v3 EA reacts with MODIFY)
-   gone + in history   → master_positions(closed); slave_orders(executed) → closing
-slave update ─► by correlation:
-   OPEN/OPENED         → executed (store ticket_slave, price_open, latency, slippage)
-   CLOSED/HASCLOSED    → closed
-   DELETED             → deleted
-   NOTFIND/ERRORDEAL/TIMEMAX/REACH* → error
-   MODIFY/NOTMODIFY/NOSLTP/NOTCLOSED → audit only (+ escalation rule)
-```
-
-Master → slave copy, end to end (Phase 1, v3 protocol; endpoint ids from Section 4.2):
+### 4.5 Sequence
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant M as Master EA (ImentoreCopy)
+    participant M as Master EA (v4)
     participant S as Copy Server
     participant DB as SQLite/Postgres
-    participant SL as Slave EA (ImentoreSlave)
-    participant R as Rails (optional)
+    participant SL as Slave EA (v4)
 
-    M->>S: E1 POST copy/post/orders (snapshot: PositionOrders, HistoryOrders)
-    S->>DB: inbound_messages (raw) + diff vs master_positions (one transaction)
-    S->>DB: master_positions(open) + slave_orders(pending) per enabled copy_link
-    S->>DB: events(outbox): position.opened
-    S-->>M: 201 "true"
+    M->>S: POST /v4/enroll {code, server, login, role=master}
+    S-->>M: 201 {token}
+    SL->>S: POST /v4/enroll {code, ..., role=slave}
+    S-->>SL: 201 {token}
+    SL->>S: PUT /v4/symbols (volume_min/step/max, contract_size) [Bearer]
 
-    loop every poll interval
-        SL->>S: E3 POST slave/post/orders (slave snapshot)
-        S->>DB: load pending/open slave_orders for this slave
-        S-->>SL: 201 pipe rows (symbol resolved via symbol_maps, comment = correlation)
-    end
+    M->>S: POST /v4/master/snapshot {seq, positions:[P1]} [Bearer, Idempotency-Key]
+    S->>DB: BEGIN IMMEDIATE; diff; master_positions(P1 open); copies(pending) + command(open) per link; outbox; COMMIT
+    S-->>M: 200 {accepted}
 
-    SL->>SL: resolve symbol, OrderSend
-    SL->>S: E5 POST slave/post/update (metaState OPENED, comment, positionID, price)
-    S->>DB: slave_orders → executed (ticket_slave, latency_ms, slippage_points)
-    S-->>SL: 201 rows
+    SL->>S: GET /v4/slave/commands [Bearer]
+    S-->>SL: 200 [{open GOLD buy 0.20, price:null, max_slippage}]
+    SL->>SL: OrderSend at market (deviation)
+    SL->>S: POST /v4/slave/results {command_id, status:done, position_id, price} [Idempotency-Key]
+    S->>DB: copy → open (position_id, latency, slippage)
 
-    M->>S: E1 snapshot: position gone, present in HistoryOrders
-    S->>DB: master_positions → closed, slave_orders → closing
-    SL->>S: E3 poll
-    S-->>SL: 201 rows (state = close)
-    SL->>SL: PositionClose
-    SL->>S: E5 update (metaState CLOSED)
-    S->>DB: slave_orders → closed; events(outbox): position.closed
-
-    opt Rails enabled
-        S-)R: signed webhook (outbox delivery, retried)
-        R-->>S: 2xx
-    end
+    M->>S: snapshot without P1 (1st)
+    M->>S: snapshot without P1 (2nd)
+    M->>S: snapshot without P1 (3rd, ≥10 s)
+    S->>DB: master_position → closed; copy → closing; command(close)
+    SL->>S: GET /v4/slave/commands
+    S-->>SL: 200 [{close copy 812}]
+    SL->>SL: PositionClose(position ticket)
+    SL->>S: POST /v4/slave/results {status:done, deal, profit}
+    S->>DB: copy → closed; outbox position.closed
+    Note over S: master history (if present) only enriches close price/profit
 ```
 
-Hedging vs netting: on hedging accounts a master position id maps to one slave position. On netting masters (`trace_service.rb:26-32`), the master reports one position per symbol whose volume changes; Phase 1 reproduces today's behavior (one slave order per symbol, no re-sizing on partial adds). Partial close/add for netting is listed as a Phase 2 item (Q7).
+---
 
-### 5.3 Lot scaling (Phase 2)
+## 5. Core model and rules
 
-`lot_mode`: `master` (copy volume), `multiplier` (volume × k), `fixed`, `min_lot_x` (today's `contract_volume`). Rounding to the slave's `volume_step`/`volume_min` needs symbol specs the server does not have; v3 slaves keep rounding locally (`NormalizeVolume`), so the server sends the unrounded value with `contract_volume=0`. Default stays `min_lot_x` for migrated data so behavior is unchanged.
+### 5.1 Tables
 
-### 5.4 Idempotency
+```
+accounts         id, broker_server, broker_server_norm, login, role(master|slave), margin_mode(hedging|netting),
+                 label, enabled, ea_version, last_seen_at, token_hash, token_issued_at,
+                 UNIQUE(broker_server_norm, login, role)
+enroll_codes     id, account_id, code_hash, expires_at, used_at
+symbol_specs     account_id, symbol, volume_min, volume_step, volume_max, contract_size, digits, point,
+                 trade_mode, updated_at, PK(account_id, symbol)
+copy_groups      id, master_id, name, enabled, magic_allow(json), symbol_filter(json)   -- ≈ Rails Trace
+copy_links       id, group_id, master_id, slave_id, enabled, lot_mode(master|multiplier|fixed|min_lot_x),
+                 lot_value, magic_mode(same|fixed), magic_value, max_slippage_points,
+                 copy_pending, copy_sl_tp, UNIQUE(group_id, master_id, slave_id)
+symbol_maps      id, slave_id (NULL = global), master_symbol, slave_symbol, UNIQUE(slave_id, master_symbol)
+master_positions id, master_id, position_id, position_ticket, symbol, type, volume, price_open, sl, tp, magic,
+                 state(open|pending|closing|closed), absent_count, absent_since, opened_at, closed_at,
+                 UNIQUE(master_id, position_id)
+copies           id, link_id, master_position_id, slave_id, symbol_master, symbol_local, volume, sl, tp,
+                 state(pending|open|closing|closed|cancelled|error|superseded),
+                 open_order, open_deal, position_ticket, position_id, close_deal, price_open, price_close,
+                 profit, fee, notmodify_count, notmodify_day, latency_ms, slippage_points,
+                 opened_at, closed_at, conciliated_at,
+                 UNIQUE(link_id, master_position_id)
+commands         id (command_id), copy_id, action, payload(json), state(queued|delivered|done|failed|expired),
+                 issued_at, expires_at, result(json)
+idempotency_keys account_id, key, request_sha256, response(json), created_at, PK(account_id, key)
+inbound_raw      id, account_id, kind, content(gz), content_sha256, received_at, reason(change|heartbeat|error)
+events (outbox)  id, type, payload(json), created_at, delivered_at, attempts
+api_tokens       id, name, token_hash, scopes, created_at, revoked_at
+```
 
-- **Snapshots are naturally idempotent:** they are full state, so reprocessing the same snapshot changes nothing. We enforce it with `UNIQUE(master_id, ticket)` on `master_positions` and `UNIQUE(link_id, master_position_id)` on `slave_orders`, inserting with `ON CONFLICT DO NOTHING`. This replaces the `RecordNotUnique` rescue in `copy_presenter.rb:34`.
-- **Slave updates** are keyed by `(slave_id, correlation, metaState, ticket_slave)`; state transitions are monotonic (an `executed` row never goes back to `pending`), so a retried `OPEN` is a no-op.
-- Each request runs in **one DB transaction** (diff + fan-out + outbox insert). Today a crash between creating the `Transaction` and the slaves leaves partial state (`trace_service.rb:31-80` is not wrapped in a transaction).
-- `content_sha256` on `inbound_messages` lets us drop byte-identical master snapshots received within the same second (the EA sends on timer *and* on trade events) without processing them twice.
-- v4 / admin API: `Idempotency-Key` header, stored 24 h. Pattern borrowed from the deterministic execution ids in `stock-dividend/mcp_mt5_sync/service.py:257-265`.
+`copy_groups` keeps the Rails trace dimension (rev-1 #4): two Rails traces linking the same accounts become two groups and two links, each with its own magic/lot settings and its own copies. Q4 is answered by this: pairwise links inside a first-class group.
 
-### 5.5 Audit log
+### 5.2 Identity model (rev-1 #3, rev-2 A6)
 
-Every inbound request is stored raw before processing (as `api_copy.rb:19` does today), with the path and a hash. Retention: 30 days by default (`AUDIT_RETENTION_DAYS`), pruned daily; slave/master rows keep a pointer to the message that last changed them. This keeps the debugging power of today's `Message` + `Logging` without unbounded growth on SQLite.
+MT5 has four distinct identifiers; the core never conflates them:
+
+| Id | MQL source | Stability | Used for |
+|---|---|---|---|
+| order ticket | `MqlTradeResult.order` | one per request | audit only (`copies.open_order`) |
+| deal ticket | `MqlTradeResult.deal`, `DEAL_TICKET` | one per fill | history enrichment, close deal |
+| position ticket | `PositionGetTicket` / `POSITION_TICKET` | may change (service ops, netting reversal) | the handle the EA passes to `PositionClose`/`PositionModify`; refreshed from every slave snapshot |
+| position identifier | `POSITION_IDENTIFIER` = `DEAL_POSITION_ID` | **stable** for the position's life | the key for matching master positions and slave copies |
+
+- Master: `UNIQUE(master_id, position_id)`.
+- Slave, hedging: **partial unique index** `UNIQUE(slave_id, position_id) WHERE position_id IS NOT NULL AND margin_mode = 'hedging'` (denormalized column; SQLite and Postgres both support partial indexes).
+- Slave, netting: see 5.3. Uniqueness is `UNIQUE(slave_id, symbol_local) WHERE state IN ('pending','open','closing') AND margin_mode='netting'`.
+
+### 5.3 Netting in Phase 1 (decision 3)
+
+- A netting slave holds **at most one active copy per symbol** (the partial index above).
+- **Config-time validation:** creating/enabling a link is rejected with a `422 config_conflict` error naming the symbol and the other link, if two enabled links (any groups, any masters) could route the same slave symbol (after `symbol_maps`) to one netting slave. Since a link's symbol set is open-ended, the rule is: on a netting slave, enabled links must have **disjoint, explicit `symbol_filter` allow-lists**, or only one enabled link may exist.
+- Netting **master**: one position per symbol; volume changes on the master position produce a `modify` with new volume only in Phase 2. Phase 1 copies the open volume and the close; partial adds/reductions are not mirrored and are logged as `copy.volume_drift`.
+- Full model (several logical copies sharing a physical netting position, proportional partials, reversals) is deferred to Phase 2 (Q7).
+
+### 5.4 Lot calculation (decision 4)
+
+Server-side, from `symbol_specs` of the slave (`PUT /v4/symbols`):
+
+```
+raw = master             : master_volume
+      multiplier         : master_volume × lot_value
+      fixed              : lot_value
+      min_lot_x          : volume_min × lot_value          (today's contract_volume)
+lot = floor(raw / step) × step     (decimal arithmetic, then rounded to step's digits)
+lot = clamp(lot, volume_min, volume_max);  if raw < volume_min → policy: open at volume_min (default) or skip (link flag)
+```
+
+No spec for the symbol → command not issued, copy `error: missing_symbol_spec`, config asks the EA for that symbol (`symbols_wanted`). The legacy EA computed `min × contract_volume` with `NormalizeDouble(...,2)` and sent the raw master lot otherwise (`Slave:1472-1480` region); neither rounded to step (rev-1 #2, rev-2 A3). Test table: min 0.01 and 0.1, step ≠ min, multiplier 0.333, clamp at max.
+
+### 5.5 Lifecycle and business rules ported from v3
+
+```
+master snapshot (positions/pending are full state; history is a 30-deal window)
+  new position_id            → master_positions(open); per enabled link passing filters: copies(pending) + command(open)
+  SL/TP changed              → command(modify) if link.copy_sl_tp
+  absent ≥ K snapshots AND ≥ T s → master_positions(closing→closed); copies pending→cancelled (+command cancel if delivered),
+                                   open→closing + command(close)
+  in history                 → enrich close price/profit only; never required to close
+slave result (by command_id, then position_id)
+  open done                  → copy open (position_id, ticket, price, latency, slippage)
+  open done on a closing copy (master closed first) → record position_id/ticket/price, STAY closing, command(close)  (rev-2 A12)
+  close done                 → closed
+  modify done / notmodify    → audit; notmodify escalation (below)
+  failed / expired           → error with code
+```
+
+Absence-based close (rev-2 A9): `absent_count` increments per accepted snapshot whose `seq` is newer and which lacks the position; resets on reappearance. Defaults K=3, T=10 s, configurable. A snapshot is only counted if `taken_at` is newer than the last (stale retries never count). If the master reconnects after a gap, the server sets `send_history=true` in config to fetch full history for enrichment.
+
+Rules to port (with the Rails source they come from):
+
+| Rule | Rails source |
+|---|---|
+| Fan-out per trace (group) and per enabled slave | `trace_service.rb:23-83`, `copy_presenter.rb:25-30` |
+| Netting master: one order per symbol | `trace_service.rb:26-32,61` |
+| Magic allow-list per trace and per account | `trade_helper_service.rb:26-50`, `trace_service.rb:60` |
+| Magic rewrite / prop-firm prefix | `trace_service.rb:65-73` → `magic_mode` |
+| Instrument rename per slave | `trace_service.rb:90-96` → `symbol_maps` |
+| NOTMODIFY counted per day; escalates to NOSLTP | `slave_presenter.rb:61-65` → `notmodify_count/day`, threshold 2, then copy flagged `no_sltp` and SL/TP modify stops |
+| OPENED after master close keeps `remove` | `slave_presenter.rb:38-46` |
+| Master close moves all non-deleted slaves to close | `transaction.rb:183-186` |
+| Duplicate cleanup | `slave_presenter.rb:85-97` → mark `superseded`, never delete |
+| Full-history conciliation on request | `slave_conciliate_presenter.rb:13-24` → `send_history` |
+
+Not ported: Rails' 1:1 volume re-sync on every MODIFY when `contract_volume="0"` (Appendix A); version gate via `meta_versions.yml` (`.present?` bug, Q5): v4 uses `ea_version` minimum in config.
+
+### 5.6 Idempotency (rev-1 #9)
+
+- Every mutating v4 call carries `Idempotency-Key`; a replay returns the stored response, a different body with the same key returns `409`.
+- Snapshots: additionally `seq` monotonic per account; older `seq` is accepted (200) but ignored.
+- Results are keyed by `command_id`: a second `done` for the same command is a no-op (**transition idempotency** for terminal states: `closed`, `cancelled`, `error` never move back; `open` never returns to `pending`).
+- `modify`/`notmodify` are **not** deduplicated by content: each modify is a new command with its own `command_id`, so two successive SL/TP changes or two failures both count.
+- Every request runs as one unit of work (diff + fan-out + commands + outbox) under D6; a crash leaves no partial fan-out.
+
+### 5.7 Raw storage and retention (rev-2 A8)
+
+Estimate: a master snapshot with 30 history deals + ~5 positions is ~17 KB (measured on `spec/api/v3/orders_history.txt`, ~500 B per record). Every 2 s that is ~750 MB/day per master, unacceptable to keep raw.
+
+- Master snapshot raw stored only when copy-relevant state changes (position set, volumes, SL/TP, pending set, new history deals), plus **one heartbeat sample every 5 min**, plus any snapshot causing an error. Gzipped (~4×).
+- Slave command polls: not stored. Slave results: always stored. Slave snapshots: on change only.
+- Retention: raw snapshots **48 h**; results, commands, events **30 d**; copies/master_positions kept forever (small).
+- Expected: ~300 changes/day + 288 heartbeats ≈ 600 × 17 KB / 4 ≈ **2.5 MB/day per master**, ~1 MB/day per slave; target < 50 MB/day total, checked by a 24 h demo soak.
+- Pruning in the background job (D6), batched, then `PRAGMA incremental_vacuum`.
 
 ---
 
@@ -399,140 +423,137 @@ Every inbound request is stored raw before processing (as `api_copy.rb:19` does 
 
 ### 6.1 Today
 
-- Rails v3 endpoints: **no authentication.** Anyone who knows a login number and broker name can post snapshots for a master (`api_copy.rb:17-18`) or read a slave's pending orders.
-- MT5Dividend license server: `auth_hash = SHA256(account_number + SERVER_SECRET)` with the secret **hardcoded in the EA** (`EA/Include/RemoteLicense.mqh:66-67`; server side from env, `main.py:26`, which falls back to a placeholder default). Any decompiled `.ex5` reveals it and lets anyone forge any account. Sessions are an in-memory dict (`main.py:93`), lost on restart; admin routes (`main.py:625-771`) have no auth; CORS `*` (`main.py:59-66`); plain HTTP URLs (`RemoteLicense.mqh:30-31`).
+- **Rails v3: no authentication.** Anyone who knows a login and broker server name can post master snapshots (triggering trades on every slave) or read a slave's orders.
+- **Rails E1 with unknown/disabled account returns 500**, not 400: `api_copy.rb` dereferences `account.store` with `account == nil` and v3 has no `rescue_from`. The legacy EA then loops forever (Appendix A).
+- **`eval` in `app/presenters/API/V3/base_presenter.rb:54-58`** on a string built from request params, reached on every slave update. Not proven exploitable, but a code-execution surface; being fixed separately (replace with JSON). Further reason not to proxy v3 endpoints in Phase 3.
+- **MT5Dividend license server:** auth hash = SHA256(account + a shared secret compiled into the EA, `EA/Include/RemoteLicense.mqh`); any decompiled `.ex5` reveals it. In-memory sessions, unauthenticated admin routes, CORS `*`, plain HTTP URLs. The secret is in git history and must be rotated regardless of this design.
 
-### D8. Per-account tokens with enrollment
+### D8. Per-account tokens with enrollment, always required
 
-**Recommendation:**
+1. Admin creates the account (or a link) and the server issues a **one-time enrollment code** (10 chars base32, 15 min TTL, single use, stored hashed).
+2. User enters the code in the EA input. EA calls `POST /v4/enroll {code, broker_server, login, role, margin_mode}`. Server checks the code was issued for that `(broker_server, login, role)`, or binds it on first use if admin left those blank.
+3. Server returns a random 256-bit token, stores `HMAC(TOKEN_PEPPER, token)`.
+4. **Token storage in the EA:** a file in the terminal's own `MQL5\Files` (not `FILE_COMMON`, which every terminal and third-party EA on the machine shares; not a terminal global variable, which is a `double`). Name `copy_token_<server_norm>_<login>_<role>.dat`, so master and slave on the same PC never collide (rev-2 A17).
+5. Every other call sends `Authorization: Bearer`. Missing/invalid → `401`; revoked or account disabled → `403`. **There is no unauthenticated or legacy mode** (rev-1 #5, rev-2 A10).
+6. Rotation `POST /v4/token/rotate`; revocation from admin; re-enrollment invalidates the previous token.
 
-1. Admin creates an account (or a link) and the server issues a **one-time enrollment code** (short, e.g. 8 chars, 15-minute TTL).
-2. The user pastes the code into the EA input (`InputEnrollCode`). The EA calls `POST /api/core/enroll {code, broker_server, login, role, margin_mode}` once.
-3. The server binds the code to that `(broker_server, login)` and returns a random 256-bit **account token**. The EA stores it in a terminal global/file (`FILE_COMMON`), never in the source. The server stores only `HMAC(TOKEN_PEPPER, token)`.
-4. Subsequent requests send `Authorization: Bearer <token>`. MQL `WebRequest` supports custom headers, so the existing multipart body is unchanged.
-5. Rotation: `POST /api/core/token/rotate`; revocation from admin. Short-lived session tokens (the `authenticate → validate` dance in `main.py`) are unnecessary once the long-lived token is unique per account and revocable; we keep the "validate" idea as the periodic store-config call (E2).
-
-Transition for installed v3 EAs (which cannot send a header): `V3_COMPAT_MODE=open` accepts header-less v3 requests **only for accounts that exist and are enabled** (today's rule). An admin can switch an account to `token_required` once it runs a new EA build. New installs default to `enrolled`.
-
-Alternatives: *keep a shared secret but per-build*: still extractable. *mTLS*: MT5 `WebRequest` cannot present client certs. *OAuth device flow*: same shape as the enrollment code but more moving parts.
+Alternatives: shared per-build secret (extractable), mTLS (`WebRequest` can't present client certs), OAuth device flow (same shape, more parts).
 
 ### 6.2 TLS
 
-The server does not terminate TLS. Production: behind kamal-proxy (already used for Rails, `config/deploy.yml`) or Caddy with automatic certificates. MT5 `WebRequest` requires the URL to be whitelisted and handles HTTPS natively. Docs will state that plain HTTP is for `localhost` only. Local trials keep `http://localhost:8080/8081`, matching `ImentoreLib-13.mqh:1741-1744`.
+Reverse proxy (kamal-proxy or Caddy). EA refuses `http://` unless the host is `localhost`/`127.0.0.1`.
 
 ### 6.3 Admin auth
 
-- `/api/core/admin/*` requires a bearer admin token (`api_tokens`, scoped `admin` or `readonly`). The first one comes from `ADMIN_TOKEN` env; the server refuses to start without it outside dev.
-- Rails (Phase 3) gets its own scoped service token.
-- No CORS by default; the minimal admin UI is served same-origin.
+`/admin/*` needs an admin bearer token (`api_tokens`, scopes `admin|readonly`); first from `ADMIN_TOKEN`. Rails gets its own scoped service token. No CORS by default.
 
-### 6.4 Rate limiting and input limits
+### 6.4 Rate limits (rev-1 #6)
 
-- Per account: 10 req/s burst, 5 req/s sustained (the EA's normal rate is ≤1 req/s; retries back off to 10 s, `ImentoreLib-13.mqh:247-252`). Per IP for unauthenticated/enroll: 10/min.
-- Body cap 2 MB (a full-history snapshot is the large case; `orders_history.txt` is ~8 KB for a few dozen deals). Log uploads (E8) capped separately.
-- In-process limiter (slowapi or a token bucket in SQLite) is enough for one container; the proxy can add more.
+Keyed by **token** for authenticated calls, so many terminals behind one IP don't share a budget:
+
+| Route | Limit | Normal load |
+|---|---|---|
+| `master/snapshot` | 5/s burst, 2/s sustained per token | 0.5/s + trade-event bursts |
+| `slave/commands` | 5/s burst, 2/s sustained per token | 0.5/s |
+| `slave/results` | 20/s burst, 5/s sustained per token | bursts on fan-out |
+| `config`, `symbols`, `slave/snapshot`, `logs` | 1/s per token | ≤ 0.1/s |
+| per IP, authenticated total | 200/s | 20 terminals × ~2 req/s ≈ 40/s |
+| `enroll` and any request without a valid token | **10/min per IP**, 5 failed codes per code → code burned | rare |
+
+Exceeding returns `429` with `Retry-After`; the v4 EA honors it (4.2). Body cap 2 MB (256 KB for logs). Token-bucket in process; the proxy may add more.
 
 ### 6.5 Secrets
 
-All secrets via env or Docker secrets (`ADMIN_TOKEN`, `TOKEN_PEPPER`, `WEBHOOK_SECRET`, `DATABASE_URL`). Nothing in images or EA source. The hardcoded secret in `RemoteLicense.mqh:67` must be rotated on the MT5Dividend server whatever happens to this design, since it is in git history.
+`ADMIN_TOKEN`, `TOKEN_PEPPER`, `WEBHOOK_SECRET`, `DATABASE_URL` via env or Docker secrets. Nothing in images or EA source.
 
 ---
 
-## 7. Conciliation and symbol mapping
+## 7. Symbol mapping and conciliation
 
-### 7.1 Symbol mapping
+### 7.1 Symbol mapping (D9)
 
-Today the slave EA uses the master's symbol name as-is (`ImentoreLib-13.mqh:1278`), so a follower broker that names an instrument differently (`EURUSD.m`, `GOLD` for `XAUUSD`) can't copy it; Rails only has the per-account `Instrument` rename (`trace_service.rb:90-96`). Symbol mapping is implemented from scratch in the core; no external contribution is reused.
+Server-side only. `symbol_maps` (per slave, then global) resolves `master_symbol → slave_symbol` before the command is issued; the command's `symbol` is final. The new EA does **no local mapping, prefix or suffix**: it trades exactly the symbol received, and reports `failed: symbol_not_found` if it doesn't exist. Because the EA uploads its symbol list (`PUT /v4/symbols`), the server can validate maps at config time and suggest candidates (`XAUUSD` → `GOLD`, `XAUUSD.m`). The executed symbol is stored as `copies.symbol_local`. (rev-1 #7 / rev-2 A11 are moot: the v3 EA's local precedence logic is not carried into the new build.)
 
-**Recommendation (D9):** resolve on the server:
-1. Server `symbol_maps` (per slave, or global) is applied before the row is sent: field 12 carries the slave symbol. Admin-managed, visible, auditable. Replaces Rails `Instrument` + `instrument_control` (`trace_service.rb:90-96`).
-2. Unmapped symbols are sent as-is (today's behavior); the admin sees `symbol not found` from the slave's update and adds a map. A future v4 EA can upload its broker's symbol list so the server can suggest maps (discovery stays a server feature, not EA logic).
-3. The slave reports the symbol it actually traded in its update; the server stores it as `slave_orders.symbol_local`.
+### 7.2 Conciliation (D10, #79)
 
-### 7.2 Conciliation (#79)
-
-The bug: `SlaveConciliatePresenter#conciliate_position` matches by `symbol` + `ticket_slave` (`slave_conciliate_presenter.rb:128`), but `symbol` is the master symbol and history reports the local one, so mapped copies never match.
-
-**Recommendation (D10):** in the core, conciliation matches **only by identity**: `(slave_id, ticket_slave)` (position id), falling back to `correlation` (comment) when the ticket is not yet known. Symbol is compared only as a consistency check, logged on mismatch. `UNIQUE(slave_id, ticket_slave)` makes this the natural key.
-
-Also fix #79 in Rails *now*, independently (match by `ticket_slave` + `account`, add a `symbol_local` column, regression spec where history reports `GOLD` for master `XAUUSD`), because Rails is the running backend until Phase 3, and any symbol mapping will hit it first. The same fixture then becomes a golden test (Section 4.5), where the Rails behavior after the fix is the golden one.
-
-Conciliation also computes latency (`slave open_at − master open_at`, both normalized via `time_gmt`) and slippage (`slave price_open − master price_open` in points) and stores them on `slave_orders` (#66). Time-zone handling follows `slave_serializer.rb:147-160`.
+Rails' bug matched by master symbol (#79, fixed in `776c5cb` by ticket + account). The core matches **only by identity**: `command_id` → `position_id` (stable) → `(slave_id, deal)` for closes. Position ticket is refreshed from slave snapshots, never used as a key. Symbol is a consistency check, logged on mismatch. Conciliation runs in the background job over slave snapshots/history, batched (D6), and computes latency (slave open time − master open time, both from `time_msc` corrected by each terminal's server-time offset) and slippage in points (#66).
 
 ---
 
-## 8. Rails as an optional module
+## 8. Testing: behavior scenarios from the Rails specs
+
+No byte-level golden recorder (rev-1 #10/#11, rev-2 A14 obsolete). Instead:
+
+1. **Scenario catalog** in `docs/protocol/v4/scenarios/*.yaml`: each step is a v4 call (snapshot / poll / result) with a frozen clock, and expected **business outcomes**: copies created (count, link, symbol, volume), commands issued (action, side, volume, price null/value), state after each step, events emitted.
+2. **Sources:** every `spec/api/v2|v3` file, translated by hand into scenarios with the same intent, e.g. `api_copy_hedging*_spec.rb` (hedging fan-out/close), `api_magic_number_restrictions_spec.rb` (magic filters), `api_slave_spec.rb` (metaState handling incl. NOTMODIFY → NOSLTP), the #79 regression (master `XAUUSD`, slave history `GOLD`), payloads from `spec/api/v3/orders_history.txt` converted to v4 JSON.
+3. **New scenarios** for things v3 got wrong or never covered: absence close without history; OPENED after master close; netting conflict rejected at config; lot rounding table; BUY and SELL both `price: null`; idempotent replays; 409 on key reuse; 401/403/429 paths; two groups on the same pair.
+4. **Concurrency test** (D6): threads with barriers, 1 master at 0.5 s + 5 slaves for 10 min on a SQLite file: zero `database is locked`, zero partial or duplicate fan-out; same invariants on Postgres.
+5. **EA client test**: a fake server returning each status code; the EA (in Strategy Tester or a script harness) must stop retrying per 4.2.
+
+Phase 1 exit: all scenarios pass on SQLite and Postgres, plus a 48 h demo run (1 master, 1 hedging + 1 netting slave) with zero orphan copies.
+
+---
+
+## 9. Rails as an optional module
 
 ### D11. Contract
 
-**Recommendation:** Rails becomes a client of the Copy Server; the Copy Server never calls into Rails for authorization on the hot path.
+Rails becomes a client of the Copy Server, never on the hot path.
 
-- **Copy Server → Rails: signed webhooks** from the outbox (`account.seen`, `master_position.opened/closed`, `slave_order.executed/closed/error`, `conciliation.completed`). HMAC-SHA256 signature header, at-least-once delivery, retries with exponential backoff (shape from `stock-dividend/mcp_mt5_sync/service.py:128-160`), event id for dedupe on the Rails side.
-- **Rails → Copy Server: admin API** with a service token: create/enable/disable accounts and links, set lot/symbol/magic settings, issue enrollment codes, read positions and history for the panel.
-- **Authorization (plans, billing):** Rails decides and *pushes* the result (`PATCH /admin/accounts/:id {enabled: false}` when an invoice is unpaid). No synchronous "may this account copy?" call per EA request, so a Rails outage does not stop copying. Alternative considered: Copy Server calls a Rails `authorize` endpoint with a cache. Rejected because it puts Rails back on the critical path.
-
-### What moves out of Rails, what stays
+- **Copy Server → Rails:** signed webhooks from the outbox (`account.seen`, `master_position.opened/closed`, `copy.opened/closed/error`, `conciliation.completed`), HMAC-SHA256, at-least-once, backoff, event id for dedupe.
+- **Rails → Copy Server:** admin API with a service token (accounts, groups/links, lot/symbol/magic settings, enrollment codes, read positions/history).
+- **Authorization (plans, billing):** Rails pushes results (`PATCH /admin/accounts/:id {enabled:false}`). No per-request callback.
 
 | Moves to Copy Server | Stays in Rails |
 |---|---|
-| `app/controllers/api/v3/*` copy/slave/store endpoints | `Customer`, `User`, `Store` (as tenant), `Plan`, `CustomerPlan`, `Invoice`, Stripe |
-| `CopyPresenter`, `SlavePresenter`, `*ConciliatePresenter`, `TraceService`, v3 serializers | Admin, control and panel UIs (read from Copy Server API or from webhook-fed tables) |
-| `Message::V3::*` raw storage | Telegram signals (`stores/telegram/python`), `BotTelegram` |
-| `config/meta_versions.yml` (EA version gate) | Statistics/reports derived from webhook data |
-| v1/v2 APIs: **not ported** (see Q4) | v1/v2 endpoints until retired |
+| Copy/slave/store logic (as ported rules, not code) | `Customer`, `User`, `Store`, `Plan`, `CustomerPlan`, `Invoice`, Stripe |
+| `Trace` settings → `copy_groups`/`copy_links` via admin API | Admin/panel UIs (read from Copy Server API or webhook tables) |
+| | Telegram signals, `BotTelegram` |
 
-Rails keeps `Trace` as the commercial product ("a signal you subscribe to"); subscribing an account creates a `copy_link` via the admin API.
+**v1/v2/v3 are retired as the copy backend** once the Copy Server reaches Phase 1. The Rails endpoints remain until Phase 3 only for the owner's own use, then are removed (not proxied).
 
 ---
 
-## 9. Migration plan and phases
+## 10. Phases
 
 | Phase | Scope | Exit criteria |
 |---|---|---|
-| **0** | This document approved; #79 fixed in Rails | Decisions D1–D11 approved or amended; open questions answered or deferred explicitly |
-| **0.5** | Monorepo + rename (D1–D4) | One repo, CI green for `web/`, `ea/`; `python-signal` archived; Rails image still deploys |
-| **1** | Copy Server core: E1–E7, accounts/links/master_positions/slave_orders, SQLite, Docker, admin API (token), golden tests | All golden scenarios pass; demo master + 2 slaves (hedging and netting) copy, modify and close for 48 h on a demo broker with zero unmatched slaves; `docker compose up` gives a working server with no Rails |
-| **2** | Server-side symbol maps, lot modes, conciliation by ticket, latency/slippage, enrollment + tokens in a new EA build | Golden tests updated deliberately; #66 numbers visible via API; a new EA build passes enrollment; mapped-symbol conciliation scenario passes |
-| **3** | Rails as client: webhooks + admin API; Rails' v3 endpoints removed or proxied | Rails panel shows positions from the Copy Server; disabling a plan disables copying within one webhook/admin round trip; Rails can be stopped without affecting copying |
+| **0** | This document approved | D1–D11 approved; open questions answered or deferred |
+| **0.5** | Layout + rename (D1–D4): Rails to `web/`, CI split, python-signal archived | CI green; Rails image deploys |
+| **1** | Server (new, `server/`): v4 API, enrollment/tokens, groups/links, copies/commands, absence close, lot calc, symbol maps, netting one-per-symbol, SQLite+Postgres, Docker, admin API. **New EA written fresh in `ea/mt5/`** (master + slave v4 client) | Section 8 exit; `docker compose up` works with no Rails |
+| **2** | Netting full model, partial close/add mirroring, symbol-map suggestions, installer, latency/slippage reporting (#66) | Scenarios for partials pass; #66 numbers visible |
+| **3** | Rails as client (webhooks + admin API); Rails v1/v2/v3 copy endpoints removed | Rails panel shows Copy Server data; Rails can be stopped without affecting copying |
 
-### Existing deployments and data
-
-There are no active deployments today, so no live cutover is needed. Still provided:
-- `server/scripts/import_from_rails.py`: reads Rails Postgres (`accounts`, `traces`, `permissions`, `instruments`, `magic_numbers`, open `transactions`/`transaction_slaves`) and writes core rows, mapping each `(trace, master account, slave account)` permission triple to a `copy_link`. Closed history is optional (`--with-history`).
-- `db/seeds/demo.rb` gets a twin in `server/` so the local trial has the same demo data.
-
-### Rollback
-
-- Phases 0.5 to 2: Rails remains fully functional, and the EA's server URL (`ImentoreLib-13.mqh:1746`, or DNS) decides which backend is used. Rollback = point DNS/proxy back to Rails.
-- The importer is one-way. For the rollback window, run in shadow mode: the proxy mirrors master snapshots to the Copy Server (responses ignored) and the golden comparison runs on real traffic for a week before switching.
-- Phase 3 is reversible as long as Rails' v3 code is deleted only one release after cutover.
+No migration of live data is needed (nothing deployed). `server/scripts/import_from_rails.py` maps each Rails trace to a `copy_group` and each `(trace, master, slave)` permission to a `copy_link`, for the owner's existing configuration; it rejects netting conflicts (5.3) with a diagnostic instead of deduplicating.
 
 ---
 
-## 10. Risks and open questions
+## 11. Risks and open questions
 
 ### Risks
 
-- **R1. Hidden v3 behavior.** The presenters encode years of edge cases (duplicate cleanup, `NOTMODIFY` escalation, three closing mechanisms). Golden tests only cover recorded scenarios. Mitigation: shadow mode on real traffic before cutover; port the scenario list from all `spec/api/v2|v3` files, not only v3.
-- **R2. Compiled-in server URL.** Installed EAs can only be redirected by DNS. If the old hostname is gone, users need a new build anyway, which weakens the "installed EAs keep working" goal in practice.
-- **R3. Comment as correlation key.** MT5 brokers may truncate comments (31 chars) or overwrite them; prop-firm prefixes make them longer (`trace_service.rb:71`). Today's design has the same risk; the core reduces reliance on it once `ticket_slave` is known.
-- **R4. SQLite with multiple workers.** Mitigated by refusing to start with >1 worker on SQLite.
-- **R5. Monorepo move breaks Kamal/CI paths** (`config/deploy.yml`, Dockerfile context). Mitigation: the move PR changes paths only, and a deploy dry-run is part of its checklist.
-- **R6. Licensing.** Both repos use PolyForm Noncommercial + CLA. Confirm the CLA wording covers relocation into a renamed/merged repo (it should, since it grants rights to the maintainer, not to a repo), and only import history whose contributors signed it.
+- **R1. Business-rule gaps.** Rails presenters encode edge cases; scenarios cover what we enumerate. Mitigation: port every v2/v3 spec, read `copy_presenter.rb`, `slave_presenter.rb`, both conciliate presenters line by line when writing scenarios, 48 h demo soak.
+- **R2. New EA quality.** The EA is now a rewrite of the HTTP client and command loop; MQL has no CI compile here. Mitigation: EA client test (8.5), Strategy Tester runs, small surface (commands are explicit).
+- **R3. Netting restriction is visible to users.** Some configurations are rejected in Phase 1. Mitigation: clear 422 messages; Phase 2 model.
+- **R4. SQLite contention.** Mitigated by D6; Postgres for larger installs.
+- **R5. Moving Rails to `web/` breaks Kamal/CI paths.** Paths-only PR with a deploy dry-run.
+- **R6. Clock skew** between terminals affects `expires_at` and latency. Mitigation: `server_time` in every response, EA keeps an offset.
 
-### Open questions (for the owner and reviewers)
+### Open questions (for the owner)
 
-- **Q1.** New project name (#78). It blocks D4 step 2 but not Phase 1 code.
-- **Q2.** Are any EA builds older than 3.00 still installed anywhere? If not, the server implements v3 only and `web/` can drop v1/v2 (#64).
-- **Q3.** Keep the production hostname of `ImentoreLib-13.mqh:1746` alive (DNS to the Copy Server) or accept that all users reinstall a renamed EA? This decides how much effort `V3_COMPAT_MODE=open` deserves.
-- **Q4.** Is pairwise `copy_links` acceptable as the core model, with "trace" kept only as a Rails concept? Or should the core have a first-class "group" (one master, shared settings, many slaves)?
-- **Q5.** `meta_versions.yml` `disable` entries are accepted today because of the `.present?` check (`defaults.rb:28`). Is enforcing them in the Copy Server the intended behavior?
-- **Q6.** EA log upload (E8, `ImentoreLib-13.mqh:992`) has no Rails route. Implement a log sink in the server, or drop the call in the next EA build?
-- **Q7.** Netting partial adds/closes: mirror proportionally on slaves in Phase 2, or keep today's "one slave order per symbol" behavior?
-- **Q8.** Lot scaling server-side vs. EA-side: OK to keep EA-side rounding (the server lacks `volume_step`) and only move the *policy* to the server?
-- **Q9.** Should the minimal admin UI in the Copy Server be a few server-rendered pages, or API-only with Rails/CLI as the UI?
-- **Q10.** Reuse StockInstaller (C#/.NET 8, `MT5Dividend/StockInstaller/src`, GitHub releases updater in `Services/GitHubService.cs`) for the copy EAs in `installer/`, or keep installation manual until Phase 2?
-- **Q11.** Does the MT5Dividend license server (`main.py`) get migrated onto the same account/token model later (shared `server/` auth package), or stay separate?
+- **Q1.** New project name (#78). Blocks D4 step 2, not Phase 1 code.
+- **Q2.** *Answered:* v1/v2/v3 retired as copy backend; Rails endpoints kept until Phase 3 for the owner's own use.
+- **Q3.** *Moot:* no installed EAs, no hostname continuity.
+- **Q4.** *Proposed:* pairwise `copy_links` inside first-class `copy_groups` (5.1). Approve?
+- **Q5.** *Proposed:* minimum `ea_version` per role in config; older EAs get `403` with a message. `meta_versions.yml` not ported. Approve?
+- **Q6.** *Proposed:* `POST /v4/logs` with 256 KB cap, kept 7 days, only when `debug=true`. Or drop log upload entirely?
+- **Q7.** *Decided for Phase 1* (one copy per symbol on netting slaves; partials not mirrored). Phase 2: proportional mirroring or keep?
+- **Q8.** *Decided:* server-side lots from EA-reported specs (5.4). Remaining: when `raw < volume_min`, default open at min or skip?
+- **Q9.** Admin UI: a few server-rendered pages, or API/CLI only until Rails?
+- **Q10.** Reuse StockInstaller for the copy EAs, or manual install until Phase 2?
+- **Q11.** Migrate the MT5Dividend license server to this token model later, or keep separate?
+- **Q12.** Absence-close defaults K=3 / T=10 s: acceptable, or more conservative?
+- **Q13.** Retention defaults (raw 48 h, results/events 30 d, logs 7 d): acceptable?
 
 ---
 
@@ -540,14 +561,28 @@ There are no active deployments today, so no live cutover is needed. Still provi
 
 | # | Decision | Recommendation |
 |---|---|---|
-| D1 | Repo layout | Monorepo: `ea/ server/ web/ client/ installer/ docs/` |
-| D2 | History migration | `git filter-repo` import of python-signal + `git mv` Rails to `web/` |
-| D3 | CI | Path-filtered workflows per directory, one CLA bot, two GHCR images |
-| D4 | Sequencing | Tag → rename → move PR → EA rename PR → archive; Phase 1 in parallel after move |
+| D1 | Repo layout | This repo holds new `ea/mt5/`, new `server/`, `web/` (moved), `docs/`; installer later |
+| D2 | python-signal | Not imported; archived as legacy with a pointer; legacy EAs stay there |
+| D3 | CI | Path-filtered workflows; server job also on `docs/protocol/**`, EA and Rails API sources |
+| D4 | Sequencing | Name → rename repo → move Rails PR → server/EA PRs → archive python-signal |
 | D5 | Stack | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2 (sync), Alembic |
-| D6 | Storage | SQLite WAL default, Postgres optional; never JSON files |
-| D7 | Deploy/config | Single image, compose, env-only config, TLS at proxy |
-| D8 | Auth | Per-account tokens via one-time enrollment code; v3 compat mode for old EAs; admin bearer tokens |
-| D9 | Symbol mapping | Server-side `symbol_maps`, implemented from scratch |
-| D10 | Conciliation | Match by `ticket_slave` / correlation, never symbol; fix #79 in Rails now |
-| D11 | Rails contract | Webhooks out + admin API in; Rails pushes authorization, never on the hot path |
+| D6 | Storage | SQLite WAL + `BEGIN IMMEDIATE` + whole-transaction retry; Postgres optional |
+| D7 | Deploy/config | Single image, compose, env-only, TLS at proxy |
+| D8 | Auth | Enrollment code → per-account token, always required; stored per terminal in `MQL5\Files` |
+| D9 | Symbol mapping | Server-side only; EA trades the received symbol |
+| D10 | Conciliation | By `command_id` / `position_id` / deal, never symbol or position ticket |
+| D11 | Rails contract | Webhooks out, admin API in; v1–v3 retired, removed in Phase 3 |
+
+---
+
+## Appendix A. Legacy v3 wire format (reference only)
+
+Not a contract. Kept so the ported rules can be traced back.
+
+- **Transport** (`Lib:210-292`): always `POST`, multipart with a fixed boundary, one part `data` with `Content-Disposition: attachment` and the JSON as file content (Rails also accepts field `orders`, `defaults.rb:31-51`, which converts from Latin-1 unconditionally). No auth: identity in the path `/api/v3/{copy|slave}/post/{name}/{expert}/{version}/{server}/{login}/{HEDGING|NETTING}`. `int timeout = 5000` is declared but `WebRequest` gets `0`. Local mode uses ports 8080 (copy) and 8081 (slave).
+- **Defect (do not repeat):** success is only `201`; the loop `do { ... } while (status != 201)` never gives up. A `403` prints a message and continues; any 4xx/5xx is retried forever (first ~10 attempts with no delay) with the same body, freezing the single-threaded EA. Since Rails returns 500 for an unknown account on E1, a misconfigured EA hammers the server indefinitely.
+- **Endpoints:** E1 `copy/post/orders` (`api_copy.rb`), E2/E6 `{copy,slave}/post/store` (`store_presenter.rb:52-69`, 201/401/403), E3/E4 `slave/post/orders` POST/GET (`api_slave.rb:33-65`), E5 `slave/post/update` (`api_slave.rb:12-29`), E7 `stores/config` (`api_store.rb:20-28`, 2.x EAs only), log upload `post/{LogFileName}` (no Rails route).
+- **Slave rows:** `/`-joined rows of 18 `|`-separated fields (`trade_helper_service.rb`); the EA checks `< 17` but reads index 17, so 18 are required. Fields: `ordertype | ticket_master | ticket_slave | trace_id | transaction_slave_id | magic | master_id | price_open | lot | sl | tp | state | symbol | ticket_deal | seconds_ago | comment | open_at | contract_volume`. `state` vocabulary: `pending` → EA opens, `executed` → EA modifies, `remove` → EA closes; nothing else is acted on. Correlation by comment `"{trace_id}-{ticket_master}"` (`trace_service.rb:65`, prop-firm prefix `:70-73`). `seconds_ago ≥ 30` makes the EA refuse a market order (TIMEMAX).
+- **Lot:** with `contract_volume != 0` the EA sends `NormalizeDouble(SYMBOL_VOLUME_MIN × contract_volume, 2)`; with `0` it sends the master lot unrounded, and on every `executed` row it compares position volume with field 8 and issues `MODIFY_VOLUME`, so Rails' per-snapshot lot rewrite mirrors partial closes/adds 1:1.
+- **Price:** field 7 is `"0"` (market) for SELL but the master price for BUY due to `0 == "0"` in `trade_helper_service.rb:61-63`.
+- **metaState** (`slave_presenter.rb:37-78`): `OPEN/OPENED`, `CLOSED/HASCLOSED`, `DELETED`, `MODIFY`, `MODIFY_VOLUME`, `NOTMODIFY` (→ `NOSLTP` after 2/day), `NOSLTP/ERRORDEAL/TIMEMAX/NOTCLOSED/REACHMFE/REACHLOSS` → error. `check_order_duplicate` (`:85-97`) destroys duplicates including master `Order`s.
