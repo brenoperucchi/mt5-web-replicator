@@ -16,8 +16,13 @@ module API
               content_type 'text/plain'
               account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
               account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :copy, state: :enable)
+              # Unknown/disabled account: reject before touching account.store (was a 500).
+              if account.nil?
+                status 400
+                return false
+              end
               message = Message::V3::MetaCopy.create(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
-              if account && message.execute
+              if message.execute
                 message.execute_conciliated
                 status 201
                 return true

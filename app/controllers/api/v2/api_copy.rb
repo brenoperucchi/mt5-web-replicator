@@ -23,7 +23,8 @@ module API
             post "/:expert_name/:expert_version/:account_server_name/:account_id/:account_mode" do
               content_type 'text/plain'
               presenter = API::V2::APICopyPresenter.api_copy(params, request)
-              if presenter.execute
+              # api_copy returns nil for an unknown account: answer 400, not 500.
+              if presenter&.execute
                 body "OK|OK|OK"
                 status 201
               else

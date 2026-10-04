@@ -90,7 +90,7 @@ class Account < ApplicationRecord
   end
 
   def create_invoice(trace, month_proporcional = false, month=nil)
-    date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
+    date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + Integer(month).months).beginning_of_month
     name = name.blank? ? "#{self.customer.id}-#{date_today.strftime("%Y-%m")}" : name 
 
     invoice = customer.invoices.find_or_initialize_by(name: name, store:store, kind: :client)

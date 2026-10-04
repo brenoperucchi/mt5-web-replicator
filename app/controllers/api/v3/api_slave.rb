@@ -14,7 +14,7 @@ module API
           account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
-            message = Message::V3::MetaSlave.create(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
+            message = Message::V3::MetaSlave.create(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
             begin
               message.execute
               message.execute_conciliated
@@ -35,7 +35,7 @@ module API
           account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
-            message = Message::V3::MetaSlave.new(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
+            message = Message::V3::MetaSlave.new(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
               message.execute_conciliated
               body message.response
               status 201
@@ -51,7 +51,7 @@ module API
           account_server = AccountServer.find_or_create_by(name: params["account_server_name"].try(:downcase))
           account = Account.find_by(name: params["account_id"], account_server: account_server, kind: :slave, state: :enable)
           if account
-            message = Message::V3::MetaSlave.new(content: content, params: params.to_s, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
+            message = Message::V3::MetaSlave.new(content: content, params: params.to_json, request_url: request.url, account: account, store: account.store, content_at: Time.zone.now)
             begin
               message.execute_conciliated
               body message.response
