@@ -82,4 +82,15 @@ RSpec.describe 'V3 Slave conciliation', type: :request do
     expect(@slave.profit.to_f).to eq(0)
     expect(@slave.symbol_local).to be_nil
   end
+
+  it 'reuses the existing order by content_id and account when the copy has no order and the broker reports a local symbol' do
+    @slave.update_columns(order_id: nil)
+
+    expect { post_history('GOLD') }.not_to change { Order.where(account: @account_slave).count }
+    expect(response.status).to eq(201)
+
+    @slave.reload
+    expect(@slave.state).to eq('closed')
+    expect(@slave.order_id).to eq(@order.id)
+  end
 end

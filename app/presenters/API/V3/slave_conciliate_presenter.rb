@@ -197,6 +197,7 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
       slave.trace = trace
       slave.closed_at = serializer.closed_at# if slave.closed_at.nil?
       slave.conciliated_at = Time.current
+      slave.order ||= order # orphan copy: attach the order found by content_id
 
       if slave.save
         order.update(state: 'closed', conciliated_at: Time.current)
@@ -351,7 +352,7 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
 
     Rails.logger.info("[DEBUG] Attempting to find or create order: #{debug_info.to_json}")
 
-    order = Order.find_by(symbol: json_last['symbol'], content_id: content_id, account: @account)
+    order = find_existing_order(json_last['symbol'], content_id)
 
     unless order
       begin
@@ -374,6 +375,23 @@ class API::V3::SlaveConciliatePresenter < API::V3::BasePresenter
       end
     end
 
+    order
+  end
+
+  # Real tickets (content_id > 0) are unique per account, so match by
+  # content_id + account only (mirrors #79): the slave history reports the
+  # LOCAL broker symbol (e.g. GOLD) while the Order keeps the MASTER symbol
+  # (XAUUSD). Symbol is only a consistency check / tie-breaker. Synthetic
+  # adjustment orders (content_id <= 0, e.g. "conciliated", "<trace>-YYYYMM")
+  # share content_id -1 and are still distinguished by symbol.
+  def find_existing_order(symbol, content_id)
+    return Order.find_by(symbol: symbol, content_id: content_id, account: @account) if content_id.to_i <= 0
+
+    orders = Order.where(content_id: content_id, account: @account).order(:id).to_a
+    order  = orders.detect { |o| o.symbol.to_s.casecmp?(symbol.to_s) } || orders.first
+    if order && !order.symbol.to_s.casecmp?(symbol.to_s)
+      Rails.logger.warn("[CONCILIATE] Symbol mismatch on Order##{order.id} (account #{@account&.id}, content_id #{content_id}): order=#{order.symbol} reported=#{symbol}")
+    end
     order
   end
 
