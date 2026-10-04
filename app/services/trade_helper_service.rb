@@ -59,7 +59,8 @@ class TradeHelperService
   end
   
   def self.price_open(resource)
-    (resource.ordertype == "0" or resource.ordertype == 1) ? "0" : resource.price_request
+    # ordertype is an integer column (0 = BUY, 1 = SELL market); pending types send the requested price.
+    [0, 1].include?(resource.ordertype.to_i) ? "0" : resource.price_request
   end
   
   def self.order_pending?(content)
