@@ -138,7 +138,7 @@ class Store < ApplicationRecord
   end
 
   def create_invoice_month(proporcional=false, month=nil)
-    date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + eval("#{month}.month")).beginning_of_month
+    date_today = month.nil? ? DateTime.current.beginning_of_month : (DateTime.current + Integer(month).months).beginning_of_month
     invoice_name = "#{self.id}-#{date_today.strftime("%Y-%m")}"
     invoice = self.invoices.find_or_create_by(name: invoice_name, store:self, payment: billing_payment)
 

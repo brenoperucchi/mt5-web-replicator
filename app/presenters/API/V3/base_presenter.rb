@@ -47,18 +47,9 @@ module API
 					return JSON.parse(params)
 				rescue JSON::ParserError
 					begin
-						# Second attempt: try converting Ruby hash notation to JSON
-						result = nil
-						
-						# Handle different input formats
-						if params.include?('=>')
-							# Convert Ruby hash string to actual hash
-							cleaned = params.gsub(/#<(File|Tempfile):[^>]+>/, '"file_object"')
-							result = eval(cleaned) rescue nil
-							return result if result.is_a?(Hash)
-						end
-						
-						# Third attempt: more aggressive regex replacement
+						# Legacy rows stored Hash#inspect text. Never eval it (RCE): fall back
+						# to a textual conversion and JSON.parse, which can only yield data.
+						# Second attempt: regex conversion of Hash#inspect notation
 						cleaned = params
 							.gsub('=>', ':')
 							.gsub(/(\w+):/, '"\1":')

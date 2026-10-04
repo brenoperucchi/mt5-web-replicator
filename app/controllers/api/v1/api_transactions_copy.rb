@@ -21,8 +21,8 @@ module API
           content_type 'text/plain'
           action = params[:action]
           if action == "closed"
-            parameters = eval(params[:body].encode("UTF-8", "Windows-1252"))
-            serializer_attributes = SerializerAPITransaction.new(YAML.load(params[:body].encode("UTF-8", "Windows-1252")))
+            parameters = YAML.safe_load(params[:body].encode("UTF-8", "Windows-1252")).to_h.with_indifferent_access
+            serializer_attributes = SerializerAPITransaction.new(YAML.safe_load(params[:body].encode("UTF-8", "Windows-1252")))
             Transaction.where(ticket: parameters[:ticket_id]).each do |transaction|
               
               transaction.attributes = {price_closed:  parameters[:close_price], profit: parameters[:profit], closed_at:serializer_attributes.open_at}
