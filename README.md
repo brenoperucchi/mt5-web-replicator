@@ -9,6 +9,12 @@
 
 Ruby on Rails application to receive, organize, and replicate trading information coming from MT5/MQL to a web backend. The project centralizes admin dashboards, accounts, customers, plans, invoices, payment integrations, and APIs to manage the distribution of orders and events across multiple accounts.
 
+## Copy Server (Phase 1, in progress)
+
+A standalone Copy Server (FastAPI, Python 3.12) is being built in [`server/`](server/README.md)
+following the approved design [`docs/design/0001-copy-core.md`](docs/design/0001-copy-core.md) (#77).
+It does not replace anything in the Rails app yet.
+
 ## Quick start (Docker)
 
 Try it locally with nothing but Docker:
