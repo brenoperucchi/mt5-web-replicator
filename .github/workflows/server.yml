@@ -1,0 +1,71 @@
+name: Server
+
+# Copy Server CI (design 0001, D3). Only runs when the server or the protocol changes.
+on:
+  pull_request:
+    paths:
+      - "server/**"
+      - "docs/protocol/**"
+      - ".github/workflows/server.yml"
+  push:
+    branches: [master]
+    paths:
+      - "server/**"
+      - "docs/protocol/**"
+      - ".github/workflows/server.yml"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  test:
+    name: test (${{ matrix.db }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, postgres]
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: copy
+          POSTGRES_PASSWORD: copy
+          POSTGRES_DB: copy_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U copy"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: server/uv.lock
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: uv sync --frozen --python 3.12
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Pytest
+        env:
+          COPYCORE_TEST_DATABASE_URL: ${{ matrix.db == 'postgres' && 'postgresql://copy:copy@localhost:5432/copy_test' || '' }}
+        run: uv run pytest -ra
+
+      - name: Alembic upgrade head
+        env:
+          DATABASE_URL: ${{ matrix.db == 'postgres' && 'postgresql://copy:copy@localhost:5432/copy_test' || 'sqlite:///ci-migrate.db' }}
+        run: uv run alembic upgrade head && uv run alembic downgrade base
