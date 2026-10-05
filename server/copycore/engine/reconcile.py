@@ -19,9 +19,10 @@ Runs inline in `POST /v4/slave/snapshot` for this slave's copies:
 History-based decisions (3, 4 and adoption from deals) need `history_synced=true`; nothing runs
 while `connected=false` (a disconnected terminal's view is not evidence).
 
+Operator resolution (`/admin/copies/:id/resolve`, `/admin/symbol_conflicts/:id/resolve`, `resolve`
+command to the EA journal) lives in `engine.admin_ops`.
+
 TODO(PR: background worker): adoption sweep for copies older than the 7-day inline window (5.8, D6).
-TODO(PR: admin UI): operator resolution `POST /admin/copies/:id/resolve` and
-`/admin/symbol_conflicts/:id/resolve` + `resolve` command to the EA journal (4.6 step 7, 5.8).
 """
 
 from __future__ import annotations

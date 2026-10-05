@@ -21,7 +21,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..models import Command, CommandAttempt, Copy
+from ..models import Command, CommandAttempt, Copy, SymbolConflict
 from . import commands as cmds
 from .lifecycle import (
     ZERO_EXPOSURE,
@@ -176,6 +176,9 @@ def _open(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> 
 
 def _close(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> None:
     status = r["status"]
+    if (cmd.payload or {}).get("conflict_id") is not None:
+        _conflict_close(s, cmd, copy, r, ctx)
+        return
     if status in ("done", "closed"):
         _settle(cmd, "done", r)
         mark_closed(s, copy, ctx, reason=r.get("close_reason") or "master_closed", deal=r.get("deal"),
@@ -208,10 +211,11 @@ def _close(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) ->
 
 def _cancel(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> None:
     status = r["status"]
+    why = (cmd.payload or {}).get("reason") or "master_closed"
     if status == "not_executed":
         _settle(cmd, "done", r)
         if copy.position_id is None:
-            mark_cancelled(s, copy, ctx, "master_closed")
+            mark_cancelled(s, copy, ctx, why)
     elif status in ("closed", "done"):
         # The open had executed; the EA closed that position and reports the close deal (4.4, S05).
         _settle(cmd, "done", r)
@@ -220,7 +224,7 @@ def _cancel(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -
             copy.position_ticket = r.get("position_ticket")
         for open_cmd in cmds.outstanding(s, copy.id, ("open",)):
             open_cmd.state, open_cmd.result = "done", {"status": "done", "source": "cancel_closed"}
-        mark_closed(s, copy, ctx, reason="master_closed", deal=r.get("deal"), price=r.get("price"),
+        mark_closed(s, copy, ctx, reason=why, deal=r.get("deal"), price=r.get("price"),
                     profit=r.get("profit"), fee=_fee(r))
     elif status == "uncertain":
         _mark_uncertain(s, cmd, copy, r, close_intent=True)
@@ -296,6 +300,34 @@ def _modify(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -
 
 def _resolve(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> None:
     _settle(cmd, "done" if r["status"] in CONCLUSIVE else "failed", r)
+
+
+def _conflict_close(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> None:
+    """Operator-requested close of the extra exposure of a `symbol_conflicts` row (5.8, C8). Its
+    carrier copy is a `superseded` sibling without `close_intent`, so it never takes a reservation;
+    the conflict (and the block on new opens) ends only when the close is confirmed."""
+    status = r["status"]
+    conflict = s.get(SymbolConflict, int(cmd.payload["conflict_id"]))
+    if status in ("done", "closed"):
+        _settle(cmd, "done", r)
+        copy.closed_at, copy.close_reason = ctx.now, "conflict_closed"
+        copy.close_deal = r.get("deal") if r.get("deal") is not None else copy.close_deal
+        if conflict is not None and conflict.resolved_at is None:
+            conflict.resolved_at = ctx.now
+            conflict.resolution = f"closed (command {cmd.id})"
+        event(s, "symbol_conflict.closed", conflict_id=cmd.payload["conflict_id"], copy_id=copy.id,
+              position_id=copy.position_id, deal=r.get("deal"))
+    elif status == "uncertain":
+        cmd.state, cmd.lease_until, cmd.result = "in_progress", None, _jsonable(r)
+        event(s, "copy.uncertain", copy_id=copy.id, command_id=cmd.id, action="close",
+              error_code=r.get("error_code"), conflict_id=cmd.payload["conflict_id"])
+    elif status == "skipped" or r.get("error_code") == "position_not_found":
+        # No evidence the exposure is gone (C3): the conflict stays open for the operator.
+        _settle(cmd, "skipped" if status == "skipped" else "failed", r)
+        event(s, "symbol_conflict.close_failed", conflict_id=cmd.payload["conflict_id"], command_id=cmd.id,
+              error_code=r.get("error_code") or status)
+    else:
+        _retry(s, cmd, copy, r, ctx)
 
 
 def _retry(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> None:

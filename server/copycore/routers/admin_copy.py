@@ -1,8 +1,10 @@
-"""Admin API for copy configuration and debugging (Phase 1 / PR 2).
+"""Admin API for copy configuration and debugging (Phase 1 / PR 2; drain on disable in PR 5).
 
 Groups (≈ Rails traces), links with config-time validation (5.3: hedging master → netting
 slave 422, cycles 422, netting filter overlap 422, contract size 5.4), symbol maps (7.1, two
 partial unique indexes → 409 map_conflict), and read-only listings of copies and commands.
+Disabling a link or a group applies the C6 drain transitions in the same transaction (6.2).
+The `*_op` functions are shared with the admin UI (`routers.ui`).
 """
 
 from __future__ import annotations
@@ -18,7 +20,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..auth import authenticate_admin
-from ..deps import settings_of, uow
+from ..deps import engine_ctx, settings_of, uow
+from ..engine.admin_ops import drain_copies
 from ..engine.commands import command_json
 from ..engine.validation import contract_size_conflict, link_problem, netting_overlap
 from ..errors import ApiError, json_response
@@ -148,19 +151,23 @@ def _revalidate_slave(s: Session, slave_id: int | None) -> None:
 
 # --- groups -----------------------------------------------------------------------------------
 
+def create_group_op(s: Session, body: GroupIn) -> CopyGroup:
+    master = _get(s, Account, body.master_id, "master account")
+    if master.role != "master":
+        raise conflict("group master must be a master account")
+    g = CopyGroup(**body.model_dump())
+    s.add(g)
+    s.flush()
+    return g
+
+
 @router.post("/groups", status_code=201)
 def create_group(body: GroupIn, request: Request):
     settings = settings_of(request)
 
     def work(s: Session):
         authenticate_admin(s, request, settings)
-        master = _get(s, Account, body.master_id, "master account")
-        if master.role != "master":
-            raise conflict("group master must be a master account")
-        g = CopyGroup(**body.model_dump())
-        s.add(g)
-        s.flush()
-        return json_response(group_json(g), 201)
+        return json_response(group_json(create_group_op(s, body)), 201)
 
     return uow(request, work)
 
@@ -179,25 +186,55 @@ def list_groups(request: Request, master_id: int | None = None):
     return uow(request, work)
 
 
+def patch_group_op(s: Session, group_id: int, body: GroupPatch, ctx) -> tuple[CopyGroup, dict | None]:
+    g = _get(s, CopyGroup, group_id, "group")
+    was_enabled = g.enabled
+    for k, v in body.model_dump(exclude_unset=True).items():
+        setattr(g, k, v)
+    s.flush()
+    for lk in s.scalars(select(CopyLink).where(CopyLink.group_id == g.id, CopyLink.enabled.is_(True))):
+        if (reason := link_problem(s, lk, g)) is not None:
+            raise conflict(reason)
+    drained = None
+    if was_enabled and g.enabled is False:  # disabling a group = disabling all its links (6.2, C6)
+        link_ids = list(s.scalars(select(CopyLink.id).where(CopyLink.group_id == g.id)))
+        drained = drain_copies(s, ctx, "link_disabled", link_ids=link_ids)
+    return g, drained
+
+
 @router.patch("/groups/{group_id}")
 def patch_group(group_id: int, body: GroupPatch, request: Request):
     settings = settings_of(request)
 
     def work(s: Session):
         authenticate_admin(s, request, settings)
-        g = _get(s, CopyGroup, group_id, "group")
-        for k, v in body.model_dump(exclude_unset=True).items():
-            setattr(g, k, v)
-        s.flush()
-        for lk in s.scalars(select(CopyLink).where(CopyLink.group_id == g.id, CopyLink.enabled.is_(True))):
-            if (reason := link_problem(s, lk, g)) is not None:
-                raise conflict(reason)
-        return json_response(group_json(g))
+        g, drained = patch_group_op(s, group_id, body, engine_ctx(request))
+        return json_response({**group_json(g), **({"drain": drained} if drained is not None else {})})
 
     return uow(request, work)
 
 
 # --- links ------------------------------------------------------------------------------------
+
+def create_link_op(s: Session, body: LinkIn) -> CopyLink:
+    g = _get(s, CopyGroup, body.group_id, "group")
+    _get(s, Account, body.slave_id, "slave account")
+    dup = s.scalar(select(CopyLink.id).where(CopyLink.group_id == g.id, CopyLink.slave_id == body.slave_id))
+    if dup is not None:
+        raise ApiError(409, "link_exists", "this group already links that slave")
+    params = {k: v for k, v in body.model_dump(exclude={"group_id", "slave_id"}).items() if v is not None}
+    lk = CopyLink(group_id=g.id, master_id=g.master_id, slave_id=body.slave_id, **params)
+    for f, default in (("enabled", True), ("lot_mode", "master"), ("below_min", "skip"),
+                       ("allow_contract_size_diff", False), ("magic_mode", "same"), ("copy_sl_tp", True)):
+        if getattr(lk, f) is None:
+            setattr(lk, f, default)
+    _check_lot(lk)
+    if (reason := link_problem(s, lk, g)) is not None:
+        raise conflict(reason)
+    s.add(lk)
+    s.flush()
+    return lk
+
 
 @router.post("/links", status_code=201)
 def create_link(body: LinkIn, request: Request):
@@ -205,23 +242,7 @@ def create_link(body: LinkIn, request: Request):
 
     def work(s: Session):
         authenticate_admin(s, request, settings)
-        g = _get(s, CopyGroup, body.group_id, "group")
-        _get(s, Account, body.slave_id, "slave account")
-        dup = s.scalar(select(CopyLink.id).where(CopyLink.group_id == g.id, CopyLink.slave_id == body.slave_id))
-        if dup is not None:
-            raise ApiError(409, "link_exists", "this group already links that slave")
-        params = {k: v for k, v in body.model_dump(exclude={"group_id", "slave_id"}).items() if v is not None}
-        lk = CopyLink(group_id=g.id, master_id=g.master_id, slave_id=body.slave_id, **params)
-        for f, default in (("enabled", True), ("lot_mode", "master"), ("below_min", "skip"),
-                           ("allow_contract_size_diff", False), ("magic_mode", "same"), ("copy_sl_tp", True)):
-            if getattr(lk, f) is None:
-                setattr(lk, f, default)
-        _check_lot(lk)
-        if (reason := link_problem(s, lk, g)) is not None:
-            raise conflict(reason)
-        s.add(lk)
-        s.flush()
-        return json_response(link_json(lk), 201)
+        return json_response(link_json(create_link_op(s, body)), 201)
 
     return uow(request, work)
 
@@ -242,25 +263,36 @@ def list_links(request: Request, master_id: int | None = None, slave_id: int | N
     return uow(request, work)
 
 
+def patch_link_op(s: Session, link_id: int, body: LinkParams, ctx) -> tuple[CopyLink, dict | None]:
+    """Parameter changes apply to new copies only; existing copies keep their frozen exec_params (C6).
+    Disabling the link stops new opens and drains its not-yet-executed copies (6.2, C6); existing
+    copies keep receiving modify/close."""
+    lk = _get(s, CopyLink, link_id, "link")
+    was_enabled = lk.enabled
+    for k, v in body.model_dump(exclude_unset=True).items():
+        setattr(lk, k, v)
+    if body.enabled:
+        lk.disabled_reason = None
+    _check_lot(lk)
+    if (reason := link_problem(s, lk, s.get(CopyGroup, lk.group_id))) is not None:
+        raise conflict(reason)
+    s.add(Event(type="link.updated", payload={"link_id": lk.id,
+                                              "fields": sorted(body.model_dump(exclude_unset=True))}))
+    drained = None
+    if was_enabled and lk.enabled is False:
+        s.flush()
+        drained = drain_copies(s, ctx, "link_disabled", link_ids=[lk.id])
+    return lk, drained
+
+
 @router.patch("/links/{link_id}")
 def patch_link(link_id: int, body: LinkParams, request: Request):
-    """Parameter changes apply to new copies only; existing copies keep their frozen exec_params (C6).
-    TODO(PR: drain/link disable): disabling a link supersedes proven-unsent opens (6.2, C6)."""
     settings = settings_of(request)
 
     def work(s: Session):
         authenticate_admin(s, request, settings)
-        lk = _get(s, CopyLink, link_id, "link")
-        for k, v in body.model_dump(exclude_unset=True).items():
-            setattr(lk, k, v)
-        if body.enabled:
-            lk.disabled_reason = None
-        _check_lot(lk)
-        if (reason := link_problem(s, lk, s.get(CopyGroup, lk.group_id))) is not None:
-            raise conflict(reason)
-        s.add(Event(type="link.updated", payload={"link_id": lk.id,
-                                                  "fields": sorted(body.model_dump(exclude_unset=True))}))
-        return json_response(link_json(lk))
+        lk, drained = patch_link_op(s, link_id, body, engine_ctx(request))
+        return json_response({**link_json(lk), **({"drain": drained} if drained is not None else {})})
 
     return uow(request, work)
 
@@ -271,27 +303,31 @@ def _map_conflict() -> ApiError:
     return ApiError(409, "map_conflict", "a map for this master symbol already exists in this scope")
 
 
+def create_map_op(s: Session, body: MapIn) -> SymbolMap:
+    if body.slave_id is not None and _get(s, Account, body.slave_id, "slave account").role != "slave":
+        raise conflict("symbol maps apply to slave accounts")
+    same_scope = (SymbolMap.slave_id == body.slave_id) if body.slave_id is not None \
+        else SymbolMap.slave_id.is_(None)
+    if s.scalar(select(SymbolMap.id).where(same_scope, SymbolMap.master_symbol == body.master_symbol)):
+        raise _map_conflict()
+    m = SymbolMap(**body.model_dump())
+    try:
+        with s.begin_nested():
+            s.add(m)
+            s.flush()
+    except IntegrityError as exc:  # concurrent insert: the partial unique index decides
+        raise _map_conflict() from exc
+    _revalidate_slave(s, body.slave_id)
+    return m
+
+
 @router.post("/symbol_maps", status_code=201)
 def create_map(body: MapIn, request: Request):
     settings = settings_of(request)
 
     def work(s: Session):
         authenticate_admin(s, request, settings)
-        if body.slave_id is not None and _get(s, Account, body.slave_id, "slave account").role != "slave":
-            raise conflict("symbol maps apply to slave accounts")
-        same_scope = (SymbolMap.slave_id == body.slave_id) if body.slave_id is not None \
-            else SymbolMap.slave_id.is_(None)
-        if s.scalar(select(SymbolMap.id).where(same_scope, SymbolMap.master_symbol == body.master_symbol)):
-            raise _map_conflict()
-        m = SymbolMap(**body.model_dump())
-        try:
-            with s.begin_nested():
-                s.add(m)
-                s.flush()
-        except IntegrityError as exc:  # concurrent insert: the partial unique index decides
-            raise _map_conflict() from exc
-        _revalidate_slave(s, body.slave_id)
-        return json_response(map_json(m), 201)
+        return json_response(map_json(create_map_op(s, body)), 201)
 
     return uow(request, work)
 
@@ -325,17 +361,21 @@ def patch_map(map_id: int, body: MapPatch, request: Request):
     return uow(request, work)
 
 
+def delete_map_op(s: Session, map_id: int) -> None:
+    m = _get(s, SymbolMap, map_id, "symbol map")
+    slave_id = m.slave_id
+    s.delete(m)
+    s.flush()
+    _revalidate_slave(s, slave_id)
+
+
 @router.delete("/symbol_maps/{map_id}", status_code=204)
 def delete_map(map_id: int, request: Request):
     settings = settings_of(request)
 
     def work(s: Session):
         authenticate_admin(s, request, settings)
-        m = _get(s, SymbolMap, map_id, "symbol map")
-        slave_id = m.slave_id
-        s.delete(m)
-        s.flush()
-        _revalidate_slave(s, slave_id)
+        delete_map_op(s, map_id)
         return Response(status_code=204)
 
     return uow(request, work)

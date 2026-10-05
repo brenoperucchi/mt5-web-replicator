@@ -119,7 +119,9 @@ def deliver(s: Session, slave_id: int, now: datetime | None = None) -> list[Comm
             cmd.state = "delivered"
             cmd.lease_until = None
         out.append(cmd)
-    out.sort(key=lambda c: (aware(c.issued_at), c.copy_id, c.seq_in_copy))
+    # A `resolve` is a journal update the EA applies on receipt (4.6 step 7): it goes first, so a
+    # re-issued attempt of the command it settles is never seen before it.
+    out.sort(key=lambda c: (c.action != "resolve", aware(c.issued_at), c.copy_id, c.seq_in_copy))
     return out
 
 
