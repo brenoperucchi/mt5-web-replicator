@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import time
 import uuid
 
@@ -82,7 +83,7 @@ class Copier:
         return r.json()
 
     def snapshot_body(self, acct, positions=(), seq=None, session=None, connected=True, pending=(),
-                      login=None, server=SERVER):
+                      login=None, server=SERVER, history=(), history_synced=True):
         token = acct["token"]
         sess = session or self.sessions.get(token) or self.session(token)
         if seq is None:
@@ -91,7 +92,8 @@ class Copier:
         return {"session_id": sess["session_id"], "epoch": sess["epoch"], "seq": seq,
                 "taken_at": int(time.time() * 1000), "ea_clock_offset_ms": 0, "connected": connected,
                 "login": login if login is not None else acct["login"], "server": server,
-                "history_synced": True, "positions": list(positions), "pending": list(pending), "history": []}
+                "history_synced": history_synced, "positions": list(positions), "pending": list(pending),
+                "history": list(history)}
 
     def post_snapshot(self, acct, body, idem=None):
         return self.c.post("/v4/master/snapshot", json=body,
@@ -101,6 +103,10 @@ class Copier:
         r = self.post_snapshot(acct, self.snapshot_body(acct, positions, **kw))
         assert r.status_code == expect, r.text
         return r
+
+    def close_master(self, master, *position_ids, keep=()):
+        """Master fast close (5.6): the positions are gone and their `out` deals are in history."""
+        return self.snapshot(master, list(keep), history=[deal(next(DEAL_IDS), pid, "out") for pid in position_ids])
 
     def poll(self, acct, after=None):
         r = self.c.get("/v4/slave/commands", params={"after": after} if after else None,
@@ -127,6 +133,9 @@ class Copier:
                         headers={**bearer(acct["token"]), "Idempotency-Key": idem or str(uuid.uuid4())})
         assert r.status_code == expect, r.text
         return r.json()
+
+
+DEAL_IDS = itertools.count(900_000)
 
 
 def deal(deal_id, position_id, entry="in", reason="expert", symbol="EURUSD", volume=1.0, price=1.1, magic=0,

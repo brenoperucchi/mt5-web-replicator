@@ -104,7 +104,8 @@ def map_json(m: SymbolMap) -> dict:
 
 COPY_FIELDS = ("id", "link_id", "master_position_id", "slave_id", "slave_margin_mode", "symbol_master",
                "symbol_local", "volume", "sl", "tp", "state", "blocked_by", "skip_reason", "close_reason",
-               "close_intent", "exec_params", "position_id", "position_ticket", "confirmed_volume", "open_order",
+               "close_intent", "exec_params", "position_id", "opened_volume", "reduction_target",
+               "position_ticket", "confirmed_volume", "open_order",
                "open_deal", "close_deal", "price_open", "price_close", "profit", "fee", "no_sltp",
                "notmodify_count", "created_at")
 

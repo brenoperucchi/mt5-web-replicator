@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from . import __version__
 from .config import Settings, get_settings
 from .db import make_engine, make_sessionmaker
+from .engine.clock import Clock
 from .errors import install_handlers, server_time_ms
 from .routers import admin, admin_copy, health, v4, v4_copy
 from .security import install_log_redaction
@@ -24,6 +25,8 @@ def create_app(settings: Settings | None = None, engine=None) -> FastAPI:
     app.state.settings = settings
     app.state.engine = engine or make_engine(settings.database_url)
     app.state.sessionmaker = make_sessionmaker(app.state.engine)
+    # Server runtime epoch + monotonic clock for close-detection timers (5.6, C4).
+    app.state.clock = Clock()
 
     @app.middleware("http")
     async def _server_time_and_limits(request: Request, call_next):

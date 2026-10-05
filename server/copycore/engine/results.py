@@ -27,6 +27,7 @@ from .lifecycle import (
     ZERO_EXPOSURE,
     Ctx,
     Fill,
+    advance_reduction,
     apply_fill,
     event,
     issue_close,
@@ -34,6 +35,7 @@ from .lifecycle import (
     mark_closed,
     mark_open_failed,
     master_open,
+    volume_min,
 )
 
 RESULT_STATUSES = ("in_progress", "done", "done_partial", "closed", "failed", "expired", "not_executed",
@@ -231,13 +233,35 @@ def _cancel(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -
 def _close_partial(s: Session, cmd: Command, copy: Copy, r: dict[str, Any], ctx: Ctx) -> None:
     status = r["status"]
     if status in ("done", "done_partial"):
+        # Per-action evidence (4.6 step 4): executed volume and the resulting position volume.
         residual = _d(r.get("residual_volume"))
+        if residual is None:
+            executed = _d(r.get("executed_volume") or r.get("volume") or (cmd.payload or {}).get("volume"))
+            base = copy.confirmed_volume if copy.confirmed_volume is not None else copy.volume
+            if executed is not None and base is not None:
+                residual = Decimal(base) - executed
         if residual is not None:
             copy.confirmed_volume = residual
-        _settle(cmd, "done", r)
+            copy.volume = residual
         event(s, "copy.reduced", copy_id=copy.id, executed=r.get("executed_volume"), residual=residual,
               partial=status == "done_partial")
-        # TODO(PR: partials): recompute the next delta from reduction_target after a DONE_PARTIAL (5.4, C7).
+        if residual is not None and residual <= 0:
+            _settle(cmd, "done", r)
+            mark_closed(s, copy, ctx, reason="master_reduced", deal=r.get("deal"), price=r.get("price"))
+            return
+        target = _d(copy.reduction_target)
+        rest = (residual - target) if (status == "done_partial" and residual is not None
+                                       and target is not None) else None
+        if rest is not None and rest > 0 and rest >= volume_min(s, copy) and copy.state == "open":
+            # DONE_PARTIAL: same obligation, the remainder toward the (possibly coalesced) target as a
+            # new attempt (4.6 step 4, C2).
+            cmd.result = _jsonable(r)
+            cmd.payload = {**(cmd.payload or {}), "volume": float(rest), "residual_volume": float(target)}
+            cmds.new_attempt(s, cmd, now=ctx.now)
+            return
+        _settle(cmd, "done", r)
+        # Reductions coalesced while this one was in flight: next delta from the persisted target (C7).
+        advance_reduction(s, copy)
     elif status == "uncertain":
         _mark_uncertain(s, cmd, copy, r, close_intent=copy.close_intent)
     elif status == "skipped":

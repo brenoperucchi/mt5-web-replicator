@@ -13,8 +13,12 @@ PR 3 adds command results (copy state separate from command status, one result p
 `(command_id, attempt_id)`, new attempts for rejected close/cancel), the slave snapshot with the
 same session/seq fencing as the master, reconciliation (slave-side closes, `position_not_found`),
 adoption by comment `c<copy_id>` + magic, duplicate siblings, `symbol_conflicts`, and promotion of
-the blocked netting successor. Modify issue, partials, reversal, master close detection and the
-admin UI (including the 5.8 resolve actions) come in later PRs.
+the blocked netting successor.
+PR 4 adds master close detection (fast path by history exit deal, guarded absence path with the
+mass-disappearance guard, epoch-aware timers), the 5.5 "master closed" transitions, proportional
+partial reductions (`reduction_target`, coalesced, one financial mutation in flight per position),
+netting reversal as close-then-open by generation, `processed_deals` dedup, and SL/TP `modify`.
+The admin UI (including the 5.8 resolve actions) comes in a later PR.
 
 ## Run locally
 
@@ -76,7 +80,7 @@ the database lives at `/data/copy.db`. Healthcheck: `GET /healthz` (alias `/heal
 | `GET /v4/config` | token | `{mode, message, poll_ms, debug, send_history, symbols_wanted, min_ea_version}` |
 | `POST /v4/session` | token | `{boot_nonce, taken_at, ea_clock_offset_ms}` → `201 {session_id, epoch}`; retires the previous session |
 | `PUT /v4/symbols` | token | `{symbols:[{name, volume_min/step/max, contract_size, digits, point, tick_size, trade_mode, filling_modes, stops_level, freeze_level}]}` → `204` |
-| `POST /v4/master/snapshot` | master | `200 {accepted, seq}`; `409 account_mismatch` / `stale_session`; new positions fanned out |
+| `POST /v4/master/snapshot` | master | `200 {accepted, seq}`; `409 account_mismatch` / `stale_session`; new positions fanned out; reductions, reversal, SL/TP and closes (rules below) |
 | `GET /v4/slave/commands?after=` | slave | un-acked commands (cursor is a hint); never-sent `open` past TTL expires |
 | `POST /v4/slave/results` | slave | `{results:[{command_id, attempt_id, copy_id, status, order, deal, position_ticket, position_id, volume, executed_volume, residual_volume, price, sl, tp, profit, commission, swap, error_code, message}]}` → `200 {unknown, applied, duplicates}`; status `in_progress\|done\|done_partial\|closed\|failed\|expired\|not_executed\|uncertain\|skipped\|notmodify`; unknown status → 422 |
 | `POST /v4/slave/snapshot` | slave | same body/fencing as the master snapshot; reconciliation + adoption; renews `in_progress` leases |
@@ -97,8 +101,31 @@ uv run pytest
 createdb copycore_test && COPYCORE_TEST_DATABASE_URL=postgresql:///copycore_test uv run pytest; dropdb copycore_test
 ```
 
-Tests reference the design's scenario ids (S01, S04-S06, S08-S11, S14, S17-S22, S25-S27, S29, S30,
-S34, S35, S37, S38, S40, S41, S44-S46, S51-S53) where they cover one.
+Tests reference the design's scenario ids (S01, S04-S22, S25-S35, S37, S38, S40, S41, S43-S46,
+S49-S53) where they cover one.
+
+### Master snapshot rules (PR 4)
+
+Per `position_id`, one interpretation, in this order (5.4, C1). Closes are applied before new
+positions of the same snapshot, so a close-then-reopen on a netting slave blocks behind the close.
+
+| Master event | Effect |
+|---|---|
+| present, same side, lower volume | per copy `reduction_target = floor_step(opened × new / master volume at issue)`; `close_partial` of `confirmed − target` only when no open/close/close_partial/cancel is in flight; deltas below `volume_min` wait; target below `volume_min` → full `close`; `done_partial` → rest as a new attempt |
+| present, side changed or unprocessed `inout` | generation g `closed` (`reversal`), copies follow "master closed"; generation g+1 fanned out `pending_blocked` behind each link's previous copy (netting and hedging slaves) |
+| present, higher volume | `copy.volume_drift` only (netting, Phase 1) |
+| present, SL/TP changed | `modify` (supersedes queued modifies); undelivered open / blocked copy → SL/TP in the open payload |
+| absent + `out`/`out_by` deal after the generation start | fast close (`history`) |
+| absent, no exit deal | absence: `CLOSE_ABSENT_SNAPSHOTS` snapshots **and** `CLOSE_ABSENT_SECONDS` on the server monotonic clock in the current epoch; only `connected` + `history_synced` snapshots count; mass disappearance → alert, `send_history=true`, `MASS_DISAPPEAR_SECONDS`; reappearance resets |
+| closed id reappears | not re-copied; `master_position.reappeared` alert once |
+
+"Master closed" per copy state (5.5): `open` → `closing` + `close`; `pending` with the open never
+delivered → `cancelled`; delivered → `cancel_requested` + `cancel`; `pending_blocked` → `cancelled`;
+`uncertain` → `close_intent` (adoption/resolution decides). Deals are recorded once in
+`processed_deals` with the generation they affected.
+
+Deviation: a superseded `modify` that was already delivered is not tombstoned (4.5); only queued
+modifies are superseded, delivered ones run first in `seq_in_copy` order so the latest SL/TP ends last.
 
 ### Result rules (PR 3)
 

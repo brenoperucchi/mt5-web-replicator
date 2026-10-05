@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 from copycore.app import create_app
 from copycore.config import load_settings
 from copycore.db import make_engine
+from copycore.engine.clock import FakeClock
 from copycore.models import Base
 
 PG_URL = os.environ.get("COPYCORE_TEST_DATABASE_URL")
@@ -44,7 +45,14 @@ def settings(db_url):
 
 @pytest.fixture
 def app(settings, engine):
-    return create_app(settings, engine=engine)
+    app = create_app(settings, engine=engine)
+    app.state.clock = FakeClock()  # close-detection timers are driven by the tests (5.6)
+    return app
+
+
+@pytest.fixture
+def clock(app) -> FakeClock:
+    return app.state.clock
 
 
 @pytest.fixture

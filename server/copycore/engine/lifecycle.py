@@ -19,9 +19,21 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from ..models import Account, Command, Copy, CopyGroup, CopyLink, Event, MasterPosition, SymbolConflict, utcnow
+from ..models import (
+    Account,
+    Command,
+    Copy,
+    CopyGroup,
+    CopyLink,
+    Event,
+    MasterPosition,
+    SymbolConflict,
+    SymbolSpec,
+    utcnow,
+)
 from . import commands as cmds
 from .fanout import issue_open, policy_check, slot_holder
+from .lots import floor_to_step
 from .symbols import resolve_symbol
 
 # A zero-exposure terminal state frees the netting slot (5.2, C5).
@@ -36,6 +48,9 @@ class Ctx:
     lease_seconds: int
     gated: Callable[[Account], bool]
     now: datetime = field(default_factory=utcnow)
+    # Server monotonic clock and runtime epoch for close-detection timers (5.6, C4).
+    mono: float = 0.0
+    server_epoch: str = ""
 
 
 def event(s: Session, type_: str, **payload) -> None:
@@ -70,6 +85,8 @@ def issue_close(s: Session, copy: Copy, reason: str) -> Command | None:
         copy.state = "closing"
     if existing:
         return existing[0]
+    # A full close replaces reductions and SL/TP changes the EA has not received yet.
+    supersede(s, copy, ("close_partial", "modify"), "close_issued", undelivered_only=True)
     params = copy.exec_params or {}
     cmd = cmds.issue(s, copy, "close", {
         "symbol": copy.symbol_local, "position_id": copy.position_id,
@@ -194,6 +211,8 @@ def apply_fill(s: Session, copy: Copy, fill: Fill, ctx: Ctx, *, source: str) -> 
     if target == "open":
         event(s, "copy.opened", copy_id=copy.id, position_id=fill.position_id, volume=copy.confirmed_volume,
               price_open=copy.price_open, source=source)
+        # A reduction that arrived while the open was in flight starts from the confirmed volume (5.4).
+        advance_reduction(s, copy)
         return "open"
     # Master closed / cancel requested before the open was confirmed: keep the ids, close it (rev-2 A12).
     supersede(s, copy, ("cancel",), "late_fill_close", undelivered_only=True)
@@ -224,6 +243,127 @@ def _settle_open(s: Session, copy: Copy, source: str) -> None:
 
 def _dec(v) -> Decimal | None:
     return None if v is None else Decimal(str(v))
+
+
+# --- master closed (5.5) -----------------------------------------------------------------------------
+
+def master_closed(s: Session, copy: Copy, ctx: Ctx, reason: str = "master_closed") -> str:
+    """The 5.5 "master closed" transitions for one copy, by its state. Returns what was done.
+
+    pending (open never delivered) → cancelled, open superseded; pending (open delivered/in progress)
+    → cancel_requested + cancel; pending_blocked → cancelled; open → closing + close by position
+    identity; uncertain → close intent kept for adoption/resolution (5.8). Closes are never issued
+    without a position identity (C5)."""
+    st = copy.state
+    if st in ZERO_EXPOSURE or st in ("closing", "cancel_requested") or (st == "superseded"):
+        return "none"
+    if st == "pending_blocked":
+        copy.blocked_by = None
+        mark_cancelled(s, copy, ctx, "master_closed_while_blocked")
+        return "cancelled"
+    if st == "uncertain":
+        copy.close_intent = True
+        event(s, "copy.close_intent", copy_id=copy.id, reason=reason)
+        return "close_intent"
+    if st == "open":
+        copy.close_reason = copy.close_reason or reason  # kept when the close is confirmed
+        issue_close(s, copy, reason)
+        return "closing"
+    # pending
+    opens = cmds.outstanding(s, copy.id, ("open",))
+    if opens and all(c.state == "queued" for c in opens):
+        mark_cancelled(s, copy, ctx, reason)  # proven unsent: supersedes the open
+        return "cancelled"
+    copy.state = "cancel_requested"
+    copy.close_intent = True
+    params = copy.exec_params or {}
+    cmd = cmds.issue(s, copy, "cancel", {
+        "symbol": copy.symbol_local, "position_id": None, "open_command_id": opens[0].id if opens else None,
+        "magic": params.get("magic"), "comment": params.get("comment", f"c{copy.id}")})
+    event(s, "copy.cancel_requested", copy_id=copy.id, command_id=cmd.id, reason=reason)
+    return "cancel_requested"
+
+
+# --- partial reductions (5.4, C7) ----------------------------------------------------------------
+
+def reduction_target(s: Session, copy: Copy, master_volume: Decimal, master_opened: Decimal) -> Decimal | None:
+    """round_down_step(copy.opened_volume × new_master_volume / master.opened_volume), from persisted
+    values only (never from in-flight volumes)."""
+    if copy.opened_volume is None or not master_opened:
+        return None
+    spec = s.get(SymbolSpec, (copy.slave_id, copy.symbol_local))
+    raw = Decimal(copy.opened_volume) * Decimal(master_volume) / Decimal(master_opened)
+    if spec is None or not spec.volume_step:
+        return raw
+    return floor_to_step(raw, Decimal(spec.volume_step))
+
+
+def volume_min(s: Session, copy: Copy) -> Decimal:
+    spec = s.get(SymbolSpec, (copy.slave_id, copy.symbol_local))
+    return Decimal(spec.volume_min) if spec is not None and spec.volume_min else Decimal(0)
+
+
+FINANCIAL = ("open", "close", "close_partial", "cancel")
+
+
+def advance_reduction(s: Session, copy: Copy) -> Command | None:
+    """Issue the next `close_partial` toward `reduction_target` when nothing financial is in flight
+    for this position (5.4, C7). Reductions arriving meanwhile only move the target (coalesced).
+
+    - delta = confirmed_volume − target; delta below volume_min → nothing now (the target persists);
+    - target below volume_min → full `close`."""
+    if copy.state != "open" or copy.reduction_target is None or copy.position_id is None:
+        return None
+    if cmds.outstanding(s, copy.id, FINANCIAL):
+        return None
+    vmin = volume_min(s, copy)
+    target = Decimal(copy.reduction_target)
+    if target < vmin or target <= 0:
+        cmd = issue_close(s, copy, "master_reduced_below_min")
+        event(s, "copy.reduction_full_close", copy_id=copy.id, target=target, volume_min=vmin)
+        return cmd
+    confirmed = Decimal(copy.confirmed_volume if copy.confirmed_volume is not None else copy.volume or 0)
+    delta = confirmed - target
+    if delta <= 0 or delta < vmin:
+        return None
+    params = copy.exec_params or {}
+    cmd = cmds.issue(s, copy, "close_partial", {
+        "symbol": copy.symbol_local, "position_id": copy.position_id, "side": params.get("side"),
+        "volume": delta, "residual_volume": target, "magic": params.get("magic"),
+        "comment": params.get("comment", f"c{copy.id}")})
+    event(s, "copy.reducing", copy_id=copy.id, command_id=cmd.id, volume=delta, target=target)
+    return cmd
+
+
+# --- SL/TP modify (5.5, S28) ---------------------------------------------------------------------
+
+MODIFIABLE = ("pending", "pending_blocked", "open")
+
+
+def apply_sltp(s: Session, copy: Copy, sl, tp) -> Command | None:
+    """Mirror a master SL/TP change on one copy.
+
+    pending_blocked / pending with an undelivered open → the open payload carries the new SL/TP (no
+    command). Otherwise a `modify` that supersedes the queued (undelivered) modifies of the copy;
+    delivered ones keep their seq and run first, so the latest values always end last (S28)."""
+    if copy.state not in MODIFIABLE or copy.no_sltp:
+        return None
+    sl, tp = _dec(sl), _dec(tp)
+    opens = cmds.outstanding(s, copy.id, ("open",))
+    if copy.state == "pending_blocked" or (copy.state == "pending" and opens
+                                           and all(c.state == "queued" for c in opens)):
+        copy.sl, copy.tp = sl, tp
+        for c in opens:
+            c.payload = {**(c.payload or {}), "sl": cmds.wire(sl), "tp": cmds.wire(tp)}
+        event(s, "copy.sltp_in_open", copy_id=copy.id, sl=sl, tp=tp)
+        return None
+    supersede(s, copy, ("modify",), "newer_modify", undelivered_only=True)
+    params = copy.exec_params or {}
+    cmd = cmds.issue(s, copy, "modify", {
+        "symbol": copy.symbol_local, "position_id": copy.position_id, "sl": sl, "tp": tp,
+        "magic": params.get("magic"), "comment": params.get("comment", f"c{copy.id}")})
+    event(s, "copy.modify", copy_id=copy.id, command_id=cmd.id, sl=sl, tp=tp)
+    return cmd
 
 
 # --- netting successor (5.3, C5) -------------------------------------------------------------------
@@ -291,6 +431,6 @@ def _promote(s: Session, copy: Copy, mp: MasterPosition, ctx: Ctx) -> Copy | Non
     return copy
 
 
-__all__ = ["Ctx", "Fill", "ZERO_EXPOSURE", "apply_fill", "event", "issue_close", "mark_cancelled", "mark_closed",
-           "mark_open_failed", "master_open", "open_symbol_conflict", "promote_successors",
-           "supersede"]
+__all__ = ["Ctx", "Fill", "ZERO_EXPOSURE", "advance_reduction", "apply_fill", "apply_sltp", "event", "issue_close",
+           "mark_cancelled", "mark_closed", "mark_open_failed", "master_closed", "master_open",
+           "open_symbol_conflict", "promote_successors", "reduction_target", "supersede", "volume_min"]
