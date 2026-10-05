@@ -23,12 +23,7 @@ defaults:
 
 jobs:
   test:
-    name: test (${{ matrix.db }})
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        db: [sqlite, postgres]
 
     services:
       postgres:
@@ -60,12 +55,20 @@ jobs:
       - name: Ruff
         run: uv run ruff check .
 
-      - name: Pytest
-        env:
-          COPYCORE_TEST_DATABASE_URL: ${{ matrix.db == 'postgres' && 'postgresql://copy:copy@localhost:5432/copy_test' || '' }}
+      - name: Pytest (SQLite)
         run: uv run pytest -ra
 
-      - name: Alembic upgrade head
+      - name: Pytest (Postgres)
         env:
-          DATABASE_URL: ${{ matrix.db == 'postgres' && 'postgresql://copy:copy@localhost:5432/copy_test' || 'sqlite:///ci-migrate.db' }}
+          COPYCORE_TEST_DATABASE_URL: postgresql://copy:copy@localhost:5432/copy_test
+        run: uv run pytest -ra
+
+      - name: Alembic upgrade/downgrade (SQLite)
+        env:
+          DATABASE_URL: sqlite:///ci-migrate.db
+        run: uv run alembic upgrade head && uv run alembic downgrade base
+
+      - name: Alembic upgrade/downgrade (Postgres)
+        env:
+          DATABASE_URL: postgresql://copy:copy@localhost:5432/copy_test
         run: uv run alembic upgrade head && uv run alembic downgrade base
