@@ -18,7 +18,10 @@ PR 4 adds master close detection (fast path by history exit deal, guarded absenc
 mass-disappearance guard, epoch-aware timers), the 5.5 "master closed" transitions, proportional
 partial reductions (`reduction_target`, coalesced, one financial mutation in flight per position),
 netting reversal as close-then-open by generation, `processed_deals` dedup, and SL/TP `modify`.
-The admin UI (including the 5.8 resolve actions) comes in a later PR.
+PR 5 adds the operator side: the 5.8 resolution actions with the `resolve` command to the EA journal,
+symbol-conflict resolution, the C6 drain transitions on account suspension and link/group disable,
+events/alerts/EA-log/orphan listings, scoped admin and service tokens, and a minimal server-rendered
+admin UI at `/ui` (Q9).
 
 ## Run locally
 
@@ -88,6 +91,16 @@ the database lives at `/data/copy.db`. Healthcheck: `GET /healthz` (alias `/heal
 | `POST/GET/PATCH /admin/links` | admin | lot/magic/guard params; 422 `config_conflict` on hedging→netting, cycles, netting filter overlap, contract size |
 | `POST/GET/PATCH/DELETE /admin/symbol_maps` | admin | per-slave or global (`slave_id: null`); duplicate → `409 map_conflict` |
 | `GET /admin/copies`, `GET /admin/commands` | readonly | debugging listings |
+| `GET /admin/accounts?role=&status=` | readonly | account listing |
+| `POST /admin/copies/{id}/resolve` | admin | `{executed: position_id}` \| `{not_executed: true}` \| `{resolution: closed\|retry_close}`; optional `volume`, `price`, `note` |
+| `POST /admin/symbol_conflicts/{id}/resolve` | admin | `{resolution: accept\|close, note?}` |
+| `GET /admin/symbol_conflicts?open=&slave_id=` | readonly | |
+| `GET /admin/events?type=&prefix=&alerts=&copy_id=&account_id=&before_id=&limit=` | readonly | newest first; `next_before_id` pages back |
+| `GET /admin/alerts?account_id=&before_id=` | readonly | operator alert types only |
+| `GET /admin/logs?account_id=&before_id=` | readonly | EA log uploads (`ea_logs`) |
+| `GET /admin/orphans` | readonly | uncertain, close_unconfirmed, exposure on revoked slaves, open conflicts |
+| `POST/GET /admin/api_tokens`, `POST /admin/api_tokens/{id}/revoke` | admin | scoped bearer (`admin`/`readonly`); the token is returned once and stored as HMAC |
+| `GET /ui/` | cookie | server-rendered admin (see below) |
 
 Mutating `/v4/*` calls require `Idempotency-Key`.
 
@@ -101,8 +114,8 @@ uv run pytest
 createdb copycore_test && COPYCORE_TEST_DATABASE_URL=postgresql:///copycore_test uv run pytest; dropdb copycore_test
 ```
 
-Tests reference the design's scenario ids (S01, S04-S22, S25-S35, S37, S38, S40, S41, S43-S46,
-S49-S53) where they cover one.
+Tests reference the design's scenario ids (S01, S04-S22, S25-S35, S37-S47, S49-S53) where they
+cover one.
 
 ### Master snapshot rules (PR 4)
 
@@ -139,4 +152,103 @@ modifies are superseded, delivered ones run first in `seq_in_copy` order so the 
 | close | `failed: position_not_found` | waits for slave history; 3 snapshots without an exit deal → `copy.close_unconfirmed` (stays `closing`, reservation kept) |
 | cancel | `not_executed` / `closed` | `cancelled` / `closed` |
 | modify | `done` / `notmodify` / `failed` | audit only; 2 NOTMODIFY per day → `no_sltp` |
+
+## Admin operations (PR 5)
+
+### Admin UI
+
+`/ui` is a minimal server-rendered admin (no SPA, no JavaScript). Sign in at `/ui/login` with
+`ADMIN_TOKEN` or an `api_tokens` bearer. The cookie stores only a signed reference and expiry
+(8 h, HttpOnly, SameSite=Strict, `Secure` behind HTTPS, path `/ui`); it stops working when the
+token is revoked or `ADMIN_TOKEN` changes. Forms carry a CSRF token. A `readonly` token sees every
+page and changes nothing.
+
+Pages: attention (orphans + recent alerts), accounts (create, enrollment code shown once,
+suspend/reactivate, revoke with confirmation, groups), links (create, per-link parameters:
+lot mode/multiplier, below-min policy, contract-size opt-in, magic, max slippage, max entry
+deviation, SL/TP), symbol maps, copies (filters, commands, events, resolution form), symbol
+conflicts, events/alerts with filters, EA logs, admin/service tokens. Every action goes through the
+same functions as the JSON API, in one unit of work, and is recorded in `events`.
+
+### Drain: suspension and link/group disable (6.2, C6)
+
+`PATCH /admin/accounts/{id} {status: "suspended"}`, `PATCH /admin/links/{id} {enabled: false}` and
+`PATCH /admin/groups/{id} {enabled: false}` apply, in the same transaction:
+
+| Copy | Effect |
+|---|---|
+| `pending`, open only `queued` (proven unsent) | open `superseded`, copy `cancelled` (`account_drain` / `link_disabled`) |
+| `pending`, open delivered / in progress | `cancel_requested` + `cancel` (the EA closes the position if the open executed) |
+| `pending_blocked` | `cancelled` |
+| `open`, `closing`, `uncertain`, `superseded` with `close_intent` | unchanged: modify, close, close_partial, adoption and resolution continue |
+
+The response carries `drain: {cancelled, cancel_requested}`. New master positions for the slave or
+link become `skipped` (`account_drain`) or are not created (disabled link). A suspended slave gets
+`403` once nothing is exposed (S14). `status: active` lifts the suspension; nothing is re-opened.
+
+### Resolving a copy (4.6 step 7, 5.8)
+
+`POST /admin/copies/{id}/resolve`, audited as `admin.resolved` (actor, note, prior and new state).
+When an EA attempt was suspended, a `resolve` command is issued **before** any follow-up command of
+the copy and is delivered first; the EA applies it on receipt (journal entry `suspended` →
+`confirmed`) and answers `done`. Payload: `resolves_command_id`, `resolves_attempt_id`,
+`resolves_action`, `resolution`, `position_id`, `residual_volume`.
+
+| Suspended attempt | `executed` | `not_executed` |
+|---|---|---|
+| open | requires `position_id` (optional `volume`, `price`): copy `open`, or `closing` + `close` when the master closed meanwhile | copy `cancelled` (`operator_not_executed`) |
+| close | copy `closed` | same close, new `attempt_id`; copy back to `closing` |
+| close_partial | requires `volume` = residual position volume; copy `open`, next reduction or close | copy `open`, next reduction from the persisted target |
+| cancel | the open executed and the EA closed it: copy `closed` | no position came from this copy: `cancelled` |
+
+Without a suspended attempt:
+
+- `closed`: a close answered `position_not_found` without an exit deal (`close_unconfirmed`), an
+  `uncertain` copy, or exposure left on a revoked slave. The copy becomes `closed`
+  (`operator_closed`), freeing its netting slot.
+- `retry_close`: re-issues the `position_not_found` close as a new attempt.
+
+`409 not_resolvable` when the action does not apply to the copy's state; `422` for a missing
+`position_id`/`volume`.
+
+### Resolving a symbol conflict (5.8, C8)
+
+`POST /admin/symbol_conflicts/{id}/resolve {resolution, note?}`:
+
+- `accept`: the exposure stays as it is, the conflict is closed and new opens on that slave symbol
+  are allowed again (on netting the EA still refuses an open while an unmanaged position holds the
+  slot). Refused while a close of it is in flight.
+- `close`: closes the position by its id. The close rides on a `superseded` sibling copy without
+  `close_intent`, so it never takes a reservation and never touches the managed copy. It is retried
+  like any close; the conflict (and the block on new opens) ends only when the close is confirmed
+  (`symbol_conflict.closed`). `position_not_found` leaves the conflict open
+  (`symbol_conflict.close_failed`). Repeating `close` returns the same command.
+
+Both emit a `resolve` command for the conflict's copy (`conflict_id`, `resolution`, `position_id`)
+so the EA can clear any suspended journal entry for that position.
+
+### Orphans and alerts
+
+`GET /admin/orphans` (and the UI front page) lists what only an operator, or later broker evidence,
+can settle: `uncertain` copies, `close_unconfirmed` closes, exposure on revoked slaves, and open
+symbol conflicts. `GET /admin/alerts` lists the alert event types (`master.stale`,
+`master.mass_disappearance`, `copy.uncertain`, `copy.symbol_conflict`, `copy.duplicate_position`,
+`copy.close_unconfirmed`, `account.mismatch`, `account.revoked`, `link.disabled_conflict`, ...).
+
+### Tokens
+
+`ADMIN_TOKEN` (env) is the bootstrap admin. `POST /admin/api_tokens {name, scopes}` issues scoped
+tokens (`admin` for Rails or automation, `readonly` for dashboards); the token is returned once with
+`Cache-Control: no-store`. Revoking one ends its API access and its UI sessions immediately. EA tokens
+are per account: `POST /admin/accounts/{id}/enroll_codes` (15 min code), `POST /admin/accounts/{id}/revoke`.
+
+### Not in PR 5
+
+- Background adoption sweep for copies older than the 7-day inline window (background worker PR).
+- Diagnostic candidate matching (magic + symbol + open time ±2 s, 5.8a): slave positions are not
+  stored outside the gzipped raw snapshots, so the admin shows no candidates yet.
+- `POST /v4/logs` (EA log upload) is not implemented yet; the log viewer reads `ea_logs`.
+- Changing `MIN_EA_VERSION` does not run the drain transitions (there is no admin action to hook);
+  version-gated EAs already get `mode: drain` and refuse opens with `failed: drain`.
+
 CI: `.github/workflows/server.yml` (SQLite and Postgres).

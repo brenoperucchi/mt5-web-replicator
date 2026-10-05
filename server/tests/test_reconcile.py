@@ -270,14 +270,15 @@ def test_s46_blocked_candidate_of_closed_master_cancelled(cp, app):
 
 
 def test_promotion_revalidates_drain(cp, app):
-    """C6: promotion never emits an open while the slave is suspended (drain)."""
+    """C6: entering drain cancels the blocked successor (6.2), so the freed slot never emits an open."""
     master, sl, o, close, blocked = _close_then_reopen(cp, app)
     r = cp.c.patch(f"/admin/accounts/{sl['id']}", json={"status": "suspended"},
                    headers={"Authorization": "Bearer test-admin-token"})
     assert r.status_code == 200, r.text
+    assert r.json()["drain"] == {"cancelled": 1, "cancel_requested": 0}
     cp.results(sl, [res(close, "done", deal=5)])
     got = copy_of(cp, blocked["id"])
-    assert (got["state"], got["skip_reason"]) == ("skipped", "account_drain")
+    assert (got["state"], got["close_reason"]) == ("cancelled", "account_drain")
     assert len(cp.commands(copy_id=blocked["id"])) == 0  # no open born in drain
     # nothing exposed any more: the drained slave now gets 403 (6.2, S14)
     r = cp.c.get("/v4/slave/commands", headers={"Authorization": f"Bearer {sl['token']}"})

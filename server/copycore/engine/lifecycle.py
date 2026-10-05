@@ -269,7 +269,14 @@ def master_closed(s: Session, copy: Copy, ctx: Ctx, reason: str = "master_closed
         copy.close_reason = copy.close_reason or reason  # kept when the close is confirmed
         issue_close(s, copy, reason)
         return "closing"
-    # pending
+    return withdraw_pending(s, copy, ctx, reason)
+
+
+def withdraw_pending(s: Session, copy: Copy, ctx: Ctx, reason: str) -> str:
+    """Take back a `pending` copy's open (5.5 master closed, 6.2/C6 drain and link disable).
+
+    Open proven unsent (only `queued`) → superseded, copy `cancelled`; delivered/in progress →
+    `cancel_requested` + `cancel` (the EA closes the position if the open executed)."""
     opens = cmds.outstanding(s, copy.id, ("open",))
     if opens and all(c.state == "queued" for c in opens):
         mark_cancelled(s, copy, ctx, reason)  # proven unsent: supersedes the open
@@ -279,7 +286,7 @@ def master_closed(s: Session, copy: Copy, ctx: Ctx, reason: str = "master_closed
     params = copy.exec_params or {}
     cmd = cmds.issue(s, copy, "cancel", {
         "symbol": copy.symbol_local, "position_id": None, "open_command_id": opens[0].id if opens else None,
-        "magic": params.get("magic"), "comment": params.get("comment", f"c{copy.id}")})
+        "magic": params.get("magic"), "comment": params.get("comment", f"c{copy.id}"), "reason": reason})
     event(s, "copy.cancel_requested", copy_id=copy.id, command_id=cmd.id, reason=reason)
     return "cancel_requested"
 
@@ -433,4 +440,5 @@ def _promote(s: Session, copy: Copy, mp: MasterPosition, ctx: Ctx) -> Copy | Non
 
 __all__ = ["Ctx", "Fill", "ZERO_EXPOSURE", "advance_reduction", "apply_fill", "apply_sltp", "event", "issue_close",
            "mark_cancelled", "mark_closed", "mark_open_failed", "master_closed", "master_open",
-           "open_symbol_conflict", "promote_successors", "reduction_target", "supersede", "volume_min"]
+           "open_symbol_conflict", "promote_successors", "reduction_target", "supersede", "volume_min",
+           "withdraw_pending"]
