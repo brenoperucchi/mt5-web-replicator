@@ -1,6 +1,7 @@
 # 0001: Rails-agnostic copy core (standalone Copy Server)
 
-- **Status:** Draft, revision 3 (after review round mt5-4), Phase 0 of #77
+- **Status:** Phase 0 — Approved (2026-10-05). Revision 4 (after scout verification of revision 3), Phase 0 of #77
+- **Decision log:** 2026-10-05 — approved by the owner without further review rounds; residual risks are covered by the Phase 1 scenario gate (section 8).
 - **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket, fixed by PR #81), #64 (shared API core), #66 (latency/slippage)
 - **Reviewers:** the mt5 reviewers. Each numbered **Decision (Dn)** below can be approved or rejected on its own.
 
@@ -8,7 +9,25 @@ Rails citations describing legacy behavior are `path:line` against `master` at `
 
 ---
 
-## 0. Changes since review mt5-4
+## 0. Changes since scout verification
+
+The scout verified revision 3 and listed nine open contracts (C1–C9). All are resolved in this revision, together with the owner decisions of 2026-10-05 on correlation/netting exclusivity (5.8a) and the open questions Q1, Q9–Q11 (11).
+
+| Contract | Resolution | Where |
+|---|---|---|
+| C1 exit deal ≠ full close | Precedence: same side + lower volume → partial; side changed → one reversal (one new generation); full exit confirmed → fast close. Deals deduplicated per `(account, deal)` in `processed_deals`, bound to the generation they affected; replays never act on a newer generation. T floor fixed at 60 s (30 s minimum removed; lower values rejected at config) | 5.4, 5.6 |
+| C2 journal per action and attempt | `command_id` = logical obligation, `attempt_id` = one durable attempt; new attempt only after a definitive reject with no effect. Per-action evidence for `done`/`failed`; `DONE_PARTIAL` updates the residual and keeps the copy `closing`. `in_progress` is a receipt ack with a lease and redelivery | 4.5, 4.6, 5.5 |
+| C3 absence of evidence ≠ not executed | `not_executed` only from `prepared` without proven send, or a definitive rejection. `sent` without conclusive evidence stays `uncertain`/`suspended` **per copy**, never global. Explicit operator/evidence resolution path. Order/request/deal ids persisted as soon as known | 4.6, 5.8 |
+| C4 epoch and fencing | Server-issued `session_id` + `epoch`; retired sessions registry; timers epoch-aware (absence/mass counters restart after a server restart with a healthy confirmation, elapsed never reused across epochs); `ea_clock_offset_ms` on the wire; a fenced producer cannot re-authorize by inventing a new UUID | 4.3, 5.6 |
+| C5 blocked_by and single successor | Unblock on **proof of zero exposure** (`closed`/`cancelled`/`skipped`/`error` proven). One successor per slot chosen atomically; stale candidates cancelled; policy/volume/specs/drain revalidated inside the transaction. Reversal reuses lifecycle close/cancel transitions (no close without identity). Fixed the lifecycle line that emitted `open` for `pending_blocked`/`skipped` | 5.3, 5.4, 5.5 |
+| C6 drain and existing opens | Drain/suspend/link disable: proven-unsent opens superseded, in-flight opens cancelled/closed, known/uncertain exposure still managed; promotion revalidates account/link/mode; execution params frozen per copy/command | 5.3, 6.2 |
+| C7 successive partials | Persisted `reduction_target`/residual; at most one financial mutation in flight per position; reductions coalesced; reduction during an in-flight open defined; hedging closes by resolved ticket, netting reduces with an opposite deal capped at confirmed volume, never flipping side | 5.4 |
+| C8 adoption, external exposure, siblings | Unexpected exposure → explicit `symbol_conflicts` flow that blocks new opens on that symbol and reconciles; `superseded` sibling keeps exposure and close obligation until confirmed; netting physical-slot check before open; weak matching diagnostic only | 5.2, 5.8, 5.8a |
+| C9 scheduling | Absolute per-callback cap (one HTTP call, ≤ 5 s); local close handling first; bounded results batch; fairness so poll/snapshots get turns; modify seq gaps accepted as non-contiguous (superseded seqs are skipped by tombstone) | 4.2, 4.5 |
+
+<details>
+<summary>Changes since review mt5-4 (collapsed)</summary>
+
 
 Owner decisions of 2026-10-05 (OD1–OD8) are applied. Summary: Phase 1 copies **market positions only**; hedging-master → netting-slave links are rejected; netting conflicts never roll back a snapshot; disabled accounts **drain**; netting reversal is close-then-open; hedging partial closes are mirrored; lots below minimum are skipped by default and adjusted by contract size; a per-link entry-distance guard exists; close detection has a fast path (history exit deal) and a guarded absence path. The EA gets a durable command journal and result outbox, and the server an adoption rule, so a lost result can never duplicate or orphan a position.
 
@@ -33,6 +52,8 @@ Owner decisions of 2026-10-05 (OD1–OD8) are applied. Summary: Phase 1 copies *
 | rev-2 I9 (contract size, below-min default) | OD6: skip default (opt-in `open at volume_min`); contract-size factor; map rejected when sizes differ without opt-in | 5.4 |
 | rev-2 I10 (guard vs master price) | OD7: `master_price` + `max_entry_deviation_points`; `failed: price_out_of_range` | 4.4 |
 | rev-2 S1 (specs, cycles, modify, Appendix A) | `symbol_specs` adds `filling_modes, stops_level, freeze_level, tick_size`; copy cycles rejected; `exclude_copier_positions`; modify supersession; `api_time_max_seconds` | 5.1, 5.3, 5.5, App. A |
+
+</details>
 
 <details>
 <summary>Changes since review mt5-3 (collapsed)</summary>
@@ -106,7 +127,7 @@ Fixtures are never regenerated automatically in CI; changing an expected outcome
 
 ### D4. Sequencing relative to the rename (#78)
 
-1. Decide the new name (Q1); rename repo and image.
+1. Keep the repo name for now (Q1); new EA/server names decided in Phase 1 (#78).
 2. Move Rails to `web/`, split CI. One "moves only" PR with a deploy dry-run.
 3. Add `server/` and `ea/mt5/` in feature PRs.
 4. Archive python-signal with the pointer README.
@@ -177,7 +198,7 @@ One image (python:3.12-slim, non-root, `HEALTHCHECK /healthz`), compose service 
 |---|---|---|
 | `DATABASE_URL` | `sqlite:////data/copy.db` | |
 | `ADMIN_TOKEN`, `TOKEN_PEPPER` | *(required)* | refuse to start if unset outside `ENV=dev` |
-| `CLOSE_ABSENT_SNAPSHOTS`, `CLOSE_ABSENT_SECONDS` | `3`, `60` | absence path (5.6) |
+| `CLOSE_ABSENT_SNAPSHOTS`, `CLOSE_ABSENT_SECONDS` | `3`, `60` | absence path (5.6); `CLOSE_ABSENT_SECONDS < 60` refused at startup/config |
 | `MASS_DISAPPEAR_MIN`, `MASS_DISAPPEAR_SECONDS` | `3`, `300` | mass-disappearance guard (5.6) |
 | `OPEN_TTL_SECONDS` | `30` | `api_time_max_seconds` equivalent (4.4) |
 | `MASTER_STALE_SECONDS` | `120` | `master.stale` alert (6.2) |
@@ -204,7 +225,9 @@ The legacy `ApiData` (`Lib:210-292`) loops `while (status != 201)` forever. `Web
 - **At most one HTTP attempt per request per timer tick** (timer 1 s). No `Sleep` loops. A failed request goes to a per-route **outbox** with `next_attempt_at`.
 - **One transient budget** for 429, 503, other 5xx, timeout and network errors: max 6 attempts **and** 60 s total deadline per request, backoff 1/2/4/8/16 s with jitter. `Retry-After` sets `next_attempt_at` **for that route only**; other routes continue.
 - **When the budget runs out:** state requests (`master/snapshot`, `slave/snapshot`, `config`, `commands` poll) are dropped and replaced by fresh state on a later tick. **Event requests (`slave/results`) are never dropped**: they stay in the durable outbox (4.6) and keep retrying at the max backoff (16 s) indefinitely, with a chart alert after the budget.
-- Request timeout 5 s passed to `WebRequest`. Worst case per tick: one call per due route; typical tick ≤ 2 calls.
+- Request timeout 5 s passed to `WebRequest`.
+- **Per-callback cap (C9):** each `OnTimer` callback makes **at most one HTTP call** (so ≤ 5 s blocked), whatever is due. Local work runs first and never waits on HTTP: execution of already-received `close`/`close_partial`/`cancel` commands and journal recovery, then already-received `open`/`modify`.
+- **Fairness:** the single HTTP slot rotates among due routes: results batch, commands poll, snapshot, then config/symbols/logs. Results get every other slot at most while a backlog exists, so poll and snapshots always get turns; `next_attempt_at` of each route is respected. A results batch carries at most 50 results (bounded body).
 
 | Response | EA behavior |
 |---|---|
@@ -218,12 +241,13 @@ The legacy `ApiData` (`Lib:210-292`) loops `while (status != 201)` forever. `Web
 | 403 | stop opening; keep polling `/v4/config` every 5 min (6.2) |
 | 429 / 503 / 5xx / timeout / network | transient budget above |
 
-**Per-tick priority** (one queue, highest first): (1) `slave/results` outbox, (2) commands poll and `close`/`cancel` execution, (3) `open`/`modify` execution, (4) `master/snapshot` / `slave/snapshot`, (5) `config`, `symbols`, `logs`. Execution of `close` commands already received never waits on HTTP.
+**Per-tick order:** (1) local: close/close_partial/cancel execution and journal recovery, (2) local: open/modify execution, (3) the one HTTP call chosen by the fair rotation above. Execution of `close` commands already received never waits on HTTP.
 
 ### 4.3 Endpoints
 
 | Route | Caller | Request → Response |
 |---|---|---|
+| `POST /v4/session` | EA, each `OnInit` and after `409 stale_session` | `{boot_nonce, taken_at, ea_clock_offset_ms}` → `201 {session_id, epoch}` (server-issued; retires the previous session) |
 | `POST /v4/enroll` (no token) | EA, once | `{code, broker_server, login, role, margin_mode, ea_version}` → `201 {token, account_id}` (never cached) |
 | `POST /v4/token/rotate` | EA | → `200 {new_token, pending_id}`; old token stays valid; replay while pending → `409 rotation_pending` |
 | `POST /v4/token/confirm` | EA, with the **new** token | `{pending_id}` → `204`; revokes the old token |
@@ -235,7 +259,7 @@ The legacy `ApiData` (`Lib:210-292`) loops `while (status != 201)` forever. `Web
 | `POST /v4/slave/snapshot` | slave, ~10 s and after any execution | same shape as master snapshot (positions + recent history) |
 | `POST /v4/logs` | EA when `debug=true` | text, ≤ 256 KB → `204`; `413` above cap or daily quota (EA stops until next config) |
 
-**Snapshot body** (master and slave): `{session_id, seq, taken_at, connected, login, server, history_synced, positions[], pending[], history[]}`.
+**Snapshot body** (master and slave): `{session_id, epoch, seq, taken_at, ea_clock_offset_ms, connected, login, server, history_synced, positions[], pending[], history[]}`. `ea_clock_offset_ms` is the EA's current estimate of `server_time − local time` (0 until the first response).
 
 - `positions[]`: `position_ticket, position_id (POSITION_IDENTIFIER), symbol, type, volume, price_open, sl, tp, magic, comment, time_msc`.
 - `history[]`: `deal, order, position_id, entry (in|out|inout|out_by), reason, symbol, volume, price, profit, commission, swap, magic, comment, time_msc`. Window: deals since the last accepted snapshot, at least the last 30.
@@ -258,29 +282,40 @@ The legacy `ApiData` (`Lib:210-292`) loops `while (status != 201)` forever. `Web
 - **Expiry:** only `open` carries `expires_at` (`OPEN_TTL_SECONDS`, equivalent of legacy `api_time_max_seconds`); the EA refuses an `open` past expiry (`status: expired`). `modify` has no TTL but is superseded (5.5). **`close`, `close_partial` and `cancel` never expire.**
 - `close`/`close_partial`/`modify` carry `position_id`; the EA resolves the current position ticket from it (tickets may change).
 - `cancel` targets an `open` command the server no longer wants. The EA answers: `not_executed` (journal shows never sent; the open command is then dropped locally), or, if the open was executed, it **closes that position** and reports `closed` with the close deal.
-- `comment` = `c<copy_id>` (≤ 31 chars), with link `magic`. It is the correlation key for the journal check (4.6) and adoption (5.8).
+- `comment` = `c<copy_id>` (≤ 31 chars), with link `magic`. **The comment `c<copy_id>` is the correlation key** for the journal check (4.6) and adoption (5.8). It does not depend on the symbol name, so it works across different broker symbol names (e.g. master `EURUSD`, slave `EURUSD.m`).
+- **Netting physical-slot check (owner decision 2026-10-05):** before sending an `open` on a netting slave, the EA verifies there is no position on that symbol that is not managed by the copier (no position, or only the one this copy owns). Otherwise it sends nothing and reports `failed: unmanaged_position_on_symbol` (copy `error`, event `copy.slot_occupied`, chart alert).
+- Execution parameters (symbol, side, volume, magic, comment, deviation, guard) are **frozen in the command payload** at issue time; later config changes (magic, maps, multiplier) apply only to new copies and never change how existing copies are recognized (C6).
 
 ### 4.5 Delivery semantics and cursor (rev-1 #1, rev-2 B1.4)
 
 - Commands are durable rows. A poll returns **every command for this slave whose state is not terminal** (`queued`, `delivered`, `retry_wait` past its time), plus new ones; `after=<cursor>` only lets the server skip re-serializing commands the EA has *acked*; it never hides an un-acked command.
-- A command is acked by a result for its `command_id` (any terminal status) or by a `status: in_progress` result the EA posts when it moves the journal entry to `sent`.
+- A command is acked by a result for its `command_id` (any terminal status) or by a `status: in_progress` result the EA posts when it moves the journal entry to `sent`. **`in_progress` is a receipt ack, not a settlement (C2):** it puts the command under a lease (`lease_until = now + 120 s`, renewed by any later `in_progress`/snapshot from that session). On lease expiry, or on a new session, the command is re-delivered; the EA answers from its journal (4.6) and never re-executes a sent attempt.
 - **Per-copy ordering:** commands carry `seq_in_copy`. The EA executes a copy's commands in that order; if an `open` failed/expired, later `modify`/`close` of that copy are reported `skipped: open_not_executed`. Different copies are independent.
+- **Seq gaps (C9):** `seq_in_copy` is monotonic but **not contiguous**. A superseded modify is delivered once as a tombstone `{command_id, action:"superseded"}` if it was ever delivered; otherwise it simply never appears. The EA executes the lowest pending seq it holds and never waits for a missing number.
 
 ### 4.6 EA durable journal and results outbox (rev-1 #1, rev-2 B1)
 
 Files in the terminal's own `MQL5\Files`, per account and role: `journal_<server>_<login>.jsonl` (append-only, compacted on start) and `outbox_<server>_<login>.jsonl`. Writes use `FileFlush`; compaction writes a temp file then `FileMove` with `FILE_REWRITE`.
 
 ```
-journal entry: command_id → {copy_id, action, state: prepared|sent|uncertain|confirmed|suspended, request, result}
+journal entry: (command_id, attempt_id) → {copy_id, action, state: prepared|sent|uncertain|confirmed|suspended,
+                 request, order, request_id, deal, position_id, executed_volume, residual_volume, result}
 ```
 
-1. On receiving a command: if the journal has it as `confirmed`, **re-enqueue the stored result** in the outbox; never execute again. If `suspended`, skip (alert already raised).
-2. Before executing an `open`: scan positions (`PositionsTotal`), orders and `HistorySelect` deals for `comment == c<copy_id>` and the link magic. If found → journal `confirmed` with the real `order/deal/position_id/price`, report `done`; do not send.
-3. Write `prepared`, flush; write `sent`, flush; call `OrderSend` / `PositionClose`.
-4. On `TRADE_RETCODE_DONE`/`DONE_PARTIAL`: wait for the deal (via `OnTradeTransaction` or `HistoryDealSelect(result.deal)`) to get `position_id`; write `confirmed` + result; append the result to the outbox.
-5. On a definite reject (`REQUOTE`, `PRICE_OFF`, `INVALID_*`, `NO_MONEY`, `MARKET_CLOSED`, etc.) → `confirmed` with `failed` + `error_code`.
-6. On timeout / no answer / restart while `sent`: mark `uncertain`; on the next tick (and on `OnInit`) re-run the step-2 scan. Found → `confirmed done`. Not found after the scan **and** a second scan ≥ 10 s later with `history_synced` → `confirmed failed: not_executed`. If the terminal is disconnected or the scan cannot decide → `suspended` + chart alert + result `status: uncertain` (server keeps the copy `uncertain`, 5.5; adoption may resolve it later).
-7. The outbox is retried until 2xx (4.2). On restart, every `sent`/`uncertain` entry is resolved (step 6) before any new command executes.
+`command_id` is the **logical obligation** (open this copy, close that position); `attempt_id` is **one durable attempt** to fulfil it. The server issues a new `attempt_id` for the same `command_id` only after a definitive reject with no effect (e.g. `MARKET_CLOSED`, `REQUOTE`) on retry; the journal deduplicates by `(command_id, attempt_id)` (C2).
+
+1. On receiving a command attempt: if the journal has it `confirmed`, **re-enqueue the stored result**; never execute that attempt again. A **new** `attempt_id` of a command whose previous attempt is `confirmed failed` (definitive, no effect) is executed normally (e.g. close after `MARKET_CLOSED` once the market reopens). If the copy has any attempt `sent`/`uncertain`/`suspended`, no new attempt executes for **that copy** until it is resolved; other copies continue.
+2. **Pre-send evidence check, per action:**
+   - `open`: scan positions, orders and `HistorySelect` deals for `comment == c<copy_id>` + link magic. Found → `confirmed done` with the real ids; nothing sent.
+   - `close`: position for `position_id` absent **and** an exit deal for it in history → `confirmed done`. Position present → execute.
+   - `close_partial`: compare the position's current volume with the persisted `residual_volume` target; already at or below target → `done` with the observed volume.
+   - `cancel`: journal shows the open never reached `sent` → `not_executed`; open in flight → wait for it; position exists → close it and report `closed`.
+3. Write `prepared`, flush; write `sent`, flush; call `OrderSend` / `PositionClose`. Persist `order`/`request_id`/`deal` in the journal **as soon as each is known** (from `MqlTradeResult` and `OnTradeTransaction`).
+4. **Per-action evidence for `done`:** open → entry deal + `position_id`; close → position gone and exit deal(s) attributable to `position_id`; close_partial → executed volume and resulting position volume. `DONE_PARTIAL` reports `executed_volume` and `residual_volume`: the server updates the copy volume and keeps it `closing` (close) or keeps the reduction target (partial) while exposure remains, issuing the remaining volume as a new attempt.
+5. On a definite reject (`REQUOTE`, `PRICE_OFF`, `INVALID_*`, `NO_MONEY`, `MARKET_CLOSED`, etc.) with no deal → `confirmed failed` + `error_code` for this attempt only. The obligation (command) is still open on the server for close/close_partial/cancel.
+6. On timeout / no answer / restart while `sent`: mark `uncertain` and re-run the step-2 check with the persisted ids (order/deal lookup first, then comment). Conclusive evidence of execution → `confirmed done`. **No evidence never proves non-execution (C3):** a `sent` attempt without conclusive evidence stays `uncertain`; after the checks the entry becomes `suspended` + chart alert + result `status: uncertain`. `failed: not_executed` is only reported from `prepared` (never sent) or from a definitive rejection.
+7. **Suspension is per copy**, never global. A suspended entry is resolved only by (a) broker evidence found later (EA re-check on every snapshot tick, or server adoption 5.8), or (b) an explicit operator action in admin (`resolve: executed{position_id}` / `not_executed`, audited). The resolution updates the journal (via a `resolve` command) and unblocks the copy's pending close/cancel. A suspended open whose master closed keeps a durable close obligation on the server (copy `uncertain` with `close_intent=true`).
+8. The outbox is retried until 2xx (4.2). On restart, every `sent`/`uncertain` entry is re-checked (step 6) before any new attempt of the same copy executes.
 
 Exactly-once execution is not claimed: the window between broker acceptance and the `sent` flush is closed by the comment/magic scan, not by the file alone.
 
@@ -339,7 +374,7 @@ sequenceDiagram
 ```
 accounts         id, broker_server, broker_server_norm, login, role(master|slave), margin_mode(hedging|netting|unknown),
                  label, status(active|suspended|revoked), suspended_reason, ea_version, last_seen_at,
-                 session_id, session_taken_at, last_seq, exclude_copier_positions,
+                 session_id, session_epoch, session_taken_at, last_seq, exclude_copier_positions,
                  token_hash, pending_token_hash, pending_token_id, token_issued_at,
                  UNIQUE(broker_server_norm, login, role)
 enroll_codes     id, account_id, server_norm, login, role, code_hash, expires_at, consumed_at
@@ -355,17 +390,24 @@ symbol_maps      id, slave_id (NULL = global), master_symbol, slave_symbol
                  UNIQUE(master_symbol) WHERE slave_id IS NULL
                  UNIQUE(slave_id, master_symbol) WHERE slave_id IS NOT NULL
 master_positions id, master_id, position_id, generation, position_ticket, symbol, type, volume, price_open, sl, tp,
-                 magic, comment, state(open|closed), absent_count, absent_since_mono, close_source(history|absence|reversal),
+                 magic, comment, state(open|closed), absent_count, absent_since_mono, absent_epoch, mass_episode_id,
+                 close_source(history|absence|reversal),
                  opened_at, closed_at, UNIQUE(master_id, position_id, generation)
 copies           id, link_id, master_position_id, slave_id, slave_margin_mode, symbol_master, symbol_local, volume,
-                 sl, tp, state (5.2), blocked_by, skip_reason, close_reason, no_sltp,
+                 sl, tp, state (5.2), blocked_by, skip_reason, close_reason, no_sltp, close_intent,
+                 confirmed_volume, reduction_target, exec_params(json, frozen at issue),
                  open_order, open_deal, position_ticket, position_id, close_deal, price_open, price_close,
                  profit, fee, notmodify_count, notmodify_day, latency_ms, slippage_points,
                  opened_at, closed_at, conciliated_at,
                  UNIQUE(link_id, master_position_id)
 commands         id (command_id), copy_id, seq_in_copy, action, payload(json),
                  state(queued|delivered|in_progress|retry_wait|done|failed|expired|superseded|skipped),
-                 attempts, next_attempt_at, issued_at, expires_at, acked_at, result(json)
+                 attempt_id, attempts, next_attempt_at, lease_until, issued_at, expires_at, acked_at, result(json)
+command_attempts command_id, attempt_id, issued_at, outcome(done|done_partial|rejected|uncertain), evidence(json)
+sessions         id (server-issued), account_id, epoch, boot_nonce, created_at, retired_at
+processed_deals  account_id, deal, position_id, generation, effect(partial|reversal|close|none), PK(account_id, deal)
+symbol_conflicts id, slave_id, symbol_local, kind(unexpected_exposure|unmanaged_position|late_adoption),
+                 copy_id, position_id, opened_at, resolved_at, resolution
 idempotency_keys account_id, key, request_sha256, response(json, never token-bearing), created_at, PK(account_id, key)
 inbound_raw      id, account_id, kind, content(gz), content_sha256, received_at, reason(change|heartbeat|error)
 error_signatures account_id, signature, first_raw_id, count, first_seen, last_seen, samples(≤5 raw ids)
@@ -381,19 +423,19 @@ The copy's state describes **exposure on the slave**; commands describe **attemp
 
 | Copy state | Meaning | Exposure possible? | Netting reservation |
 |---|---|---|---|
-| `pending_blocked` | waiting for `blocked_by` copy to reach `closed` | no | no (the blocking copy holds the slot) |
+| `pending_blocked` | waiting for `blocked_by` copy to prove zero exposure | no | no (the blocking copy holds the slot) |
 | `pending` | open command queued/delivered | maybe (in flight) | yes |
 | `open` | position confirmed | yes | yes |
 | `cancel_requested` | master closed before open confirmed; cancel issued | maybe | yes |
 | `closing` | close command outstanding | yes | yes |
-| `uncertain` | EA reported `uncertain` or open expired after delivery | maybe | yes |
+| `uncertain` | EA reported `uncertain`/suspended, or open expired after delivery; per copy only | maybe | yes |
 | `closed` | position confirmed closed (result, master/slave history) | no | no |
 | `cancelled` | proven never executed (`not_executed`, or open never delivered) | no | no |
 | `skipped` | not opened by policy (netting conflict, below min, filter, price guard on first open) | no | no |
 | `error` | open definitively failed with no position (e.g. `symbol_not_found`, `failed` reject) | no | no |
-| `superseded` | duplicate cleanup (never deleted) | no | no |
+| `superseded` | duplicate sibling: marks the logical relation only. While its extra position is alive it keeps a close obligation (`close_intent`) and is managed like `closing`; it becomes terminal only when the close is confirmed | yes until close confirmed | yes until close confirmed |
 
-- Netting index: `UNIQUE(slave_id, symbol_local) WHERE slave_margin_mode='netting' AND state IN ('pending','open','cancel_requested','closing','uncertain')`. A `pending_blocked` copy is outside the index; promotion to `pending` (5.3) happens in the same transaction that marks the blocking copy `closed`. The symbol is freed only on `closed`/`cancelled`/`skipped`/`error`, all of which require proof of no exposure; `error` on a close never frees it (5.5).
+- Netting index: `UNIQUE(slave_id, symbol_local) WHERE slave_margin_mode='netting' AND (state IN ('pending','open','cancel_requested','closing','uncertain') OR (state='superseded' AND close_intent))`. A `pending_blocked` copy is outside the index; promotion to `pending` (5.3) happens in the same transaction that proves the blocking copy has zero exposure. The symbol is freed only on `closed`/`cancelled`/`skipped`/`error`, all of which require proof of no exposure; `error` on a close never frees it (5.5). An open `symbol_conflicts` row also blocks new opens on that slave symbol (5.8).
 - Hedging index: `UNIQUE(slave_id, position_id) WHERE position_id IS NOT NULL AND slave_margin_mode='hedging'`.
 - Master: `UNIQUE(master_id, position_id, generation)`.
 
@@ -410,10 +452,13 @@ Identity (unchanged): order ticket (audit), deal ticket (fills, close confirmati
 
 **Runtime admission (per copy, inside the snapshot unit of work, never raising):**
 
-1. New master position for a netting slave, and the slot is held by a copy of an **earlier generation/position of the same master and link that is now closing** (close-then-reopen): new copy `pending_blocked`, `blocked_by=<previous copy>`. No `open` is emitted. When the previous copy becomes `closed`, the engine promotes it: reserve the symbol, set `pending`, issue `open` (with a fresh `expires_at`). If the previous copy instead stays `uncertain`/`closing` and the new master position closes first, the blocked copy becomes `cancelled` (never sent).
-2. Any other conflict (should be impossible after config validation, e.g. a race with a config change): copy `skipped`, `skip_reason=netting_conflict`, event `copy.skipped_netting_conflict`. Snapshot still `200`, other positions processed normally.
+1. New master position for a netting slave, and the slot is held by a copy of an **earlier generation/position of the same master and link that is being closed or cancelled** (close-then-reopen): new copy `pending_blocked`, `blocked_by=<previous copy>`. No `open` is emitted.
+   - **Unblock condition (C5):** the predecessor reaches a state with **proof of zero exposure**: `closed`, `cancelled`, `skipped`, or `error` proven without exposure. An inconclusive error, `uncertain` or `closing` never unblocks.
+   - **Single successor (C5):** in the same transaction, the engine cancels every candidate blocked on that slot whose master position/generation is no longer open (`cancelled`, never sent, event), then chooses **one** eligible successor (the newest open generation of that slot); others stay blocked behind it or are cancelled if stale. Promotion revalidates, inside the transaction: account status (not drain/suspended), link enabled, `mode`, symbol filter/map, specs and lot policy (C6). If revalidation fails → that copy `skipped` with reason, no open. Otherwise: reserve the symbol, set `pending`, issue `open` with a fresh `expires_at` and frozen `exec_params`.
+   - If the new master position closes while blocked → `cancelled` (never sent).
+2. Any other conflict (should be impossible after config validation, e.g. a race with a config change, or an open `symbol_conflicts` row): copy `skipped`, `skip_reason=netting_conflict`, event `copy.skipped_netting_conflict`. Snapshot still `200`, other positions processed normally.
 
-Netting **master** (allowed to netting or hedging slaves): one position per symbol. Volume changes in Phase 1 (stated rule, OD5): **reductions** are mirrored with `close_partial` using the hedging formula (5.4); **increases** are not mirrored and emit `copy.volume_drift` with master/slave volumes. Reversal: 5.4.
+Netting **master** (allowed to netting or hedging slaves): one position per symbol. Volume changes in Phase 1 (stated rule, OD5): **reductions** are mirrored with `close_partial` using the reduction rules of 5.4 (netting execution path); **increases** are not mirrored and emit `copy.volume_drift` with master/slave volumes. Reversal: 5.4.
 
 #### 5.3a Pending orders deferred (OD2, rev-1 #6, rev-2 I6)
 
@@ -439,30 +484,51 @@ if lot < volume_min:  below_min = skip (default) → copy skipped, skip_reason=b
 - **Contract size at config:** a `symbol_map` used by a link whose master and slave contract sizes differ is rejected (422) unless the link sets `allow_contract_size_diff=true` (then the factor above applies). If a spec is missing at fan-out: copy `skipped: missing_symbol_spec`, the symbol is added to `symbols_wanted`.
 - Test table: min 0.01 and 0.1, step ≠ min, multiplier 0.333, clamp at max, contract 100 vs 10, raw below min with each policy.
 
-**Hedging partial close (OD5):** master `position_id` still present with lower volume (and an `out` deal in history when available). For each open copy: `close_volume = round_down_step(copy_volume × (prev_master_volume − new_master_volume) / prev_master_volume)`. If `copy_volume − close_volume < volume_min` → full `close`. If `close_volume < volume_min` → nothing now, the reduction is accumulated against the copy (`pending_reduction`) and applied on the next reduction. Command `close_partial {position_id, volume}`; the EA uses `PositionClosePartial`. Master volume increase on hedging cannot happen (new deal = new position).
+**Master event precedence (C1).** For each master `position_id` in a snapshot, exactly one interpretation applies, in this order:
+
+1. Position present, **same side, lower volume** → partial reduction (below), even if an `out` deal is in history.
+2. Position present, **side changed** (or an unprocessed `inout` deal) → one reversal = one new generation (below).
+3. Position absent **and** exit deal(s) confirm a full exit → fast close (5.6).
+4. Position absent without exit deal → absence path (5.6).
+
+Each history deal is recorded once in `processed_deals (account_id, deal)` with the generation it affected. A deal already processed is ignored on later snapshots (the history window repeats the last 30 deals), and a deal whose time precedes the current generation's start can never close or reverse that generation.
+
+**Partial reductions (OD5, C7).** The target is proportional to the master, computed from persisted values, never from in-flight volumes:
+
+```
+reduction_target(copy) = round_down_step(copy.opened_volume × new_master_volume / master.opened_volume)
+```
+
+- `confirmed_volume` is the copy's volume confirmed by results/snapshots. The next `close_partial` volume is `confirmed_volume − reduction_target`, issued only when **no financial mutation is in flight** for that position (at most one open/close/close_partial attempt in flight per position). Several master reductions before an ack are **coalesced**: only `reduction_target` is updated; the next delta is computed after the previous result is reconciled. Example: copy 1.00, master 1.0 → 0.8 → 0.6 before any ack → one in-flight 0.20, then 0.20 more → copy 0.60.
+- Delta below `volume_min` → nothing now; the target persists and is applied when the delta reaches `volume_min`. If `reduction_target < volume_min` → full `close`.
+- **Reduction during an in-flight open:** the target is updated on the `pending` copy; once the open is confirmed (including a partially filled open), the first delta is computed from `confirmed_volume`.
+- **Execution by margin mode:** hedging slave → `PositionClosePartial` on the ticket resolved from `position_id`. Netting slave → an opposite market deal with volume `min(delta, confirmed position volume)`; the EA re-reads the position volume before sending and refuses any volume that would flip the side.
+- `DONE_PARTIAL` (4.6) updates `confirmed_volume`; the remainder is retried as a new attempt.
+
+Master volume increase on hedging cannot happen (new deal = new position); on netting it is drift-only (5.3).
 
 **Netting reversal (OD4, rev-1 #10, rev-2 I1):** same `position_id` with a different `type` in a snapshot (or an `inout` deal in history):
 
-1. Current `master_positions` row (generation g) → `closed`, `close_source=reversal`; its copies → `closing` + `close`.
+1. Current `master_positions` row (generation g) → `closed`, `close_source=reversal`; its copies follow the **normal lifecycle "master closed" transitions** of 5.5 for their state (open → closing + close by `position_id`; pending not delivered → cancelled; delivered → cancel_requested + cancel; pending_blocked → cancelled; uncertain → close intent). No close is ever issued without a position identity (C5).
 2. New row with generation g+1, new type and volume.
-3. Its copies follow runtime admission: on a netting slave the previous copy holds the slot → `pending_blocked` → `open` on the new side only after the close is confirmed. On a hedging slave the open is also serialized after the close (`blocked_by` set), so the slave never holds both sides of a reversal at once.
+3. Its copies follow runtime admission: on a netting slave the previous copy holds the slot → `pending_blocked` → `open` on the new side only after the predecessor proves zero exposure (5.3). On a hedging slave the open is also serialized after the close (`blocked_by` set), so the slave never holds both sides of a reversal at once.
 
 ### 5.5 Lifecycle and business rules
 
 ```
 master snapshot (accepted, 5.6)
   new position_id                 → master_positions(open, gen 0); per enabled link passing filters → admission (5.3) → lot (5.4)
-                                    → copies(pending|pending_blocked|skipped) + command(open)
+                                    → copies(pending + command(open) | pending_blocked | skipped)  -- open only for admitted pending
   SL/TP changed                   → command(modify) if link.copy_sl_tp and not copy.no_sltp; supersedes pending modifies
-  volume reduced                  → close_partial (5.4)
+  volume reduced (same side)      → reduction_target updated; close_partial when nothing in flight (5.4)
   type changed (same id)          → reversal (5.4)
-  exit deal in history (fast)     → master closed now (close_source=history)
+  exit deal in history (fast)     → master closed now (close_source=history) if position absent; deal deduped (5.4)
   absent without exit deal        → absence path (5.6)
   master closed                   → copies: pending (open never delivered) → cancelled, command(open) superseded
                                              pending (open delivered/in_progress) → cancel_requested + command(cancel)
                                              pending_blocked → cancelled
                                              open → closing + command(close)
-                                             uncertain → stays uncertain; adoption decides (5.8)
+                                             uncertain → stays uncertain with close_intent; adoption/resolution decides (5.8)
 slave result (by command_id; copy_id checked)
   open done                       → open (ids, price, latency, slippage); if copy is cancel_requested/closing → record ids,
                                     closing + command(close)   (rev-2 A12, rev-1 #2)
@@ -470,9 +536,12 @@ slave result (by command_id; copy_id checked)
   open uncertain                  → uncertain
   cancel not_executed             → cancelled
   cancel closed                   → closed (close_reason=master_closed)
-  close done / close_partial done → closed / volume updated
-  close failed transient          → command retry_wait with backoff (MARKET_CLOSED, TRADE_DISABLED, REQUOTE, NO_CONNECTION,
-                                    TIMEOUT); copy stays closing; never expires
+  close done (position gone + exit deal) → closed
+  close/close_partial DONE_PARTIAL → confirmed_volume updated; copy stays closing / target kept; new attempt for the rest
+  close_partial done              → confirmed_volume updated
+  close failed (definitive reject, no deal) → new attempt_id after backoff (MARKET_CLOSED, TRADE_DISABLED, REQUOTE,
+                                    NO_CONNECTION); copy stays closing; obligation never expires
+  any action uncertain            → copy uncertain (per copy); no new attempt until resolved (4.6 step 7)
   close position_not_found        → wait for slave history: exit deal for position_id → closed (close_reason from deal reason);
                                     no evidence after 3 slave snapshots → error(close_unconfirmed) + alert; reservation KEPT
   modify done / notmodify         → audit; notmodify escalation; modify failure never changes copy state
@@ -484,7 +553,7 @@ slave snapshot
 
 - **Modify supersession (S1):** a new `modify` marks queued/delivered-but-unexecuted modifies of the same copy `superseded`. A modify on a `pending`/`pending_blocked` copy updates the SL/TP in the undelivered `open` payload instead of creating a command; if the open was already delivered, the modify is queued after it (`seq_in_copy`).
 - **Command expiry:** only `open` (TTL) and superseded `modify`. `close`, `close_partial`, `cancel` stay until a definitive result.
-- **Transition idempotency:** `closed`, `cancelled`, `skipped`, `superseded` are terminal. `error` is terminal **only** for open failures with no exposure; adoption (5.8) may move `error`/`cancelled`/`uncertain` to `open`/`closing` when a real position is found, because exposure evidence always wins.
+- **Transition idempotency:** `closed`, `cancelled`, `skipped` are terminal; `superseded` is terminal once its close is confirmed. `error` is terminal **only** for open failures with no exposure; adoption (5.8) may move `error`/`cancelled`/`uncertain` to `open`/`closing` when a real position is found, because exposure evidence always wins.
 
 Rules ported from Rails:
 
@@ -506,21 +575,23 @@ Not ported: Rails' 1:1 volume re-sync on every MODIFY (Appendix A; replaced by `
 
 ### 5.6 Snapshot ordering and close detection (OD8, rev-1 #4, rev-2 B4, I4)
 
-**Sessions and fencing.** The EA generates a random `session_id` in every `OnInit`; `seq` starts at 1 per session. The server keeps `(session_id, session_taken_at, last_seq)` per account, updated in the same transaction as the diff.
+**Sessions and fencing (C4).** Sessions are **server-issued**: on every `OnInit` the EA calls `POST /v4/session` and receives `{session_id, epoch}`; `seq` starts at 1 per session. Issuing a session retires the previous one in `sessions` (`retired_at`). The server keeps `(session_id, session_epoch, last_seq)` per account, updated in the same transaction as the diff.
 
-- Same session: `seq > last_seq` → processed; otherwise `200 {accepted:false}` (stale retry, no state change).
-- New session: accepted, and ordering restarts, if `taken_at − ea_clock_offset` (the offset the EA reports from `server_time`) is newer than `session_taken_at` minus 5 s tolerance. Otherwise `409 stale_session` (a late request of an old producer).
-- Requests from a previous session after a newer session was accepted → `409 stale_session` (fencing). Only one producer per account is live.
-- EA: 3 consecutive `accepted:false` → new `session_id` + chart alert.
-- All time-based rules (T, mass guard, stale master) use the **server's monotonic clock** at receipt, never `taken_at`.
+- Current session: `seq > last_seq` → processed; otherwise `200 {accepted:false}` (stale retry, no state change).
+- Unknown or retired `session_id` → `409 stale_session`. A UUID the server never issued is never accepted, so a fenced producer cannot re-authorize itself by inventing one.
+- After `409 stale_session` the EA may request a new session only from `OnInit` or after an operator action / config `mode` change; it never loops on automatic re-registration. Two live terminals with the same token keep fencing each other → `account.duplicate_producer` alert.
+- EA: 3 consecutive `accepted:false` → chart alert (no automatic new session).
+- `ea_clock_offset_ms` travels in every snapshot and in `POST /v4/session`; it is used only for latency/conciliation, never for ordering.
+
+**Epoch-aware timers (C4).** All time-based rules (T, mass guard, stale master) use the server monotonic clock **within a server runtime epoch** (`server_epoch` = new value at each server process start). `absent_since_mono` is stored with `absent_epoch`. After a server restart (or a host reboot) an elapsed from a previous epoch is never reused: absence counters and mass-guard episodes restart and need at least one healthy confirmation snapshot (`connected=true`, `history_synced=true`) in the new epoch before counting. Wall-clock `taken_at` is never used for T.
 
 **Fast path.** An `out`/`out_by` deal (or `inout` reversal) for the position in `history[]` closes the master position on that snapshot.
 
 **Absence path.** A position missing from an accepted snapshot without an exit deal:
 
 - Counts only if the snapshot has `connected=true` and `history_synced=true`. Snapshots with `connected=false` neither increment nor reset the counter.
-- Closes when `absent_count ≥ K` (3) **and** absent for `T ≥ 60 s` (configurable, minimum 30 s).
-- **Mass-disappearance guard:** if, in one snapshot, `≥ MASS_DISAPPEAR_MIN` positions or all open positions (when ≥ 2) vanish without exit deals: emit `master.mass_disappearance` alert, set `send_history=true` in the master's config, and use `T = MASS_DISAPPEAR_SECONDS` (300 s) for those positions. Exit deals arriving meanwhile close them via the fast path.
+- Closes when `absent_count ≥ K` (3) **and** absent for `T ≥ 60 s` within the current epoch. T is configurable upward only; **the floor is fixed at 60 s** (values below are rejected).
+- **Mass-disappearance guard:** if, in one snapshot, `≥ MASS_DISAPPEAR_MIN` positions or all open positions (when ≥ 2) vanish without exit deals: emit `master.mass_disappearance` alert, set `send_history=true` in the master's config, and use `T = MASS_DISAPPEAR_SECONDS` (300 s) for those positions. The episode stays latched (`mass_episode_id`) for those positions until they reappear or exit deals confirm them; it is not forgotten when later snapshots have no *new* disappearances. Exit deals arriving meanwhile close them via the fast path.
 - Reappearance resets the counter.
 
 **Login mismatch:** `409 account_mismatch`, nothing stored, event `account.mismatch`.
@@ -540,7 +611,18 @@ On every slave snapshot (inline for copies in `pending/cancel_requested/uncertai
   - Master position still open → copy `open`.
   - Master position closed → copy `closing` + `command(close)`.
   - If adoption finds an exit deal too → `closed`.
-- A position with comment `c<id>` whose copy already has a different `position_id` → duplicate: alert `copy.duplicate_position` and `command(close)` for the extra position (recorded as a `superseded` sibling copy).
+- A position with comment `c<id>` whose copy already has a different `position_id` → duplicate: alert `copy.duplicate_position`; a `superseded` sibling copy is created with the extra `position_id`, `close_intent=true` and `command(close)`. The sibling keeps exposure and the close obligation until the close is confirmed (5.2).
+- **Unexpected exposure (C8):** if adoption cannot be applied without violating a reservation (e.g. a late fill of a copy whose slot was already freed and re-occupied on a netting slave), the server never inserts a second reservation and never rolls back the snapshot. It opens a `symbol_conflicts` row (`late_adoption`), records the evidence on the original copy, **blocks new opens on that slave symbol**, emits `copy.symbol_conflict`, and the operator (or broker evidence) reconciles: close the extra exposure by its identity, or accept it. Same flow for a position found on a managed netting symbol with no copier correlation (`unmanaged_position`).
+- **Resolution path:** admin `POST /admin/copies/:id/resolve {executed: position_id | not_executed}` and `POST /admin/symbol_conflicts/:id/resolve`; both audited, both emit a `resolve` command to the EA journal (4.6 step 7) and unblock pending close/cancel.
+### 5.8a Correlation and netting exclusivity (owner decision 2026-10-05)
+
+- The correlation key is the comment **`c<copy_id>`** with the link magic. It is independent of the symbol name, so it works when the broker names differ (`EURUSD` vs `EURUSD.m`).
+- On **netting** slaves, symbols managed by the copier are **exclusive** to it in Phase 1: no manual trades and no other EAs on those symbols. Before opening, the EA verifies the physical slot (no unmanaged position on that symbol) and fails observably otherwise (4.4).
+- Executions without reliable correlation (comment rewritten/truncated by the broker and no journal ids) stay **suspended** for explicit manual reconciliation (5.8 resolution path).
+- Matching by magic + symbol + open time (±2 s) is **diagnostic only**: it lists candidates in the admin, and is never used for automatic adoption or close.
+
+### 5.8b Conciliation
+
 - Conciliation (background, batched) enriches close price/profit/fees, latency (slave open − master open, offsets corrected) and slippage (#66), matching only by `command_id` → `position_id` → deal. Symbol is a consistency check.
 
 ### 5.9 Raw storage, errors, retention (rev-1 #12)
@@ -581,6 +663,15 @@ On every slave snapshot (inline for copies in `pending/cancel_requested/uncertai
 | **Stale master** (`last_seen_at` older than `MASTER_STALE_SECONDS`) | alert `master.stale` only. **No auto-close.** Absence counting is paused (no snapshots) |
 
 Link disable (not account): new opens stop; existing copies of the link keep receiving modify/close.
+
+**Entering drain, suspension, version gate or link disable (C6)**, in the same transaction:
+
+- `pending` copies whose open is **proven unsent** (never delivered, or EA journal `prepared` only) → open `superseded`, copy `cancelled`.
+- `pending` copies whose open was delivered/in progress → `cancel_requested` + `cancel` (the EA closes it if it executed).
+- `pending_blocked` copies → `cancelled`.
+- `open`/`closing`/`uncertain`/`superseded` with `close_intent` keep full management (modify, close, close_partial, adoption, resolution).
+- Promotion of a blocked copy revalidates account/link/mode (5.3) and never emits an open in drain. The EA also refuses any `open` received while its config says `drain`, reporting `failed: drain` (definitive, no effect).
+- Execution parameters are frozen per copy/command (`exec_params`), so changing magic or maps later never loses recognition of existing obligations.
 
 ### 6.3 TLS, admin auth, secrets
 
@@ -655,6 +746,35 @@ No byte-level recorder. Scenario catalog in `docs/protocol/v4/scenarios/*.yaml`:
 | S29 | Close result `position_not_found` with slave history exit | `closed`, not `error` |
 | S30 | Pending order on master | ignored for fan-out; fill appears as a position and is copied at market |
 
+**Scenarios for the scout contracts C1–C9** (Phase 1 gate):
+
+| # | Contract | Scenario | Expected |
+|---|---|---|---|
+| S31 | C1 | Hedging master 1.0 → 0.4 with a real `out` deal and the position still present | one `close_partial`, no close |
+| S32 | C1 | Same `out` deal repeated in three snapshots | processed once (`processed_deals`); no extra partial/close |
+| S33 | C1 | `inout` deal repeated after a reversal (S12) | one reversal; generation g+1 untouched |
+| S34 | C1 | Config `CLOSE_ABSENT_SECONDS=30` | rejected |
+| S35 | C2 | Close hits `MARKET_CLOSED`, market reopens | new `attempt_id` executes the close for real; copy `closed` |
+| S36 | C2 | Crash before / after close and close_partial `OrderSend` | per-action evidence; no repeated effect; no false `done` from finding the position |
+| S37 | C2 | `DONE_PARTIAL` on a full close | `confirmed_volume` updated, copy stays `closing`, remainder closed; symbol freed only when flat |
+| S38 | C2 | `in_progress` ack then EA silent past lease | command re-delivered; EA answers from journal; no second execution |
+| S39 | C3 | Fill arrives > 10 s late; broker rewrites comment | stays `uncertain`/suspended; never `not_executed`; resolved by ids or operator |
+| S40 | C3 | Open executed and closed locally before restart | journal ids + history deals resolve it; no false non-exposure |
+| S41 | C3 | One copy uncertain while another copy needs a close | the other close executes; suspension per copy |
+| S42 | C3 | Operator resolves a suspended open as executed | journal updated via `resolve`; later close executes |
+| S43 | C4 | Server restart and host reboot during absence counting | counters restart in the new epoch; no premature close, no stuck timer |
+| S44 | C4 | Clock skew backwards; late request of a retired session; two concurrent producers | 409 for retired/unknown session; no self-reauthorization; duplicate-producer alert |
+| S45 | C5 | Reversal before the predecessor's open was delivered / rejected / uncertain | cancel/close by lifecycle; successor promoted only on zero-exposure proof; waits while uncertain |
+| S46 | C5 | Three fast reversals, two blocked candidates, one cancelled | at most one promotion; no UNIQUE violation; no poisoned snapshot |
+| S47 | C6 | Drain with open queued, delivered, uncertain and pending_blocked; suspend before predecessor ack | no open born in drain; delivered → cancel; uncertain still managed |
+| S48 | C6 | Change magic/map after an open was sent | existing copy still recognized and closed with its frozen params |
+| S49 | C7 | Two reductions before the first ack; reductions below min accumulated | coalesced; final volume = proportional target (0.60 in the 5.4 example); no over-reduction |
+| S50 | C7 | Partial fill on open; netting drift-only increase then reduction; restart between partials | no side flip, no duplicate close_partial |
+| S51 | C8 | Late adoption after the slot was freed and re-occupied | `symbol_conflicts` opened; new opens on the symbol blocked; no rollback loop |
+| S52 | C8 | Two fills with the same correlation | `superseded` sibling keeps exposure until its close is confirmed |
+| S53 | C8 | Pre-existing manual position on a netting symbol; manual change after copy open | open refused `unmanaged_position_on_symbol`; manual change → conflict, never auto-close by weak matching |
+| S54 | C9 | All routes due, persistent results backlog, real timeouts, modify seq gaps | ≤ 1 HTTP call per callback; local close latency unaffected; poll/snapshots get turns; seq gaps never block |
+
 Also: lot table; BUY and SELL market; idempotent replays; 409 on key reuse; two groups on the same pair; **concurrency test** (1 master at 0.5 s + 5 slaves, 10 min, threads with barriers: zero `database is locked`, zero duplicate fan-out, both DBs); **EA client tests** with an injectable transport in the Strategy Tester (which does not run `WebRequest`) and a real HTTP fake server from a script outside the Tester, covering S01–S05, S24–S26.
 
 Phase 1 exit: all scenarios pass on SQLite and Postgres, plus a 48 h demo run (1 master, 1 hedging + 1 netting slave) with zero orphan copies, including one forced EA restart and one network cut.
@@ -681,7 +801,7 @@ v1/v2/v3 are retired as the copy backend at Phase 1; the Rails endpoints remain 
 
 | Phase | Scope | Exit criteria |
 |---|---|---|
-| **0** | This document approved | D1–D11 approved; Q1, Q9–Q11 answered or deferred |
+| **0** | This document approved — **done 2026-10-05** | D1–D11 approved; Q1, Q9–Q11 answered |
 | **0.5** | Layout + rename: Rails to `web/`, CI split, python-signal archived | CI green; Rails image deploys |
 | **1** | Server: v4 API, enrollment/rotation, groups/links, copies/commands, journal-aware delivery, adoption, close detection (history + guarded absence), drain, lots/contract size, hedging partials, netting one-per-symbol with blocking and reversal, symbol maps, SQLite+Postgres, Docker, admin API. New EA in `ea/mt5/` with journal + outbox. Market positions only | Section 8 exit; `docker compose up` works without Rails |
 | **2** | Pending orders, netting full model (shared positions, proportional increases), symbol-map suggestions UI, installer, latency/slippage reporting (#66) | Scenarios for pending/netting pass; #66 numbers visible |
@@ -695,18 +815,19 @@ v1/v2/v3 are retired as the copy backend at Phase 1; the Rails endpoints remain 
 
 ### Risks
 
-- **R1. Business-rule gaps.** Mitigation: port every v2/v3 spec, read the presenters line by line, scenario catalog S01–S30, 48 h soak.
+- **R1. Business-rule gaps.** Mitigation: port every v2/v3 spec, read the presenters line by line, scenario catalog S01–S54, 48 h soak.
 - **R2. EA journal correctness.** The journal and scan are the new hardest code. Mitigation: EA client tests for S01–S05, comment+magic scan as the final authority, `suspended` instead of guessing.
 - **R3. Phase 1 restrictions are visible** (hedging→netting rejected, no pending orders, netting increases not mirrored). Mitigation: clear 422 messages and events; Phase 2.
 - **R4. SQLite contention.** D6; Postgres for larger installs.
 - **R5. Moving Rails to `web/`.** Paths-only PR with deploy dry-run.
 - **R6. Clock skew.** `server_time` offset in the EA; all server timing on its monotonic clock.
 - **R7. Slower absence close** (60 s, 300 s under mass guard). Accepted by OD8; the fast history path covers normal closes.
-- **R8. Broker comment rewriting.** Some brokers alter or truncate comments; then the scan/adoption falls back to journal ids and magic + symbol + open time ±2 s, and ambiguous cases suspend.
+- **R8. Broker comment rewriting.** Some brokers alter or truncate comments; then the scan/adoption uses persisted journal ids (order/request/deal). Without them the copy stays suspended for manual reconciliation; magic + symbol + time ±2 s is diagnostic only (5.8a).
+- **R9. Netting exclusivity is an operating rule.** A manual trade on a managed netting symbol after the open cannot be prevented by the EA; it is detected (`unmanaged_position`/volume drift) and handled by the conflict flow (5.8).
 
 ### Open questions (for the owner)
 
-- **Q1.** New project name (#78). Blocks D4 step 2, not Phase 1 code. **Open.**
+- **Q1.** *Answered (2026-10-05):* keep the repository name `mt5-web-replicator` for now. The new EAs and the server get new names (not `Imentore*`), decided when the new EA is written in Phase 1; #78 stays open for that.
 - **Q2.** *Answered:* v1/v2/v3 retired as copy backend; Rails endpoints kept until Phase 3.
 - **Q3.** *Moot:* no installed EAs.
 - **Q4.** *Approved:* pairwise `copy_links` inside `copy_groups`.
@@ -714,9 +835,9 @@ v1/v2/v3 are retired as the copy backend at Phase 1; the Rails endpoints remain 
 - **Q6.** *Answered:* keep `/v4/logs` with 256 KB cap, 7 d retention and daily byte quota.
 - **Q7.** *Answered:* Phase 1 reversal = close then open (OD4); hedging partials mirrored, netting reductions mirrored, increases drift-only (OD5). Proportional netting model in Phase 2.
 - **Q8.** *Answered:* below minimum → skip by default; `open_min` opt-in per link; contract-size factor.
-- **Q9.** Admin UI: a few server-rendered pages, or API/CLI only until Rails? **Open.**
-- **Q10.** Reuse StockInstaller for the copy EAs, or manual install until Phase 2? **Open.**
-- **Q11.** Migrate the MT5Dividend license server to this token model later, or keep separate? **Open.**
+- **Q9.** *Answered (2026-10-05):* a minimal server-rendered admin inside the Python server (FastAPI + simple templates, no SPA): accounts, links and per-link parameters (multiplier, symbol maps, magic, max entry deviation), enrollment code generation, events/EA log viewer with filters, copy states (open/error/suspended/uncertain) and the resolution actions of 5.8. Customers, plans and billing stay in the optional Rails app.
+- **Q10.** *Answered (2026-10-05):* manual installation in Phase 1; StockInstaller reused later (Phase 2+).
+- **Q11.** *Answered (2026-10-05):* reuse the owner's `mt5-license-server` (FastAPI, `brenoperucchi/mt5-license-server`) token model as the shared license/token service, after fixing it: per-account tokens instead of the shared `SERVER_SECRET` compiled into EAs, authenticated admin routes, and DB persistence instead of in-memory/JSON storage. The copier and the owner's other EAs can share it.
 - **Q12.** *Answered (OD8):* fast close by history exit deal; absence K=3 and T ≥ 60 s, never while disconnected, mass guard 300 s.
 - **Q13.** *Approved:* raw 48 h, results/events 30 d, logs 7 d, daily quotas; token-bearing responses never stored; active obligations never pruned.
 
@@ -735,7 +856,7 @@ v1/v2/v3 are retired as the copy backend at Phase 1; the Rails endpoints remain 
 | D7 | Deploy/config | Single image, compose, env-only, TLS at proxy |
 | D8 | Auth | Enrollment code → per-account token; two-step rotation; token responses never stored |
 | D9 | Symbol mapping | Server-side only, unique per slave and per global symbol |
-| D10 | Conciliation | By `command_id` / `position_id` / deal; adoption by comment + magic for copies without `position_id` |
+| D10 | Conciliation | By `command_id` / `position_id` / deal; adoption by comment `c<copy_id>` + magic for copies without `position_id`; weak matching diagnostic only; conflicts via `symbol_conflicts` |
 | D11 | Rails contract | Webhooks out, admin API in; billing = suspension (drain); v1–v3 removed in Phase 3 |
 
 ---
