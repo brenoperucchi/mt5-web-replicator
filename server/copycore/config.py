@@ -44,6 +44,8 @@ class Settings(BaseSettings):
 
     open_ttl_seconds: int = Field(default=30, ge=1)
     master_stale_seconds: int = Field(default=120, ge=1)
+    # Receipt-ack lease of an `in_progress` command before it is re-delivered (4.5, C2).
+    command_lease_seconds: int = Field(default=120, ge=1)
 
     # Retention and quotas (5.9)
     raw_snapshot_retention_h: int = 48

@@ -30,6 +30,7 @@ class AccountPatch(BaseModel):
     status: Literal["active", "suspended"] | None = None
     suspended_reason: str | None = Field(default=None, max_length=255)
     label: str | None = Field(default=None, max_length=128)
+    exclude_copier_positions: bool | None = None
 
 
 def account_json(a: Account) -> dict:
@@ -37,7 +38,7 @@ def account_json(a: Account) -> dict:
         "id": a.id, "broker_server": a.broker_server, "login": a.login, "role": a.role,
         "margin_mode": a.margin_mode, "label": a.label, "status": a.status,
         "suspended_reason": a.suspended_reason, "ea_version": a.ea_version,
-        "enrolled": a.token_hash is not None,
+        "enrolled": a.token_hash is not None, "exclude_copier_positions": a.exclude_copier_positions,
         "last_seen_at": a.last_seen_at.isoformat() if a.last_seen_at else None,
     }
 
@@ -134,6 +135,8 @@ def patch_account(account_id: int, body: AccountPatch, request: Request):
                         payload={"account_id": acct.id}))
         if body.label is not None:
             acct.label = body.label
+        if body.exclude_copier_positions is not None:
+            acct.exclude_copier_positions = body.exclude_copier_positions
         return json_response(account_json(acct))
 
     return uow(request, work)
