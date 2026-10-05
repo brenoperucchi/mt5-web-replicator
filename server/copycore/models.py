@@ -225,7 +225,10 @@ class MasterPosition(Base):
 class Copy(Base):
     __tablename__ = "copies"
     __table_args__ = (
-        UniqueConstraint("link_id", "master_position_id"),
+        # One copy per (link, master position); a `superseded` duplicate sibling (5.8, S52) shares
+        # the pair with the copy it duplicates, so it is outside the constraint.
+        Index("uq_copies_link_master_position", "link_id", "master_position_id", unique=True,
+              sqlite_where=text("state <> 'superseded'"), postgresql_where=text("state <> 'superseded'")),
         # Netting reservation: one exposed copy per (slave, symbol) (5.2).
         Index(
             "uq_copies_netting_slot", "slave_id", "symbol_local", unique=True,

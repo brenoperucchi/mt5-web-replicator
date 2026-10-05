@@ -83,8 +83,7 @@ def test_ack_unknown_or_foreign_commands(cp):
     assert r.json()["unknown"] == [c["command_id"]]
     assert cp.ack(s1, "c_nope").json()["unknown"] == ["c_nope"]
     assert cp.ack(s1, c["command_id"], copy_id=c["copy_id"] + 999).json()["unknown"] == [c["command_id"]]
-    r = cp.ack(s1, c["command_id"], status="done")  # terminal results arrive in the results PR
-    assert r.status_code == 422 and r.json()["error"] == "result_status_not_supported"
+    assert cp.ack(s1, c["command_id"], status="bogus").status_code == 422  # unknown status: EA keeps it
 
 
 def test_open_expires_before_delivery_only(cp, app):

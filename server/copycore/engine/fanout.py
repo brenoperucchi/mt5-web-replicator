@@ -133,6 +133,59 @@ def _skip(s: Session, copy: Copy, reason: str, event: str, stats: dict, **extra)
     return copy
 
 
+def policy_check(s: Session, master: Account, mp: MasterPosition, link: CopyLink, group: CopyGroup,
+                 slave: Account, symbol_local: str, gated) -> tuple[Decimal | None, tuple[str, str, dict] | None]:
+    """Filters, drain, specs, contract size, lot policy and open symbol conflicts (5.3, 5.4, 5.8).
+
+    Returns `(volume, None)` when the copy may open, else `(None, (skip_reason, event_type, extra))`.
+    Used at fan-out and again when a blocked successor is promoted (C5/C6 revalidation)."""
+    # Filters (group = Rails trace): magic allow-list, master symbol allow-list.
+    if group.magic_allow and mp.magic not in group.magic_allow:
+        return None, ("filtered_magic", "copy.skipped", {})
+    if group.symbol_filter and mp.symbol not in group.symbol_filter:
+        return None, ("filtered_symbol", "copy.skipped", {})
+    if account_drained(slave, gated(slave)):
+        return None, ("account_drain", "copy.skipped", {})
+
+    sspec = s.get(SymbolSpec, (slave.id, symbol_local))
+    mspec = s.get(SymbolSpec, (master.id, mp.symbol))
+    if sspec is None:
+        return None, ("missing_symbol_spec", "copy.skipped", {"symbol": symbol_local})
+    mcs, scs = (mspec.contract_size if mspec else None), sspec.contract_size
+    if (link.lot_mode in ("master", "multiplier") and mcs and scs and Decimal(mcs) != Decimal(scs)
+            and not link.allow_contract_size_diff):
+        return None, ("contract_size_mismatch", "copy.skipped",
+                      {"master_contract_size": str(mcs), "slave_contract_size": str(scs)})
+    lot = calc_lot(lot_mode=link.lot_mode, lot_value=link.lot_value, master_volume=mp.volume,
+                   below_min=link.below_min, volume_min=sspec.volume_min, volume_step=sspec.volume_step,
+                   volume_max=sspec.volume_max, master_contract_size=mcs, slave_contract_size=scs)
+    if lot.volume is None:
+        event = "copy.skipped_below_min" if lot.skip_reason == "below_min" else "copy.skipped"
+        return None, (lot.skip_reason or "lot", event, {"raw": str(lot.raw) if lot.raw is not None else None})
+
+    # Open symbol conflict blocks new opens on that slave symbol (5.8, C8).
+    conflict = open_conflict(s, slave.id, symbol_local)
+    if conflict is not None:
+        return None, ("netting_conflict", "copy.skipped_netting_conflict", {"symbol_conflict": conflict})
+    return lot.volume, None
+
+
+def open_conflict(s: Session, slave_id: int, symbol_local: str) -> int | None:
+    return s.scalar(select(SymbolConflict.id).where(
+        SymbolConflict.slave_id == slave_id, SymbolConflict.symbol_local == symbol_local,
+        SymbolConflict.resolved_at.is_(None)).limit(1))
+
+
+def slot_holder(s: Session, slave_id: int, symbol_local: str, exclude_id: int | None = None) -> Copy | None:
+    """The copy holding the netting reservation of (slave, symbol), if any (5.2)."""
+    q = select(Copy).where(
+        Copy.slave_id == slave_id, Copy.symbol_local == symbol_local, Copy.slave_margin_mode == "netting",
+        Copy.state.in_(NETTING_RESERVING) | ((Copy.state == "superseded") & Copy.close_intent))
+    if exclude_id is not None:
+        q = q.where(Copy.id != exclude_id)
+    return s.scalar(q.limit(1))
+
+
 def fan_out_one(s: Session, master: Account, mp: MasterPosition, pair: tuple[CopyLink, CopyGroup], *,
                 open_ttl_seconds: int, gated, stats: dict) -> Copy | None:
     link, group = pair
@@ -148,43 +201,14 @@ def fan_out_one(s: Session, master: Account, mp: MasterPosition, pair: tuple[Cop
     copy = Copy(link_id=link.id, master_position_id=mp.id, slave_id=slave.id, slave_margin_mode=slave.margin_mode,
                 symbol_master=mp.symbol, symbol_local=symbol_local, state="pending")
 
-    # Filters (group = Rails trace): magic allow-list, master symbol allow-list.
-    if group.magic_allow and mp.magic not in group.magic_allow:
-        return _skip(s, copy, "filtered_magic", "copy.skipped", stats)
-    if group.symbol_filter and mp.symbol not in group.symbol_filter:
-        return _skip(s, copy, "filtered_symbol", "copy.skipped", stats)
-    if account_drained(slave, gated(slave)):
-        return _skip(s, copy, "account_drain", "copy.skipped", stats)
-
-    sspec = s.get(SymbolSpec, (slave.id, symbol_local))
-    mspec = s.get(SymbolSpec, (master.id, mp.symbol))
-    if sspec is None:
-        return _skip(s, copy, "missing_symbol_spec", "copy.skipped", stats, symbol=symbol_local)
-    mcs, scs = (mspec.contract_size if mspec else None), sspec.contract_size
-    if (link.lot_mode in ("master", "multiplier") and mcs and scs and Decimal(mcs) != Decimal(scs)
-            and not link.allow_contract_size_diff):
-        return _skip(s, copy, "contract_size_mismatch", "copy.skipped", stats,
-                     master_contract_size=str(mcs), slave_contract_size=str(scs))
-    lot = calc_lot(lot_mode=link.lot_mode, lot_value=link.lot_value, master_volume=mp.volume,
-                   below_min=link.below_min, volume_min=sspec.volume_min, volume_step=sspec.volume_step,
-                   volume_max=sspec.volume_max, master_contract_size=mcs, slave_contract_size=scs)
-    if lot.volume is None:
-        event = "copy.skipped_below_min" if lot.skip_reason == "below_min" else "copy.skipped"
-        return _skip(s, copy, lot.skip_reason or "lot", event, stats,
-                     raw=str(lot.raw) if lot.raw is not None else None)
-    copy.volume = copy.opened_volume = lot.volume
-
-    # Open symbol conflict blocks new opens on that slave symbol (5.8, C8).
-    conflict = s.scalar(select(SymbolConflict.id).where(
-        SymbolConflict.slave_id == slave.id, SymbolConflict.symbol_local == symbol_local,
-        SymbolConflict.resolved_at.is_(None)).limit(1))
-    if conflict is not None:
-        return _skip(s, copy, "netting_conflict", "copy.skipped_netting_conflict", stats, symbol_conflict=conflict)
+    volume, skip = policy_check(s, master, mp, link, group, slave, symbol_local, gated)
+    if skip is not None:
+        reason, event, extra = skip
+        return _skip(s, copy, reason, event, stats, **extra)
+    copy.volume = copy.opened_volume = volume
 
     if slave.margin_mode == "netting":
-        holder = s.scalar(select(Copy).where(
-            Copy.slave_id == slave.id, Copy.symbol_local == symbol_local, Copy.slave_margin_mode == "netting",
-            Copy.state.in_(NETTING_RESERVING) | ((Copy.state == "superseded") & Copy.close_intent)).limit(1))
+        holder = slot_holder(s, slave.id, symbol_local)
         if holder is not None:
             if holder.link_id == link.id and holder.state in LEAVING_SLOT:
                 copy.state = "pending_blocked"
@@ -195,7 +219,7 @@ def fan_out_one(s: Session, master: Account, mp: MasterPosition, pair: tuple[Cop
                 s.add(Event(type="copy.pending_blocked", payload={"copy_id": copy.id, "blocked_by": holder.id}))
                 stats["copies"] += 1
                 stats["blocked"] += 1
-                # TODO(PR: netting successor): promotion on zero-exposure proof of `holder` (C5).
+                # Promoted by lifecycle.promote_successors once `holder` proves zero exposure (C5).
                 return copy
             return _skip(s, copy, "netting_conflict", "copy.skipped_netting_conflict", stats,
                          blocking_copy_id=holder.id, symbol=symbol_local)
@@ -211,22 +235,28 @@ def fan_out_one(s: Session, master: Account, mp: MasterPosition, pair: tuple[Cop
                     slave_margin_mode=slave.margin_mode, symbol_master=mp.symbol, symbol_local=symbol_local)
         return _skip(s, copy, "netting_conflict", "copy.skipped_netting_conflict", stats, symbol=symbol_local)
 
-    exec_params = {
-        "symbol": symbol_local, "side": mp.type, "volume": str(lot.volume), "magic": magic,
+    issue_open(s, copy, mp, link, volume, magic=magic, ttl_seconds=open_ttl_seconds)
+    stats["copies"] += 1
+    stats["opens"] += 1
+    return copy
+
+
+def issue_open(s: Session, copy: Copy, mp: MasterPosition, link: CopyLink, volume: Decimal, *, magic: int | None,
+               ttl_seconds: int):
+    """Freeze execution params on the copy and issue its `open` (4.4, C6)."""
+    copy.exec_params = {
+        "symbol": copy.symbol_local, "side": mp.type, "volume": str(volume), "magic": magic,
         "comment": f"c{copy.id}", "max_slippage_points": link.max_slippage_points,
         "max_entry_deviation_points": link.max_entry_deviation_points,
         "master_price": str(mp.price_open) if mp.price_open is not None else None,
     }
-    copy.exec_params = exec_params
     cmd = cmds.issue(s, copy, "open", {
-        "symbol": symbol_local, "side": mp.type, "volume": lot.volume, "master_price": mp.price_open,
+        "symbol": copy.symbol_local, "side": mp.type, "volume": volume, "master_price": mp.price_open,
         "sl": copy.sl, "tp": copy.tp, "max_slippage_points": link.max_slippage_points,
         "max_entry_deviation_points": link.max_entry_deviation_points, "position_id": None,
         "magic": magic, "comment": f"c{copy.id}",
-    }, ttl_seconds=open_ttl_seconds)
+    }, ttl_seconds=ttl_seconds)
     s.add(Event(type="copy.pending", payload={"copy_id": copy.id, "command_id": cmd.id, "link_id": link.id,
-                                              "slave_id": slave.id, "symbol": symbol_local,
-                                              "volume": str(lot.volume)}))
-    stats["copies"] += 1
-    stats["opens"] += 1
-    return copy
+                                              "slave_id": copy.slave_id, "symbol": copy.symbol_local,
+                                              "volume": str(volume)}))
+    return cmd
