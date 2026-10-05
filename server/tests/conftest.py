@@ -32,6 +32,7 @@ def engine(db_url):
     Base.metadata.drop_all(eng)
     Base.metadata.create_all(eng)
     yield eng
+    Base.metadata.drop_all(eng)  # leave a shared Postgres database empty
     eng.dispose()
 
 
