@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from .. import idempotency as idem
 from ..auth import authenticate, aware, pending_expired, version_gated
 from ..deps import settings_of, uow
+from ..engine.master import send_history_wanted
 from ..engine.validation import revalidate_account_links
 from ..errors import ApiError, json_response
 from ..models import Account, Copy, EnrollCode, SymbolSpec, utcnow
@@ -169,7 +170,7 @@ def get_config(request: Request):
             "message": message,
             "poll_ms": settings.poll_ms,
             "debug": False,
-            "send_history": False,
+            "send_history": acct.role == "master" and send_history_wanted(s, acct.id),
             "symbols_wanted": symbols_wanted(s, acct),
             "min_ea_version": settings.min_ea_version,
         })

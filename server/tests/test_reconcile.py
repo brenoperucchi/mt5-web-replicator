@@ -9,7 +9,7 @@ from sqlalchemy import select
 from copycore.models import Command, Copy, Event, MasterPosition, SymbolConflict, utcnow
 
 from .copyhelpers import deal, pos
-from .test_results import copy_of, done, master_closes, opened, res, setup
+from .test_results import copy_of, done, opened, res, setup
 
 
 def events(app, type_):
@@ -200,7 +200,7 @@ def test_s21_slave_sl_hit_closes_without_command(cp, app):
     got = copy_of(cp, o["copy_id"])
     assert (got["state"], got["close_reason"], got["close_deal"]) == ("closed", "slave_sl", 31)
     assert cp.poll(sl)["commands"] == []
-    master_closes(app, o["copy_id"])  # master closes later: no close for a closed copy
+    cp.close_master(master, 1)  # master closes later: no close for a closed copy
     assert cp.poll(sl)["commands"] == [] and copy_of(cp, o["copy_id"])["state"] == "closed"
 
 
@@ -220,8 +220,7 @@ def test_s29_close_position_not_found(cp, app):
     o1 = opened(cp, master, s1)
     o2 = next(x for x in cp.poll(s2)["commands"])
     cp.results(s2, [done(o2, 7101)])
-    for o in (o1, o2):
-        master_closes(app, o["copy_id"])
+    cp.close_master(master, 1)
     (k1,) = cp.poll(s1)["commands"]
     (k2,) = cp.poll(s2)["commands"]
     cp.results(s1, [res(k1, "failed", error_code="position_not_found")])
@@ -241,8 +240,7 @@ def test_s29_close_position_not_found(cp, app):
 def _close_then_reopen(cp, app):
     master, (sl,) = setup(cp, master_margin="netting", slave_margin="netting")
     o = opened(cp, master, sl)
-    master_closes(app, o["copy_id"])
-    cp.snapshot(master, [pos(2)])
+    cp.close_master(master, 1, keep=[pos(2)])  # close-then-reopen in one snapshot
     blocked = max(cp.copies(), key=lambda c: c["id"])
     assert (blocked["state"], blocked["blocked_by"]) == ("pending_blocked", o["copy_id"])
     (close,) = cp.poll(sl)["commands"]

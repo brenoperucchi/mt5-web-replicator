@@ -1,7 +1,6 @@
 """Command results, retry policy and journal replay (design 4.5, 4.6, 5.5, 5.7; C2, C3).
 
-Master close detection lands in a later PR: `master_closes` below applies the 5.5 "master closed"
-transitions directly with the engine so result handling can be exercised now.
+Master closes are driven by real master snapshots (fast path: position gone + `out` deal, 5.6).
 """
 
 from __future__ import annotations
@@ -12,7 +11,6 @@ from decimal import Decimal
 from sqlalchemy import select
 
 from copycore.engine import commands as cmds
-from copycore.engine.lifecycle import issue_close
 from copycore.models import Command, CommandAttempt, Copy, Event, MasterPosition, utcnow
 
 from .copyhelpers import pos
@@ -45,21 +43,6 @@ def done(c, position_id=7001, **kw):
 def res(c, status, **kw):
     return {"command_id": c["command_id"], "attempt_id": c["attempt_id"], "copy_id": c["copy_id"],
             "status": status, **kw}
-
-
-def master_closes(app, copy_id):
-    """5.5 'master closed' transitions (PR 4 will drive them from master snapshots)."""
-    with app.state.sessionmaker() as s:
-        copy = s.get(Copy, copy_id)
-        s.get(MasterPosition, copy.master_position_id).state = "closed"
-        if copy.state == "open":
-            issue_close(s, copy, "master_closed")
-        elif copy.state == "pending":
-            copy.state = "cancel_requested"
-            cmds.issue(s, copy, "cancel", {"position_id": None, "symbol": copy.symbol_local})
-        elif copy.state == "uncertain":
-            copy.close_intent = True
-        s.commit()
 
 
 def opened(cp, master, sl, position_id=1, result_pid=7001):
@@ -189,7 +172,7 @@ def test_open_done_after_cancel_requested_closes(cp, app):
     master, (sl,) = setup(cp)
     cp.snapshot(master, [pos(1)])
     (c,) = cp.poll(sl)["commands"]
-    master_closes(app, c["copy_id"])
+    cp.close_master(master, 1)
     assert copy_of(cp, c["copy_id"])["state"] == "cancel_requested"
     cp.results(sl, [done(c)])
     assert copy_of(cp, c["copy_id"])["state"] == "closing"
@@ -201,7 +184,7 @@ def test_s05_cancel_after_execution_reports_closed(cp, app):
     master, (sl,) = setup(cp)
     cp.snapshot(master, [pos(1)])
     (o,) = cp.poll(sl)["commands"]
-    master_closes(app, o["copy_id"])
+    cp.close_master(master, 1)
     (cancel,) = [x for x in cp.poll(sl)["commands"] if x["action"] == "cancel"]
     cp.results(sl, [res(cancel, "closed", position_id=7001, deal=99, price=1.2, profit=5.5)])
     got = copy_of(cp, o["copy_id"])
@@ -215,7 +198,7 @@ def test_cancel_not_executed_cancels(cp, app):
     master, (sl,) = setup(cp)
     cp.snapshot(master, [pos(1)])
     (o,) = cp.poll(sl)["commands"]
-    master_closes(app, o["copy_id"])
+    cp.close_master(master, 1)
     (cancel,) = [x for x in cp.poll(sl)["commands"] if x["action"] == "cancel"]
     cp.results(sl, [res(cancel, "not_executed")])
     assert copy_of(cp, o["copy_id"])["state"] == "cancelled"
@@ -229,7 +212,7 @@ def test_s08_s35_close_market_closed_retries_with_new_attempt(cp, app):
     the old attempt's replay is a no-op; the new attempt closes for real."""
     master, (sl,) = setup(cp, master_margin="netting", slave_margin="netting")
     o = opened(cp, master, sl)
-    master_closes(app, o["copy_id"])
+    cp.close_master(master, 1)
     (close,) = cp.poll(sl)["commands"]
     out = cp.results(sl, [res(close, "failed", error_code="MARKET_CLOSED")])
     assert out["applied"] == 1
@@ -252,7 +235,7 @@ def test_s08_s35_close_market_closed_retries_with_new_attempt(cp, app):
 def test_s37_done_partial_on_close_keeps_closing_and_reissues_rest(cp, app):
     master, (sl,) = setup(cp)
     o = opened(cp, master, sl)
-    master_closes(app, o["copy_id"])
+    cp.close_master(master, 1)
     (close,) = cp.poll(sl)["commands"]
     cp.results(sl, [res(close, "done_partial", executed_volume=0.6, residual_volume=0.4, deal=55)])
     got = copy_of(cp, o["copy_id"])
@@ -270,8 +253,7 @@ def test_s41_uncertain_is_per_copy(cp, app):
     a, b = cp.poll(sl)["commands"]
     cp.results(sl, [res(a, "uncertain", message="no answer while disconnected"), done(b, 7002)])
     assert copy_of(cp, a["copy_id"])["state"] == "uncertain"
-    master_closes(app, a["copy_id"])
-    master_closes(app, b["copy_id"])
+    cp.close_master(master, 1, 2)
     polled = cp.poll(sl)["commands"]
     assert [(x["action"], x["copy_id"]) for x in polled] == [("close", b["copy_id"])]
     got = copy_of(cp, a["copy_id"])

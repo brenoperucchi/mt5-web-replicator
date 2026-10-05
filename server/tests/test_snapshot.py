@@ -271,17 +271,16 @@ def test_netting_close_then_reopen_is_pending_blocked(cp, app):
     sl = cp.account("slave", 601, "netting")
     cp.link(cp.group(master["id"])["id"], sl["id"])
     cp.snapshot(master, [pos(1)])
-    with app.state.sessionmaker() as s:  # the close path lands in a later PR: put the copy in closing
-        c = s.scalars(select(Copy)).one()
-        c.state = "closing"
-        mp = s.get(MasterPosition, c.master_position_id)
-        mp.state = "closed"
-        s.commit()
-        first_id = c.id
+    (o,) = cp.poll(sl)["commands"]
+    cp.results(sl, [{"command_id": o["command_id"], "attempt_id": o["attempt_id"], "copy_id": o["copy_id"],
+                     "status": "done", "position_id": 7001, "volume": 1.0}])
+    cp.close_master(master, 1)
+    first_id = o["copy_id"]
+    assert next(c for c in cp.copies() if c["id"] == first_id)["state"] == "closing"
     cp.snapshot(master, [pos(2)])
     blocked = [c for c in cp.copies() if c["id"] != first_id]
     assert [(c["state"], c["blocked_by"]) for c in blocked] == [("pending_blocked", first_id)]
-    assert count(app, Command) == 1  # no open for the blocked copy
+    assert count(app, Command, Command.action == "open") == 1  # no open for the blocked copy
 
 
 def test_exclude_copier_positions(cp, app):

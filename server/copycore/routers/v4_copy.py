@@ -1,5 +1,6 @@
 """v4 copy endpoints: sessions, symbol specs, master snapshot, command delivery (PR 2), command
-results, slave snapshot reconciliation and adoption (PR 3) (design 4.3-4.6, 5.5-5.8).
+results, slave snapshot reconciliation and adoption (PR 3), master close detection, partial
+reductions, reversal and SL/TP modify (PR 4) (design 4.3-4.6, 5.4-5.8).
 
 Mutating calls require `Idempotency-Key` and run as one unit of work (retried as a whole on
 SQLITE_BUSY). The unit of work runs in the threadpool so concurrent requests serialize on the
@@ -25,8 +26,9 @@ from ..auth import authenticate, version_gated
 from ..deps import settings_of, uow
 from ..engine import commands as cmds
 from ..engine import raw as rawstore
-from ..engine.fanout import PositionData, process_master_positions
+from ..engine.fanout import PositionData
 from ..engine.lifecycle import Ctx
+from ..engine.master import CloseRules, process_master_snapshot
 from ..engine.reconcile import reconcile_slave
 from ..engine.results import apply_results
 from ..errors import ApiError, json_response
@@ -88,7 +90,7 @@ class SnapshotIn(BaseModel):
     positions: list[PositionIn] = Field(default_factory=list, max_length=2000)
     # Reported but ignored for fan-out in Phase 1 (5.3a).
     pending: list[dict[str, Any]] = Field(default_factory=list, max_length=2000)
-    # TODO(PR: close detection): exit deals → fast close, processed_deals dedup (5.4, 5.6).
+    # Exit/inout deals: fast close, reversal and processed_deals dedup (5.4, 5.6).
     history: list[dict[str, Any]] = Field(default_factory=list, max_length=5000)
 
 
@@ -270,16 +272,18 @@ async def master_snapshot(body: SnapshotIn, request: Request):
         stats: dict = {}
         if body.connected:
             fan_out = acct.status != "suspended" and not version_gated(acct, settings)
-            stats = process_master_positions(
-                s, acct, positions, open_ttl_seconds=settings.open_ttl_seconds, fan_out=fan_out,
-                gated=lambda a: version_gated(a, settings))
-        # connected=false: seq advances but positions are not acted on (5.6: a disconnected
-        # terminal's view is not evidence); the next connected snapshot carries them again.
+            stats = process_master_snapshot(
+                s, acct, positions, body.history, history_synced=body.history_synced,
+                ea_clock_offset_ms=body.ea_clock_offset_ms, fan_out=fan_out, rules=_close_rules(settings),
+                ctx=_ctx(settings, clock=request.app.state.clock))
+        # connected=false: seq advances but positions are not acted on and absence is neither counted
+        # nor reset (5.6: a disconnected terminal's view is not evidence).
 
         state = {"connected": body.connected, "positions": sorted(
             (p.position_id, p.position_ticket, p.symbol, p.type, str(p.volume), str(p.sl), str(p.tp))
             for p in body.positions),
-            "pending": sorted(str(sorted(o.items())) for o in body.pending)}
+            "pending": sorted(str(sorted(o.items())) for o in body.pending),
+            "deals": sorted(str(h.get("deal")) for h in body.history)}
         rawstore.store_snapshot_raw(s, account_id=acct.id, kind="master_snapshot", body=raw_body, state=state,
                                     quota_mb=settings.raw_daily_quota_mb)
         resp = {"accepted": True, "seq": body.seq, **({"fanout": stats} if stats else {})}
@@ -310,9 +314,17 @@ async def slave_commands(request: Request, after: str | None = None):
     return await run_in_threadpool(uow, request, work)
 
 
-def _ctx(settings, now: datetime | None = None) -> Ctx:
+def _ctx(settings, now: datetime | None = None, clock=None) -> Ctx:
     return Ctx(open_ttl_seconds=settings.open_ttl_seconds, lease_seconds=settings.command_lease_seconds,
-               gated=lambda a: version_gated(a, settings), now=now or utcnow())
+               gated=lambda a: version_gated(a, settings), now=now or utcnow(),
+               mono=clock.monotonic() if clock is not None else 0.0,
+               server_epoch=clock.epoch if clock is not None else "")
+
+
+def _close_rules(settings) -> CloseRules:
+    return CloseRules(absent_snapshots=settings.close_absent_snapshots,
+                      absent_seconds=settings.close_absent_seconds, mass_min=settings.mass_disappear_min,
+                      mass_seconds=settings.mass_disappear_seconds)
 
 
 @router.post("/slave/results")

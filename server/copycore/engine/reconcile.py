@@ -72,6 +72,7 @@ class Deal:
     fee: Decimal | None
     magic: int | None
     comment: str
+    time_msc: int | None = None
 
     @classmethod
     def parse(cls, d: dict[str, Any]) -> Deal | None:
@@ -84,7 +85,7 @@ class Deal:
                    reason=str(d["reason"]).lower() if d.get("reason") is not None else None,
                    volume=_dec(d.get("volume")), price=_dec(d.get("price")), profit=_dec(d.get("profit")),
                    fee=sum(fee, Decimal(0)) if fee else None, magic=_int(d.get("magic")),
-                   comment=str(d.get("comment") or ""))
+                   comment=str(d.get("comment") or ""), time_msc=_int(d.get("time_msc")))
 
 
 def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], history: list[dict[str, Any]], *,
