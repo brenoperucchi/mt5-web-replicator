@@ -14,8 +14,9 @@ from sqlalchemy.orm import Session
 from .. import idempotency as idem
 from ..auth import authenticate, aware, pending_expired, version_gated
 from ..deps import settings_of, uow
+from ..engine.validation import revalidate_account_links
 from ..errors import ApiError, json_response
-from ..models import Account, EnrollCode, utcnow
+from ..models import Account, Copy, EnrollCode, SymbolSpec, utcnow
 from ..security import hmac_hex, new_token, normalize_code, normalize_server
 
 router = APIRouter(prefix="/v4")
@@ -77,6 +78,8 @@ async def enroll(body: EnrollIn, request: Request):
         if acct.status == "revoked":
             acct.status = "active"  # the admin issued a new code after revocation
         code.issued_at = now
+        s.flush()
+        revalidate_account_links(s, acct)  # margin_mode now known (5.3, S10)
         code.issued_token_hash = th
         idem.record(s, account_id=acct.id, key=key, route="/v4/enroll", req_hash=req_hash,
                     status_code=201, response=None, token_bearing=True)
@@ -137,6 +140,15 @@ async def confirm(body: ConfirmIn, request: Request):
     return uow(request, work)
 
 
+def symbols_wanted(s: Session, acct: Account) -> list[str]:
+    """Slave symbols a copy was skipped for because their spec is missing (5.4)."""
+    if acct.role != "slave":
+        return []
+    rows = s.scalars(select(Copy.symbol_local).where(
+        Copy.slave_id == acct.id, Copy.skip_reason == "missing_symbol_spec").distinct())
+    return sorted(sym for sym in rows if s.get(SymbolSpec, (acct.id, sym)) is None)
+
+
 @router.get("/config")
 def get_config(request: Request):
     settings = settings_of(request)
@@ -158,7 +170,7 @@ def get_config(request: Request):
             "poll_ms": settings.poll_ms,
             "debug": False,
             "send_history": False,
-            "symbols_wanted": [],
+            "symbols_wanted": symbols_wanted(s, acct),
             "min_ea_version": settings.min_ea_version,
         })
 

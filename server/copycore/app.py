@@ -11,7 +11,7 @@ from . import __version__
 from .config import Settings, get_settings
 from .db import make_engine, make_sessionmaker
 from .errors import install_handlers, server_time_ms
-from .routers import admin, health, v4
+from .routers import admin, admin_copy, health, v4, v4_copy
 from .security import install_log_redaction
 
 log = logging.getLogger("copycore")
@@ -37,7 +37,9 @@ def create_app(settings: Settings | None = None, engine=None) -> FastAPI:
     install_handlers(app)
     app.include_router(health.router)
     app.include_router(v4.router)
+    app.include_router(v4_copy.router)
     app.include_router(admin.router)
+    app.include_router(admin_copy.router)
     log.info("copy server %s started (env=%s, db=%s)", __version__, settings.env,
              "sqlite" if settings.is_sqlite else "postgres")
     return app

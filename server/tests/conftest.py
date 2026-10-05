@@ -98,3 +98,9 @@ class Api:
 @pytest.fixture
 def api(client):
     return Api(client)
+
+
+@pytest.fixture
+def cp(api, client):
+    from .copyhelpers import Copier
+    return Copier(api, client)
