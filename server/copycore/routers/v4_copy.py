@@ -1,5 +1,5 @@
-"""v4 copy endpoints (Phase 1 / PR 2): sessions, symbol specs, master snapshot, command delivery
-and the `in_progress` receipt ack (design 4.3-4.5, 5.6, 5.7).
+"""v4 copy endpoints: sessions, symbol specs, master snapshot, command delivery (PR 2), command
+results, slave snapshot reconciliation and adoption (PR 3) (design 4.3-4.6, 5.5-5.8).
 
 Mutating calls require `Idempotency-Key` and run as one unit of work (retried as a whole on
 SQLITE_BUSY). The unit of work runs in the threadpool so concurrent requests serialize on the
@@ -26,6 +26,9 @@ from ..deps import settings_of, uow
 from ..engine import commands as cmds
 from ..engine import raw as rawstore
 from ..engine.fanout import PositionData, process_master_positions
+from ..engine.lifecycle import Ctx
+from ..engine.reconcile import reconcile_slave
+from ..engine.results import apply_results
 from ..errors import ApiError, json_response
 from ..models import Account, Event, SessionRow, SymbolSpec, utcnow
 from ..security import normalize_server
@@ -89,11 +92,37 @@ class SnapshotIn(BaseModel):
     history: list[dict[str, Any]] = Field(default_factory=list, max_length=5000)
 
 
+ResultStatus = Literal["in_progress", "done", "done_partial", "closed", "failed", "expired", "not_executed",
+                       "uncertain", "skipped", "notmodify"]
+
+
 class ResultIn(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    """One journal result (4.3, 4.6). `attempt_id` defaults to the command's current attempt."""
+
+    model_config = ConfigDict(extra="ignore")
     command_id: str = Field(min_length=1, max_length=40)
+    attempt_id: str | None = Field(default=None, max_length=40)
     copy_id: int | None = None
-    status: str = Field(min_length=1, max_length=32)
+    status: ResultStatus
+    order: int | None = None
+    deal: int | None = None
+    request_id: int | None = None
+    position_ticket: int | None = None
+    position_id: int | None = None
+    symbol: str | None = Field(default=None, max_length=64)
+    volume: Decimal | None = None
+    executed_volume: Decimal | None = None
+    residual_volume: Decimal | None = None
+    price: Decimal | None = None
+    sl: Decimal | None = None
+    tp: Decimal | None = None
+    profit: Decimal | None = None
+    commission: Decimal | None = None
+    swap: Decimal | None = None
+    close_reason: str | None = Field(default=None, max_length=64)
+    executed_at: int | None = None
+    error_code: str | None = Field(default=None, max_length=64)
+    message: str | None = Field(default=None, max_length=512)
 
 
 class ResultsIn(BaseModel):
@@ -189,6 +218,34 @@ def _session_problem(s: Session, acct: Account, body: SnapshotIn) -> str | None:
     return None
 
 
+def _snapshot_refusal(s: Session, acct: Account, body: SnapshotIn, route: str, raw_body: bytes, settings,
+                      key: str, req_hash: str):
+    """Login/server check (409 account_mismatch), session fencing (409 stale_session) and seq
+    ordering (200 accepted:false), shared by master and slave snapshots (4.3, 5.6)."""
+    if body.login != acct.login or normalize_server(body.server) != acct.broker_server_norm:
+        # 409, no snapshot state stored; the error is deduplicated by signature (5.9).
+        rawstore.record_error(s, account_id=acct.id, route=route, error_class="account_mismatch",
+                              cause=f"{body.login}@{normalize_server(body.server)}", body=raw_body,
+                              quota_mb=settings.raw_daily_quota_mb)
+        s.add(Event(type="account.mismatch", payload={"account_id": acct.id, "login": body.login,
+                                                      "server": body.server}))
+        return ApiError(409, "account_mismatch",
+                        "snapshot login/server differ from the token's account").response()
+
+    if (problem := _session_problem(s, acct, body)) is not None:
+        rawstore.record_error(s, account_id=acct.id, route=route, error_class="stale_session",
+                              cause=problem, body=raw_body, quota_mb=settings.raw_daily_quota_mb)
+        return ApiError(409, "stale_session", f"{problem}: request a new session").response()
+
+    if body.seq <= (acct.last_seq or 0):
+        resp = {"accepted": False, "seq": acct.last_seq}
+        idem.record(s, account_id=acct.id, key=key, route=route, req_hash=req_hash, status_code=200,
+                    response=resp, token_bearing=False)
+        return json_response(resp)
+
+    return None
+
+
 @router.post("/master/snapshot")
 async def master_snapshot(body: SnapshotIn, request: Request):
     settings = settings_of(request)
@@ -204,26 +261,8 @@ async def master_snapshot(body: SnapshotIn, request: Request):
         if replay is not None:
             return replay
 
-        if body.login != acct.login or normalize_server(body.server) != acct.broker_server_norm:
-            # 409, no snapshot state stored; the error is deduplicated by signature (5.9).
-            rawstore.record_error(s, account_id=acct.id, route=route, error_class="account_mismatch",
-                                  cause=f"{body.login}@{normalize_server(body.server)}", body=raw_body,
-                                  quota_mb=settings.raw_daily_quota_mb)
-            s.add(Event(type="account.mismatch", payload={"account_id": acct.id, "login": body.login,
-                                                          "server": body.server}))
-            return ApiError(409, "account_mismatch",
-                            "snapshot login/server differ from the token's account").response()
-
-        if (problem := _session_problem(s, acct, body)) is not None:
-            rawstore.record_error(s, account_id=acct.id, route=route, error_class="stale_session",
-                                  cause=problem, body=raw_body, quota_mb=settings.raw_daily_quota_mb)
-            return ApiError(409, "stale_session", f"{problem}: request a new session").response()
-
-        if body.seq <= (acct.last_seq or 0):
-            resp = {"accepted": False, "seq": acct.last_seq}
-            idem.record(s, account_id=acct.id, key=key, route=route, req_hash=req_hash, status_code=200,
-                        response=resp, token_bearing=False)
-            return json_response(resp)
+        if (refused := _snapshot_refusal(s, acct, body, route, raw_body, settings, key, req_hash)) is not None:
+            return refused
 
         acct.last_seq = body.seq
         acct.session_taken_at = _ms_to_dt(body.taken_at)
@@ -264,38 +303,80 @@ async def slave_commands(request: Request, after: str | None = None):
         acct = authenticate(s, request, settings).account
         _require_role(acct, "slave")
         now = utcnow()
-        cmds.expire_opens(s, acct.id, now)
+        cmds.expire_opens(s, acct.id, now, ctx=_ctx(settings, now))
         out = cmds.deliver(s, acct.id, now)
         return json_response({"commands": [cmds.command_json(c) for c in out], "cursor": cmds.cursor_for(s, acct.id)})
 
     return await run_in_threadpool(uow, request, work)
 
 
+def _ctx(settings, now: datetime | None = None) -> Ctx:
+    return Ctx(open_ttl_seconds=settings.open_ttl_seconds, lease_seconds=settings.command_lease_seconds,
+               gated=lambda a: version_gated(a, settings), now=now or utcnow())
+
+
 @router.post("/slave/results")
 async def slave_results(body: ResultsIn, request: Request):
-    """Results outbox. This PR implements only the `in_progress` receipt ack (lease, 4.5/C2);
-    terminal results arrive in the results PR and are refused with 422 meanwhile so the EA keeps
-    them in its durable outbox."""
+    """Results outbox (4.5, 4.6, 5.5). Applied once per (command_id, attempt_id); unknown or foreign
+    commands/attempts are answered in `unknown` (never 404). Results are not session-fenced: the
+    EA's durable outbox replays them across restarts."""
     settings = settings_of(request)
     route = "/v4/slave/results"
-    key, _raw, req_hash = await _mutating(request, route)
-    unsupported = sorted({r.status for r in body.results if r.status != "in_progress"})
-    if unsupported:
-        raise ApiError(422, "result_status_not_supported",
-                       f"statuses not handled yet: {', '.join(unsupported)}")
+    key, raw_body, req_hash = await _mutating(request, route)
 
     def work(s: Session):
         acct = authenticate(s, request, settings).account
         _require_role(acct, "slave")
+        acct = _locked_account(s, acct)
         replay = idem.lookup(s, account_id=acct.id, key=key, route=route, req_hash=req_hash,
                              ttl_hours=settings.idempotency_ttl_hours)
         if replay is not None:
             return replay
-        now = utcnow()
-        unknown = [r.command_id for r in body.results
-                   if not cmds.ack_in_progress(s, acct.id, r.command_id, r.copy_id,
-                                               settings.command_lease_seconds, now)]
-        resp = {"unknown": unknown}
+        if any(r.status != "in_progress" for r in body.results):  # results always stored (5.9)
+            rawstore.store_raw(s, account_id=acct.id, kind="slave_results", body=raw_body, reason="change",
+                               quota_mb=settings.raw_daily_quota_mb)
+        out = apply_results(s, acct.id, [r.model_dump() for r in body.results], _ctx(settings))
+        resp = {"unknown": out.unknown, "applied": out.applied, "duplicates": out.duplicates}
+        idem.record(s, account_id=acct.id, key=key, route=route, req_hash=req_hash, status_code=200,
+                    response=resp, token_bearing=False)
+        return json_response(resp)
+
+    return await run_in_threadpool(uow, request, work)
+
+
+@router.post("/slave/snapshot")
+async def slave_snapshot(body: SnapshotIn, request: Request):
+    """Slave positions + recent history (4.3): same fencing as the master snapshot, then
+    reconciliation and adoption (5.5, 5.8). Nothing is acted on while `connected=false`."""
+    settings = settings_of(request)
+    route = "/v4/slave/snapshot"
+    key, raw_body, req_hash = await _mutating(request, route)
+
+    def work(s: Session):
+        acct = authenticate(s, request, settings).account
+        _require_role(acct, "slave")
+        acct = _locked_account(s, acct)
+        replay = idem.lookup(s, account_id=acct.id, key=key, route=route, req_hash=req_hash,
+                             ttl_hours=settings.idempotency_ttl_hours)
+        if replay is not None:
+            return replay
+        if (refused := _snapshot_refusal(s, acct, body, route, raw_body, settings, key, req_hash)) is not None:
+            return refused
+
+        acct.last_seq = body.seq
+        acct.session_taken_at = _ms_to_dt(body.taken_at)
+        ctx = _ctx(settings)
+        stats: dict = {}
+        if body.connected:
+            cmds.renew_leases(s, acct.id, settings.command_lease_seconds, ctx.now)
+            positions = [PositionData(**p.model_dump()) for p in body.positions]
+            stats = reconcile_slave(s, acct, positions, body.history, history_synced=body.history_synced, ctx=ctx)
+        state = {"connected": body.connected, "positions": sorted(
+            (p.position_id, p.position_ticket, p.symbol, p.type, str(p.volume), p.comment, p.magic)
+            for p in body.positions), "deals": sorted(str(h.get("deal")) for h in body.history)}
+        rawstore.store_snapshot_raw(s, account_id=acct.id, kind="slave_snapshot", body=raw_body, state=state,
+                                    quota_mb=settings.raw_daily_quota_mb)
+        resp = {"accepted": True, "seq": body.seq, **({"reconcile": stats} if stats else {})}
         idem.record(s, account_id=acct.id, key=key, route=route, req_hash=req_hash, status_code=200,
                     response=resp, token_bearing=False)
         return json_response(resp)

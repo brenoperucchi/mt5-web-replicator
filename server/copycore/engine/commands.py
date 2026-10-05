@@ -80,8 +80,9 @@ def _live_commands(s: Session, slave_id: int) -> list[tuple[Command, Copy]]:
     return [(c, cp) for c, cp in rows]
 
 
-def expire_opens(s: Session, slave_id: int, now: datetime | None = None) -> list[str]:
-    """Expire never-sent `open` commands past `expires_at` (4.4); the copy becomes `cancelled`."""
+def expire_opens(s: Session, slave_id: int, now: datetime | None = None, ctx=None) -> list[str]:
+    """Expire never-sent `open` commands past `expires_at` (4.4); the copy becomes `cancelled`.
+    With an engine context the freed netting slot promotes its blocked successor (C5)."""
     now = now or utcnow()
     expired = []
     for cmd, copy in _live_commands(s, slave_id):
@@ -96,7 +97,9 @@ def expire_opens(s: Session, slave_id: int, now: datetime | None = None) -> list
             copy.close_reason = "open_expired"
             s.add(Event(type="copy.cancelled", payload={"copy_id": copy.id, "reason": "open_expired",
                                                         "command_id": cmd.id}))
-            # TODO(PR: netting successor): promote a `pending_blocked` successor of this slot (5.3, C5).
+            if ctx is not None:
+                from .lifecycle import promote_successors  # lifecycle imports this module
+                promote_successors(s, copy, ctx)
         expired.append(cmd.id)
     return expired
 
@@ -110,6 +113,8 @@ def deliver(s: Session, slave_id: int, now: datetime | None = None) -> list[Comm
             continue
         if cmd.state == "in_progress" and cmd.lease_until is not None and aware(cmd.lease_until) > now:
             continue  # acked and leased
+        if cmd.state == "in_progress" and is_uncertain(cmd):
+            continue  # the EA suspended this attempt (4.6 step 7); a new session re-delivers it once
         if cmd.state in ("queued", "retry_wait", "in_progress"):
             cmd.state = "delivered"
             cmd.lease_until = None
@@ -149,5 +154,49 @@ def release_leases(s: Session, slave_id: int) -> int:
         if cmd.state == "in_progress":
             cmd.state = "delivered"
             cmd.lease_until = None
+            n += 1
+    return n
+
+
+def is_uncertain(cmd: Command) -> bool:
+    return (cmd.result or {}).get("status") == "uncertain"
+
+
+def retry_backoff_seconds(attempts: int) -> int:
+    """Backoff before a new attempt of a never-expiring obligation (close/cancel): 5, 10, 20 ... 300 s."""
+    return min(5 * 2 ** max(attempts - 1, 0), 300)
+
+
+def new_attempt(s: Session, cmd: Command, *, delay_seconds: int = 0, now: datetime | None = None) -> str:
+    """Same logical obligation (`command_id`), new durable attempt (`attempt_id`) (4.6, C2).
+
+    Issued only after a definitive reject with no effect, or for the remainder of a DONE_PARTIAL."""
+    now = now or utcnow()
+    cmd.attempt_id = new_attempt_id()
+    cmd.attempts = (cmd.attempts or 1) + 1
+    cmd.state = "retry_wait" if delay_seconds > 0 else "queued"
+    cmd.next_attempt_at = now + timedelta(seconds=delay_seconds) if delay_seconds > 0 else None
+    cmd.lease_until = None
+    s.add(CommandAttempt(command_id=cmd.id, attempt_id=cmd.attempt_id, issued_at=now))
+    s.add(Event(type="command.retry", payload={"command_id": cmd.id, "copy_id": cmd.copy_id,
+                                               "attempt_id": cmd.attempt_id, "attempts": cmd.attempts,
+                                               "delay_seconds": delay_seconds}))
+    return cmd.attempt_id
+
+
+def outstanding(s: Session, copy_id: int, actions: tuple[str, ...] | None = None) -> list[Command]:
+    q = select(Command).where(Command.copy_id == copy_id, Command.state.not_in(TERMINAL_COMMAND_STATES))
+    if actions is not None:
+        q = q.where(Command.action.in_(actions))
+    return list(s.scalars(q.order_by(Command.seq_in_copy)))
+
+
+def renew_leases(s: Session, slave_id: int, lease_seconds: int, now: datetime | None = None) -> int:
+    """A snapshot from the current session renews the receipt-ack leases (4.5)."""
+    now = now or utcnow()
+    n = 0
+    for cmd, _copy in _live_commands(s, slave_id):
+        if cmd.state == "in_progress" and cmd.lease_until is not None:
+            cmd.lease_until = now + timedelta(seconds=lease_seconds)
             n += 1
     return n

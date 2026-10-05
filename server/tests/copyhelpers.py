@@ -112,3 +112,25 @@ class Copier:
         return self.c.post("/v4/slave/results",
                            json={"results": [{"command_id": command_id, "copy_id": copy_id, "status": status}]},
                            headers={**bearer(acct["token"]), **key()})
+
+    def results(self, acct, results, idem=None, expect=200):
+        r = self.c.post("/v4/slave/results", json={"results": results},
+                        headers={**bearer(acct["token"]), "Idempotency-Key": idem or str(uuid.uuid4())})
+        assert r.status_code == expect, r.text
+        return r.json()
+
+    def slave_snapshot(self, acct, positions=(), history=(), expect=200, idem=None, history_synced=True, **kw):
+        body = self.snapshot_body(acct, positions, **kw)
+        body["history"] = list(history)
+        body["history_synced"] = history_synced
+        r = self.c.post("/v4/slave/snapshot", json=body,
+                        headers={**bearer(acct["token"]), "Idempotency-Key": idem or str(uuid.uuid4())})
+        assert r.status_code == expect, r.text
+        return r.json()
+
+
+def deal(deal_id, position_id, entry="in", reason="expert", symbol="EURUSD", volume=1.0, price=1.1, magic=0,
+         comment="", profit=0.0):
+    return {"deal": deal_id, "order": deal_id, "position_id": position_id, "entry": entry, "reason": reason,
+            "symbol": symbol, "volume": volume, "price": price, "profit": profit, "commission": -0.5, "swap": 0,
+            "magic": magic, "comment": comment, "time_msc": int(time.time() * 1000)}
