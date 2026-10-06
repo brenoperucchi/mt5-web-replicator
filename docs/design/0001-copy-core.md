@@ -1,7 +1,7 @@
 # 0001: Rails-agnostic copy core (standalone Copy Server)
 
 - **Status:** Phase 0 — Approved (2026-10-05). Revision 4 (after scout verification of revision 3), Phase 0 of #77
-- **Decision log:** 2026-10-05 — approved by the owner without further review rounds; residual risks are covered by the Phase 1 scenario gate (section 8).
+- **Decision log:** 2026-10-05 — approved by the owner without further review rounds; residual risks are covered by the Phase 1 scenario gate (section 8). 2026-10-06 — owner decision: the slave order comment is `c<copy_id>-<master position_id>` (master `POSITION_IDENTIFIER`, legacy `c<copy_id>` when it would exceed 31 chars) so slave and master can be compared side by side; correlation keeps using only the `c<copy_id>` part (5.8a).
 - **Naming:** 2026-10-05 — the product is named **TradeMirror** (#78): the EA is `ea/mt5/Experts/TradeMirror.mq5`; the Copy Server's Python package stays `copycore`; the repository keeps its name (Q1).
 - **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket, fixed by PR #81), #64 (shared API core), #66 (latency/slippage)
 - **Reviewers:** the mt5 reviewers. Each numbered **Decision (Dn)** below can be approved or rejected on its own.
@@ -608,7 +608,7 @@ Not ported: Rails' 1:1 volume re-sync on every MODIFY (Appendix A; replaced by `
 
 On every slave snapshot (inline for copies in `pending/cancel_requested/uncertain/error/cancelled` younger than 7 days, background for the rest):
 
-- A slave position (or a history `in` deal) with `comment == c<copy_id>` and `magic == link magic`, belonging to a copy **without `position_id`**, is **adopted**: the copy gets `position_id/ticket/price_open/open_deal`.
+- A slave position (or a history `in` deal) whose comment correlates with `c<copy_id>` (5.8a) and `magic == link magic`, belonging to a copy **without `position_id`**, is **adopted**: the copy gets `position_id/ticket/price_open/open_deal`.
   - Master position still open → copy `open`.
   - Master position closed → copy `closing` + `command(close)`.
   - If adoption finds an exit deal too → `closed`.
@@ -617,7 +617,10 @@ On every slave snapshot (inline for copies in `pending/cancel_requested/uncertai
 - **Resolution path:** admin `POST /admin/copies/:id/resolve {executed: position_id | not_executed}` and `POST /admin/symbol_conflicts/:id/resolve`; both audited, both emit a `resolve` command to the EA journal (4.6 step 7) and unblock pending close/cancel.
 ### 5.8a Correlation and netting exclusivity (owner decision 2026-10-05)
 
-- The correlation key is the comment **`c<copy_id>`** with the link magic. It is independent of the symbol name, so it works when the broker names differ (`EURUSD` vs `EURUSD.m`).
+- The correlation key is the comment **`c<copy_id>`** with the link magic. Since 2026-10-06 the slave order comment is `c<copy_id>-<master position_id>` (falls back to `c<copy_id>` above the 31-char MT5 limit); only the `c<copy_id>` part correlates, by this rule (server `engine.correlation`, EA `TmCommentMatches`):
+  - `c<digits>-<anything>`: the copy id is the digits between `c` and the first `-`. The `-` proves the digits are complete, so a suffix the broker truncated or rewrote is tolerated.
+  - `c<digits>` with no `-`: accepted only for a copy whose frozen comment is exactly `c<copy_id>` (legacy/fallback). For a long-form copy it is ambiguous (a cut right before `-` looks like a cut inside the digits, `c13-…` → `c1`) and is rejected: never adopted, and on a netting slave it counts as unmanaged exposure.
+  - The frozen magic must always match too. Ambiguity is resolved by rejecting, never by a guess. It is independent of the symbol name, so it works when the broker names differ (`EURUSD` vs `EURUSD.m`).
 - On **netting** slaves, symbols managed by the copier are **exclusive** to it in Phase 1: no manual trades and no other EAs on those symbols. Before opening, the EA verifies the physical slot (no unmanaged position on that symbol) and fails observably otherwise (4.4).
 - Executions without reliable correlation (comment rewritten/truncated by the broker and no journal ids) stay **suspended** for explicit manual reconciliation (5.8 resolution path).
 - Matching by magic + symbol + open time (±2 s) is **diagnostic only**: it lists candidates in the admin, and is never used for automatic adoption or close.
@@ -857,7 +860,7 @@ v1/v2/v3 are retired as the copy backend at Phase 1; the Rails endpoints remain 
 | D7 | Deploy/config | Single image, compose, env-only, TLS at proxy |
 | D8 | Auth | Enrollment code → per-account token; two-step rotation; token responses never stored |
 | D9 | Symbol mapping | Server-side only, unique per slave and per global symbol |
-| D10 | Conciliation | By `command_id` / `position_id` / deal; adoption by comment `c<copy_id>` + magic for copies without `position_id`; weak matching diagnostic only; conflicts via `symbol_conflicts` |
+| D10 | Conciliation | By `command_id` / `position_id` / deal; adoption by the `c<copy_id>` part of the comment `c<copy_id>-<master position_id>` + magic for copies without `position_id`; weak matching diagnostic only; conflicts via `symbol_conflicts` |
 | D11 | Rails contract | Webhooks out, admin API in; billing = suspension (drain); v1–v3 removed in Phase 3 |
 
 ---
