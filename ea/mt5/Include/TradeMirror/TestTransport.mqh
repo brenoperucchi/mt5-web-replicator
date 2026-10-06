@@ -88,6 +88,8 @@ public:
    bool              dropNextEnroll;
    bool              dropNextRotate;
    string            fail429Path;     // path prefix answered 429
+   int               forceStatus;     // != 0: every call answers this transport status/error (no server)
+   int               forceError;
    int               retryAfterSec;
 
                      CFakeServer(void) { Reset(); }
@@ -97,7 +99,7 @@ public:
       m_tokenSeq = 0; m_sessionSeq = 0; code = "ABCD2345EF"; codeConsumed = false; token = ""; issuedUnconfirmed = "";
       pendingToken = ""; pendingId = ""; sessionId = ""; mode = "normal"; resultPosts = 0; commandPolls = 0;
       snapshotPosts = 0; enrollCalls = 0; rotateCalls = 0; dropResults = 0; dropNextEnroll = false; dropNextRotate = false;
-      fail429Path = ""; retryAfterSec = 0; lastCallMs = 0; minGapMs = -1;
+      fail429Path = ""; retryAfterSec = 0; lastCallMs = 0; minGapMs = -1; forceStatus = 0; forceError = 0;
       ArrayResize(cmdIds, 0); ArrayResize(cmdJson, 0); ArrayResize(cmdState, 0); ArrayResize(results, 0);
       ArrayResize(retiredTokens, 0);
      }
@@ -153,6 +155,11 @@ public:
       if(lastCallMs > 0 && (minGapMs < 0 || nowMs - lastCallMs < minGapMs))
          minGapMs = nowMs - lastCallMs;
       lastCallMs = nowMs;
+      if(forceStatus != 0)
+        {
+         resp.status = forceStatus; resp.error = forceError; resp.headers = ""; resp.body = "";
+         return;
+        }
       if(fail429Path != "" && StringFind(path, fail429Path) == 0)
         {
          Reply(resp, 429, "{\"error\":\"rate_limited\"}", "Retry-After: " + IntegerToString(retryAfterSec) + "\r\n");

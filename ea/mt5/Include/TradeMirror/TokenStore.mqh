@@ -1,7 +1,8 @@
 //+------------------------------------------------------------------+
 //| TradeMirror - per-terminal token file (design D8 steps 4-5)      |
 //|                                                                  |
-//| MQL5\Files\TradeMirror\copy_token_<server>_<login>_<role>.dat    |
+//| MQL5\Files\TradeMirror\copy_token_<broker>_<login>_<role>_<copy   |
+//| server host[:port]>.dat; the file also records the server URL.   |
 //| (terminal-local, never FILE_COMMON). Always written atomically.  |
 //| Holds the current token and, during a rotation, the pending one. |
 //| The token is never logged.                                       |
@@ -16,6 +17,7 @@ class CTokenStore
   {
 private:
    string            m_path;
+   string            m_server;         // ServerUrl written into the file (not cleared by Reset)
 
 public:
    string            token;
@@ -24,10 +26,12 @@ public:
    long              login;
    string            pending_token;
    string            pending_id;
+   string            server_url;       // as read from the file ("" in files written before it was stored)
 
-                     CTokenStore(void) { Reset(); }
-   void              Reset(void) { token = ""; issued_ms = 0; account_id = 0; login = 0; pending_token = ""; pending_id = ""; }
+                     CTokenStore(void) { m_server = ""; m_path = ""; Reset(); }
+   void              Reset(void) { token = ""; issued_ms = 0; account_id = 0; login = 0; pending_token = ""; pending_id = ""; server_url = ""; }
    void              SetPath(const string path) { m_path = path; }
+   void              SetServer(const string url) { m_server = url; }
    string            Path(void) const { return m_path; }
    bool              HasToken(void) const { return token != ""; }
 
@@ -48,6 +52,7 @@ public:
       login = j.Long("login");
       pending_token = j.Str("pending_token");
       pending_id = j.Str("pending_id");
+      server_url = j.Str("server_url");
       delete j;
       return token != "";
      }
@@ -60,6 +65,9 @@ public:
       w.Int("issued_ms", issued_ms);
       w.Int("account_id", account_id);
       w.Int("login", login);
+      string srv = m_server != "" ? m_server : server_url;
+      if(srv != "")
+         w.Str("server_url", srv);
       if(pending_token != "")
         {
          w.Str("pending_token", pending_token);

@@ -11,7 +11,8 @@
 #include "Util.mqh"
 
 #define TM_HTTP_NETWORK_ERROR (-1)   // no HTTP answer (timeout, DNS, refused, WebRequest error)
-#define TM_HTTP_NOT_ALLOWED   (-2)   // URL not in the WebRequest allow-list (err 4014/4060)
+#define TM_HTTP_NOT_ALLOWED   (-2)   // URL not in the WebRequest allow-list (err 4006 on build 6244, 4014, 4060)
+#define TM_WR_TLS_FAILED      1009   // WebRequest "status" 1009: TLS handshake / secure connection failed
 
 struct STmHttpResponse
   {
@@ -20,6 +21,36 @@ struct STmHttpResponse
    string            headers;
    string            body;
   };
+
+//--- WebRequest return value + GetLastError() -> (status, error). Codes >= 1000 are terminal-side
+//    connection errors, not HTTP: they become a network error (transient) carrying the code.
+void TmClassifyWebRequest(const int code, const int lastError, int &status, int &error)
+  {
+   if(code == -1)
+     {
+      error = lastError;
+      status = (lastError == 4006 || lastError == 4014 || lastError == 4060) ? TM_HTTP_NOT_ALLOWED : TM_HTTP_NETWORK_ERROR;
+      return;
+     }
+   if(code >= 1000)
+     {
+      error = code;
+      status = TM_HTTP_NETWORK_ERROR;
+      return;
+     }
+   error = 0;
+   status = code;
+  }
+
+//--- operator hint for a failed call ("" when there is nothing specific to say)
+string TmTransportHint(const int status, const int error, const string url)
+  {
+   if(status == TM_HTTP_NOT_ALLOWED)
+      return "URL not allowed in Tools > Options > Expert Advisors > WebRequest: " + url;
+   if(status == TM_HTTP_NETWORK_ERROR && error == TM_WR_TLS_FAILED)
+      return "TLS failed (error 1009) - does the server speak https? check ServerUrl scheme: " + url;
+   return "";
+  }
 
 class ITransport
   {
@@ -55,14 +86,7 @@ public:
       int code = WebRequest(method, url, headers, timeoutMs, data, result, respHeaders);
       resp.headers = respHeaders;
       resp.body = CharArrayToString(result, 0, WHOLE_ARRAY, CP_UTF8);
-      if(code == -1)
-        {
-         resp.error = GetLastError();
-         resp.status = (resp.error == 4014 || resp.error == 4060) ? TM_HTTP_NOT_ALLOWED : TM_HTTP_NETWORK_ERROR;
-         return;
-        }
-      resp.error = 0;
-      resp.status = code;
+      TmClassifyWebRequest(code, code == -1 ? GetLastError() : 0, resp.status, resp.error);
      }
   };
 

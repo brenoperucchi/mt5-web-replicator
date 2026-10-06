@@ -103,6 +103,44 @@ string TmRouteName(const int r)
    return "?";
   }
 
+//--- Copy Server identity for file names: host[:port] of the URL, lower case, no scheme/userinfo/path,
+//    default port dropped, then made file-name safe (':' -> '_').
+string TmServerId(const string url)
+  {
+   string u = url;
+   StringTrimLeft(u);
+   StringTrimRight(u);
+   StringToLower(u);
+   string scheme = "";
+   int p = StringFind(u, "://");
+   if(p >= 0)
+     {
+      scheme = StringSubstr(u, 0, p);
+      u = StringSubstr(u, p + 3);
+     }
+   int cut = StringLen(u);
+   string stops[3] = {"/", "?", "#"};
+   for(int i = 0; i < 3; i++)
+     {
+      int q = StringFind(u, stops[i]);
+      if(q >= 0 && q < cut)
+         cut = q;
+     }
+   u = StringSubstr(u, 0, cut);
+   int at = StringFind(u, "@");
+   if(at >= 0)
+      u = StringSubstr(u, at + 1);
+   if(StringLen(u) > 0 && StringGetCharacter(u, StringLen(u) - 1) == '.')
+      u = StringSubstr(u, 0, StringLen(u) - 1);
+   string defPort = scheme == "http" ? ":80" : ":443";
+   int dl = StringLen(defPort);
+   if(StringLen(u) > dl && StringSubstr(u, StringLen(u) - dl) == defPort)
+      u = StringSubstr(u, 0, StringLen(u) - dl);
+   if(u == "")
+      return "noserver";
+   return TmSafeName(u);
+  }
+
 bool TmUrlAllowed(const string url)
   {
    if(StringFind(url, "https://") == 0)
@@ -162,6 +200,8 @@ private:
    bool              m_blocked;
    bool              m_accountMismatch;
    bool              m_enrollRefused;
+   bool              m_tlsAlerted;
+   string            m_migratedFrom;   // legacy file suffix the state was adopted from ("" = none)
    bool              m_restartRotation;
    string            m_status;
    long              m_httpCalls;
@@ -181,9 +221,55 @@ private:
       string tag = m_s.file_tag == "" ? "" : m_s.file_tag + "_";
       return "TradeMirror\\" + tag;
      }
-   string            Suffix(void)
+   //--- <broker server>_<login>_<role>_<copy server host[:port]>: switching ServerUrl uses separate state
+   string            Suffix(void) { return LegacySuffix() + "_" + TmServerId(m_s.server_url); }
+   //--- name used before the Copy Server identity was part of it (migrated once, see MigrateLegacy)
+   string            LegacySuffix(void)
      {
       return TmSafeName(AccountInfoString(ACCOUNT_SERVER)) + "_" + IntegerToString(AccountInfoInteger(ACCOUNT_LOGIN)) + "_" + Role();
+     }
+
+   //--- Adopt token/journal/outbox written under the legacy names, but only when the legacy token file
+   //    records the same Copy Server as ServerUrl. Old files are never deleted or changed.
+   void              MigrateLegacy(const string base)
+     {
+      string newTok = base + "copy_token_" + Suffix() + ".dat";
+      string oldTok = base + "copy_token_" + LegacySuffix() + ".dat";
+      if(FileIsExist(newTok) || !FileIsExist(oldTok))
+         return;
+      CTokenStore old;
+      old.SetPath(oldTok);
+      old.Load();
+      if(!old.HasToken() || old.server_url == "" || TmServerId(old.server_url) != TmServerId(m_s.server_url))
+        {
+         TmLog.Info("ignoring " + oldTok + ": it does not record " + TmServerId(m_s.server_url) +
+                    (old.server_url == "" ? " (no server stored)" : " (it belongs to " + TmServerId(old.server_url) + ")"));
+         return;
+        }
+      if(IsSlave())
+        {
+         string kinds[2] = {"journal_", "outbox_"};
+         for(int i = 0; i < 2; i++)
+           {
+            string from = base + kinds[i] + LegacySuffix() + ".jsonl";
+            string to = base + kinds[i] + Suffix() + ".jsonl";
+            if(FileIsExist(from) && !FileIsExist(to) && !FileCopy(from, 0, to, 0))
+              {
+               TmLog.Alarm(StringFormat("cannot copy %s -> %s (err %d): state not migrated", from, to, GetLastError()));
+               return;
+              }
+           }
+        }
+      // the token goes last: a crash before this point retries the whole migration on the next start
+      old.SetPath(newTok);
+      old.server_url = m_s.server_url;
+      if(!old.Save())
+        {
+         TmLog.Alarm("cannot write " + newTok + ": state not migrated");
+         return;
+        }
+      m_migratedFrom = LegacySuffix();
+      TmLog.Info("state migrated from " + oldTok + " to " + newTok + " (old files kept)");
      }
 
    long              Jitter(const long ms) { return ms + (long)(MathRand() % 250); }
@@ -363,8 +449,8 @@ private:
       if(exhausted && eventRequest && !m_routes[r].alerted)
         {
          m_routes[r].alerted = true;
-         TmLog.Alarm(StringFormat("%s: server unreachable (last %d); results kept in the outbox and retried",
-                                  TmRouteName(r), resp.status));
+         TmLog.Alarm(StringFormat("%s: server unreachable (last %d, error %d); results kept in the outbox and retried",
+                                  TmRouteName(r), resp.status, resp.error));
         }
       long wait = exhausted ? TM_MAX_BACKOFF_MS : Jitter(backoff);
       if(retryAfterMs > 0)
@@ -378,13 +464,18 @@ private:
       int st = resp.status;
       if(st == TM_HTTP_NOT_ALLOWED)
         {
-         TmLog.Alarm("WebRequest is not allowed for " + m_s.server_url +
-                     ": Tools > Options > Expert Advisors > Allow WebRequest for listed URL");
+         TmLog.Alarm(TmTransportHint(st, resp.error, m_s.server_url));
          Schedule(r, 60000);
          return true;
         }
       if(IsTransient(st))
         {
+         string hint = TmTransportHint(st, resp.error, m_s.server_url);
+         if(hint != "" && !m_tlsAlerted)
+           {
+            m_tlsAlerted = true;    // once per run: the call keeps being retried with backoff
+            TmLog.Alarm(hint);
+           }
          Transient(r, resp, eventRequest);
          return true;
         }
@@ -843,6 +934,7 @@ public:
       m_lastAcceptedMs = 0; m_staleSession = false; m_snapshotDirty = true; m_commandsBurst = false; m_mode = "normal"; m_pollMs = 2000;
       m_sendHistory = false; m_debug = false; m_cursor = ""; m_logsDisabled = false; m_unauthorized = false;
       m_blocked = false; m_accountMismatch = false; m_enrollRefused = false; m_restartRotation = false;
+      m_tlsAlerted = false; m_migratedFrom = "";
       m_sessionId = ""; m_status = ""; m_httpCalls = 0;
       m_minGapMs = TM_DEFAULT_CALL_GAP_MS; m_lastCallMs = 0; m_rateWindowMs = 0; m_rateWindowCalls = 0; m_callsPerMin = -1; m_rateWindows = 0; m_inStep = false;
       for(int i = 0; i < R_COUNT; i++)
@@ -868,7 +960,9 @@ public:
         }
       FolderCreate("TradeMirror");
       string base = FileBase();
+      MigrateLegacy(base);
       m_token.SetPath(base + "copy_token_" + Suffix() + ".dat");
+      m_token.SetServer(m_s.server_url);
       m_token.Load();
       if(m_token.HasToken() && m_s.enroll_code != "" &&
          (m_s.force_enroll || m_token.login != AccountInfoInteger(ACCOUNT_LOGIN)))
@@ -972,6 +1066,7 @@ public:
    CExecutor        *Exec(void) { return GetPointer(m_exec); }
    CJournal         *Journal(void) { return GetPointer(m_journal); }
    COutbox          *Outbox(void) { return GetPointer(m_outbox); }
+   string            MigratedFrom(void) const { return m_migratedFrom; }
    CTokenStore      *Token(void) { return GetPointer(m_token); }
    string            SessionId(void) const { return m_sessionId; }
    bool              Unauthorized(void) const { return m_unauthorized; }
