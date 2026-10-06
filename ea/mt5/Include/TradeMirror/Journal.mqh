@@ -46,6 +46,7 @@ public:
 
                      CJournalEntry(void)
      {
+      command_id = ""; attempt_id = ""; action = ""; state = ""; command = ""; result = "";
       copy_id = 0; seq_in_copy = 0; order = 0; request_id = 0; deal = 0; position_id = 0;
       executed_volume = 0; residual_volume = 0; created_ms = 0; updated_ms = 0; sent_ms = 0; checks = 0;
      }

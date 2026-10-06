@@ -369,7 +369,9 @@ public:
    void              Num(const string key, const double v, const int digits = 8) { Sep(key); m_s += JsonNum(v, digits); }
    void              Bool(const string key, const bool v)   { Sep(key); m_s += (v ? "true" : "false"); }
    void              Null(const string key)                 { Sep(key); m_s += "null"; }
-   void              Raw(const string key, const string json) { Sep(key); m_s += (json == "" ? "null" : json); }
+   // StringLen, not == "": an unassigned MQL5 string is NULL, and NULL == "" is false, so the
+   // old check let a NULL through and emitted `"key":,` (invalid JSON).
+   void              Raw(const string key, const string json) { Sep(key); m_s += (StringLen(json) == 0 ? "null" : json); }
    //--- optional numbers: 0 / EMPTY means "unknown" and is written as null
    void              IntOrNull(const string key, const long v) { if(v == 0) Null(key); else Int(key, v); }
    void              NumOrNull(const string key, const double v, const int digits = 8) { if(v == 0.0) Null(key); else Num(key, v, digits); }

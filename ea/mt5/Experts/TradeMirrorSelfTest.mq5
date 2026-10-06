@@ -3,7 +3,7 @@
 //|  EA client tests for the Strategy Tester (design section 8).     |
 //|  The Tester does not run WebRequest, so the real client engine   |
 //|  runs against an injected in-memory fake server (ITransport).    |
-//|  Covers S01-S05 (journal/outbox) and S24-S26 (transport, rotate, |
+//|  Covers S01-S06 (journal/outbox) and S24-S26 (transport, rotate, |
 //|  enroll). Real trades are placed on the tester symbol.           |
 //|                                                                  |
 //|  Run: Strategy Tester, Expert = TradeMirrorSelfTest, a hedging   |
@@ -269,6 +269,49 @@ void S05()
    CloseAll();
   }
 
+//--- S06: journal entry round-trips through Save + reload (Open), including a NULL result
+void S06()
+  {
+   string path = "TradeMirror\\" + g_runTag + "s06_journal_roundtrip.jsonl";
+   FileDelete(path);
+   CJournal *j = new CJournal();
+   Check("S06", j.Open(path), "open empty journal");
+   CJournalEntry *e = j.Create("c_s06", "a_c_s06", 9106, "open", 1, OpenCmd("c_s06", 9106));
+   e.state = JS_UNCERTAIN;                      // result left unassigned (NULL string)
+   e.order = 9000000000123;
+   e.request_id = 77;
+   e.position_id = 9000000000456;
+   e.executed_volume = 0.01;
+   e.sent_ms = 1234;
+   e.checks = 2;
+   Check("S06", j.Save(e), "entry saved");
+   delete j;
+   j = new CJournal();
+   Check("S06", j.Open(path), "journal reopened");
+   Check("S06", j.Total() == 1, "one entry reloaded");
+   CJournalEntry *r = j.Find("c_s06", "a_c_s06");
+   Check("S06", r != NULL && r.state == JS_UNCERTAIN && r.copy_id == 9106 && r.action == "open" && r.seq_in_copy == 1,
+         "identity and state preserved");
+   Check("S06", r != NULL && r.order == 9000000000123 && r.request_id == 77 && r.position_id == 9000000000456 &&
+         r.executed_volume == 0.01 && r.sent_ms == 1234 && r.checks == 2, "execution fields preserved (64-bit ids)");
+   Check("S06", r != NULL && StringFind(r.command, "\"command_id\":\"c_s06\"") >= 0 && StringLen(r.result) == 0,
+         "command kept, empty result stays empty");
+   if(r != NULL)
+     {
+      r.result = "{\"status\":\"done\"}";
+      r.state = JS_CONFIRMED;
+      j.Save(r);
+     }
+   delete j;
+   j = new CJournal();
+   j.Open(path);
+   r = j.Find("c_s06", "a_c_s06");
+   Check("S06", j.Total() == 1 && r != NULL && r.state == JS_CONFIRMED && r.result == "{\"status\":\"done\"}",
+         "last line wins, result JSON preserved");
+   delete j;
+   FileDelete(path);
+  }
+
 //--- S24: 429 forever with a huge Retry-After on results -> EA keeps ticking, other routes continue, outbox retained
 void S24()
   {
@@ -355,7 +398,7 @@ void OnTick()
       return;
    g_done = true;
    g_tm_fake_now_ms = (long)TimeCurrent() * 1000;
-   S01(); S02(); S03(); S04(); S05(); S24(); S25(); S26();
+   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26();
    g_tm_fake_now_ms = 0;
    PrintFormat("TradeMirror self-test: %d passed, %d failed", g_passed, g_failed);
   }
