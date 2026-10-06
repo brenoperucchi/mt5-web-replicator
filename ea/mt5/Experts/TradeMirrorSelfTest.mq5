@@ -97,7 +97,8 @@ void CloseAll()
       r.action = TRADE_ACTION_DEAL; r.position = t; r.symbol = PositionGetString(POSITION_SYMBOL);
       r.volume = PositionGetDouble(POSITION_VOLUME); r.type = sell ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
       r.price = sell ? tick.bid : tick.ask; r.deviation = 50; r.type_filling = TmFilling(r.symbol);
-      OrderSend(r, res);
+      if(!OrderSend(r, res))
+         PrintFormat("cleanup close of %I64u failed: %u", t, res.retcode);
      }
   }
 

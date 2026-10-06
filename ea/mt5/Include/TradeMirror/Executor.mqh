@@ -614,7 +614,8 @@ private:
       r.sl = sl;
       r.tp = tp;
       r.magic = (ulong)p.magic;
-      OrderSend(r, res);
+      if(!OrderSend(r, res))
+         PrintFormat("SL/TP modify of %I64u rejected: %u", p.ticket, res.retcode);
       if(res.retcode == TRADE_RETCODE_DONE)
          Confirm(e, "done", ev, "", "");
       else if(res.retcode == TRADE_RETCODE_INVALID_STOPS || res.retcode == TRADE_RETCODE_NO_CHANGES)
