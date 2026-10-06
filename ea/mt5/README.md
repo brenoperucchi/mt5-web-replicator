@@ -85,7 +85,7 @@ recovered through `409 rotation_pending` and `rotate?restart=true`.
 
 | Input | Default | Meaning |
 |---|---|---|
-| `ServerUrl` | `https://copy.example.com` | Copy Server base URL |
+| `ServerUrl` | `http://127.0.0.1:8099` | Copy Server base URL (a local server by default; use https for a remote one) |
 | `Role` | Slave | Master or Slave |
 | `EnrollCode` | empty | one-time enrollment code |
 | `ForceReEnroll` | false | enroll even when a token file exists |

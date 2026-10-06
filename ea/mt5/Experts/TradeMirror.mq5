@@ -11,7 +11,7 @@
 
 #include <TradeMirror\Client.mqh>
 
-input string        ServerUrl     = "https://copy.example.com"; // Copy Server URL (https; http only for localhost)
+input string        ServerUrl     = "http://127.0.0.1:8099";    // Copy Server URL (https; http only for localhost)
 input ENUM_TM_ROLE  Role          = TM_ROLE_SLAVE;              // Role of this terminal
 input string        EnrollCode    = "";                         // One-time enrollment code from the admin
 input bool          ForceReEnroll = false;                      // Enroll again even if a token file exists
