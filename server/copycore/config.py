@@ -64,7 +64,11 @@ class Settings(BaseSettings):
     idempotency_ttl_hours: int = 24
 
     # Config endpoint defaults (4.3)
-    poll_ms: int = 2000
+    poll_ms: int = Field(default=2000, ge=500)   # EA clamps to >= 500 too
+    # Opt-in per-call trace file for latency/load tests (account id, route, status, timing; no secrets).
+    access_trace_path: str | None = None
+    # last_seen_at is written at most this often per account, so idle polls stay read-only (D6).
+    last_seen_write_seconds: int = Field(default=30, ge=0)
     min_ea_version: str | None = None
 
     # Rate limits (6.4) are not enforced yet; the switch exists so later PRs only add logic.

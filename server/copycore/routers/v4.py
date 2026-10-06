@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from .. import idempotency as idem
 from ..auth import authenticate, aware, pending_expired, version_gated
-from ..deps import settings_of, uow
+from ..deps import read_first, settings_of, uow
 from ..engine.master import send_history_wanted
 from ..engine.validation import revalidate_account_links
 from ..errors import ApiError, json_response
@@ -175,4 +175,4 @@ def get_config(request: Request):
             "min_ea_version": settings.min_ea_version,
         })
 
-    return uow(request, work)
+    return read_first(request, work)

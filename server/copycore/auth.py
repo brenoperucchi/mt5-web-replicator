@@ -88,7 +88,12 @@ def authenticate(session: Session, request: Request, settings: Settings, *,
         EnrollCode.consumed_at.is_(None)))
     if code is not None:
         code.consumed_at = utcnow()
-    acct.last_seen_at = utcnow()
+    # Throttled: an idle poll must not turn into a write (it would serialize every EA on SQLite).
+    now = utcnow()
+    seen = aware(acct.last_seen_at)
+    if seen is None or now - seen >= timedelta(seconds=settings.last_seen_write_seconds):
+        acct.last_seen_at = now
+    request.state.account_id = acct.id
 
     if (acct.status == "suspended" or version_gated(acct, settings)) and not has_exposure(session, acct):
         raise ApiError(403, "account_blocked",

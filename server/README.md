@@ -63,7 +63,9 @@ the database lives at `/data/copy.db`. Healthcheck: `GET /healthz` (alias `/heal
 | `RAW_DAILY_QUOTA_MB`, `LOG_DAILY_QUOTA_MB` | `50`, `20` | |
 | `WEBHOOK_URL`, `WEBHOOK_SECRET` | unset | |
 | `ENROLL_CODE_TTL_SECONDS`, `PENDING_TOKEN_TTL_HOURS`, `IDEMPOTENCY_TTL_HOURS` | `900`, `24`, `24` | |
-| `MIN_EA_VERSION`, `POLL_MS` | unset, `2000` | returned by `/v4/config` |
+| `MIN_EA_VERSION`, `POLL_MS` | unset, `2000` | returned by `/v4/config`; `POLL_MS` must be >= 500 (the EA clamps too) |
+| `LAST_SEEN_WRITE_SECONDS` | `30` | `last_seen_at` is written at most this often per account, so idle polls stay read-only |
+| `ACCESS_TRACE_PATH` | unset | opt-in file with one line per `/v4` call (`start_ms account_id method path status ms`; no tokens), for latency and load tests |
 | `RATE_LIMIT_ENABLED` | `false` | placeholder; limits (6.4) arrive in a later PR |
 | `WEB_CONCURRENCY` | `1` | must be 1 on SQLite |
 
@@ -252,3 +254,15 @@ are per account: `POST /admin/accounts/{id}/enroll_codes` (15 min code), `POST /
   version-gated EAs already get `mode: drain` and refuse opens with `failed: drain`.
 
 CI: `.github/workflows/server.yml` (SQLite and Postgres).
+
+## Polling at scale
+
+Idle polls (`GET /v4/slave/commands` with nothing to deliver or expire, `GET /v4/config`) run first in a
+read-only unit (a deferred `BEGIN` on SQLite, no write lock); only when the work would change something
+is it rolled back and re-run as a normal `BEGIN IMMEDIATE` unit. With `last_seen_at` throttled, many
+EAs polling at once no longer serialize on the SQLite write lock. `scripts/poll_load.py` measures this
+against a throwaway server and database (never a live one):
+
+```bash
+uv run python scripts/poll_load.py --database-url sqlite:////tmp/load/a.db --slaves 50 --poll-ms 1000 --duration 60
+```

@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from .. import idempotency as idem
 from ..auth import authenticate, version_gated
-from ..deps import settings_of, uow
+from ..deps import read_first, settings_of, uow
 from ..engine import commands as cmds
 from ..engine import raw as rawstore
 from ..engine.fanout import PositionData
@@ -311,7 +311,8 @@ async def slave_commands(request: Request, after: str | None = None):
         out = cmds.deliver(s, acct.id, now)
         return json_response({"commands": [cmds.command_json(c) for c in out], "cursor": cmds.cursor_for(s, acct.id)})
 
-    return await run_in_threadpool(uow, request, work)
+    # Nothing to expire, deliver or touch (the common idle poll): answered without a write lock.
+    return await run_in_threadpool(read_first, request, work)
 
 
 def _ctx(settings, now: datetime | None = None, clock=None) -> Ctx:

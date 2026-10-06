@@ -108,5 +108,6 @@ def test_busy_maps_to_503_with_retry_after(app, client, monkeypatch):
         raise BusyError("busy")
 
     monkeypatch.setattr(deps, "run_unit_of_work", busy)
+    monkeypatch.setattr(deps, "run_read_first", busy)
     r = client.get("/v4/config", headers={"Authorization": "Bearer x"})
     assert r.status_code == 503 and r.headers["Retry-After"] == "1"
