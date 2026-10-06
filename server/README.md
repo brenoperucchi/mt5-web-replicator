@@ -44,6 +44,14 @@ docker run -p 8000:8000 -v copy-data:/data \
   -e TOKEN_PEPPER=$(openssl rand -hex 32) -e ADMIN_TOKEN=$(openssl rand -hex 32) copy-server
 ```
 
+With Postgres 16, healthchecks and a named volume, use the compose file instead (`cp .env.example .env`,
+fill the secrets with `openssl rand -hex 32`):
+
+```bash
+docker compose -f docker-compose.copy-server.yml up -d --build
+# SQLite, single worker: add --profile sqlite and name the service copy-server-sqlite
+```
+
 The container runs `alembic upgrade head` and then uvicorn (one worker) as a non-root user;
 the database lives at `/data/copy.db`. Healthcheck: `GET /healthz` (alias `/health`).
 

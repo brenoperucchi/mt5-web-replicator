@@ -15,6 +15,9 @@ A standalone Copy Server (FastAPI, Python 3.12) is being built in [`server/`](se
 following the approved design [`docs/design/0001-copy-core.md`](docs/design/0001-copy-core.md) (#77).
 It does not replace anything in the Rails app yet.
 
+Want to try TradeMirror (Copy Server + MT5 EA) on two demo accounts? Follow the
+[quickstart](docs/trademirror/quickstart.md). See also [CONTRIBUTING](CONTRIBUTING.md).
+
 ## Quick start (Docker)
 
 Try it locally with nothing but Docker:
