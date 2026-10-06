@@ -6,7 +6,7 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 
 from .config import Settings
-from .db import run_unit_of_work
+from .db import run_read_first, run_unit_of_work
 
 
 def settings_of(request: Request) -> Settings:
@@ -16,6 +16,11 @@ def settings_of(request: Request) -> Settings:
 def uow[T](request: Request, work: Callable[[Session], T]) -> T:
     """One request = one unit of work (5.7), retried as a whole on SQLITE_BUSY (D6)."""
     return run_unit_of_work(request.app.state.sessionmaker, work)
+
+
+def read_first[T](request: Request, work: Callable[[Session], T]) -> T:
+    """Polling paths: a read-only unit when nothing changes, else the normal unit of work."""
+    return run_read_first(request.app.state.read_sessionmaker, request.app.state.sessionmaker, work)
 
 
 def engine_ctx(request: Request):

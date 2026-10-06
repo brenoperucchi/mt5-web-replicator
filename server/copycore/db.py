@@ -4,6 +4,12 @@ SQLite: pysqlite runs in driver autocommit and a SQLAlchemy ``begin`` hook issue
 ``BEGIN IMMEDIATE``, so the write lock is taken before the first read of a unit of work.
 PRAGMAs: WAL, synchronous=FULL, busy_timeout=5000, foreign_keys=ON, auto_vacuum=INCREMENTAL.
 Postgres: plain transactions (row locks are added by the engine logic in later PRs).
+
+Read-first units (``run_read_first``): the hot polling paths (empty ``GET /v4/slave/commands``,
+``GET /v4/config``) first run on a connection marked ``copycore_read_only``, which opens a plain
+deferred ``BEGIN``: in WAL mode it takes no write lock, so idle polls of many EAs never serialize
+on the database lock. When the work would change anything (dirty/new/deleted objects), that read
+unit is rolled back and the same work runs again as a normal write unit.
 """
 
 from __future__ import annotations
@@ -29,6 +35,7 @@ SQLITE_PRAGMAS = (
 )
 
 BUSY_RETRIES = 3
+READ_ONLY_OPTION = "copycore_read_only"
 
 
 def normalize_url(url: str) -> str:
@@ -60,11 +67,49 @@ def install_sqlite_hooks(engine: Engine) -> None:
 
     @event.listens_for(engine, "begin")
     def _on_begin(conn):
-        conn.exec_driver_sql("BEGIN IMMEDIATE")
+        conn.exec_driver_sql("BEGIN" if conn.get_execution_options().get(READ_ONLY_OPTION) else "BEGIN IMMEDIATE")
 
 
 def make_sessionmaker(engine: Engine) -> sessionmaker[Session]:
     return sessionmaker(bind=engine, expire_on_commit=False)
+
+
+def make_read_sessionmaker(engine: Engine) -> sessionmaker[Session]:
+    """Sessions whose transactions start with a deferred BEGIN on SQLite (no write lock)."""
+    return sessionmaker(bind=engine.execution_options(**{READ_ONLY_OPTION: True}), expire_on_commit=False,
+                        autoflush=False)
+
+
+class NeedsWrite(Exception):
+    """Raised inside a read-first unit when the work has something to write."""
+
+
+def run_read_first[T](read_factory: sessionmaker[Session], factory: sessionmaker[Session],
+                      work: Callable[[Session], T]) -> T:
+    """Run ``work`` read-only when it changes nothing; otherwise run it again as a write unit.
+
+    ``work`` must be safe to run twice (the read attempt is always rolled back) and must not flush:
+    the read session has autoflush off, and any pending change sends the call to the write path.
+    """
+    session = read_factory()
+    try:
+        result = work(session)
+        if session.new or session.dirty or session.deleted:
+            raise NeedsWrite
+        session.rollback()
+        return result
+    except NeedsWrite:
+        session.rollback()
+    except OperationalError as exc:
+        session.rollback()
+        if not is_busy_error(exc):
+            raise
+    except BaseException:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+    return run_unit_of_work(factory, work)
 
 
 def is_busy_error(exc: BaseException) -> bool:
