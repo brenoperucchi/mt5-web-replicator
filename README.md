@@ -25,6 +25,9 @@ anything in the Rails app yet.
   end-to-end suite (demo accounts only).
 - Protocol v4 scenario catalog: [`docs/protocol/v4/scenarios/`](docs/protocol/v4/scenarios/).
 
+Want to try TradeMirror (Copy Server + MT5 EA) on two demo accounts? Follow the
+[quickstart](docs/trademirror/quickstart.md). See also [CONTRIBUTING](CONTRIBUTING.md).
+
 ## Quick start (Docker)
 
 Try it locally with nothing but Docker:
