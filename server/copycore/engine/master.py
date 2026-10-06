@@ -20,7 +20,8 @@ Present positions also carry SL/TP changes (→ `modify`, 5.5) and volume increa
 drift only, `copy.volume_drift`, 5.3).
 
 Each history deal is recorded once in `processed_deals (account_id, deal)` with the generation it
-affected; replays are ignored. A deal whose time (EA time + `ea_clock_offset_ms`) is not after the
+affected; replays are ignored. A deal whose time (broker time - `broker_offset_ms` + `ea_clock_offset_ms`)
+is not after the
 current generation's start can never close or reverse that generation. A position id that reappears
 after its last generation was closed is not re-copied: `master_position.reappeared` alert (once).
 """
@@ -56,7 +57,7 @@ class CloseRules:
 
 def process_master_snapshot(s: Session, master: Account, positions: list[PositionData],
                             history: list[dict[str, Any]], *, history_synced: bool, ea_clock_offset_ms: int,
-                            fan_out: bool, rules: CloseRules, ctx: Ctx) -> dict:
+                            broker_offset_ms: int | None = None, fan_out: bool, rules: CloseRules, ctx: Ctx) -> dict:
     """Apply one accepted snapshot of a connected master. Returns counters."""
     stats: dict[str, int] = defaultdict(int)
     present: dict[int, PositionData] = {}
@@ -73,7 +74,7 @@ def process_master_snapshot(s: Session, master: Account, positions: list[Positio
         open_mps[mp.position_id] = mp  # latest open generation per position id
 
     deals = _unprocessed_deals(s, master.id, history) if history_synced else {}
-    snap = _Snap(s, master, ctx, rules, fan_out, ea_clock_offset_ms, stats)
+    snap = _Snap(s, master, ctx, rules, fan_out, ea_clock_offset_ms, broker_offset_ms, stats)
 
     # Closes first: a netting slot freed by a close in this snapshot is visible to the positions
     # opened in the same snapshot (close-then-reopen blocks behind the closing copy, 5.3).
@@ -115,15 +116,22 @@ def _unprocessed_deals(s: Session, account_id: int, history: list[dict[str, Any]
 
 class _Snap:
     def __init__(self, s: Session, master: Account, ctx: Ctx, rules: CloseRules, fan_out: bool,
-                 offset_ms: int, stats: dict[str, int]):
+                 offset_ms: int, broker_offset_ms: int | None, stats: dict[str, int]):
         self.s, self.master, self.ctx, self.rules = s, master, ctx, rules
         self.fan_out, self.offset_ms, self.stats = fan_out, offset_ms, stats
+        self.broker_offset_ms = broker_offset_ms
 
     # --- helpers ---------------------------------------------------------------------------------
     def after_start(self, d: Deal, mp: MasterPosition) -> bool:
         """The deal happened after this generation started (C1). Without a time it cannot be proven."""
         start = cmds.ms(mp.opened_at)
-        return d.time_msc is not None and (start is None or d.time_msc + self.offset_ms > start)
+        if d.time_msc is None:
+            return False
+        # Deal time is broker server time; generation start is Copy Server UTC. Convert:
+        # server = time_msc - broker_offset (-> EA UTC) + ea_clock_offset (-> server). An EA that
+        # does not report `broker_offset_ms` is treated as broker time == UTC (legacy behaviour).
+        server_ms = d.time_msc - (self.broker_offset_ms or 0) + self.offset_ms
+        return start is None or server_ms > start
 
     def record(self, d: Deal, mp: MasterPosition | None, effect: str) -> None:
         self.s.add(ProcessedDeal(account_id=self.master.id, deal=d.deal, position_id=d.position_id,

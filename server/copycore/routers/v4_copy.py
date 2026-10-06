@@ -276,7 +276,8 @@ async def master_snapshot(body: SnapshotIn, request: Request):
             fan_out = acct.status != "suspended" and not version_gated(acct, settings)
             stats = process_master_snapshot(
                 s, acct, positions, body.history, history_synced=body.history_synced,
-                ea_clock_offset_ms=body.ea_clock_offset_ms, fan_out=fan_out, rules=_close_rules(settings),
+                ea_clock_offset_ms=body.ea_clock_offset_ms, broker_offset_ms=body.broker_offset_ms,
+                fan_out=fan_out, rules=_close_rules(settings),
                 ctx=_ctx(settings, clock=request.app.state.clock))
         # connected=false: seq advances but positions are not acted on and absence is neither counted
         # nor reset (5.6: a disconnected terminal's view is not evidence).
