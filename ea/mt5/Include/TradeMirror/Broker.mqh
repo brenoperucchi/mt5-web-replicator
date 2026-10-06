@@ -51,7 +51,21 @@ long TmCommentCopyId(const string comment, bool &dashed)
    return StringToInteger(StringSubstr(comment, 1, i - 1));
   }
 
+bool TmAllDigits(const string s)
+  {
+   int n = StringLen(s);
+   if(n == 0)
+      return false;
+   for(int i = 0; i < n; i++)
+      if(StringGetCharacter(s, i) < '0' || StringGetCharacter(s, i) > '9')
+         return false;
+   return true;
+  }
+
 // True when the broker-side `actual` comment correlates with the command comment `expected`.
+// A digits-only suffix is the master position id written by a copier: it must be the expected one
+// or a truncation of it (c22-<other master id> is another copy that reused the same copy id, e.g.
+// from another Copy Server). A suffix with anything else in it was rewritten by the broker: prefix rule.
 bool TmCommentMatches(const string expected, const string actual)
   {
    bool expDashed, actDashed;
@@ -62,8 +76,53 @@ bool TmCommentMatches(const string expected, const string actual)
    if(got != want)
       return false;
    if(actDashed)
+     {
+      if(!expDashed)
+         return true;              // legacy command, broker appended a suffix
+      int ea = StringFind(actual, "-"), ee = StringFind(expected, "-");
+      string as = StringSubstr(actual, ea + 1), es = StringSubstr(expected, ee + 1);
+      if(TmAllDigits(as) && TmAllDigits(es))
+         return StringFind(es, as) == 0;
       return true;
+     }
    return !expDashed;              // bare c<id>: legacy command only
+  }
+
+//+------------------------------------------------------------------+
+//| Evidence time bound. Comment-correlated evidence (positions,     |
+//| history deals, orders) counts only when it is not older than the |
+//| command: a c<copy_id> on the account from before the command     |
+//| belongs to something else (another Copy Server, a reset          |
+//| sequence). Ids persisted in our own journal stay authoritative.  |
+//| Time bases: DEAL_TIME_MSC / POSITION_TIME_MSC / ORDER_TIME_SETUP_ |
+//| MSC are broker server time (the server's wall clock written as   |
+//| if it were UTC). Command issued_at is Copy Server UTC ms; the EA |
+//| journal created_ms is local UTC ms (TmNowMs). Conversion:        |
+//|   local = issued_at - ea_clock_offset (server_time - local)      |
+//|   broker = local + (TimeTradeServer - TimeGMT), rounded to 15 min|
+//| minus TM_EVIDENCE_SKEW_MS for clock skew.                        |
+//+------------------------------------------------------------------+
+#define TM_EVIDENCE_SKEW_MS    5000
+
+// broker server time - UTC, ms. Self-test: "now" on the fake clock is mapped onto the tester's broker clock,
+// which stays frozen during the run (every tester deal carries the same TimeCurrent).
+long TmBrokerOffsetMs(void)
+  {
+   if(g_tm_fake_now_ms > 0)
+      return (long)TimeCurrent() * 1000 - g_tm_fake_now_ms;
+   long d = (long)TimeTradeServer() - (long)TimeGMT();
+   return (long)MathRound(d / 900.0) * 900 * 1000;
+  }
+
+// Oldest broker-time ms a comment match may have for a command issued at `issuedServerMs` (Copy Server
+// clock; 0 = unknown, then `createdLocalMs`, the local UTC time the EA journaled it), given the EA clock
+// offset (server_time - local).
+long TmEvidenceFloor(const long issuedServerMs, const long createdLocalMs, const long clockOffsetMs)
+  {
+   long local = issuedServerMs > 0 ? issuedServerMs - clockOffsetMs : createdLocalMs;
+   if(local <= 0)
+      return 0;
+   return local + TmBrokerOffsetMs() - TM_EVIDENCE_SKEW_MS;
   }
 
 string TmDealEntry(const long e)
@@ -122,6 +181,7 @@ struct STmPosition
    double            tp;
    long              magic;
    string            comment;
+   long              time_msc;        // POSITION_TIME_MSC (broker time)
   };
 
 bool TmSelectPositionAt(const int i, STmPosition &p)
@@ -139,6 +199,7 @@ bool TmSelectPositionAt(const int i, STmPosition &p)
    p.tp = PositionGetDouble(POSITION_TP);
    p.magic = PositionGetInteger(POSITION_MAGIC);
    p.comment = PositionGetString(POSITION_COMMENT);
+   p.time_msc = PositionGetInteger(POSITION_TIME_MSC);
    return true;
   }
 
@@ -154,11 +215,13 @@ bool TmFindPositionById(const ulong positionId, STmPosition &p)
   }
 
 // Netting physical slot (4.4): any position on the symbol that this copy does not own.
-bool TmUnmanagedPositionOnSymbol(const string symbol, const string ownComment, const long ownMagic)
+// A position with our comment + magic opened before `floorMs` (broker time) is someone else's.
+bool TmUnmanagedPositionOnSymbol(const string symbol, const string ownComment, const long ownMagic, const long floorMs)
   {
    STmPosition p;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
-      if(TmSelectPositionAt(i, p) && p.symbol == symbol && !(TmCommentMatches(ownComment, p.comment) && p.magic == ownMagic))
+      if(TmSelectPositionAt(i, p) && p.symbol == symbol &&
+         !(TmCommentMatches(ownComment, p.comment) && p.magic == ownMagic && p.time_msc >= floorMs))
          return true;
    return false;
   }
@@ -201,14 +264,15 @@ void TmFillAlive(STmEvidence &e)
   }
 
 // Entry evidence of an open: persisted ids first (order, deal), then the c<copy_id> part of the comment + magic
-// over live positions, live orders and history deals.
+// over live positions, live orders and history deals, each no older than `floorMs` (broker time,
+// TmEvidenceFloor). Persisted ids are ours whatever their time.
 bool TmFindOpenEvidence(const string comment, const long magic, const ulong knownOrder, const ulong knownDeal,
-                        const long sinceMs, STmEvidence &e)
+                        const long floorMs, STmEvidence &e)
   {
    TmEvidenceReset(e);
    if(g_tm_hide_evidence)
       return false;
-   datetime from = (datetime)(MathMax(sinceMs / 1000 - 86400, (long)TimeCurrent() - TM_EVIDENCE_DAYS * 86400));
+   datetime from = (datetime)(MathMax(floorMs / 1000 - 86400, (long)TimeCurrent() - TM_EVIDENCE_DAYS * 86400));
    if(!HistorySelect(from, TimeCurrent() + 86400))
       return false;
    // 1. by persisted deal
@@ -246,7 +310,7 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
    // 3. live position with the correlation comment
    STmPosition p;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
-      if(TmSelectPositionAt(i, p) && TmCommentMatches(comment, p.comment) && p.magic == magic)
+      if(TmSelectPositionAt(i, p) && TmCommentMatches(comment, p.comment) && p.magic == magic && p.time_msc >= floorMs)
         {
          e.found = true;
          e.position_id = p.position_id;
@@ -281,6 +345,8 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
          continue;
       if(!TmCommentMatches(comment, HistoryDealGetString(d, DEAL_COMMENT)) || HistoryDealGetInteger(d, DEAL_MAGIC) != magic)
          continue;
+      if(HistoryDealGetInteger(d, DEAL_TIME_MSC) < floorMs)
+         continue;   // older than the command: not this copy's
       e.found = true;
       e.deal = d;
       e.order = (ulong)HistoryDealGetInteger(d, DEAL_ORDER);
@@ -295,7 +361,8 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
    for(int i = OrdersTotal() - 1; i >= 0; i--)
      {
       ulong o = OrderGetTicket(i);
-      if(o != 0 && TmCommentMatches(comment, OrderGetString(ORDER_COMMENT)) && OrderGetInteger(ORDER_MAGIC) == magic)
+      if(o != 0 && TmCommentMatches(comment, OrderGetString(ORDER_COMMENT)) && OrderGetInteger(ORDER_MAGIC) == magic &&
+         OrderGetInteger(ORDER_TIME_SETUP_MSC) >= floorMs)
         {
          e.order = o;
          return false;
@@ -476,6 +543,7 @@ string TmBuildSnapshot(const string sessionId, const long epoch, const long seq,
    w.Int("seq", seq);
    w.Int("taken_at", TmNowMs());
    w.Int("ea_clock_offset_ms", clockOffsetMs);
+   w.Int("broker_offset_ms", TmBrokerOffsetMs());   // deal/position time_msc - this = local UTC ms
    w.Bool("connected", TerminalInfoInteger(TERMINAL_CONNECTED) != 0);
    w.Int("login", AccountInfoInteger(ACCOUNT_LOGIN));
    w.Str("server", AccountInfoString(ACCOUNT_SERVER));

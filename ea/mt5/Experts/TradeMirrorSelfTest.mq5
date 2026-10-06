@@ -5,7 +5,8 @@
 //|  runs against an injected in-memory fake server (ITransport).    |
 //|  Covers S01-S06 (journal/outbox) and S24-S26 (transport, rotate, |
 //|  enroll), S27-S28 (comment correlation), S29 (latency schedule), |
-//|  S30 (per-server state files + migration), S31 (WebRequest errors). Real trades are placed on the tester symbol.           |
+//|  S30 (per-server state files + migration), S31 (WebRequest errors),
+//|  S32 (stale c<copy_id> from before the command is not evidence). Real trades are placed on the tester symbol.           |
 //|                                                                  |
 //|  Run: Strategy Tester, Expert = TradeMirrorSelfTest, a hedging   |
 //|  account, any liquid symbol (EURUSD), "Every tick", 1 day.       |
@@ -120,7 +121,7 @@ ulong PlaceRaw(const string comment)
    return PositionIdWithComment(comment);
   }
 
-string OpenCmd(const string id, const long copyId)
+string OpenCmd(const string id, const long copyId, const long issuedAt = 0)
   {
    MqlTick t;
    SymbolInfoTick(_Symbol, t);
@@ -142,7 +143,7 @@ string OpenCmd(const string id, const long copyId)
    w.Null("position_id");
    w.Int("magic", TestMagic);
    w.Str("comment", TestComment(copyId));
-   w.Int("issued_at", g_tm_fake_now_ms);
+   w.Int("issued_at", issuedAt > 0 ? issuedAt : g_tm_fake_now_ms);
    w.Int("expires_at", g_tm_fake_now_ms + 600000);
    w.EndObj();
    return w.Text();
@@ -412,6 +413,8 @@ void S27()
    Check("S27", TmCommentMatches("c13", "c13"), "legacy c<id>");
    Check("S27", TmCommentMatches("c13", "c13-5"), "legacy command, broker appended a suffix");
    Check("S27", !TmCommentMatches("c13", "c13x"), "legacy command, garbage after the digits");
+   Check("S27", !TmCommentMatches("c13-9001", "c13-9002"), "full comment, another master position id");
+   Check("S27", !TmCommentMatches("c13-9001", "c13-90011"), "full comment, longer master position id");
   }
 
 //--- S28: broker truncated/rewrote the comment suffix -> the open is found by c<copy_id> + magic,
@@ -449,6 +452,55 @@ void S28()
    S28Case("a", 9128, "c9128-7", true);               // suffix truncated
    S28Case("b", 9129, "c9129-x[sl]", true);           // suffix rewritten
    S28Case("c", 9130, "c9130", false);                // bare id: ambiguous for a long-form command
+  }
+
+//--- S32: a c<copy_id> already on the account from BEFORE the command (another Copy Server, a reset
+//    sequence: live 2026-10-06) is not evidence: the open is sent and done reports the NEW position.
+//    A truncated suffix seen after the command is still ours; a full comment with another master
+//    position id never is. `issuedOffsetMs` places the command's issued_at relative to the broker-side deal.
+void S32Case(const string tag, const long copyId, const string brokerComment, const bool closeIt,
+             const long issuedOffsetMs, const bool expectAdopt)
+  {
+   string scen = "S32" + tag;
+   ulong pid = PlaceRaw(brokerComment);
+   Check(scen, pid != 0, "broker-side position placed with comment " + brokerComment);
+   if(closeIt)
+      CloseAll();   // history deals only (S40 shape)
+   g_fake.Reset();
+   CTradeMirror *tm = NewEngine("s32" + tag, true);
+   UntilSession(tm);
+   string id = "c_s32" + tag;
+   // tester deals all carry the frozen broker time of this OnTick, which the fake clock maps to "now":
+   // a command issued after now makes the deal older than the command
+   g_fake.Queue(id, OpenCmd(id, copyId, g_tm_fake_now_ms + issuedOffsetMs));
+   Ticks(tm, 12);
+   string done = g_fake.LastResult(id, "done");
+   ulong fresh = PositionIdWithComment(TestComment(copyId));
+   if(expectAdopt)
+     {
+      Check(scen, fresh == 0, "no second order");
+      Check(scen, done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)pid)) >= 0,
+            "done with the existing position_id");
+     }
+   else
+     {
+      Check(scen, fresh != 0 && fresh != pid, "a real new order was placed");
+      Check(scen, done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)fresh)) >= 0,
+            "done reports the new position");
+      Check(scen, StringFind(done, "\"position_id\":" + IntegerToString((long)pid) + ",") < 0 &&
+                  StringFind(done, "\"position_id\":" + IntegerToString((long)pid) + "}") < 0,
+            "not correlated with the old position");
+     }
+   delete tm;
+   CloseAll();
+  }
+
+void S32()
+  {
+   S32Case("a", 9132, "c9132-7", false, 60000, false);        // stale live position, truncated-looking suffix
+   S32Case("b", 9133, "c9133-7", true, 60000, false);         // stale history deals only
+   S32Case("c", 9134, "c9134-70", false, -60000, true);       // truncated suffix after the command: ours
+   S32Case("d", 9135, "c9135-123456", false, -60000, false);  // full comment, another master id: not ours
   }
 
 //--- S29: latency scheduling with a short tick: the commands poll keeps its interval (not one call per tick),
@@ -641,7 +693,7 @@ void OnTick()
       return;
    g_done = true;
    g_tm_fake_now_ms = (long)TimeCurrent() * 1000;
-   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29(); S30(); S31();
+   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29(); S30(); S31(); S32();
    g_tm_fake_now_ms = 0;
    PrintFormat("TradeMirror self-test: %d passed, %d failed", g_passed, g_failed);
   }

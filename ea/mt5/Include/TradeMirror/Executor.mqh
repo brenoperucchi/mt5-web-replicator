@@ -22,6 +22,7 @@
 #include "Broker.mqh"
 
 #define TM_DEFAULT_DEVIATION     30
+#define TM_CANCEL_LOOKBACK_MS    3600000 // cancel without its open in the journal: evidence up to 1 h before it
 #define TM_UNCERTAIN_WINDOW_MS   20000   // keep re-checking a sent attempt this long before suspending
 #define TM_UNCERTAIN_MIN_CHECKS  3
 #define TM_VOL_EPS               0.0000001
@@ -274,6 +275,11 @@ private:
    //--- helpers on the command payload ---------------------------------------------------------
    long              Magic(CJson *j) { return j.Long("magic", 0); }
    string            Comment(CJson *j, const long copyId) { return j.Str("comment", "c" + IntegerToString(copyId)); }
+   // broker-time floor for comment evidence of this command (TmEvidenceFloor)
+   long              Floor(CJson *j, CJournalEntry *e)
+     {
+      return TmEvidenceFloor(j != NULL ? j.Long("issued_at", 0) : 0, e != NULL ? e.created_ms : 0, m_clockOffsetMs);
+     }
 
    //--- actions -----------------------------------------------------------------------------
    void              DoOpen(CTmCommand *c, CJournalEntry *e)
@@ -292,7 +298,8 @@ private:
         { ConfirmSimple(e, "expired", "expired", "open received after expires_at"); return; }
 
       // pre-send evidence (4.6 step 2): comment c<copy_id> + magic, persisted ids first
-      if(TmFindOpenEvidence(comment, magic, e.order, e.deal, j.Long("issued_at", e.created_ms), ev) && ev.position_id != 0)
+      long floor = Floor(j, e);
+      if(TmFindOpenEvidence(comment, magic, e.order, e.deal, floor, ev) && ev.position_id != 0)
         {
          Confirm(e, "done", ev, "", "found by evidence check; nothing sent", ev.volume, -1, symbol);
          return;
@@ -308,7 +315,7 @@ private:
         }
       if(!SymbolSelect(symbol, true) || !SymbolInfoInteger(symbol, SYMBOL_EXIST))
         { ConfirmSimple(e, "failed", "symbol_not_found", "symbol " + symbol + " not found on this account"); return; }
-      if(!m_hedging && TmUnmanagedPositionOnSymbol(symbol, comment, magic))
+      if(!m_hedging && TmUnmanagedPositionOnSymbol(symbol, comment, magic, floor))
         {
          TmLog.Alarm("netting slot on " + symbol + " is held by a position not managed by the copier: open refused");
          ConfirmSimple(e, "failed", "unmanaged_position_on_symbol", "position on " + symbol + " not managed by the copier");
@@ -352,7 +359,7 @@ private:
      {
       STmEvidence ev;
       string comment = Comment(j, e.copy_id);
-      if(!TmFindOpenEvidence(comment, Magic(j), e.order, e.deal, e.created_ms, ev) || ev.position_id == 0)
+      if(!TmFindOpenEvidence(comment, Magic(j), e.order, e.deal, Floor(j, e), ev) || ev.position_id == 0)
          return false;
       Confirm(e, "done", ev, "", "", ev.volume, -1, j.Str("symbol"));
       ApplyStops(ev.position_id, j.Dbl("sl", 0), j.Dbl("tp", 0));
@@ -545,14 +552,18 @@ private:
       STmEvidence ev;
       string comment = Comment(j, c.copy_id);
       ulong knownOrder = 0, knownDeal = 0;
-      long since = e.created_ms;
+      // the open never reached this journal: it was issued before the cancel, within TM_CANCEL_LOOKBACK_MS
+      long floor = Floor(j, e) - TM_CANCEL_LOOKBACK_MS;
       if(oe != NULL)
         {
          knownOrder = oe.order;
          knownDeal = oe.deal;
-         since = oe.created_ms;
+         CJson *oj = JsonParse(oe.command);
+         floor = Floor(oj, oe);
+         if(oj != NULL)
+            delete oj;
         }
-      bool found = TmFindOpenEvidence(comment, Magic(j), knownOrder, knownDeal, since, ev) && ev.position_id != 0;
+      bool found = TmFindOpenEvidence(comment, Magic(j), knownOrder, knownDeal, floor, ev) && ev.position_id != 0;
       if(!found && oe != NULL && oe.position_id != 0)
         {
          found = true;
