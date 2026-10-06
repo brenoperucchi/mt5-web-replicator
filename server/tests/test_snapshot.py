@@ -52,13 +52,13 @@ def test_new_position_one_open_command_per_enabled_link(cp, app):
         assert c["action"] == "open" and c["side"] == "buy" and c["symbol"] == "EURUSD"
         assert c["volume"] == 0.2 and c["master_price"] == 1.2345 and c["magic"] == 7
         assert c["max_entry_deviation_points"] == 150 and c["max_slippage_points"] == 30
-        assert c["comment"] == f"c{c['copy_id']}" and c["seq_in_copy"] == 1 and c["position_id"] is None
+        assert c["comment"] == f"c{c['copy_id']}-9001" and c["seq_in_copy"] == 1 and c["position_id"] is None
         assert c["expires_at"] - c["issued_at"] == 30_000  # OPEN_TTL_SECONDS
         assert c["attempt_id"].startswith("a_") and c["command_id"].startswith("c_")
     assert cp.poll(off)["commands"] == []
     copies = cp.copies()
     assert len(copies) == 2 and {c["state"] for c in copies} == {"pending"}
-    assert copies[0]["exec_params"]["comment"] == f"c{copies[0]['id']}"
+    assert copies[0]["exec_params"]["comment"] == f"c{copies[0]['id']}-9001"
     assert len(events(app, "copy.pending")) == 2 and len(events(app, "master_position.opened")) == 1
 
 
@@ -295,14 +295,17 @@ def test_exclude_copier_positions(cp, app):
                headers=admin_headers())
     c_slave = cp.account("slave", 888)
     cp.link(cp.group(b_master["id"])["id"], c_slave["id"])
-    cp.snapshot(b_master, [pos(55, magic=4242, comment=f"c{copy_id}"),  # the copier's own position
-                           pos(56, magic=4242, comment="c999999"),  # unknown copy id: a real trade
-                           pos(57, magic=1, comment=f"c{copy_id}")])  # wrong magic: a real trade
+    cp.snapshot(b_master, [pos(55, magic=4242, comment=f"c{copy_id}-1"),  # the copier's own position
+                           pos(54, magic=4242, comment=f"c{copy_id}-"),  # same, suffix truncated by the broker
+                           pos(56, magic=4242, comment="c999999-1"),  # unknown copy id: a real trade
+                           pos(57, magic=1, comment=f"c{copy_id}-1"),  # wrong magic: a real trade
+                           pos(58, magic=4242, comment=f"c{copy_id}")])  # bare id for a long-form copy: ambiguous
     assert sorted(c["comment"] for c in cp.poll(c_slave)["commands"]) == [
-        f"c{x['id']}" for x in sorted(cp.copies(slave_id=c_slave["id"]), key=lambda x: x["id"])]
+        f"c{x['id']}-{pid}" for x, pid in zip(sorted(cp.copies(slave_id=c_slave["id"]), key=lambda x: x["id"]),
+                                              (56, 57, 58), strict=True)]
     with app.state.sessionmaker() as s:
         ids = set(s.scalars(select(MasterPosition.position_id).where(MasterPosition.master_id == b_master["id"])))
-    assert ids == {56, 57}
+    assert ids == {56, 57, 58}
 
 
 # --- raw storage (5.9) ----------------------------------------------------------------------------

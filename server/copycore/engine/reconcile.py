@@ -2,7 +2,8 @@
 
 Runs inline in `POST /v4/slave/snapshot` for this slave's copies:
 
-1. **Adoption (5.8):** a position (or a history `in` deal) with comment `c<copy_id>` and the copy's
+1. **Adoption (5.8):** a position (or a history `in` deal) whose comment correlates with `c<copy_id>`
+   (`engine.correlation`: `c<copy_id>-<master position_id>` or legacy `c<copy_id>`) and the copy's
    frozen magic, for a copy without `position_id` in `pending/cancel_requested/uncertain/error/cancelled`
    younger than 7 days → the copy gets the ids; master open → `open`; master closed → `closing` +
    `close`; an exit deal for it in history → `closed`. A reservation that cannot be taken →
@@ -27,7 +28,6 @@ TODO(PR: background worker): adoption sweep for copies older than the 7-day inli
 
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
@@ -39,6 +39,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..models import Account, Copy
+from . import correlation
 from .fanout import NETTING_RESERVING, PositionData, slot_holder
 from .lifecycle import (
     Ctx,
@@ -51,7 +52,6 @@ from .lifecycle import (
 )
 from .results import pending_not_found
 
-COMMENT = re.compile(r"^c(\d+)$")
 ADOPTABLE = ("pending", "cancel_requested", "uncertain", "error", "cancelled")
 ADOPTION_WINDOW = timedelta(days=7)
 NOT_FOUND_SNAPSHOTS = 3
@@ -99,12 +99,12 @@ def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], h
     for d in deals:
         if d.entry in EXIT_ENTRIES and d.position_id is not None:
             exits[d.position_id].append(d)
-        elif d.entry == "in" and (m := COMMENT.match(d.comment)):
-            entries_by_copy[int(m.group(1))].append(d)
+        elif d.entry == "in" and (cid := correlation.candidate_copy_id(d.comment)) is not None:
+            entries_by_copy[cid].append(d)
     positions_by_copy: dict[int, list[PositionData]] = defaultdict(list)
     for p in positions:
-        if m := COMMENT.match(p.comment or ""):
-            positions_by_copy[int(m.group(1))].append(p)
+        if (cid := correlation.candidate_copy_id(p.comment)) is not None:
+            positions_by_copy[cid].append(p)
 
     # 1 + 2: correlation by comment c<copy_id> + frozen magic (5.8a).
     correlated: set[int] = set()
@@ -112,8 +112,8 @@ def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], h
         copy = s.get(Copy, copy_id)
         if copy is None or copy.slave_id != slave.id:
             continue
-        magic = (copy.exec_params or {}).get("magic")
-        hits = sorted((p for p in plist if p.magic == magic), key=lambda p: p.position_id)
+        hits = sorted((p for p in plist if correlation.matches(copy.exec_params, copy.id, p.comment, p.magic)),
+                      key=lambda p: p.position_id)
         if not hits:
             continue
         correlated.update(p.position_id for p in hits)
@@ -133,8 +133,8 @@ def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], h
         copy = s.get(Copy, copy_id)
         if copy is None or copy.slave_id != slave.id or copy.position_id is not None:
             continue
-        magic = (copy.exec_params or {}).get("magic")
-        hit = next((d for d in dlist if d.magic == magic and d.position_id is not None), None)
+        hit = next((d for d in dlist if correlation.matches(copy.exec_params, copy.id, d.comment, d.magic)
+                    and d.position_id is not None), None)
         if hit is None or copy.state not in ADOPTABLE or not _recent(copy, ctx):
             continue
         _adopt(s, copy, Fill(position_id=hit.position_id, deal=hit.deal, price=hit.price, volume=hit.volume),
@@ -223,11 +223,12 @@ def _ours(s: Session, slave_id: int, p: PositionData) -> bool:
     if s.scalar(select(Copy.id).where(Copy.slave_id == slave_id, Copy.position_id == p.position_id,
                                       Copy.state.in_((*NETTING_RESERVING, "superseded"))).limit(1)):
         return True
-    m = COMMENT.match(p.comment or "")
-    if not m:
+    copy_id = correlation.candidate_copy_id(p.comment)
+    if copy_id is None:
         return False
-    copy = s.get(Copy, int(m.group(1)))
-    return copy is not None and copy.slave_id == slave_id and (copy.exec_params or {}).get("magic") == p.magic
+    copy = s.get(Copy, copy_id)
+    return copy is not None and copy.slave_id == slave_id and correlation.matches(copy.exec_params, copy.id,
+                                                                                    p.comment, p.magic)
 
 
 def _exit(exits: dict[int, list[Deal]], position_id: int | None) -> Deal | None:
