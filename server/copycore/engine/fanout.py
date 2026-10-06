@@ -6,7 +6,6 @@ lives in `engine.master`. Business conflicts never raise: each copy gets its own
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from decimal import Decimal
 
@@ -25,13 +24,13 @@ from ..models import (
     SymbolSpec,
 )
 from . import commands as cmds
+from . import correlation
 from .lots import calc_lot
 from .symbols import resolve_symbol
 
 NETTING_RESERVING = ("pending", "open", "cancel_requested", "closing", "uncertain")
 # A predecessor of the same link in these states is being taken off the slot (close-then-reopen, 5.3).
 LEAVING_SLOT = ("closing", "cancel_requested")
-COPIER_COMMENT = re.compile(r"^c(\d+)$")
 
 
 @dataclass
@@ -56,16 +55,16 @@ def account_drained(acct: Account, gated: bool) -> bool:
 def is_copier_position(s: Session, master: Account, pos: PositionData) -> bool:
     """`exclude_copier_positions` (5.3): comment `c<id>` of a copy whose slave is this same terminal
     (same broker server + login) and whose frozen magic matches."""
-    m = COPIER_COMMENT.match(pos.comment or "")
-    if not m:
+    copy_id = correlation.candidate_copy_id(pos.comment)
+    if copy_id is None:
         return False
-    copy = s.get(Copy, int(m.group(1)))
+    copy = s.get(Copy, copy_id)
     if copy is None:
         return False
     slave = s.get(Account, copy.slave_id)
     if slave is None or (slave.broker_server_norm, slave.login) != (master.broker_server_norm, master.login):
         return False
-    return (copy.exec_params or {}).get("magic") == pos.magic
+    return correlation.matches(copy.exec_params, copy.id, pos.comment, pos.magic)
 
 
 def enabled_links(s: Session, master_id: int) -> list[tuple[CopyLink, CopyGroup]]:
@@ -211,9 +210,10 @@ def fan_out_one(s: Session, master: Account, mp: MasterPosition, pair: tuple[Cop
 def issue_open(s: Session, copy: Copy, mp: MasterPosition, link: CopyLink, volume: Decimal, *, magic: int | None,
                ttl_seconds: int):
     """Freeze execution params on the copy and issue its `open` (4.4, C6)."""
+    comment = correlation.build_comment(copy.id, mp.position_id)
     copy.exec_params = {
         "symbol": copy.symbol_local, "side": mp.type, "volume": str(volume), "magic": magic,
-        "comment": f"c{copy.id}", "max_slippage_points": link.max_slippage_points,
+        "comment": comment, "max_slippage_points": link.max_slippage_points,
         "max_entry_deviation_points": link.max_entry_deviation_points,
         "master_price": str(mp.price_open) if mp.price_open is not None else None,
         # Master volume this copy was sized from: base of its proportional reductions (5.4).
@@ -223,7 +223,7 @@ def issue_open(s: Session, copy: Copy, mp: MasterPosition, link: CopyLink, volum
         "symbol": copy.symbol_local, "side": mp.type, "volume": volume, "master_price": mp.price_open,
         "sl": copy.sl, "tp": copy.tp, "max_slippage_points": link.max_slippage_points,
         "max_entry_deviation_points": link.max_entry_deviation_points, "position_id": None,
-        "magic": magic, "comment": f"c{copy.id}",
+        "magic": magic, "comment": comment,
     }, ttl_seconds=ttl_seconds)
     s.add(Event(type="copy.pending", payload={"copy_id": copy.id, "command_id": cmd.id, "link_id": link.id,
                                               "slave_id": copy.slave_id, "symbol": copy.symbol_local,

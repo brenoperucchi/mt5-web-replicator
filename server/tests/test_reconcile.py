@@ -17,9 +17,10 @@ def events(app, type_):
         return [e.payload for e in s.scalars(select(Event).where(Event.type == type_).order_by(Event.id))]
 
 
-def spos(position_id, copy_id, magic=0, symbol="EURUSD", volume=1.0, comment=None):
+def spos(position_id, copy_id, magic=0, symbol="EURUSD", volume=1.0, comment=None, master_pid=1):
+    """Slave position carrying the copier comment `c<copy_id>-<master position_id>`."""
     return pos(position_id, symbol=symbol, volume=volume, magic=magic,
-               comment=comment if comment is not None else f"c{copy_id}")
+               comment=comment if comment is not None else f"c{copy_id}-{master_pid}")
 
 
 # --- fencing ---------------------------------------------------------------------------------------
@@ -117,7 +118,7 @@ def test_s40_adoption_from_history_already_closed(cp, app):
     cp.snapshot(master, [pos(1)])
     (c,) = cp.poll(sl)["commands"]
     cp.results(sl, [res(c, "uncertain")])
-    hist = [deal(10, 7001, "in", comment=f"c{c['copy_id']}"), deal(11, 7001, "out", reason="client", profit=-3)]
+    hist = [deal(10, 7001, "in", comment=f"c{c['copy_id']}-1"), deal(11, 7001, "out", reason="client", profit=-3)]
     cp.slave_snapshot(sl, [], hist)
     got = copy_of(cp, c["copy_id"])
     assert (got["state"], got["position_id"], got["close_deal"], got["close_reason"]) == (
@@ -126,7 +127,7 @@ def test_s40_adoption_from_history_already_closed(cp, app):
     cp.snapshot(master, [pos(1), pos(2)])
     (c2,) = [x for x in cp.poll(sl)["commands"] if x["copy_id"] != c["copy_id"]]
     cp.results(sl, [res(c2, "uncertain")])
-    cp.slave_snapshot(sl, [], [deal(20, 7002, "in", comment=f"c{c2['copy_id']}")], history_synced=False)
+    cp.slave_snapshot(sl, [], [deal(20, 7002, "in", comment=f"c{c2['copy_id']}-1")], history_synced=False)
     assert copy_of(cp, c2["copy_id"])["state"] == "uncertain"
 
 
@@ -255,7 +256,7 @@ def test_s11_successor_promoted_after_close_confirmed(cp, app):
     got = copy_of(cp, blocked["id"])
     assert got["state"] == "pending" and got["blocked_by"] is None
     (op,) = cp.poll(sl)["commands"]
-    assert (op["action"], op["copy_id"], op["comment"]) == ("open", blocked["id"], f"c{blocked['id']}")
+    assert (op["action"], op["copy_id"], op["comment"]) == ("open", blocked["id"], f"c{blocked['id']}-2")
     assert len(events(app, "copy.promoted")) == 1
 
 

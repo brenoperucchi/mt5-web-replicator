@@ -12,7 +12,7 @@ positions (lots, symbol maps, filters, netting admission), command delivery with
 PR 3 adds command results (copy state separate from command status, one result per
 `(command_id, attempt_id)`, new attempts for rejected close/cancel), the slave snapshot with the
 same session/seq fencing as the master, reconciliation (slave-side closes, `position_not_found`),
-adoption by comment `c<copy_id>` + magic, duplicate siblings, `symbol_conflicts`, and promotion of
+adoption by the `c<copy_id>` part of the comment `c<copy_id>-<master position_id>` + magic, duplicate siblings, `symbol_conflicts`, and promotion of
 the blocked netting successor.
 PR 4 adds master close detection (fast path by history exit deal, guarded absence path with the
 mass-disappearance guard, epoch-aware timers), the 5.5 "master closed" transitions, proportional
