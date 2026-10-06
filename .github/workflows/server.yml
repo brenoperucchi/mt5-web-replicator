@@ -6,12 +6,14 @@ on:
     paths:
       - "server/**"
       - "docs/protocol/**"
+      - "ea/mt5/**"
       - ".github/workflows/server.yml"
   push:
     branches: [master]
     paths:
       - "server/**"
       - "docs/protocol/**"
+      - "ea/mt5/**"
       - ".github/workflows/server.yml"
 
 permissions:

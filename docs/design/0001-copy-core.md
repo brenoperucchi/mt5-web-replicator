@@ -2,6 +2,7 @@
 
 - **Status:** Phase 0 — Approved (2026-10-05). Revision 4 (after scout verification of revision 3), Phase 0 of #77
 - **Decision log:** 2026-10-05 — approved by the owner without further review rounds; residual risks are covered by the Phase 1 scenario gate (section 8).
+- **Naming:** 2026-10-05 — the product is named **TradeMirror** (#78): the EA is `ea/mt5/Experts/TradeMirror.mq5`; the Copy Server's Python package stays `copycore`; the repository keeps its name (Q1).
 - **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket, fixed by PR #81), #64 (shared API core), #66 (latency/slippage)
 - **Reviewers:** the mt5 reviewers. Each numbered **Decision (Dn)** below can be approved or rejected on its own.
 

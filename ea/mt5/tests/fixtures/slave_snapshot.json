@@ -1,0 +1,45 @@
+{
+ "session_id": "{{session_id}}",
+ "epoch": "{{#epoch}}",
+ "seq": "{{#seq}}",
+ "taken_at": "{{#now}}",
+ "ea_clock_offset_ms": 35,
+ "connected": true,
+ "login": "{{#login}}",
+ "server": "{{server}}",
+ "history_synced": true,
+ "positions": [
+  {
+   "position_ticket": "{{#position_id}}",
+   "position_id": "{{#position_id}}",
+   "symbol": "EURUSD",
+   "type": "buy",
+   "volume": 1,
+   "price_open": 1.10031,
+   "sl": null,
+   "tp": null,
+   "magic": "{{#magic}}",
+   "comment": "{{comment}}",
+   "time_msc": "{{#now}}"
+  }
+ ],
+ "pending": [],
+ "history": [
+  {
+   "deal": "{{#deal}}",
+   "order": "{{#order}}",
+   "position_id": "{{#position_id}}",
+   "entry": "in",
+   "reason": "expert",
+   "symbol": "EURUSD",
+   "volume": 1,
+   "price": 1.10031,
+   "profit": 0,
+   "commission": -3.5,
+   "swap": 0,
+   "magic": "{{#magic}}",
+   "comment": "{{comment}}",
+   "time_msc": "{{#now}}"
+  }
+ ]
+}

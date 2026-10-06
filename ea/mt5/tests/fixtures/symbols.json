@@ -1,0 +1,21 @@
+{
+ "symbols": [
+  {
+   "name": "EURUSD",
+   "volume_min": 0.01,
+   "volume_step": 0.01,
+   "volume_max": 100,
+   "contract_size": 100000,
+   "digits": 5,
+   "point": 1e-05,
+   "tick_size": 1e-05,
+   "trade_mode": "full",
+   "filling_modes": [
+    "fok",
+    "ioc"
+   ],
+   "stops_level": 0,
+   "freeze_level": 0
+  }
+ ]
+}

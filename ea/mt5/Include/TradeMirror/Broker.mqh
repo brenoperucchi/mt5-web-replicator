@@ -1,0 +1,515 @@
+//+------------------------------------------------------------------+
+//| TradeMirror - terminal state: snapshots, symbol specs, evidence  |
+//| lookups by position id / order / deal / comment+magic            |
+//+------------------------------------------------------------------+
+#ifndef TRADEMIRROR_BROKER_MQH
+#define TRADEMIRROR_BROKER_MQH
+
+#include "Json.mqh"
+#include "Util.mqh"
+
+#define TM_HISTORY_MIN_DEALS   30
+#define TM_EVIDENCE_DAYS       7
+
+// Test seam (self-test EA only): pretend the broker rewrote the comment and the ids are unknown,
+// i.e. no evidence is visible (S04 / S39). Never set by the production EA.
+bool g_tm_hide_evidence = false;
+
+string TmSide(const long type) { return type == POSITION_TYPE_BUY ? "buy" : "sell"; }
+
+string TmDealEntry(const long e)
+  {
+   switch((int)e)
+     {
+      case DEAL_ENTRY_IN:    return "in";
+      case DEAL_ENTRY_OUT:   return "out";
+      case DEAL_ENTRY_INOUT: return "inout";
+      case DEAL_ENTRY_OUT_BY:return "out_by";
+     }
+   return "unknown";
+  }
+
+string TmDealReason(const long r)
+  {
+   switch((int)r)
+     {
+      case DEAL_REASON_CLIENT:   return "client";
+      case DEAL_REASON_MOBILE:   return "mobile";
+      case DEAL_REASON_WEB:      return "web";
+      case DEAL_REASON_EXPERT:   return "expert";
+      case DEAL_REASON_SL:       return "sl";
+      case DEAL_REASON_TP:       return "tp";
+      case DEAL_REASON_SO:       return "so";
+      case DEAL_REASON_ROLLOVER: return "rollover";
+      case DEAL_REASON_VMARGIN:  return "vmargin";
+      case DEAL_REASON_SPLIT:    return "split";
+     }
+   return "other";
+  }
+
+bool TmIsTradeDeal(const ulong deal)
+  {
+   long t = HistoryDealGetInteger(deal, DEAL_TYPE);
+   return t == DEAL_TYPE_BUY || t == DEAL_TYPE_SELL;
+  }
+
+bool TmIsHedging(void)
+  {
+   return AccountInfoInteger(ACCOUNT_MARGIN_MODE) == ACCOUNT_MARGIN_MODE_RETAIL_HEDGING;
+  }
+
+//+------------------------------------------------------------------+
+//| Positions                                                        |
+//+------------------------------------------------------------------+
+struct STmPosition
+  {
+   ulong             ticket;
+   ulong             position_id;
+   string            symbol;
+   long              type;
+   double            volume;
+   double            price_open;
+   double            sl;
+   double            tp;
+   long              magic;
+   string            comment;
+  };
+
+bool TmSelectPositionAt(const int i, STmPosition &p)
+  {
+   ulong ticket = PositionGetTicket(i);
+   if(ticket == 0)
+      return false;
+   p.ticket = ticket;
+   p.position_id = (ulong)PositionGetInteger(POSITION_IDENTIFIER);
+   p.symbol = PositionGetString(POSITION_SYMBOL);
+   p.type = PositionGetInteger(POSITION_TYPE);
+   p.volume = PositionGetDouble(POSITION_VOLUME);
+   p.price_open = PositionGetDouble(POSITION_PRICE_OPEN);
+   p.sl = PositionGetDouble(POSITION_SL);
+   p.tp = PositionGetDouble(POSITION_TP);
+   p.magic = PositionGetInteger(POSITION_MAGIC);
+   p.comment = PositionGetString(POSITION_COMMENT);
+   return true;
+  }
+
+// The current ticket for a stable POSITION_IDENTIFIER (tickets may change, 4.4).
+bool TmFindPositionById(const ulong positionId, STmPosition &p)
+  {
+   if(positionId == 0)
+      return false;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+      if(TmSelectPositionAt(i, p) && p.position_id == positionId)
+         return true;
+   return false;
+  }
+
+// Netting physical slot (4.4): any position on the symbol that this copy does not own.
+bool TmUnmanagedPositionOnSymbol(const string symbol, const string ownComment, const long ownMagic)
+  {
+   STmPosition p;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+      if(TmSelectPositionAt(i, p) && p.symbol == symbol && !(p.comment == ownComment && p.magic == ownMagic))
+         return true;
+   return false;
+  }
+
+//+------------------------------------------------------------------+
+//| Evidence (4.6 step 2 / step 6)                                   |
+//+------------------------------------------------------------------+
+struct STmEvidence
+  {
+   bool              found;
+   ulong             order;
+   ulong             deal;
+   ulong             position_id;
+   ulong             position_ticket;
+   double            volume;          // entry volume (open) / exit volume (close)
+   double            price;
+   double            profit;
+   double            commission;
+   double            swap;
+   long              time_msc;
+   bool              position_alive;
+   double            position_volume;
+  };
+
+void TmEvidenceReset(STmEvidence &e)
+  {
+   e.found = false; e.order = 0; e.deal = 0; e.position_id = 0; e.position_ticket = 0; e.volume = 0; e.price = 0;
+   e.profit = 0; e.commission = 0; e.swap = 0; e.time_msc = 0; e.position_alive = false; e.position_volume = 0;
+  }
+
+void TmFillAlive(STmEvidence &e)
+  {
+   STmPosition p;
+   if(TmFindPositionById(e.position_id, p))
+     {
+      e.position_alive = true;
+      e.position_ticket = p.ticket;
+      e.position_volume = p.volume;
+     }
+  }
+
+// Entry evidence of an open: persisted ids first (order, deal), then comment c<copy_id> + magic
+// over live positions, live orders and history deals.
+bool TmFindOpenEvidence(const string comment, const long magic, const ulong knownOrder, const ulong knownDeal,
+                        const long sinceMs, STmEvidence &e)
+  {
+   TmEvidenceReset(e);
+   if(g_tm_hide_evidence)
+      return false;
+   datetime from = (datetime)(MathMax(sinceMs / 1000 - 86400, (long)TimeCurrent() - TM_EVIDENCE_DAYS * 86400));
+   if(!HistorySelect(from, TimeCurrent() + 86400))
+      return false;
+   // 1. by persisted deal
+   if(knownDeal != 0 && HistoryDealSelect(knownDeal))
+     {
+      e.found = true;
+      e.deal = knownDeal;
+      e.order = (ulong)HistoryDealGetInteger(knownDeal, DEAL_ORDER);
+      e.position_id = (ulong)HistoryDealGetInteger(knownDeal, DEAL_POSITION_ID);
+      e.volume = HistoryDealGetDouble(knownDeal, DEAL_VOLUME);
+      e.price = HistoryDealGetDouble(knownDeal, DEAL_PRICE);
+      e.time_msc = HistoryDealGetInteger(knownDeal, DEAL_TIME_MSC);
+      TmFillAlive(e);
+      return true;
+     }
+   // 2. by persisted order: its deals
+   if(knownOrder != 0)
+     {
+      for(int i = HistoryDealsTotal() - 1; i >= 0; i--)
+        {
+         ulong d = HistoryDealGetTicket(i);
+         if(d == 0 || (ulong)HistoryDealGetInteger(d, DEAL_ORDER) != knownOrder)
+            continue;
+         e.found = true;
+         e.deal = d;
+         e.order = knownOrder;
+         e.position_id = (ulong)HistoryDealGetInteger(d, DEAL_POSITION_ID);
+         e.volume = HistoryDealGetDouble(d, DEAL_VOLUME);
+         e.price = HistoryDealGetDouble(d, DEAL_PRICE);
+         e.time_msc = HistoryDealGetInteger(d, DEAL_TIME_MSC);
+         TmFillAlive(e);
+         return true;
+        }
+     }
+   // 3. live position with the correlation comment
+   STmPosition p;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+      if(TmSelectPositionAt(i, p) && p.comment == comment && p.magic == magic)
+        {
+         e.found = true;
+         e.position_id = p.position_id;
+         e.position_ticket = p.ticket;
+         e.position_alive = true;
+         e.position_volume = p.volume;
+         e.volume = p.volume;
+         e.price = p.price_open;
+         // the entry deal, when history has it
+         if(HistorySelectByPosition(p.position_id))
+            for(int k = 0; k < HistoryDealsTotal(); k++)
+              {
+               ulong d = HistoryDealGetTicket(k);
+               if(d != 0 && HistoryDealGetInteger(d, DEAL_ENTRY) == DEAL_ENTRY_IN)
+                 {
+                  e.deal = d;
+                  e.order = (ulong)HistoryDealGetInteger(d, DEAL_ORDER);
+                  e.time_msc = HistoryDealGetInteger(d, DEAL_TIME_MSC);
+                  break;
+                 }
+              }
+         return true;
+        }
+   // 4. history entry deal with the comment (position may already be closed: S40)
+   HistorySelect(from, TimeCurrent() + 86400);
+   for(int i = HistoryDealsTotal() - 1; i >= 0; i--)
+     {
+      ulong d = HistoryDealGetTicket(i);
+      if(d == 0 || !TmIsTradeDeal(d))
+         continue;
+      if(HistoryDealGetInteger(d, DEAL_ENTRY) != DEAL_ENTRY_IN)
+         continue;
+      if(HistoryDealGetString(d, DEAL_COMMENT) != comment || HistoryDealGetInteger(d, DEAL_MAGIC) != magic)
+         continue;
+      e.found = true;
+      e.deal = d;
+      e.order = (ulong)HistoryDealGetInteger(d, DEAL_ORDER);
+      e.position_id = (ulong)HistoryDealGetInteger(d, DEAL_POSITION_ID);
+      e.volume = HistoryDealGetDouble(d, DEAL_VOLUME);
+      e.price = HistoryDealGetDouble(d, DEAL_PRICE);
+      e.time_msc = HistoryDealGetInteger(d, DEAL_TIME_MSC);
+      TmFillAlive(e);
+      return true;
+     }
+   // 5. a live (not yet filled) order with the comment: execution in flight, not conclusive
+   for(int i = OrdersTotal() - 1; i >= 0; i--)
+     {
+      ulong o = OrderGetTicket(i);
+      if(o != 0 && OrderGetString(ORDER_COMMENT) == comment && OrderGetInteger(ORDER_MAGIC) == magic)
+        {
+         e.order = o;
+         return false;
+        }
+     }
+   return false;
+  }
+
+// Exit evidence for a position id: every out/out_by deal (sums volume, profit, fees).
+// `afterMs` > 0 restricts to deals at or after that time (only this attempt's effect).
+bool TmFindExitDeals(const ulong positionId, const long afterMs, STmEvidence &e)
+  {
+   TmEvidenceReset(e);
+   if(g_tm_hide_evidence || positionId == 0)
+      return false;
+   e.position_id = positionId;
+   if(!HistorySelectByPosition((long)positionId))
+      return false;
+   for(int i = 0; i < HistoryDealsTotal(); i++)
+     {
+      ulong d = HistoryDealGetTicket(i);
+      if(d == 0)
+         continue;
+      long entry = HistoryDealGetInteger(d, DEAL_ENTRY);
+      if(entry != DEAL_ENTRY_OUT && entry != DEAL_ENTRY_OUT_BY)
+         continue;
+      long t = HistoryDealGetInteger(d, DEAL_TIME_MSC);
+      if(afterMs > 0 && t < afterMs)
+         continue;
+      e.found = true;
+      e.deal = d;                   // last exit deal
+      e.order = (ulong)HistoryDealGetInteger(d, DEAL_ORDER);
+      e.volume += HistoryDealGetDouble(d, DEAL_VOLUME);
+      e.price = HistoryDealGetDouble(d, DEAL_PRICE);
+      e.profit += HistoryDealGetDouble(d, DEAL_PROFIT);
+      e.commission += HistoryDealGetDouble(d, DEAL_COMMISSION);
+      e.swap += HistoryDealGetDouble(d, DEAL_SWAP);
+      e.time_msc = t;
+     }
+   TmFillAlive(e);
+   return e.found;
+  }
+
+// Deals of one order (close/close_partial by persisted order id).
+bool TmFindDealsOfOrder(const ulong order, STmEvidence &e)
+  {
+   TmEvidenceReset(e);
+   if(g_tm_hide_evidence || order == 0)
+      return false;
+   if(!HistorySelect(TimeCurrent() - TM_EVIDENCE_DAYS * 86400, TimeCurrent() + 86400))
+      return false;
+   for(int i = HistoryDealsTotal() - 1; i >= 0; i--)
+     {
+      ulong d = HistoryDealGetTicket(i);
+      if(d == 0 || (ulong)HistoryDealGetInteger(d, DEAL_ORDER) != order)
+         continue;
+      e.found = true;
+      e.deal = d;
+      e.order = order;
+      e.position_id = (ulong)HistoryDealGetInteger(d, DEAL_POSITION_ID);
+      e.volume += HistoryDealGetDouble(d, DEAL_VOLUME);
+      e.price = HistoryDealGetDouble(d, DEAL_PRICE);
+      e.profit += HistoryDealGetDouble(d, DEAL_PROFIT);
+      e.commission += HistoryDealGetDouble(d, DEAL_COMMISSION);
+      e.swap += HistoryDealGetDouble(d, DEAL_SWAP);
+      e.time_msc = HistoryDealGetInteger(d, DEAL_TIME_MSC);
+     }
+   if(e.found)
+      TmFillAlive(e);
+   return e.found;
+  }
+
+//+------------------------------------------------------------------+
+//| Snapshot body (4.3)                                              |
+//+------------------------------------------------------------------+
+void TmWritePositions(CJsonWriter &w)
+  {
+   w.BeginArr("positions");
+   STmPosition p;
+   for(int i = 0; i < PositionsTotal(); i++)
+     {
+      if(!TmSelectPositionAt(i, p))
+         continue;
+      int digits = (int)SymbolInfoInteger(p.symbol, SYMBOL_DIGITS);
+      w.BeginObj();
+      w.Int("position_ticket", (long)p.ticket);
+      w.Int("position_id", (long)p.position_id);
+      w.Str("symbol", p.symbol);
+      w.Str("type", TmSide(p.type));
+      w.Num("volume", p.volume);
+      w.Num("price_open", p.price_open, digits);
+      w.NumOrNull("sl", p.sl, digits);
+      w.NumOrNull("tp", p.tp, digits);
+      w.Int("magic", p.magic);
+      w.Str("comment", p.comment);
+      w.Int("time_msc", PositionGetInteger(POSITION_TIME_MSC));
+      w.EndObj();
+     }
+   w.EndArr();
+  }
+
+void TmWritePending(CJsonWriter &w)
+  {
+   // Reported only; ignored for fan-out in Phase 1 (5.3a).
+   w.BeginArr("pending");
+   for(int i = 0; i < OrdersTotal(); i++)
+     {
+      ulong o = OrderGetTicket(i);
+      if(o == 0)
+         continue;
+      string sym = OrderGetString(ORDER_SYMBOL);
+      int digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+      w.BeginObj();
+      w.Int("order", (long)o);
+      w.Str("symbol", sym);
+      w.Int("type", OrderGetInteger(ORDER_TYPE));
+      w.Num("volume", OrderGetDouble(ORDER_VOLUME_CURRENT));
+      w.Num("price", OrderGetDouble(ORDER_PRICE_OPEN), digits);
+      w.Int("magic", OrderGetInteger(ORDER_MAGIC));
+      w.Str("comment", OrderGetString(ORDER_COMMENT));
+      w.EndObj();
+     }
+   w.EndArr();
+  }
+
+// history[]: trade deals since `sinceMs` (the last accepted snapshot), at least the last 30;
+// `full` (config send_history) sends up to `maxDeals` of the evidence window.
+bool TmWriteHistory(CJsonWriter &w, const long sinceMs, const bool full, const int maxDeals)
+  {
+   bool synced = HistorySelect(TimeCurrent() - TM_EVIDENCE_DAYS * 86400, TimeCurrent() + 86400);
+   w.BeginArr("history");
+   if(synced)
+     {
+      int total = HistoryDealsTotal();
+      int written = 0;
+      // newest first; the server does not depend on order
+      for(int i = total - 1; i >= 0 && written < maxDeals; i--)
+        {
+         ulong d = HistoryDealGetTicket(i);
+         if(d == 0 || !TmIsTradeDeal(d))
+            continue;
+         long t = HistoryDealGetInteger(d, DEAL_TIME_MSC);
+         if(!full && written >= TM_HISTORY_MIN_DEALS && t < sinceMs)
+            break;
+         string sym = HistoryDealGetString(d, DEAL_SYMBOL);
+         int digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+         w.BeginObj();
+         w.Int("deal", (long)d);
+         w.Int("order", HistoryDealGetInteger(d, DEAL_ORDER));
+         w.Int("position_id", HistoryDealGetInteger(d, DEAL_POSITION_ID));
+         w.Str("entry", TmDealEntry(HistoryDealGetInteger(d, DEAL_ENTRY)));
+         w.Str("reason", TmDealReason(HistoryDealGetInteger(d, DEAL_REASON)));
+         w.Str("symbol", sym);
+         w.Num("volume", HistoryDealGetDouble(d, DEAL_VOLUME));
+         w.Num("price", HistoryDealGetDouble(d, DEAL_PRICE), digits > 0 ? digits : 8);
+         w.Num("profit", HistoryDealGetDouble(d, DEAL_PROFIT), 2);
+         w.Num("commission", HistoryDealGetDouble(d, DEAL_COMMISSION), 2);
+         w.Num("swap", HistoryDealGetDouble(d, DEAL_SWAP), 2);
+         w.Int("magic", HistoryDealGetInteger(d, DEAL_MAGIC));
+         w.Str("comment", HistoryDealGetString(d, DEAL_COMMENT));
+         w.Int("time_msc", t);
+         w.EndObj();
+         written++;
+        }
+     }
+   w.EndArr();
+   return synced;
+  }
+
+// Full snapshot body; returns history_synced via the out parameter.
+string TmBuildSnapshot(const string sessionId, const long epoch, const long seq, const long clockOffsetMs,
+                       const long historySinceMs, const bool fullHistory, bool &historySynced)
+  {
+   CJsonWriter w;
+   w.BeginObj();
+   w.Str("session_id", sessionId);
+   w.Int("epoch", epoch);
+   w.Int("seq", seq);
+   w.Int("taken_at", TmNowMs());
+   w.Int("ea_clock_offset_ms", clockOffsetMs);
+   w.Bool("connected", TerminalInfoInteger(TERMINAL_CONNECTED) != 0);
+   w.Int("login", AccountInfoInteger(ACCOUNT_LOGIN));
+   w.Str("server", AccountInfoString(ACCOUNT_SERVER));
+   // history first so history_synced reflects this snapshot's HistorySelect
+   CJsonWriter h;
+   h.BeginObj();
+   historySynced = TmWriteHistory(h, historySinceMs, fullHistory, fullHistory ? 1000 : 500);
+   h.EndObj();
+   w.Bool("history_synced", historySynced);
+   TmWritePositions(w);
+   TmWritePending(w);
+   string hist = h.Text();               // {"history":[...]}
+   w.Raw("history", StringSubstr(hist, 11, StringLen(hist) - 12));
+   w.EndObj();
+   return w.Text();
+  }
+
+//+------------------------------------------------------------------+
+//| Symbol specs (PUT /v4/symbols)                                   |
+//+------------------------------------------------------------------+
+string TmTradeMode(const long m)
+  {
+   switch((int)m)
+     {
+      case SYMBOL_TRADE_MODE_DISABLED:  return "disabled";
+      case SYMBOL_TRADE_MODE_LONGONLY:  return "longonly";
+      case SYMBOL_TRADE_MODE_SHORTONLY: return "shortonly";
+      case SYMBOL_TRADE_MODE_CLOSEONLY: return "closeonly";
+      case SYMBOL_TRADE_MODE_FULL:      return "full";
+     }
+   return "unknown";
+  }
+
+void TmWriteFillingModes(CJsonWriter &w, const string symbol)
+  {
+   long f = SymbolInfoInteger(symbol, SYMBOL_FILLING_MODE);
+   w.BeginArr("filling_modes");
+   if((f & SYMBOL_FILLING_FOK) != 0) w.Str("", "fok");
+   if((f & SYMBOL_FILLING_IOC) != 0) w.Str("", "ioc");
+   if(SymbolInfoInteger(symbol, SYMBOL_TRADE_EXEMODE) != SYMBOL_TRADE_EXECUTION_MARKET) w.Str("", "return");
+   w.EndArr();
+  }
+
+void TmWriteSymbolSpec(CJsonWriter &w, const string s)
+  {
+   w.BeginObj();
+   w.Str("name", s);
+   w.Num("volume_min", SymbolInfoDouble(s, SYMBOL_VOLUME_MIN));
+   w.Num("volume_step", SymbolInfoDouble(s, SYMBOL_VOLUME_STEP));
+   w.Num("volume_max", SymbolInfoDouble(s, SYMBOL_VOLUME_MAX));
+   w.Num("contract_size", SymbolInfoDouble(s, SYMBOL_TRADE_CONTRACT_SIZE));
+   w.Int("digits", SymbolInfoInteger(s, SYMBOL_DIGITS));
+   w.Num("point", SymbolInfoDouble(s, SYMBOL_POINT), 10);
+   w.Num("tick_size", SymbolInfoDouble(s, SYMBOL_TRADE_TICK_SIZE), 10);
+   w.Str("trade_mode", TmTradeMode(SymbolInfoInteger(s, SYMBOL_TRADE_MODE)));
+   TmWriteFillingModes(w, s);
+   w.Int("stops_level", SymbolInfoInteger(s, SYMBOL_TRADE_STOPS_LEVEL));
+   w.Int("freeze_level", SymbolInfoInteger(s, SYMBOL_TRADE_FREEZE_LEVEL));
+   w.EndObj();
+  }
+
+// Market Watch symbols plus the ones the server asked for (`symbols_wanted`).
+string TmBuildSymbols(const string &wanted[])
+  {
+   for(int i = 0; i < ArraySize(wanted); i++)
+      SymbolSelect(wanted[i], true);
+   CJsonWriter w;
+   w.BeginObj();
+   w.BeginArr("symbols");
+   int n = SymbolsTotal(true);
+   for(int i = 0; i < n && i < 5000; i++)
+      TmWriteSymbolSpec(w, SymbolName(i, true));
+   w.EndArr();
+   w.EndObj();
+   return w.Text();
+  }
+
+ENUM_ORDER_TYPE_FILLING TmFilling(const string symbol)
+  {
+   long f = SymbolInfoInteger(symbol, SYMBOL_FILLING_MODE);
+   if((f & SYMBOL_FILLING_FOK) != 0) return ORDER_FILLING_FOK;
+   if((f & SYMBOL_FILLING_IOC) != 0) return ORDER_FILLING_IOC;
+   return ORDER_FILLING_RETURN;
+  }
+
+#endif

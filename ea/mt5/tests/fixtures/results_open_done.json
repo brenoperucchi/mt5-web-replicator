@@ -1,0 +1,20 @@
+{
+ "results": [
+  {
+   "command_id": "{{command_id}}",
+   "attempt_id": "{{attempt_id}}",
+   "copy_id": "{{#copy_id}}",
+   "status": "done",
+   "order": "{{#order}}",
+   "deal": "{{#deal}}",
+   "request_id": 17,
+   "position_ticket": "{{#position_id}}",
+   "position_id": "{{#position_id}}",
+   "symbol": "EURUSD",
+   "volume": 1,
+   "executed_volume": 1,
+   "price": 1.10031,
+   "executed_at": "{{#now}}"
+  }
+ ]
+}
