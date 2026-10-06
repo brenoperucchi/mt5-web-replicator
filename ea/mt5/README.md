@@ -23,7 +23,8 @@ Phase 1 copies market positions only (buy/sell). Pending orders are reported but
 ea/mt5/
 ├── Experts/
 │   ├── TradeMirror.mq5            # the EA (master or slave)
-│   └── TradeMirrorSelfTest.mq5    # client tests for the Strategy Tester (fake server injected)
+│   ├── TradeMirrorSelfTest.mq5    # client tests for the Strategy Tester (fake server injected)
+│   └── TradeMirrorE2EDriver.mq5   # test driver for the end-to-end suite (demo only)
 ├── Include/TradeMirror/
 │   ├── Client.mqh                 # v4 client: routes, fair scheduling, retries, session, enroll, rotation, drain
 │   ├── Executor.mqh               # slave command executor: pre-send evidence, journal states, results
@@ -175,6 +176,75 @@ validates every EA request against the server models and prints any violation. F
 `--drop-results N` (S01), `--drop-enroll 1` (S26), `--drop-rotate 1` (S25),
 `--rate-limit /v4/slave/results=3600` (S24), `--fail-all-for 120` (network cut). The proxy must run
 where the terminal can reach it (on Windows, or in the same Wine prefix host).
+
+## End-to-end tests
+
+`ea/mt5/e2e/run.py` runs the live demo checks (most of the checklist below and the feasible §8
+scenarios) with one command against two real terminals and a real Copy Server.
+
+- `Experts/TradeMirrorE2EDriver.mq5` is a small test EA that trades on command. It runs next to
+  `TradeMirror` in both terminals (its own chart), reads one JSON file per command from
+  `MQL5\Files\TradeMirrorE2E\cmd\`, writes the reply to `...\ack\` (temp file + `FileMove`, a command
+  with an existing ack is never executed twice) and writes `status.json` (account, positions with
+  ticket/comment/volume/SL/TP/magic, recent deals) every second. It refuses every trade unless the
+  account is DEMO. Ops: `open`, `modify`, `close`, `close_partial`, `close_all`, `ping`.
+- The runner writes the command files straight into the bind-mounted Wine prefixes and checks the
+  result through the admin API (`/admin/copies`, `/admin/commands`, `/admin/events`,
+  `/admin/orphans`) and the slave's `status.json`. Every scenario ends by flattening both accounts
+  (master first, so the copier closes its copies) and waiting until the link has no exposure.
+
+Assumed setup (the `mt5wine:vnc` lab): the master and slave terminals run in podman containers
+`mt5-trademirror` and `mt5-trademirror-slave`, each with `/home/mt5/.mt5/tm_forward.py` forwarding
+the EA's `http://127.0.0.1:8099` to the server on the host (`172.17.0.1:8099`). Network cuts stop
+that forwarder; the fault scenarios point it at `tests/fault_proxy.py` on `172.17.0.1:8098`; the
+restart scenarios hard-kill `terminal64.exe` (the container exits) and start the container again.
+All paths, containers, ids and symbols are options (`--help`) or `E2E_*` environment variables.
+
+One-time setup, per terminal (master and slave):
+
+1. Copy `Experts/TradeMirrorE2EDriver.mq5` to `MQL5\Experts` and compile it (0 errors, 0 warnings).
+2. Open a second chart (any symbol) and attach `TradeMirrorE2EDriver` with default inputs; on the
+   *Common* tab tick **Allow Algo Trading**. AutoTrading must be on.
+   Headless alternative: close the terminal gracefully (`wine taskkill /im terminal64.exe` inside the
+   container, so it saves its profile), add a `chartNN.chr` copied from the TradeMirror chart with
+   the `<expert>` block replaced by `name=TradeMirrorE2EDriver`, `path=Experts\TradeMirrorE2EDriver.ex5`,
+   `expertmode=5`, list it in `order.wnd`, start the container again and restart the forwarder.
+3. Check `MQL5\Files\TradeMirrorE2E\status.json` is rewritten every second.
+
+The server needs the master and slave enrolled with one enabled link (`lot_mode=master`,
+`magic_mode=same`, `copy_sl_tp=true`), with both `TradeMirror` EAs running.
+
+Run (from the repository root):
+
+```bash
+uv run ea/mt5/e2e/run.py --list
+uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh          # all scenarios (~20 min)
+uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh --fast   # no restarts/cuts/faults (~2.5 min)
+uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh full_close sltp_modify
+```
+
+`--env-file` (or `ADMIN_TOKEN`) gives the admin token. `server_restart` also needs
+`E2E_SERVER_RESTART_CMD`, a shell command that starts the server again (the runner stops the
+process matching `--server-match` first); without it the scenario is skipped. The output is a
+PASS/FAIL table; a JSON report with the server events of each scenario goes to `ea/mt5/e2e/out/`.
+Exit code 0 when all ran scenarios passed, 1 on any failure, 2 when preconditions fail (server
+health, enrolled accounts, link settings, drivers alive and on DEMO, AutoTrading on).
+
+| Scenario | Covers |
+|---|---|
+| `open_copy`, `sell_side`, `full_close` | open/close mirrored, side, volume, magic, one entry deal |
+| `sltp_modify` | SL/TP mirrored twice |
+| `partial_close` | hedging partial closes (S13) |
+| `multi_symbol` | three symbols at once, close-all |
+| `manual_untouched` | a manual slave position is never touched or adopted |
+| `slave_restart_mid_open` | terminal killed right after delivery: no second position (S02/S03) |
+| `slave_restart_while_open` | restart with an open copy: no duplicate, close still works |
+| `network_cut_during_close` | slave offline across the master close (S07, shorter) |
+| `network_cut_during_open` | slave offline when the master opens |
+| `server_restart` | server restart with an open copy (S43, partial) |
+| `fault_drop_results` | lost results reply (S01) |
+| `fault_rate_limit_results` | 429 with a huge `Retry-After` on results (S24) |
+| `fault_server_down` | 503 for 45 s around an open |
 
 ## Owner checklist before merge
 
