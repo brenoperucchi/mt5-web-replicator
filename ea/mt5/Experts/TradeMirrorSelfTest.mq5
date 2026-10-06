@@ -44,6 +44,7 @@ CTradeMirror *NewEngine(const string tag, const bool enroll)
    s.verbose = false;
    s.popups = false;
    s.file_tag = g_runTag + tag;
+   s.min_gap_ms = 300;
    CTradeMirror *tm = new CTradeMirror();
    tm.Init(s, GetPointer(g_fake));
    return tm;
@@ -449,6 +450,51 @@ void S28()
    S28Case("c", 9130, "c9130", false);                // bare id: ambiguous for a long-form command
   }
 
+//--- S29: latency scheduling with a short tick: the commands poll keeps its interval (not one call per tick),
+//    a received command executes and its result goes out on the next ticks, followed by one immediate re-poll.
+void TicksMs(CTradeMirror *tm, const int n, const int stepMs)
+  {
+   for(int i = 0; i < n; i++)
+     {
+      g_tm_fake_now_ms += stepMs;
+      tm.OnTimerTick();
+     }
+  }
+
+void S29()
+  {
+   g_fake.Reset();
+   CTradeMirror *tm = NewEngine("s29", true);
+   UntilSession(tm);
+   TicksMs(tm, 100, 200);                       // settle (config, symbols, first snapshot)
+   int polls = g_fake.commandPolls;
+   long calls = tm.HttpCalls();
+   TicksMs(tm, 100, 200);                       // 20 s idle at 200 ms ticks, poll_ms = 2000
+   int idlePolls = g_fake.commandPolls - polls;
+   Check("S29", idlePolls >= 9 && idlePolls <= 11, StringFormat("idle polls follow poll_ms, not the tick (%d in 20 s)", idlePolls));
+   Check("S29", tm.HttpCalls() - calls <= 14, StringFormat("idle HTTP rate bounded (%I64d calls in 20 s)", tm.HttpCalls() - calls));
+   g_fake.Queue("c_s29", OpenCmd("c_s29", 9131));
+   polls = g_fake.commandPolls;
+   int t = 0;
+   while(g_fake.commandPolls == polls && t < 15) { TicksMs(tm, 1, 200); t++; }
+   Check("S29", g_fake.commandPolls > polls && t <= 11, StringFormat("command picked up within one interval (%d ticks)", t));
+   int results = g_fake.resultPosts;
+   polls = g_fake.commandPolls;
+   TicksMs(tm, 1, 200);
+   Check("S29", PositionsWithComment(TestComment(9131)) == 1, "executed on the next tick");
+   TicksMs(tm, 1, 200);
+   Check("S29", g_fake.resultPosts > results, "result posted on the first tick the min gap allows");
+   TicksMs(tm, 2, 200);
+   Check("S29", g_fake.commandPolls == polls + 1, "one immediate re-poll after a non-empty batch (after the gap)");
+   polls = g_fake.commandPolls;
+   TicksMs(tm, 5, 200);
+   Check("S29", g_fake.commandPolls == polls, "back to the interval after the burst");
+   Check("S29", g_fake.minGapMs >= 300, StringFormat("no two calls closer than the 300 ms gap (min %I64d ms)", g_fake.minGapMs));
+   Check("S29", tm.MinGapMs() == 300, "gap input honored");
+   delete tm;
+   CloseAll();
+  }
+
 int OnInit()
   {
    if(!MQLInfoInteger(MQL_TESTER))
@@ -468,7 +514,7 @@ void OnTick()
       return;
    g_done = true;
    g_tm_fake_now_ms = (long)TimeCurrent() * 1000;
-   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28();
+   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29();
    g_tm_fake_now_ms = 0;
    PrintFormat("TradeMirror self-test: %d passed, %d failed", g_passed, g_failed);
   }

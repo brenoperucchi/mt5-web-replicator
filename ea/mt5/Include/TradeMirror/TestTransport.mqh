@@ -78,6 +78,8 @@ public:
    string            results[];       // every result object received (raw)
    int               resultPosts;
    int               commandPolls;
+   long              lastCallMs;       // fake clock of the previous call, for the min-gap check
+   long              minGapMs;         // smallest gap seen between two calls (-1 = fewer than two calls)
    int               snapshotPosts;
    int               enrollCalls;
    int               rotateCalls;
@@ -95,7 +97,7 @@ public:
       m_tokenSeq = 0; m_sessionSeq = 0; code = "ABCD2345EF"; codeConsumed = false; token = ""; issuedUnconfirmed = "";
       pendingToken = ""; pendingId = ""; sessionId = ""; mode = "normal"; resultPosts = 0; commandPolls = 0;
       snapshotPosts = 0; enrollCalls = 0; rotateCalls = 0; dropResults = 0; dropNextEnroll = false; dropNextRotate = false;
-      fail429Path = ""; retryAfterSec = 0;
+      fail429Path = ""; retryAfterSec = 0; lastCallMs = 0; minGapMs = -1;
       ArrayResize(cmdIds, 0); ArrayResize(cmdJson, 0); ArrayResize(cmdState, 0); ArrayResize(results, 0);
       ArrayResize(retiredTokens, 0);
      }
@@ -147,6 +149,10 @@ public:
       int p = StringFind(url, "/v4/");
       string path = p >= 0 ? StringSubstr(url, p) : url;
       string bearer = Bearer(headers);
+      long nowMs = TmMonoMs();
+      if(lastCallMs > 0 && (minGapMs < 0 || nowMs - lastCallMs < minGapMs))
+         minGapMs = nowMs - lastCallMs;
+      lastCallMs = nowMs;
       if(fail429Path != "" && StringFind(path, fail429Path) == 0)
         {
          Reply(resp, 429, "{\"error\":\"rate_limited\"}", "Retry-After: " + IntegerToString(retryAfterSec) + "\r\n");

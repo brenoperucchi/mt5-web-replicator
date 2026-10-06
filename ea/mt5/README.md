@@ -93,6 +93,15 @@ recovered through `409 rotation_pending` and `rotate?restart=true`.
 | `TokenRotateDays` | 30 | automatic token rotation period (0 = off) |
 | `VerboseLog` | false | debug lines in the Experts log |
 | `AlertPopups` | true | alerts as terminal pop-ups (always printed to the log) |
+| `MinCallGapMs` | 300 | minimum gap between ANY two HTTP calls (clamped to >= 200); urgent calls only jump the queue |
+| `DriveOnTick` | true | also run the scheduler on chart ticks (more chances to run, never more calls) |
+
+Scheduling: one step runs on a 200 ms timer (and on chart ticks); each step does local execution and at
+most one HTTP call, only when `MinCallGapMs` has passed since the previous call. Order: prerequisites,
+a master snapshot right after a trade, results of what just executed, a due commands poll, then the
+rotation (config, symbols, logs). The commands poll interval is `poll_ms` from `/v4/config`
+(clamped to >= 500); after a non-empty batch the slave polls once more right away. The status line
+shows calls/min; the Experts log prints it every 10 min (every minute with `VerboseLog`).
 
 ## How it behaves
 
@@ -154,7 +163,9 @@ or with other EAs on the slave.
 **Strategy Tester (no network).** `TradeMirrorSelfTest` runs the real client against an injected
 fake server (`TestTransport.mqh`) and real tester trades. It covers S01-S05 (journal and outbox,
 with crash seams before/after `OrderSend`) and S24-S26 (429 with a huge `Retry-After`, lost rotate
-reply, lost enroll reply). Run it on a hedging account, any liquid symbol, "Every tick", one day.
+reply, lost enroll reply), S27-S28 (comment correlation) and S29 (scheduling with a 200 ms tick: poll
+rate follows `poll_ms`, results right after execution, one burst re-poll, never two calls closer than
+the min gap). Run it on a hedging account, any liquid symbol, "Every tick", one day.
 The tester journal prints `PASS`/`FAIL` lines; the optimization criterion (`OnTester`) is the number
 of failed checks, 0 when green.
 
@@ -227,7 +238,9 @@ uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh full_close sltp_modify
 `E2E_SERVER_RESTART_CMD`, a shell command that starts the server again (the runner stops the
 process matching `--server-match` first); without it the scenario is skipped. The output is a
 PASS/FAIL table; a JSON report with the server events of each scenario goes to `ea/mt5/e2e/out/`.
-Exit code 0 when all ran scenarios passed, 1 on any failure, 2 when preconditions fail (server
+With `--access-trace` (the server's `ACCESS_TRACE_PATH` file) every run also reports calls/min per EA
+and fails when two calls of one account arrive closer than `--min-gap-ms` (default 300) minus
+`--gap-tolerance-ms` (30). Exit code 0 when all ran scenarios passed, 1 on any failure, 2 when preconditions fail (server
 health, enrolled accounts, link settings, drivers alive and on DEMO, AutoTrading on).
 
 | Scenario | Covers |
@@ -237,6 +250,7 @@ health, enrolled accounts, link settings, drivers alive and on DEMO, AutoTrading
 | `partial_close` | hedging partial closes (S13) |
 | `multi_symbol` | three symbols at once, close-all |
 | `manual_untouched` | a manual slave position is never touched or adopted |
+| `latency` | N (`--latency-cycles`, default 10) open+close cycles on GBPUSD/EURUSD: open/close latency (slave deal - master deal, broker `time_msc`) and price diff in pips, p50/p90/max; `--max-p90-ms` fails the run |
 | `slave_restart_mid_open` | terminal killed right after delivery: no second position (S02/S03) |
 | `slave_restart_while_open` | restart with an open copy: no duplicate, close still works |
 | `network_cut_during_close` | slave offline across the master close (S07, shorter) |

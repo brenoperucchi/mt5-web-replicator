@@ -4,8 +4,11 @@
 //| One OnTimer tick:                                                |
 //|   1. local: journal recovery, close/close_partial/cancel/resolve |
 //|   2. local: open/modify                                          |
-//|   3. at most ONE HTTP call, chosen by a fair rotation of the due |
-//|      routes (results get at most every other slot)               |
+//|   3. at most ONE HTTP call: prerequisites, then a dirty master   |
+//|      snapshot, then results (at most every other slot), then a   |
+//|      due commands poll, then a fair rotation of the other routes |
+//| The tick is short (TM_TICK_MS) for responsiveness; the HTTP rate |
+//| is still set by the per-route intervals, not by the tick.        |
 //| WebRequest is synchronous, so nothing ever retries inside a call |
 //| and nothing sleeps.                                              |
 //+------------------------------------------------------------------+
@@ -42,6 +45,10 @@ enum ENUM_TM_ROUTE
    R_COUNT
   };
 
+#define TM_TICK_MS               200
+#define TM_MIN_POLL_MS           500
+#define TM_MIN_CALL_GAP_MS       200     // floor of the configurable gap between any two HTTP calls
+#define TM_DEFAULT_CALL_GAP_MS   300
 #define TM_TIMEOUT_MS            5000
 #define TM_BUDGET_ATTEMPTS       6
 #define TM_BUDGET_MS             60000
@@ -63,6 +70,7 @@ struct STmSettings
    bool              popups;
    string            file_tag;         // "" in production; isolates files in the self-test EA
    bool              force_enroll;     // ignore an existing token file and enroll with enroll_code
+   int               min_gap_ms;       // minimum gap between ANY two HTTP calls (clamped to >= 200)
   };
 
 struct STmRoute
@@ -138,6 +146,7 @@ private:
    long              m_lastAcceptedMs;
    bool              m_staleSession;
    bool              m_snapshotDirty;
+   bool              m_commandsBurst;  // the next commands poll is the one immediate re-poll after a non-empty batch
 
    // server config
    string            m_mode;
@@ -156,6 +165,13 @@ private:
    bool              m_restartRotation;
    string            m_status;
    long              m_httpCalls;
+   long              m_minGapMs;       // no call starts sooner than this after the previous one (urgent ones included)
+   long              m_lastCallMs;
+   bool              m_inStep;         // re-entrancy guard for the scheduler step
+   long              m_rateWindowMs;   // calls/min: start of the current minute window
+   long              m_rateWindowCalls;
+   long              m_callsPerMin;    // calls in the last complete minute (status line)
+   int               m_rateWindows;
 
    string            Role(void) const { return m_s.role == TM_ROLE_MASTER ? "master" : "slave"; }
    bool              IsSlave(void) const { return m_s.role == TM_ROLE_SLAVE; }
@@ -240,10 +256,16 @@ private:
       for(int i = 0; i < 4; i++)
          if(Wants(pre[i]))
             return pre[i];
+      // latency: a trade on the master goes out on the very next tick, ahead of config/symbols
+      if(!IsSlave() && m_snapshotDirty && m_routes[R_SNAPSHOT].attempts == 0 && Wants(R_SNAPSHOT))
+         return R_SNAPSHOT;
       int ring[5] = {R_COMMANDS, R_SNAPSHOT, R_CONFIG, R_SYMBOLS, R_LOGS};
       bool resultsDue = Wants(R_RESULTS);
       if(resultsDue && m_lastRoute != R_RESULTS)
          return R_RESULTS;
+      // a due commands poll is not delayed by the rotation (its interval still bounds the rate)
+      if(Wants(R_COMMANDS))
+         return R_COMMANDS;
       int start = 0;
       for(int i = 0; i < 5; i++)
          if(ring[i] == m_lastRoute)
@@ -274,9 +296,29 @@ private:
      {
       m_routes[r].sent++;
       m_httpCalls++;
+      m_lastCallMs = TmMonoMs();
+      CountRate(m_lastCallMs);
       string key = (method == "GET") ? "" : m_routes[r].key;
       m_transport.Send(method, m_s.server_url + path, Headers(token, key, contentType), body, TM_TIMEOUT_MS, resp);
       TmLog.Debug(StringFormat("%s %s -> %d", method, path, resp.status));
+     }
+
+   void              CountRate(const long now)
+     {
+      if(m_rateWindowMs == 0)
+         m_rateWindowMs = now;
+      if(now - m_rateWindowMs >= 60000)
+        {
+         m_callsPerMin = m_rateWindowCalls;
+         m_rateWindowCalls = 0;
+         m_rateWindowMs = now;
+         string line = StringFormat("http: %I64d calls in the last minute (poll %I64d ms, min gap %I64d ms)", m_callsPerMin, m_pollMs, m_minGapMs);
+         if(++m_rateWindows % 10 == 1)
+            TmLog.Info(line);    // every 10 min in the Experts log; every minute with VerboseLog
+         else
+            TmLog.Debug(line);
+        }
+      m_rateWindowCalls++;
      }
 
    CJson            *ParseBody(const STmHttpResponse &resp)
@@ -615,7 +657,7 @@ private:
          m_blocked = false;
          m_exec.SetDrain(mode == "drain");
          long poll = j.Long("poll_ms", 2000);
-         m_pollMs = MathMax(poll, (long)500);
+         m_pollMs = MathMax(poll, (long)TM_MIN_POLL_MS);
          m_sendHistory = j.Bool("send_history", false);
          bool debug = j.Bool("debug", false);
          if(debug && !m_debug)
@@ -711,9 +753,19 @@ private:
       CJson *j = ParseBody(resp);
       if(resp.status == 200 && j != NULL)
         {
-         m_exec.Receive(j.Get("commands"));
+         CJson *cmds = j.Get("commands");
+         bool got = cmds != NULL && cmds.type == JSON_ARRAY && cmds.Size() > 0;
+         m_exec.Receive(cmds);
          m_cursor = j.Str("cursor", m_cursor);
          Success(R_COMMANDS);
+         // after a non-empty batch, poll once more right away (a close often follows an open), then back to the interval
+         if(got && !m_commandsBurst)
+           {
+            m_commandsBurst = true;
+            Schedule(R_COMMANDS, 0);
+           }
+         else
+            m_commandsBurst = false;
         }
       else
          CommonError(R_COMMANDS, resp, j, false);
@@ -788,10 +840,11 @@ public:
                      CTradeMirror(void)
      {
       m_transport = NULL; m_lastRoute = -1; m_epoch = 0; m_seq = 0; m_clockOffsetMs = 0; m_notAccepted = 0;
-      m_lastAcceptedMs = 0; m_staleSession = false; m_snapshotDirty = true; m_mode = "normal"; m_pollMs = 2000;
+      m_lastAcceptedMs = 0; m_staleSession = false; m_snapshotDirty = true; m_commandsBurst = false; m_mode = "normal"; m_pollMs = 2000;
       m_sendHistory = false; m_debug = false; m_cursor = ""; m_logsDisabled = false; m_unauthorized = false;
       m_blocked = false; m_accountMismatch = false; m_enrollRefused = false; m_restartRotation = false;
       m_sessionId = ""; m_status = ""; m_httpCalls = 0;
+      m_minGapMs = TM_DEFAULT_CALL_GAP_MS; m_lastCallMs = 0; m_rateWindowMs = 0; m_rateWindowCalls = 0; m_callsPerMin = -1; m_rateWindows = 0; m_inStep = false;
       for(int i = 0; i < R_COUNT; i++)
         {
          ResetRequest(i);
@@ -805,6 +858,7 @@ public:
      {
       m_s = s;
       m_transport = transport;
+      m_minGapMs = MathMax((long)s.min_gap_ms, (long)TM_MIN_CALL_GAP_MS);
       TmLog.Verbose(s.verbose);
       TmLog.Popups(s.popups);
       if(!TmUrlAllowed(m_s.server_url))
@@ -836,7 +890,18 @@ public:
    //--- force a re-enroll with a newly entered code even when a token file exists
    void              ForceEnroll(void) { m_token.Reset(); m_unauthorized = false; m_enrollRefused = false; }
 
+   // The single scheduler step, driven by OnTimer and OnTick. MQL5 delivers events one at a time, so
+   // a nested call cannot normally happen; the guard keeps it a no-op if one ever does.
    void              OnTimerTick(void)
+     {
+      if(m_inStep)
+         return;
+      m_inStep = true;
+      Step();
+      m_inStep = false;
+     }
+
+   void              Step(void)
      {
       // 1 + 2: local execution never waits on HTTP (revoked: no trading at all)
       if(IsSlave() && m_token.HasToken() && !m_unauthorized)
@@ -845,10 +910,16 @@ public:
          if(m_exec.m_crashed)
             return;
          if(m_exec.TakeExecutedFlag())
+           {
             m_snapshotDirty = true;
+            // results of what just executed go out on the next call (unless the route is backing off)
+            if(m_routes[R_RESULTS].attempts == 0 && m_outbox.Count() > 0 && m_routes[R_RESULTS].due_ms - TmMonoMs() <= 1000)
+               Schedule(R_RESULTS, 0);
+           }
         }
-      // 3: at most one HTTP call
-      int r = PickRoute();
+      // 3: at most one HTTP call, and never sooner than m_minGapMs after the previous one (no exceptions:
+      //    urgent snapshot, results and the burst re-poll only jump the queue, they never shorten the gap)
+      int r = (m_lastCallMs == 0 || TmMonoMs() - m_lastCallMs >= m_minGapMs) ? PickRoute() : -1;
       if(r >= 0)
         {
          m_lastRoute = r;
@@ -888,6 +959,7 @@ public:
       else if(m_staleSession)       s += " | SESSION FENCED: reload EA";
       else if(m_accountMismatch)    s += " | ACCOUNT MISMATCH";
       else                          s += " | " + m_mode + " | session " + (m_sessionId == "" ? "-" : "ok");
+      s += StringFormat(" | http %s/min (gap %I64d ms)", m_callsPerMin < 0 ? "-" : IntegerToString(m_callsPerMin), m_minGapMs);
       if(IsSlave())
          s += StringFormat(" | outbox %d | suspended %d", m_outbox.Count(), m_exec.CountState(JS_SUSPENDED));
       if(TmLog.LastAlert() != "")
@@ -907,6 +979,8 @@ public:
    long              RouteSent(const int r) const { return m_routes[r].sent; }
    long              RouteOk(const int r) const { return m_routes[r].ok; }
    long              HttpCalls(void) const { return m_httpCalls; }
+   long              MinGapMs(void) const { return m_minGapMs; }
+   long              CallsPerMin(void) const { return m_callsPerMin; }
    void              ForceRotate(void) { m_token.issued_ms = 0; if(m_s.rotate_days <= 0) m_s.rotate_days = 1; Schedule(R_ROTATE, 0); }
   };
 

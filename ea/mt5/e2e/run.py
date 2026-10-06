@@ -703,6 +703,114 @@ def s_fault_server_down(ctx: Ctx) -> None:
         check(not ctx.slave_pos(copy["id"]), f"copy {c['state']} but slave holds a position")
 
 
+# --- latency ---------------------------------------------------------------------------------------
+
+def _pctl(v: list[float], q: float) -> float:
+    v = sorted(v)
+    return v[min(len(v) - 1, max(0, int(round(q * (len(v) - 1)))))]
+
+
+def _deal(t: Terminal, position_id: Any, entry: str, timeout: float) -> dict:
+    def find():
+        for d in t.fresh_status()["deals"]:
+            if str(d["position_id"]) == str(position_id) and d["entry"] == entry:
+                return d
+        return None
+    return wait_for(f"{t.role} {entry} deal of position {position_id}", find, timeout, 0.5)
+
+
+def read_trace(path: Path, since_ms: int, until_ms: int) -> dict[str, list[tuple[int, str]]]:
+    """Server access trace (ACCESS_TRACE_PATH): `start_ms account method path status dur_ms` per /v4 call."""
+    out: dict[str, list[tuple[int, str]]] = {}
+    for line in path.read_text().splitlines():
+        f = line.split("\t")
+        if len(f) < 4 or not f[0].isdigit():
+            continue
+        t = int(f[0])
+        if since_ms <= t <= until_ms and f[1] != "-":
+            out.setdefault(f[1], []).append((t, f[3].split("?")[0]))
+    return out
+
+
+def check_trace(ctx: Ctx, since_ms: int, until_ms: int) -> dict:
+    """Per account: calls/min and the smallest gap between two calls (asserted >= --min-gap-ms - tolerance)."""
+    a = ctx.args
+    if not a.access_trace or not Path(a.access_trace).exists():
+        ctx.note("no --access-trace file: calls/min and min-gap not checked")
+        return {}
+    res = {}
+    minutes = max((until_ms - since_ms) / 60000, 1e-9)
+    for acct, calls in sorted(read_trace(Path(a.access_trace), since_ms, until_ms).items()):
+        if acct not in (str(ctx.master_id), str(ctx.slave_id)):
+            continue
+        ts = sorted(t for t, _ in calls)
+        gaps = [b - x for x, b in zip(ts, ts[1:])]
+        role = "master" if acct == str(ctx.master_id) else "slave"
+        by_route: dict[str, int] = {}
+        for _, p in calls:
+            by_route[p] = by_route.get(p, 0) + 1
+        res[role] = {"calls": len(ts), "per_min": round(len(ts) / minutes, 1), "min_gap_ms": min(gaps) if gaps else None,
+                     "routes": by_route}
+        ctx.note(f"{role}: {len(ts)} calls, {res[role]['per_min']}/min, min gap {res[role]['min_gap_ms']} ms, {by_route}")
+        if gaps:
+            check(min(gaps) >= a.min_gap_ms - a.gap_tolerance_ms,
+                  f"{role}: two calls {min(gaps)} ms apart (< min gap {a.min_gap_ms} - {a.gap_tolerance_ms} ms)")
+    return res
+
+
+@scenario()
+def s_latency(ctx: Ctx) -> None:
+    """N open+close cycles on GBPUSD/EURUSD: open/close latency (slave deal - master deal, broker time_msc),
+    price diff in pips, p50/p90/max; --max-p90-ms fails the run; per-account calls/min and min gap from the
+    server access trace."""
+    a = ctx.args
+    syms = [s for s in ("GBPUSD", "EURUSD") if s in a.symbols] or a.symbols[:2]
+    rows = []
+    since = int(time.time() * 1000)
+    for i in range(a.latency_cycles):
+        sym, side = syms[i % len(syms)], ("buy", "sell")[(i // len(syms)) % 2]
+        tag = f"lat{i}"
+        ctx.master_open(sym, side, 0.01, tag)
+        seen = {r["copy_id"] for r in rows}
+        copy = wait_for(f"new copy({sym}) open",
+                        lambda: next((c for c in ctx.new_copies(sym) if c["id"] not in seen and c["state"] == "open"),
+                                     None), ctx.timeout, 0.5)
+        spos = ctx.wait_slave_pos(copy["id"])
+        mpos = ctx.master.positions(comment=f"e2e-{tag}"[:31], symbol=sym)
+        check(len(mpos) == 1, f"one master position e2e-{tag}")
+        m_in = _deal(ctx.master, mpos[0]["identifier"], "in", ctx.timeout)
+        s_in = _deal(ctx.slave, spos["identifier"], "in", ctx.timeout)
+        time.sleep(a.latency_hold)
+        ctx.master.must("close", ticket=mpos[0]["ticket"])
+        ctx.wait_slave_gone(copy["id"])
+        m_out = _deal(ctx.master, mpos[0]["identifier"], "out", ctx.timeout)
+        s_out = _deal(ctx.slave, spos["identifier"], "out", ctx.timeout)
+        pip = 0.01 if "JPY" in sym else 0.0001
+        sgn = 1 if side == "buy" else -1
+        r = {"symbol": sym, "side": side, "copy_id": copy["id"],
+             "open_ms": s_in["time_msc"] - m_in["time_msc"], "close_ms": s_out["time_msc"] - m_out["time_msc"],
+             # + = the slave got a worse price than the master
+             "open_pips": round(sgn * (s_in["price"] - m_in["price"]) / pip, 1),
+             "close_pips": round(sgn * (m_out["price"] - s_out["price"]) / pip, 1)}
+        rows.append(r)
+        ctx.note(f"cycle {i + 1}/{a.latency_cycles} {sym} {side}: open {r['open_ms']} ms ({r['open_pips']} pip), "
+                 f"close {r['close_ms']} ms ({r['close_pips']} pip)")
+        time.sleep(a.latency_pause)
+    until = int(time.time() * 1000)
+    summary = {}
+    for k in ("open_ms", "close_ms", "open_pips", "close_pips"):
+        v = [r[k] for r in rows]
+        summary[k] = {"p50": _pctl(v, 0.5), "p90": _pctl(v, 0.9), "max": max(v)}
+        ctx.note(f"{k:10} p50={summary[k]['p50']} p90={summary[k]['p90']} max={summary[k]['max']}")
+    trace = check_trace(ctx, since, until)
+    out = a.out_dir / f"latency-{time.strftime('%Y%m%d-%H%M%S')}.json"
+    out.write_text(json.dumps({"rows": rows, "summary": summary, "http": trace, "label": a.latency_label}, indent=2))
+    ctx.note(f"latency report: {out}")
+    if a.max_p90_ms:
+        for k in ("open_ms", "close_ms"):
+            check(summary[k]["p90"] <= a.max_p90_ms, f"{k} p90 {summary[k]['p90']} ms > --max-p90-ms {a.max_p90_ms}")
+
+
 # --- runner --------------------------------------------------------------------------------------------
 
 def preconditions(ctx: Ctx) -> list[str]:
@@ -790,6 +898,17 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
                     help="pgrep -f pattern of the server process (server_restart)")
     ap.add_argument("--server-restart-cmd", default=env.get("E2E_SERVER_RESTART_CMD"),
                     help="shell command that starts the server again (server_restart is skipped without it)")
+    ap.add_argument("--latency-cycles", type=int, default=int(env.get("E2E_LATENCY_CYCLES", 10)))
+    ap.add_argument("--latency-hold", type=float, default=3.0, help="seconds a latency position stays open")
+    ap.add_argument("--latency-pause", type=float, default=2.0, help="seconds between latency cycles")
+    ap.add_argument("--latency-label", default="", help="free text stored in the latency report")
+    ap.add_argument("--max-p90-ms", type=float, default=0, help="latency fails when open/close p90 exceeds this")
+    ap.add_argument("--access-trace", default=env.get("E2E_ACCESS_TRACE"),
+                    help="server ACCESS_TRACE_PATH file: per-account calls/min and min-gap check")
+    ap.add_argument("--min-gap-ms", type=int, default=int(env.get("E2E_MIN_GAP_MS", 300)),
+                    help="EA MinCallGapMs: no two calls of one account closer than this")
+    ap.add_argument("--gap-tolerance-ms", type=int, default=30,
+                    help="clock/arrival jitter allowed below --min-gap-ms (EA timer resolution ~16 ms)")
     ap.add_argument("--out-dir", type=Path, default=Path(__file__).resolve().parent / "out")
     ap.add_argument("--keep-going-on-cleanup-failure", action="store_true")
     a = ap.parse_args(argv)
@@ -882,6 +1001,20 @@ def main(argv: list[str] | None = None) -> int:
         if cleanup_err and not a.keep_going_on_cleanup_failure:
             print("stopping: cleanup failed, the accounts may not be flat", file=sys.stderr)
             break
+
+    if a.access_trace and results:
+        # every run: no two calls of one EA closer than the configured min gap (server-side arrival times)
+        ctx.notes = []
+        try:
+            http = check_trace(ctx, int(started * 1000), int(time.time() * 1000))
+            gap = {"name": "min_gap (whole run)", "status": "PASS", "detail": json.dumps(
+                {k: {"per_min": v["per_min"], "min_gap_ms": v["min_gap_ms"]} for k, v in http.items()}),
+                   "seconds": 0, "notes": list(ctx.notes), "cleanup_error": "", "events": []}
+        except Fail as e:
+            gap = {"name": "min_gap (whole run)", "status": "FAIL", "detail": str(e), "seconds": 0,
+                   "notes": list(ctx.notes), "cleanup_error": "", "events": []}
+        results.append(gap)
+        selected = [*selected, None]
 
     print("\n" + "-" * 78)
     print(f"{'scenario':30} {'result':6} {'time':>6}  detail")

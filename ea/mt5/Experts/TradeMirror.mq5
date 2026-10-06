@@ -18,6 +18,8 @@ input bool          ForceReEnroll = false;                      // Enroll again 
 input int           TokenRotateDays = 30;                       // Rotate the token every N days (0 = never)
 input bool          VerboseLog    = false;                      // Debug lines in the Experts log
 input bool          AlertPopups   = true;                       // Show alerts as terminal pop-ups
+input int           MinCallGapMs  = 300;                        // Minimum gap between any two HTTP calls, ms (>= 200)
+input bool          DriveOnTick   = true;                       // Also run the scheduler on chart ticks (never more calls)
 
 CWebRequestTransport g_transport;
 CTradeMirror         g_tm;
@@ -42,9 +44,10 @@ int OnInit()
    s.verbose = VerboseLog;
    s.popups = AlertPopups;
    s.file_tag = "";
+   s.min_gap_ms = MinCallGapMs;
    if(!g_tm.Init(s, GetPointer(g_transport)))
       return INIT_PARAMETERS_INCORRECT;
-   EventSetTimer(1);   // 4.2: one tick per second, at most one HTTP call per tick
+   EventSetMillisecondTimer(TM_TICK_MS);   // short tick for latency; at most one HTTP call per tick, rate set by route intervals
    return INIT_SUCCEEDED;
   }
 
@@ -54,10 +57,18 @@ void OnDeinit(const int reason)
    Comment("");
   }
 
+// OnTimer and OnTick both run the same gated step: the min gap and the route intervals decide whether
+// an HTTP call happens; extra events are only extra chances to run, never extra calls.
 void OnTimer()
   {
    g_tm.OnTimerTick();
    Comment(g_tm.Status());
+  }
+
+void OnTick()
+  {
+   if(DriveOnTick)
+      g_tm.OnTimerTick();
   }
 
 void OnTrade()

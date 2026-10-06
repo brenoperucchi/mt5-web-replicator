@@ -131,7 +131,7 @@ private:
    long              m_clockOffsetMs;
    bool              m_hedging;
    bool              m_executedSomething;
-   int               m_suspendedTicks;
+   long              m_suspendedScanMs;
 
    //--- results ----------------------------------------------------------------------------
    string            ResultJson(CJournalEntry *e, const string status, const STmEvidence &ev, const string errorCode,
@@ -779,7 +779,7 @@ public:
                      CExecutor(void)
      {
       m_journal = NULL; m_outbox = NULL; m_drain = false; m_clockOffsetMs = 0; m_hedging = true;
-      m_executedSomething = false; m_crash = TM_CRASH_NONE; m_crashed = false; m_suspendedTicks = 0;
+      m_executedSomething = false; m_crash = TM_CRASH_NONE; m_crashed = false; m_suspendedScanMs = 0;
      }
                     ~CExecutor(void)
      {
@@ -906,10 +906,12 @@ public:
      {
       m_crashed = false;
       Recover(false);
-      m_suspendedTicks++;
-      if(m_suspendedTicks >= 10)   // ~every 10 s: suspended entries look for late evidence
+      long now = TmMonoMs();
+      if(m_suspendedScanMs == 0)
+         m_suspendedScanMs = now - 1000;
+      if(now - m_suspendedScanMs >= 10000)   // every 10 s (not per tick): suspended entries look for late evidence
         {
-         m_suspendedTicks = 0;
+         m_suspendedScanMs = now;
          Recover(true);
         }
       // resolves first: they unblock copies
