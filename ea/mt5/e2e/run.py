@@ -113,6 +113,101 @@ def sh(args: list[str], check_rc: bool = False, timeout: float = 60) -> subproce
 
 # --- terminals --------------------------------------------------------------------------------
 
+class Remote:
+    """A host reached over ssh (one multiplexed connection, so each call costs one round trip)."""
+
+    def __init__(self, target: str, control_dir: Path):
+        control_dir.mkdir(parents=True, exist_ok=True)
+        self.target = target
+        self.opts = ["-o", "ControlMaster=auto", "-o", f"ControlPath={control_dir}/cm-%C", "-o", "ControlPersist=15m",
+                     "-o", "BatchMode=yes", "-o", "ServerAliveInterval=15"]
+
+    def run(self, script: str, stdin: str | None = None, timeout: float = 30) -> subprocess.CompletedProcess:
+        return subprocess.run(["ssh", *self.opts, self.target, script], input=stdin, capture_output=True, text=True,
+                              timeout=timeout)
+
+    def must(self, script: str, stdin: str | None = None) -> str:
+        p = self.run(script, stdin)
+        if p.returncode != 0:
+            raise RuntimeError(f"ssh {self.target} {script[:80]!r} -> {p.returncode}: {p.stderr.strip()[:300]}")
+        return p.stdout
+
+
+class LocalFiles:
+    """Driver directory on this host (bind-mounted Wine prefix)."""
+
+    def __init__(self, root: Path):
+        self.root = root
+
+    def __str__(self) -> str:
+        return str(self.root)
+
+    def read(self, rel: str) -> str | None:
+        try:
+            return (self.root / rel).read_text(encoding="utf-8")
+        except FileNotFoundError:
+            return None
+
+    def age(self, rel: str) -> float:
+        return time.time() - (self.root / rel).stat().st_mtime
+
+    def write_atomic(self, rel: str, text: str) -> None:
+        dst = self.root / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        tmp = dst.parent / f".{dst.name}.tmp"
+        tmp.write_text(text, encoding="utf-8")
+        os.replace(tmp, dst)
+
+    def take(self, rel: str) -> str | None:
+        """Read and delete (ack files)."""
+        t = self.read(rel)
+        if t is not None:
+            (self.root / rel).unlink(missing_ok=True)
+        return t
+
+    def unlink(self, rel: str) -> None:
+        (self.root / rel).unlink(missing_ok=True)
+
+
+class RemoteFiles(LocalFiles):
+    """Driver directory on a remote host, over ssh: writes are tmp + mv in the same directory (atomic for the
+    driver's FileFindFirst, which skips dot files); ages use the remote clock."""
+
+    def __init__(self, remote: Remote, root: str):
+        self.remote, self.root_s = remote, root.rstrip("/")
+        self.root = Path(root)
+
+    def __str__(self) -> str:
+        return f"{self.remote.target}:{self.root_s}"
+
+    def _p(self, rel: str) -> str:
+        return shlex.quote(f"{self.root_s}/{rel}")
+
+    def read(self, rel: str) -> str | None:
+        p = self.remote.run(f"cat {self._p(rel)} 2>/dev/null")
+        return p.stdout if p.returncode == 0 else None
+
+    def age(self, rel: str) -> float:
+        p = self.remote.run(f"echo $(date +%s.%N) $(stat -c %Y {self._p(rel)})")
+        f = p.stdout.split()
+        if p.returncode != 0 or len(f) != 2:
+            raise OSError(f"stat {self}/{rel} failed: {p.stderr.strip()[:200]}")
+        return float(f[0]) - float(f[1])
+
+    def write_atomic(self, rel: str, text: str) -> None:
+        d, name = (rel.rsplit("/", 1) if "/" in rel else ("", rel))
+        dq = shlex.quote(f"{self.root_s}/{d}".rstrip("/"))
+        tmp = shlex.quote(f".{name}.tmp")
+        self.remote.must(f"mkdir -p {dq} && cd {dq} && cat > {tmp} && mv -f {tmp} {shlex.quote(name)}", stdin=text)
+
+    def take(self, rel: str) -> str | None:
+        p = self.remote.run(f"cat {self._p(rel)} 2>/dev/null && rm -f {self._p(rel)}")
+        return p.stdout if p.returncode == 0 and p.stdout else None
+
+    def unlink(self, rel: str) -> None:
+        self.remote.run(f"rm -f {self._p(rel)}")
+
+
 @dataclass
 class Terminal:
     role: str
@@ -121,17 +216,28 @@ class Terminal:
     terminal_dir: str     # drive_c/<terminal_dir>
     forward_host: str     # host address the in-container forwarder connects to
     seq: int = 0
+    remote: Remote | None = None       # master on another host: driver files and docker over ssh
+    remote_files: str | None = None    # driver directory on that host (…/MQL5/Files/TradeMirrorE2E)
+    _io: LocalFiles | None = None
 
     @property
-    def files(self) -> Path:
-        return self.prefix / "drive_c" / self.terminal_dir / "MQL5" / "Files" / "TradeMirrorE2E"
+    def files(self) -> LocalFiles:
+        if self._io is None:
+            if self.remote:
+                self._io = RemoteFiles(self.remote, self.remote_files or "")
+            else:
+                self._io = LocalFiles(self.prefix / "drive_c" / self.terminal_dir / "MQL5" / "Files" / "TradeMirrorE2E")
+        return self._io
 
     # driver protocol ------------------------------------------------------------------------
     def status(self) -> dict:
-        return json.loads((self.files / "status.json").read_text(encoding="utf-8"))
+        t = self.files.read("status.json")
+        if t is None:
+            raise OSError(f"no status.json in {self.files}")
+        return json.loads(t)
 
     def status_age(self) -> float:
-        return time.time() - (self.files / "status.json").stat().st_mtime
+        return self.files.age("status.json")
 
     def alive(self, max_age: float = 5.0) -> bool:
         try:
@@ -143,24 +249,17 @@ class Terminal:
         """Write one command file atomically and wait for its ack."""
         self.seq += 1
         cid = f"{time.time_ns():020d}-{self.seq:04d}-{uuid.uuid4().hex[:6]}"
-        cmd_dir, ack_dir = self.files / "cmd", self.files / "ack"
-        cmd_dir.mkdir(parents=True, exist_ok=True)
-        tmp = cmd_dir / f".{cid}.tmp"
-        tmp.write_text(json.dumps({"id": cid, "op": op, **kw}), encoding="utf-8")
-        os.replace(tmp, cmd_dir / f"{cid}.json")
-        ack_path = ack_dir / f"{cid}.json"
+        self.files.write_atomic(f"cmd/{cid}.json", json.dumps({"id": cid, "op": op, **kw}))
 
         def ack() -> dict | None:
-            if ack_path.exists():
-                return json.loads(ack_path.read_text(encoding="utf-8"))
-            return None
+            t = self.files.take(f"ack/{cid}.json")
+            return json.loads(t) if t else None
 
         try:
             a = wait_for(f"{self.role} driver ack of {op}", ack, timeout, 0.2)
         except Fail:
-            (cmd_dir / f"{cid}.json").unlink(missing_ok=True)   # never let a late command trade later
+            self.files.unlink(f"cmd/{cid}.json")   # never let a late command trade later
             raise
-        ack_path.unlink(missing_ok=True)
         log(f"{self.role}: {op} {kw} -> {'ok' if a.get('ok') else 'FAILED'} {a.get('retcode_text') or a.get('error') or ''}")
         return a
 
@@ -183,15 +282,24 @@ class Terminal:
 
     # container / process control --------------------------------------------------------------
     def podman(self, *args: str, check_rc: bool = False) -> subprocess.CompletedProcess:
+        if self.remote:   # docker on the remote host; only read-only inspection is used there
+            p = self.remote.run(shlex.join(["docker", *args]))
+            if check_rc and p.returncode != 0:
+                raise RuntimeError(f"remote docker {args} -> {p.returncode}: {p.stderr.strip()[:300]}")
+            return p
         return sh(["podman", *args], check_rc=check_rc)
 
     def state(self) -> str:
         return self.podman("inspect", self.container, "--format", "{{.State.Status}}").stdout.strip()
 
     def forwarder_running(self) -> bool:
+        if self.remote:
+            return True   # a remote terminal talks to the server directly (no forwarder to cut)
         return self.podman("exec", self.container, "pgrep", "-f", "forward").returncode == 0
 
     def stop_forwarder(self) -> None:
+        if self.remote:
+            raise Skip(f"{self.role} is remote ({self.remote.target}): network cuts are not supported")
         self.podman("exec", self.container, "pkill", "-f", "tm_forward.py")
         self.podman("exec", self.container, "pkill", "-f", "tm_e2e_forward")
         wait_for(f"{self.role} forwarder stopped", lambda: not self.forwarder_running(), 10, 0.5)
@@ -209,6 +317,8 @@ class Terminal:
         wait_for(f"{self.role} forwarder started", self.forwarder_running, 10, 0.5)
 
     def kill_terminal(self) -> None:
+        if self.remote:
+            raise Skip(f"{self.role} is remote ({self.remote.target}): terminal restarts are not supported")
         """Hard-kill terminal64 (no profile save, no OnDeinit): the container's main process exits."""
         self.podman("exec", self.container, "pkill", "-9", "-f", "terminal64.exe")
         try:
@@ -224,7 +334,7 @@ class Terminal:
                  lambda: self.podman("exec", self.container, "pgrep", "-f", "terminal64.exe").returncode == 0, 60)
         self.start_forwarder()
         wait_for(f"{self.role} driver writing status again",
-                 lambda: (self.files / "status.json").stat().st_mtime > started + 1 and self.alive(), 120)
+                 lambda: self.status_age() < time.time() - started - 1 and self.alive(), 120)
 
 
 # --- server ------------------------------------------------------------------------------------
@@ -335,21 +445,31 @@ class Ctx:
         check(not bad, f"orphan copies after scenario: {bad}")
 
     def cleanup(self) -> None:
-        """Flatten both accounts and wait until the link holds no exposure."""
+        """Flatten both accounts and wait until the link holds no exposure. With --cleanup-magic-only only
+        positions/copies carrying --magic count (a shared master where someone may trade by hand)."""
+        mo = self.args.cleanup_magic_only
+        flt: dict[str, Any] = {"magic": self.args.magic} if mo else {}
+
+        def mine(ps: list[dict]) -> list[dict]:
+            return [p for p in ps if not mo or p.get("magic") == self.args.magic]
+
         # Master first and give the copier a chance to close its own copies; only then flatten the
         # slave by hand (that also removes manual positions and anything a failed scenario left).
-        if self.master.alive(15) and self.master.status()["positions"]:
-            self.master.send("close_all")
+        if self.master.alive(15) and mine(self.master.status()["positions"]):
+            self.master.send("close_all", **flt)
         try:
-            wait_for("slave flat via the copier", lambda: not self.slave.fresh_status()["positions"], 20, 1)
+            wait_for("slave flat via the copier", lambda: not mine(self.slave.fresh_status()["positions"]), 20, 1)
         except Fail:
-            if self.slave.alive(15) and self.slave.status()["positions"]:
-                self.slave.send("close_all")
+            if self.slave.alive(15) and mine(self.slave.status()["positions"]):
+                self.slave.send("close_all", **flt)
         for t in (self.master, self.slave):
-            wait_for(f"{t.role} flat", lambda t=t: not t.fresh_status()["positions"], 60, 1)
+            wait_for(f"{t.role} flat", lambda t=t: not mine(t.fresh_status()["positions"]), 60, 1)
+
+        def mine_copy(c: dict) -> bool:
+            return not mo or str((c.get("exec_params") or {}).get("magic")) == str(self.args.magic)
         wait_for("no exposure on the link",
-                 lambda: not [c for c in self.admin.copies(link_id=self.link_id, limit=50)
-                              if c["state"] in EXPOSURE or (c["state"] == "superseded" and c["close_intent"])],
+                 lambda: not [c for c in self.admin.copies(link_id=self.link_id, limit=50) if mine_copy(c) and
+                              (c["state"] in EXPOSURE or (c["state"] == "superseded" and c["close_intent"]))],
                  90, 2)
 
 
@@ -735,6 +855,15 @@ def read_trace(path: Path, since_ms: int, until_ms: int) -> dict[str, list[tuple
 def check_trace(ctx: Ctx, since_ms: int, until_ms: int) -> dict:
     """Per account: calls/min and the smallest gap between two calls (asserted >= --min-gap-ms - tolerance)."""
     a = ctx.args
+    if a.remote_access_trace:
+        host, container, path = a.remote_access_trace.split(":", 2)
+        p = subprocess.run(["ssh", "-o", "BatchMode=yes", host, shlex.join(["docker", "exec", container, "cat", path])],
+                           capture_output=True, text=True, timeout=60)
+        if p.returncode == 0:
+            a.access_trace = str(a.out_dir / "access-remote.tsv")
+            Path(a.access_trace).write_text(p.stdout)
+        else:
+            ctx.note(f"remote access trace not readable: {p.stderr.strip()[:200]}")
     if not a.access_trace or not Path(a.access_trace).exists():
         ctx.note("no --access-trace file: calls/min and min-gap not checked")
         return {}
@@ -833,7 +962,7 @@ def preconditions(ctx: Ctx) -> list[str]:
             problems.append(f"container {term.container} is {term.state()}")
             continue
         if not term.alive(10):
-            problems.append(f"{role} driver not writing {term.files / 'status.json'} (attach TradeMirrorE2EDriver)")
+            problems.append(f"{role} driver not writing {term.files}/status.json (attach TradeMirrorE2EDriver)")
             continue
         st = term.status()
         if str(st["login"]) != str(a["login"]):
@@ -870,6 +999,16 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--fast", action="store_true", help="skip slow scenarios (restarts, network cuts, faults)")
     ap.add_argument("--server-url", default=env.get("E2E_SERVER_URL", "http://172.17.0.1:8099"))
     ap.add_argument("--admin-token", default=env.get("ADMIN_TOKEN"))
+    ap.add_argument("--admin-token-file", default=env.get("E2E_ADMIN_TOKEN_FILE"),
+                    help="file holding the admin token (bare, or an env file with ADMIN_TOKEN=...)")
+    ap.add_argument("--master-ssh", default=env.get("E2E_MASTER_SSH"),
+                    help="user@host of a remote master: driver files and docker inspect go over ssh")
+    ap.add_argument("--master-files", default=env.get("E2E_MASTER_FILES"),
+                    help="with --master-ssh: remote path of the master driver dir (MQL5/Files/TradeMirrorE2E)")
+    ap.add_argument("--cleanup-magic-only", action="store_true",
+                    help="cleanup touches only --magic positions/copies (implied by --master-ssh)")
+    ap.add_argument("--remote-access-trace", default=env.get("E2E_REMOTE_ACCESS_TRACE"),
+                    help="'user@host:container:/path' of the server access trace (copied locally via docker exec)")
     ap.add_argument("--env-file", help="shell file with 'export ADMIN_TOKEN=...' (e.g. the demo env.sh)",
                     default=env.get("E2E_ENV_FILE"))
     ap.add_argument("--link-id", type=int, default=int(env.get("E2E_LINK_ID", 1)))
@@ -917,6 +1056,18 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
             line = line.strip().removeprefix("export ").strip()
             if line.startswith("ADMIN_TOKEN="):
                 a.admin_token = line.split("=", 1)[1].strip().strip("'\"")
+    if a.admin_token_file and not a.admin_token:
+        text = Path(a.admin_token_file).read_text()
+        for line in text.splitlines():
+            line = line.strip().removeprefix("export ").strip()
+            if line.startswith("ADMIN_TOKEN="):
+                a.admin_token = line.split("=", 1)[1].strip().strip("'\"")
+        if not a.admin_token and len(text.split()) == 1:
+            a.admin_token = text.strip()
+    if a.master_ssh and not a.master_files:
+        ap.error("--master-ssh needs --master-files")
+    if a.master_ssh:
+        a.cleanup_magic_only = True
     a.symbols = [s.strip() for s in a.symbols.split(",") if s.strip()]
     return a
 
@@ -939,7 +1090,9 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     a.out_dir.mkdir(parents=True, exist_ok=True)
     ctx = Ctx(args=a, admin=Admin(a.server_url, a.admin_token),
-              master=Terminal("master", a.master_container, a.master_prefix, a.master_dir, a.forward_host),
+              master=Terminal("master", a.master_container, a.master_prefix, a.master_dir, a.forward_host,
+                              remote=Remote(a.master_ssh, Path.home() / ".ssh" / "tm-e2e") if a.master_ssh else None,
+                              remote_files=a.master_files),
               slave=Terminal("slave", a.slave_container, a.slave_prefix, a.slave_dir, a.forward_host),
               link_id=a.link_id, slave_id=a.slave_id, master_id=a.master_id, timeout=a.timeout)
 
@@ -1002,7 +1155,7 @@ def main(argv: list[str] | None = None) -> int:
             print("stopping: cleanup failed, the accounts may not be flat", file=sys.stderr)
             break
 
-    if a.access_trace and results:
+    if (a.access_trace or a.remote_access_trace) and results:
         # every run: no two calls of one EA closer than the configured min gap (server-side arrival times)
         ctx.notes = []
         try:
