@@ -2,6 +2,10 @@
 
 Runs inline in `POST /v4/slave/snapshot` for this slave's copies:
 
+Comment correlation also requires the fill to be no older than the copy (`correlation.fresh`, broker
+time converted with the snapshot's `broker_offset_ms` / `ea_clock_offset_ms`): a `c<copy_id>` left on
+the account by another Copy Server or a reset sequence is never adopted, duplicated or counted as ours.
+
 1. **Adoption (5.8):** a position (or a history `in` deal) whose comment correlates with `c<copy_id>`
    (`engine.correlation`: `c<copy_id>-<master position_id>` or legacy `c<copy_id>`) and the copy's
    frozen magic, for a copy without `position_id` in `pending/cancel_requested/uncertain/error/cancelled`
@@ -90,8 +94,15 @@ class Deal:
 
 
 def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], history: list[dict[str, Any]], *,
-                    history_synced: bool, ctx: Ctx) -> dict:
+                    history_synced: bool, ctx: Ctx, ea_clock_offset_ms: int = 0,
+                    broker_offset_ms: int | None = None) -> dict:
     stats = defaultdict(int)
+
+    def ours(copy: Copy, comment: str, magic: int | None, time_msc: int | None) -> bool:
+        # comment + magic, and not older than the copy (a c<id> from before it belongs to something else)
+        return correlation.matches(copy.exec_params, copy.id, comment, magic) and correlation.fresh(
+            time_msc, copy.created_at, ea_clock_offset_ms=ea_clock_offset_ms, broker_offset_ms=broker_offset_ms)
+
     deals = [d for d in (Deal.parse(h) for h in history) if d is not None] if history_synced else []
     by_pid = {p.position_id: p for p in positions}
     exits: dict[int, list[Deal]] = defaultdict(list)
@@ -112,7 +123,7 @@ def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], h
         copy = s.get(Copy, copy_id)
         if copy is None or copy.slave_id != slave.id:
             continue
-        hits = sorted((p for p in plist if correlation.matches(copy.exec_params, copy.id, p.comment, p.magic)),
+        hits = sorted((p for p in plist if ours(copy, p.comment, p.magic, p.time_msc)),
                       key=lambda p: p.position_id)
         if not hits:
             continue
@@ -133,7 +144,7 @@ def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], h
         copy = s.get(Copy, copy_id)
         if copy is None or copy.slave_id != slave.id or copy.position_id is not None:
             continue
-        hit = next((d for d in dlist if correlation.matches(copy.exec_params, copy.id, d.comment, d.magic)
+        hit = next((d for d in dlist if ours(copy, d.comment, d.magic, d.time_msc)
                     and d.position_id is not None), None)
         if hit is None or copy.state not in ADOPTABLE or not _recent(copy, ctx):
             continue
@@ -177,7 +188,7 @@ def reconcile_slave(s: Session, slave: Account, positions: list[PositionData], h
     # 5: unmanaged exposure on a netting symbol held by the copier.
     if slave.margin_mode == "netting":
         for p in positions:
-            if p.position_id in correlated or _ours(s, slave.id, p):
+            if p.position_id in correlated or _ours(s, slave.id, p, ours):
                 continue
             holder = slot_holder(s, slave.id, p.symbol)
             if holder is not None and holder.position_id != p.position_id:
@@ -219,7 +230,7 @@ def _duplicate(s: Session, copy: Copy, p: PositionData, ctx: Ctx, stats) -> None
     stats["duplicates"] += 1
 
 
-def _ours(s: Session, slave_id: int, p: PositionData) -> bool:
+def _ours(s: Session, slave_id: int, p: PositionData, ours) -> bool:
     if s.scalar(select(Copy.id).where(Copy.slave_id == slave_id, Copy.position_id == p.position_id,
                                       Copy.state.in_((*NETTING_RESERVING, "superseded"))).limit(1)):
         return True
@@ -227,8 +238,7 @@ def _ours(s: Session, slave_id: int, p: PositionData) -> bool:
     if copy_id is None:
         return False
     copy = s.get(Copy, copy_id)
-    return copy is not None and copy.slave_id == slave_id and correlation.matches(copy.exec_params, copy.id,
-                                                                                    p.comment, p.magic)
+    return copy is not None and copy.slave_id == slave_id and ours(copy, p.comment, p.magic, p.time_msc)
 
 
 def _exit(exits: dict[int, list[Deal]], position_id: int | None) -> Deal | None:

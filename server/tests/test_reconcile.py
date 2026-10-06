@@ -102,13 +102,13 @@ def test_s06_expired_open_executed_result_lost_adopted(cp, app):
             cmd.state = "expired"
         s.get(MasterPosition, s.get(Copy, b["copy_id"]).master_position_id).state = "closed"
         s.commit()
-    cp.slave_snapshot(sl, [spos(7001, a["copy_id"]), spos(7002, b["copy_id"])])
+    cp.slave_snapshot(sl, [spos(7001, a["copy_id"]), spos(7002, b["copy_id"], master_pid=2)])
     assert copy_of(cp, a["copy_id"])["state"] == "open"
     assert copy_of(cp, b["copy_id"])["state"] == "closing"
     (close,) = cp.poll(sl)["commands"]
     assert (close["action"], close["position_id"]) == ("close", 7002)
     # adoption is idempotent across snapshots
-    cp.slave_snapshot(sl, [spos(7001, a["copy_id"]), spos(7002, b["copy_id"])])
+    cp.slave_snapshot(sl, [spos(7001, a["copy_id"]), spos(7002, b["copy_id"], master_pid=2)])
     assert len(events(app, "copy.adopted")) == 2 and len(cp.poll(sl)["commands"]) == 1
 
 

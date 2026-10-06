@@ -83,6 +83,8 @@ class SnapshotIn(BaseModel):
     seq: int = Field(ge=1)
     taken_at: int = Field(ge=0)
     ea_clock_offset_ms: int = 0
+    # broker server time - EA UTC (ms): deal/position time_msc are broker time. None: older EA.
+    broker_offset_ms: int | None = None
     connected: bool
     login: int
     server: str = Field(min_length=1, max_length=128)
@@ -383,7 +385,9 @@ async def slave_snapshot(body: SnapshotIn, request: Request):
         if body.connected:
             cmds.renew_leases(s, acct.id, settings.command_lease_seconds, ctx.now)
             positions = [PositionData(**p.model_dump()) for p in body.positions]
-            stats = reconcile_slave(s, acct, positions, body.history, history_synced=body.history_synced, ctx=ctx)
+            stats = reconcile_slave(s, acct, positions, body.history, history_synced=body.history_synced, ctx=ctx,
+                                    ea_clock_offset_ms=body.ea_clock_offset_ms,
+                                    broker_offset_ms=body.broker_offset_ms)
         state = {"connected": body.connected, "positions": sorted(
             (p.position_id, p.position_ticket, p.symbol, p.type, str(p.volume), p.comment, p.magic)
             for p in body.positions), "deals": sorted(str(h.get("deal")) for h in body.history)}
