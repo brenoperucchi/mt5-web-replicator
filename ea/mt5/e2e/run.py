@@ -381,7 +381,9 @@ class Ctx:
     master_id: int
     timeout: float
     notes: list[str] = field(default_factory=list)
-    copy_floor: int = 0     # copies with id <= floor belong to earlier scenarios
+    copy_floor: int = 0     # newest copy id before this scenario
+    copies_before: set[int] = field(default_factory=set)  # ids that belong to earlier scenarios (the id
+    # sequence may be rewound to reproduce a c<id> collision, so "newer" is not "bigger id")
     event_floor: int = 0
 
     def note(self, msg: str) -> None:
@@ -392,11 +394,12 @@ class Ctx:
     def mark(self) -> None:
         cs = self.admin.copies(link_id=self.link_id, limit=1)
         self.copy_floor = cs[0]["id"] if cs else 0
+        self.copies_before = {c["id"] for c in self.admin.copies(link_id=self.link_id, limit=500)}
         ev = self.admin.events(limit=1)
         self.event_floor = ev[0]["id"] if ev else 0
 
     def new_copies(self, symbol: str | None = None) -> list[dict]:
-        cs = [c for c in self.admin.copies(link_id=self.link_id) if c["id"] > self.copy_floor]
+        cs = [c for c in self.admin.copies(link_id=self.link_id) if c["id"] not in self.copies_before]
         if symbol:
             cs = [c for c in cs if c["symbol_master"] == symbol]
         return sorted(cs, key=lambda c: c["id"])
@@ -435,13 +438,17 @@ class Ctx:
             return c if c and c["state"] in states else None
         return wait_for(f"copy {copy_id} in {sorted(states)}", ok, timeout or self.timeout)
 
-    def slave_in_deals(self, copy_id: int) -> list[dict]:
-        return [d for d in self.slave.status()["deals"] if is_copy_comment(d["comment"], copy_id) and d["entry"] == "in"]
+    def slave_in_deals(self, copy: dict) -> list[dict]:
+        """Entry deals of this copy: its exact frozen comment, so an older c<id>-<other master id> deal left in
+        the slave history (another Copy Server, a reset sequence) is not counted."""
+        want = (copy.get("exec_params") or {}).get("comment")
+        return [d for d in self.slave.status()["deals"] if d["entry"] == "in" and
+                (d["comment"] == want if want else is_copy_comment(d["comment"], copy["id"]))]
 
     def assert_no_new_orphans(self) -> None:
         o = self.admin.orphans()
         bad = [(k, c["id"], c["state"]) for k in ("uncertain", "close_unconfirmed", "revoked_exposure")
-               for c in o.get(k, []) if c.get("link_id") == self.link_id and c["id"] > self.copy_floor]
+               for c in o.get(k, []) if c.get("link_id") == self.link_id and c["id"] not in self.copies_before]
         check(not bad, f"orphan copies after scenario: {bad}")
 
     def cleanup(self) -> None:
@@ -532,7 +539,7 @@ def _master_ticket(ctx: Ctx, symbol: str) -> int:
 def s_open_copy(ctx: Ctx) -> None:
     """Master opens BUY 0.01: copy becomes open, slave holds one position c<id> with same side/volume/magic."""
     copy, pos = open_and_mirror(ctx, ctx.args.symbol, "buy", 0.01, "open")
-    check(len(ctx.slave_in_deals(copy["id"])) == 1, "slave must have exactly one entry deal")
+    check(len(ctx.slave_in_deals(copy)) == 1, "slave must have exactly one entry deal")
 
 
 @scenario()
@@ -631,7 +638,7 @@ def s_slave_restart_mid_open(ctx: Ctx) -> None:
     time.sleep(15)   # give a duplicate the chance to appear
     ps = ctx.slave.fresh_status() and ctx.slave_pos(copy["id"])
     check(len(ps) == 1, f"expected 1 slave position for c{copy['id']} after restart, got {len(ps)}")
-    check(len(ctx.slave_in_deals(copy["id"])) == 1, f"duplicate entry deals for c{copy['id']}: {ctx.slave_in_deals(copy['id'])}")
+    check(len(ctx.slave_in_deals(copy)) == 1, f"duplicate entry deals for c{copy['id']}: {ctx.slave_in_deals(copy)}")
     close_and_mirror(ctx, copy, sym)
 
 
@@ -773,7 +780,7 @@ def s_fault_drop_results(ctx: Ctx) -> None:
         copy, _ = open_and_mirror(ctx, sym, "buy", 0.01, "dropres")
         time.sleep(10)
         check(len(ctx.slave_pos(copy["id"])) == 1, "duplicate slave position after a lost result")
-        check(len(ctx.slave_in_deals(copy["id"])) == 1, "duplicate entry deal after a lost result")
+        check(len(ctx.slave_in_deals(copy)) == 1, "duplicate entry deal after a lost result")
         close_and_mirror(ctx, copy, sym)
         v = px.violations()
     check(not v, f"proxy contract violations: {v[:3]}")
