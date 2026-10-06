@@ -29,6 +29,8 @@ def test_build_comment_carries_master_position_id_within_mt5_limit():
     ("c13-", LONG, True),                # truncated right after the separator
     ("c13-9001[sl 1.1]", LONG, True),    # suffix rewritten
     ("c13-xyz", LONG, True),             # suffix replaced
+    ("c13-9002", LONG, False),           # full comment of another master position (reused copy id)
+    ("c13-90011", LONG, False),          # longer master position id, not a truncation of 9001
     ("c13", LONG, False),                # truncated before `-`: indistinguishable from a cut inside the digits
     ("c1", LONG, False),                 # `c13-...` cut inside the digits: other id, never this copy
     ("c14-9001", LONG, False),           # wrong copy id
