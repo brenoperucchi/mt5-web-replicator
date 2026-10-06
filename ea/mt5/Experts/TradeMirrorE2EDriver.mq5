@@ -328,6 +328,17 @@ string Execute(const string cmd)
    string op = JsonStr(cmd, "op", "");
    if(op == "ping")
       return "\"ok\":true";
+   if(op == "quote")
+     {
+      string qs = JsonStr(cmd, "symbol", _Symbol);
+      MqlTick qt;
+      if(!SymbolSelect(qs, true) || !SymbolInfoTick(qs, qt))
+         return "\"ok\":false,\"error\":\"symbol not found\"";
+      int qd = (int)SymbolInfoInteger(qs, SYMBOL_DIGITS);
+      return "\"ok\":true,\"bid\":" + JNum(qt.bid, qd) + ",\"ask\":" + JNum(qt.ask, qd) +
+             ",\"digits\":" + JInt(qd) + ",\"time_msc\":" + JInt(qt.time_msc) +
+             ",\"trade_mode\":" + JInt(SymbolInfoInteger(qs, SYMBOL_TRADE_MODE));
+     }
    if(!IsDemo())
       return "\"ok\":false,\"error\":\"refused: account is not DEMO\"";
 
@@ -347,11 +358,15 @@ string Execute(const string cmd)
       if(!SymbolSelect(symbol, true))
          return "\"ok\":false,\"error\":\"symbol not found\"";
       g_trade.SetTypeFillingBySymbol(symbol);
+      MqlTick ot;
+      SymbolInfoTick(symbol, ot);   // quote right before the send (spread at open)
       bool sent = side == "sell" ? g_trade.Sell(vol, symbol, 0.0, sl, tp, comment)
                   : g_trade.Buy(vol, symbol, 0.0, sl, tp, comment);
       bool ok = sent && TradeOk();
       long pos = ok ? PositionIdOfDeal(g_trade.ResultDeal()) : 0;
-      return "\"ok\":" + JBool(ok) + ",\"position\":" + JInt(pos) + ResultJson();
+      int od = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+      return "\"ok\":" + JBool(ok) + ",\"position\":" + JInt(pos) + ",\"bid\":" + JNum(ot.bid, od) +
+             ",\"ask\":" + JNum(ot.ask, od) + ResultJson();
      }
    if(op == "modify")
      {

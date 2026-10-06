@@ -894,54 +894,134 @@ def check_trace(ctx: Ctx, since_ms: int, until_ms: int) -> dict:
     return res
 
 
+def _pip(sym: str) -> float:
+    return 0.01 if "JPY" in sym else 0.0001
+
+
+def _rollover(utc_s: float) -> bool:
+    """Inside 17:55-18:15 Brasília (UTC-3), the New York rollover window (spreads widen)."""
+    t = time.gmtime(utc_s - 3 * 3600)
+    m = t.tm_hour * 60 + t.tm_min
+    return 17 * 60 + 55 <= m <= 18 * 60 + 15
+
+
+def _latency_cycle(ctx: Ctx, sym: str, side: str, tag: str, seen: set[int]) -> dict:
+    a = ctx.args
+    t0 = time.time()
+    op = ctx.master_open(sym, side, 0.01, tag)
+    try:
+        sq = ctx.slave.send("quote", timeout=10, symbol=sym)
+    except Fail:
+        sq = {}
+    copy = wait_for(f"new copy({sym}) open",
+                    lambda: next((c for c in ctx.new_copies(sym) if c["id"] not in seen and c["state"] == "open"),
+                                 None), ctx.timeout, 0.5)
+    spos = ctx.wait_slave_pos(copy["id"])
+    mpos = ctx.master.positions(comment=f"e2e-{tag}"[:31], symbol=sym)
+    check(len(mpos) == 1, f"one master position e2e-{tag}")
+    m_in = _deal(ctx.master, mpos[0]["identifier"], "in", ctx.timeout)
+    s_in = _deal(ctx.slave, spos["identifier"], "in", ctx.timeout)
+    time.sleep(a.latency_hold)
+    ctx.master.must("close", ticket=mpos[0]["ticket"])
+    ctx.wait_slave_gone(copy["id"])
+    m_out = _deal(ctx.master, mpos[0]["identifier"], "out", ctx.timeout)
+    s_out = _deal(ctx.slave, spos["identifier"], "out", ctx.timeout)
+    pip = _pip(sym)
+    sgn = 1 if side == "buy" else -1
+
+    def spread(q: dict) -> float | None:
+        return round((q["ask"] - q["bid"]) / pip, 2) if q.get("ask") and q.get("bid") else None
+
+    return {"symbol": sym, "side": side, "copy_id": copy["id"], "utc": time.strftime("%H:%M:%S", time.gmtime(t0)),
+            "rollover": _rollover(t0) or _rollover(time.time()),
+            "open_ms": s_in["time_msc"] - m_in["time_msc"], "close_ms": s_out["time_msc"] - m_out["time_msc"],
+            # + = the slave got a worse price than the master
+            "open_pips": round(sgn * (s_in["price"] - m_in["price"]) / pip, 2),
+            "close_pips": round(sgn * (m_out["price"] - s_out["price"]) / pip, 2),
+            "master_spread_pips": spread(op), "slave_spread_pips": spread(sq)}
+
+
+def _summary(rows: list[dict]) -> dict:
+    out = {}
+    for k in ("open_ms", "close_ms", "open_pips", "close_pips", "master_spread_pips", "slave_spread_pips"):
+        v = [r[k] for r in rows if r.get(k) is not None]
+        if v:
+            out[k] = {"p50": _pctl(v, 0.5), "p90": _pctl(v, 0.9), "max": max(v), "min": min(v)}
+    return out
+
+
 @scenario()
 def s_latency(ctx: Ctx) -> None:
-    """N open+close cycles on GBPUSD/EURUSD: open/close latency (slave deal - master deal, broker time_msc),
-    price diff in pips, p50/p90/max; --max-p90-ms fails the run; per-account calls/min and min gap from the
-    server access trace."""
+    """N open+close cycles on GBPUSD/EURUSD (or N per symbol of --latency-symbols): open/close latency (slave
+    deal - master deal, broker time_msc), price diff in pips (+ = worse for the slave), spread at open,
+    p50/p90/max; --max-p90-ms fails the run; per-account calls/min and min gap from the server access trace."""
     a = ctx.args
-    syms = [s for s in ("GBPUSD", "EURUSD") if s in a.symbols] or a.symbols[:2]
-    rows = []
+    if a.latency_symbols:
+        plan, skipped = [], {}
+        def quotable(t: Terminal, sym: str) -> bool:
+            for _ in range(3):   # a symbol just added to Market Watch has no tick for a moment
+                q = t.send("quote", timeout=10, symbol=sym)
+                if q.get("ok") or "unknown op" in str(q.get("error")):   # older driver: no spread, still try
+                    return True
+                time.sleep(1.5)
+            return False
+
+        for sym in a.latency_symbols:
+            bad = [t.role for t in (ctx.master, ctx.slave) if not quotable(t, sym)]
+            if bad:
+                skipped[sym] = f"no quote on {'/'.join(bad)}"
+                ctx.note(f"{sym}: skipped ({skipped[sym]})")
+            else:
+                plan += [(sym, ("buy", "sell")[k % 2]) for k in range(a.latency_cycles)]
+    else:
+        syms = [s for s in ("GBPUSD", "EURUSD") if s in a.symbols] or a.symbols[:2]
+        plan = [(syms[i % len(syms)], ("buy", "sell")[(i // len(syms)) % 2]) for i in range(a.latency_cycles)]
+        skipped = {}
+    rows: list[dict] = []
+    failed: dict[str, str] = {}
     since = int(time.time() * 1000)
-    for i in range(a.latency_cycles):
-        sym, side = syms[i % len(syms)], ("buy", "sell")[(i // len(syms)) % 2]
-        tag = f"lat{i}"
-        ctx.master_open(sym, side, 0.01, tag)
-        seen = {r["copy_id"] for r in rows}
-        copy = wait_for(f"new copy({sym}) open",
-                        lambda: next((c for c in ctx.new_copies(sym) if c["id"] not in seen and c["state"] == "open"),
-                                     None), ctx.timeout, 0.5)
-        spos = ctx.wait_slave_pos(copy["id"])
-        mpos = ctx.master.positions(comment=f"e2e-{tag}"[:31], symbol=sym)
-        check(len(mpos) == 1, f"one master position e2e-{tag}")
-        m_in = _deal(ctx.master, mpos[0]["identifier"], "in", ctx.timeout)
-        s_in = _deal(ctx.slave, spos["identifier"], "in", ctx.timeout)
-        time.sleep(a.latency_hold)
-        ctx.master.must("close", ticket=mpos[0]["ticket"])
-        ctx.wait_slave_gone(copy["id"])
-        m_out = _deal(ctx.master, mpos[0]["identifier"], "out", ctx.timeout)
-        s_out = _deal(ctx.slave, spos["identifier"], "out", ctx.timeout)
-        pip = 0.01 if "JPY" in sym else 0.0001
-        sgn = 1 if side == "buy" else -1
-        r = {"symbol": sym, "side": side, "copy_id": copy["id"],
-             "open_ms": s_in["time_msc"] - m_in["time_msc"], "close_ms": s_out["time_msc"] - m_out["time_msc"],
-             # + = the slave got a worse price than the master
-             "open_pips": round(sgn * (s_in["price"] - m_in["price"]) / pip, 1),
-             "close_pips": round(sgn * (m_out["price"] - s_out["price"]) / pip, 1)}
+    started = time.time()
+    for i, (sym, side) in enumerate(plan):
+        if sym in failed:
+            continue
+        try:
+            r = _latency_cycle(ctx, sym, side, f"lat{i}", {x["copy_id"] for x in rows})
+        except Fail as e:
+            if not a.latency_symbols:
+                raise
+            failed[sym] = str(e)
+            ctx.note(f"{sym}: cycle failed, symbol abandoned: {e}")
+            ctx.cleanup()
+            continue
         rows.append(r)
-        ctx.note(f"cycle {i + 1}/{a.latency_cycles} {sym} {side}: open {r['open_ms']} ms ({r['open_pips']} pip), "
-                 f"close {r['close_ms']} ms ({r['close_pips']} pip)")
+        ctx.note(f"cycle {i + 1}/{len(plan)} {sym} {side}: open {r['open_ms']} ms ({r['open_pips']} pip), "
+                 f"close {r['close_ms']} ms ({r['close_pips']} pip), spread {r['master_spread_pips']}/"
+                 f"{r['slave_spread_pips']} pip{' ROLLOVER' if r['rollover'] else ''}")
         time.sleep(a.latency_pause)
     until = int(time.time() * 1000)
-    summary = {}
-    for k in ("open_ms", "close_ms", "open_pips", "close_pips"):
-        v = [r[k] for r in rows]
-        summary[k] = {"p50": _pctl(v, 0.5), "p90": _pctl(v, 0.9), "max": max(v)}
-        ctx.note(f"{k:10} p50={summary[k]['p50']} p90={summary[k]['p90']} max={summary[k]['max']}")
+    check(rows, "no latency cycle completed")
+    summary = _summary(rows)
+    for k, v in summary.items():
+        ctx.note(f"{k:18} p50={v['p50']} p90={v['p90']} max={v['max']}")
+    per_symbol = {}
+    if a.latency_symbols:
+        for sym in dict.fromkeys(r["symbol"] for r in rows):
+            per_symbol[sym] = _summary([r for r in rows if r["symbol"] == sym])
+            ps = per_symbol[sym]
+            ctx.note(f"{sym}: open {ps['open_ms']['p50']}/{ps['open_ms']['p90']} ms, close {ps['close_ms']['p50']}/"
+                     f"{ps['close_ms']['p90']} ms, open pips p50 {ps['open_pips']['p50']} p90 {ps['open_pips']['p90']}"
+                     f" worst {ps['open_pips']['max']}, close pips p50 {ps['close_pips']['p50']} p90 "
+                     f"{ps['close_pips']['p90']} worst {ps['close_pips']['max']}")
+    window = {"start_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(started)),
+              "end_utc": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
+              "rollover_overlap": any(r["rollover"] for r in rows)}
     trace = check_trace(ctx, since, until)
     out = a.out_dir / f"latency-{time.strftime('%Y%m%d-%H%M%S')}.json"
-    out.write_text(json.dumps({"rows": rows, "summary": summary, "http": trace, "label": a.latency_label}, indent=2))
-    ctx.note(f"latency report: {out}")
+    out.write_text(json.dumps({"rows": rows, "summary": summary, "per_symbol": per_symbol, "skipped": skipped,
+                               "failed": failed, "window": window, "http": trace, "label": a.latency_label},
+                              indent=2))
+    ctx.note(f"latency report: {out} ({window['start_utc']} - {window['end_utc']} UTC"
+             f"{', overlaps the NY rollover' if window['rollover_overlap'] else ''})")
     if a.max_p90_ms:
         for k in ("open_ms", "close_ms"):
             check(summary[k]["p90"] <= a.max_p90_ms, f"{k} p90 {summary[k]['p90']} ms > --max-p90-ms {a.max_p90_ms}")
@@ -1047,6 +1127,8 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--latency-cycles", type=int, default=int(env.get("E2E_LATENCY_CYCLES", 10)))
     ap.add_argument("--latency-hold", type=float, default=3.0, help="seconds a latency position stays open")
     ap.add_argument("--latency-pause", type=float, default=2.0, help="seconds between latency cycles")
+    ap.add_argument("--latency-symbols", default="",
+                    help="comma list: --latency-cycles open+close cycles per symbol, per-symbol summary")
     ap.add_argument("--latency-label", default="", help="free text stored in the latency report")
     ap.add_argument("--max-p90-ms", type=float, default=0, help="latency fails when open/close p90 exceeds this")
     ap.add_argument("--access-trace", default=env.get("E2E_ACCESS_TRACE"),
@@ -1076,6 +1158,7 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
     if a.master_ssh:
         a.cleanup_magic_only = True
     a.symbols = [s.strip() for s in a.symbols.split(",") if s.strip()]
+    a.latency_symbols = [s.strip() for s in a.latency_symbols.split(",") if s.strip()]
     return a
 
 
