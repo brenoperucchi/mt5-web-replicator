@@ -192,7 +192,7 @@ def test_full_cycle_with_ea_fixtures(cp, app):
     assert out["accepted"] is True
 
     (o,) = cp.poll(sl)["commands"]
-    assert o["action"] == "open" and o["comment"] == f"c{o['copy_id']}"
+    assert o["action"] == "open" and o["comment"] == f"c{o['copy_id']}-1"
     assert ea_results(cp, sl, "results_in_progress.json", o)["applied"] == 1
     assert ea_results(cp, sl, "results_open_done.json", o, order=81, deal=91, position_id=7001)["applied"] == 1
     assert copy_of(cp, o["copy_id"])["state"] == "open"

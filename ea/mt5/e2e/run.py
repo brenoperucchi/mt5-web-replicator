@@ -307,7 +307,7 @@ class Ctx:
         return wait_for(f"{n} copy({symbol}) in {sorted(states)}", ok, timeout or self.timeout)
 
     def slave_pos(self, copy_id: int) -> list[dict]:
-        return self.slave.positions(comment=f"c{copy_id}")
+        return [p for p in self.slave.status()["positions"] if is_copy_comment(p.get("comment"), copy_id)]
 
     def wait_slave_pos(self, copy_id: int, pred: Callable[[dict], bool] = lambda p: True,
                        what: str = "", timeout: float | None = None) -> dict:
@@ -326,7 +326,7 @@ class Ctx:
         return wait_for(f"copy {copy_id} in {sorted(states)}", ok, timeout or self.timeout)
 
     def slave_in_deals(self, copy_id: int) -> list[dict]:
-        return [d for d in self.slave.status()["deals"] if d["comment"] == f"c{copy_id}" and d["entry"] == "in"]
+        return [d for d in self.slave.status()["deals"] if is_copy_comment(d["comment"], copy_id) and d["entry"] == "in"]
 
     def assert_no_new_orphans(self) -> None:
         o = self.admin.orphans()
@@ -373,6 +373,11 @@ def scenario(slow: bool = False):
     return deco
 
 
+def is_copy_comment(comment: str | None, copy_id: int) -> bool:
+    """Slave comment of copy `copy_id`: `c<copy_id>-<master position id>` (or legacy `c<copy_id>`)."""
+    return comment == f"c{copy_id}" or (comment or "").startswith(f"c{copy_id}-")
+
+
 def open_and_mirror(ctx: Ctx, symbol: str, side: str, volume: float, tag: str, **kw: Any) -> tuple[dict, dict]:
     ctx.master_open(symbol, side, volume, tag, **kw)
     copy = ctx.wait_copy(symbol, {"open"})[0]
@@ -383,6 +388,10 @@ def open_and_mirror(ctx: Ctx, symbol: str, side: str, volume: float, tag: str, *
     check(pos["magic"] == ctx.args.magic, f"slave magic {pos['magic']} != {ctx.args.magic} (magic_mode same)")
     check(str(copy["position_id"]) == str(pos["identifier"]),
           f"copy position_id {copy['position_id']} != slave identifier {pos['identifier']}")
+    mps = ctx.master.positions(comment=f"e2e-{tag}"[:31], symbol=symbol)
+    check(len(mps) == 1, f"expected one master position e2e-{tag} on {symbol}, got {len(mps)}")
+    want = f"c{copy['id']}-{mps[0]['identifier']}"
+    check(pos["comment"] == want, f"slave comment {pos['comment']!r} != {want!r} (c<copy_id>-<master position_id>)")
     return copy, pos
 
 

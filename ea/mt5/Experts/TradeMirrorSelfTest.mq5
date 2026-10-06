@@ -4,7 +4,7 @@
 //|  The Tester does not run WebRequest, so the real client engine   |
 //|  runs against an injected in-memory fake server (ITransport).    |
 //|  Covers S01-S06 (journal/outbox) and S24-S26 (transport, rotate, |
-//|  enroll). Real trades are placed on the tester symbol.           |
+//|  enroll), S27-S28 (comment correlation). Real trades are placed on the tester symbol.           |
 //|                                                                  |
 //|  Run: Strategy Tester, Expert = TradeMirrorSelfTest, a hedging   |
 //|  account, any liquid symbol (EURUSD), "Every tick", 1 day.       |
@@ -102,6 +102,22 @@ void CloseAll()
      }
   }
 
+// Server comment shape: c<copy_id>-<master position_id> (design 5.8a).
+string TestComment(const long copyId) { return "c" + IntegerToString(copyId) + "-" + IntegerToString(700000 + copyId); }
+
+// A position placed directly (as the broker would hold it), with an arbitrary comment.
+ulong PlaceRaw(const string comment)
+  {
+   MqlTradeRequest r; MqlTradeResult res; ZeroMemory(r); ZeroMemory(res);
+   MqlTick tick; SymbolInfoTick(_Symbol, tick);
+   r.action = TRADE_ACTION_DEAL; r.symbol = _Symbol; r.volume = TestVolume; r.type = ORDER_TYPE_BUY;
+   r.price = tick.ask; r.deviation = 50; r.type_filling = TmFilling(_Symbol); r.magic = TestMagic;
+   r.comment = comment;
+   if(!OrderSend(r, res) || res.deal == 0)
+      return 0;
+   return PositionIdWithComment(comment);
+  }
+
 string OpenCmd(const string id, const long copyId)
   {
    MqlTick t;
@@ -123,7 +139,7 @@ string OpenCmd(const string id, const long copyId)
    w.Null("max_entry_deviation_points");
    w.Null("position_id");
    w.Int("magic", TestMagic);
-   w.Str("comment", "c" + IntegerToString(copyId));
+   w.Str("comment", TestComment(copyId));
    w.Int("issued_at", g_tm_fake_now_ms);
    w.Int("expires_at", g_tm_fake_now_ms + 600000);
    w.EndObj();
@@ -143,7 +159,7 @@ string CancelCmd(const string id, const long copyId, const string openId)
    w.Null("position_id");
    w.Str("open_command_id", openId);
    w.Int("magic", TestMagic);
-   w.Str("comment", "c" + IntegerToString(copyId));
+   w.Str("comment", TestComment(copyId));
    w.Str("reason", "master_closed");
    w.Int("issued_at", g_tm_fake_now_ms);
    w.Null("expires_at");
@@ -160,10 +176,10 @@ void S01()
    g_fake.Queue("c_s01", OpenCmd("c_s01", 9101));
    g_fake.dropResults = 1;                      // the first results POST is processed, reply lost
    Ticks(tm, 12);
-   Check("S01", PositionsWithComment("c9101") == 1, "one position after the lost reply");
+   Check("S01", PositionsWithComment(TestComment(9101)) == 1, "one position after the lost reply");
    g_fake.Redeliver("c_s01");                   // lease expired: the server delivers the open again
    Ticks(tm, 12);
-   Check("S01", PositionsWithComment("c9101") == 1, "still one position after re-delivery (never re-executed)");
+   Check("S01", PositionsWithComment(TestComment(9101)) == 1, "still one position after re-delivery (never re-executed)");
    Check("S01", g_fake.CountResults("c_s01", "done") >= 2, "stored done result re-sent");
    Check("S01", StringFind(g_fake.LastResult("c_s01", "done"), "\"position_id\":") >= 0, "done carries position_id");
    Check("S01", tm.Outbox().Count() == 0, "outbox drained after 2xx");
@@ -182,13 +198,13 @@ void S02()
    ex.m_crash = TM_CRASH_AFTER_PREPARED;
    Ticks(tm, 6);
    Check("S02", ex.m_crashed, "crashed after prepared");
-   Check("S02", PositionsWithComment("c9102") == 0, "nothing sent before the crash");
+   Check("S02", PositionsWithComment(TestComment(9102)) == 0, "nothing sent before the crash");
    delete tm;                                   // process dies; files stay
    tm = NewEngine("s02", false);
    g_fake.Redeliver("c_s02");
    UntilSession(tm);
    Ticks(tm, 12);
-   Check("S02", PositionsWithComment("c9102") == 1, "executed exactly once after restart");
+   Check("S02", PositionsWithComment(TestComment(9102)) == 1, "executed exactly once after restart");
    Check("S02", g_fake.CountResults("c_s02", "done") >= 1, "done reported");
    delete tm;
    CloseAll();
@@ -205,15 +221,15 @@ void S03()
    ex.m_crash = TM_CRASH_AFTER_ORDERSEND;
    Ticks(tm, 6);
    Check("S03", ex.m_crashed, "crashed after OrderSend");
-   Check("S03", PositionsWithComment("c9103") == 1, "order reached the broker");
+   Check("S03", PositionsWithComment(TestComment(9103)) == 1, "order reached the broker");
    delete tm;
    tm = NewEngine("s03", false);
    g_fake.Redeliver("c_s03");
    UntilSession(tm);
    Ticks(tm, 12);
-   Check("S03", PositionsWithComment("c9103") == 1, "no second order");
+   Check("S03", PositionsWithComment(TestComment(9103)) == 1, "no second order");
    string done = g_fake.LastResult("c_s03", "done");
-   Check("S03", done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)PositionIdWithComment("c9103"))) >= 0,
+   Check("S03", done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)PositionIdWithComment(TestComment(9103)))) >= 0,
          "done with the real position_id");
    delete tm;
    CloseAll();
@@ -238,7 +254,7 @@ void S04()
    Check("S04", tm.Exec().CountState(JS_SUSPENDED) == 1, "journal entry suspended");
    Check("S04", g_fake.CountResults("c_s04", "uncertain") >= 1, "result uncertain reported");
    Check("S04", g_fake.CountResults("c_s04", "failed") == 0, "never reported not executed");
-   Check("S04", PositionsWithComment("c9104") == 1, "no second order while suspended");
+   Check("S04", PositionsWithComment(TestComment(9104)) == 1, "no second order while suspended");
    g_tm_hide_evidence = false;                  // evidence becomes visible (late fill / adoption)
    Ticks(tm, 25);
    Check("S04", g_fake.CountResults("c_s04", "done") >= 1, "late evidence -> done");
@@ -255,10 +271,10 @@ void S05()
    UntilSession(tm);
    g_fake.Queue("c_s05", OpenCmd("c_s05", 9105));
    Ticks(tm, 10);
-   Check("S05", PositionsWithComment("c9105") == 1, "open executed");
+   Check("S05", PositionsWithComment(TestComment(9105)) == 1, "open executed");
    g_fake.Queue("x_s05", CancelCmd("x_s05", 9105, "c_s05"));
    Ticks(tm, 12);
-   Check("S05", PositionsWithComment("c9105") == 0, "position closed by the cancel");
+   Check("S05", PositionsWithComment(TestComment(9105)) == 0, "position closed by the cancel");
    string closed = g_fake.LastResult("x_s05", "closed");
    Check("S05", closed != "" && StringFind(closed, "\"deal\":") >= 0, "cancel reported closed with the close deal");
    // cancel of an open that never reached the terminal -> not_executed
@@ -328,7 +344,7 @@ void S24()
    Check("S24", g_fake.commandPolls > polls, "commands poll continues while results are rate limited");
    Check("S24", g_fake.resultPosts == resultPosts, "results route respects Retry-After (no calls)");
    Check("S24", tm.Outbox().Count() > 0, "results retained in the outbox");
-   Check("S24", PositionsWithComment("c9124") == 1, "execution not blocked by HTTP");
+   Check("S24", PositionsWithComment(TestComment(9124)) == 1, "execution not blocked by HTTP");
    Check("S24", tm.HttpCalls() <= 10 + 60 + 30, "at most one HTTP call per tick");
    g_fake.fail429Path = "";
    delete tm;
@@ -379,6 +395,60 @@ void S26()
    delete tm;
   }
 
+//--- S27: comment correlation rule (pure): only the c<copy_id> part counts
+void S27()
+  {
+   Check("S27", TmCommentMatches("c13-9001", "c13-9001"), "full comment");
+   Check("S27", TmCommentMatches("c13-9001", "c13-90"), "suffix truncated");
+   Check("S27", TmCommentMatches("c13-9001", "c13-"), "truncated right after '-'");
+   Check("S27", TmCommentMatches("c13-9001", "c13-9001[sl 1.1]"), "suffix rewritten");
+   Check("S27", !TmCommentMatches("c13-9001", "c13"), "bare id for a long-form command is ambiguous");
+   Check("S27", !TmCommentMatches("c13-9001", "c1"), "cut inside the digits never matches");
+   Check("S27", !TmCommentMatches("c13-9001", "c14-9001"), "wrong copy id");
+   Check("S27", !TmCommentMatches("c13-9001", "c130-9001"), "longer id with the same prefix");
+   Check("S27", !TmCommentMatches("c13-9001", "manual"), "not a copier comment");
+   Check("S27", TmCommentMatches("c13", "c13"), "legacy c<id>");
+   Check("S27", TmCommentMatches("c13", "c13-5"), "legacy command, broker appended a suffix");
+   Check("S27", !TmCommentMatches("c13", "c13x"), "legacy command, garbage after the digits");
+  }
+
+//--- S28: broker truncated/rewrote the comment suffix -> the open is found by c<copy_id> + magic,
+//    never re-sent; a bare c<copy_id> for a long-form command is not taken as evidence.
+void S28Case(const string tag, const long copyId, const string brokerComment, const bool expectAdopt)
+  {
+   string scen = "S28" + tag;
+   ulong pid = PlaceRaw(brokerComment);
+   Check(scen, pid != 0, "broker-side position placed with comment " + brokerComment);
+   g_fake.Reset();
+   CTradeMirror *tm = NewEngine("s28" + tag, true);
+   UntilSession(tm);
+   string id = "c_s28" + tag;
+   g_fake.Queue(id, OpenCmd(id, copyId));
+   Ticks(tm, 12);
+   string done = g_fake.LastResult(id, "done");
+   if(expectAdopt)
+     {
+      Check(scen, PositionsWithComment(TestComment(copyId)) == 0, "no second order");
+      Check(scen, done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)pid)) >= 0,
+            "done with the existing position_id");
+     }
+   else
+     {
+      Check(scen, PositionsWithComment(TestComment(copyId)) == 1, "ambiguous evidence ignored: order sent");
+      Check(scen, done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)pid)) < 0,
+            "not correlated with the ambiguous position");
+     }
+   delete tm;
+   CloseAll();
+  }
+
+void S28()
+  {
+   S28Case("a", 9128, "c9128-7", true);               // suffix truncated
+   S28Case("b", 9129, "c9129-x[sl]", true);           // suffix rewritten
+   S28Case("c", 9130, "c9130", false);                // bare id: ambiguous for a long-form command
+  }
+
 int OnInit()
   {
    if(!MQLInfoInteger(MQL_TESTER))
@@ -398,7 +468,7 @@ void OnTick()
       return;
    g_done = true;
    g_tm_fake_now_ms = (long)TimeCurrent() * 1000;
-   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26();
+   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28();
    g_tm_fake_now_ms = 0;
    PrintFormat("TradeMirror self-test: %d passed, %d failed", g_passed, g_failed);
   }

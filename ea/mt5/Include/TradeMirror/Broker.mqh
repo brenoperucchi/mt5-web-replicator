@@ -17,6 +17,55 @@ bool g_tm_hide_evidence = false;
 
 string TmSide(const long type) { return type == POSITION_TYPE_BUY ? "buy" : "sell"; }
 
+//+------------------------------------------------------------------+
+//| Copier comment correlation (design 5.8a, same rule as the server |
+//| engine.correlation). The command comment is                     |
+//| c<copy_id>-<master position_id> (or legacy c<copy_id>); only the |
+//| c<copy_id> part correlates, always together with the magic:      |
+//|  - "c<digits>-<anything>": id = digits before the first '-'; a   |
+//|    suffix truncated or rewritten by the broker is tolerated.     |
+//|  - "c<digits>" (no '-'): accepted only when the command comment  |
+//|    is exactly the legacy "c<copy_id>"; for a long-form command   |
+//|    it is ambiguous (a cut before '-' looks like a cut inside the |
+//|    digits) and rejected.                                         |
+//+------------------------------------------------------------------+
+// Copy id of a copier comment ("c<digits>" optionally followed by "-..."), -1 when not one.
+// `dashed` reports whether the digits were terminated by '-'.
+long TmCommentCopyId(const string comment, bool &dashed)
+  {
+   dashed = false;
+   int n = StringLen(comment);
+   if(n < 2 || StringGetCharacter(comment, 0) != 'c')
+      return -1;
+   int i = 1;
+   while(i < n && StringGetCharacter(comment, i) >= '0' && StringGetCharacter(comment, i) <= '9')
+      i++;
+   if(i == 1 || i - 1 > 18)
+      return -1;
+   if(i < n)
+     {
+      if(StringGetCharacter(comment, i) != '-')
+         return -1;
+      dashed = true;
+     }
+   return StringToInteger(StringSubstr(comment, 1, i - 1));
+  }
+
+// True when the broker-side `actual` comment correlates with the command comment `expected`.
+bool TmCommentMatches(const string expected, const string actual)
+  {
+   bool expDashed, actDashed;
+   long want = TmCommentCopyId(expected, expDashed);
+   if(want < 0)
+      return actual == expected;   // not a copier comment: exact match only
+   long got = TmCommentCopyId(actual, actDashed);
+   if(got != want)
+      return false;
+   if(actDashed)
+      return true;
+   return !expDashed;              // bare c<id>: legacy command only
+  }
+
 string TmDealEntry(const long e)
   {
    switch((int)e)
@@ -109,7 +158,7 @@ bool TmUnmanagedPositionOnSymbol(const string symbol, const string ownComment, c
   {
    STmPosition p;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
-      if(TmSelectPositionAt(i, p) && p.symbol == symbol && !(p.comment == ownComment && p.magic == ownMagic))
+      if(TmSelectPositionAt(i, p) && p.symbol == symbol && !(TmCommentMatches(ownComment, p.comment) && p.magic == ownMagic))
          return true;
    return false;
   }
@@ -151,7 +200,7 @@ void TmFillAlive(STmEvidence &e)
      }
   }
 
-// Entry evidence of an open: persisted ids first (order, deal), then comment c<copy_id> + magic
+// Entry evidence of an open: persisted ids first (order, deal), then the c<copy_id> part of the comment + magic
 // over live positions, live orders and history deals.
 bool TmFindOpenEvidence(const string comment, const long magic, const ulong knownOrder, const ulong knownDeal,
                         const long sinceMs, STmEvidence &e)
@@ -197,7 +246,7 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
    // 3. live position with the correlation comment
    STmPosition p;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
-      if(TmSelectPositionAt(i, p) && p.comment == comment && p.magic == magic)
+      if(TmSelectPositionAt(i, p) && TmCommentMatches(comment, p.comment) && p.magic == magic)
         {
          e.found = true;
          e.position_id = p.position_id;
@@ -230,7 +279,7 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
          continue;
       if(HistoryDealGetInteger(d, DEAL_ENTRY) != DEAL_ENTRY_IN)
          continue;
-      if(HistoryDealGetString(d, DEAL_COMMENT) != comment || HistoryDealGetInteger(d, DEAL_MAGIC) != magic)
+      if(!TmCommentMatches(comment, HistoryDealGetString(d, DEAL_COMMENT)) || HistoryDealGetInteger(d, DEAL_MAGIC) != magic)
          continue;
       e.found = true;
       e.deal = d;
@@ -246,7 +295,7 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
    for(int i = OrdersTotal() - 1; i >= 0; i--)
      {
       ulong o = OrderGetTicket(i);
-      if(o != 0 && OrderGetString(ORDER_COMMENT) == comment && OrderGetInteger(ORDER_MAGIC) == magic)
+      if(o != 0 && TmCommentMatches(comment, OrderGetString(ORDER_COMMENT)) && OrderGetInteger(ORDER_MAGIC) == magic)
         {
          e.order = o;
          return false;
