@@ -59,3 +59,4 @@ lib/signal/lib/__pycache__/
 lib/telegram/tdlib/libtdjson.so
 public/mntpoint/signal_copy_trasmit.txt
 public/mntpoint/signal_copy_trasmit.txt.tmp
+ea/mt5/tests/__pycache__/

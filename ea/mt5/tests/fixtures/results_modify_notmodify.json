@@ -1,0 +1,15 @@
+{
+ "results": [
+  {
+   "command_id": "{{command_id}}",
+   "attempt_id": "{{attempt_id}}",
+   "copy_id": "{{#copy_id}}",
+   "status": "notmodify",
+   "position_ticket": "{{#position_id}}",
+   "position_id": "{{#position_id}}",
+   "executed_at": "{{#now}}",
+   "error_code": "invalid_stops",
+   "message": "Invalid stops"
+  }
+ ]
+}

@@ -2,6 +2,7 @@
 
 - **Status:** Phase 0 — Approved (2026-10-05). Revision 4 (after scout verification of revision 3), Phase 0 of #77
 - **Decision log:** 2026-10-05 — approved by the owner without further review rounds; residual risks are covered by the Phase 1 scenario gate (section 8). 2026-10-06 — owner decision: the slave order comment is `c<copy_id>-<master position_id>` (master `POSITION_IDENTIFIER`, legacy `c<copy_id>` when it would exceed 31 chars) so slave and master can be compared side by side; correlation keeps using only the `c<copy_id>` part (5.8a).
+- **Naming:** 2026-10-05 — the product is named **TradeMirror** (#78): the EA is `ea/mt5/Experts/TradeMirror.mq5`; the Copy Server's Python package stays `copycore`; the repository keeps its name (Q1).
 - **Related:** #77 (this design), #78 (rename), #79 (conciliation by ticket, fixed by PR #81), #64 (shared API core), #66 (latency/slippage)
 - **Reviewers:** the mt5 reviewers. Each numbered **Decision (Dn)** below can be approved or rejected on its own.
 
