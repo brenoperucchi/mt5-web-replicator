@@ -6,7 +6,8 @@
 //|  Covers S01-S06 (journal/outbox) and S24-S26 (transport, rotate, |
 //|  enroll), S27-S28 (comment correlation), S29 (latency schedule), |
 //|  S30 (per-server state files + migration), S31 (WebRequest errors),
-//|  S32 (stale c<copy_id> from before the command is not evidence). Real trades are placed on the tester symbol.           |
+//|  S32 (stale c<copy_id> from before the command is not evidence),
+//|  S33 (the same full comment from before the command is: DB rollback). Real trades are placed on the tester symbol.           |
 //|                                                                  |
 //|  Run: Strategy Tester, Expert = TradeMirrorSelfTest, a hedging   |
 //|  account, any liquid symbol (EURUSD), "Every tick", 1 day.       |
@@ -503,6 +504,40 @@ void S32()
    S32Case("d", 9135, "c9135-123456", false, -60000, false);  // full comment, another master id: not ours
   }
 
+//--- S33: the Copy Server database was restored/reset and re-issues an open for a copy id whose position is
+//    already on the account (live chaos run db_rollback, 2026-10-11): the account holds a position with the
+//    command's EXACT comment c<copy_id>-<master position id> and magic, opened BEFORE the command. Same copy id and
+//    same master position id is the same copy, so the open is answered "done" with that position (no second order);
+//    otherwise the old position stays open unmanaged and is never closed. S32 keeps the other side: a comment that
+//    only looks like ours (truncated suffix, another master id) from before the command is not evidence.
+void S33Case(const string tag, const long copyId, const bool closeIt)
+  {
+   string scen = "S33" + tag;
+   string cmt = TestComment(copyId);
+   ulong pid = PlaceRaw(cmt);
+   Check(scen, pid != 0, "position placed with the exact comment " + cmt);
+   if(closeIt)
+      CloseAll();   // history deals only (the slave closed it by hand before the rollback)
+   g_fake.Reset();
+   CTradeMirror *tm = NewEngine("s33" + tag, true);
+   UntilSession(tm);
+   string id = "c_s33" + tag;
+   g_fake.Queue(id, OpenCmd(id, copyId, g_tm_fake_now_ms + 60000));   // issued after the position (the old "now")
+   Ticks(tm, 12);
+   string done = g_fake.LastResult(id, "done");
+   Check(scen, PositionsWithComment(cmt) == (closeIt ? 0 : 1), "no second order");
+   Check(scen, done != "" && StringFind(done, "\"position_id\":" + IntegerToString((long)pid)) >= 0,
+         "done with the existing position_id");
+   delete tm;
+   CloseAll();
+  }
+
+void S33()
+  {
+   S33Case("a", 9136, false);   // live position older than the command
+   S33Case("b", 9137, true);    // only its history deals are left
+  }
+
 //--- S29: latency scheduling with a short tick: the commands poll keeps its interval (not one call per tick),
 //    a received command executes and its result goes out on the next ticks, followed by one immediate re-poll.
 void TicksMs(CTradeMirror *tm, const int n, const int stepMs)
@@ -693,7 +728,7 @@ void OnTick()
       return;
    g_done = true;
    g_tm_fake_now_ms = (long)TimeCurrent() * 1000;
-   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29(); S30(); S31(); S32();
+   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29(); S30(); S31(); S32(); S33();
    g_tm_fake_now_ms = 0;
    PrintFormat("TradeMirror self-test: %d passed, %d failed", g_passed, g_failed);
   }

@@ -125,6 +125,15 @@ long TmEvidenceFloor(const long issuedServerMs, const long createdLocalMs, const
    return local + TmBrokerOffsetMs() - TM_EVIDENCE_SKEW_MS;
   }
 
+// A comment that equals the command's FULL comment c<copy_id>-<master position id> is the same copy whatever its age:
+// the master position id is unique, so only a restored/reset Copy Server database (same copy id, same master position,
+// re-issued open) can produce it. The time bound stays for everything that merely looks like ours (truncated suffix,
+// bare c<copy_id>, another master position id).
+bool TmSameCopyComment(const string expected, const string actual)
+  {
+   return actual == expected && StringFind(expected, "-") > 1;
+  }
+
 string TmDealEntry(const long e)
   {
    switch((int)e)
@@ -221,7 +230,8 @@ bool TmUnmanagedPositionOnSymbol(const string symbol, const string ownComment, c
    STmPosition p;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
       if(TmSelectPositionAt(i, p) && p.symbol == symbol &&
-         !(TmCommentMatches(ownComment, p.comment) && p.magic == ownMagic && p.time_msc >= floorMs))
+         !(TmCommentMatches(ownComment, p.comment) && p.magic == ownMagic &&
+           (p.time_msc >= floorMs || TmSameCopyComment(ownComment, p.comment))))
          return true;
    return false;
   }
@@ -310,7 +320,8 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
    // 3. live position with the correlation comment
    STmPosition p;
    for(int i = PositionsTotal() - 1; i >= 0; i--)
-      if(TmSelectPositionAt(i, p) && TmCommentMatches(comment, p.comment) && p.magic == magic && p.time_msc >= floorMs)
+      if(TmSelectPositionAt(i, p) && TmCommentMatches(comment, p.comment) && p.magic == magic &&
+         (p.time_msc >= floorMs || TmSameCopyComment(comment, p.comment)))
         {
          e.found = true;
          e.position_id = p.position_id;
@@ -345,7 +356,7 @@ bool TmFindOpenEvidence(const string comment, const long magic, const ulong know
          continue;
       if(!TmCommentMatches(comment, HistoryDealGetString(d, DEAL_COMMENT)) || HistoryDealGetInteger(d, DEAL_MAGIC) != magic)
          continue;
-      if(HistoryDealGetInteger(d, DEAL_TIME_MSC) < floorMs)
+      if(HistoryDealGetInteger(d, DEAL_TIME_MSC) < floorMs && !TmSameCopyComment(comment, HistoryDealGetString(d, DEAL_COMMENT)))
          continue;   // older than the command: not this copy's
       e.found = true;
       e.deal = d;

@@ -260,6 +260,49 @@ health, enrolled accounts, link settings, drivers alive and on DEMO, AutoTrading
 | `fault_rate_limit_results` | 429 with a huge `Retry-After` on results (S24) |
 | `fault_server_down` | 503 for 45 s around an open |
 
+### Chaos group (error scenarios)
+
+`--group chaos` (or the scenario names below) runs eleven error scenarios against the same two terminals. Each
+one sets up a copy, injects a fault, asserts on the admin API (`/admin/copies`, `/commands`, `/events`,
+`/orphans`) and the drivers' `status.json` with timeouts, restores everything it touched (network tables, proxy,
+link parameters, symbol maps, account status; the runner then flattens both accounts as for every scenario) and
+prints PASS/FAIL/SKIP plus the JSON report. A scenario that cannot run on the current setup is SKIPped with the
+reason. The whole group takes about 70 minutes (`--outage-seconds` shortens the 10-minute outage).
+
+```bash
+uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh --group chaos \
+    --server-db /path/to/local/copy.db --server-restart-cmd 'start-the-local-server.sh'
+uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh chaos_slave_side_close chaos_slave_suspend
+```
+
+How faults are injected:
+
+- **Network / broker loss** of a local terminal: nftables in that container's own network namespace
+  (`podman unshare nsenter -t <pid> -n nft ...`, rootless, nothing else on the host is touched). `server` rejects
+  only the Copy Server's address, `broker` rejects everything except the server (the terminal reports
+  `connected=false` about 90 s later on a quiet market). A remote master (KS1, no root) is cut by
+  `docker network disconnect <network> <container>`, which takes broker and server away together.
+- **Terminal / container**: `kill -9` of `terminal64.exe`, `podman stop`. A pending MT5 live update makes the terminal
+  exit and stops the container, so a restart applies it in a throwaway `<container>-updater` container first.
+- **Fault proxy** (`ea/mt5/tests/fault_proxy.py`, local terminals behind their forwarder): besides the old flags it
+  reads a control file on every request, so a scenario can rewrite master/slave snapshots (`connected`,
+  `history_synced`, empty positions or history) and shift `server_time` in replies (a skewed EA clock).
+- **Server database rollback**: SQLite online backup, stop, copy back, start (local server only; `--server-db`).
+
+| Scenario | Covers |
+|---|---|
+| `chaos_master_restart` | master terminal killed with a position open, and right after a close the server never heard: no duplicate copy, the close still reaches the slave |
+| `chaos_master_netloss` | master cut off from the server for `--chaos-cut-seconds` (75) while it closes: slave keeps the position, closes after recovery, no orphan |
+| `chaos_broker_disconnect` | broker loss on the master, `connected=false` + empty snapshots through the proxy, broker loss on the slave during a master close |
+| `chaos_slave_side_close` | copied position closed on the slave (by hand, by a stop-loss) while the master is open: copy closed with a slave reason, no re-open, no double close, master close is a no-op |
+| `chaos_slave_reject` | margin / volume reject (link multiplier 10000) and a closed-market symbol: copy skipped/error with a reason, bounded retries, no position, nothing uncertain |
+| `chaos_partial_restart` | partial close executed, result held back (429), slave killed before it is reported: exact volume after restart, converges after replay |
+| `chaos_mass_close` | three master positions at once: fast path through history deals; empty position list without exit deals (guard latches, holds, resets); `history_synced=false` held |
+| `chaos_clock_skew` | EA clocks +/-90 s through the proxy: expired opens are refused (cancelled, no exposure), a slow clock still executes, a skewed master still gets its close mirrored |
+| `chaos_long_outage` | slave down for `--outage-seconds` (600): close replayed, stale open cancelled by its TTL without executing, never-delivered open cancelled at the master close |
+| `chaos_db_rollback` | local SQLite database restored to a snapshot taken before two copies existed, EAs running: one slave position per master position, no unmanaged exposure |
+| `chaos_slave_suspend` | slave suspended with open copies: drain keeps closes flowing, new opens skipped, EA recovers after reactivation (its blocked-state config check runs every 5 min) |
+
 ## Owner checklist before merge
 
 MetaEditor:

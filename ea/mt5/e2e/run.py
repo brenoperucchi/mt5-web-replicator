@@ -335,27 +335,29 @@ class Terminal:
             self.podman("stop", "-t", "5", self.container)
 
     def start_terminal(self) -> None:
-        if self.state() != "running":
-            self.podman("start", self.container, check_rc=True)
-        started = time.time()
-        def up() -> bool:
-            if self.state() != "running":
-                if time.time() - started > 12:
-                    raise Fail(f"{self.container} stopped right after it started")
-                return False
-            return self.podman("exec", self.container, "pgrep", "-f", "terminal64.exe").returncode == 0
-
         for attempt in range(3):
+            if self.state() != "running":
+                self.podman("start", self.container, check_rc=True)
+            started = time.time()
+
+            def up() -> bool:
+                if self.state() != "running":
+                    if time.time() - started > 12:
+                        raise Fail(f"{self.container} stopped right after it started")
+                    return False
+                return self.podman("exec", self.container, "pgrep", "-f", "terminal64.exe").returncode == 0
+
             try:
                 wait_for(f"{self.container} terminal64 running", up, 60, 1)
+                time.sleep(8)   # a terminal that hands over to a live updater is gone within seconds
+                if self.state() != "running":
+                    raise Fail(f"{self.container} stopped right after it started")
                 break
             except Fail:
                 # A pending MT5 live update makes terminal64 hand over to its updater and exit, which stops the
                 # container (the updater dies with it): apply it in a throwaway container and start again.
-                if attempt == 2 or self.remote or self.state() == "running" or not self.apply_pending_update(started):
+                if attempt == 2 or self.state() == "running" or not self.apply_pending_update(started):
                     raise
-                started = time.time()
-                self.podman("start", self.container, check_rc=True)
         self.start_forwarder(self._fwd_port)
         wait_for(f"{self.role} driver writing status again",
                  lambda: self.status_age() < time.time() - started - 1 and self.alive(), 120)
@@ -363,25 +365,38 @@ class Terminal:
     def apply_pending_update(self, since: float) -> bool:
         """The container's terminal exited after announcing a LiveUpdate: run that updater to completion in a
         container of its own (same image and prefix, name ends in -updater so it stays ours)."""
-        logdir = self.prefix / "drive_c" / self.terminal_dir / "logs"
-        cmd = None
-        for f in sorted(logdir.glob("*.log"))[-2:]:
-            if f.stat().st_mtime < since - 5:
-                continue
-            for line in f.read_bytes().decode("utf-16", errors="ignore").splitlines():
-                m = re.search(r'LiveUpdate\s+start "([^"]+)" /update /path:"([^"]+)"', line)
-                if m:
-                    cmd = [m.group(1), "/update", f"/path:{m.group(2)}", "/portable"]
-        if cmd is None:
-            return False
+        pat = re.compile(r'LiveUpdate\s+start "([^"]+)" /update /path:"([^"]+)"')
         image = self.podman("inspect", self.container, "--format", "{{.ImageName}}").stdout.strip()
+        if self.remote:
+            root, rest = (self.remote_files or "").split("/drive_c/", 1)
+            tdir = rest.split("/MQL5/")[0]
+            line = self.remote.run(f"f=$(ls -t {shlex.quote(root)}/drive_c/{shlex.quote(tdir)}/logs/*.log | head -1);"
+                                   f" iconv -f utf-16 -t utf-8 \"$f\" | grep -a LiveUpdate | tail -1").stdout
+            m = pat.search(line)
+            user = self.podman("inspect", self.container, "--format", "{{.Config.User}}").stdout.strip()
+            run_args = ["--user", user, "-v", f"{root}:/wineprefix", "-e", "WINEPREFIX=/wineprefix", "-e", "HOME=/tmp"]
+        else:
+            logdir = self.prefix / "drive_c" / self.terminal_dir / "logs"
+            m = None
+            for f in sorted(logdir.glob("*.log"))[-2:]:
+                if f.stat().st_mtime < since - 5:
+                    continue
+                for ln in f.read_bytes().decode("utf-16", errors="ignore").splitlines():
+                    m = pat.search(ln) or m
+            run_args = ["--userns=keep-id", "-v", f"{self.prefix}:/home/mt5/.mt5", "-e", "WINEPREFIX=/home/mt5/.mt5",
+                        "-e", "HOME=/home/mt5"]
+        if m is None:
+            return False
+        cmd = [m.group(1), "/update", f"/path:{m.group(2)}", "/portable"]
         script = ("Xvfb :99 -screen 0 1600x900x24 >/dev/null 2>&1 & sleep 3; wine " +
                   " ".join(shlex.quote(x) for x in cmd) + "; sleep 3")
-        log(f"{self.role}: MT5 live update pending, applying it ({cmd[0].split(chr(92))[-3:]})")
-        p = sh(["podman", "run", "--rm", "--userns=keep-id", "--name", f"{self.container}-updater",
-                "-e", "WINEPREFIX=/home/mt5/.mt5", "-e", "WINEDEBUG=-all", "-e", "WINEDLLOVERRIDES=mscoree=d",
-                "-e", "DISPLAY=:99", "-e", "TZ=BRT3", "-e", "HOME=/home/mt5", "-v", f"{self.prefix}:/home/mt5/.mt5",
-                image, "bash", "-c", script], timeout=900)
+        log(f"{self.role}: MT5 live update pending, applying it in {self.container}-updater")
+        argv = ["run", "--rm", "--name", f"{self.container}-updater", *run_args, "-e", "WINEDEBUG=-all",
+                "-e", "WINEDLLOVERRIDES=mscoree=d", "-e", "DISPLAY=:99", "-e", "TZ=BRT3", image, "bash", "-c", script]
+        if self.remote:
+            p = self.remote.run(shlex.join(["docker", *argv]), timeout=900)
+        else:
+            p = sh(["podman", *argv], timeout=900)
         return p.returncode == 0
 
     def stop_container(self, timeout: int = 20) -> None:
@@ -662,8 +677,11 @@ def is_copy_comment(comment: str | None, copy_id: int) -> bool:
 
 
 def open_and_mirror(ctx: Ctx, symbol: str, side: str, volume: float, tag: str, **kw: Any) -> tuple[dict, dict]:
+    known = {c["id"] for c in ctx.new_copies(symbol)}   # a scenario may open the same symbol more than once
     ctx.master_open(symbol, side, volume, tag, **kw)
-    copy = ctx.wait_copy(symbol, {"open"})[0]
+    copy = wait_for(f"a new copy({symbol}) open",
+                    lambda: next((c for c in ctx.new_copies(symbol) if c["id"] not in known and c["state"] == "open"),
+                                 None), ctx.timeout)
     pos = ctx.wait_slave_pos(copy["id"])
     check(pos["symbol"] == copy["symbol_local"], f"slave symbol {pos['symbol']} != {copy['symbol_local']}")
     check(pos["side"] == side, f"slave side {pos['side']} != {side}")
@@ -1443,22 +1461,24 @@ def s_chaos_slave_side_close(ctx: Ctx) -> None:
     check(len(exit_deals(ctx, ctx.slave, pos["identifier"])) == 1, "double close on the slave")
     check(len(ctx.new_copies(sym)) == 1, "extra copies after the master close")
 
-    # (b) the broker closes the slave position on a stop-loss (best effort: needs a tick through the SL)
+    # (b) the broker closes the slave position on a stop-loss or take-profit (best effort: needs a tick)
     copy2, pos2 = open_and_mirror(ctx, sym, "buy", 0.01, "sclose-sl")
     q = ctx.slave.must("quote", symbol=pos2["symbol"])
     point = 10 ** -int(q["digits"])
     sl = round(q["bid"] - 2 * point, int(q["digits"]))
-    m = ctx.slave.send("modify", ticket=pos2["ticket"], sl=sl, tp=0)
+    tp = round(q["bid"] + 2 * point, int(q["digits"]))   # whichever side the next tick takes
+    m = ctx.slave.send("modify", ticket=pos2["ticket"], sl=sl, tp=tp)
     if not m.get("ok"):
-        ctx.note(f"(b) SL not accepted on the slave ({m.get('retcode_text') or m.get('error')}): skipped")
+        ctx.note(f"(b) SL/TP not accepted on the slave ({m.get('retcode_text') or m.get('error')}): skipped")
     else:
         try:
             wait_for("slave position stopped out", lambda: not ctx.slave_pos(copy2["id"]), 90, 1)
         except Fail:
-            ctx.note("(b) price never touched the 2-point stop within 90 s: skipped")
+            ctx.note("(b) price never touched the 2-point SL/TP within 90 s: skipped")
         else:
             c3 = ctx.wait_copy_state(copy2["id"], {"closed"}, 60)
-            ctx.note(f"(b) slave stop-loss -> copy closed, close_reason={c3['close_reason']}")
+            ctx.note(f"(b) slave SL/TP hit -> copy closed, close_reason={c3['close_reason']}")
+            check(c3["close_reason"] in ("slave_sl", "slave_tp"), f"close_reason {c3['close_reason']} is not slave_sl/slave_tp")
             check(c3["close_reason"] != "master_closed", f"close_reason {c3['close_reason']} names no slave source")
             time.sleep(15)
             check(len(ctx.new_copies(sym)) == 2, "re-open after the slave stop-loss")
@@ -1480,12 +1500,15 @@ def _patch_link_restoring(ctx: Ctx, **params: Any) -> None:
 
 
 def _reject_probe(ctx: Ctx, symbol: str) -> str | None:
-    """Try 0.01 on the slave: returns the broker's reject text when the symbol cannot trade right now, None when
-    it can (the probe position is closed again) or does not exist."""
-    q = ctx.slave.send("quote", symbol=symbol)
-    if not q.get("ok"):
+    """Try one lot (one share on a stock CFD) on the slave: returns the broker's reject text when the symbol cannot
+    trade right now, None when it can (the probe position is closed again) or does not exist."""
+    for _ in range(3):   # a symbol just added to Market Watch has no tick for a moment
+        if ctx.slave.send("quote", symbol=symbol).get("ok"):
+            break
+        time.sleep(1.5)
+    else:
         return None
-    r = ctx.slave.send("open", symbol=symbol, side="buy", volume=0.01, magic=777005, comment="probe-reject")
+    r = ctx.slave.send("open", symbol=symbol, side="buy", volume=1.0, magic=777005, comment="probe-reject")
     if r.get("ok"):
         for p in ctx.slave.fresh_status()["positions"]:
             if p["comment"] == "probe-reject":
@@ -1504,8 +1527,10 @@ def s_chaos_slave_reject(ctx: Ctx) -> None:
     outcomes: list[str] = []
 
     def one(label: str, tag: str) -> None:
+        known = {c["id"] for c in ctx.new_copies(sym)}
         ctx.master_open(sym, "buy", 0.01, tag)
-        copy = wait_for(f"{label}: a new copy", lambda: (ctx.new_copies(sym) or [None])[-1], 30)
+        copy = wait_for(f"{label}: a new copy", lambda: next((c for c in ctx.new_copies(sym) if c["id"] not in known),
+                                                             None), 30)
         c = wait_for(f"{label}: copy settled", lambda: (r := copy_row(ctx, copy["id"])) and
                      r["state"] in ("open", "skipped", "error", "cancelled", "closed", "uncertain") and r, 90, 2)
         if c["state"] == "open":
@@ -1549,9 +1574,9 @@ def s_chaos_slave_reject(ctx: Ctx) -> None:
     else:
         cand, why = closed
         ctx.note(f"(b) slave symbol {cand} rejects orders now: {why}")
+        _patch_link_restoring(ctx, allow_contract_size_diff=True, lot_mode="fixed", lot_value="1")
         m = ctx.admin.post("/admin/symbol_maps", {"slave_id": ctx.slave_id, "master_symbol": sym, "slave_symbol": cand})
         ctx.on_cleanup("delete symbol map", lambda: ctx.admin.delete(f"/admin/symbol_maps/{m['id']}"))
-        _patch_link_restoring(ctx, allow_contract_size_diff=True)
         one(f"(b) closed symbol {cand}", "rej-closed")
     if all(o.endswith("accepted") for o in outcomes):
         raise Skip(f"no variant produced a reject: {outcomes}")
