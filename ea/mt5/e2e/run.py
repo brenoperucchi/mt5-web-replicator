@@ -1222,6 +1222,19 @@ def s_latency(ctx: Ctx) -> None:
 # drivers' status, and restores everything through ctx.on_cleanup. Select with --group chaos or by name.
 # A scenario that cannot run on the current setup raises Skip with the reason.
 
+def warm_symbols(ctx: Ctx) -> None:
+    """Put the scenario symbols in the slave's Market Watch with a tick: a terminal restarted with kill -9 forgets
+    them, and an open on a symbol without a tick fails with no_quote (an EA limitation, see the README)."""
+    for sym in ctx.args.symbols:
+        for _ in range(4):
+            try:
+                if ctx.slave.send("quote", symbol=sym, timeout=10).get("ok"):
+                    break
+            except Fail:
+                pass
+            time.sleep(1.5)
+
+
 def hold(seconds: float, probe: Callable[[], None], every: float = 3.0) -> None:
     """Run probe() every `every` seconds for `seconds`; probe raises Fail when an invariant breaks."""
     end = time.monotonic() + seconds
@@ -2186,6 +2199,8 @@ def main(argv: list[str] | None = None) -> int:
         status, detail = "PASS", ""
         try:
             ctx.mark()
+            if s.group == "chaos":
+                warm_symbols(ctx)
             s.fn(ctx)
             ctx.assert_no_new_orphans()
         except Skip as e:
