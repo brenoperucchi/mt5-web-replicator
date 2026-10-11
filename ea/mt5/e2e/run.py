@@ -371,7 +371,7 @@ class Terminal:
             root, rest = (self.remote_files or "").split("/drive_c/", 1)
             tdir = rest.split("/MQL5/")[0]
             line = self.remote.run(f"f=$(ls -t {shlex.quote(root)}/drive_c/{shlex.quote(tdir)}/logs/*.log | head -1);"
-                                   f" iconv -f utf-16 -t utf-8 \"$f\" | grep -a LiveUpdate | tail -1").stdout
+                                   f" iconv -f utf-16 -t utf-8 \"$f\" | grep -a 'LiveUpdate.*start ' | tail -1").stdout
             m = pat.search(line)
             user = self.podman("inspect", self.container, "--format", "{{.Config.User}}").stdout.strip()
             run_args = ["--user", user, "-v", f"{root}:/wineprefix", "-e", "WINEPREFIX=/wineprefix", "-e", "HOME=/tmp"]
@@ -919,7 +919,8 @@ class Proxy:
                str(REPO / "ea/mt5/tests/fault_proxy.py"), "--upstream", a.server_url,
                "--host", a.proxy_host, "--port", str(self.port), "--control", str(self.control), *self.fault_args]
         self.fh = self.out.open("w")
-        self.proc = subprocess.Popen(cmd, stdout=self.fh, stderr=subprocess.STDOUT, start_new_session=True)
+        self.proc = subprocess.Popen(cmd, stdout=self.fh, stderr=subprocess.STDOUT, start_new_session=True,
+                                     env={**os.environ, "FAULT_PROXY_SERVER_DIR": str(a.server_project)})
         wait_for("fault proxy listening", lambda: _port_open(a.proxy_host, self.port), 60, 0.5)
         self.term.start_forwarder(self.port)
         log(f"{self.term.role} -> proxy :{self.port} {' '.join(self.fault_args)}")

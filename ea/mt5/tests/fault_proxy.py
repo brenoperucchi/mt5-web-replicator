@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import threading
 import time
@@ -56,7 +57,7 @@ HOP_HEADERS = {"connection", "keep-alive", "transfer-encoding", "content-length"
 def _models():
     """The server's request models (the v4 contract). Imported lazily so the proxy also runs without
     validation when copycore is not importable."""
-    server_dir = Path(__file__).resolve().parents[3] / "server"
+    server_dir = Path(os.environ.get("FAULT_PROXY_SERVER_DIR") or Path(__file__).resolve().parents[3] / "server")
     if str(server_dir) not in sys.path:
         sys.path.insert(0, str(server_dir))
     from copycore.routers.v4 import ConfirmIn, EnrollIn
