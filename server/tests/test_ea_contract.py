@@ -361,3 +361,43 @@ def test_proxy_rate_limit_and_lost_results(proxy, cp):
     status, _, raw = call(url, "POST", "/v4/slave/results", token=sl["token"], body=body, key="r-1")
     assert status == 200                                   # same key → stored response replayed
     assert state.violations == []
+
+
+def test_proxy_control_file_rewrites_snapshots_and_server_time(proxy, cp, tmp_path):
+    """The chaos group drives the proxy through its control file: a snapshot rewritten to connected=false with no
+    positions is ignored by the server, history_synced=false holds the absence counter, and `server_time_shift_ms`
+    moves the clock the EA derives its offset from."""
+    state, url = proxy
+    state.control_path = tmp_path / "control.json"
+    master, (sl,) = setup(cp)
+
+    def snapshot(positions, **kw):
+        body = cp.snapshot_body(master, positions, **kw)
+        return call(url, "POST", "/v4/master/snapshot", token=master["token"], body=body, key=f"s-{body['seq']}")
+
+    assert snapshot([pos(1)])[0] == 200
+    assert len(cp.copies()) == 1
+    # rewritten to connected=false + no positions: seq advances, nothing is acted on, nothing is counted as absent
+    state.control_path.write_text(json.dumps({"snapshot": {"connected": False, "drop_positions": True}}))
+    for _ in range(3):
+        assert snapshot([pos(1)])[0] == 200
+    assert state.counters["snapshots_mutated"] == 3
+    assert cp.copies()[0]["state"] == "pending"
+    # history_synced=false with the position gone from the list is also not evidence
+    state.control_path.write_text(json.dumps({"snapshot": {"history_synced": False, "drop_positions": True}}))
+    for _ in range(4):
+        assert snapshot([pos(1)])[0] == 200
+    assert cp.copies()[0]["state"] == "pending"
+    # the control file is optional: deleting it restores a plain pass-through
+    state.control_path.unlink()
+    assert snapshot([pos(1)])[0] == 200
+    assert state.counters["snapshots_mutated"] == 7
+    # server_time shift
+    _, _, raw = call(url, "POST", "/v4/session", token=master["token"],
+                     body={"boot_nonce": "n1", "taken_at": 1, "ea_clock_offset_ms": 0}, key="k-plain")
+    plain = json.loads(raw)["server_time"]
+    state.control_path.write_text(json.dumps({"server_time_shift_ms": 90_000}))
+    _, _, raw = call(url, "POST", "/v4/session", token=master["token"],
+                     body={"boot_nonce": "n2", "taken_at": 1, "ea_clock_offset_ms": 0}, key="k-shift")
+    assert 89_000 < json.loads(raw)["server_time"] - plain < 92_000
+    assert state.violations == []

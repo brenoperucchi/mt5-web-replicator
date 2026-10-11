@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shlex
 import signal
 import subprocess
@@ -218,7 +219,11 @@ class Terminal:
     seq: int = 0
     remote: Remote | None = None       # master on another host: driver files and docker over ssh
     remote_files: str | None = None    # driver directory on that host (…/MQL5/Files/TradeMirrorE2E)
+    direct: bool = False               # the EA talks to the server itself (https), no in-container forwarder
+    remote_network: str = "bridge"     # docker network a remote terminal is disconnected from to cut it
     _io: LocalFiles | None = None
+    _cut: bool = False
+    _fwd_port: int | None = None       # forwarder target port (a fault proxy), None = the server itself
 
     @property
     def files(self) -> LocalFiles:
@@ -293,19 +298,24 @@ class Terminal:
         return self.podman("inspect", self.container, "--format", "{{.State.Status}}").stdout.strip()
 
     def forwarder_running(self) -> bool:
-        if self.remote:
-            return True   # a remote terminal talks to the server directly (no forwarder to cut)
+        if self.remote or self.direct:
+            return True   # talks to the server directly (no forwarder to cut)
         return self.podman("exec", self.container, "pgrep", "-f", "forward").returncode == 0
 
     def stop_forwarder(self) -> None:
-        if self.remote:
-            raise Skip(f"{self.role} is remote ({self.remote.target}): network cuts are not supported")
+        if self.remote or self.direct:
+            raise Skip(f"{self.role} talks to the server directly: use cut()/uncut() instead of the forwarder")
         self.podman("exec", self.container, "pkill", "-f", "tm_forward.py")
         self.podman("exec", self.container, "pkill", "-f", "tm_e2e_forward")
         wait_for(f"{self.role} forwarder stopped", lambda: not self.forwarder_running(), 10, 0.5)
 
     def start_forwarder(self, port: int | None = None) -> None:
         """Default forwarder (tm_forward.py -> host:8099) or, with a port, one to host:<port>."""
+        if self.remote or self.direct:
+            if port is not None:
+                raise Skip(f"{self.role} talks to the server directly: the fault proxy cannot be put in front of it")
+            return
+        self._fwd_port = port
         if self.forwarder_running():
             self.stop_forwarder()
         if port is None:
@@ -317,8 +327,6 @@ class Terminal:
         wait_for(f"{self.role} forwarder started", self.forwarder_running, 10, 0.5)
 
     def kill_terminal(self) -> None:
-        if self.remote:
-            raise Skip(f"{self.role} is remote ({self.remote.target}): terminal restarts are not supported")
         """Hard-kill terminal64 (no profile save, no OnDeinit): the container's main process exits."""
         self.podman("exec", self.container, "pkill", "-9", "-f", "terminal64.exe")
         try:
@@ -330,11 +338,111 @@ class Terminal:
         if self.state() != "running":
             self.podman("start", self.container, check_rc=True)
         started = time.time()
-        wait_for(f"{self.container} terminal64 running",
-                 lambda: self.podman("exec", self.container, "pgrep", "-f", "terminal64.exe").returncode == 0, 60)
-        self.start_forwarder()
+        def up() -> bool:
+            if self.state() != "running":
+                if time.time() - started > 12:
+                    raise Fail(f"{self.container} stopped right after it started")
+                return False
+            return self.podman("exec", self.container, "pgrep", "-f", "terminal64.exe").returncode == 0
+
+        for attempt in range(3):
+            try:
+                wait_for(f"{self.container} terminal64 running", up, 60, 1)
+                break
+            except Fail:
+                # A pending MT5 live update makes terminal64 hand over to its updater and exit, which stops the
+                # container (the updater dies with it): apply it in a throwaway container and start again.
+                if attempt == 2 or self.remote or self.state() == "running" or not self.apply_pending_update(started):
+                    raise
+                started = time.time()
+                self.podman("start", self.container, check_rc=True)
+        self.start_forwarder(self._fwd_port)
         wait_for(f"{self.role} driver writing status again",
                  lambda: self.status_age() < time.time() - started - 1 and self.alive(), 120)
+
+    def apply_pending_update(self, since: float) -> bool:
+        """The container's terminal exited after announcing a LiveUpdate: run that updater to completion in a
+        container of its own (same image and prefix, name ends in -updater so it stays ours)."""
+        logdir = self.prefix / "drive_c" / self.terminal_dir / "logs"
+        cmd = None
+        for f in sorted(logdir.glob("*.log"))[-2:]:
+            if f.stat().st_mtime < since - 5:
+                continue
+            for line in f.read_bytes().decode("utf-16", errors="ignore").splitlines():
+                m = re.search(r'LiveUpdate\s+start "([^"]+)" /update /path:"([^"]+)"', line)
+                if m:
+                    cmd = [m.group(1), "/update", f"/path:{m.group(2)}", "/portable"]
+        if cmd is None:
+            return False
+        image = self.podman("inspect", self.container, "--format", "{{.ImageName}}").stdout.strip()
+        script = ("Xvfb :99 -screen 0 1600x900x24 >/dev/null 2>&1 & sleep 3; wine " +
+                  " ".join(shlex.quote(x) for x in cmd) + "; sleep 3")
+        log(f"{self.role}: MT5 live update pending, applying it ({cmd[0].split(chr(92))[-3:]})")
+        p = sh(["podman", "run", "--rm", "--userns=keep-id", "--name", f"{self.container}-updater",
+                "-e", "WINEPREFIX=/home/mt5/.mt5", "-e", "WINEDEBUG=-all", "-e", "WINEDLLOVERRIDES=mscoree=d",
+                "-e", "DISPLAY=:99", "-e", "TZ=BRT3", "-e", "HOME=/home/mt5", "-v", f"{self.prefix}:/home/mt5/.mt5",
+                image, "bash", "-c", script], timeout=900)
+        return p.returncode == 0
+
+    def stop_container(self, timeout: int = 20) -> None:
+        """Graceful stop (SIGTERM, the terminal saves its state); used for long outages."""
+        self.podman("stop", "-t", str(timeout), self.container)
+
+    # network faults -----------------------------------------------------------------------------
+    # Local terminals: nftables in the container's own network namespace (rootless: `podman unshare nsenter`),
+    # so only this container is touched and it can be selective. Remote (KS1, no sudo): the whole container
+    # is disconnected from its docker network (broker and server together).
+    NFT_TABLE = "tmchaos"
+
+    def _nft(self, script: str, check_rc: bool = True) -> None:
+        pid = self.podman("inspect", "-f", "{{.State.Pid}}", self.container).stdout.strip()
+        if not pid.isdigit() or int(pid) == 0:
+            raise RuntimeError(f"{self.container} has no running process (pid {pid!r})")
+        p = subprocess.run(["podman", "unshare", "nsenter", "-t", pid, "-n", "nft", "-f", "-"], input=script,
+                           capture_output=True, text=True, timeout=30)
+        if check_rc and p.returncode != 0:
+            raise RuntimeError(f"nft in {self.container} failed: {p.stderr.strip()[:300]}")
+
+    def cut(self, kind: str, server_ips: list[str], server_port: int) -> None:
+        """kind 'server': nothing reaches the Copy Server (the terminal keeps its broker connection).
+        kind 'broker': the terminal loses its broker connection (the server stays reachable).
+        kind 'all': both. Remote terminals can only do 'all'."""
+        assert kind in ("server", "broker", "all"), kind
+        if self.remote:
+            if kind != "all":
+                raise Skip(f"{self.role} is remote ({self.remote.target}) and cannot be cut selectively (no root)")
+            self.podman("network", "disconnect", self.remote_network, self.container, check_rc=True)
+            self._cut = True
+            return
+        ips = "{ " + ", ".join(server_ips) + " }"
+        rules = []
+        if kind in ("server", "all"):
+            rules.append(f"ip daddr {ips} tcp dport {server_port} counter reject with tcp reset")
+        if kind in ("broker", "all"):
+            rules += ["ip daddr 127.0.0.0/8 accept", "meta l4proto { tcp, udp } th dport 53 accept"]
+            if kind == "broker":
+                rules.append(f"ip daddr {ips} accept")
+            rules += ["meta l4proto tcp counter reject with tcp reset", "counter drop"]
+        body = "\n    ".join(rules)
+        self._nft(f"table inet {self.NFT_TABLE}\ndelete table inet {self.NFT_TABLE}\n"
+                  f"table inet {self.NFT_TABLE} {{\n  chain out {{\n    type filter hook output priority 0; "
+                  f"policy accept;\n    {body}\n  }}\n}}\n")
+        self._cut = True
+        log(f"{self.role}: network cut ({kind})")
+
+    def uncut(self) -> None:
+        """Undo cut(); idempotent and safe on a terminal that was never cut."""
+        if self.remote:
+            if self._cut:
+                self.podman("network", "connect", self.remote_network, self.container, check_rc=True)
+        elif self.state() == "running":
+            self._nft(f"table inet {self.NFT_TABLE}\ndelete table inet {self.NFT_TABLE}\n", check_rc=False)
+        if self._cut:
+            log(f"{self.role}: network restored")
+        self._cut = False
+
+    def connected(self) -> bool:
+        return bool(self.fresh_status()["connected"])
 
 
 # --- server ------------------------------------------------------------------------------------
@@ -348,6 +456,23 @@ class Admin:
         r = self.http.get(path, params={k: v for k, v in params.items() if v is not None})
         r.raise_for_status()
         return r.json()
+
+    def send(self, method: str, path: str, body: dict | None = None) -> Any:
+        r = self.http.request(method, path, json=body)
+        r.raise_for_status()
+        return r.json() if r.content else None
+
+    def patch(self, path: str, body: dict) -> Any:
+        return self.send("PATCH", path, body)
+
+    def post(self, path: str, body: dict | None = None) -> Any:
+        return self.send("POST", path, body or {})
+
+    def delete(self, path: str) -> Any:
+        return self.send("DELETE", path)
+
+    def account(self, account_id: int) -> dict:
+        return self.get(f"/admin/accounts/{account_id}")
 
     def health(self) -> bool:
         try:
@@ -381,6 +506,7 @@ class Ctx:
     master_id: int
     timeout: float
     notes: list[str] = field(default_factory=list)
+    undo: list[tuple[str, Callable[[], None]]] = field(default_factory=list)   # restore steps of the running scenario
     copy_floor: int = 0     # newest copy id before this scenario
     copies_before: set[int] = field(default_factory=set)  # ids that belong to earlier scenarios (the id
     # sequence may be rewound to reproduce a c<id> collision, so "newer" is not "bigger id")
@@ -389,6 +515,35 @@ class Ctx:
     def note(self, msg: str) -> None:
         self.notes.append(msg)
         log(msg)
+
+    def on_cleanup(self, label: str, fn: Callable[[], None]) -> None:
+        """Register a restore step; the runner runs them (newest first) after the scenario, pass or fail."""
+        self.undo.append((label, fn))
+
+    def run_undo(self) -> list[str]:
+        errs = []
+        while self.undo:
+            label, fn = self.undo.pop()
+            try:
+                fn()
+            except Exception as e:  # noqa: BLE001
+                errs.append(f"{label}: {type(e).__name__}: {e}")
+                log(f"restore step {label!r} failed: {e}")
+        return errs
+
+    def server_endpoint(self) -> tuple[list[str], int]:
+        """IPv4 addresses and port of the Copy Server (what a network cut has to block)."""
+        import socket
+        from urllib.parse import urlparse
+        u = urlparse(self.args.server_url)
+        port = u.port or (443 if u.scheme == "https" else 80)
+        ips = sorted({ai[4][0] for ai in socket.getaddrinfo(u.hostname, port, socket.AF_INET, socket.SOCK_STREAM)})
+        return ips, port
+
+    def cut(self, t: "Terminal", kind: str) -> None:
+        ips, port = self.server_endpoint()
+        t.cut(kind, ips, port)
+        self.on_cleanup(f"restore {t.role} network", t.uncut)
 
     # baseline ---------------------------------------------------------------------------------
     def mark(self) -> None:
@@ -488,14 +643,15 @@ class Scenario:
     fn: Callable[[Ctx], None]
     doc: str
     slow: bool = False
+    group: str = "core"
 
 
 SCENARIOS: list[Scenario] = []
 
 
-def scenario(slow: bool = False):
+def scenario(slow: bool = False, group: str = "core"):
     def deco(fn: Callable[[Ctx], None]):
-        SCENARIOS.append(Scenario(fn.__name__.removeprefix("s_"), fn, (fn.__doc__ or "").strip(), slow))
+        SCENARIOS.append(Scenario(fn.__name__.removeprefix("s_"), fn, (fn.__doc__ or "").strip(), slow, group))
         return fn
     return deco
 
@@ -724,28 +880,43 @@ def restart_server(ctx: Ctx) -> None:
 
 
 class Proxy:
-    """fault_proxy.py on the host, with the slave forwarder pointed at it."""
+    """fault_proxy.py on the host, with a terminal's forwarder pointed at it (the slave by default).
 
-    def __init__(self, ctx: Ctx, *fault_args: str):
+    `set(...)` rewrites the proxy's control file while it runs (snapshot mutations, server_time shift, fail_all);
+    see ea/mt5/tests/fault_proxy.py. Several proxies can run at once on different ports (one per terminal)."""
+
+    def __init__(self, ctx: Ctx, *fault_args: str, term: Terminal | None = None, port: int | None = None):
         self.ctx, self.fault_args = ctx, list(fault_args)
+        self.term = term or ctx.slave
+        self.port = port or ctx.args.proxy_port
         self.proc: subprocess.Popen | None = None
-        self.out = ctx.args.out_dir / f"proxy-{int(time.time())}.log"
+        stamp = f"{self.term.role}-{int(time.time())}"
+        self.out = ctx.args.out_dir / f"proxy-{stamp}.log"
+        self.control = ctx.args.out_dir / f"proxy-{stamp}.control.json"
 
     def __enter__(self) -> "Proxy":
         a = self.ctx.args
+        self.control.unlink(missing_ok=True)
         cmd = ["uv", "run", "-q", "--project", str(a.server_project), "python",
                str(REPO / "ea/mt5/tests/fault_proxy.py"), "--upstream", a.server_url,
-               "--host", a.proxy_host, "--port", str(a.proxy_port), *self.fault_args]
+               "--host", a.proxy_host, "--port", str(self.port), "--control", str(self.control), *self.fault_args]
         self.fh = self.out.open("w")
         self.proc = subprocess.Popen(cmd, stdout=self.fh, stderr=subprocess.STDOUT, start_new_session=True)
-        wait_for("fault proxy listening", lambda: _port_open(a.proxy_host, a.proxy_port), 60, 0.5)
-        self.ctx.slave.start_forwarder(a.proxy_port)
-        log(f"slave -> proxy {' '.join(self.fault_args)}")
+        wait_for("fault proxy listening", lambda: _port_open(a.proxy_host, self.port), 60, 0.5)
+        self.term.start_forwarder(self.port)
+        log(f"{self.term.role} -> proxy :{self.port} {' '.join(self.fault_args)}")
         return self
+
+    def set(self, **ctl: Any) -> None:
+        """Replace the runtime faults (set() with nothing clears them)."""
+        tmp = self.control.with_suffix(".tmp")
+        tmp.write_text(json.dumps(ctl))
+        os.replace(tmp, self.control)
+        log(f"{self.term.role} proxy faults: {ctl or 'none'}")
 
     def __exit__(self, *exc: Any) -> None:
         try:
-            self.ctx.slave.start_forwarder()
+            self.term.start_forwarder()
         finally:
             if self.proc:
                 os.killpg(self.proc.pid, signal.SIGINT)
@@ -1027,6 +1198,763 @@ def s_latency(ctx: Ctx) -> None:
             check(summary[k]["p90"] <= a.max_p90_ms, f"{k} p90 {summary[k]['p90']} ms > --max-p90-ms {a.max_p90_ms}")
 
 
+# --- chaos group -----------------------------------------------------------------------------------
+# Error scenarios: each one sets up a copy, injects a fault (kill, network or broker loss, proxy rewrite, DB
+# rollback, suspension ...), asserts on the admin API (/admin/copies, /commands, /events, /orphans) and the
+# drivers' status, and restores everything through ctx.on_cleanup. Select with --group chaos or by name.
+# A scenario that cannot run on the current setup raises Skip with the reason.
+
+def hold(seconds: float, probe: Callable[[], None], every: float = 3.0) -> None:
+    """Run probe() every `every` seconds for `seconds`; probe raises Fail when an invariant breaks."""
+    end = time.monotonic() + seconds
+    while True:
+        probe()
+        if time.monotonic() >= end:
+            return
+        time.sleep(min(every, max(0.1, end - time.monotonic())))
+
+
+def copy_row(ctx: Ctx, copy_id: int) -> dict:
+    row = next((c for c in ctx.admin.copies(link_id=ctx.link_id, limit=500) if c["id"] == copy_id), None)
+    check(row is not None, f"copy {copy_id} not found")
+    return row  # type: ignore[return-value]
+
+
+def copy_commands(ctx: Ctx, copy_id: int, *actions: str) -> list[dict]:
+    return [c for c in ctx.admin.commands(copy_id=copy_id, limit=200) if not actions or c["action"] in actions]
+
+
+def new_events_of(ctx: Ctx, *types: str) -> list[dict]:
+    return [e for e in ctx.new_events() if e["type"] in types]
+
+
+def exit_deals(ctx: Ctx, t: Terminal, position_id: Any) -> list[dict]:
+    return [d for d in t.status()["deals"] if d["entry"] in ("out", "out_by") and str(d["position_id"]) == str(position_id)]
+
+
+def master_ticket_of(ctx: Ctx, tag: str) -> int:
+    ps = [p for p in ctx.master.fresh_status()["positions"] if p["comment"] == f"e2e-{tag}"[:31]]
+    check(len(ps) == 1, f"expected one master position e2e-{tag}, got {len(ps)}")
+    return ps[0]["ticket"]
+
+
+def close_reason_events(ctx: Ctx) -> dict[str, int]:
+    """close_source of every master_position.closed event of this scenario, counted."""
+    out: dict[str, int] = {}
+    for e in new_events_of(ctx, "master_position.closed"):
+        src = (e["payload"] or {}).get("close_source", "?")
+        out[src] = out.get(src, 0) + 1
+    return out
+
+
+def exposure_intact(ctx: Ctx, copy: dict, what: str) -> None:
+    """The copy is still open, the slave still holds exactly its position, and nothing on the server looks
+    like a master close (no absence/close events, no close/cancel command)."""
+    row = copy_row(ctx, copy["id"])
+    check(row["state"] == "open", f"{what}: copy {copy['id']} is {row['state']} (expected open)")
+    ps = ctx.slave_pos(copy["id"])
+    check(len(ps) == 1, f"{what}: slave holds {len(ps)} position(s) for c{copy['id']}")
+    bad = [e["type"] for e in new_events_of(ctx, "master_position.closed", "master_position.absent",
+                                            "master_position.absence_restarted", "master.mass_disappearance")]
+    check(not bad, f"{what}: server events that look like a master close: {bad}")
+    cmds = copy_commands(ctx, copy["id"], "close", "cancel")
+    check(not cmds, f"{what}: close/cancel commands exist: {[(c['action'], c['state']) for c in cmds]}")
+
+
+# 1 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_master_restart(ctx: Ctx) -> None:
+    """Master terminal hard-killed with a position open, and right after a close the server never heard: no
+    duplicate copy after the restart, and the close still reaches the slave."""
+    a = ctx.args
+    sym, sym2 = a.symbol, (a.symbols[1] if len(a.symbols) > 1 else a.symbol)
+    copy, _ = open_and_mirror(ctx, sym, "buy", 0.01, "mrestart-a")
+    mid = ctx.master.positions(symbol=sym, magic=a.magic)[0]["identifier"]
+    ctx.master.kill_terminal()
+    ctx.master.start_terminal()
+    time.sleep(25)   # a new session and fresh snapshots: give a duplicate the chance to appear
+    check(len(ctx.new_copies(sym)) == 1,
+          f"restart created extra copies: {[(c['id'], c['state']) for c in ctx.new_copies(sym)]}")
+    ctx.wait_copy_state(copy["id"], {"open"}, 10)
+    check(len(ctx.slave_pos(copy["id"])) == 1, "slave position count changed after the master restart")
+    mps = ctx.master.fresh_status() and ctx.master.positions(symbol=sym, magic=a.magic)
+    check(len(mps) == 1 and mps[0]["identifier"] == mid, "master position changed across the restart")
+    bad = new_events_of(ctx, "master_position.closed", "master_position.reappeared", "master_position.absent")
+    check(not bad, f"the restart looked like a close/reappearance: {[e['type'] for e in bad]}")
+    ctx.note("(a) position open across a master restart: one copy, nothing closed")
+
+    # (b) the master closes while the server cannot hear it, then dies before it can tell
+    copy_b, _ = open_and_mirror(ctx, sym2, "sell", 0.01, "mrestart-b")
+    tk = _master_ticket(ctx, sym2)
+    if ctx.master.remote:
+        ctx.master.must("close", ticket=tk)       # no selective cut on a remote master: kill right after the ack
+        ctx.master.kill_terminal()
+    else:
+        ctx.cut(ctx.master, "server")
+        ctx.master.must("close", ticket=tk)
+        time.sleep(4)                              # snapshots fail meanwhile
+        check(copy_row(ctx, copy_b["id"])["state"] == "open", "server learned of the close despite the cut")
+        ctx.master.kill_terminal()
+    ctx.master.start_terminal()
+    ctx.wait_slave_gone(copy_b["id"], timeout=150)
+    c = ctx.wait_copy_state(copy_b["id"], {"closed"}, 60)
+    check(c["close_reason"] == "master_closed", f"close_reason {c['close_reason']} != master_closed")
+    check(len(ctx.new_copies(sym2)) == 1 and len(ctx.new_copies(sym)) == 1,
+          "extra copies after the restart-during-close")
+    ctx.note(f"(b) close made while the server was unreachable reached the slave after the restart "
+             f"(master closes by source: {close_reason_events(ctx)})")
+    close_and_mirror(ctx, copy, sym)
+
+
+# 2 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_master_netloss(ctx: Ctx) -> None:
+    """Master loses its link to the server for --chaos-cut-seconds while it closes its position: the slave keeps
+    the position during the blackout (the server cannot know) and closes it after recovery; no orphan.
+    A remote master (no root) loses all internet instead, so its close happens right after reconnecting."""
+    a = ctx.args
+    sym = a.symbol
+    copy, _ = open_and_mirror(ctx, sym, "buy", 0.01, "mnet")
+    tk = _master_ticket(ctx, sym)
+    remote = bool(ctx.master.remote)
+    ctx.cut(ctx.master, "all" if remote else "server")
+    if remote:
+        ctx.note("remote master: broker and server are both unreachable, it closes after the reconnect")
+    else:
+        ctx.master.must("close", ticket=tk)
+        ctx.note("master closed its position while cut off from the server")
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < a.chaos_cut_seconds:
+        check(len(ctx.slave_pos(copy["id"])) == 1, "slave closed without the server hearing from the master")
+        check(copy_row(ctx, copy["id"])["state"] == "open", "server moved the copy while the master was silent")
+        time.sleep(3)
+    ctx.master.uncut()
+    if remote:
+        wait_for("master terminal reconnected", lambda: ctx.master.fresh_status()["connected"], 150, 3)
+        time.sleep(10)
+        check(len(ctx.slave_pos(copy["id"])) == 1, "slave closed before the master closed")
+        check(copy_row(ctx, copy["id"])["state"] == "open", "copy changed after reconnect without a master close")
+        ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+    ctx.wait_slave_gone(copy["id"], timeout=150)
+    c = ctx.wait_copy_state(copy["id"], {"closed"}, 60)
+    check(c["close_reason"] == "master_closed", f"close_reason {c['close_reason']} != master_closed")
+    check(len(ctx.new_copies(sym)) == 1, "extra copies after the outage")
+    check(len(ctx.slave_in_deals(c)) == 1, "duplicate entry deals on the slave")
+    ctx.note(f"slave closed {time.monotonic() - t0 - a.chaos_cut_seconds:.0f}s after the link returned "
+             f"(close source: {close_reason_events(ctx)})")
+
+
+# 3 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_broker_disconnect(ctx: Ctx) -> None:
+    """The terminal loses its BROKER connection (nftables, server stays reachable): (a) on the master, (b) a
+    master that reports connected=false with an empty position list (fault proxy; the real EA never sends one)
+    and (c) on the slave while the master closes. Nothing closes by mistake; the slave closes after it reconnects."""
+    a = ctx.args
+    sym = a.symbol
+    copy, _ = open_and_mirror(ctx, sym, "buy", 0.01, "brk")
+
+    def intact(what: str) -> Callable[[], None]:
+        return lambda: exposure_intact(ctx, copy, what)
+
+    try:
+        ctx.cut(ctx.master, "broker")
+    except Skip as e:
+        ctx.note(f"(a) skipped: {e}")
+    else:
+        wait_for("master terminal reports no broker connection", lambda: not ctx.master.fresh_status()["connected"],
+                 180, 2)   # the terminal notices a silent cut after ~90 s when the market is quiet
+        hold(a.chaos_cut_seconds, intact("(a) master offline from the broker"))
+        ctx.master.uncut()
+        wait_for("master terminal back on the broker", lambda: ctx.master.fresh_status()["connected"], 150, 3)
+        time.sleep(15)
+        exposure_intact(ctx, copy, "(a) after the master reconnected")
+        ctx.note("(a) master broker outage: copy stayed open, no close/absence event")
+
+    if ctx.master.remote or ctx.master.direct:
+        ctx.note("(b) skipped: the master talks to the server directly, no fault proxy possible")
+    else:
+        with Proxy(ctx, term=ctx.master, port=a.master_proxy_port) as px:
+            px.set(snapshot={"connected": False, "drop_positions": True})
+            hold(max(a.chaos_cut_seconds, 70), intact("(b) connected=false snapshots"))
+            px.set()
+            time.sleep(10)
+            exposure_intact(ctx, copy, "(b) after the proxy rewrite stopped")
+        ctx.note("(b) connected=false + empty positions for >70 s were ignored")
+
+    try:
+        ctx.cut(ctx.slave, "broker")
+    except Skip as e:
+        ctx.note(f"(c) skipped: {e}")
+        close_and_mirror(ctx, copy, sym)
+        return
+    wait_for("slave terminal reports no broker connection", lambda: not ctx.slave.fresh_status()["connected"], 180, 2)
+    ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+    ctx.wait_copy_state(copy["id"], {"closing"}, 30)
+
+    def slave_holds() -> None:
+        check(len(ctx.slave_pos(copy["id"])) == 1, "slave position vanished while its terminal was offline")
+        st = copy_row(ctx, copy["id"])["state"]
+        check(st in ("closing", "open"), f"copy is {st} while the slave cannot execute the close")
+
+    hold(a.chaos_cut_seconds, slave_holds)
+    cl = copy_commands(ctx, copy["id"], "close")
+    attempts = max((c.get("attempts") or 1) for c in cl) if cl else 0
+    ctx.slave.uncut()
+    wait_for("slave terminal back on the broker", lambda: ctx.slave.fresh_status()["connected"], 150, 3)
+    ctx.wait_slave_gone(copy["id"], timeout=150)
+    c = ctx.wait_copy_state(copy["id"], {"closed"}, 90)
+    check(c["close_reason"] == "master_closed", f"close_reason {c['close_reason']} != master_closed")
+    n_retry = len([e for e in new_events_of(ctx, "command.retry") if e["payload"].get("copy_id") == copy["id"]])
+    check(n_retry <= 12, f"retry storm: {n_retry} retries of the close in {a.chaos_cut_seconds:.0f}s")
+    ctx.note(f"(c) slave broker outage during the master close: closed after reconnect "
+             f"({attempts} attempt(s) while offline, {n_retry} retries)")
+
+
+# 4 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_slave_side_close(ctx: Ctx) -> None:
+    """The copied position is closed on the slave (by hand, then by a stop-loss) while the master stays open: the
+    copy is marked closed with a slave close reason, nothing re-opens, nothing closes twice, and the master's later
+    close is a no-op."""
+    a = ctx.args
+    sym = a.symbol
+    copy, pos = open_and_mirror(ctx, sym, "buy", 0.01, "sclose")
+    ctx.slave.must("close", ticket=pos["ticket"])
+    c = ctx.wait_copy_state(copy["id"], {"closed"}, 60)
+    ctx.note(f"manual slave close -> copy closed, close_reason={c['close_reason']}")
+    check(c["close_reason"] != "master_closed" and c["close_reason"], f"close_reason {c['close_reason']!r} names no slave source")
+    time.sleep(20)   # a re-open or a second close would show up now
+    check(len(ctx.new_copies(sym)) == 1, f"a new copy appeared after the slave-side close: "
+          f"{[(x['id'], x['state']) for x in ctx.new_copies(sym)]}")
+    check(not ctx.slave_pos(copy["id"]), "slave position came back")
+    check(len(ctx.slave_in_deals(c)) == 1, "re-opened: more than one entry deal")
+    check(len(exit_deals(ctx, ctx.slave, pos["identifier"])) == 1, "more than one exit deal for the position")
+    live = [x for x in copy_commands(ctx, copy["id"]) if x["state"] not in ("done", "superseded", "expired", "failed", "skipped")]
+    check(not live, f"commands still live after the copy closed: {[(x['action'], x['state']) for x in live]}")
+    n_cmds = len(copy_commands(ctx, copy["id"]))
+    ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+    wait_for("master flat", lambda: not ctx.master.fresh_status()["positions"], 30, 1)
+    time.sleep(20)
+    c2 = copy_row(ctx, copy["id"])
+    check(c2["state"] == "closed" and c2["close_reason"] == c["close_reason"],
+          f"master's later close changed the copy: {c2['state']}/{c2['close_reason']}")
+    check(len(copy_commands(ctx, copy["id"])) == n_cmds, "master's later close issued new commands (not a no-op)")
+    check(len(exit_deals(ctx, ctx.slave, pos["identifier"])) == 1, "double close on the slave")
+    check(len(ctx.new_copies(sym)) == 1, "extra copies after the master close")
+
+    # (b) the broker closes the slave position on a stop-loss (best effort: needs a tick through the SL)
+    copy2, pos2 = open_and_mirror(ctx, sym, "buy", 0.01, "sclose-sl")
+    q = ctx.slave.must("quote", symbol=pos2["symbol"])
+    point = 10 ** -int(q["digits"])
+    sl = round(q["bid"] - 2 * point, int(q["digits"]))
+    m = ctx.slave.send("modify", ticket=pos2["ticket"], sl=sl, tp=0)
+    if not m.get("ok"):
+        ctx.note(f"(b) SL not accepted on the slave ({m.get('retcode_text') or m.get('error')}): skipped")
+    else:
+        try:
+            wait_for("slave position stopped out", lambda: not ctx.slave_pos(copy2["id"]), 90, 1)
+        except Fail:
+            ctx.note("(b) price never touched the 2-point stop within 90 s: skipped")
+        else:
+            c3 = ctx.wait_copy_state(copy2["id"], {"closed"}, 60)
+            ctx.note(f"(b) slave stop-loss -> copy closed, close_reason={c3['close_reason']}")
+            check(c3["close_reason"] != "master_closed", f"close_reason {c3['close_reason']} names no slave source")
+            time.sleep(15)
+            check(len(ctx.new_copies(sym)) == 2, "re-open after the slave stop-loss")
+            check(not ctx.slave_pos(copy2["id"]), "slave position came back after the stop-loss")
+    ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+    ctx.wait_copy_state(copy2["id"], {"closed"}, 60)
+
+
+# 5 -----------------------------------------------------------------------------------------------
+def _link(ctx: Ctx) -> dict:
+    return next(x for x in ctx.admin.get("/admin/links")["links"] if x["id"] == ctx.link_id)
+
+
+def _patch_link_restoring(ctx: Ctx, **params: Any) -> None:
+    link = _link(ctx)
+    before = {k: link[k] for k in params}
+    ctx.admin.patch(f"/admin/links/{ctx.link_id}", params)
+    ctx.on_cleanup("restore link parameters", lambda: ctx.admin.patch(f"/admin/links/{ctx.link_id}", before))
+
+
+def _reject_probe(ctx: Ctx, symbol: str) -> str | None:
+    """Try 0.01 on the slave: returns the broker's reject text when the symbol cannot trade right now, None when
+    it can (the probe position is closed again) or does not exist."""
+    q = ctx.slave.send("quote", symbol=symbol)
+    if not q.get("ok"):
+        return None
+    r = ctx.slave.send("open", symbol=symbol, side="buy", volume=0.01, magic=777005, comment="probe-reject")
+    if r.get("ok"):
+        for p in ctx.slave.fresh_status()["positions"]:
+            if p["comment"] == "probe-reject":
+                ctx.slave.send("close", ticket=p["ticket"])
+        return None
+    return str(r.get("retcode_text") or r.get("error"))
+
+
+@scenario(slow=True, group="chaos")
+def s_chaos_slave_reject(ctx: Ctx) -> None:
+    """Orders the slave's broker rejects: (a) a copy far beyond the slave's margin (link multiplier 10000) and
+    (b) a symbol that is closed right now (symbol map to a stock CFD): the copy ends skipped/error/cancelled with a
+    reason, the slave holds no position, retries stay bounded and nothing is left uncertain."""
+    a = ctx.args
+    sym = a.symbol
+    outcomes: list[str] = []
+
+    def one(label: str, tag: str) -> None:
+        ctx.master_open(sym, "buy", 0.01, tag)
+        copy = wait_for(f"{label}: a new copy", lambda: (ctx.new_copies(sym) or [None])[-1], 30)
+        c = wait_for(f"{label}: copy settled", lambda: (r := copy_row(ctx, copy["id"])) and
+                     r["state"] in ("open", "skipped", "error", "cancelled", "closed", "uncertain") and r, 90, 2)
+        if c["state"] == "open":
+            ctx.note(f"{label}: the broker ACCEPTED the order (copy open); not a reject case")
+            outcomes.append(f"{label}: accepted")
+        else:
+            check(c["state"] in ("skipped", "error", "cancelled"), f"{label}: copy ended {c['state']} (uncertain/closed?)")
+            reason = c["skip_reason"] or c["close_reason"]
+            check(bool(reason), f"{label}: copy {c['state']} without a reason")
+            check(not ctx.slave_pos(copy["id"]), f"{label}: slave holds a position of a rejected copy")
+            outcomes.append(f"{label}: {c['state']} ({reason})")
+            ctx.note(f"{label}: copy {copy['id']} -> {c['state']} ({reason})")
+        n0 = len([e for e in new_events_of(ctx, "command.retry") if e["payload"].get("copy_id") == copy["id"]])
+        cmds0 = len(copy_commands(ctx, copy["id"]))
+        check(n0 <= 3, f"{label}: {n0} retries of a rejected open")
+        time.sleep(20)   # a retry storm would grow now
+        n1 = len([e for e in new_events_of(ctx, "command.retry") if e["payload"].get("copy_id") == copy["id"]])
+        check(n1 == n0 and len(copy_commands(ctx, copy["id"])) == cmds0, f"{label}: commands keep being issued ({n0}->{n1} retries)")
+        # the master closes its (still open) position: for a settled copy this must be a no-op
+        if c["state"] == "open":
+            close_and_mirror(ctx, copy, sym)
+        else:
+            ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+            time.sleep(8)
+            check(copy_row(ctx, copy["id"])["state"] == c["state"], f"{label}: master close changed a settled copy")
+
+    # (a) margin / volume
+    _patch_link_restoring(ctx, lot_mode="multiplier", lot_value="10000")
+    one("(a) huge lot", "rej-lot")
+    ctx.admin.patch(f"/admin/links/{ctx.link_id}", {"lot_mode": "master", "lot_value": None})
+
+    # (b) a symbol that cannot trade right now
+    closed = None
+    for cand in a.reject_symbols:
+        why = _reject_probe(ctx, cand)
+        if why:
+            closed = (cand, why)
+            break
+    if closed is None:
+        ctx.note(f"(b) skipped: none of {a.reject_symbols} rejects an order right now (all open or unknown)")
+    else:
+        cand, why = closed
+        ctx.note(f"(b) slave symbol {cand} rejects orders now: {why}")
+        m = ctx.admin.post("/admin/symbol_maps", {"slave_id": ctx.slave_id, "master_symbol": sym, "slave_symbol": cand})
+        ctx.on_cleanup("delete symbol map", lambda: ctx.admin.delete(f"/admin/symbol_maps/{m['id']}"))
+        _patch_link_restoring(ctx, allow_contract_size_diff=True)
+        one(f"(b) closed symbol {cand}", "rej-closed")
+    if all(o.endswith("accepted") for o in outcomes):
+        raise Skip(f"no variant produced a reject: {outcomes}")
+
+
+# 6 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_partial_restart(ctx: Ctx) -> None:
+    """A partial close executes on the slave, its result is held back (429 on /v4/slave/results) and the slave
+    terminal dies before it is reported: after the restart the volume is exactly the reduced one (no second
+    partial), the result is replayed once the link works, and the next partial and the close still converge."""
+    sym = ctx.args.symbol
+    copy, _ = open_and_mirror(ctx, sym, "buy", 0.03, "prestart")
+    with Proxy(ctx, "--rate-limit", "/v4/slave/results=3600"):
+        ctx.master.must("close_partial", ticket=_master_ticket(ctx, sym), volume=0.01)
+        ctx.wait_slave_pos(copy["id"], lambda p: abs(p["volume"] - 0.02) < 1e-9, "volume 0.02")
+        parts = copy_commands(ctx, copy["id"], "close_partial")
+        ctx.note(f"slave reduced to 0.02; partial command state at the server: {[c['state'] for c in parts]}")
+        ctx.slave.kill_terminal()
+        ctx.slave.start_terminal()
+        time.sleep(20)   # a re-executed partial would show now
+        ps = ctx.slave.fresh_status() and ctx.slave_pos(copy["id"])
+        check(len(ps) == 1 and abs(ps[0]["volume"] - 0.02) < 1e-9,
+              f"after the restart the slave holds {[p['volume'] for p in ps]} (expected [0.02])")
+    # proxy gone, but the EA honours the 3600 s Retry-After it was given: reload it so the outbox replays now
+    ctx.slave.kill_terminal()
+    ctx.slave.start_terminal()
+
+    def converged() -> dict | None:
+        r = copy_row(ctx, copy["id"])
+        parts = copy_commands(ctx, copy["id"], "close_partial")
+        done = parts and all(c["state"] == "done" for c in parts)
+        return r if (r["state"] == "open" and r["confirmed_volume"] is not None and
+                     abs(float(r["confirmed_volume"]) - 0.02) < 1e-9 and done) else None
+    wait_for("server confirmed volume 0.02 and the partial is done", converged, 120, 2)
+    ps = ctx.slave_pos(copy["id"])
+    check(len(ps) == 1 and abs(ps[0]["volume"] - 0.02) < 1e-9, f"slave volume {[p['volume'] for p in ps]} after replay")
+    ctx.master.must("close_partial", ticket=_master_ticket(ctx, sym), volume=0.01)
+    ctx.wait_slave_pos(copy["id"], lambda p: abs(p["volume"] - 0.01) < 1e-9, "volume 0.01")
+    time.sleep(8)
+    check(len(ctx.slave_pos(copy["id"])) == 1 and abs(ctx.slave_pos(copy["id"])[0]["volume"] - 0.01) < 1e-9,
+          "second partial did not converge to 0.01")
+    check(len(ctx.new_copies(sym)) == 1, "extra copies")
+    close_and_mirror(ctx, copy, sym)
+
+
+# 7 -----------------------------------------------------------------------------------------------
+def _open_legs(ctx: Ctx, tag: str, n: int = 3) -> list[dict]:
+    legs = [(s, "buy" if i % 2 == 0 else "sell") for i, s in enumerate(ctx.args.symbols[:n])]
+    check(len(legs) >= 3, "mass close needs three symbols (--symbols)")
+    for s, side in legs:
+        ctx.master_open(s, side, 0.01, f"{tag}-{s}")
+    copies = []
+    for s, _ in legs:
+        c = wait_for(f"copy for {s} open", lambda s=s: next((c for c in ctx.new_copies(s) if c["state"] == "open"
+                     and c["id"] not in {x["id"] for x in copies}), None), ctx.timeout, 1)
+        ctx.wait_slave_pos(c["id"])
+        copies.append(c)
+    return copies
+
+
+@scenario(slow=True, group="chaos")
+def s_chaos_mass_close(ctx: Ctx) -> None:
+    """Three master positions vanish at once. (a) A real close_all: the exit deals close all three copies on the fast
+    path, no mass-disappearance alert. (b) The position list goes empty in a connected, history-synced snapshot with
+    no exit deals (a terminal glitch, simulated by the fault proxy while the positions stay open): the guard latches
+    (alert), nothing closes for longer than the normal 60 s absence timer, and when the positions come back the
+    episode resets. (c) The same empty list with history_synced=false is held, not counted. A final close_all
+    still closes everything on the fast path."""
+    a = ctx.args
+    legs = a.symbols[:3]
+    check(len(legs) >= 3, "mass close needs three symbols (--symbols)")
+
+    # (a) fast path
+    copies = _open_legs(ctx, "mass-a")
+    t0 = time.monotonic()
+    ctx.master.must("close_all", magic=a.magic)
+    for c in copies:
+        ctx.wait_slave_gone(c["id"], timeout=60)
+        ctx.wait_copy_state(c["id"], {"closed"}, 30)
+    srcs = close_reason_events(ctx)
+    check(srcs == {"history": 3}, f"(a) close sources {srcs}, expected 3 x history")
+    check(not new_events_of(ctx, "master.mass_disappearance"), "(a) mass-disappearance alert on a clean close_all")
+    ctx.note(f"(a) 3 copies closed via history deals in {time.monotonic() - t0:.0f}s")
+
+    if ctx.master.remote or ctx.master.direct:
+        raise Skip("(b)/(c) need the fault proxy in front of the master (local master only); (a) passed")
+
+    def last_event_id() -> int:
+        return max([e["id"] for e in ctx.new_events()] or [ctx.event_floor])
+
+    with Proxy(ctx, term=ctx.master, port=a.master_proxy_port) as px:
+        copies = _open_legs(ctx, "mass-b")
+        floor = last_event_id()
+
+        def untouched(what: str) -> None:
+            for c in copies:
+                check(copy_row(ctx, c["id"])["state"] == "open", f"{what}: copy {c['id']} left 'open'")
+                check(len(ctx.slave_pos(c["id"])) == 1, f"{what}: slave position of copy {c['id']} closed")
+            closed = [e["type"] for e in ctx.new_events() if e["id"] > floor and e["type"] == "master_position.closed"]
+            check(not closed, f"{what}: master_position.closed {closed}")
+
+        # (b) glitch: connected + history_synced, positions gone, no exit deals
+        px.set(snapshot={"drop_positions": True})
+        ev = wait_for("master.mass_disappearance event",
+                      lambda: [e for e in ctx.new_events() if e["id"] > floor and e["type"] == "master.mass_disappearance"],
+                      45, 2)
+        check((ev[0]["payload"] or {}).get("count") == 3, f"(b) the episode covers {ev[0]['payload']}")
+        hold(75, lambda: untouched("(b) during the guard hold"))   # a plain absence would have closed them at ~60 s
+        px.set()
+        time.sleep(12)
+        untouched("(b) after the positions came back")
+        back = [e for e in ctx.new_events() if e["id"] > floor and e["type"] == "master_position.reappeared_before_close"]
+        check(len(back) == 3, f"(b) expected 3 reappeared_before_close events, got {len(back)}")
+        ctx.note("(b) mass guard latched, held 75 s (> the 60 s absence timer) and reset when the positions returned")
+
+        # (c) unsynced history: not evidence at all
+        floor = last_event_id()
+        px.set(snapshot={"history_synced": False, "drop_positions": True})
+
+        def unsynced() -> None:
+            untouched("(c) unsynced snapshots")
+            bad = [e["type"] for e in ctx.new_events() if e["id"] > floor and e["type"].startswith(("master_position.", "master."))]
+            check(not bad, f"(c) absence bookkeeping on unsynced snapshots: {bad}")
+
+        hold(max(a.chaos_cut_seconds, 70), unsynced)
+        px.set()
+        time.sleep(10)
+        unsynced()
+        ctx.note("(c) history_synced=false + empty list for >70 s: nothing counted, nothing closed")
+
+    ctx.master.must("close_all", magic=a.magic)
+    for c in copies:
+        ctx.wait_slave_gone(c["id"], timeout=60)
+        ctx.wait_copy_state(c["id"], {"closed"}, 30)
+
+
+# 8 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_clock_skew(ctx: Ctx) -> None:
+    """EA clocks skewed by +/-90 s (the fault proxy shifts `server_time` in replies, which is how the EA learns its
+    offset): a slave whose clock reads the server 90 s ahead refuses the open as expired (copy cancelled, no
+    exposure); one 90 s behind still executes; a skewed master still gets its close mirrored."""
+    a = ctx.args
+    if ctx.slave.direct or ctx.master.remote or ctx.master.direct:
+        raise Skip("needs the fault proxy in front of both EAs (local pair behind forwarders)")
+    sym = a.symbol
+    shift = 90_000
+    with Proxy(ctx, term=ctx.slave) as sp, Proxy(ctx, term=ctx.master, port=a.master_proxy_port) as mp:
+        # slave thinks the server is 90 s ahead: every open looks past its 30 s TTL
+        sp.set(server_time_shift_ms=shift)
+        time.sleep(8)   # the offset refreshes on the next reply
+        ctx.master_open(sym, "buy", 0.01, "skew-a")
+        copy = wait_for("copy for skew-a", lambda: (ctx.new_copies(sym) or [None])[-1], 30)
+        c = wait_for("copy settled", lambda: (r := copy_row(ctx, copy["id"])) and r["state"] in
+                     ("cancelled", "open", "error", "skipped") and r, 60, 2)
+        ctx.note(f"slave clock +90 s: copy {c['state']} ({c['close_reason'] or c['skip_reason']})")
+        check(c["state"] in ("cancelled", "error", "skipped"), f"open executed although it looked expired: {c['state']}")
+        check(not ctx.slave_pos(copy["id"]), "slave holds a position for an open it judged expired")
+        ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+        time.sleep(8)
+        check(copy_row(ctx, copy["id"])["state"] == c["state"], "master close changed a cancelled copy")
+        sp.set()
+
+        # slave 90 s behind: the open is fresh in its view and executes
+        sp.set(server_time_shift_ms=-shift)
+        time.sleep(8)
+        copy_b, _ = open_and_mirror(ctx, sym, "buy", 0.01, "skew-b")
+        close_and_mirror(ctx, copy_b, sym)
+        ctx.note("slave clock -90 s: open and close mirrored normally")
+        sp.set()
+
+        # master clocks: close detection compares deal time with the generation start using that offset
+        for sign in (1, -1):
+            mp.set(server_time_shift_ms=sign * shift)
+            time.sleep(8)
+            copy_c, _ = open_and_mirror(ctx, sym, "buy", 0.01, f"skew-m{'p' if sign > 0 else 'n'}")
+            t0 = time.monotonic()
+            ctx.master.must("close", ticket=_master_ticket(ctx, sym))
+            ctx.wait_slave_gone(copy_c["id"], timeout=150)
+            cc = ctx.wait_copy_state(copy_c["id"], {"closed"}, 30)
+            check(cc["close_reason"] == "master_closed", f"close_reason {cc['close_reason']}")
+            ctx.note(f"master clock {'+' if sign > 0 else '-'}90 s: slave closed after {time.monotonic() - t0:.0f}s "
+                     f"(sources so far {close_reason_events(ctx)})")
+        mp.set()
+    check(len([c for c in ctx.new_copies(sym)]) == 4, f"unexpected copy count {len(ctx.new_copies(sym))} (expected 4)")
+
+
+# 9 -----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_long_outage(ctx: Ctx) -> None:
+    """The slave terminal is down for --outage-seconds (default 10 min) while the master closes one copied
+    position, opens another and leaves it open, and opens+closes a third: on return the close is executed, the
+    stale open is cancelled by its TTL without ever executing, the never-delivered open was cancelled when the
+    master closed it, and the slave ends flat."""
+    a = ctx.args
+    s0, s1, s2 = (a.symbols + a.symbols)[:3] if len(a.symbols) < 3 else a.symbols[:3]
+    if a.outage_seconds < 60:
+        raise Skip(f"--outage-seconds {a.outage_seconds:.0f} is below the open TTL window; use >= 60")
+    c0, p0 = open_and_mirror(ctx, s0, "buy", 0.01, "out0")
+    ctx.on_cleanup("restart slave", lambda: ctx.slave.start_terminal() if ctx.slave.state() != "running" else None)
+    ctx.slave.stop_container()
+    t_down = time.monotonic()
+    ctx.note(f"slave container stopped; outage {a.outage_seconds:.0f}s")
+    ctx.master.must("close", ticket=_master_ticket(ctx, s0))                    # P0: close queued
+    c0r = wait_for("P0 close issued", lambda: (r := copy_row(ctx, c0["id"])) and r["state"] == "closing" and r, 30, 1)
+    ctx.master_open(s1, "sell", 0.01, "out1")                                   # P1: stays open on the master
+    c1 = wait_for("P1 copy", lambda: (ctx.new_copies(s1) or [None])[-1], 30)
+    ctx.master_open(s2, "buy", 0.01, "out2")                                    # P2: opened and closed meanwhile
+    c2 = wait_for("P2 copy", lambda: (ctx.new_copies(s2) or [None])[-1], 30)
+    ctx.master.must("close", ticket=_master_ticket(ctx, s2))
+    wait_for("P2 copy cancelled (open never delivered)", lambda: copy_row(ctx, c2["id"])["state"] == "cancelled", 30, 1)
+    ctx.note(f"during the outage: P0 {c0r['state']}, P1 {copy_row(ctx, c1['id'])['state']}, "
+             f"P2 {copy_row(ctx, c2['id'])['state']}")
+
+    def while_down() -> None:
+        check(copy_row(ctx, c1["id"])["state"] == "pending", "P1 open left 'pending' state while the slave is down "
+              "(expiry needs the slave's poll)")
+        check(copy_row(ctx, c0["id"])["state"] == "closing", "P0 close completed without a slave")
+    while time.monotonic() - t_down < a.outage_seconds:
+        while_down()
+        time.sleep(15)
+    ctx.slave.start_terminal()
+    ctx.note(f"slave back after {time.monotonic() - t_down:.0f}s")
+    ctx.wait_slave_gone(c0["id"], timeout=120)
+    ctx.wait_copy_state(c0["id"], {"closed"}, 60)
+    r1 = wait_for("P1 copy cancelled by its TTL", lambda: (r := copy_row(ctx, c1["id"])) and r["state"] in
+                  ("cancelled", "open", "error", "skipped") and r, 90, 2)
+    check(r1["state"] == "cancelled" and r1["close_reason"] == "open_expired",
+          f"stale open P1 ended {r1['state']}/{r1['close_reason']} (expected cancelled/open_expired)")
+    time.sleep(10)
+    check(not ctx.slave_pos(c1["id"]) and not ctx.slave_pos(c2["id"]), "a stale open executed on the slave")
+    check(not ctx.slave_in_deals(r1) and not ctx.slave_in_deals(copy_row(ctx, c2["id"])), "entry deals exist for cancelled opens")
+    cmds0 = copy_commands(ctx, c0["id"])
+    order = [(c["action"], c["state"]) for c in sorted(cmds0, key=lambda c: c["seq_in_copy"])]
+    check(order == [("open", "done"), ("close", "done")], f"P0 commands {order}")
+    flat = ctx.slave.fresh_status()["positions"]
+    check(not [p for p in flat if p["magic"] == a.magic], f"slave not flat: {flat}")
+    ctx.master.must("close", ticket=_master_ticket(ctx, s1))   # P1's master close: no-op for the cancelled copy
+    time.sleep(10)
+    check(copy_row(ctx, c1["id"])["state"] == "cancelled", "master close changed the cancelled copy")
+    check(not [p for p in ctx.slave.fresh_status()["positions"] if p["magic"] == a.magic],
+          "slave got a position after the master close")
+
+
+# 10 ----------------------------------------------------------------------------------------------
+def _server_pids(ctx: Ctx) -> list[str]:
+    return sh(["pgrep", "-f", ctx.args.server_match]).stdout.split()
+
+
+def stop_server(ctx: Ctx) -> None:
+    pids = _server_pids(ctx)
+    check(bool(pids), f"no server process matching {ctx.args.server_match!r}")
+    for pid in pids:
+        os.kill(int(pid), signal.SIGTERM)
+    wait_for("server down", lambda: not ctx.admin.health(), 30, 0.5)
+
+
+def start_server(ctx: Ctx) -> None:
+    subprocess.Popen(["bash", "-c", ctx.args.server_restart_cmd], start_new_session=True,
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    wait_for("server healthy", ctx.admin.health, 60, 1)
+
+
+@scenario(slow=True, group="chaos")
+def s_chaos_db_rollback(ctx: Ctx) -> None:
+    """The (local, SQLite) server database is restored to a snapshot taken BEFORE two copies existed while both EAs
+    keep running: the copy ids are reused (the c<id> collision class). After settling there must be exactly one
+    slave position per open master position, at most one live copy per master position, no orphan, and a master
+    close_all must leave the slave flat."""
+    a = ctx.args
+    if not a.server_db or not a.server_restart_cmd:
+        raise Skip("needs --server-db (a LOCAL SQLite server database) and --server-restart-cmd; never run against KS1")
+    import re
+    import sqlite3
+    import shutil
+    db = Path(a.server_db)
+    check(db.exists(), f"{db} not found")
+    snap = a.out_dir / f"db-before-{int(time.time())}.sqlite"
+    with sqlite3.connect(str(db)) as src, sqlite3.connect(str(snap)) as dst:
+        src.backup(dst)
+    ctx.note(f"database snapshot {snap.name} ({snap.stat().st_size} bytes)")
+    s0, s1 = a.symbols[0], (a.symbols[1] if len(a.symbols) > 1 else a.symbols[0])
+    ca, pa = open_and_mirror(ctx, s0, "buy", 0.01, "rb-a")
+    cb, pb = open_and_mirror(ctx, s1, "sell", 0.01, "rb-b")
+    before = sorted((c["id"], c["state"]) for c in ctx.new_copies())
+    ctx.note(f"before the rollback: copies {before}")
+    stop_server(ctx)
+    shutil.copyfile(snap, db)
+    for suffix in ("-wal", "-shm"):
+        Path(str(db) + suffix).unlink(missing_ok=True)
+    start_server(ctx)
+    ctx.note("database rolled back and the server restarted")
+    # the slave EA must come back to a consistent state on its own
+    time.sleep(a.timeout + 45)
+    mp = {str(p["identifier"]): p for p in ctx.master.fresh_status()["positions"] if p["magic"] == a.magic}
+    check(len(mp) == 2, f"master positions {sorted(mp)}")
+    sp = [p for p in ctx.slave.fresh_status()["positions"] if p["magic"] == a.magic]
+    by_master: dict[str, list[dict]] = {}
+    for p in sp:
+        m = re.match(r"c(\d+)-(\d+)$", p["comment"] or "")
+        by_master.setdefault(m.group(2) if m else "?", []).append(p)
+    ctx.note(f"slave positions per master position: { {k: [(x['comment'], x['volume']) for x in v] for k, v in by_master.items()} }")
+    copies = ctx.admin.copies(link_id=ctx.link_id, limit=500)
+    live = [c for c in copies if c["state"] in EXPOSURE or (c["state"] == "superseded" and c["close_intent"])]
+    ctx.note(f"live copies after the rollback: {[(c['id'], c['state'], c['position_id']) for c in live]}")
+    problems = []
+    for pid in mp:
+        n = len(by_master.get(pid, []))
+        if n != 1:
+            problems.append(f"master position {pid}: {n} slave positions")
+    extra = [k for k in by_master if k not in mp]
+    if extra:
+        problems.append(f"slave positions for unknown master positions: {extra}")
+    owned = {str(c["position_id"]) for c in live if c["position_id"] is not None}
+    unmanaged = [p for p in sp if str(p["identifier"]) not in owned]
+    if unmanaged:
+        problems.append(f"slave positions no live copy manages: {[(p['comment'], p['ticket']) for p in unmanaged]}")
+    check(not problems, "; ".join(problems))
+    ctx.master.must("close_all", magic=a.magic)
+    wait_for("slave flat after the master close_all", lambda: not [p for p in ctx.slave.fresh_status()["positions"]
+             if p["magic"] == a.magic], 90, 2)
+
+
+# 11 ----------------------------------------------------------------------------------------------
+@scenario(slow=True, group="chaos")
+def s_chaos_slave_suspend(ctx: Ctx) -> None:
+    """Slave account suspended (admin PATCH) while copies are open: it drains. (a) open copies stay managed, a new
+    master open is skipped (account_drain) and resuming while exposure remains works at once; (b) after suspending
+    again the master's closes still reach the slave, the flat slave is then refused (403) and, once reactivated, the
+    EA comes back on its own (its blocked-state config check runs every 5 min) and mirrors a new open."""
+    a = ctx.args
+    s0, s1, s2 = (a.symbols + a.symbols + a.symbols)[:3]
+    path = f"/admin/accounts/{ctx.slave_id}"
+
+    def suspend() -> None:
+        ctx.admin.patch(path, {"status": "suspended", "suspended_reason": "chaos"})
+        check(ctx.admin.account(ctx.slave_id)["status"] == "suspended", "account not suspended")
+
+    def resume() -> None:
+        ctx.admin.patch(path, {"status": "active"})
+        check(ctx.admin.account(ctx.slave_id)["status"] == "active", "account not active")
+
+    ctx.on_cleanup("reactivate slave", resume)
+
+    # (a) drain with exposure, resume with exposure
+    ca, _ = open_and_mirror(ctx, s0, "buy", 0.01, "susp-a")
+    cb, _ = open_and_mirror(ctx, s1, "sell", 0.01, "susp-b")
+    suspend()
+    time.sleep(10)
+    for c in (ca, cb):
+        check(copy_row(ctx, c["id"])["state"] == "open", f"copy {c['id']} changed on suspension")
+        check(len(ctx.slave_pos(c["id"])) == 1, f"slave position of copy {c['id']} closed on suspension")
+    ctx.master_open(s2, "buy", 0.01, "susp-c")
+    cc = wait_for("copy for the open made while suspended", lambda: (ctx.new_copies(s2) or [None])[-1], 30)
+    r = wait_for("drained copy settled", lambda: (x := copy_row(ctx, cc["id"])) and x["state"] != "pending" and x, 30, 1)
+    check(r["state"] == "skipped" and r["skip_reason"] == "account_drain",
+          f"open while suspended: {r['state']}/{r['skip_reason']}")
+    check(not ctx.slave_pos(cc["id"]), "slave opened a position while suspended")
+    ctx.note("(a) suspended: open copies untouched, new open skipped (account_drain)")
+    resume()
+    ctx.master.must("close", ticket=_master_ticket(ctx, s2))   # the skipped copy's master closes: no-op
+    ctx.master_open(s2, "sell", 0.01, "susp-c2")
+    cc2 = wait_for("copy opened right after resuming", lambda: next((c for c in ctx.new_copies(s2) if c["id"] != cc["id"]), None), 30)
+    ctx.wait_copy_state(cc2["id"], {"open"}, 60)
+    ctx.wait_slave_pos(cc2["id"])
+    ctx.note("(a) resumed with exposure still open: the next open was mirrored at once")
+    ctx.master.must("close", ticket=_master_ticket(ctx, s2))
+    ctx.wait_slave_gone(cc2["id"], timeout=60)
+
+    # (b) full drain: closes still flow, then 403, then recovery after reactivation
+    suspend()
+    ctx.master.must("close", ticket=_master_ticket(ctx, s0))
+    ctx.wait_slave_gone(ca["id"], timeout=60)
+    ctx.wait_copy_state(ca["id"], {"closed"}, 30)
+    ctx.master.must("close", ticket=_master_ticket(ctx, s1))
+    ctx.wait_slave_gone(cb["id"], timeout=60)
+    ctx.wait_copy_state(cb["id"], {"closed"}, 30)
+    ctx.note("(b) drain: both closes were mirrored while suspended")
+    time.sleep(15)   # the flat slave is refused with 403 now and its EA blocks itself
+    t_resume = time.time()
+    resume()
+
+    def seen_again() -> bool:
+        ls = ctx.admin.account(ctx.slave_id)["last_seen_at"]
+        if not ls:
+            return False
+        from datetime import datetime, timezone
+        dt = datetime.fromisoformat(ls)
+        dt = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp() > t_resume
+    wait_for("slave EA calls the server again after reactivation", seen_again, 380, 5)
+    t_back = time.time() - t_resume
+    time.sleep(8)   # session + first poll
+    ctx.master_open(s0, "buy", 0.01, "susp-d")
+    cd = wait_for("copy after resume", lambda: (ctx.new_copies(s0) or [None])[-1] if len(ctx.new_copies(s0)) >= 2 else None, 30)
+    ctx.wait_copy_state(cd["id"], {"open"}, 120)
+    ctx.wait_slave_pos(cd["id"])
+    ctx.note(f"(b) reactivated: the slave EA was back {t_back:.0f}s later and mirrored the new open")
+    close_and_mirror(ctx, cd, s0)
+    check(len(ctx.new_copies(s0)) == 2 and len(ctx.new_copies(s1)) == 1, "unexpected copy counts")
+
+
 # --- runner --------------------------------------------------------------------------------------------
 
 def preconditions(ctx: Ctx) -> list[str]:
@@ -1083,6 +2011,9 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("scenarios", nargs="*", help="scenario names (default: all)")
     ap.add_argument("--list", action="store_true", help="list scenarios and exit")
     ap.add_argument("-k", dest="keyword", help="run scenarios whose name contains this text")
+    ap.add_argument("--group", choices=["core", "chaos", "all"], default="core",
+                    help="scenario group when no names are given: core (default), chaos (error scenarios: restarts, "
+                         "network and broker loss, rejects, outages, DB rollback, suspension) or all")
     ap.add_argument("--fast", action="store_true", help="skip slow scenarios (restarts, network cuts, faults)")
     ap.add_argument("--server-url", default=env.get("E2E_SERVER_URL", "http://172.17.0.1:8099"))
     ap.add_argument("--admin-token", default=env.get("ADMIN_TOKEN"))
@@ -1114,10 +2045,25 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--magic", type=int, default=int(env.get("E2E_MAGIC", 424242)))
     ap.add_argument("--timeout", type=float, default=45.0, help="default wait per step (s)")
     ap.add_argument("--cut-seconds", type=float, default=60.0, help="network cut length (s)")
+    ap.add_argument("--chaos-cut-seconds", type=float, default=75.0,
+                    help="chaos group: how long master/slave lose the server or the broker (60-90 s is the useful range:"
+                         " above the server's 60 s absence timer, below MASTER_STALE_SECONDS)")
+    ap.add_argument("--outage-seconds", type=float, default=600.0,
+                    help="chaos long_outage: how long the slave terminal stays down (default 10 min)")
+    ap.add_argument("--slave-direct", action="store_true", default=env.get("E2E_SLAVE_DIRECT") == "1",
+                    help="the slave EA talks to the server itself (https): no forwarder, no fault proxy for it; "
+                         "network cuts use nftables on the server address")
+    ap.add_argument("--master-network", default=env.get("E2E_MASTER_NETWORK", "bridge"),
+                    help="docker network a remote master is disconnected from for 'all' network cuts")
+    ap.add_argument("--server-db", type=Path, default=env.get("E2E_SERVER_DB"),
+                    help="SQLite file of a LOCAL server: enables db_rollback (never point this at a shared server)")
+    ap.add_argument("--reject-symbols", default=env.get("E2E_REJECT_SYMBOLS", "AAPL,MSFT,TSLA,NVDA,AMZN,GOOGL,META"),
+                    help="chaos slave_reject: candidate slave symbols that may be closed right now (market-closed reject)")
     ap.add_argument("--rate-limit-wait", type=float, default=60.0,
                     help="wait for the held result after removing the 429 proxy before reloading the slave")
     ap.add_argument("--proxy-host", default="172.17.0.1")
-    ap.add_argument("--proxy-port", type=int, default=8098)
+    ap.add_argument("--proxy-port", type=int, default=8098, help="fault proxy port in front of the slave")
+    ap.add_argument("--master-proxy-port", type=int, default=8097, help="fault proxy port in front of the master")
     ap.add_argument("--server-project", type=Path, default=REPO / "server",
                     help="uv project used to run fault_proxy.py (needs the server models)")
     ap.add_argument("--server-match", default=env.get("E2E_SERVER_MATCH", "uvicorn copycore.app:create_app.*--port 8099"),
@@ -1158,6 +2104,7 @@ def build_args(argv: list[str] | None) -> argparse.Namespace:
     if a.master_ssh:
         a.cleanup_magic_only = True
     a.symbols = [s.strip() for s in a.symbols.split(",") if s.strip()]
+    a.reject_symbols = [s.strip() for s in a.reject_symbols.split(",") if s.strip()]
     a.latency_symbols = [s.strip() for s in a.latency_symbols.split(",") if s.strip()]
     return a
 
@@ -1166,14 +2113,15 @@ def main(argv: list[str] | None = None) -> int:
     a = build_args(argv)
     if a.list:
         for s in SCENARIOS:
-            print(f"{s.name:28} {'[slow] ' if s.slow else ''}{s.doc.splitlines()[0] if s.doc else ''}")
+            print(f"{s.name:26} {s.group:6} {'[slow] ' if s.slow else ''}{s.doc.splitlines()[0] if s.doc else ''}")
         return 0
     names = {s.name for s in SCENARIOS}
     unknown = [n for n in a.scenarios if n not in names]
     if unknown:
         print(f"unknown scenario(s): {unknown}; see --list", file=sys.stderr)
         return 2
-    selected = [s for s in SCENARIOS if (not a.scenarios or s.name in a.scenarios)
+    selected = [s for s in SCENARIOS
+                if (s.name in a.scenarios if a.scenarios else a.group in ("all", s.group))
                 and (not a.keyword or a.keyword in s.name) and not (a.fast and s.slow)]
     if not a.admin_token:
         print("ADMIN_TOKEN not set (use --admin-token, ADMIN_TOKEN or --env-file)", file=sys.stderr)
@@ -1182,8 +2130,9 @@ def main(argv: list[str] | None = None) -> int:
     ctx = Ctx(args=a, admin=Admin(a.server_url, a.admin_token),
               master=Terminal("master", a.master_container, a.master_prefix, a.master_dir, a.forward_host,
                               remote=Remote(a.master_ssh, Path.home() / ".ssh" / "tm-e2e") if a.master_ssh else None,
-                              remote_files=a.master_files),
-              slave=Terminal("slave", a.slave_container, a.slave_prefix, a.slave_dir, a.forward_host),
+                              remote_files=a.master_files, remote_network=a.master_network),
+              slave=Terminal("slave", a.slave_container, a.slave_prefix, a.slave_dir, a.forward_host,
+                             direct=a.slave_direct),
               link_id=a.link_id, slave_id=a.slave_id, master_id=a.master_id, timeout=a.timeout)
 
     print(f"TradeMirror e2e: {len(selected)} scenario(s) against {a.server_url}", flush=True)
@@ -1191,6 +2140,11 @@ def main(argv: list[str] | None = None) -> int:
     if problems:
         print("PRECONDITIONS FAILED:\n  - " + "\n  - ".join(problems), file=sys.stderr)
         return 2
+    for term in (ctx.master, ctx.slave):   # a table left by an aborted earlier run would keep the terminal cut
+        try:
+            term.uncut()
+        except Exception as e:  # noqa: BLE001
+            print(f"could not clear network faults on {term.role}: {e}", file=sys.stderr)
     print("preconditions ok; initial cleanup", flush=True)
     try:
         ctx.cleanup()
@@ -1217,6 +2171,9 @@ def main(argv: list[str] | None = None) -> int:
             status, detail = "ERROR", f"{type(e).__name__}: {e}"
             traceback.print_exc()
         finally:
+            undo_errs = ctx.run_undo()
+            if undo_errs and status == "PASS":
+                status, detail = "FAIL", "restore failed: " + "; ".join(undo_errs)
             for t in (ctx.slave, ctx.master):   # never leave a cut link behind
                 try:
                     if t.state() != "running":

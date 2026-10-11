@@ -14,6 +14,14 @@ key the server would silently ignore is reported. Faults are injected per route:
     --drop-rotate N      forward token/rotate, drop the reply (S25)
     --rate-limit P=S     answer 429 with Retry-After S to every request whose path starts with P (S24)
     --fail-all-for S     answer 503 to everything for S seconds (network cut / server down)
+    --control FILE       JSON file re-read on every request, so a test can change faults while the proxy runs:
+                           {"snapshot": {"connected": false, "history_synced": false,
+                                         "drop_positions": true, "drop_history": true},
+                            "server_time_shift_ms": 90000, "fail_all": true}
+                         `snapshot` rewrites the body of every /v4/master|slave/snapshot before it reaches the
+                         server (a disconnected terminal, an unsynced history, a vanished position list);
+                         `server_time_shift_ms` shifts `server_time` in JSON replies (the EA derives its clock
+                         offset from it: a skewed clock); `fail_all` answers 503 to everything.
 
 Run from the repository root (uses the server's virtualenv for the models):
 
@@ -96,9 +104,36 @@ class Faults:
 class ProxyState:
     faults: Faults
     validate: bool = True
+    control_path: Path | None = None
     violations: list[str] = field(default_factory=list)
     events: list[str] = field(default_factory=list)
+    counters: dict[str, int] = field(default_factory=dict)
     lock: threading.Lock = field(default_factory=threading.Lock)
+    _ctl: dict = field(default_factory=dict)
+    _ctl_mtime: float = 0.0
+
+    def control(self) -> dict:
+        """The control file, re-read when it changes (missing/invalid file = no runtime faults)."""
+        if self.control_path is None:
+            return {}
+        try:
+            mtime = self.control_path.stat().st_mtime_ns
+        except OSError:
+            self._ctl, self._ctl_mtime = {}, 0.0
+            return {}
+        if mtime != self._ctl_mtime:
+            try:
+                self._ctl = json.loads(self.control_path.read_text() or "{}")
+            except (OSError, ValueError):
+                self._ctl = {}
+            self._ctl_mtime = mtime
+            print(f"[proxy] control: {json.dumps(self._ctl)}", flush=True)
+        return self._ctl
+
+    def count(self, key: str) -> int:
+        with self.lock:
+            self.counters[key] = self.counters.get(key, 0) + 1
+            return self.counters[key]
 
     def note(self, kind: str, msg: str) -> None:
         with self.lock:
@@ -144,7 +179,8 @@ def make_handler(state: ProxyState, forward: Forward):
             length = int(self.headers.get("Content-Length") or 0)
             body = self.rfile.read(length) if length else b""
             path = self.path.split("?", 1)[0]
-            if time.monotonic() < state.faults.fail_until:
+            ctl = state.control()
+            if time.monotonic() < state.faults.fail_until or ctl.get("fail_all"):
                 state.note("fault", f"503 {self.command} {path}")
                 return self._reply(503, {"Retry-After": "2", "Content-Type": "application/json"},
                                    b'{"error":"busy"}')
@@ -167,7 +203,13 @@ def make_handler(state: ProxyState, forward: Forward):
                     and not self.headers.get("Idempotency-Key"):
                 state.note("violation", f"{self.command} {path}: missing Idempotency-Key")
             headers = {k: v for k, v in self.headers.items() if k.lower() not in HOP_HEADERS}
+            if self.command == "POST" and path in ("/v4/master/snapshot", "/v4/slave/snapshot") \
+                    and isinstance(ctl.get("snapshot"), dict) and ctl["snapshot"]:
+                body = mutate_snapshot(body, ctl["snapshot"], state)
             status, rheaders, rbody = forward(self.command, self.path, headers, body)
+            if ctl.get("server_time_shift_ms") and "json" in rheaders.get("Content-Type", "json").lower():
+                rbody = shift_server_time(rbody, int(ctl["server_time_shift_ms"]))
+                state.count("server_time_shifted")
             if path == "/v4/slave/results" and state.take("drop_results"):
                 return self._lose("results")
             if path == "/v4/enroll" and state.take("drop_enroll"):
@@ -179,6 +221,38 @@ def make_handler(state: ProxyState, forward: Forward):
         do_GET = do_POST = do_PUT = _handle
 
     return Handler
+
+
+def mutate_snapshot(body: bytes, spec: dict, state: ProxyState) -> bytes:
+    """Rewrite a snapshot body per the control file's `snapshot` block (see the module docstring)."""
+    try:
+        data = json.loads(body)
+    except ValueError:
+        return body
+    if not isinstance(data, dict):
+        return body
+    for key in ("connected", "history_synced"):
+        if key in spec and spec[key] is not None:
+            data[key] = bool(spec[key])
+    if spec.get("drop_positions"):
+        data["positions"] = []
+    if spec.get("drop_history"):
+        data["history"] = []
+    n = state.count("snapshots_mutated")
+    if n == 1 or n % 20 == 0:
+        state.note("fault", f"snapshot #{n} rewritten: {spec} (positions now {len(data.get('positions', []))})")
+    return json.dumps(data, separators=(",", ":")).encode()
+
+
+def shift_server_time(rbody: bytes, shift_ms: int) -> bytes:
+    try:
+        data = json.loads(rbody)
+    except ValueError:
+        return rbody
+    if isinstance(data, dict) and isinstance(data.get("server_time"), int):
+        data["server_time"] += shift_ms
+        return json.dumps(data, separators=(",", ":")).encode()
+    return rbody
 
 
 def url_forwarder(upstream: str, timeout: float = 10.0) -> Forward:
@@ -217,18 +291,22 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--drop-rotate", type=int, default=0)
     ap.add_argument("--rate-limit", action="append", default=[], metavar="PATH=SECONDS")
     ap.add_argument("--fail-all-for", type=float, default=0.0, metavar="SECONDS")
+    ap.add_argument("--control", type=Path, default=None, metavar="FILE",
+                    help="JSON file with runtime faults (see the module docstring), re-read on every request")
     ap.add_argument("--no-validate", action="store_true")
     args = ap.parse_args(argv)
     faults = Faults(drop_results=args.drop_results, drop_enroll=args.drop_enroll, drop_rotate=args.drop_rotate,
                     rate_limit=parse_rate_limits(args.rate_limit),
                     fail_until=time.monotonic() + args.fail_all_for if args.fail_all_for else 0.0)
-    state = ProxyState(faults=faults, validate=not args.no_validate)
+    state = ProxyState(faults=faults, validate=not args.no_validate, control_path=args.control)
     server = serve(state, url_forwarder(args.upstream), args.host, args.port)
     print(f"[proxy] http://{args.host}:{args.port} -> {args.upstream}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
+    if state.counters:
+        print(f"[proxy] counters: {state.counters}", flush=True)
     print(f"[proxy] {len(state.violations)} contract violation(s)", flush=True)
     return 1 if state.violations else 0
 
