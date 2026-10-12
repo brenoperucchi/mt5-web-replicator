@@ -916,17 +916,36 @@ class Proxy:
 
     def __enter__(self) -> "Proxy":
         a = self.ctx.args
+        if self.term.remote or self.term.direct:
+            raise Skip(f"{self.term.role} talks to the server directly: the fault proxy cannot be put in front of it")
         self.control.unlink(missing_ok=True)
         cmd = ["uv", "run", "-q", "--project", str(a.server_project), "python",
                str(REPO / "ea/mt5/tests/fault_proxy.py"), "--upstream", a.server_url,
                "--host", a.proxy_host, "--port", str(self.port), "--control", str(self.control), *self.fault_args]
+        if _port_open(a.proxy_host, self.port):
+            raise RuntimeError(f"port {self.port} is already in use (a fault proxy left over from an earlier run?)")
         self.fh = self.out.open("w")
         self.proc = subprocess.Popen(cmd, stdout=self.fh, stderr=subprocess.STDOUT, start_new_session=True,
                                      env={**os.environ, "FAULT_PROXY_SERVER_DIR": str(a.server_project)})
-        wait_for("fault proxy listening", lambda: _port_open(a.proxy_host, self.port), 60, 0.5)
-        self.term.start_forwarder(self.port)
+        try:
+            wait_for("fault proxy listening", lambda: _port_open(a.proxy_host, self.port), 60, 0.5)
+            self.term.start_forwarder(self.port)
+        except BaseException:   # Skip (terminal cannot sit behind a proxy) included: never leave the process behind
+            self._stop()
+            raise
         log(f"{self.term.role} -> proxy :{self.port} {' '.join(self.fault_args)}")
         return self
+
+    def _stop(self) -> None:
+        if self.proc:
+            try:
+                os.killpg(self.proc.pid, signal.SIGINT)
+                self.proc.wait(10)
+            except subprocess.TimeoutExpired:
+                os.killpg(self.proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        self.fh.close()
 
     def set(self, **ctl: Any) -> None:
         """Replace the runtime faults (set() with nothing clears them)."""
@@ -939,13 +958,7 @@ class Proxy:
         try:
             self.term.start_forwarder()
         finally:
-            if self.proc:
-                os.killpg(self.proc.pid, signal.SIGINT)
-                try:
-                    self.proc.wait(10)
-                except subprocess.TimeoutExpired:
-                    os.killpg(self.proc.pid, signal.SIGKILL)
-            self.fh.close()
+            self._stop()
             text = self.out.read_text(errors="replace")
             viol = [line for line in text.splitlines() if "violation" in line.lower() and "0 contract" not in line]
             if viol:
