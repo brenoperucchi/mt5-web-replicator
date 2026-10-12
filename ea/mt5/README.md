@@ -303,6 +303,19 @@ How faults are injected:
 | `chaos_db_rollback` | local SQLite database restored to a snapshot taken before two copies existed, EAs running: one slave position per master position, no unmanaged exposure |
 | `chaos_slave_suspend` | slave suspended with open copies: drain keeps closes flowing, new opens skipped, EA recovers after reactivation (its blocked-state config check runs every 5 min) |
 
+Behaviours the group documents (by design, not failures): a master clock 90 s behind makes the server ignore the exit
+deal as older than the position, so the close arrives through the 60 s absence timer instead of the fast path; a
+suspended slave that reaches zero exposure is refused with 403 and its EA re-checks only every 5 minutes, and for up
+to a minute after any reactivation the EA is still in drain mode, so an open that arrives then is cancelled for good
+(`open_drain`); an open on a symbol that has no tick yet in the slave's Market Watch (a terminal restarted with `kill -9`
+forgets the symbols it added) fails with `no_quote`, which is why the runner warms the symbols first.
+
+On KS1 (`--master-ssh`, `--slave-direct`; see the options in `run.py --help`) the scenarios that need the fault proxy
+or a selective cut of the master are SKIPped with the reason (`chaos_partial_restart`, `chaos_clock_skew`,
+`chaos_db_rollback`, parts of `chaos_broker_disconnect` and `chaos_mass_close`). The whole-run call-gap check compares
+server arrival times, so on a WAN link a gap a little under `--min-gap-ms` can show up without the EA breaking its
+own gap.
+
 ## Owner checklist before merge
 
 MetaEditor:

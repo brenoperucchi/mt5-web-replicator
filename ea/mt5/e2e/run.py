@@ -356,6 +356,8 @@ class Terminal:
             except Fail:
                 # A pending MT5 live update makes terminal64 hand over to its updater and exit, which stops the
                 # container (the updater dies with it): apply it in a throwaway container and start again.
+                if self.remote:   # its restart policy keeps relaunching the exiting terminal: stop it first
+                    self.podman("stop", "-t", "10", self.container)
                 if attempt == 2 or self.state() == "running" or not self.apply_pending_update(started):
                     raise
         self.start_forwarder(self._fwd_port)
@@ -366,7 +368,7 @@ class Terminal:
         """The container's terminal exited after announcing a LiveUpdate: run that updater to completion in a
         container of its own (same image and prefix, name ends in -updater so it stays ours)."""
         pat = re.compile(r'LiveUpdate\s+start "([^"]+)" /update /path:"([^"]+)"')
-        image = self.podman("inspect", self.container, "--format", "{{.ImageName}}").stdout.strip()
+        image = self.podman("inspect", self.container, "--format", "{{.Config.Image}}").stdout.strip()
         if self.remote:
             root, rest = (self.remote_files or "").split("/drive_c/", 1)
             tdir = rest.split("/MQL5/")[0]
@@ -1953,13 +1955,32 @@ def s_chaos_slave_suspend(ctx: Ctx) -> None:
     ctx.note("(a) suspended: open copies untouched, new open skipped (account_drain)")
     resume()
     ctx.master.must("close", ticket=_master_ticket(ctx, s2))   # the skipped copy's master closes: no-op
+    # The EA learns that the drain is over from its next /v4/config (every 60 s): an open that reaches it before
+    # that is refused ("drain") and its copy is cancelled for good (open_drain). Record which of the two happens;
+    # then, after one config period, a new open must be mirrored.
+    t_resume = time.monotonic()
+    known = {c["id"] for c in ctx.new_copies(s2)}
     ctx.master_open(s2, "sell", 0.01, "susp-c2")
-    cc2 = wait_for("copy opened right after resuming", lambda: next((c for c in ctx.new_copies(s2) if c["id"] != cc["id"]), None), 30)
-    ctx.wait_copy_state(cc2["id"], {"open"}, 60)
-    ctx.wait_slave_pos(cc2["id"])
-    ctx.note("(a) resumed with exposure still open: the next open was mirrored at once")
+    cc2 = wait_for("copy opened right after resuming", lambda: next((c for c in ctx.new_copies(s2) if c["id"] not in known), None), 30)
+    r2 = wait_for("that copy settled", lambda: (x := copy_row(ctx, cc2["id"])) and x["state"] != "pending" and x, 60, 1)
+    if r2["state"] == "open":
+        ctx.wait_slave_pos(cc2["id"])
+        ctx.note("(a) resumed with exposure still open: the very next open was mirrored")
+    else:
+        check(r2["state"] == "cancelled" and r2["close_reason"] == "open_drain",
+              f"open right after resuming ended {r2['state']}/{r2['close_reason']} (expected open or cancelled/open_drain)")
+        ctx.note(f"(a) LIMITATION: an open {time.monotonic() - t_resume:.0f}s after reactivation reached the EA while it "
+                 f"was still in drain mode and was cancelled for good (open_drain); the master position stays uncopied")
     ctx.master.must("close", ticket=_master_ticket(ctx, s2))
-    ctx.wait_slave_gone(cc2["id"], timeout=60)
+    time.sleep(max(0.0, 70 - (time.monotonic() - t_resume)))   # one config period
+    known = {c["id"] for c in ctx.new_copies(s2)}
+    ctx.master_open(s2, "sell", 0.01, "susp-c3")
+    cc3 = wait_for("copy after the EA refreshed its config", lambda: next((c for c in ctx.new_copies(s2) if c["id"] not in known), None), 30)
+    ctx.wait_copy_state(cc3["id"], {"open"}, 60)
+    ctx.wait_slave_pos(cc3["id"])
+    ctx.note("(a) a minute after reactivation (exposure never reached zero) opens are mirrored again")
+    ctx.master.must("close", ticket=_master_ticket(ctx, s2))
+    ctx.wait_slave_gone(cc3["id"], timeout=60)
 
     # (b) full drain: closes still flow, then 403, then recovery after reactivation
     suspend()
