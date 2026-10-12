@@ -1,0 +1,12 @@
+{
+ "results": [
+  {
+   "command_id": "{{command_id}}",
+   "attempt_id": "{{attempt_id}}",
+   "copy_id": "{{#copy_id}}",
+   "status": "done",
+   "executed_at": "{{#now}}",
+   "message": "journal updated: executed"
+  }
+ ]
+}

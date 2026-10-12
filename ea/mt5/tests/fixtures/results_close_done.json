@@ -1,0 +1,23 @@
+{
+ "results": [
+  {
+   "command_id": "{{command_id}}",
+   "attempt_id": "{{attempt_id}}",
+   "copy_id": "{{#copy_id}}",
+   "status": "done",
+   "order": "{{#order}}",
+   "deal": "{{#deal}}",
+   "request_id": 18,
+   "position_id": "{{#position_id}}",
+   "symbol": "EURUSD",
+   "volume": 1,
+   "executed_volume": 1,
+   "residual_volume": 0,
+   "price": 1.10102,
+   "profit": 7.1,
+   "commission": -3.5,
+   "swap": 0,
+   "executed_at": "{{#now}}"
+  }
+ ]
+}
