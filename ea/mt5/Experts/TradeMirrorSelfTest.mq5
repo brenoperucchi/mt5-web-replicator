@@ -7,7 +7,8 @@
 //|  enroll), S27-S28 (comment correlation), S29 (latency schedule), |
 //|  S30 (per-server state files + migration), S31 (WebRequest errors),
 //|  S32 (stale c<copy_id> from before the command is not evidence),
-//|  S33 (the same full comment from before the command is: DB rollback). Real trades are placed on the tester symbol.           |
+//|  S33 (the same full comment from before the command is: DB rollback),
+//|  S34 (an open arriving while the cached config still says drain). Real trades are placed on the tester symbol.
 //|                                                                  |
 //|  Run: Strategy Tester, Expert = TradeMirrorSelfTest, a hedging   |
 //|  account, any liquid symbol (EURUSD), "Every tick", 1 day.       |
@@ -538,6 +539,51 @@ void S33()
    S33Case("b", 9137, true);    // only its history deals are left
   }
 
+//--- S34: a suspended slave was reactivated, but the EA still holds the old config (mode "drain", refreshed every
+//    60 s). An open that arrives in that window must not be cancelled for good (chaos run slave_suspend,
+//    2026-10-11: open_drain, the master position never copied). The EA asks for a fresh config first:
+//    mode back to normal -> the open executes; still drain -> failed/drain; no answer within 15 s -> failed/drain.
+void S34Case(const string tag, const long copyId, const string modeAfter, const bool configDown, const bool wantOpen)
+  {
+   string scen = "S34" + tag;
+   string cmt = TestComment(copyId);
+   g_fake.Reset();
+   g_fake.mode = "drain";
+   CTradeMirror *tm = NewEngine("s34" + tag, true);
+   UntilSession(tm);
+   Ticks(tm, 3);
+   Check(scen, g_fake.configCalls >= 1, "the EA read the config while the server was in drain");
+   g_fake.mode = modeAfter;                  // reactivated on the server; the EA does not know yet
+   g_fake.failConfig = configDown;
+   int before = g_fake.configCalls;
+   string id = "c_s34" + tag;
+   g_fake.Queue(id, OpenCmd(id, copyId));
+   Ticks(tm, 30);                            // well under the 60 s config interval
+   string failed = g_fake.LastResult(id, "failed");
+   string done = g_fake.LastResult(id, "done");
+   Check(scen, g_fake.configCalls > before, "the EA asked for a fresh config before deciding");
+   if(wantOpen)
+     {
+      Check(scen, done != "" && failed == "", "open executed after the fresh config said normal");
+      Check(scen, PositionsWithComment(cmt) == 1, "one position on the account");
+     }
+   else
+     {
+      Check(scen, failed != "" && StringFind(failed, "\"error_code\":\"drain\"") >= 0 && done == "",
+            "open answered failed/drain");
+      Check(scen, PositionsWithComment(cmt) == 0, "no position on the account");
+     }
+   delete tm;
+   CloseAll();
+  }
+
+void S34()
+  {
+   S34Case("a", 9140, "normal", false, true);    // reactivated: open executes
+   S34Case("b", 9141, "drain", false, false);    // still drain: refused after the refresh
+   S34Case("c", 9142, "normal", true, false);    // config unreachable: refused after the wait, not stuck
+  }
+
 //--- S29: latency scheduling with a short tick: the commands poll keeps its interval (not one call per tick),
 //    a received command executes and its result goes out on the next ticks, followed by one immediate re-poll.
 void TicksMs(CTradeMirror *tm, const int n, const int stepMs)
@@ -728,7 +774,7 @@ void OnTick()
       return;
    g_done = true;
    g_tm_fake_now_ms = (long)TimeCurrent() * 1000;
-   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29(); S30(); S31(); S32(); S33();
+   S01(); S02(); S03(); S04(); S05(); S06(); S24(); S25(); S26(); S27(); S28(); S29(); S30(); S31(); S32(); S33(); S34();
    g_tm_fake_now_ms = 0;
    PrintFormat("TradeMirror self-test: %d passed, %d failed", g_passed, g_failed);
   }

@@ -83,6 +83,7 @@ public:
    int               snapshotPosts;
    int               enrollCalls;
    int               rotateCalls;
+   int               configCalls;
    // --- faults ---
    int               dropResults;     // process the next N results posts, lose the reply
    bool              dropNextEnroll;
@@ -91,6 +92,7 @@ public:
    int               forceStatus;     // != 0: every call answers this transport status/error (no server)
    int               forceError;
    int               retryAfterSec;
+   bool              failConfig;      // /v4/config answers 500 (the rest of the server keeps working)
 
                      CFakeServer(void) { Reset(); }
 
@@ -98,7 +100,7 @@ public:
      {
       m_tokenSeq = 0; m_sessionSeq = 0; code = "ABCD2345EF"; codeConsumed = false; token = ""; issuedUnconfirmed = "";
       pendingToken = ""; pendingId = ""; sessionId = ""; mode = "normal"; resultPosts = 0; commandPolls = 0;
-      snapshotPosts = 0; enrollCalls = 0; rotateCalls = 0; dropResults = 0; dropNextEnroll = false; dropNextRotate = false;
+      snapshotPosts = 0; enrollCalls = 0; rotateCalls = 0; configCalls = 0; failConfig = false; dropResults = 0; dropNextEnroll = false; dropNextRotate = false;
       fail429Path = ""; retryAfterSec = 0; lastCallMs = 0; minGapMs = -1; forceStatus = 0; forceError = 0;
       ArrayResize(cmdIds, 0); ArrayResize(cmdJson, 0); ArrayResize(cmdState, 0); ArrayResize(results, 0);
       ArrayResize(retiredTokens, 0);
@@ -215,6 +217,8 @@ public:
         }
       if(path == "/v4/config")
         {
+         configCalls++;
+         if(failConfig) { Reply(resp, 500, "{\"error\":\"internal\"}"); return; }
          Reply(resp, 200, "{\"mode\":\"" + mode + "\",\"message\":\"\",\"poll_ms\":2000,\"debug\":false,"
                           "\"send_history\":false,\"symbols_wanted\":[],\"min_ea_version\":null}");
          return;
