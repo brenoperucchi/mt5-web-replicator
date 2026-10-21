@@ -551,7 +551,8 @@ void S34Case(const string tag, const long copyId, const string modeAfter, const 
    g_fake.mode = "drain";
    CTradeMirror *tm = NewEngine("s34" + tag, true);
    UntilSession(tm);
-   Ticks(tm, 3);
+   for(int i = 0; i < 20 && g_fake.configCalls < 1; i++)   // the first config read follows the session by a few ticks
+      Ticks(tm, 1);
    Check(scen, g_fake.configCalls >= 1, "the EA read the config while the server was in drain");
    g_fake.mode = modeAfter;                  // reactivated on the server; the EA does not know yet
    g_fake.failConfig = configDown;
