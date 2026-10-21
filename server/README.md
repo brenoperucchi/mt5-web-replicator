@@ -1,4 +1,4 @@
-# Copy Server (Phase 1, in progress)
+# TradeMirror Copy Server (Phase 1, in progress)
 
 Standalone copy core described in [`docs/design/0001-copy-core.md`](../docs/design/0001-copy-core.md)
 (issue #77). FastAPI + SQLAlchemy 2 (sync) + Alembic, Python 3.12, SQLite (WAL) by default,
@@ -18,6 +18,8 @@ PR 4 adds master close detection (fast path by history exit deal, guarded absenc
 mass-disappearance guard, epoch-aware timers), the 5.5 "master closed" transitions, proportional
 partial reductions (`reduction_target`, coalesced, one financial mutation in flight per position),
 netting reversal as close-then-open by generation, `processed_deals` dedup, and SL/TP `modify`.
+The MT5 client is the TradeMirror EA in [`ea/mt5/`](../ea/mt5/README.md); the product name is
+TradeMirror (#78) and the Python package stays `copycore`.
 PR 5 adds the operator side: the 5.8 resolution actions with the `resolve` command to the EA journal,
 symbol-conflict resolution, the C6 drain transitions on account suspension and link/group disable,
 events/alerts/EA-log/orphan listings, scoped admin and service tokens, and a minimal server-rendered
@@ -252,6 +254,9 @@ are per account: `POST /admin/accounts/{id}/enroll_codes` (15 min code), `POST /
 - `POST /v4/logs` (EA log upload) is not implemented yet; the log viewer reads `ea_logs`.
 - Changing `MIN_EA_VERSION` does not run the drain transitions (there is no admin action to hook);
   version-gated EAs already get `mode: drain` and refuse opens with `failed: drain`.
+
+`tests/test_ea_contract.py` checks the TradeMirror EA sources and wire fixtures (`ea/mt5/tests/fixtures`)
+against these models.
 
 CI: `.github/workflows/server.yml` (SQLite and Postgres).
 

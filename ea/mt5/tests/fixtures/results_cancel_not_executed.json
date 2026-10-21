@@ -1,0 +1,12 @@
+{
+ "results": [
+  {
+   "command_id": "{{command_id}}",
+   "attempt_id": "{{attempt_id}}",
+   "copy_id": "{{#copy_id}}",
+   "status": "not_executed",
+   "executed_at": "{{#now}}",
+   "message": "open never sent"
+  }
+ ]
+}

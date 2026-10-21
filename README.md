@@ -9,11 +9,21 @@
 
 Ruby on Rails application to receive, organize, and replicate trading information coming from MT5/MQL to a web backend. The project centralizes admin dashboards, accounts, customers, plans, invoices, payment integrations, and APIs to manage the distribution of orders and events across multiple accounts.
 
-## Copy Server (Phase 1, in progress)
+## TradeMirror (Phase 1, in progress)
 
-A standalone Copy Server (FastAPI, Python 3.12) is being built in [`server/`](server/README.md)
-following the approved design [`docs/design/0001-copy-core.md`](docs/design/0001-copy-core.md) (#77).
-It does not replace anything in the Rails app yet.
+TradeMirror is the new copy-trading product (#78) built from the approved design
+[`docs/design/0001-copy-core.md`](docs/design/0001-copy-core.md) (#77). It does not replace
+anything in the Rails app yet.
+
+- **Copy Server** (FastAPI, Python 3.12, package `copycore`): [`server/`](server/README.md).
+- **TradeMirror EA** for MetaTrader 5 (one EA, master or slave role, protocol v4 with a durable
+  journal and results outbox): [`ea/mt5/`](ea/mt5/README.md). Sources in `ea/mt5/Experts/`:
+  [`TradeMirror.mq5`](ea/mt5/Experts/TradeMirror.mq5) is the EA,
+  [`TradeMirrorSelfTest.mq5`](ea/mt5/Experts/TradeMirrorSelfTest.mq5) runs the client against a fake
+  server in the Strategy Tester, and
+  [`TradeMirrorE2EDriver.mq5`](ea/mt5/Experts/TradeMirrorE2EDriver.mq5) is the test driver for the
+  end-to-end suite (demo accounts only).
+- Protocol v4 scenario catalog: [`docs/protocol/v4/scenarios/`](docs/protocol/v4/scenarios/).
 
 ## Quick start (Docker)
 

@@ -1,0 +1,8 @@
+{
+ "code": "{{code}}",
+ "broker_server": "{{server}}",
+ "login": "{{#login}}",
+ "role": "{{role}}",
+ "margin_mode": "hedging",
+ "ea_version": "1.0.0"
+}
