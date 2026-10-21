@@ -17,7 +17,12 @@ anything in the Rails app yet.
 
 - **Copy Server** (FastAPI, Python 3.12, package `copycore`): [`server/`](server/README.md).
 - **TradeMirror EA** for MetaTrader 5 (one EA, master or slave role, protocol v4 with a durable
-  journal and results outbox): [`ea/mt5/`](ea/mt5/README.md).
+  journal and results outbox): [`ea/mt5/`](ea/mt5/README.md). Sources in `ea/mt5/Experts/`:
+  [`TradeMirror.mq5`](ea/mt5/Experts/TradeMirror.mq5) is the EA,
+  [`TradeMirrorSelfTest.mq5`](ea/mt5/Experts/TradeMirrorSelfTest.mq5) runs the client against a fake
+  server in the Strategy Tester, and
+  [`TradeMirrorE2EDriver.mq5`](ea/mt5/Experts/TradeMirrorE2EDriver.mq5) is the test driver for the
+  end-to-end suite (demo accounts only).
 - Protocol v4 scenario catalog: [`docs/protocol/v4/scenarios/`](docs/protocol/v4/scenarios/).
 
 ## Quick start (Docker)
