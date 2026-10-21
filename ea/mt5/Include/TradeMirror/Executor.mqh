@@ -25,6 +25,7 @@
 #define TM_CANCEL_LOOKBACK_MS    3600000 // cancel without its open in the journal: evidence up to 1 h before it
 #define TM_UNCERTAIN_WINDOW_MS   20000   // keep re-checking a sent attempt this long before suspending
 #define TM_UNCERTAIN_MIN_CHECKS  3
+#define TM_DRAIN_RECHECK_MS      15000   // an open held back by the drain flag waits this long for a fresh config
 #define TM_VOL_EPS               0.0000001
 
 // Test seam: simulate a process crash at a precise point of the journal protocol (self-test EA).
@@ -112,8 +113,10 @@ public:
    string            raw;
    CJson            *j;
    bool              finished;
+   long              drain_epoch;      // config epoch when the open was first held back by drain (-1 = never)
+   long              drain_since_ms;
 
-                     CTmCommand(void) { j = NULL; finished = false; copy_id = 0; seq = 0; }
+                     CTmCommand(void) { j = NULL; finished = false; copy_id = 0; seq = 0; drain_epoch = -1; drain_since_ms = 0; }
                     ~CTmCommand(void) { if(CheckPointer(j) == POINTER_DYNAMIC) delete j; }
    bool              IsClosing(void) const { return action == "close" || action == "close_partial" || action == "cancel" || action == "resolve"; }
   };
@@ -129,6 +132,8 @@ private:
    COutbox          *m_outbox;
    CTmCommand       *m_queue[];
    bool              m_drain;
+   long              m_configEpoch;    // bumped by every server answer that sets the drain flag
+   bool              m_wantConfig;     // an open is waiting for a fresh config
    long              m_clockOffsetMs;
    bool              m_hedging;
    bool              m_executedSomething;
@@ -292,7 +297,22 @@ private:
       STmEvidence ev;
 
       if(m_drain)
-        { ConfirmSimple(e, "failed", "drain", "account in drain mode: no new opens"); return; }
+        {
+         // the drain flag may be stale (a reactivated account keeps it until the next config, up to 60 s): ask for a
+         // fresh config and decide on its answer, never on the cached flag. No answer within the wait -> refuse.
+         if(c.drain_epoch < 0)
+           {
+            c.drain_epoch = m_configEpoch;
+            c.drain_since_ms = TmNowMs();
+            m_wantConfig = true;
+            TmLog.Info(StringFormat("copy %I64d open held: drain flag set, asking the server for a fresh config", c.copy_id));
+            return;
+           }
+         if(m_configEpoch == c.drain_epoch && TmNowMs() - c.drain_since_ms < TM_DRAIN_RECHECK_MS)
+            return;
+         ConfirmSimple(e, "failed", "drain", "account in drain mode: no new opens");
+         return;
+        }
       long expires = j.Long("expires_at", 0);
       if(expires > 0 && TmNowMs() + m_clockOffsetMs > expires)
         { ConfirmSimple(e, "expired", "expired", "open received after expires_at"); return; }
@@ -789,7 +809,7 @@ private:
 public:
                      CExecutor(void)
      {
-      m_journal = NULL; m_outbox = NULL; m_drain = false; m_clockOffsetMs = 0; m_hedging = true;
+      m_journal = NULL; m_outbox = NULL; m_drain = false; m_configEpoch = 0; m_wantConfig = false; m_clockOffsetMs = 0; m_hedging = true;
       m_executedSomething = false; m_crash = TM_CRASH_NONE; m_crashed = false; m_suspendedScanMs = 0;
      }
                     ~CExecutor(void)
@@ -800,7 +820,8 @@ public:
      }
 
    void              Init(CJournal *journal, COutbox *outbox) { m_journal = journal; m_outbox = outbox; m_hedging = TmIsHedging(); }
-   void              SetDrain(const bool d) { m_drain = d; }
+   void              SetDrain(const bool d) { m_drain = d; m_configEpoch++; }
+   bool              TakeConfigWanted(void) { bool w = m_wantConfig; m_wantConfig = false; return w; }
    void              SetClockOffset(const long ms) { m_clockOffsetMs = ms; }
    int               QueueSize(void) const { return ArraySize(m_queue); }
    bool              TakeExecutedFlag(void) { bool f = m_executedSomething; m_executedSomething = false; return f; }

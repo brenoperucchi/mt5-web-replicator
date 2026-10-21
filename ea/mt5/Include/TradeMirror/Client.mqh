@@ -1003,6 +1003,8 @@ public:
          m_exec.Tick();
          if(m_exec.m_crashed)
             return;
+         if(m_exec.TakeConfigWanted())
+            Schedule(R_CONFIG, 0);   // an open is held back by a possibly stale drain flag
          if(m_exec.TakeExecutedFlag())
            {
             m_snapshotDirty = true;
