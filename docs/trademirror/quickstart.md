@@ -5,9 +5,6 @@ It has two parts: the **Copy Server** (Python, in [`server/`](../../server/READM
 **TradeMirror EA** (MQL5, in [`ea/mt5/`](../../ea/mt5/README.md)). This guide takes you to one
 copied trade on two **demo** accounts. Read [Status and limits](#status-and-limits) first.
 
-> Layout note: this guide describes the repository after the EA pull request (#88,
-> branch `feat/ea-trademirror`) is merged. Until then, `ea/mt5/` exists only on that branch.
-
 ## What you need
 
 - Two **demo** MT5 accounts (one master, one slave), from any broker. Hedging accounts are the
@@ -128,7 +125,7 @@ Do not trade the copied symbols by hand on the slave, especially on a netting ac
 | Symptom | Cause and fix |
 |---|---|
 | Error 4006, 4014 or 4060, or an alert "URL not allowed" | The server URL is not in *Tools > Options > Expert Advisors > Allow WebRequest for listed URL*, or does not match `ServerUrl` exactly (scheme, host, port, no typo). Add it, and re-attach the EA. |
-| Error 1009 or other TLS failures | The EA refuses `http://` except `localhost`/`127.0.0.1`. For a remote server use `https://` with a valid certificate. Check the certificate chain from the machine running the terminal. |
+| Error 1009 or other TLS failures | The EA refuses `http://` except `localhost`/`127.0.0.1`. For a remote server use `https://` with a valid certificate, and check the certificate chain from the machine running the terminal. Error 1009 also appears when `ServerUrl` says `https://` but the server speaks plain `http` (for example `https://localhost:8000` against the local Compose setup): use `http://127.0.0.1:8000` there. |
 | "not enrolled" / chart says "re-enroll" (server answered 401) | No token file, a revoked token, or the code expired or was already used. Generate a new code, set `EnrollCode` and `ForceReEnroll=true`, then set `ForceReEnroll` back to false. A token file for another login is ignored automatically. |
 | Enrollment keeps failing | The account row must match the terminal's logged-in `broker_server` and `login`, and the `Role` input must match the role of the account. Codes are valid 15 minutes. |
 | Server unreachable | Check `docker compose ... ps` and `curl <ServerUrl>/healthz` **from the machine running MT5**. Inside Docker or Wine, `localhost` may not be the host (see the appendix). The EA retries with backoff; results are kept in a durable outbox. |
@@ -160,21 +157,27 @@ uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh --fast   # about 2.5 min, no
 uv run ea/mt5/e2e/run.py --env-file /path/to/env.sh          # all scenarios, about 20 min
 ```
 
+The error scenarios (restarts, network and broker loss, rejected orders, a restored database and
+others) are a separate group: add `--group chaos`. It takes about 70 minutes; see
+[the EA README](../../ea/mt5/README.md#chaos-group-error-scenarios).
+
 `--env-file` (or the `ADMIN_TOKEN` variable) supplies the admin token. The driver EA refuses to trade
 on anything but a DEMO account.
 
 ## Further reading
 
 - Design: [`docs/design/0001-copy-core.md`](../design/0001-copy-core.md)
-- Scenario catalog (S01 to S53): [`docs/protocol/v4/scenarios/`](../protocol/v4/scenarios/)
+- Scenario catalog (S01 to S54): [`docs/protocol/v4/scenarios/`](../protocol/v4/scenarios/)
 - Server details and admin API: [`server/README.md`](../../server/README.md)
 - EA details, inputs, journal and outbox: [`ea/mt5/README.md`](../../ea/mt5/README.md)
 
 ## Status and limits
 
 - **Phase 1, work in progress.** The server is covered by an automated suite (SQLite and Postgres)
-  and the EA by a contract test and the harness above. The EA README itself states the code needs
-  compiling and the owner checklist run before any live use.
+  and the EA by a contract test and the harness above. The EA compiles with 0 errors and 0 warnings,
+  its Strategy Tester self-test passes (148 checks), and the end-to-end harness passes on a local
+  pair of terminals and against a remote server, including a group of error scenarios (restarts,
+  network and broker loss, rejected orders, long outages, a restored database, a suspended account).
 - **Demo-tested only.** Do not run it on a live account with money you cannot lose. There is no
   guarantee of copy timing, fills or slippage; the slave receives the master's state about every
   2 s and executes at its own broker's price.
